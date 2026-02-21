@@ -15,10 +15,11 @@ public interface IExtensionGrantValidator
     /// Validates the custom grant request.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// A principal
     /// </returns>
-    Task ValidateAsync(ExtensionGrantValidationContext context);
+    Task ValidateAsync(ExtensionGrantValidationContext context, CT ct);
 
     /// <summary>
     /// Returns the grant type this validator can deal with

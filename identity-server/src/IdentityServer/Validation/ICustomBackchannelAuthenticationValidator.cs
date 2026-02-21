@@ -13,6 +13,7 @@ public interface ICustomBackchannelAuthenticationValidator
     /// Validates a CIBA authentication request.
     /// </summary>
     /// <param name="customValidationContext"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext);
+    Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, CT ct);
 }

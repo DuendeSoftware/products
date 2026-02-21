@@ -27,81 +27,81 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         ILogger<DynamicClientRegistrationValidator> logger) => Logger = logger;
 
     /// <inheritdoc/>
-    public async Task<IDynamicClientRegistrationValidationResult> ValidateAsync(DynamicClientRegistrationContext context)
+    public async Task<IDynamicClientRegistrationValidationResult> ValidateAsync(DynamicClientRegistrationContext context, CT ct)
     {
-        var result = await ValidateSoftwareStatementAsync(context);
+        var result = await ValidateSoftwareStatementAsync(context, ct);
         if (result is DynamicClientRegistrationError softwareStatementValidation)
         {
             return softwareStatementValidation;
         }
 
-        result = await SetGrantTypesAsync(context);
+        result = await SetGrantTypesAsync(context, ct);
         if (result is DynamicClientRegistrationError grantTypeValidation)
         {
             return grantTypeValidation;
         }
 
-        result = await SetRedirectUrisAsync(context);
+        result = await SetRedirectUrisAsync(context, ct);
         if (result is DynamicClientRegistrationError redirectUrisValidation)
         {
             return redirectUrisValidation;
         }
 
-        result = await SetScopesAsync(context);
+        result = await SetScopesAsync(context, ct);
         if (result is DynamicClientRegistrationError scopeValidation)
         {
             return scopeValidation;
         }
 
-        result = await SetSecretsAsync(context);
+        result = await SetSecretsAsync(context, ct);
         if (result is DynamicClientRegistrationError keySetValidation)
         {
             return keySetValidation;
         }
 
-        result = await SetClientNameAsync(context);
+        result = await SetClientNameAsync(context, ct);
         if (result is DynamicClientRegistrationError nameValidation)
         {
             return nameValidation;
         }
 
-        result = await SetLogoutParametersAsync(context);
+        result = await SetLogoutParametersAsync(context, ct);
         if (result is DynamicClientRegistrationError logoutValidation)
         {
             return logoutValidation;
         }
 
-        result = await SetMaxAgeAsync(context);
+        result = await SetMaxAgeAsync(context, ct);
         if (result is DynamicClientRegistrationError maxAgeValidation)
         {
             return maxAgeValidation;
         }
 
-        result = await SetUserInterfaceProperties(context);
+        result = await SetUserInterfaceProperties(context, ct);
         if (result is DynamicClientRegistrationError miscValidation)
         {
             return miscValidation;
         }
 
-        result = await SetPublicClientProperties(context);
+        result = await SetPublicClientProperties(context, ct);
         if (result is DynamicClientRegistrationError publicClientValidation)
         {
             return publicClientValidation;
         }
 
-        result = await SetAccessTokenProperties(context);
+        result = await SetAccessTokenProperties(context, ct);
         if (result is DynamicClientRegistrationError accessTokenValidation)
         {
             return accessTokenValidation;
         }
 
-        result = await SetIdTokenProperties(context);
+        result = await SetIdTokenProperties(context, ct);
         if (result is DynamicClientRegistrationError idTokenValidation)
         {
             return idTokenValidation;
         }
 
-        result = await SetServerSideSessionProperties(context);
+        result = await SetServerSideSessionProperties(context, ct);
         if (result is DynamicClientRegistrationError serverSideSessionValidation)
         {
             return serverSideSessionValidation;
@@ -118,9 +118,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its allowed grant types set,
     /// the DCR request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetGrantTypesAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetGrantTypesAsync(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.GrantTypes.Count == 0)
         {
@@ -218,9 +219,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its redirect uri set, the DCR
     /// request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetRedirectUrisAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetRedirectUrisAsync(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Client.AllowedGrantTypes.Contains(GrantType.AuthorizationCode))
         {
@@ -265,13 +267,14 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its scopes set, the DCR
     /// request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetScopesAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetScopesAsync(DynamicClientRegistrationContext context, CT ct)
     {
         if (string.IsNullOrEmpty(context.Request.Scope))
         {
-            return SetDefaultScopes(context);
+            return SetDefaultScopes(context, ct);
         }
         else
         {
@@ -299,9 +302,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its scopes set, the DCR
     /// request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetDefaultScopes(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetDefaultScopes(DynamicClientRegistrationContext context, CT ct)
     {
         Logger.LogDebug("No scopes requested for dynamic client registration, and no default scope behavior implemented. To set default scopes, extend the DynamicClientRegistrationValidator and override the SetDefaultScopes method.");
         return StepResult.Success();
@@ -314,9 +318,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its secrets set, the DCR
     /// request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetSecretsAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetSecretsAsync(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.JwksUri is not null && context.Request.Jwks is not null)
         {
@@ -398,9 +403,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its name set, the DCR request,
     /// and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetClientNameAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetClientNameAsync(DynamicClientRegistrationContext context, CT ct)
     {
         context.Client.ClientName = context.Request?.ClientName;
         return StepResult.Success();
@@ -417,9 +423,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its logout parameters set, the
     /// DCR request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetLogoutParametersAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetLogoutParametersAsync(DynamicClientRegistrationContext context, CT ct)
     {
         context.Client.PostLogoutRedirectUris = context.Request.PostLogoutRedirectUris?.Select(uri => uri.ToString()).ToList() ?? new List<string>();
         context.Client.FrontChannelLogoutUri = context.Request.FrontChannelLogoutUri?.AbsoluteUri;
@@ -438,9 +445,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its max age set, the DCR
     /// request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetMaxAgeAsync(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetMaxAgeAsync(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.DefaultMaxAge.HasValue)
         {
@@ -465,9 +473,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model that is being built up, the DCR request, and
     /// other contextual information.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> ValidateSoftwareStatementAsync(DynamicClientRegistrationContext context) => StepResult.Success();
+    protected virtual Task<IStepResult> ValidateSoftwareStatementAsync(DynamicClientRegistrationContext context, CT ct) => StepResult.Success();
 
     /// <summary>
     /// Validates the requested client parameters related to public clients and
@@ -479,9 +488,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its public client properties
     /// set, the DCR request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetPublicClientProperties(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetPublicClientProperties(DynamicClientRegistrationContext context, CT ct)
     {
         context.Client.AllowedCorsOrigins = context.Request.AllowedCorsOrigins ?? new();
         if (context.Request.RequireClientSecret.HasValue)
@@ -506,9 +516,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its access token properties
     /// set, the DCR request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetAccessTokenProperties(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetAccessTokenProperties(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.AccessTokenType != null)
         {
@@ -540,9 +551,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its id token properties set,
     /// the DCR request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetIdTokenProperties(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetIdTokenProperties(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.IdentityTokenLifetime.HasValue)
         {
@@ -567,9 +579,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// includes the client model that will have its server side session
     /// properties set, the DCR request, and other contextual information.
     /// </param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetServerSideSessionProperties(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetServerSideSessionProperties(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.CoordinateLifetimeWithUserSession.HasValue)
         {
@@ -587,11 +600,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model that will have miscellaneous properties set,
     /// the DCR request, and other contextual information.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    /// <returns>A task that returns an <see cref="IStepResult"/>, which either
-    /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> SetUserInterfaceProperties(DynamicClientRegistrationContext context)
+    protected virtual Task<IStepResult> SetUserInterfaceProperties(DynamicClientRegistrationContext context, CT ct)
     {
         // Misc Uris
         context.Client.LogoUri = context.Request.LogoUri?.ToString();

@@ -20,6 +20,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ProtocolValidation_Resources
 {
     private const string Category = "AuthorizeRequest Protocol Validation - Resources";
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private readonly AuthorizeRequestValidator _subject;
 
@@ -69,7 +70,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add(OidcConstants.AuthorizeRequest.RedirectUri, "https://client1");
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBe(false);
         result.ValidatedRequest.RequestedResourceIndicators.ShouldBeEmpty();
@@ -86,7 +87,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
         parameters.Add("resource", "not_uri");
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
@@ -103,7 +104,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
         parameters.Add("resource", "http://resource1");
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -119,7 +120,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Token);
         parameters.Add("resource", "http://resource1");
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
@@ -136,7 +137,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
         parameters.Add("resource", "http://resource1" + new string('x', 512));
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
@@ -153,7 +154,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
         parameters.Add("resource", "http://resource1#fragment");
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
@@ -172,7 +173,7 @@ public class Authorize_ProtocolValidation_Resources
         parameters.Add("resource", "http://resource2");
         parameters.Add("resource", "urn:test1");
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.RequestedResourceIndicators
@@ -195,7 +196,7 @@ public class Authorize_ProtocolValidation_Resources
             {
                 InvalidScopes = { "foo" }
             };
-            var result = await _subject.ValidateAsync(parameters);
+            var result = await _subject.ValidateAsync(parameters, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_scope");
@@ -206,7 +207,7 @@ public class Authorize_ProtocolValidation_Resources
             {
                 InvalidResourceIndicators = { "foo" }
             };
-            var result = await _subject.ValidateAsync(parameters);
+            var result = await _subject.ValidateAsync(parameters, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");

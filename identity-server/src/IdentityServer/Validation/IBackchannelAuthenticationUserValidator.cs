@@ -15,6 +15,7 @@ public interface IBackchannelAuthenticationUserValidator
     /// Validates the user.
     /// </summary>
     /// <param name="userValidatorContext"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext);
+    Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext, CT ct);
 }

@@ -501,7 +501,7 @@ public class ClientConfigurationValidation
     private async Task<ClientConfigurationValidationContext> ValidateAsync(Client client)
     {
         var context = new ClientConfigurationValidationContext(client);
-        await _validator.ValidateAsync(context);
+        await _validator.ValidateAsync(context, default);
 
         return context;
     }

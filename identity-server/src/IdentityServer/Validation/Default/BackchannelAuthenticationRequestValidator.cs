@@ -94,7 +94,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         //////////////////////////////////////////////////////////
         // validate request object
         //////////////////////////////////////////////////////////
-        var roValidationResult = await TryValidateRequestObjectAsync();
+        var roValidationResult = await TryValidateRequestObjectAsync(ct);
         if (!roValidationResult.Success)
         {
             return roValidationResult.ErrorResult;
@@ -165,7 +165,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.RequestedScopes,
             ResourceIndicators = resourceIndicators,
-        }, default);
+        }, ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -391,7 +391,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             IdTokenHintClaims = _validatedRequest.IdTokenHintClaims,
             UserCode = _validatedRequest.UserCode,
             BindingMessage = _validatedRequest.BindingMessage
-        });
+        }, ct);
 
         if (userResult.IsError)
         {
@@ -440,7 +440,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         var result = new BackchannelAuthenticationRequestValidationResult(_validatedRequest);
 
         var customValidationContext = new CustomBackchannelAuthenticationRequestValidationContext(result);
-        await _customValidator.ValidateAsync(customValidationContext);
+        await _customValidator.ValidateAsync(customValidationContext, ct);
         if (customValidationContext.ValidationResult.IsError)
         {
             LogError("Custom validation of backchannel authorize request failed");
@@ -451,7 +451,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         return result;
     }
 
-    private async Task<(bool Success, BackchannelAuthenticationRequestValidationResult ErrorResult)> TryValidateRequestObjectAsync()
+    private async Task<(bool Success, BackchannelAuthenticationRequestValidationResult ErrorResult)> TryValidateRequestObjectAsync(CT ct)
     {
         //////////////////////////////////////////////////////////
         // validate request object
@@ -465,7 +465,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 JwtTokenString = _validatedRequest.RequestObject,
                 StrictJarValidation = false,
                 IncludeJti = true
-            });
+            }, ct);
             if (jwtRequestValidationResult.IsError)
             {
                 LogError("request JWT validation failure", jwtRequestValidationResult.Error);

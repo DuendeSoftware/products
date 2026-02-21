@@ -48,11 +48,13 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
     /// </summary>
     /// <param name="secrets">The stored secrets.</param>
     /// <param name="parsedSecret">The received secret.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// A validation result
     /// </returns>
     /// <exception cref="System.ArgumentException">ParsedSecret.Credential is not a JWT token</exception>
-    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+    /// <inheritdoc/>
+    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, CT ct)
     {
         var fail = new SecretValidationResult { Success = false };
         var success = new SecretValidationResult { Success = true };
@@ -124,7 +126,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             ValidAlgorithms = _options.SupportedClientAssertionSigningAlgorithms
         };
 
-        var issuer = await _issuerNameService.GetCurrentAsync(default);
+        var issuer = await _issuerNameService.GetCurrentAsync(ct);
 
         if (enforceStrictAud)
         {
@@ -153,7 +155,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
                 // token endpoint URL
                 string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.Token),
                 // issuer URL + token (legacy support)
-                string.Concat((await _issuerNameService.GetCurrentAsync(default)).EnsureTrailingSlash(), ProtocolRoutePaths.Token),
+                string.Concat((await _issuerNameService.GetCurrentAsync(ct)).EnsureTrailingSlash(), ProtocolRoutePaths.Token),
                 // issuer URL
                 issuer,
                 // CIBA endpoint: https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#auth_request
@@ -193,14 +195,14 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
-        if (await _replayCache.ExistsAsync(Purpose, jti, default))
+        if (await _replayCache.ExistsAsync(Purpose, jti, ct))
         {
             _logger.LogError("jti is found in replay cache. Possible replay attack.");
             return fail;
         }
         else
         {
-            await _replayCache.AddAsync(Purpose, jti, exp.AddMinutes(5), default);
+            await _replayCache.AddAsync(Purpose, jti, exp.AddMinutes(5), ct);
         }
 
         return success;

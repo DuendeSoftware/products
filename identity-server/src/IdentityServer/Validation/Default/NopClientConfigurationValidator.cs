@@ -14,8 +14,10 @@ public class NopClientConfigurationValidator : IClientConfigurationValidator
     /// Determines whether the configuration of a client is valid.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public Task ValidateAsync(ClientConfigurationValidationContext context)
+    /// <inheritdoc/>
+    public Task ValidateAsync(ClientConfigurationValidationContext context, CT ct)
     {
         context.IsValid = true;
         return Task.CompletedTask;

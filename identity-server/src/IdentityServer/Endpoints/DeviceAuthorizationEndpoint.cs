@@ -79,7 +79,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
         _logger.LogDebug("Start device authorize request.");
 
         // validate client
-        var clientResult = await _clientValidator.ValidateAsync(context);
+        var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var error = clientResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
@@ -89,7 +89,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
 
         // validate request
         var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
-        var requestResult = await _requestValidator.ValidateAsync(form, clientResult);
+        var requestResult = await _requestValidator.ValidateAsync(form, clientResult, context.RequestAborted);
 
         if (requestResult.IsError)
         {

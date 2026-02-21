@@ -14,5 +14,7 @@ public interface IJwtRequestValidator
     /// <summary>
     /// Validates a JWT request object
     /// </summary>
-    Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context);
+    /// <param name="context">The validation context.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context, CT ct);
 }

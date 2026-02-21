@@ -20,8 +20,9 @@ public interface IPushedAuthorizationRequestValidator
     /// Validates the pushed authorization request.
     /// </summary>
     /// <param name="context">The validation context</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A  task containing a pushed authorization result that either
     /// wraps the validated request values or indicates the error code and
     /// description.</returns>
-    Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context);
+    Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, CT ct);
 }

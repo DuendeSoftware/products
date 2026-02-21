@@ -59,7 +59,7 @@ public class ValidatingClientStore<T> : IClientStore
             _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
 
             var context = new ClientConfigurationValidationContext(client);
-            await _validator.ValidateAsync(context);
+            await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {
@@ -88,7 +88,7 @@ public class ValidatingClientStore<T> : IClientStore
         {
             _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
             var context = new ClientConfigurationValidationContext(client);
-            await _validator.ValidateAsync(context);
+            await _validator.ValidateAsync(context, ct);
             if (context.IsValid)
             {
                 _logger.LogDebug("client configuration validation for client {clientId} succeeded.", client.ClientId);

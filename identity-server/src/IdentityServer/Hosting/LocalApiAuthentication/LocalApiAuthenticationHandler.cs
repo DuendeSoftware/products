@@ -131,7 +131,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
                 ClientClockSkew = client.DPoPClockSkew,
             };
 
-            var dpopResult = await _dpopValidator.ValidateAsync(validationContext);
+            var dpopResult = await _dpopValidator.ValidateAsync(validationContext, Context.RequestAborted);
             if (dpopResult.IsError)
             {
                 // we need to stash these values away so they are available later when the Challenge method is called later

@@ -13,8 +13,10 @@ internal class DefaultCustomTokenRequestValidator : ICustomTokenRequestValidator
     /// Custom validation logic for a token request.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The validation result
     /// </returns>
-    public Task ValidateAsync(CustomTokenRequestValidationContext context) => Task.CompletedTask;
+    /// <inheritdoc/>
+    public Task ValidateAsync(CustomTokenRequestValidationContext context, CT ct) => Task.CompletedTask;
 }

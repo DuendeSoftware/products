@@ -44,10 +44,12 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
     /// Used for "private_key_jwt" client authentication method as defined in http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication
     /// </summary>
     /// <param name="context">The HTTP context</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// A parsed secret
     /// </returns>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context)
+    /// <inheritdoc/>
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, CT ct)
     {
         _logger.LogDebug("Start parsing for JWT client assertion in post body");
 
@@ -57,7 +59,7 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
             return null;
         }
 
-        var body = await context.Request.ReadFormAsync();
+        var body = await context.Request.ReadFormAsync(ct);
 
         if (body != null)
         {

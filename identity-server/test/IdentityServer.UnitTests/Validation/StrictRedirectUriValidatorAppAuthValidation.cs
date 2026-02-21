@@ -48,7 +48,7 @@ public class StrictRedirectUriValidatorAppAuthValidation
             {
                 RequestedUri = requestedUri,
                 Client = clientWithValidLoopbackRedirectUri
-            });
+            }, default);
         result.ShouldBeTrue();
     }
 
@@ -79,7 +79,7 @@ public class StrictRedirectUriValidatorAppAuthValidation
         {
             RequestedUri = requestedUri,
             Client = clientWithValidLoopbackRedirectUri
-        });
+        }, default);
         result.ShouldBeFalse();
     }
 
@@ -93,7 +93,7 @@ public class StrictRedirectUriValidatorAppAuthValidation
         {
             RequestedUri = "http://127.0.0.1",
             Client = clientWithNoRedirectUris,
-        });
+        }, default);
         result.ShouldBeFalse();
     }
 }

@@ -182,7 +182,7 @@ public class ValidatingClientStoreTests
             _errorMessage = errorMessage;
         }
 
-        public Task ValidateAsync(ClientConfigurationValidationContext context)
+        public Task ValidateAsync(ClientConfigurationValidationContext context, CT ct)
         {
             var isValid = _validationFunc != null ? _validationFunc(context.Client) : _isValid;
 

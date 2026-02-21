@@ -229,7 +229,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
             {
                 Client = request.Client,
                 JwtTokenString = request.RequestObject
-            });
+            }, ct);
             if (jwtRequestValidationResult.IsError)
             {
                 LogError("request JWT validation failure", request);

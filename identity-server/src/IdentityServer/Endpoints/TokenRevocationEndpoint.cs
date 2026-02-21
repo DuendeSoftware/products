@@ -89,7 +89,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         _logger.LogDebug("Start revocation request.");
 
         // validate client
-        var clientValidationResult = await _clientValidator.ValidateAsync(context);
+        var clientValidationResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientValidationResult.IsError)
         {
             var error = clientValidationResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
@@ -103,7 +103,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
 
         _logger.LogTrace("Calling into token revocation request validator: {type}", _requestValidator.GetType().FullName);
-        var requestValidationResult = await _requestValidator.ValidateRequestAsync(form, clientValidationResult.Client);
+        var requestValidationResult = await _requestValidator.ValidateRequestAsync(form, clientValidationResult.Client, context.RequestAborted);
 
         if (requestValidationResult.IsError)
         {

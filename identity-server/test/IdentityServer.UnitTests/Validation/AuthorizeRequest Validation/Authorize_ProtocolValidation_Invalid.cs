@@ -19,7 +19,7 @@ public class Authorize_ProtocolValidation_Invalid
     {
         var validator = Factory.CreateAuthorizeRequestValidator();
 
-        Func<Task> act = () => validator.ValidateAsync(null);
+        Func<Task> act = () => validator.ValidateAsync(null, default);
 
         await act.ShouldThrowAsync<ArgumentNullException>();
     }
@@ -29,7 +29,7 @@ public class Authorize_ProtocolValidation_Invalid
     public async Task Empty_Parameters()
     {
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(new NameValueCollection());
+        var result = await validator.ValidateAsync(new NameValueCollection(), default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -47,7 +47,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Token);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
@@ -65,7 +65,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -82,7 +82,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Token);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
@@ -99,7 +99,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.IdToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -115,7 +115,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -131,7 +131,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -147,7 +147,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -166,7 +166,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -183,7 +183,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -199,7 +199,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.RedirectUri, "https://server/cb");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -216,7 +216,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, "unknown");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnsupportedResponseType);
@@ -234,7 +234,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -252,7 +252,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -270,7 +270,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -288,7 +288,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -306,7 +306,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -324,7 +324,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.MaxAge, "malformed");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -342,7 +342,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.MaxAge, "-1");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -360,7 +360,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -378,7 +378,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Query);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -397,7 +397,7 @@ public class Authorize_ProtocolValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.Prompt, "none login");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);

@@ -28,7 +28,7 @@ public class Authorize_ProtocolValidation_CustomValidator
         parameters.Add(OidcConstants.AuthorizeRequest.RedirectUri, "https://server/cb");
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, default);
 
         _stubAuthorizeRequestValidator.WasCalled.ShouldBeTrue();
     }
@@ -47,7 +47,7 @@ public class Authorize_ProtocolValidation_CustomValidator
         {
             ctx.Result = new AuthorizeRequestValidationResult(ctx.Result.ValidatedRequest, "foo", "bar");
         };
-        var result = await _subject.ValidateAsync(parameters);
+        var result = await _subject.ValidateAsync(parameters, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("foo");
@@ -60,7 +60,7 @@ public class StubAuthorizeRequestValidator : ICustomAuthorizeRequestValidator
     public Action<CustomAuthorizeRequestValidationContext> Callback;
     public bool WasCalled { get; set; }
 
-    public Task ValidateAsync(CustomAuthorizeRequestValidationContext context)
+    public Task ValidateAsync(CustomAuthorizeRequestValidationContext context, CT ct)
     {
         WasCalled = true;
         Callback?.Invoke(context);

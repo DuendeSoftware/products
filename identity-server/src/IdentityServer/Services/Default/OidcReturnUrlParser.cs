@@ -53,7 +53,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
             }
 
             var user = await _userSession.GetUserAsync(ct);
-            var result = await _validator.ValidateAsync(parameters, user);
+            var result = await _validator.ValidateAsync(parameters, ct, user);
             if (!result.IsError)
             {
                 _logger.LogTrace("AuthorizationRequest being returned");

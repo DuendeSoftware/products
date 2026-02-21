@@ -13,6 +13,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ClientValidation_Code
 {
     private IdentityServerOptions _options = TestIdentityServerOptions.Create();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", "AuthorizeRequest Client Validation - Code")]
@@ -25,7 +26,7 @@ public class Authorize_ClientValidation_Code
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
@@ -42,7 +43,7 @@ public class Authorize_ClientValidation_Code
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -60,7 +61,7 @@ public class Authorize_ClientValidation_Code
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -78,7 +79,7 @@ public class Authorize_ClientValidation_Code
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -95,7 +96,7 @@ public class Authorize_ClientValidation_Code
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -112,7 +113,7 @@ public class Authorize_ClientValidation_Code
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
