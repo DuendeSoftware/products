@@ -16,14 +16,14 @@ public interface IIdentityProviderStore
     /// <summary>
     /// Gets all identity providers name.
     /// </summary>
-    /// <param name="ct"></param>
-    Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default);
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct);
 
     /// <summary>
     /// Gets the identity provider by scheme name.
     /// </summary>
-    /// <param name="scheme"></param>
-    /// <param name="ct"></param>
+    /// <param name="scheme">The scheme name.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IdentityProvider?> GetBySchemeAsync(string scheme, CT ct = default);
+    Task<IdentityProvider?> GetBySchemeAsync(string scheme, CT ct);
 }

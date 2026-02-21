@@ -99,7 +99,7 @@ public class ConformanceReportEndpointTests
 
     private sealed class InMemoryClientStore(IEnumerable<ConformanceReportClient> clients) : IConformanceReportClientStore
     {
-        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CancellationToken ct = default)
+        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CancellationToken ct)
             => Task.FromResult(clients);
     }
 

@@ -10,6 +10,8 @@ namespace IdentityServer.UnitTests.Services;
 
 public class DiagnosticDataServiceTests
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task GetJsonBytesAsync_WithNoEntries_ShouldReturnEmptyJsonObject()
     {
@@ -17,7 +19,7 @@ public class DiagnosticDataServiceTests
         var entries = new List<IDiagnosticEntry>();
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonBytesAsync();
+        var result = await service.GetJsonBytesAsync(_ct);
 
         var json = Encoding.UTF8.GetString(result.Span);
         json.ShouldBe("{}");
@@ -33,7 +35,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonBytesAsync();
+        var result = await service.GetJsonBytesAsync(_ct);
 
         var json = Encoding.UTF8.GetString(result.Span);
         var jsonDoc = JsonDocument.Parse(json);
@@ -52,7 +54,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonBytesAsync();
+        var result = await service.GetJsonBytesAsync(_ct);
 
         var json = Encoding.UTF8.GetString(result.Span);
         var jsonDoc = JsonDocument.Parse(json);
@@ -72,7 +74,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        await service.GetJsonBytesAsync();
+        await service.GetJsonBytesAsync(_ct);
 
         capturedContext.Context.ShouldNotBeNull();
         capturedContext.Context.ServerStartTime.ShouldBe(serverStartTime);
@@ -90,7 +92,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonBytesAsync();
+        var result = await service.GetJsonBytesAsync(_ct);
 
         var json = Encoding.UTF8.GetString(result.Span);
         json.ShouldNotContain("\n");
@@ -105,7 +107,7 @@ public class DiagnosticDataServiceTests
         var entries = new List<IDiagnosticEntry>();
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonStringAsync();
+        var result = await service.GetJsonStringAsync(_ct);
 
         result.ShouldBe("{}");
     }
@@ -120,7 +122,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonStringAsync();
+        var result = await service.GetJsonStringAsync(_ct);
 
         var jsonDoc = JsonDocument.Parse(result);
         jsonDoc.RootElement.GetProperty("TestProperty").GetString().ShouldBe("TestValue");
@@ -138,7 +140,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonStringAsync();
+        var result = await service.GetJsonStringAsync(_ct);
 
         var jsonDoc = JsonDocument.Parse(result);
         jsonDoc.RootElement.GetProperty("Property1").GetString().ShouldBe("Value1");
@@ -156,7 +158,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonStringAsync();
+        var result = await service.GetJsonStringAsync(_ct);
 
         var jsonDoc = JsonDocument.Parse(result);
         jsonDoc.RootElement.GetProperty("Property").GetString().ShouldBe("Value with émojis 🎉");
@@ -173,8 +175,8 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var stringResult = await service.GetJsonStringAsync();
-        var bytesResult = await service.GetJsonBytesAsync();
+        var stringResult = await service.GetJsonStringAsync(_ct);
+        var bytesResult = await service.GetJsonBytesAsync(_ct);
         var stringFromBytes = Encoding.UTF8.GetString(bytesResult.Span);
 
         stringResult.ShouldBe(stringFromBytes);
@@ -190,7 +192,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonBytesAsync();
+        var result = await service.GetJsonBytesAsync(_ct);
 
         var json = Encoding.UTF8.GetString(result.Span);
         var jsonDoc = JsonDocument.Parse(json);
@@ -210,7 +212,7 @@ public class DiagnosticDataServiceTests
         };
         var service = new DiagnosticDataService(serverStartTime, entries);
 
-        var result = await service.GetJsonBytesAsync();
+        var result = await service.GetJsonBytesAsync(_ct);
 
         var json = Encoding.UTF8.GetString(result.Span);
         var jsonDoc = JsonDocument.Parse(json);

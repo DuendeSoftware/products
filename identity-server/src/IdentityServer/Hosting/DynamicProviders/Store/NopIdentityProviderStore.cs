@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
 internal class NopIdentityProviderStore : IIdentityProviderStore
 {
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default) => Task.FromResult(Enumerable.Empty<IdentityProviderName>());
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct) => Task.FromResult(Enumerable.Empty<IdentityProviderName>());
 
-    public Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct = default) => Task.FromResult<IdentityProvider>(null);
+    public Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct) => Task.FromResult<IdentityProvider>(null);
 }

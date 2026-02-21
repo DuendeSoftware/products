@@ -17,15 +17,21 @@ public interface IServerSideTicketStore : ITicketStore
     /// <summary>
     /// Gets sessions for a specific subject id and/or session id
     /// </summary>
-    Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CT ct = default);
+    /// <param name="filter">The session filter.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CT ct);
 
     /// <summary>
     /// Queries user sessions based on filter
     /// </summary>
-    Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, CT ct = default);
+    /// <param name="filter">The session query filter.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, CT ct);
 
     /// <summary>
     /// Removes and returns expired sessions
     /// </summary>
-    Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct = default);
+    /// <param name="count">The maximum number of sessions to return.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct);
 }

@@ -104,7 +104,7 @@ public class ConformanceAssessmentServiceTests
 
     private sealed class InMemoryClientStore(IEnumerable<ConformanceReportClient> clients) : IConformanceReportClientStore
     {
-        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CancellationToken ct = default) => Task.FromResult(clients);
+        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CancellationToken ct) => Task.FromResult(clients);
     }
 
     private sealed class TestHttpContextAccessor : IHttpContextAccessor

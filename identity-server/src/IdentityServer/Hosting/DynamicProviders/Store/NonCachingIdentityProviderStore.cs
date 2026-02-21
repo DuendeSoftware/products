@@ -38,10 +38,10 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default) => _inner.GetAllSchemeNamesAsync(ct);
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct) => _inner.GetAllSchemeNamesAsync(ct);
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct = default)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct)
     {
         if (_httpContextAccessor.HttpContext == null)
         {

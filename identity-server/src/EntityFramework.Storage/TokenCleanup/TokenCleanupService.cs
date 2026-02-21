@@ -43,7 +43,7 @@ public class TokenCleanupService : ITokenCleanupService
     }
 
     /// <inheritdoc/>
-    public async Task CleanupGrantsAsync(CT ct = default)
+    public async Task CleanupGrantsAsync(CT ct)
     {
         try
         {
@@ -63,7 +63,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the stale persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveGrantsAsync(CT ct = default)
+    protected virtual async Task RemoveGrantsAsync(CT ct)
     {
         await RemoveExpiredPersistedGrantsAsync(ct);
         if (_options.RemoveConsumedTokens)
@@ -76,7 +76,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the expired persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveExpiredPersistedGrantsAsync(CT ct = default)
+    protected virtual async Task RemoveExpiredPersistedGrantsAsync(CT ct)
     {
         var found = int.MaxValue;
 
@@ -145,7 +145,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the consumed persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveConsumedPersistedGrantsAsync(CT ct = default)
+    protected virtual async Task RemoveConsumedPersistedGrantsAsync(CT ct)
     {
         var found = int.MaxValue;
 
@@ -208,7 +208,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the stale device codes.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveDeviceCodesAsync(CT ct = default)
+    protected virtual async Task RemoveDeviceCodesAsync(CT ct)
     {
         var found = int.MaxValue;
 
@@ -264,7 +264,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// <summary>
     /// Removes stale pushed authorization requests.
     /// </summary>
-    protected virtual async Task RemovePushedAuthorizationRequestsAsync(CT ct = default)
+    protected virtual async Task RemovePushedAuthorizationRequestsAsync(CT ct)
     {
         var found = int.MaxValue;
 

@@ -95,7 +95,7 @@ public class KeyManager : IKeyManager
 
 
 
-    internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> signingKeys)> GetAllKeysInternalAsync(CT ct = default)
+    internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> signingKeys)> GetAllKeysInternalAsync(CT ct)
     {
         var cached = true;
         var keys = await GetAllKeysFromCacheAsync(ct);
@@ -265,7 +265,7 @@ public class KeyManager : IKeyManager
         return false;
     }
 
-    internal async Task<KeyContainer> CreateAndStoreNewKeyAsync(SigningAlgorithmOptions alg, CT ct = default)
+    internal async Task<KeyContainer> CreateAndStoreNewKeyAsync(SigningAlgorithmOptions alg, CT ct)
     {
         _logger.LogTrace("Creating new key.");
 
@@ -307,7 +307,7 @@ public class KeyManager : IKeyManager
         return container;
     }
 
-    internal async Task<IEnumerable<KeyContainer>> GetAllKeysFromCacheAsync(CT ct = default)
+    internal async Task<IEnumerable<KeyContainer>> GetAllKeysFromCacheAsync(CT ct)
     {
         var cachedKeys = await _cache.GetKeysAsync(ct);
         if (cachedKeys != null)
@@ -340,7 +340,7 @@ public class KeyManager : IKeyManager
         return result;
     }
 
-    internal async Task<IEnumerable<SerializedKey>> FilterAndDeleteRetiredKeysAsync(IEnumerable<SerializedKey> keys, CT ct = default)
+    internal async Task<IEnumerable<SerializedKey>> FilterAndDeleteRetiredKeysAsync(IEnumerable<SerializedKey> keys, CT ct)
     {
         var retired = keys
             .Where(x =>
@@ -373,7 +373,7 @@ public class KeyManager : IKeyManager
         return result;
     }
 
-    internal async Task DeleteKeysAsync(IEnumerable<string> keys, CT ct = default)
+    internal async Task DeleteKeysAsync(IEnumerable<string> keys, CT ct)
     {
         if (keys == null || !keys.Any())
         {
@@ -399,7 +399,7 @@ public class KeyManager : IKeyManager
         return result;
     }
 
-    internal async Task CacheKeysAsync(IEnumerable<KeyContainer> keys, CT ct = default)
+    internal async Task CacheKeysAsync(IEnumerable<KeyContainer> keys, CT ct)
     {
         if (keys?.Any() == true)
         {
@@ -505,7 +505,7 @@ public class KeyManager : IKeyManager
 
 
 
-    internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> activeKeys)> CreateNewKeysAndAddToCacheAsync(CT ct = default)
+    internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> activeKeys)> CreateNewKeysAndAddToCacheAsync(CT ct)
     {
         var keys = new List<KeyContainer>();
         keys.AddRange(await _cache.GetKeysAsync(ct) ?? Enumerable.Empty<KeyContainer>());

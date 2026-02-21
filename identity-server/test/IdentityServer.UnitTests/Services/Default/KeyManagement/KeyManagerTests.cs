@@ -354,7 +354,7 @@ public class KeyManagerTests
     {
         var id = CreateCacheAndStoreKey();
 
-        var keys = await _subject.GetAllKeysFromCacheAsync();
+        var keys = await _subject.GetAllKeysFromCacheAsync(_ct);
 
         keys.Count().ShouldBe(1);
         keys.Single().Id.ShouldBe(id);
@@ -543,13 +543,13 @@ public class KeyManagerTests
     public async Task CacheKeysAsync_should_not_store_empty_keys()
     {
         {
-            await _subject.CacheKeysAsync(null);
+            await _subject.CacheKeysAsync(null, _ct);
 
             _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeFalse();
         }
 
         {
-            await _subject.CacheKeysAsync(new RsaKeyContainer[0]);
+            await _subject.CacheKeysAsync(new RsaKeyContainer[0], _ct);
 
             _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeFalse();
         }
@@ -561,7 +561,7 @@ public class KeyManagerTests
         var key1 = CreateKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromMinutes(5)));
         var key2 = CreateKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromMinutes(10)));
 
-        await _subject.CacheKeysAsync(new[] { key1, key2 });
+        await _subject.CacheKeysAsync(new[] { key1, key2 }, _ct);
 
         _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
         _mockKeyStoreCache.StoreKeysAsyncDuration.ShouldBe(_options.KeyManagement.KeyCacheDuration);
@@ -574,7 +574,7 @@ public class KeyManagerTests
     {
         var key1 = CreateKey();
 
-        await _subject.CacheKeysAsync(new[] { key1 });
+        await _subject.CacheKeysAsync(new[] { key1 }, _ct);
 
         _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
         _mockKeyStoreCache.StoreKeysAsyncDuration.ShouldBe(_options.KeyManagement.InitializationKeyCacheDuration);

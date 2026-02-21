@@ -19,7 +19,7 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
             {
                 try
                 {
-                    await diagnosticSummary.PrintSummary();
+                    await diagnosticSummary.PrintSummary(stoppingToken);
                 }
                 catch (Exception ex)
                 {
@@ -39,7 +39,7 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
 
     public override async Task StopAsync(CT ct)
     {
-        await diagnosticSummary.PrintSummary();
+        await diagnosticSummary.PrintSummary(ct);
 
         await base.StopAsync(ct);
     }
