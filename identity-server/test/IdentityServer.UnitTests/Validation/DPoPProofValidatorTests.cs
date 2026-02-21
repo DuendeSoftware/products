@@ -23,6 +23,7 @@ namespace UnitTests.Validation;
 public class DPoPProofValidatorTests
 {
     private const string Category = "DPoP validator tests";
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options = new IdentityServerOptions();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
@@ -133,7 +134,7 @@ public class DPoPProofValidatorTests
     {
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeFalse();
         result.JsonWebKeyThumbprint.ShouldBe(_JKT);
@@ -150,7 +151,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeFalse();
         result.JsonWebKeyThumbprint.ShouldBe(_JKT);
@@ -182,7 +183,7 @@ public class DPoPProofValidatorTests
         _context.AccessTokenClaims = [CnfClaim()];
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -199,7 +200,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = "invalid";
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.ErrorDescription.ShouldBe("Invalid 'ath' value.");
@@ -217,7 +218,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -236,7 +237,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -254,7 +255,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -272,7 +273,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -294,7 +295,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -312,7 +313,7 @@ public class DPoPProofValidatorTests
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
@@ -343,7 +344,7 @@ public class DPoPProofValidatorTests
             _context.ProofToken = CreateDPoPProofToken();
             _now = _now.AddMinutes(5);
 
-            var result = await _subject.ValidateAsync(_context);
+            var result = await _subject.ValidateAsync(_context, _ct);
             result.IsError.ShouldBeFalse();
         }
 
@@ -354,7 +355,7 @@ public class DPoPProofValidatorTests
             _context.ProofToken = CreateDPoPProofToken();
             _now = _now.AddMinutes(-5);
 
-            var result = await _subject.ValidateAsync(_context);
+            var result = await _subject.ValidateAsync(_context, _ct);
             result.IsError.ShouldBeFalse();
         }
     }
@@ -376,11 +377,11 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(5);
 
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeFalse();
             }
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeTrue();
             }
         }
@@ -393,11 +394,11 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(-5);
 
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeFalse();
             }
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeTrue();
             }
         }
@@ -417,7 +418,7 @@ public class DPoPProofValidatorTests
             _context.ProofToken = CreateDPoPProofToken();
             _now = _now.AddMinutes(5);
 
-            var result = await _subject.ValidateAsync(_context);
+            var result = await _subject.ValidateAsync(_context, _ct);
             result.IsError.ShouldBeFalse();
         }
 
@@ -427,7 +428,7 @@ public class DPoPProofValidatorTests
             _context.ProofToken = CreateDPoPProofToken();
             _now = _now.AddMinutes(-5);
 
-            var result = await _subject.ValidateAsync(_context);
+            var result = await _subject.ValidateAsync(_context, _ct);
             result.IsError.ShouldBeFalse();
         }
     }
@@ -447,11 +448,11 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(5);
 
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeFalse();
             }
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeTrue();
             }
         }
@@ -463,11 +464,11 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(-5);
 
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeFalse();
             }
             {
-                var result = await _subject.ValidateAsync(_context);
+                var result = await _subject.ValidateAsync(_context, _ct);
                 result.IsError.ShouldBeTrue();
             }
         }
@@ -483,11 +484,11 @@ public class DPoPProofValidatorTests
         _context.ProofToken = CreateDPoPProofToken();
 
         {
-            var result = await _subject.ValidateAsync(_context);
+            var result = await _subject.ValidateAsync(_context, _ct);
             result.IsError.ShouldBeFalse();
         }
         {
-            var result = await _subject.ValidateAsync(_context);
+            var result = await _subject.ValidateAsync(_context, _ct);
             result.IsError.ShouldBeTrue();
         }
     }
@@ -498,7 +499,7 @@ public class DPoPProofValidatorTests
     {
         _context.ProofToken = "";
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
     }
@@ -509,7 +510,7 @@ public class DPoPProofValidatorTests
     {
         _context.ProofToken = "malformed";
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -523,7 +524,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -540,7 +541,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken("HS256", key);
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -555,7 +556,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -569,7 +570,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -583,7 +584,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -597,7 +598,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -613,7 +614,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -627,7 +628,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -641,7 +642,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -655,7 +656,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -669,7 +670,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -683,7 +684,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -697,7 +698,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -711,7 +712,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -725,7 +726,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -740,7 +741,7 @@ public class DPoPProofValidatorTests
         _context.ProofToken = CreateDPoPProofToken();
         _context.ClientClockSkew = TimeSpan.FromMinutes(1);
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -755,7 +756,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -771,7 +772,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -786,7 +787,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -801,7 +802,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_dpop_proof");
@@ -815,7 +816,7 @@ public class DPoPProofValidatorTests
         _context.ExpirationValidationMode = DPoPTokenExpirationValidationMode.Nonce;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("use_dpop_nonce");
@@ -829,7 +830,7 @@ public class DPoPProofValidatorTests
         _context.ExpirationValidationMode = DPoPTokenExpirationValidationMode.Nonce;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
 
@@ -837,7 +838,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        result = await _subject.ValidateAsync(_context);
+        result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeFalse();
         result.JsonWebKeyThumbprint.ShouldBe(_JKT);
@@ -850,7 +851,7 @@ public class DPoPProofValidatorTests
         _context.ProofToken = CreateDPoPProofToken();
         _context.ExpirationValidationMode = DPoPTokenExpirationValidationMode.Nonce;
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
 
@@ -858,7 +859,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        result = await _subject.ValidateAsync(_context);
+        result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("use_dpop_nonce");
@@ -872,7 +873,7 @@ public class DPoPProofValidatorTests
         _context.ExpirationValidationMode = DPoPTokenExpirationValidationMode.Nonce;
         _context.ProofToken = CreateDPoPProofToken();
 
-        var result = await _subject.ValidateAsync(_context);
+        var result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
 
@@ -883,7 +884,7 @@ public class DPoPProofValidatorTests
 
         _context.ProofToken = CreateDPoPProofToken();
 
-        result = await _subject.ValidateAsync(_context);
+        result = await _subject.ValidateAsync(_context, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("use_dpop_nonce");

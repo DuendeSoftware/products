@@ -263,7 +263,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 Url = tokenUrl,
                 Method = "POST",
             };
-            var dpopResult = await _dPoPProofValidator.ValidateAsync(dpopContext);
+            var dpopResult = await _dPoPProofValidator.ValidateAsync(dpopContext, _ct);
             if (dpopResult.IsError)
             {
                 LogError(dpopResult.ErrorDescription ?? dpopResult.Error);
@@ -298,7 +298,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _logger.LogTrace("Calling into custom request validator: {type}", _customRequestValidator.GetType().FullName);
 
         var customValidationContext = new CustomTokenRequestValidationContext { Result = result };
-        await _customRequestValidator.ValidateAsync(customValidationContext);
+        await _customRequestValidator.ValidateAsync(customValidationContext, _ct);
 
         if (customValidationContext.Result.IsError)
         {
@@ -622,7 +622,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Password = password,
             Request = _validatedRequest
         };
-        await _resourceOwnerValidator.ValidateAsync(resourceOwnerContext);
+        await _resourceOwnerValidator.ValidateAsync(resourceOwnerContext, _ct);
 
         if (resourceOwnerContext.Result.IsError)
         {
@@ -1042,7 +1042,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         /////////////////////////////////////////////
         // validate custom grant type
         /////////////////////////////////////////////
-        var result = await _extensionGrantValidator.ValidateAsync(_validatedRequest);
+        var result = await _extensionGrantValidator.ValidateAsync(_validatedRequest, _ct);
 
         if (result == null)
         {

@@ -145,7 +145,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             var redirectUri = parameters.Get(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
             if (redirectUri.IsPresent())
             {
-                if (await UriValidator.IsPostLogoutRedirectUriValidAsync(redirectUri, validatedRequest.Client))
+                if (await UriValidator.IsPostLogoutRedirectUriValidAsync(redirectUri, validatedRequest.Client, ct))
                 {
                     validatedRequest.PostLogOutUri = redirectUri;
                 }

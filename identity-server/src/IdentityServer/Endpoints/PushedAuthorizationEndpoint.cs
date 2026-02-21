@@ -65,7 +65,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         }
 
         // Authenticate Client
-        var client = await _clientValidator.ValidateAsync(context);
+        var client = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (client.IsError)
         {
             return CreateErrorResult(
@@ -91,7 +91,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         }
 
         // Perform validations specific to PAR, as well as validation of the pushed parameters
-        var parValidationResult = await _parValidator.ValidateAsync(validationContext);
+        var parValidationResult = await _parValidator.ValidateAsync(validationContext, context.RequestAborted);
         if (parValidationResult.IsError)
         {
             return CreateErrorResult(

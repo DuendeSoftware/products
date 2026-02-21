@@ -106,7 +106,7 @@ internal class TokenValidator : ITokenValidator
         }
 
         _logger.LogDebug("Calling into custom token validator: {type}", _customValidator.GetType().FullName);
-        var customResult = await _customValidator.ValidateIdentityTokenAsync(result);
+        var customResult = await _customValidator.ValidateIdentityTokenAsync(result, ct);
 
         if (customResult.IsError)
         {
@@ -253,7 +253,7 @@ internal class TokenValidator : ITokenValidator
         }
 
         _logger.LogDebug("Calling into custom token validator: {type}", _customValidator.GetType().FullName);
-        var customResult = await _customValidator.ValidateAccessTokenAsync(result);
+        var customResult = await _customValidator.ValidateAccessTokenAsync(result, ct);
 
         if (customResult.IsError)
         {

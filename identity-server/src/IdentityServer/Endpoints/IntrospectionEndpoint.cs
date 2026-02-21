@@ -100,10 +100,10 @@ internal class IntrospectionEndpoint : IEndpointHandler
         ApiResource api = null;
         Client client = null;
 
-        var apiResult = await _apiSecretValidator.ValidateAsync(context);
+        var apiResult = await _apiSecretValidator.ValidateAsync(context, context.RequestAborted);
         if (apiResult.IsError)
         {
-            clientResult = await _clientValidator.ValidateAsync(context);
+            clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
             if (clientResult.IsError)
             {
                 _logger.LogError("Unauthorized call introspection endpoint. aborting.");

@@ -69,7 +69,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     }
 
     /// <inheritdoc/>
-    public async Task<DPoPProofValidatonResult> ValidateAsync(DPoPProofValidatonContext context)
+    public async Task<DPoPProofValidatonResult> ValidateAsync(DPoPProofValidatonContext context, CT ct)
     {
         var result = new DPoPProofValidatonResult() { IsError = false };
 
@@ -96,7 +96,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 return result;
             }
 
-            await ValidatePayloadAsync(context, result);
+            await ValidatePayloadAsync(context, result, ct);
             if (result.IsError)
             {
                 Logger.LogDebug("Failed to validate DPoP payload");
@@ -284,7 +284,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the payload.
     /// </summary>
-    protected virtual async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, CT ct)
     {
         if (context.ValidateAccessToken)
         {
@@ -370,7 +370,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
 
         // we do replay at the end so we only add to the reply cache if everything else is ok
-        await ValidateReplayAsync(context, result);
+        await ValidateReplayAsync(context, result, ct);
         if (result.IsError)
         {
             result.ErrorDescription = "Detected replay of DPoP proof token.";
@@ -381,9 +381,9 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates is the token has been replayed.
     /// </summary>
-    protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, CT ct)
     {
-        if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId, default))
+        if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId, ct))
         {
             Logger.LogDebug("Detected DPoP proof token replay for jti {jti}", result.TokenId);
             result.IsError = true;
@@ -410,7 +410,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
 
-        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, TimeProvider.GetUtcNow().Add(cacheDuration), default);
+        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, TimeProvider.GetUtcNow().Add(cacheDuration), ct);
     }
 
     /// <summary>

@@ -13,5 +13,7 @@ internal class DefaultCustomAuthorizeRequestValidator : ICustomAuthorizeRequestV
     /// Custom validation logic for the authorize request.
     /// </summary>
     /// <param name="context">The context.</param>
-    public Task ValidateAsync(CustomAuthorizeRequestValidationContext context) => Task.CompletedTask;
+    /// <param name="ct">The cancellation token.</param>
+    /// <inheritdoc/>
+    public Task ValidateAsync(CustomAuthorizeRequestValidationContext context, CT ct) => Task.CompletedTask;
 }

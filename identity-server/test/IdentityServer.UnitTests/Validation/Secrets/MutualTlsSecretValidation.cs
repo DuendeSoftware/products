@@ -39,7 +39,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -60,7 +60,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret);
+        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
@@ -80,7 +80,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -101,7 +101,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeTrue();
     }
@@ -126,7 +126,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -147,7 +147,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret);
+        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
@@ -167,7 +167,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -188,7 +188,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeTrue();
     }

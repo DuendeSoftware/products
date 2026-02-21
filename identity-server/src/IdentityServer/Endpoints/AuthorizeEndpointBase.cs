@@ -84,7 +84,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         }
 
         // validate request
-        var result = await _validator.ValidateAsync(parameters, user);
+        var result = await _validator.ValidateAsync(parameters, ct, user);
 
         if (result.IsError)
         {

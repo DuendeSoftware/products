@@ -50,7 +50,7 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
             _logger.LogTrace("Calling into identity provider configuration validator: {validatorType}", _validatorType);
 
             var context = new IdentityProviderConfigurationValidationContext(idp);
-            await _validator.ValidateAsync(context);
+            await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {

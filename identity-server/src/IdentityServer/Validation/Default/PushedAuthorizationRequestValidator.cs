@@ -44,7 +44,7 @@ internal class PushedAuthorizationRequestValidator(
     IMtlsEndpointGenerator mtlsEndpointGenerator,
     ILogger<PushedAuthorizationRequestValidator> logger) : IPushedAuthorizationRequestValidator
 {
-    public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context)
+    public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, CT ct)
     {
         // Licensing
         licenseUsage.FeatureUsed(LicenseFeature.PAR);
@@ -96,7 +96,7 @@ internal class PushedAuthorizationRequestValidator(
                 Method = "POST",
                 Url = parUrl
             };
-            var dpopValidationResult = await dpopProofValidator.ValidateAsync(dpopContext);
+            var dpopValidationResult = await dpopProofValidator.ValidateAsync(dpopContext, ct);
             if (dpopValidationResult.ServerIssuedNonce != null)
             {
                 return PushedAuthorizationValidationResult.CreateServerNonceResult(dpopValidationResult.ServerIssuedNonce);
@@ -131,7 +131,7 @@ internal class PushedAuthorizationRequestValidator(
         }
 
         // -- Authorization Parameter Validation --
-        var authorizeRequestValidation = await authorizeRequestValidator.ValidateAsync(context.RequestParameters,
+        var authorizeRequestValidation = await authorizeRequestValidator.ValidateAsync(context.RequestParameters, ct,
             authorizeRequestType: AuthorizeRequestType.PushedAuthorization);
         if (authorizeRequestValidation.IsError)
         {

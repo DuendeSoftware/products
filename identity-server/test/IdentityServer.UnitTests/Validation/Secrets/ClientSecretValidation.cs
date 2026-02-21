@@ -24,7 +24,7 @@ public class ClientSecretValidation
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var result = await validator.ValidateAsync(context);
+        var result = await validator.ValidateAsync(context, default);
 
         result.IsError.ShouldBeFalse();
         result.Client.ClientId.ShouldBe("roclient");
@@ -42,7 +42,7 @@ public class ClientSecretValidation
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var result = await validator.ValidateAsync(context);
+        var result = await validator.ValidateAsync(context, default);
 
         result.IsError.ShouldBeTrue();
     }
@@ -59,7 +59,7 @@ public class ClientSecretValidation
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var result = await validator.ValidateAsync(context);
+        var result = await validator.ValidateAsync(context, default);
 
         result.IsError.ShouldBeFalse();
         result.Client.ClientId.ShouldBe("roclient.public");
@@ -78,7 +78,7 @@ public class ClientSecretValidation
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var result = await validator.ValidateAsync(context);
+        var result = await validator.ValidateAsync(context, default);
 
         result.IsError.ShouldBeFalse();
         result.Client.ClientId.ShouldBe("client.implicit");
@@ -96,7 +96,7 @@ public class ClientSecretValidation
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var result = await validator.ValidateAsync(context);
+        var result = await validator.ValidateAsync(context, default);
 
         result.IsError.ShouldBeTrue();
     }

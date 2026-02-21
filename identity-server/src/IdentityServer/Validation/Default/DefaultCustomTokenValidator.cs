@@ -32,17 +32,13 @@ public class DefaultCustomTokenValidator : ICustomTokenValidator
     /// Custom validation logic for access tokens.
     /// </summary>
     /// <param name="result">The validation result so far.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The validation result
     /// </returns>
-    public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result) => Task.FromResult(result);
+    /// <inheritdoc/>
+    public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result, CT ct) => Task.FromResult(result);
 
-    /// <summary>
-    /// Custom validation logic for identity tokens.
-    /// </summary>
-    /// <param name="result">The validation result so far.</param>
-    /// <returns>
-    /// The validation result
-    /// </returns>
-    public virtual Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result) => Task.FromResult(result);
+    /// <inheritdoc/>
+    public virtual Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result, CT ct) => Task.FromResult(result);
 }

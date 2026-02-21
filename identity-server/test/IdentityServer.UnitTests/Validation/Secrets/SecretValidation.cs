@@ -42,7 +42,7 @@ public class SecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeTrue();
     }
@@ -61,7 +61,7 @@ public class SecretValidation
             Type = "invalid"
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -80,19 +80,19 @@ public class SecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
 
         secret.Credential = "foobar";
-        result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
 
         secret.Credential = "quux";
-        result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
 
         secret.Credential = "notexpired";
-        result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
     }
 
@@ -110,7 +110,7 @@ public class SecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -129,7 +129,7 @@ public class SecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeFalse();
     }
 
@@ -147,7 +147,7 @@ public class SecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeFalse();
     }
 
@@ -164,7 +164,7 @@ public class SecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeFalse();
     }
 }
