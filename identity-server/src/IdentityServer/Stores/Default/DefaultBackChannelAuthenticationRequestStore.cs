@@ -38,7 +38,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
 
         var handle = await CreateHandleAsync(ct);
         request.InternalId = GetHashedKey(handle);
-        await StoreItemByHashedKeyAsync(request.InternalId, request, request.ClientId, request.Subject.GetSubjectId(), null, null, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct: ct);
+        await StoreItemByHashedKeyAsync(request.InternalId, request, request.ClientId, request.Subject.GetSubjectId(), null, null, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct);
         return handle;
     }
 
@@ -67,7 +67,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, string clientId = null, CT ct = default)
+    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, CT ct, string clientId = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetLoginsForUser");
 
@@ -83,6 +83,6 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.UpdateByInternalId");
 
-        return StoreItemByHashedKeyAsync(id, request, request.ClientId, request.Subject.GetSubjectId(), request.SessionId, request.Description, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct: ct);
+        return StoreItemByHashedKeyAsync(id, request, request.ClientId, request.Subject.GetSubjectId(), request.SessionId, request.Description, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct);
     }
 }

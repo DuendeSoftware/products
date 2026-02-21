@@ -200,7 +200,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.QuerySessions");
 
-        var results = await _store.QuerySessionsAsync(filter, ct);
+        var results = await _store.QuerySessionsAsync(ct, filter);
 
         var tickets = AsUserSessions(results.Results);
 

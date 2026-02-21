@@ -123,12 +123,13 @@ public class ConformanceAssessmentServiceTests
 
     public class ReportGenerationTests
     {
+        private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
         [Fact]
         public async Task GenerateReportWithBothProfilesEnabledReturnsCompleteReport()
         {
             var service = CreateService();
 
-            var report = await service.GenerateReportAsync();
+            var report = await service.GenerateReportAsync(_ct);
 
             _ = report.ShouldNotBeNull();
             _ = report.Profiles.ShouldNotBeNull();
@@ -142,7 +143,7 @@ public class ConformanceAssessmentServiceTests
             var options = CreateDefaultOptions(enableOAuth21: true, enableFapi2: false);
             var service = CreateService(options: options);
 
-            var report = await service.GenerateReportAsync();
+            var report = await service.GenerateReportAsync(_ct);
 
             _ = report.Profiles.OAuth21.ShouldNotBeNull();
             report.Profiles.Fapi2Security.ShouldBeNull();
@@ -154,7 +155,7 @@ public class ConformanceAssessmentServiceTests
             var options = CreateDefaultOptions(enableOAuth21: false, enableFapi2: true);
             var service = CreateService(options: options);
 
-            var report = await service.GenerateReportAsync();
+            var report = await service.GenerateReportAsync(_ct);
 
             report.Profiles.OAuth21.ShouldBeNull();
             _ = report.Profiles.Fapi2Security.ShouldNotBeNull();
@@ -166,7 +167,7 @@ public class ConformanceAssessmentServiceTests
             var service = CreateService();
             var beforeTime = DateTimeOffset.UtcNow;
 
-            var report = await service.GenerateReportAsync();
+            var report = await service.GenerateReportAsync(_ct);
 
             var afterTime = DateTimeOffset.UtcNow;
             report.AssessedAt.ShouldBeGreaterThanOrEqualTo(beforeTime);
@@ -184,7 +185,7 @@ public class ConformanceAssessmentServiceTests
             };
             var service = CreateService(clients: clients);
 
-            var report = await service.GenerateReportAsync();
+            var report = await service.GenerateReportAsync(_ct);
 
             // Overall summary
             report.OverallSummary.TotalClients.ShouldBe(3);

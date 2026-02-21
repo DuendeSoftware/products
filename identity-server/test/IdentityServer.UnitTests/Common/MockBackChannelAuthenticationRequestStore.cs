@@ -28,7 +28,7 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
         return Task.FromResult(item.Value);
     }
 
-    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, string clientId = null, CT ct = default)
+    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, CT ct, string clientId = null)
     {
         var items = Items.Where(x => x.Value.Subject.GetSubjectId() == subjectId
                                      && (clientId == null || x.Value.ClientId == clientId)

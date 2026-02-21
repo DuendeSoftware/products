@@ -68,7 +68,7 @@ public interface IServerSideSessionStore
     /// <summary>
     /// Queries sessions based on filter
     /// </summary>
-    /// <param name="filter">The session query filter.</param>
     /// <param name="ct">The <see cref="CT"/>.</param>
-    Task<QueryResult<ServerSideSession>> QuerySessionsAsync(SessionQuery? filter = null, CT ct = default);
+    /// <param name="filter">The session query filter.</param>
+    Task<QueryResult<ServerSideSession>> QuerySessionsAsync(CT ct, SessionQuery? filter = null);
 }
