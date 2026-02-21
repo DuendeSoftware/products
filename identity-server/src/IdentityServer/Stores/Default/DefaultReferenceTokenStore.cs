@@ -59,6 +59,6 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.RemoveReferenceTokens");
 
-        return RemoveAllAsync(subjectId, clientId, sessionId, ct);
+        return RemoveAllAsync(subjectId, clientId, ct, sessionId);
     }
 }

@@ -95,7 +95,7 @@ internal class TokenValidator : ITokenValidator
         _logger.LogDebug("Client found: {clientId} / {clientName}", client.ClientId, client.ClientName);
 
         var keys = await _keys.GetValidationKeysAsync(default);
-        var result = await ValidateJwtAsync(token, keys, audience: clientId, validateLifetime: validateLifetime, ct: ct);
+        var result = await ValidateJwtAsync(token, keys, ct, validateLifetime: validateLifetime, audience: clientId);
 
         result.Client = client;
 
@@ -149,7 +149,7 @@ internal class TokenValidator : ITokenValidator
             result = await ValidateJwtAsync(
                 token,
                 await _keys.GetValidationKeysAsync(default),
-                ct: ct);
+                ct);
         }
         else
         {
@@ -269,7 +269,7 @@ internal class TokenValidator : ITokenValidator
     }
 
     private async Task<TokenValidationResult> ValidateJwtAsync(string jwtString,
-        IEnumerable<SecurityKeyInfo> validationKeys, bool validateLifetime = true, string audience = null, CT ct = default)
+        IEnumerable<SecurityKeyInfo> validationKeys, CT ct, bool validateLifetime = true, string audience = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
 

@@ -124,13 +124,14 @@ public class ConformanceReportEndpointTests
 
     public class HtmlEndpointTests
     {
+        private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
         [Fact]
         public async Task GetHtmlReportWhenEnabledReturnsHtmlContent()
         {
             var endpoint = CreateEndpoint();
             var context = CreateHttpContext();
 
-            var result = await endpoint.GetHtmlReportAsync(context);
+            var result = await endpoint.GetHtmlReportAsync(context, _ct);
 
             _ = result.ShouldNotBeNull();
             _ = result.ShouldBeOfType<Microsoft.AspNetCore.Http.HttpResults.ContentHttpResult>();
@@ -145,7 +146,7 @@ public class ConformanceReportEndpointTests
             var endpoint = CreateEndpoint(options: options);
             var context = CreateHttpContext();
 
-            var result = await endpoint.GetHtmlReportAsync(context);
+            var result = await endpoint.GetHtmlReportAsync(context, _ct);
 
             _ = result.ShouldBeOfType<Microsoft.AspNetCore.Http.HttpResults.NotFound>();
         }
@@ -163,7 +164,7 @@ public class ConformanceReportEndpointTests
             var endpoint = CreateEndpoint(licenseInfo: licenseInfo);
             var context = CreateHttpContext();
 
-            var result = await endpoint.GetHtmlReportAsync(context);
+            var result = await endpoint.GetHtmlReportAsync(context, _ct);
 
             var contentResult = (Microsoft.AspNetCore.Http.HttpResults.ContentHttpResult)result;
             var html = contentResult.ResponseContent!;

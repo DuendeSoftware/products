@@ -102,7 +102,7 @@ public class KeyManager : IKeyManager
         if (!keys.Any())
         {
             cached = false;
-            keys = await GetAllKeysFromStoreAsync(ct: ct);
+            keys = await GetAllKeysFromStoreAsync(ct);
         }
 
         // ensure we have all of our active signing keys
@@ -154,7 +154,7 @@ public class KeyManager : IKeyManager
                 if (!signingKeysSuccess || rotationRequired)
                 {
                     // still need to do the work, but check if another server did the work already
-                    keys = await GetAllKeysFromStoreAsync(ct: ct);
+                    keys = await GetAllKeysFromStoreAsync(ct);
 
                     if (!signingKeysSuccess)
                     {
@@ -428,7 +428,7 @@ public class KeyManager : IKeyManager
         }
     }
 
-    internal async Task<IEnumerable<KeyContainer>> GetAllKeysFromStoreAsync(bool cache = true, CT ct = default)
+    internal async Task<IEnumerable<KeyContainer>> GetAllKeysFromStoreAsync(CT ct, bool cache = true)
     {
         _logger.LogTrace("Loading keys from store.");
 
@@ -535,7 +535,7 @@ public class KeyManager : IKeyManager
             }
 
             // reload in case other new keys were recently created
-            keys = new List<KeyContainer>(await GetAllKeysFromStoreAsync(false, ct));
+            keys = new List<KeyContainer>(await GetAllKeysFromStoreAsync(ct, false));
         }
 
         // explicitly cache here since we didn't when we loaded above

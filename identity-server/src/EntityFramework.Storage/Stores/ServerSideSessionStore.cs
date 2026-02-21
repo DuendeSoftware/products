@@ -281,7 +281,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<QueryResult<ServerSideSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
+    public virtual async Task<QueryResult<ServerSideSession>> QuerySessionsAsync(CT ct, SessionQuery filter = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.QuerySessions");
 
@@ -322,7 +322,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
                 // we need to start over and re-query from the beginning.
                 filter.ResultsToken = null;
                 filter.RequestPriorResults = false;
-                return await QuerySessionsAsync(filter, ct);
+                return await QuerySessionsAsync(ct, filter);
             }
         }
         else

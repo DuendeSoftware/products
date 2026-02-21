@@ -172,7 +172,7 @@ public class DefaultGrantStore<T>
     protected virtual async Task<string> CreateItemAsync(T item, string clientId, string subjectId, string sessionId, string description, DateTime created, int lifetime, CT ct)
     {
         var handle = await CreateHandleAsync(ct);
-        await StoreItemAsync(handle, item, clientId, subjectId, sessionId, description, created, created.AddSeconds(lifetime), ct: ct);
+        await StoreItemAsync(handle, item, clientId, subjectId, sessionId, description, created, created.AddSeconds(lifetime), ct);
         return handle;
     }
 
@@ -187,13 +187,13 @@ public class DefaultGrantStore<T>
     /// <param name="description">The description.</param>
     /// <param name="created">The created time.</param>
     /// <param name="expiration">The expiration.</param>
-    /// <param name="consumedTime">The consumed time.</param>
     /// <param name="ct"></param>
+    /// <param name="consumedTime">The consumed time.</param>
     /// <returns></returns>
-    protected virtual Task StoreItemAsync(string key, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, DateTime? consumedTime = null, CT ct = default)
+    protected virtual Task StoreItemAsync(string key, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, CT ct, DateTime? consumedTime = null)
     {
         key = GetHashedKey(key);
-        return StoreItemByHashedKeyAsync(key, item, clientId, subjectId, sessionId, description, created, expiration, consumedTime, ct);
+        return StoreItemByHashedKeyAsync(key, item, clientId, subjectId, sessionId, description, created, expiration, ct, consumedTime);
     }
 
     /// <summary>
@@ -207,10 +207,10 @@ public class DefaultGrantStore<T>
     /// <param name="description">The description.</param>
     /// <param name="created">The created time.</param>
     /// <param name="expiration">The expiration.</param>
-    /// <param name="consumedTime">The consumed time.</param>
     /// <param name="ct"></param>
+    /// <param name="consumedTime">The consumed time.</param>
     /// <returns></returns>
-    protected virtual async Task StoreItemByHashedKeyAsync(string hashedKey, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, DateTime? consumedTime = null, CT ct = default)
+    protected virtual async Task StoreItemByHashedKeyAsync(string hashedKey, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, CT ct, DateTime? consumedTime = null)
     {
         var json = Serializer.Serialize(item);
 
@@ -256,10 +256,10 @@ public class DefaultGrantStore<T>
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
-    /// <param name="sessionId">The optional session identifier.</param>
     /// <param name="ct"></param>
+    /// <param name="sessionId">The optional session identifier.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, string sessionId = null, CT ct = default) => await Store.RemoveAllAsync(new PersistedGrantFilter
+    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, CT ct, string sessionId = null) => await Store.RemoveAllAsync(new PersistedGrantFilter
     {
         SubjectId = subjectId,
         ClientId = clientId,

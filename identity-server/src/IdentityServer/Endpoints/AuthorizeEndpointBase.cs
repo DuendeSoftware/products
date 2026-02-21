@@ -90,10 +90,10 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         {
             return await CreateErrorResultAsync(
                 "Request validation failed",
+                ct,
                 result.ValidatedRequest,
                 result.Error,
-                result.ErrorDescription,
-                ct: ct);
+                result.ErrorDescription);
         }
 
         string consentRequestId = null;
@@ -110,7 +110,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
                 if (consent != null && consent.Data == null)
                 {
-                    return await CreateErrorResultAsync("consent message is missing data", result.ValidatedRequest, ct: ct);
+                    return await CreateErrorResultAsync("consent message is missing data", ct, result.ValidatedRequest);
                 }
             }
 
@@ -121,7 +121,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
             var interactionResult = await _interactionGenerator.ProcessInteractionAsync(request, consent?.Data, ct);
             if (interactionResult.ResponseType == InteractionResponseType.Error)
             {
-                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, interactionResult.ErrorDescription, false, ct);
+                return await CreateErrorResultAsync("Interaction generator error", ct, request, interactionResult.Error, interactionResult.ErrorDescription, false);
             }
 
             if (interactionResult.ResponseType == InteractionResponseType.UserInteraction)
@@ -163,11 +163,11 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
     protected async Task<IEndpointResult> CreateErrorResultAsync(
         string logMessage,
+        CT ct,
         ValidatedAuthorizeRequest request = null,
         string error = OidcConstants.AuthorizeErrors.ServerError,
         string errorDescription = null,
-        bool logError = true,
-        CT ct = default)
+        bool logError = true)
     {
         if (logError)
         {

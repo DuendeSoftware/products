@@ -99,7 +99,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         {
             _logger.LogDebug("No user present");
 
-            var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId(), ct: ct);
+            var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId(), ct);
             foreach (var item in items)
             {
                 if (!item.IsComplete)

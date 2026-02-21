@@ -171,7 +171,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
     }
 
     /// <inheritdoc/>
-    public Task RemoveAllGrantsAsync(string subjectId, string clientId = null, string sessionId = null, CT ct = default)
+    public Task RemoveAllGrantsAsync(string subjectId, CT ct, string clientId = null, string sessionId = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultPersistedGrantService.RemoveAllGrants");
 

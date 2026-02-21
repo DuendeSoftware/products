@@ -587,7 +587,7 @@ public class KeyManagerTests
     {
         var key = CreateAndStoreKey();
 
-        var keys = await _subject.GetAllKeysFromStoreAsync(ct: _ct);
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.ShouldNotBeNull();
         keys.Single().Id.ShouldBe(key);
@@ -603,7 +603,7 @@ public class KeyManagerTests
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(1)));
         var key5 = CreateAndStoreKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(5)));
 
-        var keys = await _subject.GetAllKeysFromStoreAsync(ct: _ct);
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
@@ -617,7 +617,7 @@ public class KeyManagerTests
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(1)));
         var key5 = CreateAndStoreKeyThatCannotBeUnprotected(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(5)));
 
-        var keys = await _subject.GetAllKeysFromStoreAsync(ct: _ct);
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
 
@@ -632,7 +632,7 @@ public class KeyManagerTests
         var key1 = CreateAndStoreKey(TimeSpan.FromSeconds(10));
         _mockKeyStore.Keys.Add(null);
 
-        var keys = await _subject.GetAllKeysFromStoreAsync(ct: _ct);
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.Select(x => x.Id).ShouldBe([key1]);
     }

@@ -257,7 +257,7 @@ public class ServerSideSessionTests
 
         var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" }, _ct);
         tickets.TotalCount.ShouldBe(2);
-        var sessions = await _sessionStore.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" }, _ct);
+        var sessions = await _sessionStore.QuerySessionsAsync(_ct, new SessionQuery { SubjectId = "alice" });
         sessions.TotalCount.ShouldBe(2);
 
         tickets.ResultsToken.ShouldBe(sessions.ResultsToken);

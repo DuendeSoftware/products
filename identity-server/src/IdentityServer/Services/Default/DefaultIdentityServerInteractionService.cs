@@ -199,7 +199,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         if (user != null)
         {
             var subject = user.GetSubjectId();
-            await _grants.RemoveAllGrantsAsync(subject, clientId, ct: ct);
+            await _grants.RemoveAllGrantsAsync(subject, ct, clientId);
         }
     }
 
@@ -213,7 +213,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         {
             var subject = user.GetSubjectId();
             var sessionId = await _userSession.GetSessionIdAsync(ct);
-            await _grants.RemoveAllGrantsAsync(subject, sessionId: sessionId, ct: ct);
+            await _grants.RemoveAllGrantsAsync(subject, ct, sessionId: sessionId);
         }
     }
 }
