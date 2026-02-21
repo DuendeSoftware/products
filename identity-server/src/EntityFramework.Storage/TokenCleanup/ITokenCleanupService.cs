@@ -19,5 +19,5 @@ public interface ITokenCleanupService
     /// <param name="ct">A token that propagates notification
     /// that the cleanup operation should be canceled.</param>
     /// <returns></returns>
-    Task CleanupGrantsAsync(CT ct = default);
+    Task CleanupGrantsAsync(CT ct);
 }

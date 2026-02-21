@@ -238,7 +238,7 @@ public class ServerSideSessionTests
         await _pipeline.LoginAsync("alice");
         _pipeline.RemoveLoginCookie();
 
-        var tickets = await _ticketService.GetSessionsAsync(new SessionFilter { SubjectId = "alice" });
+        var tickets = await _ticketService.GetSessionsAsync(new SessionFilter { SubjectId = "alice" }, _ct);
         var sessions = await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" }, _ct);
 
         tickets.Select(x => x.SessionId).ShouldBe(sessions.Select(x => x.SessionId));

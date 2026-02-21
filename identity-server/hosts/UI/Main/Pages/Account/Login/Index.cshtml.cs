@@ -46,7 +46,7 @@ public class Index : PageModel
 
     public async Task<IActionResult> OnGet(string? returnUrl)
     {
-        await BuildModelAsync(returnUrl);
+        await BuildModelAsync(returnUrl, HttpContext.RequestAborted);
 
         if (View.IsExternalLoginOnly)
         {
@@ -157,11 +157,11 @@ public class Index : PageModel
         }
 
         // something went wrong, show form with error
-        await BuildModelAsync(Input.ReturnUrl);
+        await BuildModelAsync(Input.ReturnUrl, HttpContext.RequestAborted);
         return Page();
     }
 
-    private async Task BuildModelAsync(string? returnUrl)
+    private async Task BuildModelAsync(string? returnUrl, CT ct)
     {
         Input = new InputModel
         {
@@ -203,7 +203,7 @@ public class Index : PageModel
                 displayName: x.DisplayName ?? x.Name
             )).ToList();
 
-        var dynamicSchemes = (await _identityProviderStore.GetAllSchemeNamesAsync())
+        var dynamicSchemes = (await _identityProviderStore.GetAllSchemeNamesAsync(ct))
             .Where(x => x.Enabled)
             .Select(x => new ViewModel.ExternalProvider
             (

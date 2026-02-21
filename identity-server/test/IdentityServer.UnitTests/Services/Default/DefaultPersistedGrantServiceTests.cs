@@ -314,7 +314,7 @@ public class DefaultPersistedGrantServiceTests
             RequestedScopes = new string[] { "quux3" }
         }, _ct);
 
-        await _subject.RemoveAllGrantsAsync("123", "client1");
+            await _subject.RemoveAllGrantsAsync("123", "client1", ct: _ct);
 
         (await _referenceTokens.GetReferenceTokenAsync(handle1, _ct)).ShouldBeNull();
         (await _referenceTokens.GetReferenceTokenAsync(handle2, _ct)).ShouldNotBeNull();
@@ -358,7 +358,7 @@ public class DefaultPersistedGrantServiceTests
                 Lifetime = 10,
             }, _ct);
 
-            await _subject.RemoveAllGrantsAsync("123");
+            await _subject.RemoveAllGrantsAsync("123", ct: _ct);
 
             (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
             (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldBeNull();
@@ -396,7 +396,7 @@ public class DefaultPersistedGrantServiceTests
                 Lifetime = 10,
             }, _ct);
 
-            await _subject.RemoveAllGrantsAsync("123", "client1");
+        await _subject.RemoveAllGrantsAsync("123", "client1", ct: _ct);
 
             (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
             (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldNotBeNull();
@@ -442,7 +442,7 @@ public class DefaultPersistedGrantServiceTests
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
             }, _ct);
-            await _subject.RemoveAllGrantsAsync("123", "client1", "session1");
+            await _subject.RemoveAllGrantsAsync("123", "client1", "session1", _ct);
 
             (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
             (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldNotBeNull();
@@ -490,7 +490,7 @@ public class DefaultPersistedGrantServiceTests
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
             }, _ct);
-            await _subject.RemoveAllGrantsAsync("123", sessionId: "session1");
+            await _subject.RemoveAllGrantsAsync("123", sessionId: "session1", ct: _ct);
 
             (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
             (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldBeNull();

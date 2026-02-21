@@ -185,7 +185,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CT ct = default)
+    public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetSessions");
 
@@ -196,7 +196,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc />
-    public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
+    public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.QuerySessions");
 
@@ -219,7 +219,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct = default)
+    public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetAndRemoveExpiredSessions");
 

@@ -11,6 +11,7 @@ namespace Duende.IdentityServer.IntegrationTests.Configuration;
 
 public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     [Fact]
     public async Task valid_request_creates_new_client()
     {
@@ -29,7 +30,7 @@ public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
 
         var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
         response.ShouldNotBeNull();
-        var newClient = await IdentityServerHost.GetClientAsync(response!.ClientId); // Not null already asserted
+        var newClient = await IdentityServerHost.GetClientAsync(response!.ClientId, _ct); // Not null already asserted
         newClient.ShouldNotBeNull();
         newClient.ClientId.ShouldBe(response.ClientId);
         newClient.AllowedGrantTypes.ShouldBe(request.GrantTypes);

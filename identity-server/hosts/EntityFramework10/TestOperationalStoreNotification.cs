@@ -12,7 +12,7 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
 {
     public TestOperationalStoreNotification() => Console.WriteLine("ctor");
 
-    public Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CT ct = default)
+    public Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CT ct)
     {
         ArgumentNullException.ThrowIfNull(persistedGrants);
         foreach (var grant in persistedGrants)
@@ -22,7 +22,7 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
         return Task.CompletedTask;
     }
 
-    public Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CT ct = default)
+    public Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CT ct)
     {
         ArgumentNullException.ThrowIfNull(deviceCodes);
         foreach (var deviceCode in deviceCodes)
