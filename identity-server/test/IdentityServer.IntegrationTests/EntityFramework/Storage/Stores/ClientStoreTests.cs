@@ -7,7 +7,6 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit.Sdk;
@@ -31,7 +30,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
     public async Task FindClientByIdAsync_WhenClientDoesNotExist_ExpectNull(DbContextOptions<ConfigurationDbContext> options)
     {
         await using var context = new ConfigurationDbContext(options);
-        var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+        var store = new ClientStore(context, new NullLogger<ClientStore>());
         var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString(), _ct);
         client.ShouldBeNull();
     }
@@ -54,7 +53,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         Client client;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>());
             client = await store.FindClientByIdAsync(testClient.ClientId, _ct);
         }
 
@@ -88,7 +87,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         Client client;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>());
             client = await store.FindClientByIdAsync(testClient.ClientId, _ct);
         }
 
@@ -149,7 +148,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>());
 
             const int timeout = 5000;
             var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId, _ct));
@@ -183,7 +182,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using var context = new ConfigurationDbContext(freshOptions);
         await context.Database.EnsureCreatedAsync(_ct);
 
-        var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+        var store = new ClientStore(context, new NullLogger<ClientStore>());
 
         var clients = new List<Client>();
         await foreach (var client in store.GetAllClientsAsync(_ct))
@@ -216,7 +215,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>());
 
             var clients = new List<Client>();
             await foreach (var client in store.GetAllClientsAsync(_ct))
@@ -258,7 +257,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>());
 
             var clients = new List<Client>();
             await foreach (var c in store.GetAllClientsAsync(_ct))

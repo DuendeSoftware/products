@@ -5,7 +5,6 @@
 using System.Runtime.CompilerServices;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,11 +23,6 @@ public class ClientStore : IClientStore
     protected readonly IConfigurationDbContext Context;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<ClientStore> Logger;
@@ -38,13 +32,11 @@ public class ClientStore : IClientStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public ClientStore(IConfigurationDbContext context, ILogger<ClientStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public ClientStore(IConfigurationDbContext context, ILogger<ClientStore> logger)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <summary>

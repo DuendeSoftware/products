@@ -6,7 +6,6 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -31,11 +30,6 @@ public class DeviceFlowStore : IDeviceFlowStore
     protected readonly IPersistentGrantSerializer Serializer;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger Logger;
@@ -46,17 +40,14 @@ public class DeviceFlowStore : IDeviceFlowStore
     /// <param name="context">The context.</param>
     /// <param name="serializer">The serializer</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     public DeviceFlowStore(
         IPersistedGrantDbContext context,
         IPersistentGrantSerializer serializer,
-        ILogger<DeviceFlowStore> logger,
-        ICancellationTokenProvider cancellationTokenProvider)
+        ILogger<DeviceFlowStore> logger)
     {
         Context = context;
         Serializer = serializer;
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <inheritdoc/>

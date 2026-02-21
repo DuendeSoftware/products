@@ -7,7 +7,6 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -44,7 +43,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>(), new NoneCancellationTokenProvider());
+            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>());
             var item = await store.GetBySchemeAsync("scheme1", _ct);
 
             item.ShouldNotBeNull();
@@ -68,7 +67,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>(), new NoneCancellationTokenProvider());
+            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>());
             var item = await store.GetBySchemeAsync("scheme2", _ct);
 
             item.ShouldBeNull();
@@ -91,7 +90,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>(), new NoneCancellationTokenProvider());
+            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>());
             var item = await store.GetBySchemeAsync("scheme3", _ct);
 
             item.ShouldBeNull();

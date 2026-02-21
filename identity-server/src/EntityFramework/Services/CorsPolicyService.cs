@@ -21,11 +21,6 @@ public class CorsPolicyService : ICorsPolicyService
     protected readonly IConfigurationDbContext DbContext;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<CorsPolicyService> Logger;
@@ -36,13 +31,11 @@ public class CorsPolicyService : ICorsPolicyService
     /// </summary>
     /// <param name="dbContext">The DbContext</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public CorsPolicyService(IConfigurationDbContext dbContext, ILogger<CorsPolicyService> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public CorsPolicyService(IConfigurationDbContext dbContext, ILogger<CorsPolicyService> logger)
     {
         DbContext = dbContext;
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <inheritdoc/>

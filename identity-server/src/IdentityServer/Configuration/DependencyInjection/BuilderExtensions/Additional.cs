@@ -454,7 +454,7 @@ public static class IdentityServerBuilderExtensionsAdditional
             var httpClient = httpClientFactory.CreateClient(name);
             var loggerFactory = s.GetRequiredService<ILoggerFactory>();
 
-            return new DefaultBackChannelLogoutHttpClient(httpClient, loggerFactory, new NoneCancellationTokenProvider());
+            return new DefaultBackChannelLogoutHttpClient(httpClient, loggerFactory);
         });
 
         return httpBuilder;
@@ -491,7 +491,7 @@ public static class IdentityServerBuilderExtensionsAdditional
             var loggerFactory = s.GetRequiredService<ILoggerFactory>();
             var options = s.GetRequiredService<IdentityServerOptions>();
 
-            return new DefaultJwtRequestUriHttpClient(httpClient, options, loggerFactory, new NoneCancellationTokenProvider());
+            return new DefaultJwtRequestUriHttpClient(httpClient, options, loggerFactory);
         });
 
         return httpBuilder;

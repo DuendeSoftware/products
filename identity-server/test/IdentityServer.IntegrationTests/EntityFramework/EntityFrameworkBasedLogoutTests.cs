@@ -7,7 +7,7 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
+
 using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Test;
@@ -80,8 +80,7 @@ public class EntityFrameworkBasedLogoutTests
         _mockPipeline.OnPostConfigureServices += services =>
         {
             //Override the default developer signing key store and signing credential store with the EF based implementations to repo bug specific to concurrent access to an EF db context
-            services.AddSingleton<ISigningKeyStore>(new SigningKeyStore(context, new NullLogger<SigningKeyStore>(),
-                new NoneCancellationTokenProvider()));
+            services.AddSingleton<ISigningKeyStore>(new SigningKeyStore(context, new NullLogger<SigningKeyStore>()));
             services.Replace(ServiceDescriptor.Singleton<ISigningCredentialStore, AutomaticKeyManagerKeyStore>());
         };
         _mockPipeline.Initialize();

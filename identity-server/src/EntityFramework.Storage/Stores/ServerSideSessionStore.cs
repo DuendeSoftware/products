@@ -5,7 +5,6 @@
 using Duende.IdentityServer.EntityFramework.Extensions;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,11 +23,6 @@ public class ServerSideSessionStore : IServerSideSessionStore
     protected readonly IPersistedGrantDbContext Context;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<ServerSideSessionStore> Logger;
@@ -38,13 +32,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public ServerSideSessionStore(IPersistedGrantDbContext context, ILogger<ServerSideSessionStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public ServerSideSessionStore(IPersistedGrantDbContext context, ILogger<ServerSideSessionStore> logger)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
 

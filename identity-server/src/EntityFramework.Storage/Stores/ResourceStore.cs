@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -6,7 +6,6 @@ using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -25,11 +24,6 @@ public class ResourceStore : IResourceStore
     protected readonly IConfigurationDbContext Context;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<ResourceStore> Logger;
@@ -39,13 +33,11 @@ public class ResourceStore : IResourceStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public ResourceStore(IConfigurationDbContext context, ILogger<ResourceStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public ResourceStore(IConfigurationDbContext context, ILogger<ResourceStore> logger)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <summary>

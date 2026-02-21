@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -14,19 +14,16 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
 {
     private readonly HttpClient _client;
     private readonly ILogger<DefaultBackChannelLogoutHttpClient> _logger;
-    private readonly ICancellationTokenProvider _cancellationTokenProvider;
 
     /// <summary>
     /// Constructor for BackChannelLogoutHttpClient.
     /// </summary>
     /// <param name="client"></param>
     /// <param name="loggerFactory"></param>
-    /// <param name="cancellationTokenProvider"></param>
-    public DefaultBackChannelLogoutHttpClient(HttpClient client, ILoggerFactory loggerFactory, ICancellationTokenProvider cancellationTokenProvider)
+    public DefaultBackChannelLogoutHttpClient(HttpClient client, ILoggerFactory loggerFactory)
     {
         _client = client;
         _logger = loggerFactory.CreateLogger<DefaultBackChannelLogoutHttpClient>();
-        _cancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <summary>

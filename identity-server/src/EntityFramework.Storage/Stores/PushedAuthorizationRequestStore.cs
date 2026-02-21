@@ -4,7 +4,6 @@
 
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,11 +19,6 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     protected readonly IPersistedGrantDbContext Context;
 
     /// <summary>
-    /// The CancellationToken service.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger Logger;
@@ -34,12 +28,10 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
-    public PushedAuthorizationRequestStore(IPersistedGrantDbContext context, ILogger<PushedAuthorizationRequestStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public PushedAuthorizationRequestStore(IPersistedGrantDbContext context, ILogger<PushedAuthorizationRequestStore> logger)
     {
         Context = context;
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <inheritdoc />
