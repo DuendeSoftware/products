@@ -21,6 +21,8 @@ public class CibaTests
 {
     private const string Category = "Backchannel Authentication (CIBA) endpoint";
 
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     private IdentityServerPipeline _mockPipeline = new();
     private MockCibaUserValidator _mockCibaUserValidator = new();
     private MockCibaUserNotificationService _mockCibaUserNotificationService = new();
@@ -1513,7 +1515,7 @@ public class CibaTests
         var id_token = await tokenService.IssueJwtAsync(600, new Claim[] {
             new Claim("sub", _user.SubjectId),
             new Claim("aud", _cibaClient.ClientId),
-        });
+        }, _ct);
 
         var bindingMessage = Guid.NewGuid().ToString("n");
         var body = new Dictionary<string, string>

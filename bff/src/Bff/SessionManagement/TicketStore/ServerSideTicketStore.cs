@@ -31,7 +31,7 @@ internal class ServerSideTicketStore(
 
     private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
 
-    private CT ct => accessor.HttpContext?.RequestAborted ?? CT.None;
+    private CT _ct => accessor.HttpContext?.RequestAborted ?? CT.None;
 
     /// <inheritdoc />
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
@@ -43,7 +43,7 @@ internal class ServerSideTicketStore(
         {
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId()
-        }, ct);
+        }, _ct);
 
         var key = CryptoRandom.CreateUniqueId(format: CryptoRandom.OutputFormat.Hex);
 
@@ -68,7 +68,7 @@ internal class ServerSideTicketStore(
             Ticket = ticket.Serialize(_protector)
         };
 
-        await store.CreateUserSessionAsync(session, ct);
+        await store.CreateUserSessionAsync(session, _ct);
         metrics.SessionStarted();
     }
 
@@ -78,7 +78,7 @@ internal class ServerSideTicketStore(
         logger.RetrieveAuthenticationTicket(LogLevel.Debug, key);
 
         var userSessionKey = BuildUserSessionKey(key);
-        var session = await store.GetUserSessionAsync(userSessionKey, ct);
+        var session = await store.GetUserSessionAsync(userSessionKey, _ct);
         if (session == null)
         {
             logger.NoAuthenticationTicketFoundForKey(LogLevel.Debug, key);
@@ -111,7 +111,7 @@ internal class ServerSideTicketStore(
     public async Task RenewAsync(string key, AuthenticationTicket ticket)
     {
         var userSessionKey = BuildUserSessionKey(key);
-        var session = await store.GetUserSessionAsync(userSessionKey, ct);
+        var session = await store.GetUserSessionAsync(userSessionKey, _ct);
         if (session == null)
         {
             // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
@@ -134,7 +134,7 @@ internal class ServerSideTicketStore(
             Renewed = ticket.GetIssued(timeProvider.GetUtcNow()),
             Expires = ticket.GetExpiration(),
             Ticket = ticket.Serialize(_protector)
-        }, ct);
+        }, _ct);
     }
 
     /// <inheritdoc />
@@ -150,7 +150,7 @@ internal class ServerSideTicketStore(
         logger.RemovingAuthenticationTicket(LogLevel.Debug, userSessionKey.ToString());
         metrics.SessionEnded();
 
-        return store.DeleteUserSessionAsync(userSessionKey, ct);
+        return store.DeleteUserSessionAsync(userSessionKey, _ct);
     }
 
     /// <inheritdoc />

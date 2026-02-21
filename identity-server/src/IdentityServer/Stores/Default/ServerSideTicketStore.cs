@@ -58,7 +58,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(ticket);
 
-        ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(default));
+        ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
 
         var key = CryptoRandom.CreateUniqueId(format: CryptoRandom.OutputFormat.Hex);
 
@@ -149,7 +149,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         if (ticket.GetIssuer() == null)
         {
             // when issuing a new cookie on top of an existing cookie, the AuthenticationTicket passed above is new (and not the prior one loaded from the ticket store)
-            ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(default));
+            ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
         }
         session.Renewed = ticket.GetIssued();
         session.Expires = ticket.GetExpiration();
