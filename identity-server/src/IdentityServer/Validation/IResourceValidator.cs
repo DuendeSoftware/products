@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,6 +17,6 @@ public interface IResourceValidator
     /// Validates the requested resources for the client.
     /// </summary>
     /// <param name="request">The resource validation request.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     Task<ResourceValidationResult> ValidateRequestedResourcesAsync(ResourceValidationRequest request, CT ct);
 }

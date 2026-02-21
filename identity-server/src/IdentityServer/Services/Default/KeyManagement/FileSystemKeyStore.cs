@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -44,7 +44,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// <summary>
     /// Returns all the keys in storage.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(CT ct)
     {
@@ -81,7 +81,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// Persists new key in storage.
     /// </summary>
     /// <param name="key"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public async Task StoreKeyAsync(SerializedKey key, CT ct)
     {
@@ -100,7 +100,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// Deletes key from storage.
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public Task DeleteKeyAsync(string id, CT ct)
     {

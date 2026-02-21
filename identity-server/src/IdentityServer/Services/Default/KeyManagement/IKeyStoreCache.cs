@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -12,7 +12,7 @@ public interface ISigningKeyStoreCache
     /// <summary>
     /// Returns cached keys.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<IEnumerable<KeyContainer>> GetKeysAsync(CT ct);
 
@@ -21,7 +21,7 @@ public interface ISigningKeyStoreCache
     /// </summary>
     /// <param name="keys"></param>
     /// <param name="duration"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, CT ct);
 }

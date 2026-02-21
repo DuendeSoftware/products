@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,7 +17,7 @@ public interface IPushedAuthorizationService
     /// </summary>
     /// <param name="pushedAuthorizationRequest">The pushed authorization
     /// request without serialization or data protection applied</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     ///
     Task StoreAsync(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, CT ct);
 
@@ -31,7 +31,7 @@ public interface IPushedAuthorizationService
     /// <param name="referenceValue">The reference value of the pushed
     /// authorization request. The reference value is the identifier within the
     /// request_uri parameter.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     Task ConsumeAsync(string referenceValue, CT ct);
 
     /// <summary>
@@ -40,7 +40,7 @@ public interface IPushedAuthorizationService
     /// <param name="referenceValue">The reference value of the pushed
     /// authorization request. The reference value is the identifier within the
     /// request_uri parameter.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The deserialized pushed authorization request, or null if the
     /// request does not exist or was previously consumed.
     /// </returns>

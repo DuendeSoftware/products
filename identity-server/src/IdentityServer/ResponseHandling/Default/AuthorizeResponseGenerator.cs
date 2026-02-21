@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -108,7 +108,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a hybrid flow request
     /// </summary>
     /// <param name="request"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct)
     {
@@ -127,7 +127,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a code flow request
     /// </summary>
     /// <param name="request"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct)
     {
@@ -151,7 +151,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a implicit flow request
     /// </summary>
     /// <param name="request"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="authorizationCode"></param>
     /// <returns></returns>
     protected virtual async Task<AuthorizeResponse> CreateImplicitFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct, string authorizationCode = null)
@@ -229,7 +229,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates an authorization code
     /// </summary>
     /// <param name="request"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<AuthorizationCode> CreateCodeAsync(ValidatedAuthorizeRequest request, CT ct)
     {

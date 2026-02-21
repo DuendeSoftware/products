@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -19,7 +19,7 @@ public interface IPushedAuthorizationResponseGenerator
     /// Asynchronously creates a response model from a validated pushed authorization request.
     /// </summary>
     /// <param name="request">The validated pushed authorization request.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that contains response model indicating either success or failure.</returns>
     Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, CT ct);
 }

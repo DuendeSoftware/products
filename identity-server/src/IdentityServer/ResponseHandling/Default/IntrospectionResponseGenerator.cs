@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -45,7 +45,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public virtual async Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, CT ct)
     {
@@ -107,7 +107,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// Checks if the API resource is allowed to introspect the scopes.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<bool> AreExpectedScopesPresentAsync(IntrospectionRequestValidationResult validationResult, CT ct)
     {

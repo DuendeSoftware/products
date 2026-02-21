@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -32,7 +32,7 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     /// <summary>
     /// Generates the user code.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public Task<string> GenerateAsync(CT ct)
     {

@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -24,7 +24,7 @@ public interface ITokenValidator
     /// <param name="token">The token.</param>
     /// <param name="clientId">The client identifier.</param>
     /// <param name="validateLifetime">if set to <c>true</c> the lifetime gets validated. Otherwise not.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, CT ct);
 }

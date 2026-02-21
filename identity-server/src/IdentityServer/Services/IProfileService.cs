@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,7 +17,7 @@ public interface IProfileService
     /// This method is called whenever claims about the user are requested (e.g. during token creation or via the userinfo endpoint)
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct);
 
@@ -26,7 +26,7 @@ public interface IProfileService
     /// (e.g. during token issuance or validation).
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task IsActiveAsync(IsActiveContext context, CT ct);
 }

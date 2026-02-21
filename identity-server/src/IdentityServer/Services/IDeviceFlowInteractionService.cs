@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -26,7 +26,7 @@ public interface IDeviceFlowInteractionService
     /// </summary>
     /// <param name="userCode">The user code.</param>
     /// <param name="consent">The consent.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, CT ct);
 }

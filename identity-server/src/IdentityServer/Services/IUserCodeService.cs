@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -15,7 +15,7 @@ public interface IUserCodeService
     /// Gets the user code generator.
     /// </summary>
     /// <param name="userCodeType">Type of user code.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<IUserCodeGenerator?> GetGenerator(string userCodeType, CT ct);
 }

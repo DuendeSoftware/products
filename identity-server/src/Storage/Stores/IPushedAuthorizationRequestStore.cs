@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -18,7 +18,7 @@ public interface IPushedAuthorizationRequestStore
     /// Stores the pushed authorization request.
     /// </summary>
     /// <param name="pushedAuthorizationRequest">The request.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, CT ct);
 
@@ -32,7 +32,7 @@ public interface IPushedAuthorizationRequestStore
     /// <param name="referenceValueHash">The hash of the reference value of the
     /// pushed authorization request. The reference value is the identifier
     /// within the request_uri parameter.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task ConsumeByHashAsync(string referenceValueHash, CT ct);
 
@@ -42,7 +42,7 @@ public interface IPushedAuthorizationRequestStore
     /// <param name="referenceValueHash">The hash of the reference value of the
     /// pushed authorization request. The reference value is the identifier
     /// within the request_uri parameter.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The pushed authorization request, or null if the request does
     /// not exist or was previously consumed.
     /// </returns>

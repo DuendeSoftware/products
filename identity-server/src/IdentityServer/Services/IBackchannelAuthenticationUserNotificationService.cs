@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,6 +17,6 @@ public interface IBackchannelAuthenticationUserNotificationService
     /// Sends a notification for the user to login.
     /// </summary>
     /// <param name="request"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     Task SendLoginRequestAsync(BackchannelUserLoginRequest request, CT ct);
 }

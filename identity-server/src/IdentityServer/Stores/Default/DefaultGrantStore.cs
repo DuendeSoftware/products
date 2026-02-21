@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -107,7 +107,7 @@ public class DefaultGrantStore<T>
     /// Gets the item.
     /// </summary>
     /// <param name="key">The key.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<T> GetItemAsync(string key, CT ct)
     {
@@ -124,7 +124,7 @@ public class DefaultGrantStore<T>
     /// Gets the item by the hashed key.
     /// </summary>
     /// <param name="hashedKey"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<T> GetItemByHashedKeyAsync(string hashedKey, CT ct)
     {
@@ -148,7 +148,7 @@ public class DefaultGrantStore<T>
     /// Gets the items.
     /// </summary>
     /// <param name="filter">The filter.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     protected virtual async Task<IEnumerable<T>> GetAllAsync(PersistedGrantFilter filter, CT ct)
     {
         filter.Type = GrantType;
@@ -167,7 +167,7 @@ public class DefaultGrantStore<T>
     /// <param name="description">The description.</param>
     /// <param name="created">The created.</param>
     /// <param name="lifetime">The lifetime.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task<string> CreateItemAsync(T item, string clientId, string subjectId, string sessionId, string description, DateTime created, int lifetime, CT ct)
     {
@@ -187,7 +187,7 @@ public class DefaultGrantStore<T>
     /// <param name="description">The description.</param>
     /// <param name="created">The created time.</param>
     /// <param name="expiration">The expiration.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="consumedTime">The consumed time.</param>
     /// <returns></returns>
     protected virtual Task StoreItemAsync(string key, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, CT ct, DateTime? consumedTime = null)
@@ -207,7 +207,7 @@ public class DefaultGrantStore<T>
     /// <param name="description">The description.</param>
     /// <param name="created">The created time.</param>
     /// <param name="expiration">The expiration.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="consumedTime">The consumed time.</param>
     /// <returns></returns>
     protected virtual async Task StoreItemByHashedKeyAsync(string hashedKey, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, CT ct, DateTime? consumedTime = null)
@@ -235,7 +235,7 @@ public class DefaultGrantStore<T>
     /// Removes the item.
     /// </summary>
     /// <param name="key">The key.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual Task RemoveItemAsync(string key, CT ct)
     {
@@ -247,7 +247,7 @@ public class DefaultGrantStore<T>
     /// Removes the item.
     /// </summary>
     /// <param name="key">The key.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task RemoveItemByHashedKeyAsync(string key, CT ct) => await Store.RemoveAsync(key, ct);
 
@@ -256,7 +256,7 @@ public class DefaultGrantStore<T>
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="sessionId">The optional session identifier.</param>
     /// <returns></returns>
     protected virtual async Task RemoveAllAsync(string subjectId, string clientId, CT ct, string sessionId = null) => await Store.RemoveAllAsync(new PersistedGrantFilter
