@@ -211,6 +211,16 @@ public static class IdentityServerApplicationBuilderExtensions
             throw new InvalidOperationException("CheckSessionCookieName is not configured");
         }
 
+        if (options.Authentication.CookieName.IsMissing())
+        {
+            throw new InvalidOperationException("CookieName is not configured");
+        }
+
+        if (options.Authentication.ExternalCookieName.IsMissing())
+        {
+            throw new InvalidOperationException("ExternalCookieName is not configured");
+        }
+
         if (options.Cors.CorsPolicyName.IsMissing())
         {
             throw new InvalidOperationException("CorsPolicyName is not configured");
