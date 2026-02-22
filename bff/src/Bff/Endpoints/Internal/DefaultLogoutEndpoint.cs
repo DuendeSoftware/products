@@ -22,7 +22,7 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
     : ILogoutEndpoint
 {
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         logger.ProcessingLogoutRequest(LogLevel.Debug);
 

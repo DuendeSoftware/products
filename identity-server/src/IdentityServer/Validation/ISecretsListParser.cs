@@ -22,7 +22,7 @@ public interface ISecretsListParser
     /// <returns>
     /// A parsed secret
     /// </returns>
-    Task<ParsedSecret?> ParseAsync(HttpContext context, CT ct);
+    Task<ParsedSecret?> ParseAsync(HttpContext context, Ct ct);
 
     /// <summary>
     /// Gets all available authentication methods.

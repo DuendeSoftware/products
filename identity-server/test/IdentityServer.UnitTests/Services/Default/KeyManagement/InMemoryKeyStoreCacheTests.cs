@@ -10,7 +10,7 @@ namespace UnitTests.Services.Default.KeyManagement;
 public class InMemoryKeyStoreCacheTests
 {
     private InMemoryKeyStoreCache _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider(new DateTimeOffset(new DateTime(2018, 3, 1, 9, 0, 0)));
 
     public InMemoryKeyStoreCacheTests() => _subject = new InMemoryKeyStoreCache(_mockTimeProvider);

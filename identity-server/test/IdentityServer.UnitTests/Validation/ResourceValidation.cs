@@ -103,7 +103,7 @@ public class ResourceValidation
     };
 
     private IResourceStore _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public ResourceValidation() => _subject = new InMemoryResourcesStore(_identityResources, _apiResources, _scopes);
 

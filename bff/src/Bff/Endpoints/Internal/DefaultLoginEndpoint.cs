@@ -27,7 +27,7 @@ internal class DefaultLoginEndpoint(
     : ILoginEndpoint
 {
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         logger.ProcessingLoginRequest(LogLevel.Debug);
 
@@ -85,7 +85,7 @@ internal class DefaultLoginEndpoint(
         await context.ChallengeAsync(props);
     }
 
-    private async Task<ICollection<string>?> GetPromptValuesAsync(CT ct = default)
+    private async Task<ICollection<string>?> GetPromptValuesAsync(Ct ct = default)
     {
         Scheme scheme;
 

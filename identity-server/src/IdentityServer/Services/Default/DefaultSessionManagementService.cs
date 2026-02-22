@@ -33,7 +33,7 @@ public class DefaultSessionManagementService : ISessionManagementService
     }
 
     /// <inheritdoc/>
-    public Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, CT ct)
+    public Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSessionManagementService.QuerySessions");
 
@@ -48,7 +48,7 @@ public class DefaultSessionManagementService : ISessionManagementService
     };
 
     /// <inheritdoc/>
-    public async Task RemoveSessionsAsync(RemoveSessionsContext context, CT ct)
+    public async Task RemoveSessionsAsync(RemoveSessionsContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSessionManagementService.RemoveSessions");
 

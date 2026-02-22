@@ -18,5 +18,5 @@ public interface IServerTicketStore : ITicketStore
     /// <param name="filter"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task<IReadOnlyCollection<AuthenticationTicket>> GetUserTicketsAsync(UserSessionsFilter filter, CT ct = default);
+    Task<IReadOnlyCollection<AuthenticationTicket>> GetUserTicketsAsync(UserSessionsFilter filter, Ct ct = default);
 }

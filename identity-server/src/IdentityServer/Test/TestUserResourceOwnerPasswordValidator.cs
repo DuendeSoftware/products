@@ -28,7 +28,7 @@ public class TestUserResourceOwnerPasswordValidator : IResourceOwnerPasswordVali
     }
 
     /// <inheritdoc/>
-    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, CT ct)
+    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct ct)
     {
         if (_users.ValidateCredentials(context.UserName, context.Password))
         {

@@ -44,7 +44,7 @@ internal class PushedAuthorizationRequestValidator(
     IMtlsEndpointGenerator mtlsEndpointGenerator,
     ILogger<PushedAuthorizationRequestValidator> logger) : IPushedAuthorizationRequestValidator
 {
-    public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, CT ct)
+    public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, Ct ct)
     {
         // Licensing
         licenseUsage.FeatureUsed(LicenseFeature.PAR);

@@ -18,7 +18,7 @@ public static class IResourceStoreExtensions
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct)
+    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct)
     {
         var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct);
         var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames, ct);
@@ -91,7 +91,7 @@ public static class IResourceStoreExtensions
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct) => (await store.FindResourcesByScopeAsync(scopeNames, ct)).FilterEnabled();
+    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct) => (await store.FindResourcesByScopeAsync(scopeNames, ct)).FilterEnabled();
 
     /// <summary>
     /// Gets all enabled resources.
@@ -99,7 +99,7 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store, CT ct)
+    public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store, Ct ct)
     {
         var resources = await store.GetAllResourcesAsync(ct);
         ValidateNameUniqueness(resources.IdentityResources, resources.ApiResources, resources.ApiScopes);
@@ -114,7 +114,7 @@ public static class IResourceStoreExtensions
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
+    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
 
     /// <summary>
     /// Finds the enabled API resources by name.
@@ -122,5 +122,5 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="resourceNames">The resource names.</param>
     /// <param name="ct">The cancellation token.</param>
-    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, CT ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
+    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, Ct ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
 }

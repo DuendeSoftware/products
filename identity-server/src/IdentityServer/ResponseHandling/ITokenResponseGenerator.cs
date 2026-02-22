@@ -19,5 +19,5 @@ public interface ITokenResponseGenerator
     /// <param name="validationResult">The validation result.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenResponse> ProcessAsync(TokenRequestValidationResult validationResult, CT ct);
+    Task<TokenResponse> ProcessAsync(TokenRequestValidationResult validationResult, Ct ct);
 }

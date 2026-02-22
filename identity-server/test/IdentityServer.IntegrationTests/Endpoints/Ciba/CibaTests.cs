@@ -21,7 +21,7 @@ public class CibaTests
 {
     private const string Category = "Backchannel Authentication (CIBA) endpoint";
 
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerPipeline _mockPipeline = new();
     private MockCibaUserValidator _mockCibaUserValidator = new();

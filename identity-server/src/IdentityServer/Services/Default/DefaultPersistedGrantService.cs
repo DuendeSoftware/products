@@ -34,7 +34,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId, CT ct)
+    public async Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultPersistedGrantService.GetAllGrants");
 
@@ -171,7 +171,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
     }
 
     /// <inheritdoc/>
-    public Task RemoveAllGrantsAsync(string subjectId, CT ct, string clientId = null, string sessionId = null)
+    public Task RemoveAllGrantsAsync(string subjectId, Ct ct, string clientId = null, string sessionId = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultPersistedGrantService.RemoveAllGrants");
 

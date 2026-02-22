@@ -19,7 +19,7 @@ public interface IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct);
+    Task GetProfileDataAsync(ProfileDataRequestContext context, Ct ct);
 
     /// <summary>
     /// This method gets called whenever identity server needs to determine if the user is valid or active (e.g. if the user's account has been deactivated since they logged in).
@@ -28,5 +28,5 @@ public interface IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task IsActiveAsync(IsActiveContext context, CT ct);
+    Task IsActiveAsync(IsActiveContext context, Ct ct);
 }

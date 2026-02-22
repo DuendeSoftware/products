@@ -47,7 +47,7 @@ public class PostBodySecretParser : ISecretParser
     /// A parsed secret
     /// </returns>
     /// <inheritdoc/>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context, CT ct)
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         _logger.LogDebug("Start parsing for secret in post body");
 

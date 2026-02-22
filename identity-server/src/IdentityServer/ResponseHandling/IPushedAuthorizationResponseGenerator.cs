@@ -21,5 +21,5 @@ public interface IPushedAuthorizationResponseGenerator
     /// <param name="request">The validated pushed authorization request.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that contains response model indicating either success or failure.</returns>
-    Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, CT ct);
+    Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, Ct ct);
 }

@@ -24,7 +24,7 @@ public class X509NameSecretValidator : ISecretValidator
 
     /// <inheritdoc/>
     /// <inheritdoc/>
-    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, CT ct)
+    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var fail = Task.FromResult(new SecretValidationResult { Success = false });
 

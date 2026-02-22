@@ -10,7 +10,7 @@ namespace IdentityServer.UnitTests.Services;
 
 public class DiagnosticDataServiceTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task GetJsonBytesAsync_WithNoEntries_ShouldReturnEmptyJsonObject()

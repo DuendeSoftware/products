@@ -13,7 +13,7 @@ namespace UnitTests.Validation;
 
 public class IsLocalUrlTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private const string queryParameters = "?client_id=mvc.code" +
         "&redirect_uri=https%3A%2F%2Flocalhost%3A44302%2Fsignin-oidc" +

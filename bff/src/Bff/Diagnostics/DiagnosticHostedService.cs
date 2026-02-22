@@ -14,7 +14,7 @@ internal class DiagnosticHostedService(
     ILogger<DiagnosticHostedService> logger,
     TimeProvider timeProvider) : BackgroundService
 {
-    protected override async Task ExecuteAsync(CT stoppingToken)
+    protected override async Task ExecuteAsync(Ct stoppingToken)
     {
         using var timer = new PeriodicTimer(options.Value.Diagnostics.LogFrequency, timeProvider);
         try
@@ -40,7 +40,7 @@ internal class DiagnosticHostedService(
         }
     }
 
-    public override async Task StopAsync(CT ct)
+    public override async Task StopAsync(Ct ct)
     {
         await diagnosticsSummary.PrintSummaryAsync(ct);
 

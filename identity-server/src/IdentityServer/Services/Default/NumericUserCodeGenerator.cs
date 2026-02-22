@@ -34,7 +34,7 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public Task<string> GenerateAsync(CT ct)
+    public Task<string> GenerateAsync(Ct ct)
     {
         var next = RandomNumberGenerator.GetInt32(100000000, 1000000000);
         return Task.FromResult(next.ToString(CultureInfo.InvariantCulture));

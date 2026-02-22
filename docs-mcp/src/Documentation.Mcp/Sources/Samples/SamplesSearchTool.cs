@@ -19,7 +19,7 @@ internal sealed class SamplesSearchTool(McpDb db)
         [Description("The search query. Keep it concise and specific to increase the likelihood of a match.")] string query)
     {
         var results = await db.FTSSampleProject
-            .FromSqlRaw("SELECT * FROM FTSSampleProject WHERE Title MATCH {0} OR Description MATCH {0} OR Product MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query, "OR"))
+            .FromSqlRaw("SELECt * FROM FTSSampleProject WHERE Title MATCH {0} OR Description MATCH {0} OR Product MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query, "OR"))
             .AsNoTracking()
             .Take(6)
             .ToListAsync();
@@ -49,7 +49,7 @@ internal sealed class SamplesSearchTool(McpDb db)
         [Description("The document id.")] string id)
     {
         var result = await db.FTSSampleProject
-            .FromSqlRaw("SELECT * FROM FTSSampleProject WHERE Id = {0} ORDER BY rank", id)
+            .FromSqlRaw("SELECt * FROM FTSSampleProject WHERE Id = {0} ORDER BY rank", id)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
@@ -72,7 +72,7 @@ internal sealed class SamplesSearchTool(McpDb db)
         filename = filename.Replace("wwwroot", "~", StringComparison.Ordinal);
 
         var result = await db.FTSSampleProject
-            .FromSqlRaw("SELECT * FROM FTSSampleProject WHERE Id = {0} ORDER BY rank", id)
+            .FromSqlRaw("SELECt * FROM FTSSampleProject WHERE Id = {0} ORDER BY rank", id)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 

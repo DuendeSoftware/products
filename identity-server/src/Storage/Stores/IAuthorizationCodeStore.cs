@@ -19,7 +19,7 @@ public interface IAuthorizationCodeStore
     /// <param name="code">The code.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code, CT ct);
+    Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code, Ct ct);
 
     /// <summary>
     /// Gets the authorization code.
@@ -27,7 +27,7 @@ public interface IAuthorizationCodeStore
     /// <param name="code">The code.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<AuthorizationCode?> GetAuthorizationCodeAsync(string code, CT ct);
+    Task<AuthorizationCode?> GetAuthorizationCodeAsync(string code, Ct ct);
 
     /// <summary>
     /// Removes the authorization code.
@@ -35,5 +35,5 @@ public interface IAuthorizationCodeStore
     /// <param name="code">The code.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveAuthorizationCodeAsync(string code, CT ct);
+    Task RemoveAuthorizationCodeAsync(string code, Ct ct);
 }

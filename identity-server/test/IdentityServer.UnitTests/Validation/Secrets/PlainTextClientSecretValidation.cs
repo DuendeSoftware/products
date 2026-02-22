@@ -17,7 +17,7 @@ public class PlainTextClientSecretValidation
 
     private ISecretValidator _validator = new PlainTextSharedSecretValidator(new Logger<PlainTextSharedSecretValidator>(new LoggerFactory()));
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]

@@ -11,7 +11,7 @@ public class TestEventService : IEventService
 {
     private Dictionary<Type, object> _events = new Dictionary<Type, object>();
 
-    public Task RaiseAsync(Event evt, CT ct)
+    public Task RaiseAsync(Event evt, Ct ct)
     {
         _events.Add(evt.GetType(), evt);
         return Task.CompletedTask;

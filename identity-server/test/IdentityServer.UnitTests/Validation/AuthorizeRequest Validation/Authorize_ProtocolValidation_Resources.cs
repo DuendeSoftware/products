@@ -20,7 +20,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ProtocolValidation_Resources
 {
     private const string Category = "AuthorizeRequest Protocol Validation - Resources";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private readonly AuthorizeRequestValidator _subject;
 

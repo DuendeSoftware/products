@@ -5,5 +5,5 @@ namespace Duende.ConformanceReport;
 
 internal interface IConformanceReportClientStore
 {
-    Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CT ct);
+    Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(Ct ct);
 }

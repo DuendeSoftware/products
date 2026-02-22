@@ -27,7 +27,7 @@ public class CustomAuthorizeInteractionResponseGenerator : Duende.IdentityServer
     }
 
     public InteractionResponse ProcessLoginResponse { get; set; }
-    protected internal override Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request, CT ct)
+    protected internal override Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         if (ProcessLoginResponse != null)
         {
@@ -38,7 +38,7 @@ public class CustomAuthorizeInteractionResponseGenerator : Duende.IdentityServer
     }
 
     public InteractionResponse ProcessConsentResponse { get; set; }
-    protected internal override Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, CT ct)
+    protected internal override Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, Ct ct)
     {
         if (ProcessConsentResponse != null)
         {
@@ -54,7 +54,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
     private CustomAuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public AuthorizeInteractionResponseGeneratorTests_Custom() => _subject = new CustomAuthorizeInteractionResponseGenerator(
             _options,

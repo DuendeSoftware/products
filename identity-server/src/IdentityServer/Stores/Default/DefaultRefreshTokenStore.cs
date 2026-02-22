@@ -31,7 +31,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     }
 
     /// <inheritdoc/>
-    public async Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken, CT ct)
+    public async Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.StoreRefreshTokenAsync");
 
@@ -39,7 +39,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     }
 
     /// <inheritdoc/>
-    public Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken, CT ct)
+    public Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.UpdateRefreshToken");
 
@@ -47,7 +47,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     }
 
     /// <inheritdoc/>
-    public Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle, CT ct)
+    public Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.GetRefreshToken");
 
@@ -55,7 +55,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     }
 
     /// <inheritdoc/>
-    public Task RemoveRefreshTokenAsync(string refreshTokenHandle, CT ct)
+    public Task RemoveRefreshTokenAsync(string refreshTokenHandle, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshToken");
 
@@ -63,7 +63,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     }
 
     /// <inheritdoc/>
-    public Task RemoveRefreshTokensAsync(string subjectId, string clientId, CT ct)
+    public Task RemoveRefreshTokensAsync(string subjectId, string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshTokens");
 

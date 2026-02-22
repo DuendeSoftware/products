@@ -49,7 +49,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="System.NotImplementedException"></exception>
-    public async Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken, CT ct)
+    public async Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("UserInfoRequestValidator.ValidateRequest");
 

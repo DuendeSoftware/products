@@ -27,7 +27,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
         : base(options) => _logger = logger;
 
     /// <inheritdoc/>
-    public override async Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, CT ct)
+    public override async Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, Ct ct)
     {
         var isAllowed = await base.IsRedirectUriValidAsync(context, ct);
         if (isAllowed)
@@ -53,7 +53,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
     /// <returns>
     /// <c>true</c> is the URI is valid; <c>false</c> otherwise.
     /// </returns>
-    public override async Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, CT ct)
+    public override async Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, Ct ct)
     {
         var isAllowed = await base.IsPostLogoutRedirectUriValidAsync(requestedUri, client, ct);
         if (isAllowed)

@@ -11,7 +11,7 @@ internal class MockCibaUserNotificationService : IBackchannelAuthenticationUserN
 {
     public BackchannelUserLoginRequest LoginRequest { get; set; }
 
-    public Task SendLoginRequestAsync(BackchannelUserLoginRequest request, CT ct)
+    public Task SendLoginRequestAsync(BackchannelUserLoginRequest request, Ct ct)
     {
         LoginRequest = request;
         return Task.CompletedTask;

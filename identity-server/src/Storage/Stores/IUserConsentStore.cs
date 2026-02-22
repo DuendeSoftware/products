@@ -19,7 +19,7 @@ public interface IUserConsentStore
     /// <param name="consent">The consent.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreUserConsentAsync(Consent consent, CT ct);
+    Task StoreUserConsentAsync(Consent consent, Ct ct);
 
     /// <summary>
     /// Gets the user consent.
@@ -28,7 +28,7 @@ public interface IUserConsentStore
     /// <param name="clientId">The client identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Consent?> GetUserConsentAsync(string subjectId, string clientId, CT ct);
+    Task<Consent?> GetUserConsentAsync(string subjectId, string clientId, Ct ct);
 
     /// <summary>
     /// Removes the user consent.
@@ -37,5 +37,5 @@ public interface IUserConsentStore
     /// <param name="clientId">The client identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveUserConsentAsync(string subjectId, string clientId, CT ct);
+    Task RemoveUserConsentAsync(string subjectId, string clientId, Ct ct);
 }

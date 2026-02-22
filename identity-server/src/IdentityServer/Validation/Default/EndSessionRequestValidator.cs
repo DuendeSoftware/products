@@ -84,7 +84,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     }
 
     /// <inheritdoc />
-    public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, CT ct)
+    public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("EndSessionRequestValidator.Validate");
 
@@ -222,7 +222,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     }
 
     /// <inheritdoc />
-    public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, CT ct)
+    public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, Ct ct)
     {
         var result = new EndSessionCallbackValidationResult
         {

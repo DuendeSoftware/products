@@ -14,5 +14,5 @@ public interface IBffEndpoint
     /// Process a request
     /// </summary>
     /// <returns></returns>
-    Task ProcessRequestAsync(HttpContext context, CT ct = default);
+    Task ProcessRequestAsync(HttpContext context, Ct ct = default);
 }

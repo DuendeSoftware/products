@@ -18,7 +18,7 @@ public class TokenRequestValidation_General_Invalid
 
     private IClientStore _clients = new InMemoryClientStore(TestClients.Get());
     private ClaimsPrincipal _subject = new IdentityServerUser("bob").CreatePrincipal();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]

@@ -21,5 +21,5 @@ public interface IAuthorizeInteractionResponseGenerator
     /// <param name="consent">The consent.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse? consent, CT ct);
+    Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse? consent, Ct ct);
 }

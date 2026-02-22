@@ -18,7 +18,7 @@ public interface IBackChannelAuthenticationRequestStore
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, CT ct);
+    Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, Ct ct);
 
     /// <summary>
     /// Gets the requests.
@@ -26,28 +26,28 @@ public interface IBackChannelAuthenticationRequestStore
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="clientId">The client identifier.</param>
-    Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, CT ct, string? clientId = null);
+    Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string? clientId = null);
 
     /// <summary>
     /// Gets the request.
     /// </summary>
     /// <param name="requestId">The request identifier.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<BackChannelAuthenticationRequest?> GetByAuthenticationRequestIdAsync(string requestId, CT ct);
+    Task<BackChannelAuthenticationRequest?> GetByAuthenticationRequestIdAsync(string requestId, Ct ct);
 
     /// <summary>
     /// Gets the request.
     /// </summary>
     /// <param name="id">The internal identifier.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<BackChannelAuthenticationRequest?> GetByInternalIdAsync(string id, CT ct);
+    Task<BackChannelAuthenticationRequest?> GetByInternalIdAsync(string id, Ct ct);
 
     /// <summary>
     /// Removes the request.
     /// </summary>
     /// <param name="id">The internal identifier.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task RemoveByInternalIdAsync(string id, CT ct);
+    Task RemoveByInternalIdAsync(string id, Ct ct);
 
     /// <summary>
     /// Updates the request.
@@ -55,5 +55,5 @@ public interface IBackChannelAuthenticationRequestStore
     /// <param name="id">The internal identifier.</param>
     /// <param name="request">The request.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, CT ct);
+    Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, Ct ct);
 }

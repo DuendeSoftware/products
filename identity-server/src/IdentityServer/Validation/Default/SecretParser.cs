@@ -34,7 +34,7 @@ public class SecretParser : ISecretsListParser
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context, CT ct)
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         // see if a registered parser finds a secret on the request
         ParsedSecret bestSecret = null;

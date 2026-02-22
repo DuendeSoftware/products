@@ -60,7 +60,7 @@ public class IdentityServerHost : GenericHost
     }
 
 
-    public async Task<Client> GetClientAsync(string clientId, CT ct)
+    public async Task<Client> GetClientAsync(string clientId, Ct ct)
     {
         var store = Resolve<ClientStore>();
         return await store.FindClientByIdAsync(clientId, ct);

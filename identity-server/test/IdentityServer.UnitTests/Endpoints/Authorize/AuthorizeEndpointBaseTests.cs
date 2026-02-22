@@ -50,7 +50,7 @@ public class AuthorizeEndpointBaseTests
 
     private ValidatedAuthorizeRequest _validatedAuthorizeRequest;
 
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public AuthorizeEndpointBaseTests() => Init();
 

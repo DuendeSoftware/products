@@ -9,7 +9,7 @@ namespace Bff.Benchmarks.Hosts;
 internal class CookieHandler(HttpMessageHandler innerHandler, CookieContainer cookieContainer)
     : DelegatingHandler(innerHandler)
 {
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
     {
         var requestUri = request.RequestUri;
         var header = cookieContainer.GetCookieHeader(requestUri!);

@@ -151,7 +151,7 @@ public class Index : PageModel
         return Page();
     }
 
-    private async Task BuildModelAsync(string? returnUrl, CT ct)
+    private async Task BuildModelAsync(string? returnUrl, Ct ct)
     {
         Input = new InputModel
         {

@@ -93,7 +93,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// <param name="baseUrl">The base URL.</param>
     /// <param name="issuerUri">The issuer URI.</param>
     /// <param name="ct">The cancellation token.</param>
-    public virtual async Task<Dictionary<string, object>> CreateDiscoveryDocumentAsync(string baseUrl, string issuerUri, CT ct)
+    public virtual async Task<Dictionary<string, object>> CreateDiscoveryDocumentAsync(string baseUrl, string issuerUri, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DiscoveryResponseGenerator.CreateDiscoveryDocument");
 
@@ -460,7 +460,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// Creates the JWK document.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    public virtual async Task<IEnumerable<Models.JsonWebKey>> CreateJwkDocumentAsync(CT ct)
+    public virtual async Task<IEnumerable<Models.JsonWebKey>> CreateJwkDocumentAsync(Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DiscoveryResponseGenerator.CreateJwkDocument");
 

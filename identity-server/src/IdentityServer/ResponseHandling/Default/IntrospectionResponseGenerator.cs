@@ -47,7 +47,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// <param name="validationResult">The validation result.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, CT ct)
+    public virtual async Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("IntrospectionResponseGenerator.Process");
 
@@ -109,7 +109,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// <param name="validationResult">The validation result.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<bool> AreExpectedScopesPresentAsync(IntrospectionRequestValidationResult validationResult, CT ct)
+    protected virtual async Task<bool> AreExpectedScopesPresentAsync(IntrospectionRequestValidationResult validationResult, Ct ct)
     {
         var apiScopes = validationResult.Api.Scopes;
         var tokenScopes = validationResult.Claims.Where(c => c.Type == JwtClaimTypes.Scope);

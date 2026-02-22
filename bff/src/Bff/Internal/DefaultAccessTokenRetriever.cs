@@ -12,7 +12,7 @@ namespace Duende.Bff.Internal;
 internal class DefaultAccessTokenRetriever() : IAccessTokenRetriever
 {
     /// <inheritdoc />
-    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CT ct = default)
+    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, Ct ct = default)
     {
         if (context.Metadata.TokenType.HasValue)
         {

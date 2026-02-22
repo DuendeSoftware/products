@@ -15,7 +15,7 @@ public class TestDeviceCodeValidator : IDeviceCodeValidator
 
     public TestDeviceCodeValidator(bool shouldError = false) => this.shouldError = shouldError;
 
-    public Task ValidateAsync(DeviceCodeValidationContext context, CT ct)
+    public Task ValidateAsync(DeviceCodeValidationContext context, Ct ct)
     {
         if (shouldError)
         {

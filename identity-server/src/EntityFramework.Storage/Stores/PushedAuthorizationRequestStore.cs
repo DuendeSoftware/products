@@ -35,7 +35,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     }
 
     /// <inheritdoc />
-    public async Task ConsumeByHashAsync(string referenceValueHash, CT ct)
+    public async Task ConsumeByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Remove");
         Logger.LogDebug("removing {referenceValueHash} pushed authorization from database", referenceValueHash);
@@ -49,7 +49,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     }
 
     /// <inheritdoc />
-    public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash, CT ct)
+    public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationRequestStore.Get");
 
@@ -66,7 +66,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
 
 
     /// <inheritdoc />
-    public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par, CT ct)
+    public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationStore.Store");
 

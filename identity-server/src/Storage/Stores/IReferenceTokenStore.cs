@@ -19,7 +19,7 @@ public interface IReferenceTokenStore
     /// <param name="token">The token.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string> StoreReferenceTokenAsync(Token token, CT ct);
+    Task<string> StoreReferenceTokenAsync(Token token, Ct ct);
 
     /// <summary>
     /// Gets the reference token.
@@ -27,7 +27,7 @@ public interface IReferenceTokenStore
     /// <param name="handle">The handle.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Token?> GetReferenceTokenAsync(string handle, CT ct);
+    Task<Token?> GetReferenceTokenAsync(string handle, Ct ct);
 
     /// <summary>
     /// Removes the reference token.
@@ -35,7 +35,7 @@ public interface IReferenceTokenStore
     /// <param name="handle">The handle.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveReferenceTokenAsync(string handle, CT ct);
+    Task RemoveReferenceTokenAsync(string handle, Ct ct);
 
     /// <summary>
     /// Removes the reference tokens.
@@ -45,5 +45,5 @@ public interface IReferenceTokenStore
     /// <param name="sessionId">The session identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveReferenceTokensAsync(string subjectId, string clientId, string? sessionId, CT ct);
+    Task RemoveReferenceTokensAsync(string subjectId, string clientId, string? sessionId, Ct ct);
 }

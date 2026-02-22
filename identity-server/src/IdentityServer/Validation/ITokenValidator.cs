@@ -16,7 +16,7 @@ public interface ITokenValidator
     /// <param name="expectedScope">The expected scope.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, CT ct);
+    Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, Ct ct);
 
     /// <summary>
     /// Validates an identity token.
@@ -26,5 +26,5 @@ public interface ITokenValidator
     /// <param name="validateLifetime">if set to <c>true</c> the lifetime gets validated. Otherwise not.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, CT ct);
+    Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, Ct ct);
 }

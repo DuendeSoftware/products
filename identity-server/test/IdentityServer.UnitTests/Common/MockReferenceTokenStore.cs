@@ -9,11 +9,11 @@ namespace UnitTests.Common;
 
 internal class MockReferenceTokenStore : IReferenceTokenStore
 {
-    public Task<Token> GetReferenceTokenAsync(string handle, CT ct) => throw new NotImplementedException();
+    public Task<Token> GetReferenceTokenAsync(string handle, Ct ct) => throw new NotImplementedException();
 
-    public Task RemoveReferenceTokenAsync(string handle, CT ct) => throw new NotImplementedException();
+    public Task RemoveReferenceTokenAsync(string handle, Ct ct) => throw new NotImplementedException();
 
-    public Task RemoveReferenceTokensAsync(string subjectId, string clientId, string sessionId, CT ct) => throw new NotImplementedException();
+    public Task RemoveReferenceTokensAsync(string subjectId, string clientId, string sessionId, Ct ct) => throw new NotImplementedException();
 
-    public Task<string> StoreReferenceTokenAsync(Token token, CT ct) => throw new NotImplementedException();
+    public Task<string> StoreReferenceTokenAsync(Token token, Ct ct) => throw new NotImplementedException();
 }

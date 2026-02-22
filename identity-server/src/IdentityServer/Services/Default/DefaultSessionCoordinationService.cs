@@ -81,7 +81,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     };
 
     /// <inheritdoc/>
-    public virtual async Task ProcessLogoutAsync(UserSession session, CT ct)
+    public virtual async Task ProcessLogoutAsync(UserSession session, Ct ct)
     {
         if (session.ClientIds.Count > 0)
         {
@@ -132,7 +132,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
 
     /// <inheritdoc/>
-    public virtual async Task ProcessExpirationAsync(UserSession session, CT ct)
+    public virtual async Task ProcessExpirationAsync(UserSession session, Ct ct)
     {
         var clientsToCoordinate = new List<string>();
 
@@ -194,7 +194,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
 
     /// <inheritdoc/>
-    public virtual async Task<bool> ValidateSessionAsync(SessionValidationRequest request, CT ct)
+    public virtual async Task<bool> ValidateSessionAsync(SessionValidationRequest request, Ct ct)
     {
         if (ServerSideSessionStore != null)
         {
@@ -238,7 +238,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                         //result in the cookie never being renewed and expiring in a surprising way. Renewing
                         //the ticket also updates the session, so we don't need to do both.
                         if (Options.Authentication.CookieSlidingExpiration &&
-#pragma warning disable CA2016 // ITicketStore interface has no CT parameter
+#pragma warning disable CA2016 // ITicketStore interface has no Ct parameter
                             await ServerSideTicketStore.RetrieveAsync(session.Key) is
                             { Properties: { IsPersistent: true, AllowRefresh: null or true } } ticket)
                         {

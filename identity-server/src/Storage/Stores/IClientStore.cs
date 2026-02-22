@@ -18,12 +18,12 @@ public interface IClientStore
     /// <param name="clientId">The client id</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The client</returns>
-    Task<Client?> FindClientByIdAsync(string clientId, CT ct);
+    Task<Client?> FindClientByIdAsync(string clientId, Ct ct);
 
     /// <summary>
     /// Returns all clients for enumeration purposes (e.g., conformance assessment).
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>An async enumerable of all clients.</returns>
-    IAsyncEnumerable<Client> GetAllClientsAsync(CT ct);
+    IAsyncEnumerable<Client> GetAllClientsAsync(Ct ct);
 }

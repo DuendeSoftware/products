@@ -15,13 +15,13 @@ public class MockLogoutNotificationService : ILogoutNotificationService
     public bool SendBackChannelLogoutNotificationsCalled { get; set; }
     public List<BackChannelLogoutRequest> BackChannelLogoutRequests { get; set; } = new List<BackChannelLogoutRequest>();
 
-    public Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context, CT _)
+    public Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context, Ct _)
     {
         GetFrontChannelLogoutNotificationsUrlsCalled = true;
         return Task.FromResult(FrontChannelLogoutNotificationsUrls.AsEnumerable());
     }
 
-    public Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, CT _)
+    public Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, Ct _)
     {
         SendBackChannelLogoutNotificationsCalled = true;
         return Task.FromResult(BackChannelLogoutRequests.AsEnumerable());

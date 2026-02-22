@@ -45,7 +45,7 @@ public class SystemBrowser : IBrowser
         return port;
     }
 
-    public async Task<BrowserResult> InvokeAsync(BrowserOptions options, CT ct = default)
+    public async Task<BrowserResult> InvokeAsync(BrowserOptions options, Ct ct = default)
     {
         using (var listener = new LoopbackHttpListener(Port, _path))
         {

@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class NoSubjectExtensionGrantValidator : IExtensionGrantValidator
 {
-    public Task ValidateAsync(ExtensionGrantValidationContext context, CT ct)
+    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(context);
         var credential = context.Request.Raw.Get("custom_credential");

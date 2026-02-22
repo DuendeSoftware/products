@@ -13,7 +13,7 @@ internal class InMemoryIdentityProviderStore : IIdentityProviderStore
 
     public InMemoryIdentityProviderStore(IEnumerable<IdentityProvider> providers) => _providers = providers;
 
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct)
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryOidcProviderStore.GetAllSchemeNames");
 
@@ -27,7 +27,7 @@ internal class InMemoryIdentityProviderStore : IIdentityProviderStore
         return Task.FromResult(items);
     }
 
-    public Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct)
+    public Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryOidcProviderStore.GetByScheme");
 

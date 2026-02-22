@@ -18,7 +18,7 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.TokenCl
 
 public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGrantDbContext, OperationalStoreOptions>
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     public TokenCleanupTests(DatabaseProviderFixture<PersistedGrantDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)

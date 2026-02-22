@@ -16,7 +16,7 @@ namespace UnitTests.Services.Default;
 
 public class DefaultIdentityServerInteractionServiceTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private DefaultIdentityServerInteractionService _subject;
 

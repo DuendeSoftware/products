@@ -17,5 +17,5 @@ public interface IClientConfigurationValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(ClientConfigurationValidationContext context, CT ct);
+    Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct);
 }

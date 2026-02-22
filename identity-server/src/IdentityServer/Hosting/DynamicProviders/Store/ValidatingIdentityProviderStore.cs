@@ -38,10 +38,10 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct) => _inner.GetAllSchemeNamesAsync(ct);
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct) => _inner.GetAllSchemeNamesAsync(ct);
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)
     {
         var idp = await _inner.GetBySchemeAsync(scheme, ct);
 

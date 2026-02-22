@@ -31,7 +31,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     private static string CacheKeyPrefix => "DistributedCacheAuthorizationParametersMessageStore";
 
     /// <inheritdoc/>
-    public virtual async Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, CT ct)
+    public virtual async Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Write");
 
@@ -55,7 +55,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, CT ct)
+    public virtual async Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Read");
 
@@ -71,7 +71,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     }
 
     /// <inheritdoc/>
-    public virtual Task DeleteAsync(string id, CT ct)
+    public virtual Task DeleteAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Delete");
 

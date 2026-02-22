@@ -12,5 +12,5 @@ public interface ITokenRequestValidator
     /// <summary>
     /// Validates the request.
     /// </summary>
-    Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context, CT ct);
+    Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context, Ct ct);
 }

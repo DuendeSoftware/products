@@ -20,5 +20,5 @@ public interface IDynamicClientRegistrationValidator
     /// <returns>A task that returns an <see
     /// cref="IDynamicClientRegistrationValidationResult"/>, which either
     /// indicates success or failure.</returns>
-    Task<IDynamicClientRegistrationValidationResult> ValidateAsync(DynamicClientRegistrationContext context, CT ct);
+    Task<IDynamicClientRegistrationValidationResult> ValidateAsync(DynamicClientRegistrationContext context, Ct ct);
 }

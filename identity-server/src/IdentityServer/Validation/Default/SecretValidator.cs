@@ -38,7 +38,7 @@ public class SecretValidator : ISecretsListValidator
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, CT ct)
+    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var secretsArray = secrets as Secret[] ?? secrets.ToArray();
 

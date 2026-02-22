@@ -17,5 +17,5 @@ public interface IIdentityProviderConfigurationValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(IdentityProviderConfigurationValidationContext context, CT ct);
+    Task ValidateAsync(IdentityProviderConfigurationValidationContext context, Ct ct);
 }

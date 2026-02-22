@@ -43,7 +43,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     }
 
     /// <inheritdoc/>
-    public Task StoreUserConsentAsync(Consent consent, CT ct)
+    public Task StoreUserConsentAsync(Consent consent, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.StoreUserConsent");
 
@@ -52,7 +52,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     }
 
     /// <inheritdoc/>
-    public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId, CT ct)
+    public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.GetUserConsent");
 
@@ -73,7 +73,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     }
 
     /// <inheritdoc/>
-    public Task RemoveUserConsentAsync(string subjectId, string clientId, CT ct)
+    public Task RemoveUserConsentAsync(string subjectId, string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.RemoveUserConsent");
 

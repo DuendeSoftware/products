@@ -21,7 +21,7 @@ public interface IRefreshTokenService
     /// <param name="client">The client.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenValidationResult> ValidateRefreshTokenAsync(string token, Client client, CT ct);
+    Task<TokenValidationResult> ValidateRefreshTokenAsync(string token, Client client, Ct ct);
 
     /// <summary>
     /// Creates the refresh token.
@@ -31,7 +31,7 @@ public interface IRefreshTokenService
     /// <returns>
     /// The refresh token handle
     /// </returns>
-    Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, CT ct);
+    Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, Ct ct);
 
     /// <summary>
     /// Updates the refresh token.
@@ -41,5 +41,5 @@ public interface IRefreshTokenService
     /// <returns>
     /// The refresh token handle
     /// </returns>
-    Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, CT ct);
+    Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, Ct ct);
 }

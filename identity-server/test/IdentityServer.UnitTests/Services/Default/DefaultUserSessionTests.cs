@@ -17,7 +17,7 @@ namespace UnitTests.Services.Default;
 
 public class DefaultUserSessionTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private DefaultUserSession _subject;
     private MockHttpContextAccessor _mockHttpContext = new MockHttpContextAccessor();

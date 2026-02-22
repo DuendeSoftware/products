@@ -19,14 +19,14 @@ public interface ISessionManagementService
     /// </summary>
     /// <param name="filter">The session query filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery? filter, CT ct);
+    Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery? filter, Ct ct);
 
     /// <summary>
     /// Removes all the session related data for a user.
     /// </summary>
     /// <param name="context">The context describing what to remove.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task RemoveSessionsAsync(RemoveSessionsContext context, CT ct);
+    Task RemoveSessionsAsync(RemoveSessionsContext context, Ct ct);
 }
 
 /// <summary>

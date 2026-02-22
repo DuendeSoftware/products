@@ -19,7 +19,7 @@ public interface IDeviceFlowInteractionService
     /// <param name="userCode">The user code.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<DeviceFlowAuthorizationRequest?> GetAuthorizationContextAsync(string userCode, CT ct);
+    Task<DeviceFlowAuthorizationRequest?> GetAuthorizationContextAsync(string userCode, Ct ct);
 
     /// <summary>
     /// Handles the request asynchronously.
@@ -28,5 +28,5 @@ public interface IDeviceFlowInteractionService
     /// <param name="consent">The consent.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, CT ct);
+    Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, Ct ct);
 }

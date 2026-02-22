@@ -602,7 +602,7 @@ public class MockMessageHandler : DelegatingHandler
     public Func<HttpRequestMessage, Task> OnInvoke { get; set; }
     public HttpResponseMessage Response { get; set; } = new HttpResponseMessage(HttpStatusCode.OK);
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
     {
         InvokeWasCalled = true;
 

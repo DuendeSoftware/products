@@ -31,7 +31,7 @@ public class ServerSideSessionTests
     private IPersistedGrantStore _grantStore;
     private IRefreshTokenStore _refreshTokenStore;
     private IDataProtector _protector;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private MockServerUrls _urls = new MockServerUrls();
 

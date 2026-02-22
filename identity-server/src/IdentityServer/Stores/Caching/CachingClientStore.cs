@@ -41,7 +41,7 @@ public class CachingClientStore<T> : IClientStore
     /// <returns>
     /// The client
     /// </returns>
-    public async Task<Client> FindClientByIdAsync(string clientId, CT ct)
+    public async Task<Client> FindClientByIdAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
@@ -56,7 +56,7 @@ public class CachingClientStore<T> : IClientStore
 
 #if NET10_0_OR_GREATER
     /// <inheritdoc/>
-    public IAsyncEnumerable<Client> GetAllClientsAsync(CT ct)
+    public IAsyncEnumerable<Client> GetAllClientsAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingClientStore.GetAllClients");
         return _inner.GetAllClientsAsync(ct);

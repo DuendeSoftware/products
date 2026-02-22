@@ -31,7 +31,7 @@ public class DefaultProfileService : IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
+    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.GetProfileData");
 
@@ -49,7 +49,7 @@ public class DefaultProfileService : IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual Task IsActiveAsync(IsActiveContext context, CT ct)
+    public virtual Task IsActiveAsync(IsActiveContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.IsActive");
 

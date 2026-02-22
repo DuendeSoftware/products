@@ -51,7 +51,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data, CT ct)
+    public virtual async Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.StoreDeviceAuthorization");
 
@@ -61,7 +61,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<DeviceCode> FindByUserCodeAsync(string userCode, CT ct)
+    public virtual async Task<DeviceCode> FindByUserCodeAsync(string userCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.FindByUserCode");
 
@@ -76,7 +76,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, CT ct)
+    public virtual async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.FindByDeviceCode");
 
@@ -91,7 +91,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task UpdateByUserCodeAsync(string userCode, DeviceCode data, CT ct)
+    public virtual async Task UpdateByUserCodeAsync(string userCode, DeviceCode data, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.UpdateByUserCode");
 
@@ -122,7 +122,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task RemoveByDeviceCodeAsync(string deviceCode, CT ct)
+    public virtual async Task RemoveByDeviceCodeAsync(string deviceCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.RemoveByDeviceCode");
 

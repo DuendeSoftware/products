@@ -16,7 +16,7 @@ namespace UnitTests.Validation;
 public class AccessTokenValidation
 {
     private const string Category = "Access token validation";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IClientStore _clients = Factory.CreateClientStore();
     private IdentityServerOptions _options = new IdentityServerOptions();

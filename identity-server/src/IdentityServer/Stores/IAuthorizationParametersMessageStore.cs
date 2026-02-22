@@ -17,7 +17,7 @@ public interface IAuthorizationParametersMessageStore
     /// <param name="message">The message.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The identifier for the stored message.</returns>
-    Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, CT ct);
+    Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, Ct ct);
 
     /// <summary>
     /// Reads the authorization parameters.
@@ -25,7 +25,7 @@ public interface IAuthorizationParametersMessageStore
     /// <param name="id">The identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, CT ct);
+    Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, Ct ct);
 
     /// <summary>
     /// Deletes the authorization parameters.
@@ -33,5 +33,5 @@ public interface IAuthorizationParametersMessageStore
     /// <param name="id">The identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task DeleteAsync(string id, CT ct);
+    Task DeleteAsync(string id, Ct ct);
 }

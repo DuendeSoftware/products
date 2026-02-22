@@ -12,5 +12,5 @@ public class DefaultCustomBackchannelAuthenticationValidator : ICustomBackchanne
 {
     /// <inheritdoc/>
     /// <inheritdoc/>
-    public Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, CT ct) => Task.CompletedTask;
+    public Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, Ct ct) => Task.CompletedTask;
 }

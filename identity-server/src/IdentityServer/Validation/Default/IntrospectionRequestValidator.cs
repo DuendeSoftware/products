@@ -37,7 +37,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     }
 
     /// <inheritdoc/>
-    public async Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context, CT ct)
+    public async Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context, Ct ct)
     {
         var parameters = context.Parameters;
         var api = context.Api;
@@ -181,7 +181,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     /// <summary>
     /// Attempt to obtain the claims for a token as a refresh token for a client.
     /// </summary>
-    private async Task<IEnumerable<Claim>> GetRefreshTokenClaimsAsync(string token, Client client, CT ct)
+    private async Task<IEnumerable<Claim>> GetRefreshTokenClaimsAsync(string token, Client client, Ct ct)
     {
         var refreshValidationResult = await _refreshTokenService.ValidateRefreshTokenAsync(token, client, ct);
         if (!refreshValidationResult.IsError)
@@ -210,7 +210,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     /// <summary>
     /// Attempt to obtain the claims for a token as an access token, and validate that it belongs to the client.
     /// </summary>
-    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, Client client, CT ct)
+    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, Client client, Ct ct)
     {
         var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token, null, ct);
         if (!tokenValidationResult.IsError)
@@ -234,7 +234,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     /// token belongs to a particular client, and is intended for use when we have an API caller (any API can
     /// introspect a token).
     /// </summary>
-    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, CT ct)
+    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, Ct ct)
     {
         var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token, null, ct);
         if (!tokenValidationResult.IsError)

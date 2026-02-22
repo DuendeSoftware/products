@@ -41,7 +41,7 @@ public class MutualTlsSecretParser : ISecretParser
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context, CT ct)
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         _logger.LogDebug("Start parsing for client id in post body");
 

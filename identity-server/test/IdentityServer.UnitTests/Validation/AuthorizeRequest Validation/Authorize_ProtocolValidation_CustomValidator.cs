@@ -60,7 +60,7 @@ public class StubAuthorizeRequestValidator : ICustomAuthorizeRequestValidator
     public Action<CustomAuthorizeRequestValidationContext> Callback;
     public bool WasCalled { get; set; }
 
-    public Task ValidateAsync(CustomAuthorizeRequestValidationContext context, CT ct)
+    public Task ValidateAsync(CustomAuthorizeRequestValidationContext context, Ct ct)
     {
         WasCalled = true;
         Callback?.Invoke(context);

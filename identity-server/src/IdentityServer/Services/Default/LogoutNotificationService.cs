@@ -35,7 +35,7 @@ public class LogoutNotificationService : ILogoutNotificationService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context, CT ct)
+    public async Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetFrontChannelLogoutNotificationsUrls");
 
@@ -82,7 +82,7 @@ public class LogoutNotificationService : ILogoutNotificationService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, CT ct)
+    public async Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetBackChannelLogoutNotifications");
 

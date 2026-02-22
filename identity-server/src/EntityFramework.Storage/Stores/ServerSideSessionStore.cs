@@ -42,7 +42,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc/>
-    public virtual async Task CreateSessionAsync(ServerSideSession session, CT ct)
+    public virtual async Task CreateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.CreateSession");
 
@@ -72,7 +72,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<ServerSideSession> GetSessionAsync(string key, CT ct)
+    public virtual async Task<ServerSideSession> GetSessionAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetSession");
 
@@ -103,7 +103,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task UpdateSessionAsync(ServerSideSession session, CT ct)
+    public virtual async Task UpdateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.UpdateSession");
 
@@ -138,7 +138,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task DeleteSessionAsync(string key, CT ct)
+    public virtual async Task DeleteSessionAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.DeleteSession");
 
@@ -168,7 +168,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc/>
-    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, CT ct)
+    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetSessions");
 
@@ -197,7 +197,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task DeleteSessionsAsync(SessionFilter filter, CT ct)
+    public virtual async Task DeleteSessionsAsync(SessionFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.DeleteSessions");
 
@@ -236,7 +236,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc/>
-    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct)
+    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetAndRemoveExpiredSessions");
 
@@ -273,7 +273,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<QueryResult<ServerSideSession>> QuerySessionsAsync(CT ct, SessionQuery filter = null)
+    public virtual async Task<QueryResult<ServerSideSession>> QuerySessionsAsync(Ct ct, SessionQuery filter = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.QuerySessions");
 
@@ -377,7 +377,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         Ticket = entity.Data,
     }).ToArray();
 
-    private static async Task NextPage(IQueryable<Entities.ServerSideSession> query, int last, SessionPaginationContext pagination, CT ct)
+    private static async Task NextPage(IQueryable<Entities.ServerSideSession> query, int last, SessionPaginationContext pagination, Ct ct)
     {
         pagination.Items = await query.OrderBy(x => x.Id)
             // if lastResultsId is zero, then this will just start at beginning
@@ -405,7 +405,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }
     }
 
-    private static async Task PreviousPage(IQueryable<Entities.ServerSideSession> query, int first, SessionPaginationContext pagination, CT ct)
+    private static async Task PreviousPage(IQueryable<Entities.ServerSideSession> query, int first, SessionPaginationContext pagination, Ct ct)
     {
         // sets query at the prior record from the last results, but in reverse order
         pagination.Items = await query.OrderByDescending(x => x.Id)

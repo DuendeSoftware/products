@@ -14,7 +14,7 @@ internal class TestBackchannelAuthenticationRequestIdValidator : IBackchannelAut
 
     //public DeviceCode DeviceCodeResult { get; set; } = new DeviceCode();
 
-    public Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, CT ct)
+    public Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, Ct ct)
     {
         if (shouldError)
         {

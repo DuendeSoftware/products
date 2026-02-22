@@ -25,7 +25,7 @@ public class PrivateKeyJwtSecretValidation
     private readonly ISecretValidator _validator;
     private readonly IClientStore _clients;
     private readonly IdentityServerOptions _options;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public PrivateKeyJwtSecretValidation()
     {

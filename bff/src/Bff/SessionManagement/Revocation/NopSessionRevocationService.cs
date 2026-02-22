@@ -13,7 +13,7 @@ namespace Duende.Bff.SessionManagement.Revocation;
 internal class NopSessionRevocationService(ILogger<NopSessionRevocationService> logger) : ISessionRevocationService
 {
     /// <inheritdoc />
-    public Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct = default)
+    public Task RevokeSessionsAsync(UserSessionsFilter filter, Ct ct = default)
     {
         logger.NopSessionRevocation(LogLevel.Debug, filter.SubjectId, filter.SessionId);
         return Task.CompletedTask;

@@ -45,7 +45,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         _logger = logger;
     }
 
-    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request, CT ct)
+    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request, Ct ct)
     {
         if (request == null)
         {
@@ -79,7 +79,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task<BackchannelUserLoginRequest> GetLoginRequestByInternalIdAsync(string id, CT ct)
+    public async Task<BackchannelUserLoginRequest> GetLoginRequestByInternalIdAsync(string id, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetLoginRequestByInternalId");
 
@@ -88,7 +88,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(CT ct)
+    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetPendingLoginRequestsForCurrentUser");
 
@@ -117,7 +117,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest, CT ct)
+    public async Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.CompleteLoginRequest");
 

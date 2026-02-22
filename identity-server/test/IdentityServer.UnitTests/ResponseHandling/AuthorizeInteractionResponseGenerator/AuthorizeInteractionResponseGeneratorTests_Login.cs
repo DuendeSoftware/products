@@ -19,7 +19,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
     private Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public AuthorizeInteractionResponseGeneratorTests_Login() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,

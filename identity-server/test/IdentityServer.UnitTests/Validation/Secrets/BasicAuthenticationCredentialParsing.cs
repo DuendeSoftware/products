@@ -16,7 +16,7 @@ namespace UnitTests.Validation.Secrets;
 public class BasicAuthenticationSecretParsing
 {
     private const string Category = "Secrets - Basic Authentication Secret Parsing";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options;
     private BasicAuthenticationSecretParser _parser;

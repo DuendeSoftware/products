@@ -12,13 +12,13 @@ public class MockCache<T> : ICache<T>
     public Dictionary<string, T> Items { get; set; } = new Dictionary<string, T>();
 
 
-    public Task<T> GetAsync(string key, CT ct)
+    public Task<T> GetAsync(string key, Ct ct)
     {
         Items.TryGetValue(key, out var item);
         return Task.FromResult(item);
     }
 
-    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, CT ct)
+    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, Ct ct)
     {
         var item = await GetAsync(key, ct);
         if (item == null)
@@ -29,13 +29,13 @@ public class MockCache<T> : ICache<T>
         return item;
     }
 
-    public Task RemoveAsync(string key, CT ct)
+    public Task RemoveAsync(string key, Ct ct)
     {
         Items.Remove(key);
         return Task.CompletedTask;
     }
 
-    public Task SetAsync(string key, T item, TimeSpan expiration, CT ct)
+    public Task SetAsync(string key, T item, TimeSpan expiration, Ct ct)
     {
         Items[key] = item;
         return Task.CompletedTask;

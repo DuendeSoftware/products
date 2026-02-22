@@ -50,7 +50,7 @@ public class CachingCorsPolicyService<T> : ICorsPolicyService
     }
 
     /// <inheritdoc/>
-    public virtual async Task<bool> IsOriginAllowedAsync(string origin, CT ct)
+    public virtual async Task<bool> IsOriginAllowedAsync(string origin, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingCorsPolicyService.IsOriginAllowed");
         activity?.SetTag(Tracing.Properties.Origin, origin);

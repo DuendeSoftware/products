@@ -20,5 +20,5 @@ public interface IJwtRequestUriHttpClient
     /// <param name="client"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string?> GetJwtAsync(string url, Client client, CT ct);
+    Task<string?> GetJwtAsync(string url, Client client, Ct ct);
 }

@@ -23,7 +23,7 @@ public class DefaultConsentServiceTests
     private Client _client;
     private TestUserConsentStore _userConsentStore = new TestUserConsentStore();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private DateTime now;
 

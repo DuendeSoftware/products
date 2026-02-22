@@ -18,7 +18,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
     private IdentityServerOptions _options = new IdentityServerOptions();
     private MockConsentService _mockConsent = new MockConsentService();
     private MockProfileService _fakeUserService = new MockProfileService();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private void RequiresConsent(bool value) => _mockConsent.RequiresConsentResult = value;
 

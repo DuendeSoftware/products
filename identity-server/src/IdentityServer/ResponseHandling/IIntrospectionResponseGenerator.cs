@@ -17,5 +17,5 @@ public interface IIntrospectionResponseGenerator
     /// <param name="validationResult">The validation result.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, CT ct);
+    Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, Ct ct);
 }

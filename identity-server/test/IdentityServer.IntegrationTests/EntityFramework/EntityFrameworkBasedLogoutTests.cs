@@ -21,7 +21,7 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 public class EntityFrameworkBasedLogoutTests
 {
     private readonly IdentityServerPipeline _mockPipeline = new();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private static readonly ICollection<Client> _clients =
     [

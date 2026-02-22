@@ -26,5 +26,5 @@ public interface IUserEndpointClaimsEnricher
     /// <param name="claims">The current set of claims to be returned. </param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>The updated list of claims.</returns>
-    Task<IReadOnlyList<ClaimRecord>> EnrichClaimsAsync(AuthenticateResult authenticateResult, IReadOnlyList<ClaimRecord> claims, CT ct = default);
+    Task<IReadOnlyList<ClaimRecord>> EnrichClaimsAsync(AuthenticateResult authenticateResult, IReadOnlyList<ClaimRecord> claims, Ct ct = default);
 }

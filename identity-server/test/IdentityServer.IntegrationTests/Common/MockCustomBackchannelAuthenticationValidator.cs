@@ -16,7 +16,7 @@ internal class MockCustomBackchannelAuthenticationValidator : ICustomBackchannel
     /// </summary>
     public Action<CustomBackchannelAuthenticationRequestValidationContext> Thunk { get; set; } = delegate { };
 
-    public Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, CT ct)
+    public Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, Ct ct)
     {
         Thunk(customValidationContext);
         Context = customValidationContext;

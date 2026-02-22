@@ -35,7 +35,7 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
 
 
     /// <inheritdoc />
-    public async Task<string> GetJwtAsync(string url, Client client, CT ct)
+    public async Task<string> GetJwtAsync(string url, Client client, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultJwtRequestUriHttpClient.GetJwt");
 

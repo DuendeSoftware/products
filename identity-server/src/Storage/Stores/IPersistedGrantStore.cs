@@ -19,7 +19,7 @@ public interface IPersistedGrantStore
     /// <param name="grant">The grant.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreAsync(PersistedGrant grant, CT ct);
+    Task StoreAsync(PersistedGrant grant, Ct ct);
 
     /// <summary>
     /// Gets the grant.
@@ -27,7 +27,7 @@ public interface IPersistedGrantStore
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<PersistedGrant?> GetAsync(string key, CT ct);
+    Task<PersistedGrant?> GetAsync(string key, Ct ct);
 
     /// <summary>
     /// Gets all grants based on the filter.
@@ -35,7 +35,7 @@ public interface IPersistedGrantStore
     /// <param name="filter">The filter.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CT ct);
+    Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct);
 
     /// <summary>
     /// Removes the grant by key.
@@ -43,7 +43,7 @@ public interface IPersistedGrantStore
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveAsync(string key, CT ct);
+    Task RemoveAsync(string key, Ct ct);
 
     /// <summary>
     /// Removes all grants based on the filter.
@@ -51,5 +51,5 @@ public interface IPersistedGrantStore
     /// <param name="filter">The filter.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveAllAsync(PersistedGrantFilter filter, CT ct);
+    Task RemoveAllAsync(PersistedGrantFilter filter, Ct ct);
 }

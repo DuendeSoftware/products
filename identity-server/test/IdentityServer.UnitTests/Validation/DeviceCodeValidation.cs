@@ -15,7 +15,7 @@ public class DeviceCodeValidation
 {
     private const string Category = "Device code validation";
 
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly IClientStore _clients = Factory.CreateClientStore();
 
     private readonly DeviceCode deviceCode = new DeviceCode

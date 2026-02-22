@@ -16,5 +16,5 @@ public interface IBackchannelAuthenticationThrottlingService
     /// <summary>
     /// Decides if the requesting client and request needs to slow down.
     /// </summary>
-    Task<bool> ShouldSlowDown(string requestId, BackChannelAuthenticationRequest details, CT ct);
+    Task<bool> ShouldSlowDown(string requestId, BackChannelAuthenticationRequest details, Ct ct);
 }

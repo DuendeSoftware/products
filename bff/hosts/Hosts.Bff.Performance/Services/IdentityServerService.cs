@@ -17,7 +17,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
 {
     public IdentityServerSettings Settings { get; } = settings.Value;
 
-    protected override Task ExecuteAsync(CT stoppingToken)
+    protected override Task ExecuteAsync(Ct stoppingToken)
     {
         var builder = WebApplication.CreateBuilder();
         builder.AddServiceDefaults();

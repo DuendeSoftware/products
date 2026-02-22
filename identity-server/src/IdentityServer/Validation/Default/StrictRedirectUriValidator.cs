@@ -59,7 +59,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// <returns>
     ///   <c>true</c> is the URI is valid; <c>false</c> otherwise.
     /// </returns>
-    public virtual Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, CT ct) => Task.FromResult(StringCollectionContainsString(client.PostLogoutRedirectUris, requestedUri));
+    public virtual Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, Ct ct) => Task.FromResult(StringCollectionContainsString(client.PostLogoutRedirectUris, requestedUri));
 
     /// <summary>
     /// Determines whether a redirect uri is valid for a context.
@@ -69,7 +69,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// <returns>
     ///   <c>true</c> is the URI is valid; <c>false</c> otherwise.
     /// </returns>
-    public virtual Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, CT ct)
+    public virtual Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, Ct ct)
     {
         // Check if special case handling for PAR is enabled and that the client
         // is a confidential client. If so, any pushed redirect uri is allowed

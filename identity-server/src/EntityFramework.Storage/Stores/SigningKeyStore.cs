@@ -46,7 +46,7 @@ public class SigningKeyStore : ISigningKeyStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(CT ct)
+    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.LoadKeys");
 
@@ -71,7 +71,7 @@ public class SigningKeyStore : ISigningKeyStore
     /// <param name="key"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task StoreKeyAsync(SerializedKey key, CT ct)
+    public async Task StoreKeyAsync(SerializedKey key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.StoreKey");
 
@@ -96,7 +96,7 @@ public class SigningKeyStore : ISigningKeyStore
     /// <param name="id"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task DeleteKeyAsync(string id, CT ct)
+    public async Task DeleteKeyAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.DeleteKey");
 

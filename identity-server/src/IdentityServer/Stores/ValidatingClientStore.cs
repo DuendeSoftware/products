@@ -48,7 +48,7 @@ public class ValidatingClientStore<T> : IClientStore
     /// <returns>
     /// The client or an InvalidOperationException
     /// </returns>
-    public async Task<Client> FindClientByIdAsync(string clientId, CT ct)
+    public async Task<Client> FindClientByIdAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.FindClientById");
 
@@ -81,7 +81,7 @@ public class ValidatingClientStore<T> : IClientStore
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] CT ct)
+    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.GetAllClients");
         await foreach (var client in _inner.GetAllClientsAsync(ct))

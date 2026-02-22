@@ -8,13 +8,13 @@ namespace Duende.IdentityServer.Stores.Empty;
 
 internal class EmptyResourceStore : IResourceStore
 {
-    public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, CT ct) => Task.FromResult(Enumerable.Empty<ApiResource>());
+    public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct) => Task.FromResult(Enumerable.Empty<ApiResource>());
 
-    public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct) => Task.FromResult(Enumerable.Empty<ApiResource>());
+    public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct) => Task.FromResult(Enumerable.Empty<ApiResource>());
 
-    public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, CT ct) => Task.FromResult(Enumerable.Empty<ApiScope>());
+    public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct) => Task.FromResult(Enumerable.Empty<ApiScope>());
 
-    public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct) => Task.FromResult(Enumerable.Empty<IdentityResource>());
+    public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct) => Task.FromResult(Enumerable.Empty<IdentityResource>());
 
-    public Task<Resources> GetAllResourcesAsync(CT ct) => Task.FromResult(new Resources() { OfflineAccess = true });
+    public Task<Resources> GetAllResourcesAsync(Ct ct) => Task.FromResult(new Resources() { OfflineAccess = true });
 }

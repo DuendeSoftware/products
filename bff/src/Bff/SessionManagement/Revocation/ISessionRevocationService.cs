@@ -17,5 +17,5 @@ public interface ISessionRevocationService
     /// <param name="filter"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct = default);
+    Task RevokeSessionsAsync(UserSessionsFilter filter, Ct ct = default);
 }

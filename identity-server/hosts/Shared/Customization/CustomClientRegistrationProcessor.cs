@@ -18,7 +18,7 @@ public sealed class CustomClientRegistrationProcessor(
     IClientStore clientStore) : DynamicClientRegistrationRequestProcessor(options, dcrStore)
 {
 
-    protected override async Task<IStepResult> AddClientId(DynamicClientRegistrationContext context, CT ct)
+    protected override async Task<IStepResult> AddClientId(DynamicClientRegistrationContext context, Ct ct)
     {
         if (context.Request.Extensions.TryGetValue("client_id", out var clientIdParameter))
         {

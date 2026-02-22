@@ -18,7 +18,7 @@ public interface IMessageStore<TModel>
     /// <param name="message">The message.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>An identifier for the message</returns>
-    Task<string> WriteAsync(Message<TModel> message, CT ct);
+    Task<string> WriteAsync(Message<TModel> message, Ct ct);
 
     /// <summary>
     /// Reads the message.
@@ -26,5 +26,5 @@ public interface IMessageStore<TModel>
     /// <param name="id">The identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Message<TModel>> ReadAsync(string id, CT ct);
+    Task<Message<TModel>> ReadAsync(string id, Ct ct);
 }

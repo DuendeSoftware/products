@@ -13,7 +13,7 @@ internal class StubEndSessionRequestValidator : IEndSessionRequestValidator
     public EndSessionValidationResult EndSessionValidationResult { get; set; } = new EndSessionValidationResult();
     public EndSessionCallbackValidationResult EndSessionCallbackValidationResult { get; set; } = new EndSessionCallbackValidationResult();
 
-    public Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, CT ct) => Task.FromResult(EndSessionValidationResult);
+    public Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, Ct ct) => Task.FromResult(EndSessionValidationResult);
 
-    public Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, CT ct) => Task.FromResult(EndSessionCallbackValidationResult);
+    public Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, Ct ct) => Task.FromResult(EndSessionCallbackValidationResult);
 }

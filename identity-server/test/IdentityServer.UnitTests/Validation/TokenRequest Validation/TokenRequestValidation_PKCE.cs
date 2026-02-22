@@ -21,7 +21,7 @@ public class TokenRequestValidation_PKCE
 
     private IClientStore _clients = Factory.CreateClientStore();
     private InputLengthRestrictions lengths = new InputLengthRestrictions();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Theory]
     [InlineData("codeclient.pkce")]

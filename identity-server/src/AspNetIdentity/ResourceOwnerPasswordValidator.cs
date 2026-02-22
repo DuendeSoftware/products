@@ -39,7 +39,7 @@ public class ResourceOwnerPasswordValidator<TUser> : IResourceOwnerPasswordValid
     }
 
     /// <inheritdoc/>
-    public virtual async Task ValidateAsync(ResourceOwnerPasswordValidationContext context, CT ct)
+    public virtual async Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct ct)
     {
         var user = await _userManager.FindByNameAsync(context.UserName);
         if (user != null)

@@ -32,7 +32,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public async Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, CT ct)
+    public async Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.CreateRequest");
 
@@ -43,7 +43,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id, CT ct)
+    public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetByInternalId");
 
@@ -51,7 +51,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId, CT ct)
+    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetByAuthenticationRequestId");
 
@@ -59,7 +59,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task RemoveByInternalIdAsync(string requestId, CT ct)
+    public Task RemoveByInternalIdAsync(string requestId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.RemoveByInternalId");
 
@@ -67,7 +67,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, CT ct, string clientId = null)
+    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string clientId = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetLoginsForUser");
 
@@ -79,7 +79,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, CT ct)
+    public Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.UpdateByInternalId");
 

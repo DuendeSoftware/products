@@ -35,7 +35,7 @@ internal abstract class BaseDiscoveryEndpoint(
     }
 
     private async Task<IEndpointResult> GetCachedDiscoveryDocument(IDistributedCache cache, string baseUrl,
-        string issuerUri, CT ct)
+        string issuerUri, Ct ct)
     {
         var key = $"discoveryDocument/{baseUrl}/{issuerUri}";
         var json = await cache.GetStringAsync(key, ct);

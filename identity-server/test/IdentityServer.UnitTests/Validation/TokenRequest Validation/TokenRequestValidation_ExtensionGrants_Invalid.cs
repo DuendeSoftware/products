@@ -14,7 +14,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
     private const string Category = "TokenRequest Validation - Extension Grants - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]

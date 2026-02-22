@@ -17,7 +17,7 @@ namespace UnitTests.ResponseHandling;
 
 public class DeviceAuthorizationResponseGeneratorTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly List<IdentityResource> identityResources = new List<IdentityResource> { new IdentityResources.OpenId(), new IdentityResources.Profile() };
     private readonly List<ApiResource> apiResources = new List<ApiResource> { new ApiResource("resource") { Scopes = { "api1" } } };
     private readonly List<ApiScope> scopes = new List<ApiScope> { new ApiScope("api1") };
@@ -193,7 +193,7 @@ internal class FakeUserCodeGenerator : IUserCodeGenerator
         set => retryLimit = value;
     }
 
-    public Task<string> GenerateAsync(CT ct)
+    public Task<string> GenerateAsync(Ct ct)
     {
         if (tryCount == 0)
         {

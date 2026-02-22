@@ -40,7 +40,7 @@ public class ClientSecretValidator : IClientSecretValidator
     }
 
     /// <inheritdoc/>
-    public async Task<ClientSecretValidationResult> ValidateAsync(HttpContext context, CT ct)
+    public async Task<ClientSecretValidationResult> ValidateAsync(HttpContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ClientSecretValidator.Validate");
 
@@ -104,13 +104,13 @@ public class ClientSecretValidator : IClientSecretValidator
         return success;
     }
 
-    private Task RaiseSuccessEventAsync(string clientId, string authMethod, CT ct)
+    private Task RaiseSuccessEventAsync(string clientId, string authMethod, Ct ct)
     {
         Telemetry.Metrics.ClientSecretValidation(clientId, authMethod);
         return _events.RaiseAsync(new ClientAuthenticationSuccessEvent(clientId, authMethod), ct);
     }
 
-    private Task RaiseFailureEventAsync(string clientId, string message, CT ct)
+    private Task RaiseFailureEventAsync(string clientId, string message, Ct ct)
     {
         Telemetry.Metrics.ClientSecretValidationFailure(clientId, message);
         return _events.RaiseAsync(new ClientAuthenticationFailureEvent(clientId, message), ct);

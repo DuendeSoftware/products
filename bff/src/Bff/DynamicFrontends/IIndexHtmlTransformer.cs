@@ -10,5 +10,5 @@ namespace Duende.Bff.DynamicFrontends;
 /// </summary>
 public interface IIndexHtmlTransformer
 {
-    Task<string?> Transform(string indexHtml, BffFrontend frontend, CT ct = default);
+    Task<string?> Transform(string indexHtml, BffFrontend frontend, Ct ct = default);
 }

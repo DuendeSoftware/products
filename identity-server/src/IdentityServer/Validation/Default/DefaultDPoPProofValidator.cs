@@ -69,7 +69,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     }
 
     /// <inheritdoc/>
-    public async Task<DPoPProofValidatonResult> ValidateAsync(DPoPProofValidatonContext context, CT ct)
+    public async Task<DPoPProofValidatonResult> ValidateAsync(DPoPProofValidatonContext context, Ct ct)
     {
         var result = new DPoPProofValidatonResult() { IsError = false };
 
@@ -284,7 +284,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the payload.
     /// </summary>
-    protected virtual async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, CT ct)
+    protected virtual async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, Ct ct)
     {
         if (context.ValidateAccessToken)
         {
@@ -381,7 +381,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates is the token has been replayed.
     /// </summary>
-    protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, CT ct)
+    protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, Ct ct)
     {
         if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId, ct))
         {

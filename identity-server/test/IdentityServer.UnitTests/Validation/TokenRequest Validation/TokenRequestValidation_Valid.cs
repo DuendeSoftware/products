@@ -16,7 +16,7 @@ public class TokenRequestValidation_Valid
 {
     private const string Category = "TokenRequest Validation - General - Valid";
 
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private IClientStore _clients = Factory.CreateClientStore();
     private TestDeviceCodeValidator _mockDeviceCodeValidator = new TestDeviceCodeValidator();
 

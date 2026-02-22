@@ -24,7 +24,7 @@ public class DefaultEventSink : IEventSink
     public DefaultEventSink(ILogger<DefaultEventService> logger) => _logger = logger;
 
     /// <inheritdoc/>
-    public virtual Task PersistAsync(Event evt, CT ct)
+    public virtual Task PersistAsync(Event evt, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(evt);
 

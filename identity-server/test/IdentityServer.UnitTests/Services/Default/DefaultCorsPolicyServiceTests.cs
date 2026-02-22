@@ -12,7 +12,7 @@ public class DefaultCorsPolicyServiceTests
     private const string Category = "DefaultCorsPolicyService";
 
     private DefaultCorsPolicyService subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public DefaultCorsPolicyServiceTests() => subject = new DefaultCorsPolicyService(TestLogger.Create<DefaultCorsPolicyService>());
 

@@ -60,7 +60,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet(pathString, (HttpContext c, CT ct) => "ok");
+            app.MapGet(pathString, (HttpContext c, Ct ct) => "ok");
         };
 
         await InitializeAsync();

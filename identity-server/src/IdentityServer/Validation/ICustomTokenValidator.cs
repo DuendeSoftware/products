@@ -17,7 +17,7 @@ public interface ICustomTokenValidator
     /// <param name="result">The validation result so far.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The validation result</returns>
-    Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result, CT ct);
+    Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result, Ct ct);
 
     /// <summary>
     /// Custom validation logic for identity tokens.
@@ -25,5 +25,5 @@ public interface ICustomTokenValidator
     /// <param name="result">The validation result so far.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The validation result</returns>
-    Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result, CT ct);
+    Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result, Ct ct);
 }

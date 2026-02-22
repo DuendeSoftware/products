@@ -9,7 +9,7 @@ public class ApiHostedService(IOptions<ApiSettings> apiSettings) : BackgroundSer
 {
     public ApiSettings Settings { get; } = apiSettings.Value;
 
-    protected override Task ExecuteAsync(CT stoppingToken)
+    protected override Task ExecuteAsync(Ct stoppingToken)
     {
         var builder = WebApplication.CreateBuilder();
         builder.AddServiceDefaults();

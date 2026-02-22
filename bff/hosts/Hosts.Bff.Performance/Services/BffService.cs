@@ -15,7 +15,7 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
     public IConfiguration Config { get; } = config;
     public BffSettings Settings { get; } = bffSettings.Value;
 
-    protected override async Task ExecuteAsync(CT stoppingToken)
+    protected override async Task ExecuteAsync(Ct stoppingToken)
     {
         var urls = urlConfigKeys
             .Select(x => Config[x])

@@ -13,7 +13,7 @@ namespace IdentityServer.UnitTests.Caches;
 
 public class ResourceStoreCacheTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private List<Client> _clients { get; set; } = new List<Client>();
     private List<IdentityResource> _identityResources { get; set; } = new List<IdentityResource>();

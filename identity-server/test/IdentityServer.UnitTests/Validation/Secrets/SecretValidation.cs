@@ -21,7 +21,7 @@ public class SecretValidation
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
     private SecretValidator _validator;
     private IdentityServerOptions _options = new IdentityServerOptions();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public SecretValidation() => _validator = new SecretValidator(
             new FakeTimeProvider(DateTimeOffset.UtcNow),

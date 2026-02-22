@@ -17,7 +17,7 @@ namespace UnitTests.Services.Default;
 
 public class DefaultBackChannelLogoutServiceTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private class ServiceTestHarness : DefaultBackChannelLogoutService
     {
         public ServiceTestHarness(
@@ -33,7 +33,7 @@ public class DefaultBackChannelLogoutServiceTests
 
 
         // CreateTokenAsync is protected, so we use this wrapper to exercise it in our tests
-        public async Task<string> ExerciseCreateTokenAsync(BackChannelLogoutRequest request, CT ct) => await CreateTokenAsync(request, ct);
+        public async Task<string> ExerciseCreateTokenAsync(BackChannelLogoutRequest request, Ct ct) => await CreateTokenAsync(request, ct);
     }
 
     [Fact]

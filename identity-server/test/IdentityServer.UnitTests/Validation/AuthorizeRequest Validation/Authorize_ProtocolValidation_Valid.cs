@@ -12,7 +12,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ProtocolValidation_Valid
 {
     private const string Category = "AuthorizeRequest Protocol Validation - Valid";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]

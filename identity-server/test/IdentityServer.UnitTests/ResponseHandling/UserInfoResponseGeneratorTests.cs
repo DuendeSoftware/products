@@ -15,7 +15,7 @@ namespace UnitTests.ResponseHandling;
 
 public class UserInfoResponseGeneratorTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private UserInfoResponseGenerator _subject;
     private MockProfileService _mockProfileService = new MockProfileService();

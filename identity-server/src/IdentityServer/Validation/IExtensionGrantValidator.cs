@@ -19,7 +19,7 @@ public interface IExtensionGrantValidator
     /// <returns>
     /// A principal
     /// </returns>
-    Task ValidateAsync(ExtensionGrantValidationContext context, CT ct);
+    Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct);
 
     /// <summary>
     /// Returns the grant type this validator can deal with

@@ -17,7 +17,7 @@ namespace UnitTests.Services.Default;
 public class DefaultTokenServiceTests
 {
     private DefaultTokenService _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private MockClaimsService _mockClaimsService = new MockClaimsService();
     private MockReferenceTokenStore _mockReferenceTokenStore = new MockReferenceTokenStore();

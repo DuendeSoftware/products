@@ -24,5 +24,5 @@ public interface IPushedAuthorizationRequestValidator
     /// <returns>A  task containing a pushed authorization result that either
     /// wraps the validated request values or indicates the error code and
     /// description.</returns>
-    Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, CT ct);
+    Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, Ct ct);
 }

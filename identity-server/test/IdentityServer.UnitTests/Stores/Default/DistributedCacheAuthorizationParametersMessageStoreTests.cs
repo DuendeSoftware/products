@@ -13,7 +13,7 @@ public class DistributedCacheAuthorizationParametersMessageStoreTests
 {
     private MockDistributedCache _mockCache = new MockDistributedCache();
     private DistributedCacheAuthorizationParametersMessageStore _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     public DistributedCacheAuthorizationParametersMessageStoreTests() => _subject = new DistributedCacheAuthorizationParametersMessageStore(_mockCache, new DefaultHandleGenerationService());
 
     [Fact]

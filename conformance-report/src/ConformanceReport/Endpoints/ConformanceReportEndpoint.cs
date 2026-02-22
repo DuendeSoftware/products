@@ -41,7 +41,7 @@ internal sealed partial class ConformanceReportEndpoint
     /// <summary>
     /// Processes requests for the HTML conformance report.
     /// </summary>
-    public async Task<IResult> GetHtmlReportAsync(HttpContext context, CT ct)
+    public async Task<IResult> GetHtmlReportAsync(HttpContext context, Ct ct)
     {
         LogProcessingRequest();
 

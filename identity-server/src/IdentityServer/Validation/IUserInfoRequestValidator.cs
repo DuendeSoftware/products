@@ -15,5 +15,5 @@ public interface IUserInfoRequestValidator
     /// <param name="accessToken">The access token.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken, CT ct);
+    Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken, Ct ct);
 }

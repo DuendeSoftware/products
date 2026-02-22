@@ -12,7 +12,7 @@ internal class RedirectHandler() : DelegatingHandler
     public bool AutoFollowRedirects { get; set; } = true;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CT ct)
+        Ct ct)
     {
         var originalUri = request.RequestUri;
 

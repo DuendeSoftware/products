@@ -33,7 +33,7 @@ public class HashedSharedSecretValidator : ISecretValidator
     /// </returns>
     /// <exception cref="System.ArgumentNullException">Id or credential</exception>
     /// <inheritdoc/>
-    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, CT ct)
+    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var fail = Task.FromResult(new SecretValidationResult { Success = false });
         var success = Task.FromResult(new SecretValidationResult { Success = true });

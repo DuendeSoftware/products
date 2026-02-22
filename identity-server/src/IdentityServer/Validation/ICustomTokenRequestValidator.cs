@@ -19,5 +19,5 @@ public interface ICustomTokenRequestValidator
     /// <returns>
     /// The validation result
     /// </returns>
-    Task ValidateAsync(CustomTokenRequestValidationContext context, CT ct);
+    Task ValidateAsync(CustomTokenRequestValidationContext context, Ct ct);
 }

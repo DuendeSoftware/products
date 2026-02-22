@@ -37,7 +37,7 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
     }
 
     /// <inheritdoc />
-    public async Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, CT ct)
+    public async Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, Ct ct)
     {
         // Create a reference value
         var referenceValue = await _handleGeneration.GenerateAsync(ct);

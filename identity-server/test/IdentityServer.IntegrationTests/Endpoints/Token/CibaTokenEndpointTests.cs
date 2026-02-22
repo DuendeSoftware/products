@@ -19,7 +19,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 public class CibaTokenEndpointTests
 {
     private const string Category = "CIBA Token endpoint";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
     private MockCibaUserValidator _mockCibaUserValidator = new MockCibaUserValidator();

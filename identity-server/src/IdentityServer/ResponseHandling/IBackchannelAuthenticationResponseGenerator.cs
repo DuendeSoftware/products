@@ -17,5 +17,5 @@ public interface IBackchannelAuthenticationResponseGenerator
     /// <param name="validationResult">The validation result.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<BackchannelAuthenticationResponse> ProcessAsync(BackchannelAuthenticationRequestValidationResult validationResult, CT ct);
+    Task<BackchannelAuthenticationResponse> ProcessAsync(BackchannelAuthenticationRequestValidationResult validationResult, Ct ct);
 }

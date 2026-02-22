@@ -29,7 +29,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     /// <summary>
     /// The audience URI to use
     /// </summary>
-    protected async Task<string> GetAudienceUri(CT ct)
+    protected async Task<string> GetAudienceUri(Ct ct)
     {
         if (_audienceUri.IsPresent())
         {
@@ -82,7 +82,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     }
 
     /// <inheritdoc/>
-    public virtual async Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context, CT ct)
+    public virtual async Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("JwtRequestValidator.Validate");
 
@@ -156,7 +156,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     /// <summary>
     /// Validates the JWT token
     /// </summary>
-    protected virtual async Task<JsonWebToken> ValidateJwtAsync(JwtRequestValidationContext context, IEnumerable<SecurityKey> keys, CT ct)
+    protected virtual async Task<JsonWebToken> ValidateJwtAsync(JwtRequestValidationContext context, IEnumerable<SecurityKey> keys, Ct ct)
     {
         var tokenValidationParameters = new TokenValidationParameters
         {

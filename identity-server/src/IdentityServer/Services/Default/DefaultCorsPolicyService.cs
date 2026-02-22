@@ -42,7 +42,7 @@ public class DefaultCorsPolicyService : ICorsPolicyService
     public bool AllowAll { get; set; }
 
     /// <inheritdoc/>
-    public virtual Task<bool> IsOriginAllowedAsync(string origin, CT ct)
+    public virtual Task<bool> IsOriginAllowedAsync(string origin, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultCorsPolicyService.IsOriginAllowed");
 

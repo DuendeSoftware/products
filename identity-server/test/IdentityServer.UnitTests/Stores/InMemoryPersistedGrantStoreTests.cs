@@ -10,7 +10,7 @@ namespace UnitTests.Stores;
 public class InMemoryPersistedGrantStoreTests
 {
     private InMemoryPersistedGrantStore _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public InMemoryPersistedGrantStoreTests() => _subject = new InMemoryPersistedGrantStore();
 

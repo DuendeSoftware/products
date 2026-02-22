@@ -19,5 +19,5 @@ public interface IClientSecretValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<ClientSecretValidationResult> ValidateAsync(HttpContext context, CT ct);
+    Task<ClientSecretValidationResult> ValidateAsync(HttpContext context, Ct ct);
 }

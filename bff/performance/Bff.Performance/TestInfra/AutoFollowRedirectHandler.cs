@@ -8,7 +8,7 @@ namespace Bff.Performance.TestInfra;
 public class AutoFollowRedirectHandler(Action<string> writeOutput) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CT ct)
+        Ct ct)
     {
         var previousUri = request.RequestUri;
         for (var i = 0; i < 20; i++)

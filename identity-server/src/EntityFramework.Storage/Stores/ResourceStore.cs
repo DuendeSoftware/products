@@ -46,7 +46,7 @@ public class ResourceStore : IResourceStore
     /// <param name="apiResourceNames">The names.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, CT ct)
+    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByName");
         activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
@@ -87,7 +87,7 @@ public class ResourceStore : IResourceStore
     /// <param name="scopeNames"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct)
+    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -121,7 +121,7 @@ public class ResourceStore : IResourceStore
     /// <param name="scopeNames"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct)
+    public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindIdentityResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -152,7 +152,7 @@ public class ResourceStore : IResourceStore
     /// <param name="scopeNames"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, CT ct)
+    public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiScopesByName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -181,7 +181,7 @@ public class ResourceStore : IResourceStore
     /// Gets all resources.
     /// </summary>
     /// <returns></returns>
-    public virtual async Task<Resources> GetAllResourcesAsync(CT ct)
+    public virtual async Task<Resources> GetAllResourcesAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.GetAllResources");
 

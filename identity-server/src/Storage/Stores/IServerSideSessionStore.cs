@@ -18,28 +18,28 @@ public interface IServerSideSessionStore
     /// </summary>
     /// <param name="key">The session key.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<ServerSideSession?> GetSessionAsync(string key, CT ct);
+    Task<ServerSideSession?> GetSessionAsync(string key, Ct ct);
 
     /// <summary>
     /// Creates a session
     /// </summary>
     /// <param name="session">The session to create.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task CreateSessionAsync(ServerSideSession session, CT ct);
+    Task CreateSessionAsync(ServerSideSession session, Ct ct);
 
     /// <summary>
     /// Updates a session
     /// </summary>
     /// <param name="session">The session to update.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task UpdateSessionAsync(ServerSideSession session, CT ct);
+    Task UpdateSessionAsync(ServerSideSession session, Ct ct);
 
     /// <summary>
     /// Deletes a session
     /// </summary>
     /// <param name="key">The session key.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task DeleteSessionAsync(string key, CT ct);
+    Task DeleteSessionAsync(string key, Ct ct);
 
 
     /// <summary>
@@ -47,14 +47,14 @@ public interface IServerSideSessionStore
     /// </summary>
     /// <param name="filter">The session filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, CT ct);
+    Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, Ct ct);
 
     /// <summary>
     /// Deletes sessions for a specific subject id and/or session id
     /// </summary>
     /// <param name="filter">The session filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task DeleteSessionsAsync(SessionFilter filter, CT ct);
+    Task DeleteSessionsAsync(SessionFilter filter, Ct ct);
 
 
     /// <summary>
@@ -62,7 +62,7 @@ public interface IServerSideSessionStore
     /// </summary>
     /// <param name="count">The maximum number of sessions to return.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct);
+    Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, Ct ct);
 
 
     /// <summary>
@@ -70,5 +70,5 @@ public interface IServerSideSessionStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="filter">The session query filter.</param>
-    Task<QueryResult<ServerSideSession>> QuerySessionsAsync(CT ct, SessionQuery? filter = null);
+    Task<QueryResult<ServerSideSession>> QuerySessionsAsync(Ct ct, SessionQuery? filter = null);
 }

@@ -15,5 +15,5 @@ public interface IBackchannelAuthenticationRequestIdValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, CT ct);
+    Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, Ct ct);
 }

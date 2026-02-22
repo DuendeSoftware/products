@@ -17,7 +17,7 @@ public class EndSessionRequestValidatorTests
 {
     private EndSessionRequestValidator _subject;
     private IdentityServerOptions _options;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private StubTokenValidator _stubTokenValidator = new StubTokenValidator();
     private StubRedirectUriValidator _stubRedirectUriValidator = new StubRedirectUriValidator();
     private MockUserSession _userSession = new MockUserSession();

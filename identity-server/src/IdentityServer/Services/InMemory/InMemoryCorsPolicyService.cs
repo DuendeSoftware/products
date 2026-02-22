@@ -35,7 +35,7 @@ public class InMemoryCorsPolicyService : ICorsPolicyService
     }
 
     /// <inheritdoc/>
-    public virtual Task<bool> IsOriginAllowedAsync(string origin, CT ct)
+    public virtual Task<bool> IsOriginAllowedAsync(string origin, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("InMemoryCorsPolicyService.IsOriginAllowedAsync");
 

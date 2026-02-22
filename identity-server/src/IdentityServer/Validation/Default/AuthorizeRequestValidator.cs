@@ -68,7 +68,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
 
     public async Task<AuthorizeRequestValidationResult> ValidateAsync(
         NameValueCollection parameters,
-        CT ct,
+        Ct ct,
         ClaimsPrincipal? subject = null,
         AuthorizeRequestType authorizeRequestType = AuthorizeRequestType.Authorize)
     {
@@ -196,7 +196,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> LoadClientAsync(ValidatedAuthorizeRequest request, CT ct)
+    private async Task<AuthorizeRequestValidationResult> LoadClientAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // client_id must be present
@@ -226,7 +226,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> ValidateClientAsync(ValidatedAuthorizeRequest request, CT ct)
+    private async Task<AuthorizeRequestValidationResult> ValidateClientAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // check request object requirement
@@ -475,7 +475,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> ValidateScopeAndResourceAsync(ValidatedAuthorizeRequest request, CT ct)
+    private async Task<AuthorizeRequestValidationResult> ValidateScopeAndResourceAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // scope must be present
@@ -617,7 +617,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> ValidateOptionalParametersAsync(ValidatedAuthorizeRequest request, CT ct)
+    private async Task<AuthorizeRequestValidationResult> ValidateOptionalParametersAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // check nonce

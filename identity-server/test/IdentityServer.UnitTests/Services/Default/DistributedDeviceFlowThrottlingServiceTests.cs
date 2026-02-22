@@ -16,7 +16,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 {
     private TestCache cache = new TestCache();
     private InMemoryClientStore _store;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private readonly IdentityServerOptions options = new IdentityServerOptions { DeviceFlow = new DeviceFlowOptions { Interval = 5 } };
     private readonly DeviceCode deviceCode = new DeviceCode

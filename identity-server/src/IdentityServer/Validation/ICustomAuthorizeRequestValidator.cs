@@ -16,5 +16,5 @@ public interface ICustomAuthorizeRequestValidator
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task ValidateAsync(CustomAuthorizeRequestValidationContext context, CT ct);
+    Task ValidateAsync(CustomAuthorizeRequestValidationContext context, Ct ct);
 }

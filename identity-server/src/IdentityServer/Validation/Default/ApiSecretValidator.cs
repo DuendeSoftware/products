@@ -45,7 +45,7 @@ public class ApiSecretValidator : IApiSecretValidator
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public async Task<ApiSecretValidationResult> ValidateAsync(HttpContext context, CT ct)
+    public async Task<ApiSecretValidationResult> ValidateAsync(HttpContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ApiSecretValidator.Validate");
 
@@ -114,13 +114,13 @@ public class ApiSecretValidator : IApiSecretValidator
         return fail;
     }
 
-    private Task RaiseSuccessEventAsync(string clientId, string authMethod, CT ct)
+    private Task RaiseSuccessEventAsync(string clientId, string authMethod, Ct ct)
     {
         Telemetry.Metrics.ApiSecretValidation(clientId, authMethod);
         return _events.RaiseAsync(new ApiAuthenticationSuccessEvent(clientId, authMethod), ct);
     }
 
-    private Task RaiseFailureEventAsync(string clientId, string message, CT ct)
+    private Task RaiseFailureEventAsync(string clientId, string message, Ct ct)
     {
         Telemetry.Metrics.ApiSecretValidationFailure(clientId, message);
         return _events.RaiseAsync(new ApiAuthenticationFailureEvent(clientId, message), ct);

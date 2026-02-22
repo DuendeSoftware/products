@@ -19,7 +19,7 @@ public interface IReplayCache
     /// <param name="expiration"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task AddAsync(string purpose, string handle, DateTimeOffset expiration, CT ct);
+    Task AddAsync(string purpose, string handle, DateTimeOffset expiration, Ct ct);
 
 
     /// <summary>
@@ -29,5 +29,5 @@ public interface IReplayCache
     /// <param name="handle"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<bool> ExistsAsync(string purpose, string handle, CT ct);
+    Task<bool> ExistsAsync(string purpose, string handle, Ct ct);
 }

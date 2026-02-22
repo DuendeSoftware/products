@@ -51,7 +51,7 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         HttpContent? content = null,
         HttpStatusCode? expectedStatusCode = null,
         Dictionary<string, string>? headers = null,
-        CT ct = default) => CallBffHostApi(
+        Ct ct = default) => CallBffHostApi(
         url: new Uri(path, UriKind.Relative),
         method: method,
         content: content,
@@ -65,7 +65,7 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         HttpContent? content = null,
         HttpStatusCode? expectedStatusCode = null,
         Dictionary<string, string>? headers = null,
-        CT ct = default)
+        Ct ct = default)
     {
         method ??= HttpMethod.Get;
         var req = new HttpRequestMessage(method, url);

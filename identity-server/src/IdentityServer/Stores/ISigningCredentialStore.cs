@@ -16,5 +16,5 @@ public interface ISigningCredentialStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<SigningCredentials> GetSigningCredentialsAsync(CT ct);
+    Task<SigningCredentials> GetSigningCredentialsAsync(Ct ct);
 }

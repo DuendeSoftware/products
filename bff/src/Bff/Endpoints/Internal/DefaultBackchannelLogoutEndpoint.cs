@@ -27,7 +27,7 @@ internal class DefaultBackchannelLogoutEndpoint(
     ILogger<DefaultBackchannelLogoutEndpoint> logger) : IBackchannelLogoutEndpoint
 {
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         logger.ProcessingBackChannelLogoutRequest(LogLevel.Debug);
 
@@ -167,7 +167,7 @@ internal class DefaultBackchannelLogoutEndpoint(
         var config = options.Configuration;
         if (config == null)
         {
-            config = await options.ConfigurationManager?.GetConfigurationAsync(CT.None)!;
+            config = await options.ConfigurationManager?.GetConfigurationAsync(Ct.None)!;
         }
 
         if (config == null)

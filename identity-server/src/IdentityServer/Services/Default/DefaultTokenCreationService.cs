@@ -57,7 +57,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     }
 
     /// <inheritdoc/>
-    public virtual async Task<string> CreateTokenAsync(Token token, CT ct)
+    public virtual async Task<string> CreateTokenAsync(Token token, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateToken");
 
@@ -119,7 +119,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     protected virtual async Task<string> CreateJwtAsync(Token token, string payload,
-        Dictionary<string, object> headerElements, CT ct)
+        Dictionary<string, object> headerElements, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateJwt");
 

@@ -40,7 +40,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
     }
 
     /// <inheritdoc/>
-    public virtual async Task StoreAsync(Duende.IdentityServer.Models.PersistedGrant token, CT ct)
+    public virtual async Task StoreAsync(Duende.IdentityServer.Models.PersistedGrant token, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Store");
 
@@ -72,7 +72,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Duende.IdentityServer.Models.PersistedGrant> GetAsync(string key, CT ct)
+    public virtual async Task<Duende.IdentityServer.Models.PersistedGrant> GetAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Get");
 
@@ -87,7 +87,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IEnumerable<Duende.IdentityServer.Models.PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CT ct)
+    public virtual async Task<IEnumerable<Duende.IdentityServer.Models.PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.GetAll");
 
@@ -105,7 +105,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
     }
 
     /// <inheritdoc/>
-    public virtual async Task RemoveAsync(string key, CT ct)
+    public virtual async Task RemoveAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Remove");
 
@@ -134,7 +134,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
     }
 
     /// <inheritdoc/>
-    public virtual async Task RemoveAllAsync(PersistedGrantFilter filter, CT ct)
+    public virtual async Task RemoveAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.RemoveAll");
 

@@ -10,7 +10,7 @@ namespace IdentityServer.UnitTests.AspNetIdentity;
 
 public class DefaultSessionClaimsFilterTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task FilterToSessionClaimsAsync_with_session_and_non_session_claims_should_filter_to_only_session_claims()

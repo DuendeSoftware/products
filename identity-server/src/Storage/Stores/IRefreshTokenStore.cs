@@ -19,7 +19,7 @@ public interface IRefreshTokenStore
     /// <param name="refreshToken">The refresh token.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken, CT ct);
+    Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken, Ct ct);
 
     /// <summary>
     /// Updates the refresh token.
@@ -28,7 +28,7 @@ public interface IRefreshTokenStore
     /// <param name="refreshToken">The refresh token.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken, CT ct);
+    Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken, Ct ct);
 
     /// <summary>
     /// Gets the refresh token.
@@ -36,7 +36,7 @@ public interface IRefreshTokenStore
     /// <param name="refreshTokenHandle">The refresh token handle.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<RefreshToken?> GetRefreshTokenAsync(string refreshTokenHandle, CT ct);
+    Task<RefreshToken?> GetRefreshTokenAsync(string refreshTokenHandle, Ct ct);
 
     /// <summary>
     /// Removes the refresh token.
@@ -44,7 +44,7 @@ public interface IRefreshTokenStore
     /// <param name="refreshTokenHandle">The refresh token handle.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveRefreshTokenAsync(string refreshTokenHandle, CT ct);
+    Task RemoveRefreshTokenAsync(string refreshTokenHandle, Ct ct);
 
     /// <summary>
     /// Removes the refresh tokens.
@@ -53,5 +53,5 @@ public interface IRefreshTokenStore
     /// <param name="clientId">The client identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveRefreshTokensAsync(string subjectId, string clientId, CT ct);
+    Task RemoveRefreshTokensAsync(string subjectId, string clientId, Ct ct);
 }

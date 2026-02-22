@@ -18,5 +18,5 @@ public interface ITokenCleanupService
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task CleanupGrantsAsync(CT ct);
+    Task CleanupGrantsAsync(Ct ct);
 }

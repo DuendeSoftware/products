@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class NoSubjectExtensionGrantValidator : IExtensionGrantValidator
 {
-    public Task ValidateAsync(ExtensionGrantValidationContext context, CT ct)
+    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct)
     {
         var credential = context.Request.Raw.Get("custom_credential");
 

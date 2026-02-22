@@ -18,7 +18,7 @@ public class KeyManagerTests
 {
     private KeyManager _subject;
 
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private SigningAlgorithmOptions _rsaOptions = new SigningAlgorithmOptions("RS256");
 

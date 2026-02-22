@@ -23,7 +23,7 @@ namespace UnitTests.Endpoints.Results;
 public class AuthorizeResultTests
 {
     private AuthorizeHttpWriter _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private AuthorizeResponse _response = new AuthorizeResponse();
     private IdentityServerOptions _options = new IdentityServerOptions();

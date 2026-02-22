@@ -10,19 +10,19 @@ internal class TestHybridCache : HybridCache
 {
     private ConcurrentDictionary<string, ValueTask<object>> _cache = new();
     public override async ValueTask<T> GetOrCreateAsync<TState, T>(string key, TState state,
-        Func<TState, CT, ValueTask<T>> factory, HybridCacheEntryOptions? options = null,
-        IEnumerable<string>? tags = null, CT ct = new CT()) => (T)await _cache.GetOrAdd(key, async _ => (await factory(state, ct))!);
+        Func<TState, Ct, ValueTask<T>> factory, HybridCacheEntryOptions? options = null,
+        IEnumerable<string>? tags = null, Ct ct = new Ct()) => (T)await _cache.GetOrAdd(key, async _ => (await factory(state, ct))!);
 
     public override ValueTask SetAsync<T>(string key, T value, HybridCacheEntryOptions? options = null,
         IEnumerable<string>? tags = null,
-        CT ct = new CT())
+        Ct ct = new Ct())
     {
         _cache[key] = new ValueTask<object>(value!);
         return ValueTask.CompletedTask;
     }
 
     public override ValueTask
-        RemoveAsync(string key, CT ct = new CT())
+        RemoveAsync(string key, Ct ct = new Ct())
     {
         _waitUntilRemoveAsyncCalled.Set();
         _cache.TryRemove(key, out _);
@@ -33,7 +33,7 @@ internal class TestHybridCache : HybridCache
     ManualResetEventSlim _waitUntilRemoveAsyncCalled = new ManualResetEventSlim();
 
     public override ValueTask RemoveByTagAsync(string tag,
-        CT ct = new CT())
+        Ct ct = new Ct())
     {
         _waitUntilRemoveByTagAsyncCalled.Set();
         _cache.Clear();

@@ -83,7 +83,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     }
 
     /// <inheritdoc/>
-    public virtual async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, CT ct)
+    public virtual async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeResponseGenerator.CreateResponse");
 
@@ -110,7 +110,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <param name="request"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct)
+    protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         Logger.LogDebug("Creating Hybrid Flow response.");
 
@@ -129,7 +129,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <param name="request"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct)
+    protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         Logger.LogDebug("Creating Authorization Code Flow response.");
 
@@ -154,7 +154,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <param name="ct">The cancellation token.</param>
     /// <param name="authorizationCode"></param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateImplicitFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct, string authorizationCode = null)
+    protected virtual async Task<AuthorizeResponse> CreateImplicitFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct, string authorizationCode = null)
     {
         Logger.LogDebug("Creating Implicit Flow response.");
 
@@ -231,7 +231,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <param name="request"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizationCode> CreateCodeAsync(ValidatedAuthorizeRequest request, CT ct)
+    protected virtual async Task<AuthorizationCode> CreateCodeAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         string stateHash = null;
         if (Options.EmitStateHash && request.State.IsPresent())

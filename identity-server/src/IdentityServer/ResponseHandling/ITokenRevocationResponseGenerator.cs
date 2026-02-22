@@ -17,5 +17,5 @@ public interface ITokenRevocationResponseGenerator
     /// <param name="validationResult">The userinfo request validation result.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult, CT ct);
+    Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult, Ct ct);
 }

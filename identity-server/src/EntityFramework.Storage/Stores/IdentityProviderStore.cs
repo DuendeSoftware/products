@@ -40,7 +40,7 @@ public class IdentityProviderStore : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct)
+    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetAllSchemeNames");
 
@@ -55,7 +55,7 @@ public class IdentityProviderStore : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetByScheme");
         activity?.SetTag(Tracing.Properties.Scheme, scheme);

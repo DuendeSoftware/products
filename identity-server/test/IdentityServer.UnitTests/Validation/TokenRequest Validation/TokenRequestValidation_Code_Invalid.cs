@@ -19,7 +19,7 @@ public class TokenRequestValidation_Code_Invalid
 {
     private IClientStore _clients = Factory.CreateClientStore();
     private const string Category = "TokenRequest Validation - AuthorizationCode - Invalid";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private ClaimsPrincipal _subject = new IdentityServerUser("bob").CreatePrincipal();
 

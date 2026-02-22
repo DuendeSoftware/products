@@ -31,7 +31,7 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     public DynamicClientRegistrationResponseGenerator(ILogger<DynamicClientRegistrationResponseGenerator> logger) => Logger = logger;
 
     /// <inheritdoc/>
-    public virtual async Task WriteResponse<T>(HttpContext context, int statusCode, T response, CT ct)
+    public virtual async Task WriteResponse<T>(HttpContext context, int statusCode, T response, Ct ct)
         where T : IDynamicClientRegistrationResponse
     {
         context.Response.StatusCode = statusCode;
@@ -39,7 +39,7 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     }
 
     /// <inheritdoc/>
-    public virtual Task WriteContentTypeError(HttpContext context, CT ct)
+    public virtual Task WriteContentTypeError(HttpContext context, Ct ct)
     {
         Logger.LogDebug("Invalid content type in dynamic client registration request");
         context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
@@ -47,7 +47,7 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     }
 
     /// <inheritdoc/>
-    public virtual async Task WriteBadRequestError(HttpContext context, CT ct) =>
+    public virtual async Task WriteBadRequestError(HttpContext context, Ct ct) =>
         await WriteResponse(context, StatusCodes.Status400BadRequest,
             new DynamicClientRegistrationError(
                 DynamicClientRegistrationErrors.InvalidClientMetadata,
@@ -56,11 +56,11 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
         );
 
     /// <inheritdoc/>
-    public virtual async Task WriteError(HttpContext context, DynamicClientRegistrationError error, CT ct) =>
+    public virtual async Task WriteError(HttpContext context, DynamicClientRegistrationError error, Ct ct) =>
         await WriteResponse(context, StatusCodes.Status400BadRequest, error, ct);
 
 
     /// <inheritdoc/>
-    public virtual async Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response, CT ct) =>
+    public virtual async Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response, Ct ct) =>
         await WriteResponse(context, StatusCodes.Status201Created, response, ct);
 }

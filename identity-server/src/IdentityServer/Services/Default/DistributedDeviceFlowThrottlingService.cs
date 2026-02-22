@@ -49,7 +49,7 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">deviceCode</exception>
-    public async Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details, CT ct)
+    public async Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DistributedDeviceFlowThrottlingService.ShouldSlowDown");
 

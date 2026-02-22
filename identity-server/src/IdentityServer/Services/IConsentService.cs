@@ -25,7 +25,7 @@ public interface IConsentService
     /// <returns>
     /// Boolean if consent is required.
     /// </returns>
-    Task<bool> RequiresConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, CT ct);
+    Task<bool> RequiresConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, Ct ct);
 
     /// <summary>
     /// Updates the consent.
@@ -35,5 +35,5 @@ public interface IConsentService
     /// <param name="parsedScopes">The parsed scopes.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task UpdateConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, CT ct);
+    Task UpdateConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, Ct ct);
 }

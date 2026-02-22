@@ -23,7 +23,7 @@ internal class StaticFilesHttpClient(
 {
     private readonly CancellationTokenSource _stopping = new();
 
-    public async Task<string?> GetIndexHtmlAsync(CT ct = default)
+    public async Task<string?> GetIndexHtmlAsync(Ct ct = default)
     {
         var frontend = currentFrontendAccessor.Get();
 
@@ -67,7 +67,7 @@ internal class StaticFilesHttpClient(
         }
     }
 
-    public async Task ProxyStaticAssetsAsync(HttpContext context, CT ct = default)
+    public async Task ProxyStaticAssetsAsync(HttpContext context, Ct ct = default)
     {
         var frontend = currentFrontendAccessor.Get();
 

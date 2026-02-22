@@ -15,7 +15,7 @@ public class TestBrowserClient : HttpClient
         public HttpResponseMessage LastResponse { get; private set; } = default!;
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CT ct)
+            Ct ct)
         {
             CurrentUri = request.RequestUri!;
             var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri!);

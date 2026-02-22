@@ -43,7 +43,7 @@ public class TokenCleanupService : ITokenCleanupService
     }
 
     /// <inheritdoc/>
-    public async Task CleanupGrantsAsync(CT ct)
+    public async Task CleanupGrantsAsync(Ct ct)
     {
         try
         {
@@ -63,7 +63,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the stale persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveGrantsAsync(CT ct)
+    protected virtual async Task RemoveGrantsAsync(Ct ct)
     {
         await RemoveExpiredPersistedGrantsAsync(ct);
         if (_options.RemoveConsumedTokens)
@@ -76,7 +76,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the expired persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveExpiredPersistedGrantsAsync(CT ct)
+    protected virtual async Task RemoveExpiredPersistedGrantsAsync(Ct ct)
     {
         var found = int.MaxValue;
 
@@ -145,7 +145,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the consumed persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveConsumedPersistedGrantsAsync(CT ct)
+    protected virtual async Task RemoveConsumedPersistedGrantsAsync(Ct ct)
     {
         var found = int.MaxValue;
 
@@ -208,7 +208,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the stale device codes.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveDeviceCodesAsync(CT ct)
+    protected virtual async Task RemoveDeviceCodesAsync(Ct ct)
     {
         var found = int.MaxValue;
 
@@ -264,7 +264,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// <summary>
     /// Removes stale pushed authorization requests.
     /// </summary>
-    protected virtual async Task RemovePushedAuthorizationRequestsAsync(CT ct)
+    protected virtual async Task RemovePushedAuthorizationRequestsAsync(Ct ct)
     {
         var found = int.MaxValue;
 

@@ -15,7 +15,7 @@ namespace UnitTests.Validation;
 public class IntrospectionRequestValidatorTests
 {
     private const string Category = "Introspection request validation";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IntrospectionRequestValidator _subject;
     private IReferenceTokenStore _referenceTokenStore;

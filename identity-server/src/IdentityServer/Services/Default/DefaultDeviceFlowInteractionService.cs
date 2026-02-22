@@ -31,7 +31,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         _logger = logger;
     }
 
-    public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode, CT ct)
+    public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode, Ct ct)
     {
         var deviceAuth = await _devices.FindByUserCodeAsync(userCode, ct);
         if (deviceAuth == null)
@@ -58,7 +58,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         };
     }
 
-    public async Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, CT ct)
+    public async Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(userCode);
         ArgumentNullException.ThrowIfNull(consent);

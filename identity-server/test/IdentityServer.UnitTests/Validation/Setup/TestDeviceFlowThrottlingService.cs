@@ -13,5 +13,5 @@ public class TestDeviceFlowThrottlingService : IDeviceFlowThrottlingService
 
     public TestDeviceFlowThrottlingService(bool shouldSlownDown = false) => this.shouldSlownDown = shouldSlownDown;
 
-    public Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details, CT _) => Task.FromResult(shouldSlownDown);
+    public Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details, Ct _) => Task.FromResult(shouldSlownDown);
 }

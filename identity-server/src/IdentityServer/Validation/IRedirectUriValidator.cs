@@ -29,7 +29,7 @@ public interface IRedirectUriValidator
     /// </summary>
     /// <param name="context">The validation context.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, CT ct)
+    Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, Ct ct)
 #pragma warning disable CS0618 // Type or member is obsolete
         => IsRedirectUriValidAsync(context.RequestedUri, context.Client);
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -41,7 +41,7 @@ public interface IRedirectUriValidator
     /// <param name="client">The client.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns><c>true</c> is the URI is valid; <c>false</c> otherwise.</returns>
-    Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, CT ct);
+    Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, Ct ct);
 }
 
 /// <summary>

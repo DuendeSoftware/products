@@ -12,7 +12,7 @@ internal class TestTokenValidator : ITokenValidator
 
     public TestTokenValidator(TokenValidationResult result) => _result = result;
 
-    public Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, CT ct) => Task.FromResult(_result);
+    public Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, Ct ct) => Task.FromResult(_result);
 
-    public Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, CT ct) => Task.FromResult(_result);
+    public Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, Ct ct) => Task.FromResult(_result);
 }

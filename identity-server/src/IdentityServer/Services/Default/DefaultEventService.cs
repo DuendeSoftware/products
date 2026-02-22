@@ -51,7 +51,7 @@ public class DefaultEventService : IEventService
     }
 
     /// <inheritdoc/>
-    public async Task RaiseAsync(Event evt, CT ct)
+    public async Task RaiseAsync(Event evt, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(evt);
 
@@ -93,7 +93,7 @@ public class DefaultEventService : IEventService
     /// <param name="evt">The evt.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task PrepareEventAsync(Event evt, CT ct)
+    protected virtual async Task PrepareEventAsync(Event evt, Ct ct)
     {
         evt.TimeStamp = TimeProvider.GetUtcNow().DateTime;
         using var process = Process.GetCurrentProcess();

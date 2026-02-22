@@ -77,7 +77,7 @@ public class CustomClaimsService : DefaultClaimsService
     {
     }
 
-    public override async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resourceResult, ValidatedRequest request, CT ct)
+    public override async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resourceResult, ValidatedRequest request, Ct ct)
     {
         var result = (await base.GetAccessTokenClaimsAsync(subject, resourceResult, request, ct)).ToList();
 

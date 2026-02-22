@@ -46,7 +46,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(CT ct)
+    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct ct)
     {
         var list = new List<SerializedKey>();
 
@@ -83,7 +83,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// <param name="key"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task StoreKeyAsync(SerializedKey key, CT ct)
+    public async Task StoreKeyAsync(SerializedKey key, Ct ct)
     {
         if (!_directory.Exists)
         {
@@ -102,7 +102,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// <param name="id"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public Task DeleteKeyAsync(string id, CT ct)
+    public Task DeleteKeyAsync(string id, Ct ct)
     {
         var path = Path.Combine(_directory.FullName, KeyFilePrefix + id + KeyFileExtension);
         try

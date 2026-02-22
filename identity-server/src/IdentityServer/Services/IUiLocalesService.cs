@@ -11,5 +11,5 @@ public interface IUiLocalesService
     /// </summary>
     /// <param name="uiLocales"></param>
     /// <param name="ct">The cancellation token.</param>
-    Task StoreUiLocalesForRedirectAsync(string? uiLocales, CT ct);
+    Task StoreUiLocalesForRedirectAsync(string? uiLocales, Ct ct);
 }

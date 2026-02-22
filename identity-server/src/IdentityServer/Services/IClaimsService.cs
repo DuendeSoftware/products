@@ -25,7 +25,7 @@ public interface IClaimsService
     /// <returns>
     /// Claims for the identity token
     /// </returns>
-    Task<IEnumerable<Claim>> GetIdentityTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resources, bool includeAllIdentityClaims, ValidatedRequest request, CT ct);
+    Task<IEnumerable<Claim>> GetIdentityTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resources, bool includeAllIdentityClaims, ValidatedRequest request, Ct ct);
 
     /// <summary>
     /// Returns claims for an access token.
@@ -37,5 +37,5 @@ public interface IClaimsService
     /// <returns>
     /// Claims for the access token
     /// </returns>
-    Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resources, ValidatedRequest request, CT ct);
+    Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resources, ValidatedRequest request, Ct ct);
 }

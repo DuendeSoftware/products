@@ -15,5 +15,5 @@ public interface IDeviceCodeValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(DeviceCodeValidationContext context, CT ct);
+    Task ValidateAsync(DeviceCodeValidationContext context, Ct ct);
 }

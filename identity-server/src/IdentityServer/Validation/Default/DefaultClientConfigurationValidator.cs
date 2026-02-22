@@ -27,7 +27,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task ValidateAsync(ClientConfigurationValidationContext context, CT ct)
+    public async Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultClientConfigurationValidator.Validate");
 

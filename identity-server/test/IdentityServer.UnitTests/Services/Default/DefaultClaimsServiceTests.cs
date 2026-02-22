@@ -17,7 +17,7 @@ public class DefaultClaimsServiceTests
 {
     private DefaultClaimsService _subject;
     private MockProfileService _mockMockProfileService = new MockProfileService();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private ClaimsPrincipal _user;
     private Client _client;

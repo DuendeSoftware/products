@@ -21,7 +21,7 @@ public interface IEndSessionRequestValidator
     /// <param name="subject"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, CT ct);
+    Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, Ct ct);
 
     /// <summary>
     ///  Validates requests from logout page iframe to trigger single signout.
@@ -29,5 +29,5 @@ public interface IEndSessionRequestValidator
     /// <param name="parameters"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, CT ct);
+    Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, Ct ct);
 }

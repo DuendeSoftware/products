@@ -39,7 +39,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
 
     /// <inheritdoc />
     public virtual async Task<IDynamicClientRegistrationResponse> ProcessAsync(
-        DynamicClientRegistrationContext context, CT ct)
+        DynamicClientRegistrationContext context, Ct ct)
     {
         var clientIdResult = await AddClientId(context, ct);
         if (clientIdResult is DynamicClientRegistrationError clientIdFailure)
@@ -136,7 +136,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual Task<IStepResult> AddClientId(
-        DynamicClientRegistrationContext context, CT ct)
+        DynamicClientRegistrationContext context, Ct ct)
     {
         context.Client.ClientId = CryptoRandom.CreateUniqueId();
         return StepResult.Success();

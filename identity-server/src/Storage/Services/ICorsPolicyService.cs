@@ -17,5 +17,5 @@ public interface ICorsPolicyService
     /// <param name="origin">The origin.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<bool> IsOriginAllowedAsync(string origin, CT ct);
+    Task<bool> IsOriginAllowedAsync(string origin, Ct ct);
 }

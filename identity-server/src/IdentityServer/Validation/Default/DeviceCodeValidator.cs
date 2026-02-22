@@ -49,7 +49,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task ValidateAsync(DeviceCodeValidationContext context, CT ct)
+    public async Task ValidateAsync(DeviceCodeValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceCodeValidator.Validate");
 

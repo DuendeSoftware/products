@@ -21,7 +21,7 @@ internal class DefaultSilentLoginCallbackEndpoint(
 {
 
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         logger.ProcessingSilentLoginCallbackRequest(LogLevel.Debug);
 

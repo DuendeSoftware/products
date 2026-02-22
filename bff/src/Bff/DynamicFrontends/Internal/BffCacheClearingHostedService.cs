@@ -30,7 +30,7 @@ internal class BffCacheClearingHostedService(
     private ChannelWriter<BffFrontend> Writer => _channel.Writer;
     private ChannelReader<BffFrontend> Reader => _channel.Reader;
 
-    protected override async Task ExecuteAsync(CT ct)
+    protected override async Task ExecuteAsync(Ct ct)
     {
         // Subscribe to frontend changes and publish messages to the channel
         frontendCollection.OnFrontendChanged += changedFrontend =>
@@ -55,7 +55,7 @@ internal class BffCacheClearingHostedService(
         await ProcessFrontendChangesAsync(ct);
     }
 
-    private async Task ProcessFrontendChangesAsync(CT ct)
+    private async Task ProcessFrontendChangesAsync(Ct ct)
     {
         try
         {
@@ -77,7 +77,7 @@ internal class BffCacheClearingHostedService(
         }
     }
 
-    private async Task ProcessFrontendChangeAsync(BffFrontend changedFrontend, CT ct)
+    private async Task ProcessFrontendChangeAsync(BffFrontend changedFrontend, Ct ct)
     {
         try
         {

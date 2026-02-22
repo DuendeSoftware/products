@@ -14,7 +14,7 @@ public interface ISigningKeyStoreCache
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetKeysAsync(CT ct);
+    Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct ct);
 
     /// <summary>
     /// Caches keys for duration.
@@ -23,5 +23,5 @@ public interface ISigningKeyStoreCache
     /// <param name="duration"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, CT ct);
+    Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct ct);
 }

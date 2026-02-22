@@ -27,7 +27,7 @@ internal class SessionRevocationService(
     private readonly BffOptions _options = options.Value;
 
     /// <inheritdoc/>
-    public async Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct = default)
+    public async Task RevokeSessionsAsync(UserSessionsFilter filter, Ct ct = default)
     {
         if (_options.BackchannelLogoutAllUserSessions)
         {

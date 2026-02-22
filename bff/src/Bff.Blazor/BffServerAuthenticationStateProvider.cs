@@ -126,7 +126,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
     /// <param name="authenticationState">The current authentication state.</param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns>A boolean indicating whether the authentication state is valid.</returns>
-    protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CT ct)
+    protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, Ct ct)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var sessionStore = scope.ServiceProvider.GetRequiredService<IUserSessionStore>();

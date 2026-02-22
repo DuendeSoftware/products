@@ -10,7 +10,7 @@ namespace UnitTests.Services.Default;
 
 public class DefaultEventServiceTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     [Fact]
     public async Task Raising_an_event_without_http_context_does_not_throw()
     {

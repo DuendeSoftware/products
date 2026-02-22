@@ -67,7 +67,7 @@ public class ProfileService<TUser> : IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
+    public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context, Ct ct)
     {
         var sub = context.Subject?.GetSubjectId();
         if (sub == null)
@@ -128,7 +128,7 @@ public class ProfileService<TUser> : IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task IsActiveAsync(IsActiveContext context, CT ct)
+    public virtual async Task IsActiveAsync(IsActiveContext context, Ct ct)
     {
         var sub = context.Subject?.GetSubjectId();
         if (sub == null)

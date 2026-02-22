@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.IntegrationTests.Configuration;
 
 public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     [Fact]
     public async Task valid_request_creates_new_client()
     {

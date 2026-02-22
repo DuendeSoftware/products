@@ -19,7 +19,7 @@ public interface IKeyMaterialService
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(CT ct);
+    Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct);
 
     /// <summary>
     /// Gets the signing credentials.
@@ -28,12 +28,12 @@ public interface IKeyMaterialService
     /// A value of null or empty indicates that the server default should be returned.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string>? allowedAlgorithms, CT ct);
+    Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string>? allowedAlgorithms, Ct ct);
 
     /// <summary>
     /// Gets all signing credentials.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct);
+    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct);
 }

@@ -22,7 +22,7 @@ public class DefaultPersistedGrantServiceTests
     private IUserConsentStore _userConsent;
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public DefaultPersistedGrantServiceTests()
     {
@@ -576,7 +576,7 @@ public class DefaultPersistedGrantServiceTests
 
         public CorruptingPersistedGrantStore(IPersistedGrantStore inner) => _inner = inner;
 
-        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CT ct)
+        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
         {
             var items = await _inner.GetAllAsync(filter, ct);
             if (ClientIdToCorrupt != null)
@@ -590,12 +590,12 @@ public class DefaultPersistedGrantServiceTests
             return items;
         }
 
-        public Task<PersistedGrant> GetAsync(string key, CT ct) => _inner.GetAsync(key, ct);
+        public Task<PersistedGrant> GetAsync(string key, Ct ct) => _inner.GetAsync(key, ct);
 
-        public Task RemoveAllAsync(PersistedGrantFilter filter, CT ct) => _inner.RemoveAllAsync(filter, ct);
+        public Task RemoveAllAsync(PersistedGrantFilter filter, Ct ct) => _inner.RemoveAllAsync(filter, ct);
 
-        public Task RemoveAsync(string key, CT ct) => _inner.RemoveAsync(key, ct);
+        public Task RemoveAsync(string key, Ct ct) => _inner.RemoveAsync(key, ct);
 
-        public Task StoreAsync(PersistedGrant grant, CT ct) => _inner.StoreAsync(grant, ct);
+        public Task StoreAsync(PersistedGrant grant, Ct ct) => _inner.StoreAsync(grant, ct);
     }
 }

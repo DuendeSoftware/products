@@ -47,7 +47,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         _licenseUsage = licenseUsage;
     }
 
-    public async Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, CT ct)
+    public async Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestValidator.ValidateRequest");
 
@@ -451,7 +451,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         return result;
     }
 
-    private async Task<(bool Success, BackchannelAuthenticationRequestValidationResult ErrorResult)> TryValidateRequestObjectAsync(CT ct)
+    private async Task<(bool Success, BackchannelAuthenticationRequestValidationResult ErrorResult)> TryValidateRequestObjectAsync(Ct ct)
     {
         //////////////////////////////////////////////////////////
         // validate request object

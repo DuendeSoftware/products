@@ -19,7 +19,7 @@ public interface ITokenService
     /// <param name="request">The token creation request.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>An identity token</returns>
-    Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request, CT ct);
+    Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request, Ct ct);
 
     /// <summary>
     /// Creates an access token.
@@ -27,7 +27,7 @@ public interface ITokenService
     /// <param name="request">The token creation request.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>An access token</returns>
-    Task<Token> CreateAccessTokenAsync(TokenCreationRequest request, CT ct);
+    Task<Token> CreateAccessTokenAsync(TokenCreationRequest request, Ct ct);
 
     /// <summary>
     /// Creates a serialized and protected security token.
@@ -35,5 +35,5 @@ public interface ITokenService
     /// <param name="token">The token.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A security token in serialized form</returns>
-    Task<string> CreateSecurityTokenAsync(Token token, CT ct);
+    Task<string> CreateSecurityTokenAsync(Token token, Ct ct);
 }

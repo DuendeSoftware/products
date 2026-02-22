@@ -15,7 +15,7 @@ namespace UnitTests.Validation.Secrets;
 public class FormPostCredentialExtraction
 {
     private const string Category = "Secrets - Form Post Secret Parsing";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options;
     private PostBodySecretParser _parser;

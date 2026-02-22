@@ -11,7 +11,7 @@ public class MockMessageStore<TModel> : IMessageStore<TModel>
 {
     public Dictionary<string, Message<TModel>> Messages { get; set; } = new Dictionary<string, Message<TModel>>();
 
-    public Task<Message<TModel>> ReadAsync(string id, CT ct)
+    public Task<Message<TModel>> ReadAsync(string id, Ct ct)
     {
         Message<TModel> val = null;
         if (id != null)
@@ -21,7 +21,7 @@ public class MockMessageStore<TModel> : IMessageStore<TModel>
         return Task.FromResult(val);
     }
 
-    public Task<string> WriteAsync(Message<TModel> message, CT ct)
+    public Task<string> WriteAsync(Message<TModel> message, Ct ct)
     {
         var id = Guid.NewGuid().ToString();
         Messages[id] = message;

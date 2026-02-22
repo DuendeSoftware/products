@@ -58,7 +58,7 @@ internal class TokenValidator : ITokenValidator
         _log = new TokenValidationLog();
     }
 
-    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, CT ct)
+    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateIdentityToken");
 
@@ -120,7 +120,7 @@ internal class TokenValidator : ITokenValidator
         return customResult;
     }
 
-    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, CT ct)
+    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateAccessToken");
 
@@ -269,7 +269,7 @@ internal class TokenValidator : ITokenValidator
     }
 
     private async Task<TokenValidationResult> ValidateJwtAsync(string jwtString,
-        IEnumerable<SecurityKeyInfo> validationKeys, CT ct, bool validateLifetime = true, string audience = null)
+        IEnumerable<SecurityKeyInfo> validationKeys, Ct ct, bool validateLifetime = true, string audience = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
 
@@ -366,7 +366,7 @@ internal class TokenValidator : ITokenValidator
         };
     }
 
-    private async Task<TokenValidationResult> ValidateReferenceAccessTokenAsync(string tokenHandle, CT ct)
+    private async Task<TokenValidationResult> ValidateReferenceAccessTokenAsync(string tokenHandle, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateReferenceAccessToken");
 

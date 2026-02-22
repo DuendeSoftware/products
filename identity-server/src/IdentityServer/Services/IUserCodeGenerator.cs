@@ -32,5 +32,5 @@ public interface IUserCodeGenerator
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string> GenerateAsync(CT ct);
+    Task<string> GenerateAsync(Ct ct);
 }

@@ -25,7 +25,7 @@ public class ReturnUrlParser
     /// <param name="returnUrl">The return URL.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<AuthorizationRequest> ParseAsync(string returnUrl, CT ct)
+    public virtual async Task<AuthorizationRequest> ParseAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ReturnUrlParser.Parse");
 

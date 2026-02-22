@@ -10,7 +10,7 @@ public class MockReplayCache : IReplayCache
 {
     public bool Exists { get; set; }
 
-    public Task AddAsync(string purpose, string handle, DateTimeOffset expiration, CT ct) => Task.CompletedTask;
+    public Task AddAsync(string purpose, string handle, DateTimeOffset expiration, Ct ct) => Task.CompletedTask;
 
-    public Task<bool> ExistsAsync(string purpose, string handle, CT ct) => Task.FromResult(Exists);
+    public Task<bool> ExistsAsync(string purpose, string handle, Ct ct) => Task.FromResult(Exists);
 }

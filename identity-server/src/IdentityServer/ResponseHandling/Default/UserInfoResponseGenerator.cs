@@ -54,7 +54,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Profile service returned incorrect subject value</exception>
-    public virtual async Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult, CT ct)
+    public virtual async Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("UserInfoResponseGenerator.Process");
 
@@ -112,7 +112,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     /// <param name="scopes"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected internal virtual async Task<ResourceValidationResult> GetRequestedResourcesAsync(IEnumerable<string> scopes, CT ct)
+    protected internal virtual async Task<ResourceValidationResult> GetRequestedResourcesAsync(IEnumerable<string> scopes, Ct ct)
     {
         if (scopes == null || !scopes.Any())
         {

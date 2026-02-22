@@ -80,7 +80,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         }
     }
 
-    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result, CT ct)
+    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result, Ct ct)
     {
         var referenceValue = result.Response?.Request?.PushedAuthorizationReferenceValue;
         if (referenceValue.IsPresent())

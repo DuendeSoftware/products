@@ -21,7 +21,7 @@ public class DefaultRefreshTokenServiceTests
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public DefaultRefreshTokenServiceTests()
     {

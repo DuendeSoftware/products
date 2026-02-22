@@ -211,12 +211,12 @@ public class ConventionTests
                     failures.Add($"{type.FullName}.{method.Name}: Async method should be suffixed with 'Async'.");
                 }
 
-                // 2. Last parameter should be a CT (if there are any parameters)
+                // 2. Last parameter should be a Ct (if there are any parameters)
                 var parameters = method.GetParameters();
-                if (parameters.Length == 0 || parameters.Last().ParameterType != typeof(CT))
+                if (parameters.Length == 0 || parameters.Last().ParameterType != typeof(Ct))
                 {
                     failures.Add(
-                        $"{type.FullName}.{method.Name}: Async method should have a CT as the last parameter.");
+                        $"{type.FullName}.{method.Name}: Async method should have a Ct as the last parameter.");
                 }
             }
         }
@@ -273,7 +273,7 @@ public class ConventionTests
                     }
 
                     var ctParam = parameters.Last();
-                    if (ctParam.ParameterType != typeof(CT))
+                    if (ctParam.ParameterType != typeof(Ct))
                     {
                         failures.Add($"{type.FullName}.{method.Name}: Last parameter should be CancellationToken.");
                         continue;

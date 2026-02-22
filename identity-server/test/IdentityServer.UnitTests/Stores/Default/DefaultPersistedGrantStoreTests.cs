@@ -22,7 +22,7 @@ public class DefaultPersistedGrantStoreTests
     private StubHandleGenerationService _stubHandleGenerationService = new StubHandleGenerationService();
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public DefaultPersistedGrantStoreTests()
     {

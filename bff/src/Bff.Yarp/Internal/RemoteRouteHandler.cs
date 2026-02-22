@@ -68,7 +68,7 @@ internal class RemoteRouteHandler : IDisposable
 
     public void ClearTransformerCacheFor(BffFrontend frontend) => _cache.TryRemove(frontend.Name, out _);
 
-    public async Task<bool> HandleAsync(HttpContext context, CT ct)
+    public async Task<bool> HandleAsync(HttpContext context, Ct ct)
     {
         if (!_currentFrontendAccessor.TryGet(out var frontend))
         {

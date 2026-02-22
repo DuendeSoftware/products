@@ -14,7 +14,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     private const string Category = "TokenRequest Validation - ClientCredentials - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]

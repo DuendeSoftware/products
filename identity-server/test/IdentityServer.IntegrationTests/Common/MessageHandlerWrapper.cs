@@ -13,7 +13,7 @@ public class MessageHandlerWrapper : DelegatingHandler
     {
     }
 
-    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
+    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
     {
         Response = await base.SendAsync(request, ct);
         return Response;

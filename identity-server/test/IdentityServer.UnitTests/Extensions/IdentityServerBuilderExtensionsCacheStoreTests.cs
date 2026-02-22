@@ -13,24 +13,24 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
 {
     private class CustomClientStore : IClientStore
     {
-        public Task<Client> FindClientByIdAsync(string clientId, CT _) => throw new System.NotImplementedException();
+        public Task<Client> FindClientByIdAsync(string clientId, Ct _) => throw new System.NotImplementedException();
 
 #if NET10_0_OR_GREATER
-        public IAsyncEnumerable<Client> GetAllClientsAsync(CT _) => throw new System.NotImplementedException();
+        public IAsyncEnumerable<Client> GetAllClientsAsync(Ct _) => throw new System.NotImplementedException();
 #endif
     }
 
     private class CustomResourceStore : IResourceStore
     {
-        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, CT ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct ct) => throw new System.NotImplementedException();
 
-        public Task<Resources> GetAllResourcesAsync(CT ct) => throw new System.NotImplementedException();
+        public Task<Resources> GetAllResourcesAsync(Ct ct) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, CT ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct) => throw new System.NotImplementedException();
     }
 
     [Fact]

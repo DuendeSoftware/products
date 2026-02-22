@@ -39,7 +39,7 @@ public class CorsPolicyService : ICorsPolicyService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> IsOriginAllowedAsync(string origin, CT ct)
+    public async Task<bool> IsOriginAllowedAsync(string origin, Ct ct)
     {
 #pragma warning disable CA1308 // this has historically been normalized to lower case and RFC 3986 instructs to normalize to lowercase
         origin = origin.ToLowerInvariant();

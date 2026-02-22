@@ -8,7 +8,7 @@ namespace UnitTests.Services.Default;
 
 public class NumericUserCodeGeneratorTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task GenerateAsync_should_return_expected_code()

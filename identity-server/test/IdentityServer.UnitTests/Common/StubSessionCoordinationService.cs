@@ -9,9 +9,9 @@ namespace UnitTests.Common;
 
 internal class StubSessionCoordinationService : ISessionCoordinationService
 {
-    public Task ProcessExpirationAsync(UserSession session, CT _) => Task.CompletedTask;
+    public Task ProcessExpirationAsync(UserSession session, Ct _) => Task.CompletedTask;
 
-    public Task ProcessLogoutAsync(UserSession session, CT _) => Task.CompletedTask;
+    public Task ProcessLogoutAsync(UserSession session, Ct _) => Task.CompletedTask;
 
-    public Task<bool> ValidateSessionAsync(SessionValidationRequest request, CT _) => Task.FromResult(true);
+    public Task<bool> ValidateSessionAsync(SessionValidationRequest request, Ct _) => Task.FromResult(true);
 }

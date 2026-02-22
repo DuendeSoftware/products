@@ -14,7 +14,7 @@ public class InMemoryCorsPolicyServiceTests
 
     private InMemoryCorsPolicyService _subject;
     private List<Client> _clients = new List<Client>();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public InMemoryCorsPolicyServiceTests() => _subject = new InMemoryCorsPolicyService(TestLogger.Create<InMemoryCorsPolicyService>(), _clients);
 

@@ -35,7 +35,7 @@ public class InMemoryClientStore : IClientStore
     /// <returns>
     /// The client
     /// </returns>
-    public Task<Client> FindClientByIdAsync(string clientId, CT _)
+    public Task<Client> FindClientByIdAsync(string clientId, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
@@ -49,7 +49,7 @@ public class InMemoryClientStore : IClientStore
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] CT _)
+    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.GetAllClients");
 

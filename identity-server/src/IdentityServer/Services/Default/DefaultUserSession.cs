@@ -161,7 +161,7 @@ public class DefaultUserSession : IUserSession
     /// or
     /// properties
     /// </exception>
-    public virtual async Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties, CT ct)
+    public virtual async Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(properties);
@@ -201,7 +201,7 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<ClaimsPrincipal> GetUserAsync(CT ct)
+    public virtual async Task<ClaimsPrincipal> GetUserAsync(Ct ct)
     {
         await AuthenticateAsync();
 
@@ -213,7 +213,7 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<string> GetSessionIdAsync(CT ct)
+    public virtual async Task<string> GetSessionIdAsync(Ct ct)
     {
         await AuthenticateAsync();
 
@@ -227,7 +227,7 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task EnsureSessionIdCookieAsync(CT ct)
+    public virtual async Task EnsureSessionIdCookieAsync(Ct ct)
     {
         var sid = await GetSessionIdAsync(ct);
         if (sid != null)
@@ -245,7 +245,7 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual Task RemoveSessionIdCookieAsync(CT ct)
+    public virtual Task RemoveSessionIdCookieAsync(Ct ct)
     {
         if (HttpContext.Request.Cookies.ContainsKey(CheckSessionCookieName))
         {
@@ -305,7 +305,7 @@ public class DefaultUserSession : IUserSession
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">clientId</exception>
-    public virtual async Task AddClientIdAsync(string clientId, CT ct)
+    public virtual async Task AddClientIdAsync(string clientId, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(clientId);
 
@@ -326,7 +326,7 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<string>> GetClientListAsync(CT ct)
+    public virtual async Task<IEnumerable<string>> GetClientListAsync(Ct ct)
     {
         await AuthenticateAsync();
 

@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.AspNetIdentity;
 public class DefaultSessionClaimsFilter : ISessionClaimsFilter
 {
     /// <inheritdoc/>
-    public Task<IReadOnlyCollection<Claim>> FilterToSessionClaimsAsync(SecurityStampRefreshingPrincipalContext context, CT ct)
+    public Task<IReadOnlyCollection<Claim>> FilterToSessionClaimsAsync(SecurityStampRefreshingPrincipalContext context, Ct ct)
     {
         var newClaimTypes = context.NewPrincipal.Claims.Select(x => x.Type).ToArray();
         var currentClaimsToKeep = context.CurrentPrincipal.Claims.Where(x => !newClaimTypes.Contains(x.Type)).ToArray();

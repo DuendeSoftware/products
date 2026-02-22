@@ -46,7 +46,7 @@ public class ExtensionGrantValidator
     /// <param name="request">The request.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<GrantValidationResult> ValidateAsync(ValidatedTokenRequest request, CT ct)
+    public async Task<GrantValidationResult> ValidateAsync(ValidatedTokenRequest request, Ct ct)
     {
         var validator = _validators.FirstOrDefault(v => v.GrantType.Equals(request.GrantType, StringComparison.Ordinal));
 

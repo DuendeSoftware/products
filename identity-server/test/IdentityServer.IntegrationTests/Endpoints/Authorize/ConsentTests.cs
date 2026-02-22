@@ -22,7 +22,7 @@ public class ConsentTests
     private const string Category = "Authorize and consent tests";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public ConsentTests()
     {

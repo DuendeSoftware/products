@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Validation;
 public class NopBackchannelAuthenticationUserValidator : IBackchannelAuthenticationUserValidator
 {
     /// <inheritdoc/>
-    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext, CT ct)
+    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext, Ct ct)
     {
         var result = new BackchannelAuthenticationUserValidationResult
         {

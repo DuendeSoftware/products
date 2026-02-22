@@ -22,7 +22,7 @@ public class DefaultReplayCache : IReplayCache
     public DefaultReplayCache(IDistributedCache cache) => _cache = cache;
 
     /// <inheritdoc />
-    public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration, CT ct)
+    public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Add");
 
@@ -35,7 +35,7 @@ public class DefaultReplayCache : IReplayCache
     }
 
     /// <inheritdoc />
-    public async Task<bool> ExistsAsync(string purpose, string handle, CT ct)
+    public async Task<bool> ExistsAsync(string purpose, string handle, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Exists");
 

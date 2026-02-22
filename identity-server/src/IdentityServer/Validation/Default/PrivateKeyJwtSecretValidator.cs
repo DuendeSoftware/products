@@ -54,7 +54,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
     /// </returns>
     /// <exception cref="System.ArgumentException">ParsedSecret.Credential is not a JWT token</exception>
     /// <inheritdoc/>
-    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, CT ct)
+    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var fail = new SecretValidationResult { Success = false };
         var success = new SecretValidationResult { Success = true };

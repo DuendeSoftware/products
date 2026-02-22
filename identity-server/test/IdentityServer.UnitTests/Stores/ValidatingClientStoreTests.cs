@@ -18,7 +18,7 @@ public class ValidatingClientStoreTests
 {
     private readonly TestEventService _events = new();
     private readonly NullLogger<ValidatingClientStore<StubClientStore>> _logger = new();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task GetAllClientsAsync_WhenAllClientsAreValid_ShouldReturnAllClients()
@@ -153,9 +153,9 @@ public class ValidatingClientStoreTests
 
         public static StubClientStore WithClients(IEnumerable<Client> clients) => new(clients.FirstOrDefault(), clients);
 
-        public Task<Client?> FindClientByIdAsync(string clientId, CT _) => Task.FromResult(_client);
+        public Task<Client?> FindClientByIdAsync(string clientId, Ct _) => Task.FromResult(_client);
 
-        public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] CT _)
+        public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] Ct _)
         {
             foreach (var client in _clients)
             {
@@ -182,7 +182,7 @@ public class ValidatingClientStoreTests
             _errorMessage = errorMessage;
         }
 
-        public Task ValidateAsync(ClientConfigurationValidationContext context, CT ct)
+        public Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct)
         {
             var isValid = _validationFunc != null ? _validationFunc(context.Client) : _isValid;
 
@@ -201,7 +201,7 @@ public class ValidatingClientStoreTests
 
         public bool CanRaiseEventType(EventTypes evtType) => true;
 
-        public Task RaiseAsync(Event evt, CT ct)
+        public Task RaiseAsync(Event evt, Ct ct)
         {
             RaisedEventCount++;
             return Task.CompletedTask;

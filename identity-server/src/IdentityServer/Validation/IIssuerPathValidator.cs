@@ -11,5 +11,5 @@ public interface IIssuerPathValidator
     /// <param name="path">A path component of a URI to validate against the issuer for the current request.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>True if the path component is valid in for the issuer in the context of the current request.</returns>
-    Task<bool> ValidateAsync(string path, CT ct);
+    Task<bool> ValidateAsync(string path, Ct ct);
 }

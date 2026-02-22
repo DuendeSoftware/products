@@ -42,7 +42,7 @@ public class TestUserProfileService : IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
+    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context, Ct ct)
     {
         context.LogProfileRequest(Logger);
 
@@ -67,7 +67,7 @@ public class TestUserProfileService : IProfileService
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual Task IsActiveAsync(IsActiveContext context, CT ct)
+    public virtual Task IsActiveAsync(IsActiveContext context, Ct ct)
     {
         Logger.LogDebug("IsActive called from: {caller}", context.Caller);
 

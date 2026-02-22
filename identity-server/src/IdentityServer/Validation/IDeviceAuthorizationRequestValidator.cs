@@ -18,5 +18,5 @@ public interface IDeviceAuthorizationRequestValidator
     /// <param name="clientValidationResult"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, CT ct);
+    Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, Ct ct);
 }

@@ -43,7 +43,7 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
 
 
     /// <inheritdoc/>
-    public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client, CT ct)
+    public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client, Ct ct)
     {
         var result = await Inner.ValidateRefreshTokenAsync(tokenHandle, client, ct);
 
@@ -69,8 +69,8 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
     }
 
     /// <inheritdoc/>
-    public Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, CT ct) => Inner.CreateRefreshTokenAsync(request, ct);
+    public Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, Ct ct) => Inner.CreateRefreshTokenAsync(request, ct);
 
     /// <inheritdoc/>
-    public Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, CT ct) => Inner.UpdateRefreshTokenAsync(request, ct);
+    public Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, Ct ct) => Inner.UpdateRefreshTokenAsync(request, ct);
 }

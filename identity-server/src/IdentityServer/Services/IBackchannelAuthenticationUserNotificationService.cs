@@ -18,5 +18,5 @@ public interface IBackchannelAuthenticationUserNotificationService
     /// </summary>
     /// <param name="request"></param>
     /// <param name="ct">The cancellation token.</param>
-    Task SendLoginRequestAsync(BackchannelUserLoginRequest request, CT ct);
+    Task SendLoginRequestAsync(BackchannelUserLoginRequest request, Ct ct);
 }

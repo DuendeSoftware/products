@@ -17,7 +17,7 @@ public class MutualTlsSecretValidation
     private const string Category = "Secrets - MutualTls Secret Validation";
 
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     ///////////////////
     // thumbprints

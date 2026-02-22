@@ -19,7 +19,7 @@ public interface IPushedAuthorizationService
     /// request without serialization or data protection applied</param>
     /// <param name="ct">The cancellation token.</param>
     ///
-    Task StoreAsync(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, CT ct);
+    Task StoreAsync(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, Ct ct);
 
     /// <summary>
     /// Consumes the pushed authorization request, indicating that it should not
@@ -32,7 +32,7 @@ public interface IPushedAuthorizationService
     /// authorization request. The reference value is the identifier within the
     /// request_uri parameter.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task ConsumeAsync(string referenceValue, CT ct);
+    Task ConsumeAsync(string referenceValue, Ct ct);
 
     /// <summary>
     /// Gets the raw pushed authorization parameters.
@@ -44,5 +44,5 @@ public interface IPushedAuthorizationService
     /// <returns>The deserialized pushed authorization request, or null if the
     /// request does not exist or was previously consumed.
     /// </returns>
-    Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue, CT ct);
+    Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue, Ct ct);
 }

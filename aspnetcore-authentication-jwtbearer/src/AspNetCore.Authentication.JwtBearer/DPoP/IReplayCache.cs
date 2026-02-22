@@ -11,11 +11,11 @@ public interface IReplayCache
     /// <summary>
     /// Adds a hashed jti to the cache.
     /// </summary>
-    Task Add(string jtiHash, TimeSpan expiration, CT ct = default);
+    Task Add(string jtiHash, TimeSpan expiration, Ct ct = default);
 
 
     /// <summary>
     /// Checks if a cached jti hash exists in the hash.
     /// </summary>
-    Task<bool> Exists(string jtiHash, CT ct = default);
+    Task<bool> Exists(string jtiHash, Ct ct = default);
 }

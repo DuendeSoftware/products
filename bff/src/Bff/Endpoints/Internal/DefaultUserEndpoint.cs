@@ -26,7 +26,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     private readonly BffOptions _options = options.Value;
 
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         logger.ProcessingUserRequest(LogLevel.Debug);
 
@@ -76,7 +76,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     /// Collect user-centric claims
     /// </summary>
     /// <returns></returns>
-    private static Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, CT ct = default) =>
+    private static Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, Ct ct = default) =>
         Task.FromResult(authenticateResult.Principal?.Claims.Select(x => new ClaimRecord(x.Type, x.Value)) ?? Enumerable.Empty<ClaimRecord>());
 
     /// <summary>
@@ -86,7 +86,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     private Task<IEnumerable<ClaimRecord>> GetManagementClaimsAsync(
         HttpContext context,
         AuthenticateResult authenticateResult,
-        CT ct = default)
+        Ct ct = default)
     {
         var claims = new List<ClaimRecord>();
 

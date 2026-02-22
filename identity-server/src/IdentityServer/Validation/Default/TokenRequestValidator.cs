@@ -45,7 +45,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
-    private CT _ct;
+    private Ct _ct;
 
     public TokenRequestValidator(
         IdentityServerOptions options,
@@ -102,7 +102,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     }, CancellationToken.None);
 
     /// <inheritdoc/>
-    public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context, CT ct)
+    public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRequestValidator.ValidateRequest");
 

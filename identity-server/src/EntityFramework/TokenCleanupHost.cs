@@ -38,7 +38,7 @@ public class TokenCleanupHost : IHostedService
     /// <summary>
     /// Starts the token cleanup polling.
     /// </summary>
-    public Task StartAsync(CT ct)
+    public Task StartAsync(Ct ct)
     {
         if (_options.EnableTokenCleanup)
         {
@@ -60,7 +60,7 @@ public class TokenCleanupHost : IHostedService
     /// <summary>
     /// Stops the token cleanup polling.
     /// </summary>
-    public async Task StopAsync(CT ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_options.EnableTokenCleanup)
         {
@@ -76,7 +76,7 @@ public class TokenCleanupHost : IHostedService
         }
     }
 
-    private async Task StartInternalAsync(CT ct)
+    private async Task StartInternalAsync(Ct ct)
     {
         // Start the first run at a random interval.
         var delay = _options.FuzzTokenCleanupStart
@@ -121,7 +121,7 @@ public class TokenCleanupHost : IHostedService
         }
     }
 
-    private async Task RemoveExpiredGrantsAsync(CT ct)
+    private async Task RemoveExpiredGrantsAsync(Ct ct)
     {
         try
         {

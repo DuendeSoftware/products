@@ -31,7 +31,7 @@ internal class ServerSideTicketStore(
 
     private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
 
-    private CT _ct => accessor.HttpContext?.RequestAborted ?? CT.None;
+    private Ct _ct => accessor.HttpContext?.RequestAborted ?? Ct.None;
 
     /// <inheritdoc />
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
@@ -154,7 +154,7 @@ internal class ServerSideTicketStore(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<AuthenticationTicket>> GetUserTicketsAsync(UserSessionsFilter filter, CT ct)
+    public async Task<IReadOnlyCollection<AuthenticationTicket>> GetUserTicketsAsync(UserSessionsFilter filter, Ct ct)
     {
         logger.GettingAuthenticationTickets(LogLevel.Debug, filter.SubjectId, filter.SessionId);
 

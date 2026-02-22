@@ -37,7 +37,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
     }
 
     /// <inheritdoc/>
-    public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, CT ct)
+    public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestIdValidator.Validate");
 

@@ -16,7 +16,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     private readonly ConcurrentDictionary<string, PersistedGrant> _repository = new ConcurrentDictionary<string, PersistedGrant>();
 
     /// <inheritdoc/>
-    public Task StoreAsync(PersistedGrant grant, CT ct)
+    public Task StoreAsync(PersistedGrant grant, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Store");
 
@@ -26,7 +26,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     }
 
     /// <inheritdoc/>
-    public Task<PersistedGrant> GetAsync(string key, CT ct)
+    public Task<PersistedGrant> GetAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Get");
 
@@ -39,7 +39,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CT ct)
+    public Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.GetAll");
 
@@ -51,7 +51,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     }
 
     /// <inheritdoc/>
-    public Task RemoveAsync(string key, CT ct)
+    public Task RemoveAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Remove");
 
@@ -61,7 +61,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     }
 
     /// <inheritdoc/>
-    public Task RemoveAllAsync(PersistedGrantFilter filter, CT ct)
+    public Task RemoveAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.RemoveAll");
 

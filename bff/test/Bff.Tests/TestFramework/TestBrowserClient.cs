@@ -15,7 +15,7 @@ public class TestBrowserClient : HttpClient
         public HttpResponseMessage? LastResponse { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CT ct)
+            Ct ct)
         {
             CurrentUri = request.RequestUri ?? throw new NullReferenceException("RequestUri is not set");
             var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri);
@@ -83,7 +83,7 @@ public class TestBrowserClient : HttpClient
     internal async Task<BffHostResponse> CallBffHostApi(
         string url,
         HttpStatusCode? expectedStatusCode = null,
-        CT ct = default)
+        Ct ct = default)
     {
         var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Headers.Add("x-csrf", "1");
@@ -112,7 +112,7 @@ public class TestBrowserClient : HttpClient
         HttpMethod method,
         HttpContent? content = null,
         HttpStatusCode? expectedStatusCode = null,
-        CT ct = default)
+        Ct ct = default)
     {
         var req = new HttpRequestMessage(method, url);
         if (req.Content == null)

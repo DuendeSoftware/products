@@ -36,7 +36,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
     }
 
 
-    public async Task<AuthorizeRequestValidationResult> LoadRequestObjectAsync(ValidatedAuthorizeRequest request, CT ct)
+    public async Task<AuthorizeRequestValidationResult> LoadRequestObjectAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         var requestObject = request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
         var requestUri = request.Raw.Get(OidcConstants.AuthorizeRequest.RequestUri);
@@ -116,7 +116,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
 
     private static string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
 
-    public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request, CT ct)
+    public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request, Ct ct)
     {
         // Check that the endpoint is still enabled at the time of validation, in case an existing PAR record
         // is used after PAR is disabled.
@@ -193,7 +193,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    private async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(ValidatedAuthorizeRequest request, CT ct)
+    private async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         var referenceValue = GetReferenceValue(request);
         if (referenceValue != null)
@@ -217,7 +217,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    public async Task<AuthorizeRequestValidationResult> ValidateRequestObjectAsync(ValidatedAuthorizeRequest request, CT ct)
+    public async Task<AuthorizeRequestValidationResult> ValidateRequestObjectAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // validate request object

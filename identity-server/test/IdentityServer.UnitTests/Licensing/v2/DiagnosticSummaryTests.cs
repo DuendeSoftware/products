@@ -13,7 +13,7 @@ namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class DiagnosticSummaryTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task PrintSummary_ShouldCallWriteAsyncOnEveryDiagnosticEntry()

@@ -80,7 +80,7 @@ public class DefaultGrantStore<T>
     /// <summary>
     /// Creates a handle.
     /// </summary>
-    protected async Task<string> CreateHandleAsync(CT ct) => await HandleGenerationService.GenerateAsync(ct) + HexEncodingFormatSuffix;
+    protected async Task<string> CreateHandleAsync(Ct ct) => await HandleGenerationService.GenerateAsync(ct) + HexEncodingFormatSuffix;
 
     /// <summary>
     /// Gets the hashed key.
@@ -109,7 +109,7 @@ public class DefaultGrantStore<T>
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<T> GetItemAsync(string key, CT ct)
+    protected virtual async Task<T> GetItemAsync(string key, Ct ct)
     {
         var hashedKey = GetHashedKey(key);
         var item = await GetItemByHashedKeyAsync(hashedKey, ct);
@@ -126,7 +126,7 @@ public class DefaultGrantStore<T>
     /// <param name="hashedKey"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<T> GetItemByHashedKeyAsync(string hashedKey, CT ct)
+    protected virtual async Task<T> GetItemByHashedKeyAsync(string hashedKey, Ct ct)
     {
         var grant = await Store.GetAsync(hashedKey, ct);
         if (grant != null && grant.Type == GrantType)
@@ -149,7 +149,7 @@ public class DefaultGrantStore<T>
     /// </summary>
     /// <param name="filter">The filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    protected virtual async Task<IEnumerable<T>> GetAllAsync(PersistedGrantFilter filter, CT ct)
+    protected virtual async Task<IEnumerable<T>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         filter.Type = GrantType;
         var items = await Store.GetAllAsync(filter, ct);
@@ -169,7 +169,7 @@ public class DefaultGrantStore<T>
     /// <param name="lifetime">The lifetime.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<string> CreateItemAsync(T item, string clientId, string subjectId, string sessionId, string description, DateTime created, int lifetime, CT ct)
+    protected virtual async Task<string> CreateItemAsync(T item, string clientId, string subjectId, string sessionId, string description, DateTime created, int lifetime, Ct ct)
     {
         var handle = await CreateHandleAsync(ct);
         await StoreItemAsync(handle, item, clientId, subjectId, sessionId, description, created, created.AddSeconds(lifetime), ct);
@@ -190,7 +190,7 @@ public class DefaultGrantStore<T>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="consumedTime">The consumed time.</param>
     /// <returns></returns>
-    protected virtual Task StoreItemAsync(string key, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, CT ct, DateTime? consumedTime = null)
+    protected virtual Task StoreItemAsync(string key, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, Ct ct, DateTime? consumedTime = null)
     {
         key = GetHashedKey(key);
         return StoreItemByHashedKeyAsync(key, item, clientId, subjectId, sessionId, description, created, expiration, ct, consumedTime);
@@ -210,7 +210,7 @@ public class DefaultGrantStore<T>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="consumedTime">The consumed time.</param>
     /// <returns></returns>
-    protected virtual async Task StoreItemByHashedKeyAsync(string hashedKey, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, CT ct, DateTime? consumedTime = null)
+    protected virtual async Task StoreItemByHashedKeyAsync(string hashedKey, T item, string clientId, string subjectId, string sessionId, string description, DateTime created, DateTime? expiration, Ct ct, DateTime? consumedTime = null)
     {
         var json = Serializer.Serialize(item);
 
@@ -237,7 +237,7 @@ public class DefaultGrantStore<T>
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual Task RemoveItemAsync(string key, CT ct)
+    protected virtual Task RemoveItemAsync(string key, Ct ct)
     {
         key = GetHashedKey(key);
         return RemoveItemByHashedKeyAsync(key, ct);
@@ -249,7 +249,7 @@ public class DefaultGrantStore<T>
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveItemByHashedKeyAsync(string key, CT ct) => await Store.RemoveAsync(key, ct);
+    protected virtual async Task RemoveItemByHashedKeyAsync(string key, Ct ct) => await Store.RemoveAsync(key, ct);
 
     /// <summary>
     /// Removes all items for a subject id / client id combination.
@@ -259,7 +259,7 @@ public class DefaultGrantStore<T>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="sessionId">The optional session identifier.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, CT ct, string sessionId = null) => await Store.RemoveAllAsync(new PersistedGrantFilter
+    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, Ct ct, string sessionId = null) => await Store.RemoveAllAsync(new PersistedGrantFilter
     {
         SubjectId = subjectId,
         ClientId = clientId,

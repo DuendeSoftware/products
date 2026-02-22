@@ -20,7 +20,7 @@ public interface IStaticFilesClient
     /// </summary>
     /// <param name="ct">CancellationToken</param>
     /// <returns>Index HTML</returns>
-    Task<string?> GetIndexHtmlAsync(CT ct = default);
+    Task<string?> GetIndexHtmlAsync(Ct ct = default);
 
     /// <summary>
     /// This method proxies all static asset requests to the configured CDN URL for the current frontend.
@@ -34,5 +34,5 @@ public interface IStaticFilesClient
     /// <param name="context">HttpContext</param>
     /// <param name="ct">CancellationToken</param>
     /// <returns></returns>
-    Task ProxyStaticAssetsAsync(HttpContext context, CT ct = default);
+    Task ProxyStaticAssetsAsync(HttpContext context, Ct ct = default);
 }

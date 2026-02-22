@@ -63,7 +63,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
     public abstract Task<IEndpointResult> ProcessAsync(HttpContext context);
 
-    internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(NameValueCollection parameters, ClaimsPrincipal user, CT ct, bool checkConsentResponse = false)
+    internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(NameValueCollection parameters, ClaimsPrincipal user, Ct ct, bool checkConsentResponse = false)
     {
         if (user != null)
         {
@@ -163,7 +163,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
     protected async Task<IEndpointResult> CreateErrorResultAsync(
         string logMessage,
-        CT ct,
+        Ct ct,
         ValidatedAuthorizeRequest request = null,
         string error = OidcConstants.AuthorizeErrors.ServerError,
         string errorDescription = null,
@@ -225,7 +225,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         }
     }
 
-    private Task RaiseFailureEventAsync(ValidatedAuthorizeRequest request, string error, string errorDescription, CT ct)
+    private Task RaiseFailureEventAsync(ValidatedAuthorizeRequest request, string error, string errorDescription, Ct ct)
     {
         Telemetry.Metrics.TokenIssuedFailure(
             request.ClientId,
@@ -235,7 +235,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         return _events.RaiseAsync(new TokenIssuedFailureEvent(request, error, errorDescription), ct);
     }
 
-    private Task RaiseResponseEventAsync(AuthorizeResponse response, CT ct)
+    private Task RaiseResponseEventAsync(AuthorizeResponse response, Ct ct)
     {
         if (!response.IsError)
         {

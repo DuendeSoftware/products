@@ -19,7 +19,7 @@ public interface IReturnUrlParser
     /// <param name="returnUrl">The return URL.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<AuthorizationRequest?> ParseAsync(string returnUrl, CT ct);
+    Task<AuthorizationRequest?> ParseAsync(string returnUrl, Ct ct);
 
     /// <summary>
     /// Determines whether the return URL is valid.

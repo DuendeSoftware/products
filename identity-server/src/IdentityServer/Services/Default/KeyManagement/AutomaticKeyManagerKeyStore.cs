@@ -19,7 +19,7 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct);
+    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct);
 }
 
 /// <summary>
@@ -28,13 +28,13 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
 internal class NopAutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
 {
     /// <inheritdoc/>
-    public Task<SigningCredentials> GetSigningCredentialsAsync(CT ct) => Task.FromResult<SigningCredentials>(null);
+    public Task<SigningCredentials> GetSigningCredentialsAsync(Ct ct) => Task.FromResult<SigningCredentials>(null);
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct) => Task.FromResult(Enumerable.Empty<SigningCredentials>());
+    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct) => Task.FromResult(Enumerable.Empty<SigningCredentials>());
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(CT ct) => Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
+    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct) => Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
 }
 
 /// <summary>
@@ -57,7 +57,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     }
 
     /// <inheritdoc/>
-    public async Task<SigningCredentials> GetSigningCredentialsAsync(CT ct)
+    public async Task<SigningCredentials> GetSigningCredentialsAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
@@ -71,7 +71,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct)
+    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
@@ -84,7 +84,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(CT ct)
+    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct)
     {
         if (!_options.Enabled)
         {

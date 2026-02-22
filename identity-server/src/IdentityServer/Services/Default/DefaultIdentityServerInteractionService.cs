@@ -45,7 +45,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task<AuthorizationRequest> GetAuthorizationContextAsync(string returnUrl, CT ct)
+    public async Task<AuthorizationRequest> GetAuthorizationContextAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAuthorizationContext");
 
@@ -64,7 +64,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task<LogoutRequest> GetLogoutContextAsync(string logoutId, CT ct)
+    public async Task<LogoutRequest> GetLogoutContextAsync(string logoutId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetLogoutContext");
 
@@ -74,7 +74,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task<string> CreateLogoutContextAsync(CT ct)
+    public async Task<string> CreateLogoutContextAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.CreateLogoutContext");
 
@@ -100,7 +100,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorMessage> GetErrorContextAsync(string errorId, CT ct)
+    public async Task<ErrorMessage> GetErrorContextAsync(string errorId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetErrorContext");
 
@@ -125,7 +125,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task GrantConsentAsync(AuthorizationRequest request, ConsentResponse consent, CT ct, string subject = null)
+    public async Task GrantConsentAsync(AuthorizationRequest request, ConsentResponse consent, Ct ct, string subject = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GrantConsent");
 
@@ -145,7 +145,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, CT ct, string errorDescription = null)
+    public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, Ct ct, string errorDescription = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.DenyAuthorization");
 
@@ -176,7 +176,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Grant>> GetAllUserGrantsAsync(CT ct)
+    public async Task<IEnumerable<Grant>> GetAllUserGrantsAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAllUserGrants");
 
@@ -191,7 +191,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task RevokeUserConsentAsync(string clientId, CT ct)
+    public async Task RevokeUserConsentAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeUserConsent");
 
@@ -204,7 +204,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task RevokeTokensForCurrentSessionAsync(CT ct)
+    public async Task RevokeTokensForCurrentSessionAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeTokensForCurrentSession");
 

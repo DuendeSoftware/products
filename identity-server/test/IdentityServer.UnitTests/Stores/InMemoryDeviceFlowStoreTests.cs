@@ -10,7 +10,7 @@ namespace UnitTests.Stores;
 
 public class InMemoryDeviceFlowStoreTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private InMemoryDeviceFlowStore _store = new InMemoryDeviceFlowStore();
 
     [Fact]

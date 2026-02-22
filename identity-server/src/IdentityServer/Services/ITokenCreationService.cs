@@ -19,5 +19,5 @@ public interface ITokenCreationService
     /// <param name="token">The token description.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A protected and serialized security token</returns>
-    Task<string> CreateTokenAsync(Token token, CT ct);
+    Task<string> CreateTokenAsync(Token token, Ct ct);
 }

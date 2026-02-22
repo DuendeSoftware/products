@@ -9,7 +9,7 @@ namespace UnitTests.Stores;
 
 public class InMemoryClientStoreTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     [Fact]
     public void InMemoryClient_should_throw_if_contain_duplicate_client_ids()
     {

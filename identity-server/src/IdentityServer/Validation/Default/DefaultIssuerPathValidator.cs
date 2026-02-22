@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Validation;
 
 public class DefaultIssuerPathValidator(IIssuerNameService issuerNameService, ILogger<DefaultIssuerPathValidator> logger) : IIssuerPathValidator
 {
-    public async Task<bool> ValidateAsync(string path, CT ct)
+    public async Task<bool> ValidateAsync(string path, Ct ct)
     {
         //if there is no path, this is fine since the default issuer is probably being used
         if (path.IsMissing())

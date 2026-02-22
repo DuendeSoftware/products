@@ -60,7 +60,7 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
     }
 
     /// <inheritdoc/>
-    public virtual async Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl, CT ct)
+    public virtual async Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationResponseGenerator.Process");
 

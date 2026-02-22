@@ -19,7 +19,7 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class DynamicProvidersTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private GenericHost _host;
     private GenericHost _idp1;
     private GenericHost _idp2;

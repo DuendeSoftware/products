@@ -274,7 +274,7 @@ public class ClientRepository(ConfigurationDbContext context)
             client.AllowedScopes.AddRange(toAdd.Select(s => new ClientScope { Scope = s }));
         }
 
-        // REDIRECTS & LOGOUT URIs (unchanged)...
+        // REDIRECtS & LOGOUT URIs (unchanged)...
         var flow = client.AllowedGrantTypes.Select(x => x.GrantType).Single() == GrantType.ClientCredentials
                    ? Flow.ClientCredentials
                    : Flow.CodeFlowWithPkce;

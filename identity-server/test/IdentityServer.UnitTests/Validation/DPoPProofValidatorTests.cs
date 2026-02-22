@@ -23,7 +23,7 @@ namespace UnitTests.Validation;
 public class DPoPProofValidatorTests
 {
     private const string Category = "DPoP validator tests";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options = new IdentityServerOptions();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();

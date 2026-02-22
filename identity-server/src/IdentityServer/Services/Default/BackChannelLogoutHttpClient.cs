@@ -33,7 +33,7 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
     /// <param name="payload"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task PostAsync(string url, Dictionary<string, string> payload, CT ct)
+    public async Task PostAsync(string url, Dictionary<string, string> payload, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutHttpClient.Post");
 

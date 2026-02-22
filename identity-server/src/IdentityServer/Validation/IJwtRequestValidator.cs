@@ -16,5 +16,5 @@ public interface IJwtRequestValidator
     /// </summary>
     /// <param name="context">The validation context.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context, CT ct);
+    Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context, Ct ct);
 }

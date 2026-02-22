@@ -29,7 +29,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     }
 
     /// <inheritdoc/>
-    public async Task<string> StoreDeviceAuthorizationAsync(string userCode, DeviceCode data, CT ct)
+    public async Task<string> StoreDeviceAuthorizationAsync(string userCode, DeviceCode data, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.SendLogoutNotifStoreDeviceAuthorization");
 
@@ -41,7 +41,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     }
 
     /// <inheritdoc/>
-    public Task<DeviceCode> FindByUserCodeAsync(string userCode, CT ct)
+    public Task<DeviceCode> FindByUserCodeAsync(string userCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.FindByUserCode");
 
@@ -49,7 +49,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     }
 
     /// <inheritdoc/>
-    public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, CT ct)
+    public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.FindByDeviceCode");
 
@@ -57,7 +57,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     }
 
     /// <inheritdoc/>
-    public Task UpdateByUserCodeAsync(string userCode, DeviceCode data, CT ct)
+    public Task UpdateByUserCodeAsync(string userCode, DeviceCode data, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.UpdateByUserCode");
 
@@ -65,7 +65,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     }
 
     /// <inheritdoc/>
-    public Task RemoveByDeviceCodeAsync(string deviceCode, CT ct)
+    public Task RemoveByDeviceCodeAsync(string deviceCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.RemoveByDeviceCode");
 

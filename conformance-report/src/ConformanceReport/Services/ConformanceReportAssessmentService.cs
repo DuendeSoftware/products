@@ -44,7 +44,7 @@ internal class ConformanceReportAssessmentService
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A conformance report containing the assessment results.</returns>
-    public async Task<ConformanceReportResult> GenerateReportAsync(CT ct)
+    public async Task<ConformanceReportResult> GenerateReportAsync(Ct ct)
     {
         var clients = await _clientStore.GetAllClientsAsync(ct);
         var clientList = clients.ToList();
@@ -91,7 +91,7 @@ internal class ConformanceReportAssessmentService
     /// <returns>A profile result containing the assessment findings.</returns>
     public async Task<ProfileResult> AssessProfileAsync(
         ConformanceReportProfile profile,
-        CT ct)
+        Ct ct)
     {
         var clients = await _clientStore.GetAllClientsAsync(ct);
         var clientList = clients.ToList();

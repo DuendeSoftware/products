@@ -62,7 +62,7 @@ public class DefaultCache<T> : ICache<T>
     protected string GetKey(string key) => typeof(T).FullName + KeySeparator + key;
 
     /// <inheritdoc/>
-    public Task<T> GetAsync(string key, CT ct)
+    public Task<T> GetAsync(string key, Ct ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Get");
 
@@ -72,7 +72,7 @@ public class DefaultCache<T> : ICache<T>
     }
 
     /// <inheritdoc/>
-    public Task SetAsync(string key, T item, TimeSpan expiration, CT ct)
+    public Task SetAsync(string key, T item, TimeSpan expiration, Ct ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Set");
 
@@ -82,7 +82,7 @@ public class DefaultCache<T> : ICache<T>
     }
 
     /// <inheritdoc/>
-    public Task RemoveAsync(string key, CT ct)
+    public Task RemoveAsync(string key, Ct ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Remove");
 
@@ -92,7 +92,7 @@ public class DefaultCache<T> : ICache<T>
     }
 
     /// <inheritdoc/>
-    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, CT ct)
+    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, Ct ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.GetOrAdd");
 

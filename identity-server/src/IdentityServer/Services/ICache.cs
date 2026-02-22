@@ -19,7 +19,7 @@ public interface ICache<T>
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The cached item, or <c>null</c> if no item matches the key.</returns>
-    Task<T?> GetAsync(string key, CT ct);
+    Task<T?> GetAsync(string key, Ct ct);
 
     /// <summary>
     /// Gets the cached data based upon a key index.
@@ -30,7 +30,7 @@ public interface ICache<T>
     /// <param name="get">The function to obtain the item.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The cached item.</returns>
-    Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, CT ct);
+    Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, Ct ct);
 
     /// <summary>
     /// Caches the data based upon a key
@@ -40,12 +40,12 @@ public interface ICache<T>
     /// <param name="expiration">The expiration.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task SetAsync(string key, T item, TimeSpan expiration, CT ct);
+    Task SetAsync(string key, T item, TimeSpan expiration, Ct ct);
 
     /// <summary>
     /// Removes the cached data based upon a key index.
     /// </summary>
     /// <param name="key">The key.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task RemoveAsync(string key, CT ct);
+    Task RemoveAsync(string key, Ct ct);
 }

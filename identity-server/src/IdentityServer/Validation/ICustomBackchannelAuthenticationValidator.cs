@@ -15,5 +15,5 @@ public interface ICustomBackchannelAuthenticationValidator
     /// <param name="customValidationContext"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, CT ct);
+    Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, Ct ct);
 }

@@ -11,7 +11,7 @@ namespace UnitTests.Stores.Default;
 
 public class CachingResourceStoreTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private List<IdentityResource> _identityResources = new List<IdentityResource>();
     private List<ApiResource> _apiResources = new List<ApiResource>();

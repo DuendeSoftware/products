@@ -14,7 +14,7 @@ namespace UnitTests.Validation;
 public class UserInfoRequestValidation
 {
     private const string Category = "UserInfo Request Validation Tests";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private IClientStore _clients = new InMemoryClientStore(TestClients.Get());
 
     [Fact]

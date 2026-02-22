@@ -82,7 +82,7 @@ public class DefaultTokenService : ITokenService
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request, CT ct)
+    public virtual async Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateIdentityToken");
 
@@ -155,7 +155,7 @@ public class DefaultTokenService : ITokenService
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Token> CreateAccessTokenAsync(TokenCreationRequest request, CT ct)
+    public virtual async Task<Token> CreateAccessTokenAsync(TokenCreationRequest request, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateAccessToken");
 
@@ -211,7 +211,7 @@ public class DefaultTokenService : ITokenService
     }
 
     /// <inheritdoc/>
-    public virtual async Task<string> CreateSecurityTokenAsync(Token token, CT ct)
+    public virtual async Task<string> CreateSecurityTokenAsync(Token token, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateSecurityToken");
 

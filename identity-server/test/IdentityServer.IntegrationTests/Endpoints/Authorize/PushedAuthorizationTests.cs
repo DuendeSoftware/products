@@ -116,7 +116,7 @@ public class PushedAuthorizationTests
             state: expectedState
         );
 
-        _mockPipeline.MockLogger.LogMessages.ShouldContain(msg => msg.Contains("\"client_secret\": \"***REDACTED***\""));
+        _mockPipeline.MockLogger.LogMessages.ShouldContain(msg => msg.Contains("\"client_secret\": \"***REDACtED***\""));
         _mockPipeline.MockLogger.LogMessages.ShouldNotContain(msg => msg.Contains(clientSecret));
     }
 

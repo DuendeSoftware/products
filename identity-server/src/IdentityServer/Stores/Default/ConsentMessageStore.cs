@@ -12,7 +12,7 @@ internal class ConsentMessageStore : IConsentMessageStore
 
     public ConsentMessageStore(MessageCookie<ConsentResponse> cookie) => Cookie = cookie;
 
-    public virtual Task DeleteAsync(string id, CT ct)
+    public virtual Task DeleteAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ConsentMessageStore.Delete");
 
@@ -20,14 +20,14 @@ internal class ConsentMessageStore : IConsentMessageStore
         return Task.CompletedTask;
     }
 
-    public virtual Task<Message<ConsentResponse>> ReadAsync(string id, CT ct)
+    public virtual Task<Message<ConsentResponse>> ReadAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ConsentMessageStore.Read");
 
         return Task.FromResult(Cookie.Read(id));
     }
 
-    public virtual Task WriteAsync(string id, Message<ConsentResponse> message, CT ct)
+    public virtual Task WriteAsync(string id, Message<ConsentResponse> message, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ConsentMessageStore.Write");
 

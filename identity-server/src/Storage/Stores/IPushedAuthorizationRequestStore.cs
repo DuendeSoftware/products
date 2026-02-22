@@ -20,7 +20,7 @@ public interface IPushedAuthorizationRequestStore
     /// <param name="pushedAuthorizationRequest">The request.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, CT ct);
+    Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, Ct ct);
 
     /// <summary>
     /// Consumes the pushed authorization request, indicating that it should not
@@ -34,7 +34,7 @@ public interface IPushedAuthorizationRequestStore
     /// within the request_uri parameter.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ConsumeByHashAsync(string referenceValueHash, CT ct);
+    Task ConsumeByHashAsync(string referenceValueHash, Ct ct);
 
     /// <summary>
     /// Gets the pushed authorization request.
@@ -46,5 +46,5 @@ public interface IPushedAuthorizationRequestStore
     /// <returns>The pushed authorization request, or null if the request does
     /// not exist or was previously consumed.
     /// </returns>
-    Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash, CT ct);
+    Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash, Ct ct);
 }

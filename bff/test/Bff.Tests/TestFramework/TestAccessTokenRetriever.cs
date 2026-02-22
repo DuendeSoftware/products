@@ -7,5 +7,5 @@ namespace Duende.Bff.Tests.TestFramework;
 
 public class TestAccessTokenRetriever(Func<Task<AccessTokenResult>> accessTokenGetter) : IAccessTokenRetriever
 {
-    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CT ct = default) => await accessTokenGetter();
+    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, Ct ct = default) => await accessTokenGetter();
 }

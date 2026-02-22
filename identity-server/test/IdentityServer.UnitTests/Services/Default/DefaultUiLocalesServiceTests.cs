@@ -15,7 +15,7 @@ namespace UnitTests.Services.Default;
 
 public class DefaultUiLocalesServiceTests
 {
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly DefaultHttpContext _httpContext;
     private readonly HttpContextAccessor _httpContextAccessor;
     private readonly RequestLocalizationOptions _requestLocalizationOptions;

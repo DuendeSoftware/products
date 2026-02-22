@@ -17,7 +17,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     private const string Category = "TokenRequest Validation - ResourceOwner - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]

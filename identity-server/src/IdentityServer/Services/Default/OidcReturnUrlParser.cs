@@ -38,7 +38,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
         _authorizationParametersMessageStore = authorizationParametersMessageStore;
     }
 
-    public async Task<AuthorizationRequest> ParseAsync(string returnUrl, CT ct)
+    public async Task<AuthorizationRequest> ParseAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("OidcReturnUrlParser.Parse");
 

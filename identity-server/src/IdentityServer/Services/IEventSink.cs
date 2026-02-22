@@ -18,5 +18,5 @@ public interface IEventSink
     /// </summary>
     /// <param name="evt">The event.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task PersistAsync(Event evt, CT ct);
+    Task PersistAsync(Event evt, Ct ct);
 }

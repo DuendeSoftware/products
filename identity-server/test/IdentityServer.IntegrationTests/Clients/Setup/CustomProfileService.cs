@@ -13,7 +13,7 @@ internal class CustomProfileService : TestUserProfileService
     public CustomProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : base(users, logger)
     { }
 
-    public override async Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
+    public override async Task GetProfileDataAsync(ProfileDataRequestContext context, Ct ct)
     {
         await base.GetProfileDataAsync(context, ct);
 

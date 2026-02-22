@@ -52,7 +52,7 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     }
 
     /// <inheritdoc/>
-    public virtual async Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult, CT ct)
+    public virtual async Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationResponseGenerator.Process");
 
@@ -96,7 +96,7 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// <summary>
     /// Revoke access token only if it belongs to client doing the request.
     /// </summary>
-    protected virtual async Task<bool> RevokeAccessTokenAsync(TokenRevocationRequestValidationResult validationResult, CT ct)
+    protected virtual async Task<bool> RevokeAccessTokenAsync(TokenRevocationRequestValidationResult validationResult, Ct ct)
     {
         var token = await ReferenceTokenStore.GetReferenceTokenAsync(validationResult.Token, ct);
 
@@ -121,7 +121,7 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// <summary>
     /// Revoke refresh token only if it belongs to client doing the request
     /// </summary>
-    protected virtual async Task<bool> RevokeRefreshTokenAsync(TokenRevocationRequestValidationResult validationResult, CT ct)
+    protected virtual async Task<bool> RevokeRefreshTokenAsync(TokenRevocationRequestValidationResult validationResult, Ct ct)
     {
         var token = await RefreshTokenStore.GetRefreshTokenAsync(validationResult.Token, ct);
 

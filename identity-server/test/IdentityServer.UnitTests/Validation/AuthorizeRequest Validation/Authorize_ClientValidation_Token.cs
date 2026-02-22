@@ -13,7 +13,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ClientValidation_Token
 {
     private const string Category = "AuthorizeRequest Client Validation - Token";
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options = TestIdentityServerOptions.Create();
 

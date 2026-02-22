@@ -6,7 +6,7 @@ namespace Duende.Bff.Blazor.Client.Internals;
 internal class AntiForgeryHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CT ct)
+        Ct ct)
     {
         request.Headers.Add("X-CSRF", "1");
         return base.SendAsync(request, ct);

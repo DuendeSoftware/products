@@ -19,5 +19,5 @@ public interface IApiSecretValidator
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<ApiSecretValidationResult> ValidateAsync(HttpContext context, CT ct);
+    Task<ApiSecretValidationResult> ValidateAsync(HttpContext context, Ct ct);
 }

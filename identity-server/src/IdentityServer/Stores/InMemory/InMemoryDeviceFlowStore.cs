@@ -15,7 +15,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     private readonly List<InMemoryDeviceAuthorization> _repository = new List<InMemoryDeviceAuthorization>();
 
     /// <inheritdoc/>
-    public Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data, CT _)
+    public Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.StoreDeviceAuthorization");
 
@@ -28,7 +28,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public Task<DeviceCode> FindByUserCodeAsync(string userCode, CT _)
+    public Task<DeviceCode> FindByUserCodeAsync(string userCode, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.FindByUserCode");
 
@@ -43,7 +43,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, CT _)
+    public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.FindByDeviceCode");
 
@@ -58,7 +58,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public Task UpdateByUserCodeAsync(string userCode, DeviceCode data, CT _)
+    public Task UpdateByUserCodeAsync(string userCode, DeviceCode data, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.UpdateByUserCode");
 
@@ -76,7 +76,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     }
 
     /// <inheritdoc/>
-    public Task RemoveByDeviceCodeAsync(string deviceCode, CT _)
+    public Task RemoveByDeviceCodeAsync(string deviceCode, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.RemoveByDeviceCode");
 

@@ -26,7 +26,7 @@ public class NopBackchannelAuthenticationUserNotificationService : IBackchannelA
     }
 
     /// <inheritdoc/>
-    public async Task SendLoginRequestAsync(BackchannelUserLoginRequest request, CT ct)
+    public async Task SendLoginRequestAsync(BackchannelUserLoginRequest request, Ct ct)
     {
         var url = await _issuerNameService.GetCurrentAsync(ct);
         url += "/ciba?id=" + request.InternalId;

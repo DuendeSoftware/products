@@ -75,7 +75,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     }
 
     /// <inheritdoc/>
-    public virtual async Task SendLogoutNotificationsAsync(LogoutNotificationContext context, CT ct)
+    public virtual async Task SendLogoutNotificationsAsync(LogoutNotificationContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutService.SendLogoutNotifications");
 
@@ -92,7 +92,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <param name="requests"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests, CT ct)
+    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests, Ct ct)
     {
         requests ??= [];
         var logoutRequestsWithPayload = new List<(BackChannelLogoutRequest, Dictionary<string, string>)>();
@@ -118,7 +118,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <param name="data"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data, CT ct) => HttpClient.PostAsync(client.LogoutUri, data, ct);
+    protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data, Ct ct) => HttpClient.PostAsync(client.LogoutUri, data, ct);
 
     /// <summary>
     /// Creates the form-url-encoded payload (as a dictionary) to send to the client.
@@ -126,7 +126,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <param name="request"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected async Task<Dictionary<string, string>> CreateFormPostPayloadAsync(BackChannelLogoutRequest request, CT ct)
+    protected async Task<Dictionary<string, string>> CreateFormPostPayloadAsync(BackChannelLogoutRequest request, Ct ct)
     {
         var token = await CreateTokenAsync(request, ct);
 
@@ -143,7 +143,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <param name="request"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The token.</returns>
-    protected virtual async Task<string> CreateTokenAsync(BackChannelLogoutRequest request, CT ct)
+    protected virtual async Task<string> CreateTokenAsync(BackChannelLogoutRequest request, Ct ct)
     {
         var claims = await CreateClaimsForTokenAsync(request);
         if (claims.Any(x => x.Type == JwtClaimTypes.Nonce))

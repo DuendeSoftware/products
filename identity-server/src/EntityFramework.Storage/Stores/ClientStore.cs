@@ -47,7 +47,7 @@ public class ClientStore : IClientStore
     /// <returns>
     /// The client
     /// </returns>
-    public virtual async Task<Duende.IdentityServer.Models.Client> FindClientByIdAsync(string clientId, CT ct)
+    public virtual async Task<Duende.IdentityServer.Models.Client> FindClientByIdAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
@@ -81,7 +81,7 @@ public class ClientStore : IClientStore
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync([EnumeratorCancellation] CT ct)
+    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync([EnumeratorCancellation] Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.GetAllClients");
 

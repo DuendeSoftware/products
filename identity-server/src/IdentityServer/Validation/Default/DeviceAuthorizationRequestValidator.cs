@@ -28,7 +28,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         _logger = logger;
     }
 
-    public async Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, CT ct)
+    public async Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationRequestValidator.Validate");
 
@@ -101,7 +101,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         return Valid(request);
     }
 
-    private async Task<DeviceAuthorizationRequestValidationResult> ValidateScopeAsync(ValidatedDeviceAuthorizationRequest request, CT ct)
+    private async Task<DeviceAuthorizationRequestValidationResult> ValidateScopeAsync(ValidatedDeviceAuthorizationRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // scope must be present

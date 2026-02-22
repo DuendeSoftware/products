@@ -19,7 +19,7 @@ public interface IOperationalStoreNotification
     /// <param name="persistedGrants"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CT ct);
+    Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, Ct ct);
 
     /// <summary>
     /// Notification for device codes being removed.
@@ -27,5 +27,5 @@ public interface IOperationalStoreNotification
     /// <param name="deviceCodes">The device codes being removed.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CT ct);
+    Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, Ct ct);
 }

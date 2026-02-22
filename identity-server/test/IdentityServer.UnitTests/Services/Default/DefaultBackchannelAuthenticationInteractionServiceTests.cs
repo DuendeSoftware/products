@@ -16,7 +16,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
 {
     private Client _client;
     private DefaultBackchannelAuthenticationInteractionService _subject;
-    private readonly CT _ct = TestContext.Current.CancellationToken;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private MockBackChannelAuthenticationRequestStore _mockStore = new MockBackChannelAuthenticationRequestStore();
     private InMemoryClientStore _clientStore;
