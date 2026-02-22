@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -63,13 +64,17 @@ public static class CookieNameMigrationExtensions
                 // Patch the request Cookie header so downstream auth handlers
                 // find the encrypted value under the new cookie name.
                 var existingHeader = context.Request.Headers.Cookie.ToString();
-                context.Request.Headers.Cookie = existingHeader + $"; {newCookieName}={oldValue}";
+                var newCookiePair = $"{newCookieName}={oldValue}";
+                context.Request.Headers.Cookie = string.IsNullOrWhiteSpace(existingHeader)
+                    ? newCookiePair
+                    : existingHeader + "; " + newCookiePair;
 
                 // Once the response starts, re-issue the cookie under the new name
                 // and expire the old one so the migration happens transparently.
                 context.Response.OnStarting(() =>
                 {
-                    var isHostPrefixed = newCookieName.StartsWith("__Host-", StringComparison.OrdinalIgnoreCase);
+                    var isHostPrefixed = newCookieName.StartsWith("__Host-", StringComparison.Ordinal);
+                    var idsrvOptions = context.RequestServices.GetRequiredService<IdentityServerOptions>();
 
                     context.Response.Cookies.Append(newCookieName, oldValue, new CookieOptions
                     {
@@ -77,7 +82,7 @@ public static class CookieNameMigrationExtensions
                         Secure = isHostPrefixed || context.Request.IsHttps,
                         Path = "/",
                         IsEssential = true,
-                        SameSite = SameSiteMode.None,
+                        SameSite = idsrvOptions.Authentication.CookieSameSiteMode,
                         Domain = isHostPrefixed ? null : default
                     });
 

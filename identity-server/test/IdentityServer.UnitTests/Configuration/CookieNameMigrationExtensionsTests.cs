@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace UnitTests.Configuration;
@@ -20,7 +21,8 @@ public class CookieNameMigrationExtensionsTests
     private static async Task<(IRequestCookieCollection downstreamCookies, IHeaderDictionary responseHeaders)> InvokeMiddleware(
         string oldCookieName,
         string newCookieName,
-        string[] requestCookies)
+        string[] requestCookies,
+        IdentityServerOptions idsrvOptions = null)
     {
         IRequestCookieCollection capturedCookies = null;
 
@@ -28,6 +30,10 @@ public class CookieNameMigrationExtensionsTests
             .ConfigureWebHost(webHost =>
             {
                 webHost.UseTestServer();
+                webHost.ConfigureServices(services =>
+                {
+                    services.AddSingleton(idsrvOptions ?? new IdentityServerOptions());
+                });
                 webHost.Configure(app =>
                 {
                     app.MigrateIdentityServerCookieName(oldCookieName, newCookieName);
@@ -204,5 +210,91 @@ public class CookieNameMigrationExtensionsTests
     {
         var app = new ApplicationBuilder(null!);
         Should.Throw<ArgumentException>(() => app.MigrateIdentityServerCookieName("idsrv", ""));
+    }
+
+    // --- Patched Cookie header does not start with "; " when only old cookie is present ---
+
+    [Fact]
+    public async Task when_only_old_cookie_present_patched_header_does_not_start_with_semicolon()
+    {
+        const string oldName = "idsrv";
+        const string newName = "__Host-idsrv";
+        const string cookieValue = "encrypted-ticket-value";
+
+        string patchedHeader = null;
+
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(webHost =>
+            {
+                webHost.UseTestServer();
+                webHost.ConfigureServices(services =>
+                {
+                    services.AddSingleton(new IdentityServerOptions());
+                });
+                webHost.Configure(app =>
+                {
+                    app.MigrateIdentityServerCookieName(oldName, newName);
+                    app.Run(ctx =>
+                    {
+                        patchedHeader = ctx.Request.Headers.Cookie.ToString();
+                        return Task.CompletedTask;
+                    });
+                });
+            })
+            .StartAsync();
+
+        await host.GetTestServer().SendAsync(ctx =>
+        {
+            ctx.Request.Headers.Cookie = $"{oldName}={cookieValue}";
+        });
+
+        patchedHeader.ShouldNotBeNull();
+        patchedHeader.ShouldNotStartWith("; ");
+        patchedHeader.ShouldContain($"{newName}={cookieValue}");
+    }
+
+    // --- SameSite mode is taken from IdentityServerOptions ---
+
+    [Fact]
+    public async Task same_site_mode_from_identity_server_options_is_applied_to_migrated_cookie()
+    {
+        const string oldName = "idsrv";
+        const string newName = "__Host-idsrv";
+        const string cookieValue = "encrypted-ticket-value";
+
+        var options = new IdentityServerOptions();
+        options.Authentication.CookieSameSiteMode = SameSiteMode.Strict;
+
+        var (_, responseHeaders) = await InvokeMiddleware(
+            oldName, newName,
+            [$"{oldName}={cookieValue}"],
+            options);
+
+        var newCookieHeader = responseHeaders["Set-Cookie"]
+            .FirstOrDefault(h => h.StartsWith(newName + "="));
+
+        newCookieHeader.ShouldNotBeNull();
+        newCookieHeader.ShouldContain("samesite=strict", Case.Insensitive);
+    }
+
+    // --- __Host- prefix check is case-sensitive per RFC 6265bis ---
+
+    [Fact]
+    public async Task wrong_case_host_prefix_does_not_set_secure_attribute()
+    {
+        // "__host-idsrv" (lowercase) must not trigger host-prefix enforcement per RFC 6265bis.
+        const string oldName = "idsrv-old";
+        const string newName = "__host-idsrv-new";
+        const string cookieValue = "encrypted-ticket-value";
+
+        var (_, responseHeaders) = await InvokeMiddleware(
+            oldName, newName,
+            [$"{oldName}={cookieValue}"]);
+
+        var newCookieHeader = responseHeaders["Set-Cookie"]
+            .FirstOrDefault(h => h.StartsWith(newName + "="));
+
+        newCookieHeader.ShouldNotBeNull();
+        newCookieHeader.ShouldNotContain("secure", Case.Insensitive);
     }
 }

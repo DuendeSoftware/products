@@ -59,7 +59,7 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
 
     private static void EnforceHostPrefixRequirements(CookieBuilder cookie)
     {
-        if (cookie.Name?.StartsWith("__Host-", StringComparison.OrdinalIgnoreCase) == true)
+        if (cookie.Name?.StartsWith("__Host-", StringComparison.Ordinal) == true)
         {
             cookie.SecurePolicy = CookieSecurePolicy.Always;
             cookie.Path = "/";

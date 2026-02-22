@@ -156,4 +156,18 @@ public class ConfigureInternalCookieOptionsTests
 
         options.Cookie.SecurePolicy.ShouldBe(CookieSecurePolicy.SameAsRequest);
     }
+
+    // --- __Host- prefix check is case-sensitive per RFC 6265bis ---
+
+    [Fact]
+    public void wrong_case_host_prefix_does_not_enforce_secure_policy()
+    {
+        // "__host-idsrv" (lowercase) must not be treated as host-prefixed per RFC 6265bis.
+        var idsrvOptions = new IdentityServerOptions();
+        idsrvOptions.Authentication.CookieName = "__host-idsrv";
+
+        var options = ConfigureMainCookie(idsrvOptions);
+
+        options.Cookie.SecurePolicy.ShouldNotBe(CookieSecurePolicy.Always);
+    }
 }
