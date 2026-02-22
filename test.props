@@ -28,7 +28,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)shared/GlobalAliasses.cs" Link="GlobalAliasses.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)shared/Global.cs" Link="Global.cs" />
   </ItemGroup>
 
   <ItemGroup>
