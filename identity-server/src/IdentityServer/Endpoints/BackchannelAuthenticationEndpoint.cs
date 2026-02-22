@@ -80,7 +80,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         }
 
         // validate request
-        var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+        var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
         _logger.LogTrace("Calling into backchannel authentication request validator: {type}", _requestValidator.GetType().FullName);
         var requestResult = await _requestValidator.ValidateRequestAsync(form, clientResult, context.RequestAborted);
 

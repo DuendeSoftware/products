@@ -100,7 +100,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         _logger.LogTrace("Client validation successful");
 
         // validate the token request
-        var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+        var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
 
         _logger.LogTrace("Calling into token revocation request validator: {type}", _requestValidator.GetType().FullName);
         var requestValidationResult = await _requestValidator.ValidateRequestAsync(form, clientValidationResult.Client, context.RequestAborted);

@@ -97,7 +97,7 @@ internal class TokenEndpoint : IEndpointHandler
         }
 
         // validate request
-        var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+        var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
         _logger.LogTrace("Calling into token request validator: {type}", _requestValidator.GetType().FullName);
 
         var requestContext = new TokenRequestValidationContext
@@ -153,7 +153,7 @@ internal class TokenEndpoint : IEndpointHandler
     private async Task<TokenErrorResult> TryReadProofTokens(HttpContext context, TokenRequestValidationContext tokenRequest)
     {
         // mTLS cert
-        tokenRequest.ClientCertificate = await context.Connection.GetClientCertificateAsync();
+        tokenRequest.ClientCertificate = await context.Connection.GetClientCertificateAsync(context.RequestAborted);
 
         // DPoP header value
         if (context.Request.Headers.TryGetValue(OidcConstants.HttpHeaders.DPoP, out var dpopHeader))

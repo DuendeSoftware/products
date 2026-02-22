@@ -56,7 +56,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         NameValueCollection values;
         if (HttpMethods.IsPost(context.Request.Method))
         {
-            var form = await context.Request.ReadFormAsync();
+            var form = await context.Request.ReadFormAsync(context.RequestAborted);
             values = form.AsNameValueCollection();
         }
         else
@@ -87,7 +87,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
             validationContext.DPoPProofToken = dpopHeader.First();
             //Note: if the client authenticated with mTLS, we need to know to properly validate the htu of the DPoP proof token
-            validationContext.ClientCertificate = await context.Connection.GetClientCertificateAsync();
+            validationContext.ClientCertificate = await context.Connection.GetClientCertificateAsync(context.RequestAborted);
         }
 
         // Perform validations specific to PAR, as well as validation of the pushed parameters

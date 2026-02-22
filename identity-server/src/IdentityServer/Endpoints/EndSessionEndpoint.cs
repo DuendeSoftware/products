@@ -59,7 +59,7 @@ internal class EndSessionEndpoint : IEndpointHandler
         }
         else if (HttpMethods.IsPost(context.Request.Method))
         {
-            parameters = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+            parameters = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
         }
         else
         {

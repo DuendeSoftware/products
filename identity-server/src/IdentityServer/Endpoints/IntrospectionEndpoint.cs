@@ -123,7 +123,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
 
         var callerName = api?.Name ?? client.ClientId;
 
-        var body = await context.Request.ReadFormAsync();
+        var body = await context.Request.ReadFormAsync(context.RequestAborted);
         if (body == null)
         {
             _logger.LogError("Malformed request body. aborting.");

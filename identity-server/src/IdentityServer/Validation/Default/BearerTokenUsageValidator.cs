@@ -38,7 +38,7 @@ internal class BearerTokenUsageValidator
 
         if (context.Request.HasApplicationFormContentType())
         {
-            result = await ValidatePostBodyAsync(context);
+            result = await ValidatePostBodyAsync(context, context.RequestAborted);
             if (result.TokenFound)
             {
                 _logger.LogDebug("Bearer token found in body");
@@ -87,10 +87,11 @@ internal class BearerTokenUsageValidator
     /// Validates the post body.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task<BearerTokenUsageValidationResult> ValidatePostBodyAsync(HttpContext context)
+    public static async Task<BearerTokenUsageValidationResult> ValidatePostBodyAsync(HttpContext context, Ct ct)
     {
-        var token = (await context.Request.ReadFormAsync())["access_token"].FirstOrDefault();
+        var token = (await context.Request.ReadFormAsync(ct))["access_token"].FirstOrDefault();
         if (token.IsPresent())
         {
             return new BearerTokenUsageValidationResult
