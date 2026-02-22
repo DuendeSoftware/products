@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <UserSecretsId>3a8b2c1d-4e5f-6a7b-8c9d-0e1f2a3b4c5d</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
+    <PackageReference Include="Serilog.AspNetCore" />
+
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+
+    <ProjectReference Include="..\..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Constants\Constants.csproj" />
+  </ItemGroup>
+
+</Project>

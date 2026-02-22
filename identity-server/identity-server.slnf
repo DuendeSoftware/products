@@ -40,6 +40,7 @@
       "identity-server\\clients\\src\\MvcHybridBackChannel\\MvcHybridBackChannel.csproj",
       "identity-server\\clients\\src\\MvcJarJwt\\MvcJarJwt.csproj",
       "identity-server\\clients\\src\\MvcJarUriJwt\\MvcJarUriJwt.csproj",
+      "identity-server\\clients\\src\\MvcSaml\\MvcSaml.csproj",
       "identity-server\\clients\\src\\Web\\Web.csproj",
       "identity-server\\clients\\src\\WindowsConsoleSystemBrowser\\WindowsConsoleSystemBrowser.csproj",
       "identity-server\\hosts\\AspNetIdentity10\\Host.AspNetIdentity10.csproj",
