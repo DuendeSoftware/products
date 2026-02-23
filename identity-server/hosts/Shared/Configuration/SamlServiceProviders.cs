@@ -13,37 +13,48 @@ public static class SamlServiceProviders
     private const string SpCertificatePath = "../../clients/src/MvcSaml/saml-sp.pfx";
     private const string SpCertificatePassword = "changeit";
 
-    public static IEnumerable<SamlServiceProvider> Get() =>
-    [
-        new SamlServiceProvider
-        {
-            EntityId = "https://localhost:44350/Saml2",
-            DisplayName = "MvcSaml Sample Client",
-            Enabled = true,
-            // ACS URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Acs
-            AssertionConsumerServiceUrls = [new Uri("https://localhost:44350/Saml2/Acs")],
-            // SLO URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Logout
-            SingleLogoutServiceUrl = new SamlEndpointType
-            {
-                Location = new Uri("https://localhost:44350/Saml2/Logout"),
-                Binding = SamlBinding.HttpRedirect
-            },
-            // Sign the assertion (not the response envelope) — the Sustainsys default expectation
-            SigningBehavior = SamlSigningBehavior.SignAssertion,
-            // When the SP certificate is present, require signed AuthnRequests and register the
-            // SP's public key so the IdP can validate the signatures.
-            RequireSignedAuthnRequests = SpCertificateExists(),
-            SigningCertificates = LoadSpSigningCertificates(),
-        }
-    ];
-
-    private static bool SpCertificateExists() => File.Exists(SpCertificatePath);
-
-    private static ICollection<X509Certificate2> LoadSpSigningCertificates()
+    public static IEnumerable<SamlServiceProvider> Get()
     {
-        if (!SpCertificateExists())
+        // Load the SP certificate once. When present, it enables AuthnRequest signature
+        // validation and assertion encryption. The same certificate serves both purposes.
+        var spCert = LoadSpCertificate();
+        var spCerts = spCert != null ? new[] { spCert } : [];
+
+        return
+        [
+            new SamlServiceProvider
+            {
+                EntityId = "https://localhost:44350/Saml2",
+                DisplayName = "MvcSaml Sample Client",
+                Enabled = true,
+                // ACS URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Acs
+                AssertionConsumerServiceUrls = [new Uri("https://localhost:44350/Saml2/Acs")],
+                // SLO URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Logout
+                SingleLogoutServiceUrl = new SamlEndpointType
+                {
+                    Location = new Uri("https://localhost:44350/Saml2/Logout"),
+                    Binding = SamlBinding.HttpRedirect
+                },
+                // Sign the assertion (not the response envelope) — the Sustainsys default expectation
+                SigningBehavior = SamlSigningBehavior.SignAssertion,
+                // When the SP certificate is present, require signed AuthnRequests, register the
+                // SP's public key for signature validation, and encrypt assertions with it.
+                // The same certificate serves both purposes — signing and encryption.
+                RequireSignedAuthnRequests = spCert != null,
+                SigningCertificates = spCerts,
+                EncryptAssertions = spCert != null,
+                EncryptionCertificates = spCerts,
+            }
+        ];
+    }
+
+    // Returns null if the certificate file has not been generated yet.
+    // See README.md in the MvcSaml project for generation instructions.
+    private static X509Certificate2? LoadSpCertificate()
+    {
+        if (!File.Exists(SpCertificatePath))
         {
-            return [];
+            return null;
         }
 
         // For ease during development, we load the public key directly from the SP's certificate file.
@@ -51,8 +62,7 @@ public static class SamlServiceProviders
         // another secure channel rather than reading the SP's private key material here.
 #pragma warning disable SYSLIB0057
         // Only obsolete in .NET 9+; keeping the older API while we support .NET 8.
-        var cert = new X509Certificate2(SpCertificatePath, SpCertificatePassword);
+        return new X509Certificate2(SpCertificatePath, SpCertificatePassword);
 #pragma warning restore SYSLIB0057
-        return [cert];
     }
 }
