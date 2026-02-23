@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="saml-sp.pfx" Condition="Exists('saml-sp.pfx')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
     <PackageReference Include="Serilog.AspNetCore" />
 
