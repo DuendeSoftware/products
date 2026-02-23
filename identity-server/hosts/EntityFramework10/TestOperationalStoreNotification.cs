@@ -32,7 +32,7 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
         return Task.CompletedTask;
     }
 
-    public Task ServerSideSessionsRemovedAsync(IEnumerable<ServerSideSession> userSessions, Ct ct = default)
+    public Task ServerSideSessionsRemovedAsync(IEnumerable<ServerSideSession> userSessions, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(userSessions);
         foreach (var session in userSessions)
