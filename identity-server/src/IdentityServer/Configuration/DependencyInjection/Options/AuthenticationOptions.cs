@@ -35,6 +35,22 @@ public class AuthenticationOptions
     public SameSiteMode CookieSameSiteMode { get; set; } = SameSiteMode.None;
 
     /// <summary>
+    /// Gets or sets the name of the IdentityServer authentication cookie.
+    /// Defaults to "__Host-idsrv". The "__Host-" prefix enforces that the cookie
+    /// is only sent over HTTPS, with Path=/ and no Domain attribute.
+    /// Set to "idsrv" to use the legacy cookie name when upgrading from a previous version.
+    /// </summary>
+    public string CookieName { get; set; } = "__Host-idsrv";
+
+    /// <summary>
+    /// Gets or sets the name of the IdentityServer external/temporary authentication cookie.
+    /// Defaults to "__Host-idsrv.external". The "__Host-" prefix enforces that the cookie
+    /// is only sent over HTTPS, with Path=/ and no Domain attribute.
+    /// Set to "idsrv.external" to use the legacy cookie name when upgrading from a previous version.
+    /// </summary>
+    public string ExternalCookieName { get; set; } = "__Host-idsrv.external";
+
+    /// <summary>
     /// Indicates if user must be authenticated to accept parameters to end session endpoint. Defaults to false.
     /// </summary>
     /// <value>

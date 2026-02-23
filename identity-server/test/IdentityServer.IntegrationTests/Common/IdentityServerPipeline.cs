@@ -374,7 +374,7 @@ public class IdentityServerPipeline
         BrowserClient.AllowAutoRedirect = old;
     }
 
-    public void RemoveLoginCookie() => BrowserClient.RemoveCookie(BaseUrl, IdentityServerConstants.DefaultCookieAuthenticationScheme);
+    public void RemoveLoginCookie() => BrowserClient.RemoveCookie(BaseUrl, Options.Authentication.CookieName);
     public void RemoveSessionCookie() => BrowserClient.RemoveCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
     public Cookie GetSessionCookie() => BrowserClient.GetCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
 

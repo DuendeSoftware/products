@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Stores.Default;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -26,9 +27,10 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
         {
             options.SlidingExpiration = _idsrv.Authentication.CookieSlidingExpiration;
             options.ExpireTimeSpan = _idsrv.Authentication.CookieLifetime;
-            options.Cookie.Name = IdentityServerConstants.DefaultCookieAuthenticationScheme;
+            options.Cookie.Name = _idsrv.Authentication.CookieName;
             options.Cookie.IsEssential = true;
             options.Cookie.SameSite = _idsrv.Authentication.CookieSameSiteMode;
+            EnforceHostPrefixRequirements(options.Cookie);
 
             options.LoginPath = ExtractLocalUrl(_idsrv.UserInteraction.LoginUrl);
             options.LogoutPath = ExtractLocalUrl(_idsrv.UserInteraction.LogoutUrl);
@@ -42,7 +44,7 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
 
         if (name == IdentityServerConstants.ExternalCookieAuthenticationScheme)
         {
-            options.Cookie.Name = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+            options.Cookie.Name = _idsrv.Authentication.ExternalCookieName;
             options.Cookie.IsEssential = true;
             // https://github.com/IdentityServer/IdentityServer4/issues/2595
             // need to set None because iOS 12 safari considers the POST back to the client from the
@@ -51,6 +53,17 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
             // hold onto them and send on the next redirect to the callback page.
             // see: https://brockallen.com/2019/01/11/same-site-cookies-asp-net-core-and-external-authentication-providers/
             options.Cookie.SameSite = _idsrv.Authentication.CookieSameSiteMode;
+            EnforceHostPrefixRequirements(options.Cookie);
+        }
+    }
+
+    private static void EnforceHostPrefixRequirements(CookieBuilder cookie)
+    {
+        if (cookie.Name?.StartsWith("__Host-", StringComparison.Ordinal) == true)
+        {
+            cookie.SecurePolicy = CookieSecurePolicy.Always;
+            cookie.Path = "/";
+            cookie.Domain = null;
         }
     }
 
