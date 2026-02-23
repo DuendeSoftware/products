@@ -18,7 +18,7 @@ internal class DefaultSamlSigninInteractionResponseGenerator(
     IHttpContextAccessor httpContextAccessor)
     : ISamlSigninInteractionResponseGenerator
 {
-    public async Task<SamlInteractionResponse> ProcessInteractionAsync(SamlServiceProvider sp, AuthNRequest request, CancellationToken ct)
+    public async Task<SamlInteractionResponse> ProcessInteractionAsync(SamlServiceProvider sp, AuthNRequest request, CT ct = default)
     {
         var signedInUser = await userSession.GetUserAsync();
 

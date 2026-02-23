@@ -16,7 +16,7 @@ internal class DistributedCacheSamlSigninStateStore(IDistributedCache cache) : I
         AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
     };
 
-    public async Task<StateId> StoreSigninRequestStateAsync(SamlAuthenticationState state, CancellationToken ct = default)
+    public async Task<StateId> StoreSigninRequestStateAsync(SamlAuthenticationState state, CT ct = default)
     {
         var stateId = StateId.NewId();
         var key = GetKey(stateId);
@@ -27,7 +27,7 @@ internal class DistributedCacheSamlSigninStateStore(IDistributedCache cache) : I
         return stateId;
     }
 
-    public async Task<SamlAuthenticationState?> RetrieveSigninRequestStateAsync(StateId stateId, CancellationToken ct = default)
+    public async Task<SamlAuthenticationState?> RetrieveSigninRequestStateAsync(StateId stateId, CT ct = default)
     {
         var key = GetKey(stateId);
         var json = await cache.GetStringAsync(key, ct);
@@ -42,7 +42,7 @@ internal class DistributedCacheSamlSigninStateStore(IDistributedCache cache) : I
         return JsonSerializer.Deserialize<SamlAuthenticationState>(json);
     }
 
-    public async Task UpdateSigninRequestStateAsync(StateId stateId, SamlAuthenticationState state, CancellationToken ct = default)
+    public async Task UpdateSigninRequestStateAsync(StateId stateId, SamlAuthenticationState state, CT ct = default)
     {
         var key = GetKey(stateId);
         var json = JsonSerializer.Serialize(state);

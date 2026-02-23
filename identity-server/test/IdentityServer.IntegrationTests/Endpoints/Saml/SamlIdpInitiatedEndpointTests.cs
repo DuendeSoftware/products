@@ -38,11 +38,11 @@ public class SamlIdpInitiatedEndpointTests
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", CT.None);
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.Found);
@@ -67,23 +67,23 @@ public class SamlIdpInitiatedEndpointTests
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", CT.None);
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
         var relayState = HttpUtility.UrlEncode("/my-app/dashboard");
         var result = await Fixture.NonRedirectingClient.GetAsync(
-            $"/saml/idp-initiated?spEntityId={spEntityId}&relayState={relayState}", CancellationToken.None);
+            $"/saml/idp-initiated?spEntityId={spEntityId}&relayState={relayState}", CT.None);
 
         result.StatusCode.ShouldBe(HttpStatusCode.Found);
         var redirectUri = result.Headers.Location;
         redirectUri.ShouldNotBeNull();
         redirectUri.ToString().ShouldBe($"{SamlConstants.Urls.SamlRoute}{SamlConstants.Urls.SigninCallback}");
 
-        var acsResult = await Fixture.NonRedirectingClient.GetAsync(redirectUri, CancellationToken.None);
+        var acsResult = await Fixture.NonRedirectingClient.GetAsync(redirectUri, CT.None);
 
         // Assert
-        var samlResponse = await ExtractSamlSuccessFromPostAsync(acsResult, CancellationToken.None);
+        var samlResponse = await ExtractSamlSuccessFromPostAsync(acsResult, CT.None);
         samlResponse.RelayState.ShouldBe(HttpUtility.UrlDecode(relayState));
     }
 
@@ -103,7 +103,7 @@ public class SamlIdpInitiatedEndpointTests
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.Found);
@@ -126,11 +126,11 @@ public class SamlIdpInitiatedEndpointTests
 
         // Act
         var unknownEntityId = HttpUtility.UrlEncode("https://unknown.example.com");
-        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={unknownEntityId}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={unknownEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe("Service Provider 'https://unknown.example.com' is not registered");
     }
@@ -154,11 +154,11 @@ public class SamlIdpInitiatedEndpointTests
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         // Disabled SPs are filtered by the store, so they appear as not registered
         problemDetails.Detail.ShouldBe($"Service Provider '{Data.EntityId}' is not registered");
@@ -180,11 +180,11 @@ public class SamlIdpInitiatedEndpointTests
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe($"Service Provider '{Data.EntityId}' does not allow IdP-initiated SSO");
     }
@@ -212,11 +212,11 @@ public class SamlIdpInitiatedEndpointTests
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
         var longRelayState = HttpUtility.UrlEncode(new string('a', 100));
         var result = await Fixture.Client.GetAsync(
-            $"/saml/idp-initiated?spEntityId={spEntityId}&relayState={longRelayState}", CancellationToken.None);
+            $"/saml/idp-initiated?spEntityId={spEntityId}&relayState={longRelayState}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe("RelayState exceeds maximum length of 50 bytes");
     }
@@ -238,11 +238,11 @@ public class SamlIdpInitiatedEndpointTests
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe($"Service Provider '{Data.EntityId}' has no AssertionConsumerServiceUrls configured");
     }
@@ -267,21 +267,21 @@ public class SamlIdpInitiatedEndpointTests
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", CT.None);
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         result.StatusCode.ShouldBe(HttpStatusCode.Found);
         var redirectUri = result.Headers.Location;
         redirectUri.ShouldNotBeNull();
         redirectUri.ToString().ShouldBe($"{SamlConstants.Urls.SamlRoute}{SamlConstants.Urls.SigninCallback}");
 
-        var acsResult = await Fixture.NonRedirectingClient.GetAsync(redirectUri.ToString(), CancellationToken.None);
+        var acsResult = await Fixture.NonRedirectingClient.GetAsync(redirectUri.ToString(), CT.None);
 
         // Assert
-        var samlResponse = await ExtractSamlSuccessFromPostAsync(acsResult, CancellationToken.None);
+        var samlResponse = await ExtractSamlSuccessFromPostAsync(acsResult, CT.None);
         samlResponse.Destination.ShouldBe(firstAcsUrl.ToString());
     }
 
@@ -306,7 +306,7 @@ public class SamlIdpInitiatedEndpointTests
                     new Claim(JwtClaimTypes.Email, "user@example.com"),
                     new Claim(JwtClaimTypes.Name, "Test User")
                 ], "Test"));
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", CT.None);
 
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
         var relayState = HttpUtility.UrlEncode("/target/page");
@@ -314,7 +314,7 @@ public class SamlIdpInitiatedEndpointTests
         // Act
         // Step 1: Initiate IdP SSO
         var initiateResult = await Fixture.NonRedirectingClient.GetAsync(
-            $"/saml/idp-initiated?spEntityId={spEntityId}&relayState={relayState}", CancellationToken.None);
+            $"/saml/idp-initiated?spEntityId={spEntityId}&relayState={relayState}", CT.None);
 
         initiateResult.StatusCode.ShouldBe(HttpStatusCode.Found);
         initiateResult.Headers.Location.ShouldNotBeNull();
@@ -324,12 +324,12 @@ public class SamlIdpInitiatedEndpointTests
         stateId.ShouldNotBeNull();
 
         // Step 2: Follow redirect to signin callback
-        var callbackResult = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", CancellationToken.None);
+        var callbackResult = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", CT.None);
 
         // Assert
         callbackResult.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var samlResponse = await ExtractSamlSuccessFromPostAsync(callbackResult, CancellationToken.None);
+        var samlResponse = await ExtractSamlSuccessFromPostAsync(callbackResult, CT.None);
 
         samlResponse.ShouldNotBeNull();
         samlResponse.Issuer.ShouldBe(Fixture.Url());
@@ -361,7 +361,7 @@ public class SamlIdpInitiatedEndpointTests
 
         // Act
         var spEntityId = HttpUtility.UrlEncode(Data.EntityId.ToString());
-        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/idp-initiated?spEntityId={spEntityId}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -378,7 +378,7 @@ public class SamlIdpInitiatedEndpointTests
         };
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/idp-initiated", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync("/saml/idp-initiated", CT.None);
 
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }

@@ -33,11 +33,11 @@ public class SamlSingleLogoutEndpointTests
         await Fixture.InitializeAsync();
 
         // Act
-        var result = await Fixture.Client.GetAsync("/saml/logout", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync("/saml/logout", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe("Missing 'SAMLRequest' query parameter in SAML logout request");
     }
@@ -54,11 +54,11 @@ public class SamlSingleLogoutEndpointTests
         var stringContent = new StringContent(logoutRequestXml, Encoding.UTF8, "application/xml");
 
         // Act
-        var result = await Fixture.Client.PostAsync("/saml/logout", stringContent, CancellationToken.None);
+        var result = await Fixture.Client.PostAsync("/saml/logout", stringContent, CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe("POST request does not have form content type for SAML logout request");
     }
@@ -72,7 +72,7 @@ public class SamlSingleLogoutEndpointTests
         await Fixture.InitializeAsync();
 
         var logoutRequestXml = Build.LogoutRequestXml();
-        var encodedRequest = await EncodeRequest(logoutRequestXml, CancellationToken.None);
+        var encodedRequest = await EncodeRequest(logoutRequestXml, CT.None);
         var formData = new Dictionary<string, string>
         {
             { "wrong_form_key", encodedRequest }
@@ -80,11 +80,11 @@ public class SamlSingleLogoutEndpointTests
         var content = new FormUrlEncodedContent(formData);
 
         // Act
-        var result = await Fixture.Client.PostAsync("/saml/logout", content, CancellationToken.None);
+        var result = await Fixture.Client.PostAsync("/saml/logout", content, CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe("Missing 'SAMLRequest' form parameter in SAML logout request");
     }
@@ -98,14 +98,14 @@ public class SamlSingleLogoutEndpointTests
 
         var issuer = "https://wrong-issuer.com";
         var logoutRequestXml = Build.LogoutRequestXml(issuer: issuer);
-        var urlEncoded = await EncodeRequest(logoutRequestXml, CancellationToken.None);
+        var urlEncoded = await EncodeRequest(logoutRequestXml, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe($"Service Provider '{issuer}' is not registered or is disabled");
     }
@@ -121,14 +121,14 @@ public class SamlSingleLogoutEndpointTests
         await Fixture.InitializeAsync();
 
         var logoutRequestXml = Build.LogoutRequestXml(issuer: sp.EntityId);
-        var urlEncoded = await EncodeRequest(logoutRequestXml, CancellationToken.None);
+        var urlEncoded = await EncodeRequest(logoutRequestXml, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe($"Service Provider '{sp.EntityId}' is not registered or is disabled");
     }
@@ -147,19 +147,19 @@ public class SamlSingleLogoutEndpointTests
         // Sign in a user first
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.Client.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.Client.GetAsync("/__signin", CT.None);
 
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe($"Service Provider '{sp.EntityId}' has no SingleLogoutServiceUrl configured");
     }
@@ -177,13 +177,13 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             version: "1.0");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.VersionMismatch);
     }
 
@@ -202,13 +202,13 @@ public class SamlSingleLogoutEndpointTests
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             issueInstant: futureTime,
             sessionIndex: "session123");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
     }
@@ -228,13 +228,13 @@ public class SamlSingleLogoutEndpointTests
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             issueInstant: oldTime,
             sessionIndex: "session123");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Request has expired (IssueInstant too old)");
     }
@@ -252,13 +252,13 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri("https://wrong-destination.com/saml/logout"),
             sessionIndex: "session123");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe($"Invalid destination. Expected '{Fixture.Url()}/saml/logout'");
     }
@@ -276,14 +276,14 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
-        var urlEncoded = await EncodeRequest(logoutRequestXml, CancellationToken.None);
+        var urlEncoded = await EncodeRequest(logoutRequestXml, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CancellationToken.None);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(CT.None);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldBe($"Service Provider '{sp.EntityId}' has no signing certificates configured and has sent a SAML logout request which requires signature validation");
     }
@@ -302,13 +302,13 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
-        var urlEncoded = await EncodeRequest(logoutRequestXml, CancellationToken.None);
+        var urlEncoded = await EncodeRequest(logoutRequestXml, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Missing signature parameter");
     }
@@ -327,13 +327,13 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             notOnOrAfter: expiredTime,
             sessionIndex: "session123");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Logout request expired (NotOnOrAfter is in the past)");
     }
@@ -353,13 +353,13 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
@@ -379,19 +379,19 @@ public class SamlSingleLogoutEndpointTests
         // Sign in a user first
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.Client.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.Client.GetAsync("/__signin", CT.None);
 
         // Use a different service provider than what was established
         var logoutRequestXml = Build.LogoutRequestXml(
             issuer: anotherSp.EntityId, // Use a different SP so session will not be found
             destination: new Uri($"{Fixture.Url()}/saml/logout"));
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
@@ -408,19 +408,19 @@ public class SamlSingleLogoutEndpointTests
         // Sign in a user first
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.Client.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.Client.GetAsync("/__signin", CT.None);
 
         // Use a different session index than what was established
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "wrong-session-index");
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
-        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
+        var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
@@ -437,7 +437,7 @@ public class SamlSingleLogoutEndpointTests
         // Sign in a user first
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.Client.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.Client.GetAsync("/__signin", CT.None);
 
         // Perform logout to get correct session index from the response
         var sessionIndex = await PerformSigninAndExtractSessionIndex(sp);
@@ -445,10 +445,10 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: sessionIndex);
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -472,10 +472,10 @@ public class SamlSingleLogoutEndpointTests
         // Sign in a user first
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.Client.GetAsync("/__signin", CancellationToken.None);
+        await Fixture.Client.GetAsync("/__signin", CT.None);
 
         // Ensure user can access protected resource
-        var initialProtectedResourceResult = await Fixture.Client.GetAsync("__protected-resource", CancellationToken.None);
+        var initialProtectedResourceResult = await Fixture.Client.GetAsync("__protected-resource", CT.None);
         initialProtectedResourceResult.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var sessionIndex = await PerformSigninAndExtractSessionIndex(sp);
@@ -483,16 +483,16 @@ public class SamlSingleLogoutEndpointTests
         var logoutRequestXml = Build.LogoutRequestXml(
             destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: sessionIndex);
-        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
+        var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CT.None);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CancellationToken.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", CT.None);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK); // Follows redirect
 
         // Verify user can no longer access protected resource and is redirected to login
-        var finalProtectedResourceResult = await Fixture.Client.GetAsync("__protected-resource", CancellationToken.None);
+        var finalProtectedResourceResult = await Fixture.Client.GetAsync("__protected-resource", CT.None);
         finalProtectedResourceResult.StatusCode.ShouldBe(HttpStatusCode.OK);
         finalProtectedResourceResult.RequestMessage?.RequestUri?.AbsoluteUri.ShouldStartWith($"{Fixture.Url()}{Fixture.LoginUrl.ToString()}");
     }
@@ -500,9 +500,9 @@ public class SamlSingleLogoutEndpointTests
     private static async Task<string> EncodeAndSignRequest(
         string xml,
         SamlServiceProvider sp,
-        CancellationToken cancellationToken)
+        CT ct = default)
     {
-        var encoded = await EncodeRequest(xml, cancellationToken);
+        var encoded = await EncodeRequest(xml, ct);
 
         // Sign the request using the SP's certificate
         var certificate = sp.SigningCertificates!.First();
@@ -514,9 +514,9 @@ public class SamlSingleLogoutEndpointTests
     private async Task<string> PerformSigninAndExtractSessionIndex(SamlServiceProvider samlServiceProvider)
     {
         var signinRequest = Build.AuthNRequestXml();
-        var encoded = await EncodeAndSignRequest(signinRequest, samlServiceProvider, CancellationToken.None);
-        var signinResult = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={encoded}", CancellationToken.None);
-        var samlResult = await ExtractSamlSuccessFromPostAsync(signinResult, CancellationToken.None);
+        var encoded = await EncodeAndSignRequest(signinRequest, samlServiceProvider, CT.None);
+        var signinResult = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={encoded}", CT.None);
+        var samlResult = await ExtractSamlSuccessFromPostAsync(signinResult, CT.None);
         if (string.IsNullOrWhiteSpace(samlResult.Assertion.AuthnStatement?.SessionIndex))
         {
             throw new InvalidOperationException("SAMLResult did not have a valid session index");

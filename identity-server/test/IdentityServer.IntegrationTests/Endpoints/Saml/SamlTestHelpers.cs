@@ -16,13 +16,13 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
 internal static class SamlTestHelpers
 {
-    public static async Task<string> EncodeRequest(string authenticationRequest, CancellationToken cancellationToken)
+    public static async Task<string> EncodeRequest(string authenticationRequest, CT ct = default)
     {
         var bytes = Encoding.UTF8.GetBytes(authenticationRequest);
         using var outputStream = new MemoryStream();
         await using (var deflateStream = new DeflateStream(outputStream, CompressionMode.Compress, leaveOpen: true))
         {
-            await deflateStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+            await deflateStream.WriteAsync(bytes, 0, bytes.Length, ct);
         }
 
         var compressedBytes = outputStream.ToArray();
@@ -37,9 +37,9 @@ internal static class SamlTestHelpers
     /// <summary>
     /// Extracts SAML error response from an HTTP-POST binding auto-submit form.
     /// </summary>
-    public static async Task<SamlErrorResponseData> ExtractSamlErrorFromPostAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    public static async Task<SamlErrorResponseData> ExtractSamlErrorFromPostAsync(HttpResponseMessage response, CT ct = default)
     {
-        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, cancellationToken);
+        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
         var baseData = ParseCommonResponseElements(responseElement, samlNs, samlpNs, relayState, acsUrl);
 
@@ -58,11 +58,11 @@ internal static class SamlTestHelpers
         };
     }
 
-    public static async Task<SamlLogoutResponseData> ExtractSamlLogoutResponseFromPostAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    public static async Task<SamlLogoutResponseData> ExtractSamlLogoutResponseFromPostAsync(HttpResponseMessage response, CT ct = default)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, cancellationToken);
+        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, logoutResponseElement) = ParseSamlLogoutResponseXml(responseXml);
         var baseData = ParseCommonResponseElements(logoutResponseElement, samlNs, samlpNs, relayState, acsUrl);
 
@@ -81,9 +81,9 @@ internal static class SamlTestHelpers
         };
     }
 
-    public static async Task<SamlSuccessResponseData> ExtractSamlSuccessFromPostAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    public static async Task<SamlSuccessResponseData> ExtractSamlSuccessFromPostAsync(HttpResponseMessage response, CT ct = default)
     {
-        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, cancellationToken);
+        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
         var baseData = ParseCommonResponseElements(responseElement, samlNs, samlpNs, relayState, acsUrl);
 
@@ -105,12 +105,12 @@ internal static class SamlTestHelpers
         };
     }
 
-    public static async Task<(string responseXml, string? relayState, string acsUrl)> ExtractSamlResponse(HttpResponseMessage response, CancellationToken cancellationToken)
+    public static async Task<(string responseXml, string? relayState, string acsUrl)> ExtractSamlResponse(HttpResponseMessage response, CT ct = default)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
 
-        var html = await response.Content.ReadAsStringAsync(cancellationToken);
+        var html = await response.Content.ReadAsStringAsync(ct);
 
         // Extract SAMLResponse from hidden input field
         var samlResponseMatch = System.Text.RegularExpressions.Regex.Match(
@@ -821,9 +821,9 @@ internal static class SamlTestHelpers
     public static async Task<SamlSuccessResponseData> ExtractAndDecryptSamlSuccessFromPostAsync(
         HttpResponseMessage response,
         X509Certificate2 decryptionCertificate,
-        CancellationToken cancellationToken)
+        CT ct = default)
     {
-        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, cancellationToken);
+        var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
         var baseData = ParseCommonResponseElements(responseElement, samlNs, samlpNs, relayState, acsUrl);
 

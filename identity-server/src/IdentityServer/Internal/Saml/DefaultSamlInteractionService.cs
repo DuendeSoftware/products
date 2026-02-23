@@ -17,7 +17,7 @@ internal class DefaultSamlInteractionService(
     ILogger<DefaultSamlInteractionService> logger)
     : ISamlInteractionService
 {
-    public async Task<SamlAuthenticationRequest?> GetAuthenticationRequestContextAsync(CancellationToken ct)
+    public async Task<SamlAuthenticationRequest?> GetAuthenticationRequestContextAsync(CT ct = default)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSamlInteractionService.GetAuthenticationRequestContext");
 
@@ -52,7 +52,7 @@ internal class DefaultSamlInteractionService(
         };
     }
 
-    public async Task StoreRequestedAuthnContextResultAsync(bool requestedAuthnContextRequirementsWereMet, CancellationToken ct)
+    public async Task StoreRequestedAuthnContextResultAsync(bool requestedAuthnContextRequirementsWereMet, CT ct = default)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSamlInteractionService.StoreRequestedAuthnContextResult");
 

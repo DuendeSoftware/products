@@ -18,7 +18,7 @@ internal class SamlSigninCallbackRequestProcessor(
     SamlUrlBuilder samlUrlBuilder,
     SamlResponseBuilder responseBuilder)
 {
-    internal async Task<Result<SamlSigninSuccess, SamlRequestError<SamlSigninRequest>>> ProcessAsync(CancellationToken ct)
+    internal async Task<Result<SamlSigninSuccess, SamlRequestError<SamlSigninRequest>>> ProcessAsync(CT ct = default)
     {
         if (!stateIdCookie.TryGetSamlSigninStateId(out var stateId))
         {

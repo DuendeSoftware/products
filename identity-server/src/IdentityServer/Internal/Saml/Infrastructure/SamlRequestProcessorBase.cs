@@ -28,7 +28,7 @@ internal abstract class SamlRequestProcessorBase<TMessage, TRequest, TSuccess>(
     protected readonly ILogger Logger = logger;
     protected readonly string ExpectedDestination = expectedDestination;
 
-    internal async Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessAsync(TRequest request, CancellationToken ct = default)
+    internal async Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessAsync(TRequest request, CT ct = default)
     {
         var sp = await ServiceProviderStore.FindByEntityIdAsync(request.Request.Issuer);
         if (sp?.Enabled != true)
@@ -140,5 +140,5 @@ internal abstract class SamlRequestProcessorBase<TMessage, TRequest, TSuccess>(
         return null;
     }
     protected abstract SamlRequestError<TRequest>? ValidateMessageSpecific(SamlServiceProvider sp, TRequest request);
-    protected abstract Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessValidatedRequestAsync(SamlServiceProvider sp, TRequest request, CancellationToken ct = default);
+    protected abstract Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessValidatedRequestAsync(SamlServiceProvider sp, TRequest request, CT ct = default);
 }

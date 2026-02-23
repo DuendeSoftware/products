@@ -18,7 +18,7 @@ internal class SamlLogoutCallbackProcessor(
     LogoutResponseBuilder logoutResponseBuilder,
     ILogger<SamlLogoutCallbackProcessor> logger)
 {
-    internal async Task<Result<LogoutResponse, SamlLogoutCallbackError>> ProcessAsync(string logoutId, CancellationToken ct = default)
+    internal async Task<Result<LogoutResponse, SamlLogoutCallbackError>> ProcessAsync(string logoutId, CT ct = default)
     {
         var logoutMessage = await logoutMessageStore.ReadAsync(logoutId);
         if (logoutMessage?.Data == null)

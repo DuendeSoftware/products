@@ -13,7 +13,7 @@ internal class CookieHandler(HttpMessageHandler innerHandler, CookieContainer? c
     public void ClearCookies() => CookieContainer = new CookieContainer();
     public CookieContainer CookieContainer { get; private set; } = cookies ?? new CookieContainer();
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
     {
         var requestUri = request.RequestUri;
         var header = CookieContainer.GetCookieHeader(requestUri!);
@@ -22,7 +22,7 @@ internal class CookieHandler(HttpMessageHandler innerHandler, CookieContainer? c
             request.Headers.Add(HeaderNames.Cookie, header);
         }
 
-        var response = await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, ct);
 
         if (response.Headers.TryGetValues(HeaderNames.SetCookie, out var setCookieHeaders))
         {

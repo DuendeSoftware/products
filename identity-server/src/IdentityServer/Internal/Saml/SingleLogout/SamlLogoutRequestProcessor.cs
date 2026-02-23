@@ -55,7 +55,7 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
     protected override async Task<Result<SamlLogoutSuccess, SamlRequestError<SamlLogoutRequest>>> ProcessValidatedRequestAsync(
         SamlServiceProvider sp,
         SamlLogoutRequest request,
-        CancellationToken ct)
+        CT ct = default)
     {
         var logoutRequest = request.LogoutRequest;
 

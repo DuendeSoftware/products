@@ -91,14 +91,14 @@ public class SustainSysSigninTests(ITestOutputHelper output)
         // since HttpClient doesn't support JavaScript, we need to extra the content from the auto form post and manually
         // complete the callback to the Service Provider's ACS URL the same way a user in a browser with JavaScript disabled
         // would have to manually submit the form
-        var (samlResponse, relayState, acsUrl) = await ExtractSamlResponse(response, CancellationToken.None);
+        var (samlResponse, relayState, acsUrl) = await ExtractSamlResponse(response, CT.None);
         var formData = new Dictionary<string, string> { { "SAMLResponse", ConvertToBase64Encoded(samlResponse) } };
         if (!string.IsNullOrEmpty(relayState))
         {
             formData.Add("RelayState", HttpUtility.UrlEncode(relayState));
         }
         using var formContent = new FormUrlEncodedContent(formData);
-        var acsResult = await Fixture.BrowserClient!.PostAsync(acsUrl, formContent, CancellationToken.None);
+        var acsResult = await Fixture.BrowserClient!.PostAsync(acsUrl, formContent, CT.None);
 
         return acsResult;
     }

@@ -247,7 +247,7 @@ internal class SamlFixture : IAsyncLifetime
                 {
                     var samlInteractionService = ctx.RequestServices.GetRequiredService<ISamlInteractionService>();
                     var authenticationRequest =
-                        await samlInteractionService.GetAuthenticationRequestContextAsync(CancellationToken.None);
+                        await samlInteractionService.GetAuthenticationRequestContextAsync(CT.None);
 
                     if (authenticationRequest == null)
                     {

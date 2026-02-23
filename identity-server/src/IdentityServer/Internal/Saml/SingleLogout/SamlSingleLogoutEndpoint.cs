@@ -32,7 +32,7 @@ internal class SamlSingleLogoutEndpoint(
         return await ProcessLogoutRequest(logoutRequest, context.RequestAborted);
     }
 
-    internal async Task<IEndpointResult> ProcessLogoutRequest(SamlLogoutRequest logoutRequest, CancellationToken ct = default)
+    internal async Task<IEndpointResult> ProcessLogoutRequest(SamlLogoutRequest logoutRequest, CT ct = default)
     {
         logger.ReceivedLogoutRequest(LogLevel.Debug, logoutRequest.LogoutRequest.Issuer, logoutRequest.LogoutRequest.Id, logoutRequest.LogoutRequest.SessionIndex);
 

@@ -38,7 +38,7 @@ internal class SamlSigninRequestProcessor(
     protected override async Task<Result<SamlSigninSuccess, SamlRequestError<SamlSigninRequest>>> ProcessValidatedRequestAsync(
         SamlServiceProvider sp,
         SamlSigninRequest signinRequest,
-        CancellationToken ct)
+        CT ct = default)
     {
         var authNRequest = signinRequest.AuthNRequest;
 
@@ -178,7 +178,7 @@ internal class SamlSigninRequestProcessor(
         Uri assertionConsumerServiceUrl,
         AuthNRequest authNRequest,
         SamlServiceProvider sp,
-        CancellationToken ct)
+        CT ct = default)
     {
         var state = new SamlAuthenticationState
         {
