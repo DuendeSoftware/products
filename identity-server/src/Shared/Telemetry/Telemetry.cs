@@ -45,6 +45,7 @@ public static class Telemetry
             public const string ResourceOwnerAuthentication = "tokenservice.resourceowner_authentication";
             public const string Revocation = "tokenservice.revocation";
             public const string TokenIssued = "tokenservice.token_issued";
+            public const string SamlServiceProviderConfigValidation = "tokenservice.saml_sp.config_validation";
         }
 
         /// <summary>
@@ -71,6 +72,7 @@ public static class Telemetry
             public const string RefreshTokenIssued = "refresh_token_issued";
             public const string ProofType = "proof_type";
             public const string IdTokenIssued = "id_token_issued";
+            public const string SamlEntityId = "saml_entity_id";
         }
 
         /// <summary>
@@ -242,6 +244,33 @@ public static class Telemetry
         {
             Failure(error, clientId);
             ClientValidationCounter.Add(1, new(Tags.Client, clientId), new(Tags.Error, error));
+        }
+
+        /// <summary>
+        /// SAML Service Provider configuration validation
+        /// </summary>
+        public static readonly Counter<long> SamlServiceProviderValidationCounter =
+            Meter.CreateCounter<long>(Counters.SamlServiceProviderConfigValidation);
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlServiceProviderValidationCounter"/>
+        /// </summary>
+        /// <param name="entityId">SAML Service Provider Entity ID</param>
+        public static void SamlServiceProviderValidation(string entityId)
+        {
+            Success(entityId);
+            SamlServiceProviderValidationCounter.Add(1, tag: new(Tags.SamlEntityId, entityId));
+        }
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlServiceProviderValidationCounter"/> on errors
+        /// </summary>
+        /// <param name="entityId">SAML Service Provider Entity ID</param>
+        /// <param name="error">Error</param>
+        public static void SamlServiceProviderValidationFailure(string entityId, string error)
+        {
+            Failure(error, entityId);
+            SamlServiceProviderValidationCounter.Add(1, new(Tags.SamlEntityId, entityId), new(Tags.Error, error));
         }
 
         /// <summary>

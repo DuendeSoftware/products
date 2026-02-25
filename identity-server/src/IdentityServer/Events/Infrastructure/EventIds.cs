@@ -44,6 +44,7 @@ public static class EventIds
     public const int UnhandledException = ErrorEventsStart + 0;
     public const int InvalidClientConfiguration = ErrorEventsStart + 1;
     public const int InvalidIdentityProviderConfiguration = ErrorEventsStart + 2;
+    public const int InvalidSamlServiceProviderConfiguration = ErrorEventsStart + 3;
 
     //////////////////////////////////////////////////////
     /// Grants related events
