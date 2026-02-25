@@ -103,6 +103,14 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
     public DbSet<IdentityProvider> IdentityProviders { get; set; }
 
     /// <summary>
+    /// Gets or sets the SAML service providers.
+    /// </summary>
+    /// <value>
+    /// The SAML service providers.
+    /// </value>
+    public DbSet<SamlServiceProvider> SamlServiceProviders { get; set; }
+
+    /// <summary>
     /// Override this method to further configure the model that was discovered by convention from the entity types
     /// exposed in <see cref="Microsoft.EntityFrameworkCore.DbSet{T}" /> properties on your derived context. The resulting model may be cached
     /// and re-used for subsequent instances of your derived context.
@@ -130,6 +138,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
         modelBuilder.ConfigureClientContext(StoreOptions);
         modelBuilder.ConfigureResourcesContext(StoreOptions);
         modelBuilder.ConfigureIdentityProviderContext(StoreOptions);
+        modelBuilder.ConfigureSamlServiceProviderContext(StoreOptions);
 
         base.OnModelCreating(modelBuilder);
     }

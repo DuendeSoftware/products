@@ -214,6 +214,35 @@ public class ConfigurationStoreOptions
     public TableConfiguration IdentityProvider { get; set; } = new TableConfiguration("IdentityProviders");
 
     /// <summary>
+    /// Gets or sets the SAML service providers table configuration.
+    /// </summary>
+    public TableConfiguration SamlServiceProvider { get; set; } = new TableConfiguration("SamlServiceProviders");
+
+    /// <summary>
+    /// Gets or sets the SAML service provider assertion consumer services table configuration.
+    /// </summary>
+    public TableConfiguration SamlServiceProviderAssertionConsumerService { get; set; } =
+        new TableConfiguration("SamlServiceProviderAssertionConsumerServices");
+
+    /// <summary>
+    /// Gets or sets the SAML service provider signing certificates table configuration.
+    /// </summary>
+    public TableConfiguration SamlServiceProviderSigningCertificate { get; set; } =
+        new TableConfiguration("SamlServiceProviderSigningCertificates");
+
+    /// <summary>
+    /// Gets or sets the SAML service provider encryption certificates table configuration.
+    /// </summary>
+    public TableConfiguration SamlServiceProviderEncryptionCertificate { get; set; } =
+        new TableConfiguration("SamlServiceProviderEncryptionCertificates");
+
+    /// <summary>
+    /// Gets or sets the SAML service provider claim mappings table configuration.
+    /// </summary>
+    public TableConfiguration SamlServiceProviderClaimMapping { get; set; } =
+        new TableConfiguration("SamlServiceProviderClaimMappings");
+
+    /// <summary>
     /// Gets or set if EF DbContext pooling is enabled.
     /// </summary>
     public bool EnablePooling { get; set; }

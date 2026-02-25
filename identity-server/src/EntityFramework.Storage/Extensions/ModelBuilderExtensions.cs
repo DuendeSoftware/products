@@ -391,4 +391,76 @@ public static class ModelBuilderExtensions
             entity.HasIndex(x => x.Scheme).IsUnique();
         });
     }
+
+    /// <summary>
+    /// Configures the SAML service provider context.
+    /// </summary>
+    /// <param name="modelBuilder">The model builder.</param>
+    /// <param name="storeOptions">The store options.</param>
+    public static void ConfigureSamlServiceProviderContext(this ModelBuilder modelBuilder, ConfigurationStoreOptions storeOptions)
+    {
+        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
+        {
+            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        }
+
+        modelBuilder.Entity<SamlServiceProvider>(sp =>
+        {
+            sp.ToTable(storeOptions.SamlServiceProvider);
+            sp.HasKey(x => x.Id);
+
+            sp.Property(x => x.EntityId).HasMaxLength(200).IsRequired();
+            sp.Property(x => x.DisplayName).HasMaxLength(200);
+            sp.Property(x => x.Description).HasMaxLength(1000);
+            sp.Property(x => x.DefaultNameIdFormat).HasMaxLength(500);
+            sp.Property(x => x.DefaultPersistentNameIdentifierClaimType).HasMaxLength(500);
+            sp.Property(x => x.SingleLogoutServiceUrl).HasMaxLength(2000);
+
+            sp.HasIndex(x => x.EntityId).IsUnique();
+
+            sp.HasMany(x => x.AssertionConsumerServiceUrls)
+                .WithOne(x => x.SamlServiceProvider)
+                .HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.SigningCertificates)
+                .WithOne(x => x.SamlServiceProvider)
+                .HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.EncryptionCertificates)
+                .WithOne(x => x.SamlServiceProvider)
+                .HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.ClaimMappings)
+                .WithOne(x => x.SamlServiceProvider)
+                .HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SamlServiceProviderAssertionConsumerService>(acs =>
+        {
+            acs.ToTable(storeOptions.SamlServiceProviderAssertionConsumerService);
+            acs.HasKey(x => x.Id);
+            acs.Property(x => x.Url).HasMaxLength(2000).IsRequired();
+            acs.HasIndex(x => new { x.SamlServiceProviderId, x.Url }).IsUnique();
+        });
+
+        modelBuilder.Entity<SamlServiceProviderSigningCertificate>(cert =>
+        {
+            cert.ToTable(storeOptions.SamlServiceProviderSigningCertificate);
+            cert.HasKey(x => x.Id);
+            cert.Property(x => x.Data).HasMaxLength(4000).IsRequired();
+        });
+
+        modelBuilder.Entity<SamlServiceProviderEncryptionCertificate>(cert =>
+        {
+            cert.ToTable(storeOptions.SamlServiceProviderEncryptionCertificate);
+            cert.HasKey(x => x.Id);
+            cert.Property(x => x.Data).HasMaxLength(4000).IsRequired();
+        });
+
+        modelBuilder.Entity<SamlServiceProviderClaimMapping>(mapping =>
+        {
+            mapping.ToTable(storeOptions.SamlServiceProviderClaimMapping);
+            mapping.HasKey(x => x.Id);
+            mapping.Property(x => x.ClaimType).HasMaxLength(250).IsRequired();
+            mapping.Property(x => x.SamlAttributeName).HasMaxLength(250).IsRequired();
+            mapping.HasIndex(x => new { x.SamlServiceProviderId, x.ClaimType }).IsUnique();
+        });
+    }
 }
