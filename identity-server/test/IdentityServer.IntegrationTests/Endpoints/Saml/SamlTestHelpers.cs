@@ -541,7 +541,7 @@ internal static class SamlTestHelpers
             return null;
         }
 
-        var targetCookie = cookieHeaderValues.FirstOrDefault(cookie => cookie.Name == "__IdsSvr_SamlSigninState");
+        var targetCookie = cookieHeaderValues.FirstOrDefault(cookie => cookie.Name == "__Host-idsrv.SamlSigninState");
 
         return targetCookie?.Value.ToString();
     }

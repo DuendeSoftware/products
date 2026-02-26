@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Internal.Saml.SingleSignin;
 
 internal class SamlSigninStateIdCookie(IHttpContextAccessor httpContextAccessor)
 {
-    private const string CookieName = "__IdsSvr_SamlSigninState";
+    private const string CookieName = "__Host-idsrv.SamlSigninState";
     private static readonly TimeSpan CookieLifetime = TimeSpan.FromMinutes(5);
 
     private HttpContext HttpContext => httpContextAccessor.HttpContext
