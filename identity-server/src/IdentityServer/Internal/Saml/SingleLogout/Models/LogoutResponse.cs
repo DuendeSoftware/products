@@ -76,7 +76,7 @@ internal class LogoutResponse : EndpointResult<LogoutResponse>
         {
             var responseXml = serializer.Serialize(result);
 
-            var signedResponseXml = await samlProtocolMessageSigner.SignProtocolMessage(responseXml, result.ServiceProvider);
+            var signedResponseXml = await samlProtocolMessageSigner.SignProtocolMessage(responseXml, result.ServiceProvider, httpContext.RequestAborted);
 
             var encodedResponse = Convert.ToBase64String(Encoding.UTF8.GetBytes(signedResponseXml));
 

@@ -16,6 +16,8 @@ public class SamlLogoutCallbackProcessorTests
 {
     private const string Category = "SAML Logout Callback Processor";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private readonly UnitTests.Common.MockMessageStore<LogoutMessage> _logoutMessageStore = new();
     private readonly MockServiceProviderStore _serviceProviderStore = new();
     private readonly LogoutResponseBuilder _logoutResponseBuilder;
@@ -38,7 +40,7 @@ public class SamlLogoutCallbackProcessorTests
     [Trait("Category", Category)]
     public async Task invalid_logout_id_should_return_error()
     {
-        var result = await _subject.ProcessAsync("invalid", CT.None);
+        var result = await _subject.ProcessAsync("invalid", _ct);
 
         result.Success.ShouldBeFalse();
         result.Error.Message.ShouldContain("No logout message found");
@@ -56,7 +58,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeFalse();
         result.Error.Message.ShouldContain("does not contain SAML SP entity ID");
@@ -75,7 +77,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeFalse();
         result.Error.Message.ShouldContain("Service Provider not found");
@@ -97,7 +99,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeFalse();
         result.Error.Message.ShouldContain("is disabled");
@@ -119,7 +121,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeFalse();
         result.Error.Message.ShouldContain("has no SingleLogoutServiceUrl");
@@ -140,7 +142,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeFalse();
         result.Error.Message.ShouldContain("does not contain SAML logout request ID");
@@ -162,7 +164,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeTrue();
         var logoutResponse = result.Value;
@@ -187,7 +189,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeTrue();
         var logoutResponse = result.Value;
@@ -211,7 +213,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeTrue();
         result.Value.RelayState.ShouldBeNull();
@@ -232,7 +234,7 @@ public class SamlLogoutCallbackProcessorTests
         };
         _logoutMessageStore.Messages["logoutId123"] = new Message<LogoutMessage>(logoutMessage, DateTimeOffset.UtcNow.UtcDateTime);
 
-        var result = await _subject.ProcessAsync("logoutId123", CT.None);
+        var result = await _subject.ProcessAsync("logoutId123", _ct);
 
         result.Success.ShouldBeTrue();
         result.Value.Issuer.ShouldBe("https://idp.example.com");
@@ -255,7 +257,7 @@ public class SamlLogoutCallbackProcessorTests
     {
         public Dictionary<string, SamlServiceProvider> ServiceProviders { get; } = [];
 
-        public Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId)
+        public Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId, Ct _)
         {
             ServiceProviders.TryGetValue(entityId, out var sp);
             return Task.FromResult(sp);
@@ -266,6 +268,6 @@ public class SamlLogoutCallbackProcessorTests
     {
         public string IssuerName { get; set; } = "https://idp.example.com";
 
-        public Task<string> GetCurrentAsync() => Task.FromResult(IssuerName);
+        public Task<string> GetCurrentAsync(Ct _) => Task.FromResult(IssuerName);
     }
 }

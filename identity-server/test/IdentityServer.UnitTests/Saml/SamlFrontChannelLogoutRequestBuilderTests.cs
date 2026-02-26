@@ -19,6 +19,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
 {
     private const string Category = "SAML Front Channel Logout Request Builder";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private readonly FakeTimeProvider _timeProvider;
     private readonly SamlProtocolMessageSigner _signer;
     private readonly SamlFrontChannelLogoutRequestBuilder _subject;
@@ -38,7 +40,7 @@ public class SamlFrontChannelLogoutRequestBuilderTests
         sp.SingleLogoutServiceUrl = null;
 
         await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com")
+            await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com", _ct)
         );
     }
 
@@ -53,7 +55,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         result.SamlBinding.ShouldBe(SamlBinding.HttpRedirect);
         result.Destination.ShouldBe(sp.SingleLogoutServiceUrl!.Location);
@@ -75,7 +78,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         result.SamlBinding.ShouldBe(SamlBinding.HttpPost);
     }
@@ -92,7 +96,7 @@ public class SamlFrontChannelLogoutRequestBuilderTests
         };
 
         await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com")
+            await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com", _ct)
         );
     }
 
@@ -107,7 +111,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         result.EncodedContent.ShouldNotBeNullOrEmpty();
         result.EncodedContent.ShouldContain("SAMLRequest=");
@@ -126,7 +131,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var queryString = result.EncodedContent;
         var samlRequestPart = queryString.Split('&')[0].Replace("?SAMLRequest=", "");
@@ -158,7 +164,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         result.EncodedContent.ShouldNotBeNullOrEmpty();
 
@@ -181,7 +188,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             null,
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         var expectedIssueInstant = expectedTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
@@ -199,7 +207,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             null,
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         xml.ShouldContain($"Destination=\"{sp.SingleLogoutServiceUrl!.Location}\"");
@@ -217,7 +226,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             null,
             "session123",
-            issuer);
+            issuer,
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         xml.ShouldContain($"<Issuer xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\">{issuer}</Issuer>");
@@ -235,7 +245,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             nameId,
             null,
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         xml.ShouldContain($"<NameID xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\">{nameId}</NameID>");
@@ -253,7 +264,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             nameIdFormat,
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         xml.ShouldContain($"Format=\"{nameIdFormat}\"");
@@ -270,7 +282,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             null,
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         var doc = XDocument.Parse(xml);
@@ -290,7 +303,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             null,
             sessionIndex,
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         xml.ShouldContain($"<SessionIndex>{sessionIndex}</SessionIndex>");
@@ -302,8 +316,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
     {
         var sp = CreateServiceProvider();
 
-        var result1 = await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com");
-        var result2 = await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com");
+        var result1 = await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com", _ct);
+        var result2 = await _subject.BuildLogoutRequestAsync(sp, "user@example.com", null, "session123", "https://idp.example.com", _ct);
 
         var xml1 = await DecodeRedirectRequest(result1.EncodedContent);
         var xml2 = await DecodeRedirectRequest(result2.EncodedContent);
@@ -327,7 +341,8 @@ public class SamlFrontChannelLogoutRequestBuilderTests
             "user@example.com",
             null,
             "session123",
-            "https://idp.example.com");
+            "https://idp.example.com",
+            _ct);
 
         var xml = await DecodeRedirectRequest(result.EncodedContent);
         xml.ShouldContain("Version=\"2.0\"");

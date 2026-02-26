@@ -7,5 +7,10 @@ namespace Duende.IdentityServer.Saml;
 
 public interface ISamlLogoutNotificationService
 {
-    Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context);
+    /// <summary>
+    /// Builds the URLs needed for front-channel logout notification.
+    /// </summary>
+    /// <param name="context">The context for the logout notification.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct);
 }

@@ -28,9 +28,9 @@ internal abstract class SamlRequestProcessorBase<TMessage, TRequest, TSuccess>(
     protected readonly ILogger Logger = logger;
     protected readonly string ExpectedDestination = expectedDestination;
 
-    internal async Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessAsync(TRequest request, CT ct = default)
+    internal async Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessAsync(TRequest request, Ct ct = default)
     {
-        var sp = await ServiceProviderStore.FindByEntityIdAsync(request.Request.Issuer);
+        var sp = await ServiceProviderStore.FindByEntityIdAsync(request.Request.Issuer, ct);
         if (sp?.Enabled != true)
         {
             Logger.ServiceProviderNotFound(LogLevel.Warning, request.Request.Issuer);
@@ -140,5 +140,5 @@ internal abstract class SamlRequestProcessorBase<TMessage, TRequest, TSuccess>(
         return null;
     }
     protected abstract SamlRequestError<TRequest>? ValidateMessageSpecific(SamlServiceProvider sp, TRequest request);
-    protected abstract Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessValidatedRequestAsync(SamlServiceProvider sp, TRequest request, CT ct = default);
+    protected abstract Task<Result<TSuccess, SamlRequestError<TRequest>>> ProcessValidatedRequestAsync(SamlServiceProvider sp, TRequest request, Ct ct = default);
 }

@@ -21,6 +21,8 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
 internal class SamlFixture : IAsyncLifetime
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     public SamlData Data = new SamlData();
     public SamlDataBuilder Builder => new SamlDataBuilder(Data);
 
@@ -247,7 +249,7 @@ internal class SamlFixture : IAsyncLifetime
                 {
                     var samlInteractionService = ctx.RequestServices.GetRequiredService<ISamlInteractionService>();
                     var authenticationRequest =
-                        await samlInteractionService.GetAuthenticationRequestContextAsync(CT.None);
+                        await samlInteractionService.GetAuthenticationRequestContextAsync(_ct);
 
                     if (authenticationRequest == null)
                     {

@@ -24,7 +24,7 @@ internal class SamlSigninCallbackEndpoint(SamlResponseBuilder responseBuilder, S
         return await Process(context.RequestAborted);
     }
 
-    internal async Task<IEndpointResult> Process(CT ct = default)
+    internal async Task<IEndpointResult> Process(Ct ct = default)
     {
         logger.StartSamlSigninCallbackRequest(LogLevel.Debug);
 

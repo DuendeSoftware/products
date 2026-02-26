@@ -16,6 +16,7 @@ public interface ISamlServiceProviderStore
     /// Finds a SAML Service Provider by its entity identifier.
     /// </summary>
     /// <param name="entityId">The entity identifier of the Service Provider.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The Service Provider, or null if not found.</returns>
-    Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId);
+    Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId, Ct ct);
 }

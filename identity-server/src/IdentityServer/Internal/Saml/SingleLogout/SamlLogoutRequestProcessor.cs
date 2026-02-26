@@ -55,7 +55,7 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
     protected override async Task<Result<SamlLogoutSuccess, SamlRequestError<SamlLogoutRequest>>> ProcessValidatedRequestAsync(
         SamlServiceProvider sp,
         SamlLogoutRequest request,
-        CT ct = default)
+        Ct ct = default)
     {
         var logoutRequest = request.LogoutRequest;
 
@@ -71,27 +71,27 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
 
         Logger.ProcessingSamlLogoutRequest(LogLevel.Debug, logoutRequest.Id, sp.DisplayName, logoutRequest.Issuer);
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(ct);
         if (user == null)
         {
             Logger.SamlLogoutRequestReceivedButNoActiveUserSession(LogLevel.Debug, logoutRequest.Id, logoutRequest.Issuer);
-            var noUserAuthenticatedResponse = await _logoutResponseBuilder.BuildSuccessResponseAsync(logoutRequest.Id, sp, request.RelayState);
+            var noUserAuthenticatedResponse = await _logoutResponseBuilder.BuildSuccessResponseAsync(logoutRequest.Id, sp, request.RelayState, ct);
             // there is no user to log out, return success
             return SamlLogoutSuccess.CreateResponse(noUserAuthenticatedResponse);
         }
 
-        var sessionMatch = await ValidateSessionIndexAsync(sp, logoutRequest.SessionIndex);
+        var sessionMatch = await ValidateSessionIndexAsync(sp, logoutRequest.SessionIndex, ct);
         if (!sessionMatch)
         {
             Logger.SamlLogoutRequestReceivedWithWrongSessionIndex(LogLevel.Warning, logoutRequest.Id, logoutRequest.SessionIndex);
-            var noSessionIndexResponse = await _logoutResponseBuilder.BuildSuccessResponseAsync(logoutRequest.Id, sp, request.RelayState);
+            var noSessionIndexResponse = await _logoutResponseBuilder.BuildSuccessResponseAsync(logoutRequest.Id, sp, request.RelayState, ct);
             // there is no session to terminate, return success
             return SamlLogoutSuccess.CreateResponse(noSessionIndexResponse);
         }
 
         Logger.SamlLogoutRedirectToLogoutPage(LogLevel.Information, logoutRequest.Issuer);
 
-        var logoutId = await StoreLogoutMessageAsync(user, sp, request);
+        var logoutId = await StoreLogoutMessageAsync(user, sp, request, ct);
         var logoutUri = _urlBuilder.SamlLogoutUri(logoutId);
 
         return SamlLogoutSuccess.CreateRedirect(logoutUri);
@@ -129,11 +129,11 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
         return null;
     }
 
-    private async Task<bool> ValidateSessionIndexAsync(SamlServiceProvider sp, string sessionIndex)
+    private async Task<bool> ValidateSessionIndexAsync(SamlServiceProvider sp, string sessionIndex, Ct ct)
     {
-        var samlSessions = await _userSession.GetSamlSessionListAsync();
+        var samlSessions = await _userSession.GetSamlSessionListAsync(ct);
 
-        var spSession = samlSessions.FirstOrDefault(s => s.EntityId == sp.EntityId.ToString());
+        var spSession = samlSessions.FirstOrDefault(s => s.EntityId == sp.EntityId);
 
         if (spSession == null)
         {
@@ -150,16 +150,16 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
         return true;
     }
 
-    private async Task<string> StoreLogoutMessageAsync(ClaimsPrincipal user, SamlServiceProvider serviceProvider, SamlLogoutRequest logoutRequest)
+    private async Task<string> StoreLogoutMessageAsync(ClaimsPrincipal user, SamlServiceProvider serviceProvider, SamlLogoutRequest logoutRequest, Ct ct)
     {
-        var samlSessions = await _userSession.GetSamlSessionListAsync();
+        var samlSessions = await _userSession.GetSamlSessionListAsync(ct);
 
-        var oidcClientIds = await _userSession.GetClientListAsync();
+        var oidcClientIds = await _userSession.GetClientListAsync(ct);
 
         var logoutMessage = new LogoutMessage
         {
             SubjectId = user.GetSubjectId(),
-            SessionId = await _userSession.GetSessionIdAsync(),
+            SessionId = await _userSession.GetSessionIdAsync(ct),
             ClientIds = oidcClientIds,
             SamlServiceProviderEntityId = serviceProvider.EntityId,
             SamlSessions = samlSessions,
@@ -170,6 +170,6 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
 
         var msg = new Message<LogoutMessage>(logoutMessage, _timeProvider.GetUtcNow().UtcDateTime);
 
-        return await _logoutMessageStore.WriteAsync(msg);
+        return await _logoutMessageStore.WriteAsync(msg, ct);
     }
 }

@@ -30,8 +30,9 @@ public class InMemorySamlServiceProviderStore : ISamlServiceProviderStore
     /// Finds a SAML Service Provider by its entity identifier.
     /// </summary>
     /// <param name="entityId">The entity identifier of the Service Provider.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The Service Provider, or null if not found.</returns>
-    public Task<SamlServiceProvider> FindByEntityIdAsync(string entityId)
+    public Task<SamlServiceProvider> FindByEntityIdAsync(string entityId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemorySamlServiceProviderStore.FindByEntityId");
         activity?.SetTag(Tracing.Properties.SamlEntityId, entityId);

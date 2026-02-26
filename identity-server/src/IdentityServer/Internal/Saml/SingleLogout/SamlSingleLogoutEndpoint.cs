@@ -32,7 +32,7 @@ internal class SamlSingleLogoutEndpoint(
         return await ProcessLogoutRequest(logoutRequest, context.RequestAborted);
     }
 
-    internal async Task<IEndpointResult> ProcessLogoutRequest(SamlLogoutRequest logoutRequest, CT ct = default)
+    internal async Task<IEndpointResult> ProcessLogoutRequest(SamlLogoutRequest logoutRequest, Ct ct = default)
     {
         logger.ReceivedLogoutRequest(LogLevel.Debug, logoutRequest.LogoutRequest.Issuer, logoutRequest.LogoutRequest.Id, logoutRequest.LogoutRequest.SessionIndex);
 
@@ -44,7 +44,7 @@ internal class SamlSingleLogoutEndpoint(
             return error.Type switch
             {
                 SamlRequestErrorType.Validation => HandleValidationError(error),
-                SamlRequestErrorType.Protocol => await HandleProtocolError(error),
+                SamlRequestErrorType.Protocol => await HandleProtocolError(error, ct),
                 _ => throw new InvalidOperationException($"Unexpected error type: {error.Type}")
             };
         }
@@ -61,7 +61,7 @@ internal class SamlSingleLogoutEndpoint(
         return new ValidationProblemResult(error.ValidationMessage!);
     }
 
-    private async Task<LogoutResponse> HandleProtocolError(SamlRequestError<SamlLogoutRequest> error)
+    private async Task<LogoutResponse> HandleProtocolError(SamlRequestError<SamlLogoutRequest> error, Ct ct)
     {
         var protocolError = error.ProtocolError!;
         logger.SamlLogoutProtocolError(LogLevel.Information,
@@ -71,6 +71,7 @@ internal class SamlSingleLogoutEndpoint(
         return await responseBuilder.BuildErrorResponseAsync(
             protocolError.Request,
             protocolError.ServiceProvider,
-            protocolError.Error);
+            protocolError.Error,
+            ct);
     }
 }

@@ -14,6 +14,8 @@ public class SamlSigningServiceTests
 {
     private const string Category = "SAML Signing Service";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private readonly MockKeyMaterialService _mockKeyMaterialService = new();
     private readonly SamlSigningService _signingService;
 
@@ -63,7 +65,7 @@ public class SamlSigningServiceTests
         _mockKeyMaterialService.SigningCredentials.Add(credentials);
 
         // Act
-        var result = await _signingService.GetSigningCertificateAsync();
+        var result = await _signingService.GetSigningCertificateAsync(_ct);
 
         // Assert
         result.ShouldNotBeNull();
@@ -82,7 +84,7 @@ public class SamlSigningServiceTests
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _signingService.GetSigningCertificateAsync());
+            async () => await _signingService.GetSigningCertificateAsync(_ct));
 
         ex.Message.ShouldBe("Signing credential must be an X509 certificate with private key.");
     }
@@ -98,7 +100,7 @@ public class SamlSigningServiceTests
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _signingService.GetSigningCertificateAsync());
+            async () => await _signingService.GetSigningCertificateAsync(_ct));
 
         ex.Message.ShouldBe("Signing certificate must have a private key.");
     }
@@ -111,7 +113,7 @@ public class SamlSigningServiceTests
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _signingService.GetSigningCertificateAsync());
+            async () => await _signingService.GetSigningCertificateAsync(_ct));
 
         ex.Message.ShouldBe("No signing credential available. Configure a signing certificate.");
     }
@@ -126,7 +128,7 @@ public class SamlSigningServiceTests
         _mockKeyMaterialService.SigningCredentials.Add(credentials);
 
         // Act
-        var result = await _signingService.GetSigningCertificateBase64Async();
+        var result = await _signingService.GetSigningCertificateBase64Async(_ct);
 
         // Assert
         result.ShouldNotBeNullOrEmpty();
@@ -150,7 +152,7 @@ public class SamlSigningServiceTests
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _signingService.GetSigningCertificateBase64Async());
+            async () => await _signingService.GetSigningCertificateBase64Async(_ct));
 
         ex.Message.ShouldBe("Signing credential key is not an X509SecurityKey and cannot be used to extract an X509 certificate for SAML metadata.");
     }
@@ -163,7 +165,7 @@ public class SamlSigningServiceTests
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _signingService.GetSigningCertificateBase64Async());
+            async () => await _signingService.GetSigningCertificateBase64Async(_ct));
 
         ex.Message.ShouldBe("No signing credential available. Configure a signing certificate.");
     }
@@ -178,7 +180,7 @@ public class SamlSigningServiceTests
         _mockKeyMaterialService.SigningCredentials.Add(credentials);
 
         // Act
-        var result = await _signingService.GetSigningCertificateBase64Async();
+        var result = await _signingService.GetSigningCertificateBase64Async(_ct);
         var bytes = Convert.FromBase64String(result);
         var exportedCert = X509CertificateLoader.LoadCertificate(bytes);
 

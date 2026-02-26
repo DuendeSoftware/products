@@ -8,5 +8,5 @@ namespace Duende.IdentityServer.Saml;
 
 public interface ISamlSigninInteractionResponseGenerator
 {
-    Task<SamlInteractionResponse> ProcessInteractionAsync(SamlServiceProvider sp, AuthNRequest request, CT ct = default);
+    Task<SamlInteractionResponse> ProcessInteractionAsync(SamlServiceProvider sp, AuthNRequest request, Ct ct = default);
 }

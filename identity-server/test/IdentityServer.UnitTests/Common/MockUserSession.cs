@@ -55,16 +55,16 @@ public class MockUserSession : IUserSession
         return Task.CompletedTask;
     }
 
-    public Task AddSamlSessionAsync(SamlSpSessionData session)
+    public Task AddSamlSessionAsync(SamlSpSessionData session, Ct _)
     {
         SamlSessions.RemoveAll(s => s.EntityId == session.EntityId);
         SamlSessions.Add(session);
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync() => Task.FromResult<IEnumerable<SamlSpSessionData>>(SamlSessions);
+    public Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync(Ct _) => Task.FromResult<IEnumerable<SamlSpSessionData>>(SamlSessions);
 
-    public Task RemoveSamlSessionAsync(string entityId)
+    public Task RemoveSamlSessionAsync(string entityId, Ct _)
     {
         SamlSessions.RemoveAll(s => s.EntityId == entityId);
         return Task.CompletedTask;

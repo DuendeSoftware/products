@@ -32,10 +32,10 @@ internal class SamlMetaDataEndpoint(
         }
 
         var options = samlOptions.Value;
-        var issuerUri = await issuerNameService.GetCurrentAsync();
+        var issuerUri = await issuerNameService.GetCurrentAsync(context.RequestAborted);
         var baseUrl = urls.BaseUrl;
 
-        var certificateBase64 = await samlSigningService.GetSigningCertificateBase64Async();
+        var certificateBase64 = await samlSigningService.GetSigningCertificateBase64Async(context.RequestAborted);
 
         var singleSignOnService = BuildServiceUrl(baseUrl, options.UserInteraction.Route, options.UserInteraction.SignInPath);
         var singleLogoutService = BuildServiceUrl(baseUrl, options.UserInteraction.Route, options.UserInteraction.SingleLogoutPath);

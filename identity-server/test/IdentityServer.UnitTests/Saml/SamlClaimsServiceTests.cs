@@ -16,6 +16,8 @@ public class SamlClaimsServiceTests
 {
     private const string Category = "SAML Claims Service";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private readonly SamlOptions _samlOptions;
     private readonly IOptions<SamlOptions> _options;
     private readonly MockProfileService _profileService;
@@ -51,7 +53,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await _service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await _service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(3);
@@ -105,7 +107,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(4);
@@ -140,7 +142,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(0); // No mappings, so no attributes
@@ -180,7 +182,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(2); // Only email and department are mapped; sub and unmapped are excluded
@@ -217,7 +219,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await _service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await _service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(2); // email and department from SP mappings; sub not mapped
@@ -251,7 +253,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await _service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await _service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(1); // Only email is mapped (overridden by SP); sub and given_name are not in defaults
@@ -292,7 +294,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(2); // sub + role (multi-valued)
@@ -330,7 +332,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.Count.ShouldBe(1);
@@ -360,7 +362,7 @@ public class SamlClaimsServiceTests
         _profileService.ProfileClaims = user.Claims.ToList();
 
         // Act
-        var attributes = (await _service.GetMappedAttributesAsync(user, sp)).ToList();
+        var attributes = (await _service.GetMappedAttributesAsync(user, sp, _ct)).ToList();
 
         // Assert
         attributes.ShouldAllBe(a => a.NameFormat == _samlOptions.DefaultAttributeNameFormat);

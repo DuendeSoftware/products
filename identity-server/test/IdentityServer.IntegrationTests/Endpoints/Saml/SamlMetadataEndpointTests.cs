@@ -11,6 +11,8 @@ public class SamlMetadataEndpointTests
 {
     private const string Category = "SAML Metadata Endpoint";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private SamlFixture Fixture = new();
 
     [Fact]
@@ -19,14 +21,14 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Content.Headers.ContentType
             .ShouldNotBeNull()
             .MediaType
             .ShouldBe(SamlConstants.ContentTypes.Metadata);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
 
         var settings = new VerifySettings();
         var hostUri = Fixture.Url();
@@ -49,10 +51,10 @@ public class SamlMetadataEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
 
         var expectedValidUntil = Fixture.Now.Add(TimeSpan.FromDays(30)).UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
         content.ShouldContain($"validUntil=\"{expectedValidUntil}\"");
@@ -69,10 +71,10 @@ public class SamlMetadataEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
 
         content.ShouldContain("WantAuthnRequestsSigned=\"true\"");
     }
@@ -90,10 +92,10 @@ public class SamlMetadataEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
 
         content.ShouldContain("<NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>");
         content.ShouldContain("<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>");
@@ -106,10 +108,10 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
 
         content.ShouldContain("<SingleLogoutService");
         content.ShouldContain("Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\"");
@@ -123,10 +125,10 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
         var locationUrls = GetServiceLocationUrls(content, "SingleSignOnService", "SingleLogoutService");
 
         foreach (var location in locationUrls)
@@ -141,10 +143,10 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
         var locationUrls = GetServiceLocationUrls(content, "SingleSignOnService", "SingleLogoutService");
 
         foreach (var location in locationUrls)
@@ -166,10 +168,10 @@ public class SamlMetadataEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
 
         // Should not have double slashes
         content.ShouldNotContain("saml//signin");
@@ -192,10 +194,10 @@ public class SamlMetadataEndpointTests
         // at the unit level in BuildServiceUrl unit tests
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var content = await result.Content.ReadAsStringAsync(CT.None);
+        var content = await result.Content.ReadAsStringAsync(_ct);
         var locationUrls = GetServiceLocationUrls(content, "SingleSignOnService", "SingleLogoutService");
 
         foreach (var location in locationUrls)

@@ -14,12 +14,12 @@ internal class SamlProtocolMessageSigner(
     ISamlSigningService samlSigningService,
     ILogger<SamlProtocolMessageSigner> logger)
 {
-    internal async Task<string> SignProtocolMessage(XElement messageElement, SamlServiceProvider serviceProvider)
+    internal async Task<string> SignProtocolMessage(XElement messageElement, SamlServiceProvider serviceProvider, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(messageElement);
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
-        var certificate = await samlSigningService.GetSigningCertificateAsync();
+        var certificate = await samlSigningService.GetSigningCertificateAsync(ct);
 
         logger.SigningSamlProtocolMessage(LogLevel.Debug, serviceProvider.EntityId, messageElement.Name.LocalName);
 
@@ -38,9 +38,9 @@ internal class SamlProtocolMessageSigner(
         }
     }
 
-    internal async Task<string> SignQueryString(string queryString)
+    internal async Task<string> SignQueryString(string queryString, Ct ct)
     {
-        var certificate = await samlSigningService.GetSigningCertificateAsync();
+        var certificate = await samlSigningService.GetSigningCertificateAsync(ct);
         using var rsa = certificate.GetRSAPrivateKey();
         if (rsa == null)
         {

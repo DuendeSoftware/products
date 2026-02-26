@@ -18,9 +18,9 @@ internal class SamlSigningService(
     ILogger<SamlSigningService> logger) : ISamlSigningService
 {
     /// <inheritdoc/>
-    public async Task<X509Certificate2> GetSigningCertificateAsync()
+    public async Task<X509Certificate2> GetSigningCertificateAsync(Ct ct)
     {
-        var credential = await GetSigningCredentialsAsync();
+        var credential = await GetSigningCredentialsAsync(ct);
         if (!TryExtractCertificateFromCredential(credential, out var certificate))
         {
             throw new InvalidOperationException(
@@ -37,9 +37,9 @@ internal class SamlSigningService(
     }
 
     /// <inheritdoc/>
-    public async Task<string> GetSigningCertificateBase64Async()
+    public async Task<string> GetSigningCertificateBase64Async(Ct ct)
     {
-        var credential = await GetSigningCredentialsAsync();
+        var credential = await GetSigningCredentialsAsync(ct);
         if (TryExtractCertificateFromCredential(credential, out var certificate))
         {
             var certBytes = certificate.Export(X509ContentType.Cert);
@@ -50,9 +50,9 @@ internal class SamlSigningService(
             "Signing credential key is not an X509SecurityKey and cannot be used to extract an X509 certificate for SAML metadata.");
     }
 
-    private async Task<SigningCredentials> GetSigningCredentialsAsync()
+    private async Task<SigningCredentials> GetSigningCredentialsAsync(Ct ct)
     {
-        var credential = await keyMaterialService.GetSigningCredentialsAsync();
+        var credential = await keyMaterialService.GetSigningCredentialsAsync(null, ct);
         return credential ?? throw new InvalidOperationException("No signing credential available. Configure a signing certificate.");
     }
 

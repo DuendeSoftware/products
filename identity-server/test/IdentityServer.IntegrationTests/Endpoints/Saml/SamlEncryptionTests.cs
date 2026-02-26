@@ -18,6 +18,8 @@ public class SamlEncryptionTests
 {
     private const string Category = "SAML Encryption";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private SamlFixture Fixture = new();
     private SamlData Data => Fixture.Data;
     private SamlDataBuilder Build => Fixture.Builder;
@@ -59,16 +61,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         var responseXml = responseData.responseXml;
 
         // Verify encrypted assertion is present
@@ -105,16 +107,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Decrypt and verify actual content
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var samlResponse = await ExtractAndDecryptSamlSuccessFromPostAsync(result, encryptionCert, CT.None);
+        var samlResponse = await ExtractAndDecryptSamlSuccessFromPostAsync(result, encryptionCert, _ct);
 
         samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlResponse.Assertion.ShouldNotBeNull();
@@ -163,16 +165,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Verify encrypted structure
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         var responseXml = responseData.responseXml;
 
         // Verify encryption happened
@@ -234,16 +236,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Verify structure is valid (can't test decryption due to helper limitations)
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         var responseXml = responseData.responseXml;
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
 
@@ -268,16 +270,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         var responseXml = responseData.responseXml;
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
 
@@ -307,16 +309,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Encryption should happen after signing
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         HasEncryptedAssertion(responseData.responseXml).ShouldBeTrue();
     }
 
@@ -337,16 +339,16 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         var responseXml = responseData.responseXml;
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
 
@@ -376,15 +378,15 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Should encrypt successfully with first valid cert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         HasEncryptedAssertion(responseData.responseXml).ShouldBeTrue();
     }
 
@@ -413,11 +415,11 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Expired cert is a configuration error, so expect 500
         result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
@@ -436,23 +438,23 @@ public class SamlEncryptionTests
             "Test"));
 
         await Fixture.InitializeAsync();
-        await Fixture.Client.GetAsync("/__signin", CT.None);
+        await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Act
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), CT.None);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", CT.None);
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(), _ct);
+        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - Should return plain assertion
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var responseData = await ExtractSamlResponse(result, CT.None);
+        var responseData = await ExtractSamlResponse(result, _ct);
         var responseXml = responseData.responseXml;
 
         HasPlainAssertion(responseXml).ShouldBeTrue("Response should contain plain Assertion");
         HasEncryptedAssertion(responseXml).ShouldBeFalse("Response should not be encrypted");
 
         // Verify can parse as success
-        var samlResponse = await ExtractSamlSuccessFromPostAsync(result, CT.None);
+        var samlResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlResponse.Assertion.ShouldNotBeNull();
     }

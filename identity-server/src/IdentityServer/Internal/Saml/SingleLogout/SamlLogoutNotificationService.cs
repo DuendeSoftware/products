@@ -15,7 +15,7 @@ internal class SamlLogoutNotificationService(
     SamlFrontChannelLogoutRequestBuilder frontChannelLogoutRequestBuilder,
     ILogger<SamlLogoutNotificationService> logger) : ISamlLogoutNotificationService
 {
-    public async Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context)
+    public async Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetSamlFrontChannelLogoutUrls");
 
@@ -27,11 +27,11 @@ internal class SamlLogoutNotificationService(
             return logoutUrls;
         }
 
-        var issuer = await issuerNameService.GetCurrentAsync();
+        var issuer = await issuerNameService.GetCurrentAsync(ct);
 
         foreach (var sessionData in context.SamlSessions ?? [])
         {
-            var sp = await serviceProviderStore.FindByEntityIdAsync(sessionData.EntityId);
+            var sp = await serviceProviderStore.FindByEntityIdAsync(sessionData.EntityId, ct);
             if (sp?.Enabled != true)
             {
                 logger.SkippingLogoutUrlGenerationForUnknownOrDisabledServiceProvider(LogLevel.Debug, sessionData.EntityId);
@@ -51,7 +51,8 @@ internal class SamlLogoutNotificationService(
                     sessionData.NameId,
                     sessionData.NameIdFormat,
                     sessionData.SessionIndex,
-                    issuer);
+                    issuer,
+                    ct);
 
                 logoutUrls.Add(logoutUrl);
             }

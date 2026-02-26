@@ -195,7 +195,7 @@ public class EndSessionRequestValidatorTests
 
         var parameters = new NameValueCollection();
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.SamlSessions.ShouldNotBeNull();
@@ -212,7 +212,7 @@ public class EndSessionRequestValidatorTests
 
         var parameters = new NameValueCollection();
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.SamlSessions.ShouldNotBeNull();
@@ -232,7 +232,7 @@ public class EndSessionRequestValidatorTests
 
         var parameters = new NameValueCollection();
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -267,7 +267,7 @@ public class EndSessionRequestValidatorTests
         var parameters = new NameValueCollection();
         parameters.Add("id_token_hint", "id_token");
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.SamlSessions.ShouldNotBeNull();
@@ -303,7 +303,7 @@ public class EndSessionRequestValidatorTests
             { "endSessionId", "endSessionId123" }
         };
 
-        var result = await _subject.ValidateCallbackAsync(parameters);
+        var result = await _subject.ValidateCallbackAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
         result.SamlFrontChannelLogouts.ShouldNotBeNull();
@@ -340,7 +340,7 @@ public class EndSessionRequestValidatorTests
             { "endSessionId", "endSessionId123" }
         };
 
-        var result = await _subject.ValidateCallbackAsync(parameters);
+        var result = await _subject.ValidateCallbackAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
         result.FrontChannelLogoutUrls.ShouldHaveSingleItem();
@@ -364,7 +364,7 @@ public class EndSessionRequestValidatorTests
             { "endSessionId", "endSessionId123" }
         };
 
-        var result = await _subject.ValidateCallbackAsync(parameters);
+        var result = await _subject.ValidateCallbackAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
     }
@@ -403,7 +403,7 @@ public class EndSessionRequestValidatorTests
             { "endSessionId", "endSessionId123" }
         };
 
-        await _subject.ValidateCallbackAsync(parameters);
+        await _subject.ValidateCallbackAsync(parameters, _ct);
 
         _mockSamlLogoutNotificationService.GetSamlFrontChannelLogoutsAsyncCalled.ShouldBeTrue();
     }
@@ -451,7 +451,7 @@ public class EndSessionRequestValidatorTests
             { "endSessionId", "endSessionId123" }
         };
 
-        var result = await _subject.ValidateCallbackAsync(parameters);
+        var result = await _subject.ValidateCallbackAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
         result.SamlFrontChannelLogouts.Count().ShouldBe(3);

@@ -18,9 +18,9 @@ internal class SamlLogoutCallbackProcessor(
     LogoutResponseBuilder logoutResponseBuilder,
     ILogger<SamlLogoutCallbackProcessor> logger)
 {
-    internal async Task<Result<LogoutResponse, SamlLogoutCallbackError>> ProcessAsync(string logoutId, CT ct = default)
+    internal async Task<Result<LogoutResponse, SamlLogoutCallbackError>> ProcessAsync(string logoutId, Ct ct = default)
     {
-        var logoutMessage = await logoutMessageStore.ReadAsync(logoutId);
+        var logoutMessage = await logoutMessageStore.ReadAsync(logoutId, ct);
         if (logoutMessage?.Data == null)
         {
             logger.NoLogoutMessageFound(LogLevel.Warning, logoutId);
@@ -36,7 +36,7 @@ internal class SamlLogoutCallbackProcessor(
 
         logger.BuildingLogoutResponseForSp(LogLevel.Debug, data.SamlServiceProviderEntityId);
 
-        var sp = await serviceProviderStore.FindByEntityIdAsync(data.SamlServiceProviderEntityId);
+        var sp = await serviceProviderStore.FindByEntityIdAsync(data.SamlServiceProviderEntityId, ct);
         if (sp == null)
         {
             logger.ServiceProviderNotFound(LogLevel.Error, data.SamlServiceProviderEntityId);
@@ -64,7 +64,8 @@ internal class SamlLogoutCallbackProcessor(
         var response = await logoutResponseBuilder.BuildSuccessResponseAsync(
             data.SamlLogoutRequestId,
             sp,
-            data.SamlRelayState);
+            data.SamlRelayState,
+            ct);
 
         logger.SuccessfullyBuiltLogoutResponse(LogLevel.Information, data.SamlServiceProviderEntityId, data.SamlLogoutRequestId);
 

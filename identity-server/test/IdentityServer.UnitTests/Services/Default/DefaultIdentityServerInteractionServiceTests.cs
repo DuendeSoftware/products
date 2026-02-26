@@ -188,7 +188,7 @@ public class DefaultIdentityServerInteractionServiceTests
             NameId = "user123"
         });
 
-        var context = await _subject.CreateLogoutContextAsync();
+        var context = await _subject.CreateLogoutContextAsync(_ct);
 
         context.ShouldNotBeNull();
         _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
@@ -218,7 +218,7 @@ public class DefaultIdentityServerInteractionServiceTests
             NameId = "user123"
         });
 
-        var context = await _subject.CreateLogoutContextAsync();
+        var context = await _subject.CreateLogoutContextAsync(_ct);
 
         context.ShouldNotBeNull();
         _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
@@ -242,7 +242,7 @@ public class DefaultIdentityServerInteractionServiceTests
         _mockUserSession.SessionId = "session";
         _mockUserSession.Clients.Add("client1");
 
-        var context = await _subject.CreateLogoutContextAsync();
+        var context = await _subject.CreateLogoutContextAsync(_ct);
 
         context.ShouldNotBeNull();
         _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();

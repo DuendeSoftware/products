@@ -19,7 +19,7 @@ internal class SamlClaimsService(
     IOptions<SamlOptions> options,
     ISamlClaimsMapper? customMapper = null)
 {
-    private async Task<IEnumerable<Claim>> GetClaimsAsync(ClaimsPrincipal user, SamlServiceProvider serviceProvider)
+    private async Task<IEnumerable<Claim>> GetClaimsAsync(ClaimsPrincipal user, SamlServiceProvider serviceProvider, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(serviceProvider);
@@ -32,13 +32,13 @@ internal class SamlClaimsService(
             Subject = user,
             Client = new Client
             {
-                ClientId = serviceProvider.EntityId.ToString()
+                ClientId = serviceProvider.EntityId
             },
             RequestedClaimTypes = requestedClaimTypes,
             Caller = "SAML"
         };
 
-        await profileService.GetProfileDataAsync(context);
+        await profileService.GetProfileDataAsync(context, ct);
 
         var claims = context.IssuedClaims;
 
@@ -49,12 +49,13 @@ internal class SamlClaimsService(
 
     internal async Task<IEnumerable<SamlAttribute>> GetMappedAttributesAsync(
         ClaimsPrincipal user,
-        SamlServiceProvider serviceProvider)
+        SamlServiceProvider serviceProvider,
+        Ct ct)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
-        var claims = await GetClaimsAsync(user, serviceProvider);
+        var claims = await GetClaimsAsync(user, serviceProvider, ct);
 
         if (customMapper != null)
         {

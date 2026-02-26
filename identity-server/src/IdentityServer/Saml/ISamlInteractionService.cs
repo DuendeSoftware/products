@@ -15,7 +15,7 @@ public interface ISamlInteractionService
     /// Gets the SAML authentication request context from the current request's state cookie.
     /// Returns null if no SAML authentication is in progress.
     /// </summary>
-    Task<SamlAuthenticationRequest?> GetAuthenticationRequestContextAsync(CT ct = default);
+    Task<SamlAuthenticationRequest?> GetAuthenticationRequestContextAsync(Ct ct = default);
 
     /// <summary>
     /// Stores whether the user met the requirements of the RequestedAuthnContext in the
@@ -26,5 +26,5 @@ public interface ISamlInteractionService
     /// <param name="requestedAuthnContextRequirementsWereMet">Whether the requirements of the RequestedAuthnContext were met.</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns></returns>
-    Task StoreRequestedAuthnContextResultAsync(bool requestedAuthnContextRequirementsWereMet, CT ct = default);
+    Task StoreRequestedAuthnContextResultAsync(bool requestedAuthnContextRequirementsWereMet, Ct ct = default);
 }

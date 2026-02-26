@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Internal.Saml.SingleSignin;
 
 internal interface ISamlSigninStateStore
 {
-    Task<StateId> StoreSigninRequestStateAsync(SamlAuthenticationState request, CT ct = default);
-    Task<SamlAuthenticationState?> RetrieveSigninRequestStateAsync(StateId stateId, CT ct = default);
-    Task UpdateSigninRequestStateAsync(StateId stateId, SamlAuthenticationState state, CT ct = default);
+    Task<StateId> StoreSigninRequestStateAsync(SamlAuthenticationState request, Ct ct = default);
+    Task<SamlAuthenticationState?> RetrieveSigninRequestStateAsync(StateId stateId, Ct ct = default);
+    Task UpdateSigninRequestStateAsync(StateId stateId, SamlAuthenticationState state, Ct ct = default);
 }

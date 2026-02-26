@@ -251,7 +251,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             result.IsError = false;
             result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data, ct);
 
-            var samlFrontChannelLogouts = await SamlLogoutNotificationService.GetSamlFrontChannelLogoutsAsync(endSessionMessage.Data);
+            var samlFrontChannelLogouts = await SamlLogoutNotificationService.GetSamlFrontChannelLogoutsAsync(endSessionMessage.Data, ct);
             result.SamlFrontChannelLogouts = samlFrontChannelLogouts;
         }
         else

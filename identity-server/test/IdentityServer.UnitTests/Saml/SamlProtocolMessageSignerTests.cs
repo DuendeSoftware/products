@@ -17,6 +17,8 @@ public class SamlProtocolMessageSignerTests
 {
     private const string Category = "SAML Protocol Message Signer";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private readonly SamlServiceProvider _samlServiceProvider = new SamlServiceProvider
     {
         EntityId = "https://sp.example.com",
@@ -75,7 +77,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var logoutResponse = CreateLogoutResponseElement();
 
-        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider);
+        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider, _ct);
 
         signedXml.ShouldContain("Signature");
         signedXml.ShouldContain("SignatureValue");
@@ -89,7 +91,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var logoutResponse = CreateLogoutResponseElement();
 
-        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider);
+        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider, _ct);
 
         var indexOfIssuer = signedXml.IndexOf("<Issuer", StringComparison.InvariantCulture);
         var indexOfSignature = signedXml.IndexOf("<Signature", StringComparison.InvariantCulture);
@@ -104,7 +106,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var logoutResponse = CreateLogoutResponseElement();
 
-        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider);
+        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider, _ct);
 
         signedXml.ShouldContain("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         signedXml.ShouldContain("http://www.w3.org/2001/04/xmlenc#sha256");
@@ -117,7 +119,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var logoutResponse = CreateLogoutResponseElement();
 
-        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider);
+        var signedXml = await signer.SignProtocolMessage(logoutResponse, _samlServiceProvider, _ct);
 
         signedXml.ShouldContain("KeyInfo");
         signedXml.ShouldContain("X509Data");
@@ -131,7 +133,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encodedrequest";
 
-        var signedQueryString = await signer.SignQueryString(queryString);
+        var signedQueryString = await signer.SignQueryString(queryString, _ct);
 
         signedQueryString.ShouldContain("&SigAlg=");
         signedQueryString.ShouldContain("&Signature=");
@@ -144,7 +146,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encodedrequest&RelayState=state123";
 
-        var signedQueryString = await signer.SignQueryString(queryString);
+        var signedQueryString = await signer.SignQueryString(queryString, _ct);
 
         signedQueryString.ShouldStartWith(queryString);
     }
@@ -156,7 +158,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encodedrequest";
 
-        var signedQueryString = await signer.SignQueryString(queryString);
+        var signedQueryString = await signer.SignQueryString(queryString, _ct);
 
         // The SigAlg parameter should be present
         signedQueryString.ShouldContain("&SigAlg=");
@@ -171,7 +173,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encodedrequest";
 
-        var signedQueryString = await signer.SignQueryString(queryString);
+        var signedQueryString = await signer.SignQueryString(queryString, _ct);
 
         var signaturePart = signedQueryString.Split("&Signature=")[1];
         var decodedSignature = Uri.UnescapeDataString(signaturePart);
@@ -188,7 +190,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encodedrequest";
 
-        var signedQueryString = await signer.SignQueryString(queryString);
+        var signedQueryString = await signer.SignQueryString(queryString, _ct);
 
         // Base64 can contain + and / which should be URL encoded
         signedQueryString.ShouldNotContain("Signature= "); // No unencoded spaces
@@ -202,7 +204,7 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encoded&RelayState=mystate";
 
-        var signedQueryString = await signer.SignQueryString(queryString);
+        var signedQueryString = await signer.SignQueryString(queryString, _ct);
 
         // SigAlg should come after RelayState but before Signature
         var sigAlgIndex = signedQueryString.IndexOf("&SigAlg=", StringComparison.Ordinal);
@@ -220,8 +222,8 @@ public class SamlProtocolMessageSignerTests
         var signer = CreateSigner();
         var queryString = "?SAMLRequest=encodedrequest";
 
-        var signedQueryString1 = await signer.SignQueryString(queryString);
-        var signedQueryString2 = await signer.SignQueryString(queryString);
+        var signedQueryString1 = await signer.SignQueryString(queryString, _ct);
+        var signedQueryString2 = await signer.SignQueryString(queryString, _ct);
 
         // Signatures should be identical for same input with same key
         signedQueryString1.ShouldBe(signedQueryString2);
@@ -235,8 +237,8 @@ public class SamlProtocolMessageSignerTests
         var queryString1 = "?SAMLRequest=request1";
         var queryString2 = "?SAMLRequest=request2";
 
-        var signedQueryString1 = await signer.SignQueryString(queryString1);
-        var signedQueryString2 = await signer.SignQueryString(queryString2);
+        var signedQueryString1 = await signer.SignQueryString(queryString1, _ct);
+        var signedQueryString2 = await signer.SignQueryString(queryString2, _ct);
 
         // Extract just the signature parts
         var signature1 = signedQueryString1.Split("&Signature=")[1];

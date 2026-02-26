@@ -71,7 +71,7 @@ public static class HttpContextExtensions
             }
 
             var samlEntityIds = samlSessions.Select(s => s.EntityId);
-            if (await AnyClientHasFrontChannelLogout(logoutMessage.ClientIds) || await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds))
+            if (await AnyClientHasFrontChannelLogout(logoutMessage.ClientIds) || await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {
@@ -90,7 +90,7 @@ public static class HttpContextExtensions
             var samlEntityIds = samlSessions.Select(s => s.EntityId);
 
             if ((clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds)) ||
-                (samlEntityIds.Any() && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds)))
+                (samlEntityIds.Any() && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted)))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {
@@ -135,12 +135,12 @@ public static class HttpContextExtensions
             return false;
         }
 
-        async Task<bool> AnySamlServiceProviderHasFrontChannelLogout(IEnumerable<string> entityIds)
+        async Task<bool> AnySamlServiceProviderHasFrontChannelLogout(IEnumerable<string> entityIds, Ct ct)
         {
             var serviceProviderStore = context.RequestServices.GetRequiredService<ISamlServiceProviderStore>();
             foreach (var entityId in entityIds)
             {
-                var sp = await serviceProviderStore.FindByEntityIdAsync(entityId);
+                var sp = await serviceProviderStore.FindByEntityIdAsync(entityId, ct);
                 if (sp?.Enabled == true && sp.SingleLogoutServiceUrl != null)
                 {
                     return true;

@@ -24,9 +24,9 @@ internal class SamlIdpInitiatedRequestProcessor(
     internal async Task<Result<SamlSigninSuccess, SamlRequestError<SamlSigninRequest>>> ProcessAsync(
         string spEntityId,
         string? relayState,
-        CT ct = default)
+        Ct ct = default)
     {
-        var sp = await serviceProviderStore.FindByEntityIdAsync(spEntityId);
+        var sp = await serviceProviderStore.FindByEntityIdAsync(spEntityId, ct);
         if (sp == null)
         {
             return new SamlRequestError<SamlSigninRequest>

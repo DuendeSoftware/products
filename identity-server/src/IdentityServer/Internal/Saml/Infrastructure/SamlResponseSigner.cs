@@ -14,7 +14,7 @@ internal class SamlResponseSigner(
     IOptions<SamlOptions> samlOptions,
     ILogger<SamlResponseSigner> logger)
 {
-    internal async Task<string> SignResponse(XElement responseElement, SamlServiceProvider serviceProvider)
+    internal async Task<string> SignResponse(XElement responseElement, SamlServiceProvider serviceProvider, Ct ct)
     {
         var signingBehavior = serviceProvider.SigningBehavior ?? samlOptions.Value.DefaultSigningBehavior;
 
@@ -24,7 +24,7 @@ internal class SamlResponseSigner(
             return responseElement.ToString(SaveOptions.DisableFormatting);
         }
 
-        var certificate = await samlSigningService.GetSigningCertificateAsync();
+        var certificate = await samlSigningService.GetSigningCertificateAsync(ct);
 
         logger.SigningSamlResponse(LogLevel.Debug, serviceProvider.EntityId, signingBehavior);
 

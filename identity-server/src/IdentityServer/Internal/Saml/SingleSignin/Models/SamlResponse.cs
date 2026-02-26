@@ -78,7 +78,7 @@ internal class SamlResponse : EndpointResult<SamlResponse>
         {
             var responseXml = serializer.Serialize(result);
 
-            var signedResponseXml = await samlResponseSigner.SignResponse(responseXml, result.ServiceProvider);
+            var signedResponseXml = await samlResponseSigner.SignResponse(responseXml, result.ServiceProvider, httpContext.RequestAborted);
 
             if (result.ServiceProvider.EncryptAssertions)
             {

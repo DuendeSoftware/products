@@ -17,7 +17,7 @@ internal class DefaultSamlInteractionService(
     ILogger<DefaultSamlInteractionService> logger)
     : ISamlInteractionService
 {
-    public async Task<SamlAuthenticationRequest?> GetAuthenticationRequestContextAsync(CT ct = default)
+    public async Task<SamlAuthenticationRequest?> GetAuthenticationRequestContextAsync(Ct ct = default)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSamlInteractionService.GetAuthenticationRequestContext");
 
@@ -34,7 +34,7 @@ internal class DefaultSamlInteractionService(
             return null;
         }
 
-        var sp = await serviceProviderStore.FindByEntityIdAsync(state.ServiceProviderEntityId);
+        var sp = await serviceProviderStore.FindByEntityIdAsync(state.ServiceProviderEntityId, ct);
         if (sp == null)
         {
             logger.ServiceProviderNotFound(LogLevel.Warning, state.ServiceProviderEntityId);
@@ -52,7 +52,7 @@ internal class DefaultSamlInteractionService(
         };
     }
 
-    public async Task StoreRequestedAuthnContextResultAsync(bool requestedAuthnContextRequirementsWereMet, CT ct = default)
+    public async Task StoreRequestedAuthnContextResultAsync(bool requestedAuthnContextRequirementsWereMet, Ct ct = default)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSamlInteractionService.StoreRequestedAuthnContextResult");
 

@@ -16,7 +16,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
 internal static class SamlTestHelpers
 {
-    public static async Task<string> EncodeRequest(string authenticationRequest, CT ct = default)
+    public static async Task<string> EncodeRequest(string authenticationRequest, Ct ct = default)
     {
         var bytes = Encoding.UTF8.GetBytes(authenticationRequest);
         using var outputStream = new MemoryStream();
@@ -37,7 +37,7 @@ internal static class SamlTestHelpers
     /// <summary>
     /// Extracts SAML error response from an HTTP-POST binding auto-submit form.
     /// </summary>
-    public static async Task<SamlErrorResponseData> ExtractSamlErrorFromPostAsync(HttpResponseMessage response, CT ct = default)
+    public static async Task<SamlErrorResponseData> ExtractSamlErrorFromPostAsync(HttpResponseMessage response, Ct ct = default)
     {
         var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
@@ -58,7 +58,7 @@ internal static class SamlTestHelpers
         };
     }
 
-    public static async Task<SamlLogoutResponseData> ExtractSamlLogoutResponseFromPostAsync(HttpResponseMessage response, CT ct = default)
+    public static async Task<SamlLogoutResponseData> ExtractSamlLogoutResponseFromPostAsync(HttpResponseMessage response, Ct ct = default)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -81,7 +81,7 @@ internal static class SamlTestHelpers
         };
     }
 
-    public static async Task<SamlSuccessResponseData> ExtractSamlSuccessFromPostAsync(HttpResponseMessage response, CT ct = default)
+    public static async Task<SamlSuccessResponseData> ExtractSamlSuccessFromPostAsync(HttpResponseMessage response, Ct ct = default)
     {
         var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
@@ -105,7 +105,7 @@ internal static class SamlTestHelpers
         };
     }
 
-    public static async Task<(string responseXml, string? relayState, string acsUrl)> ExtractSamlResponse(HttpResponseMessage response, CT ct = default)
+    public static async Task<(string responseXml, string? relayState, string acsUrl)> ExtractSamlResponse(HttpResponseMessage response, Ct ct = default)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
@@ -821,7 +821,7 @@ internal static class SamlTestHelpers
     public static async Task<SamlSuccessResponseData> ExtractAndDecryptSamlSuccessFromPostAsync(
         HttpResponseMessage response,
         X509Certificate2 decryptionCertificate,
-        CT ct = default)
+        Ct ct = default)
     {
         var (responseXml, relayState, acsUrl) = await ExtractSamlResponse(response, ct);
         var (samlpNs, samlNs, responseElement) = ParseSamlResponseXml(responseXml);

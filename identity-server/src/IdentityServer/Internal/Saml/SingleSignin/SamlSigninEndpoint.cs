@@ -34,7 +34,7 @@ internal class SamlSigninEndpoint(
 
     internal async Task<IEndpointResult> ProcessSpInitiatedSignin(
         SamlSigninRequest signinRequest,
-        CT ct = default)
+        Ct ct = default)
     {
         logger.StartSamlSigninRequest(LogLevel.Debug);
 

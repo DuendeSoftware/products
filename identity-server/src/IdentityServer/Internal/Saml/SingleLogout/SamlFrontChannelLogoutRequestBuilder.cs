@@ -24,7 +24,8 @@ internal class SamlFrontChannelLogoutRequestBuilder(
         string nameId,
         string? nameIdFormat,
         string sessionIndex,
-        string issuer)
+        string issuer,
+        Ct ct)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
@@ -48,8 +49,8 @@ internal class SamlFrontChannelLogoutRequestBuilder(
 
         return serviceProvider.SingleLogoutServiceUrl.Binding switch
         {
-            SamlBinding.HttpRedirect => await BuildRedirectLogoutRequest(serviceProvider.SingleLogoutServiceUrl.Location, requestXml),
-            SamlBinding.HttpPost => await BuildHttpPostLogoutRequest(serviceProvider, requestXml),
+            SamlBinding.HttpRedirect => await BuildRedirectLogoutRequest(serviceProvider.SingleLogoutServiceUrl.Location, requestXml, ct),
+            SamlBinding.HttpPost => await BuildHttpPostLogoutRequest(serviceProvider, requestXml, ct),
             _ => throw new InvalidOperationException(
                 $"Binding '{serviceProvider.SingleLogoutServiceUrl.Binding}' is not supported")
         };
@@ -106,13 +107,13 @@ internal class SamlFrontChannelLogoutRequestBuilder(
         return requestElement;
     }
 
-    private async Task<ISamlFrontChannelLogout> BuildRedirectLogoutRequest(Uri singleLogoutServiceUri, XElement requestXml)
+    private async Task<ISamlFrontChannelLogout> BuildRedirectLogoutRequest(Uri singleLogoutServiceUri, XElement requestXml, Ct ct)
     {
         var encodedRequest = DeflateAndEncode(requestXml.ToString());
 
         var queryString = $"?SAMLRequest={Uri.EscapeDataString(encodedRequest)}";
 
-        var signedQueryString = await samlProtocolMessageSigner.SignQueryString(queryString);
+        var signedQueryString = await samlProtocolMessageSigner.SignQueryString(queryString, ct);
 
         return new SamlHttpRedirectFrontChannelLogout(singleLogoutServiceUri, signedQueryString);
     }
@@ -130,9 +131,9 @@ internal class SamlFrontChannelLogoutRequestBuilder(
         return Convert.ToBase64String(output.ToArray());
     }
 
-    private async Task<ISamlFrontChannelLogout> BuildHttpPostLogoutRequest(SamlServiceProvider serviceProvider, XElement requestXml)
+    private async Task<ISamlFrontChannelLogout> BuildHttpPostLogoutRequest(SamlServiceProvider serviceProvider, XElement requestXml, Ct ct)
     {
-        var signedRequestXml = await samlProtocolMessageSigner.SignProtocolMessage(requestXml, serviceProvider);
+        var signedRequestXml = await samlProtocolMessageSigner.SignProtocolMessage(requestXml, serviceProvider, ct);
 
         var encodedXml = Convert.ToBase64String(Encoding.UTF8.GetBytes(signedRequestXml));
 

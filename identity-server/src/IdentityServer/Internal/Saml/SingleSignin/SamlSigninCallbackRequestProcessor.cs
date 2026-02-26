@@ -18,7 +18,7 @@ internal class SamlSigninCallbackRequestProcessor(
     SamlUrlBuilder samlUrlBuilder,
     SamlResponseBuilder responseBuilder)
 {
-    internal async Task<Result<SamlSigninSuccess, SamlRequestError<SamlSigninRequest>>> ProcessAsync(CT ct = default)
+    internal async Task<Result<SamlSigninSuccess, SamlRequestError<SamlSigninRequest>>> ProcessAsync(Ct ct = default)
     {
         if (!stateIdCookie.TryGetSamlSigninStateId(out var stateId))
         {
@@ -39,7 +39,7 @@ internal class SamlSigninCallbackRequestProcessor(
             };
         }
 
-        var user = await userSession.GetUserAsync();
+        var user = await userSession.GetUserAsync(ct);
         if (user == null || !user.IsAuthenticated())
         {
             var loginUri = samlUrlBuilder.SamlLoginUri();
@@ -48,7 +48,7 @@ internal class SamlSigninCallbackRequestProcessor(
         }
 
         var samlServiceProvider =
-            await serviceProviderStore.FindByEntityIdAsync(authenticationState.ServiceProviderEntityId);
+            await serviceProviderStore.FindByEntityIdAsync(authenticationState.ServiceProviderEntityId, ct);
 
         if (samlServiceProvider is not { Enabled: true })
         {
@@ -61,7 +61,7 @@ internal class SamlSigninCallbackRequestProcessor(
         }
 
         // Check if this SP already has a session - if so, reuse the SessionIndex
-        var existingSessions = await userSession.GetSamlSessionListAsync();
+        var existingSessions = await userSession.GetSamlSessionListAsync(ct);
         var existingSession = existingSessions.FirstOrDefault(s => s.EntityId == samlServiceProvider.EntityId);
         string sessionIndex;
 
@@ -76,7 +76,7 @@ internal class SamlSigninCallbackRequestProcessor(
             sessionIndex = Guid.NewGuid().ToString("N");
         }
 
-        var samlResponse = await responseBuilder.BuildSuccessResponseAsync(user, samlServiceProvider, authenticationState, sessionIndex);
+        var samlResponse = await responseBuilder.BuildSuccessResponseAsync(user, samlServiceProvider, authenticationState, sessionIndex, ct);
 
         if (string.IsNullOrEmpty(samlResponse.Assertion?.Subject?.NameId?.Value))
         {
@@ -96,7 +96,7 @@ internal class SamlSigninCallbackRequestProcessor(
             NameId = samlResponse.Assertion.Subject.NameId.Value,
             NameIdFormat = samlResponse.Assertion.Subject.NameId.Format
         };
-        await userSession.AddSamlSessionAsync(sessionData);
+        await userSession.AddSamlSessionAsync(sessionData, ct);
 
         stateIdCookie.ClearAuthenticationState();
 

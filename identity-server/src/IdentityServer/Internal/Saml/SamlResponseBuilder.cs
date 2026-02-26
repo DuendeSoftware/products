@@ -133,16 +133,17 @@ internal class SamlResponseBuilder(
         ClaimsPrincipal user,
         SamlServiceProvider samlServiceProvider,
         SamlAuthenticationState samlAuthenticationState,
-        string sessionIndex)
+        string sessionIndex,
+        Ct ct)
     {
         var now = timeProvider.GetUtcNow().DateTime;
         var options = samlOptions.Value;
         var nameId = nameIdGenerator.GenerateNameIdentifier(user, samlServiceProvider, samlAuthenticationState.Request);
-        var attributes = await samlClaimsService.GetMappedAttributesAsync(user, samlServiceProvider);
+        var attributes = await samlClaimsService.GetMappedAttributesAsync(user, samlServiceProvider, ct);
 
         var acsUrl = GetAcsUrl(samlAuthenticationState.Request, samlServiceProvider);
 
-        var issuer = await issuerNameService.GetCurrentAsync();
+        var issuer = await issuerNameService.GetCurrentAsync(ct);
 
         return new SamlResponse
         {

@@ -8,5 +8,5 @@ namespace Duende.IdentityServer.Internal.Saml;
 
 internal class EmptySamlServiceProviderStore : ISamlServiceProviderStore
 {
-    public Task<SamlServiceProvider> FindByEntityIdAsync(string entityId) => Task.FromResult<SamlServiceProvider>(null);
+    public Task<SamlServiceProvider> FindByEntityIdAsync(string entityId, Ct ct) => Task.FromResult<SamlServiceProvider>(null);
 }

@@ -23,7 +23,7 @@ public class SamlSigninEndpointTests
 {
     private const string Category = "SAML Signin Endpoint";
 
-    private readonly CT _ct = CT.None;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private SamlFixture Fixture = new();
 

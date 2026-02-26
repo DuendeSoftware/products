@@ -12,6 +12,8 @@ public class SamlSingleLogoutCallbackEndpointTests
 {
     private const string Category = "SAML single logout callback endpoint";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private SamlFixture Fixture = new();
 
     private SamlData Data => Fixture.Data;
@@ -27,7 +29,7 @@ public class SamlSingleLogoutCallbackEndpointTests
         await Fixture.InitializeAsync();
 
         // Act
-        var result = await Fixture.Client.PostAsync("/saml/logout_callback", new StringContent(""), CT.None);
+        var result = await Fixture.Client.PostAsync("/saml/logout_callback", new StringContent(""), _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.MethodNotAllowed);
@@ -42,7 +44,7 @@ public class SamlSingleLogoutCallbackEndpointTests
         await Fixture.InitializeAsync();
 
         // Act
-        var result = await Fixture.Client.GetAsync("/saml/logout_callback", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/logout_callback", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -57,7 +59,7 @@ public class SamlSingleLogoutCallbackEndpointTests
         await Fixture.InitializeAsync();
 
         // Act
-        var result = await Fixture.Client.GetAsync("/saml/logout_callback?logoutId=invalid", CT.None);
+        var result = await Fixture.Client.GetAsync("/saml/logout_callback?logoutId=invalid", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -82,13 +84,13 @@ public class SamlSingleLogoutCallbackEndpointTests
             SamlRelayState = null
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
-        var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow));
+        var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout_callback?logoutId={logoutId}", CT.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout_callback?logoutId={logoutId}", _ct);
 
         // Assert
-        var samlResponse = await SamlTestHelpers.ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
+        var samlResponse = await SamlTestHelpers.ExtractSamlLogoutResponseFromPostAsync(result, _ct);
         samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
@@ -110,13 +112,13 @@ public class SamlSingleLogoutCallbackEndpointTests
             SamlRelayState = "mystate123"
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
-        var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow));
+        var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout_callback?logoutId={logoutId}", CT.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout_callback?logoutId={logoutId}", _ct);
 
         // Assert
-        var response = await SamlTestHelpers.ExtractSamlLogoutResponseFromPostAsync(result, CT.None);
+        var response = await SamlTestHelpers.ExtractSamlLogoutResponseFromPostAsync(result, _ct);
         response.RelayState.ShouldBe(logoutMessage.SamlRelayState);
     }
 
@@ -138,10 +140,10 @@ public class SamlSingleLogoutCallbackEndpointTests
             SamlLogoutRequestId = "_abc123"
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
-        var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow));
+        var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/logout_callback?logoutId={logoutId}", CT.None);
+        var result = await Fixture.Client.GetAsync($"/saml/logout_callback?logoutId={logoutId}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);

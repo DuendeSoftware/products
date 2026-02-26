@@ -364,7 +364,7 @@ public class DefaultUserSession : IUserSession
     }
 
     /// <inheritdoc/>
-    public virtual async Task AddSamlSessionAsync(SamlSpSessionData session)
+    public virtual async Task AddSamlSessionAsync(SamlSpSessionData session, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(session);
 
@@ -377,7 +377,7 @@ public class DefaultUserSession : IUserSession
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync()
+    public virtual async Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync(Ct ct)
     {
         await AuthenticateAsync();
 
@@ -397,7 +397,7 @@ public class DefaultUserSession : IUserSession
     }
 
     /// <inheritdoc/>
-    public virtual async Task RemoveSamlSessionAsync(string entityId)
+    public virtual async Task RemoveSamlSessionAsync(string entityId, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(entityId);
 

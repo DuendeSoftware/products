@@ -17,9 +17,10 @@ internal class LogoutResponseBuilder(
     internal async Task<LogoutResponse> BuildSuccessResponseAsync(
         string logoutRequestId,
         SamlServiceProvider serviceProvider,
-        string? relayState)
+        string? relayState,
+        Ct ct)
     {
-        var issuer = await issuerNameService.GetCurrentAsync();
+        var issuer = await issuerNameService.GetCurrentAsync(ct);
         var destination = serviceProvider.SingleLogoutServiceUrl ?? throw new InvalidOperationException("No SingleLogout service url configured");
 
         return new LogoutResponse
@@ -41,9 +42,10 @@ internal class LogoutResponseBuilder(
     internal async Task<LogoutResponse> BuildErrorResponseAsync(
         SamlLogoutRequest request,
         SamlServiceProvider serviceProvider,
-        SamlError error)
+        SamlError error,
+        Ct ct)
     {
-        var issuer = await issuerNameService.GetCurrentAsync();
+        var issuer = await issuerNameService.GetCurrentAsync(ct);
         var destination = serviceProvider.SingleLogoutServiceUrl ?? throw new InvalidOperationException("No SingleLogout service url configured");
 
         return new LogoutResponse

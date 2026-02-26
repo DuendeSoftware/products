@@ -20,6 +20,8 @@ public class SamlLogoutNotificationServiceTests
 {
     private const string Category = "SAML Logout Notification Service";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private readonly MockUserSession _userSession = new();
     private readonly TestIssuerNameService _issuerNameService = new();
 
@@ -70,7 +72,7 @@ public class SamlLogoutNotificationServiceTests
         };
         var subject = CreateSubject();
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.ShouldBeEmpty();
     }
@@ -95,7 +97,7 @@ public class SamlLogoutNotificationServiceTests
         };
         var subject = CreateSubject();
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.ShouldBeEmpty();
     }
@@ -121,7 +123,7 @@ public class SamlLogoutNotificationServiceTests
         };
         var subject = CreateSubject(sp);
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.ShouldBeEmpty();
     }
@@ -147,7 +149,7 @@ public class SamlLogoutNotificationServiceTests
         };
         var subject = CreateSubject(sp);
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.ShouldBeEmpty();
     }
@@ -172,7 +174,7 @@ public class SamlLogoutNotificationServiceTests
         };
         var subject = CreateSubject(sp);
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.ShouldHaveSingleItem();
     }
@@ -205,7 +207,7 @@ public class SamlLogoutNotificationServiceTests
         };
         var subject = CreateSubject(sp1, sp2);
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.Count().ShouldBe(2);
     }
@@ -236,7 +238,7 @@ public class SamlLogoutNotificationServiceTests
 
         var subject = CreateSubject(sp);
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.ShouldHaveSingleItem();
     }
@@ -274,7 +276,7 @@ public class SamlLogoutNotificationServiceTests
 
         var subject = CreateSubject(sp1, sp2);
 
-        var result = await subject.GetSamlFrontChannelLogoutsAsync(context);
+        var result = await subject.GetSamlFrontChannelLogoutsAsync(context, _ct);
 
         result.Count().ShouldBe(2);
     }

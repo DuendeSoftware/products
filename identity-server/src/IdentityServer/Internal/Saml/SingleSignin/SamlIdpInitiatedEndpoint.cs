@@ -40,7 +40,7 @@ internal class SamlIdpInitiatedEndpoint(
     internal async Task<IEndpointResult> ProcessInternalAsync(
         string spEntityId,
         string? relayState,
-        CT ct = default)
+        Ct ct = default)
     {
         logger.StartIdpInitiatedRequest(LogLevel.Debug, spEntityId);
 

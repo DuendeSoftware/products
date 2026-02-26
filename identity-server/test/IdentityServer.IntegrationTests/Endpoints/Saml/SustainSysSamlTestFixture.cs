@@ -23,6 +23,8 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
 internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifetime
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     public KestrelTestHost? IdpHost;
     public KestrelTestHost? SpHost;
     public HttpClient? BrowserClient;
@@ -37,7 +39,7 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
     {
         _userToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id"), new Claim("name", "Test User"), new Claim(JwtClaimTypes.AuthenticationMethod, "urn:oasis:names:tc:SAML:2.0:ac:classes:Password")], "Test"));
-        await BrowserClient!.GetAsync($"{IdpHost!.Uri()}/__signin", CT.None);
+        await BrowserClient!.GetAsync($"{IdpHost!.Uri()}/__signin", _ct);
     }
 
     public void GenerateSigningCertificate() =>
@@ -132,7 +134,7 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
                     ctx.Response.StatusCode = 204;
                 });
             },
-            CT.None);
+            _ct);
     }
 
     private async Task InitializeServiceProvider(string identityProviderHostUri, X509Certificate2? signingCertificate = null) => SpHost = await KestrelTestHost.Create(output,
@@ -183,7 +185,7 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
                     await context.Response.WriteAsync(userId.Value, context.RequestAborted);
                 }).RequireAuthorization();
             },
-            CT.None);
+            _ct);
 
     public async ValueTask DisposeAsync()
     {
