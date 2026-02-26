@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class CustomResponseExtensionGrantValidator : IExtensionGrantValidator
 {
-    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct)
+    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct _)
     {
         var response = new Dictionary<string, object>
         {

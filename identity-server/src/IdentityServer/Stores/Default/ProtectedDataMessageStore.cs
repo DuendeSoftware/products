@@ -40,7 +40,7 @@ public class ProtectedDataMessageStore<TModel> : IMessageStore<TModel>
     }
 
     /// <inheritdoc />
-    public virtual Task<Message<TModel>> ReadAsync(string value, Ct ct)
+    public virtual Task<Message<TModel>> ReadAsync(string value, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ProtectedDataMessageStore.Read");
 
@@ -65,7 +65,7 @@ public class ProtectedDataMessageStore<TModel> : IMessageStore<TModel>
     }
 
     /// <inheritdoc />
-    public virtual Task<string> WriteAsync(Message<TModel> message, Ct ct)
+    public virtual Task<string> WriteAsync(Message<TModel> message, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ProtectedDataMessageStore.Write");
 

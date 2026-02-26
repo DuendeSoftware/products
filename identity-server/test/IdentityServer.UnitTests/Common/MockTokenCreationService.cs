@@ -12,7 +12,7 @@ internal class MockTokenCreationService : ITokenCreationService
     public string TokenResult { get; set; }
     public Token Token { get; set; }
 
-    public Task<string> CreateTokenAsync(Token token, Ct ct)
+    public Task<string> CreateTokenAsync(Token token, Ct _)
     {
         Token = token;
         return Task.FromResult(TokenResult);

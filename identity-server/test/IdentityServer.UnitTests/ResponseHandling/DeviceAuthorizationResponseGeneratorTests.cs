@@ -193,7 +193,7 @@ internal class FakeUserCodeGenerator : IUserCodeGenerator
         set => retryLimit = value;
     }
 
-    public Task<string> GenerateAsync(Ct ct)
+    public Task<string> GenerateAsync(Ct _)
     {
         if (tryCount == 0)
         {

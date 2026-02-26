@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class CustomResponseResourceOwnerValidator : IResourceOwnerPasswordValidator
 {
-    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct ct)
+    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct _)
     {
         var response = new Dictionary<string, object>
         {

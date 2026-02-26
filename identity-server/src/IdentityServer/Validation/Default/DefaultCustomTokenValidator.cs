@@ -37,8 +37,8 @@ public class DefaultCustomTokenValidator : ICustomTokenValidator
     /// The validation result
     /// </returns>
     /// <inheritdoc/>
-    public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result, Ct ct) => Task.FromResult(result);
+    public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result, Ct _) => Task.FromResult(result);
 
     /// <inheritdoc/>
-    public virtual Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result, Ct ct) => Task.FromResult(result);
+    public virtual Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result, Ct _) => Task.FromResult(result);
 }

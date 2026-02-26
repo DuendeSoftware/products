@@ -56,7 +56,7 @@ public class NetworkHandler : HttpMessageHandler
 
     public NetworkHandler(Func<HttpRequestMessage, HttpResponseMessage> action) => _action = action;
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct _)
     {
         Request = request;
         Body = await SafeReadContentFrom(request);

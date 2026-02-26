@@ -11,5 +11,5 @@ internal class StubAuthorizeResponseGenerator : IAuthorizeResponseGenerator
 {
     public AuthorizeResponse Response { get; set; } = new AuthorizeResponse();
 
-    public Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, Ct ct) => Task.FromResult(Response);
+    public Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, Ct _) => Task.FromResult(Response);
 }

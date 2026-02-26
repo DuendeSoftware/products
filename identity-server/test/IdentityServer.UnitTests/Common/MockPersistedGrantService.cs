@@ -12,9 +12,9 @@ public class MockPersistedGrantService : IPersistedGrantService
     public IEnumerable<Grant> GetAllGrantsResult { get; set; }
     public bool RemoveAllGrantsWasCalled { get; set; }
 
-    public Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId, Ct ct) => Task.FromResult(GetAllGrantsResult ?? Enumerable.Empty<Grant>());
+    public Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId, Ct _) => Task.FromResult(GetAllGrantsResult ?? Enumerable.Empty<Grant>());
 
-    public Task RemoveAllGrantsAsync(string subjectId, Ct ct, string clientId = null, string sessionId = null)
+    public Task RemoveAllGrantsAsync(string subjectId, Ct _, string clientId = null, string sessionId = null)
     {
         RemoveAllGrantsWasCalled = true;
         return Task.CompletedTask;

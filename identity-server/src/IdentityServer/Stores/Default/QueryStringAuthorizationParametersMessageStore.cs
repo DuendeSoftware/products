@@ -10,18 +10,18 @@ namespace Duende.IdentityServer.Stores;
 // internal just for testing
 internal class QueryStringAuthorizationParametersMessageStore : IAuthorizationParametersMessageStore
 {
-    public Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, Ct ct)
+    public Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, Ct _)
     {
         var queryString = message.Data.FromFullDictionary().ToQueryString();
         return Task.FromResult(queryString);
     }
 
-    public Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, Ct ct)
+    public Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, Ct _)
     {
         var values = id.ReadQueryStringAsNameValueCollection();
         var msg = new Message<IDictionary<string, string[]>>(values.ToFullDictionary());
         return Task.FromResult(msg);
     }
 
-    public Task DeleteAsync(string id, Ct ct) => Task.CompletedTask;
+    public Task DeleteAsync(string id, Ct _) => Task.CompletedTask;
 }

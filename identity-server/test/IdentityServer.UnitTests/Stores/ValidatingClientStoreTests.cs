@@ -182,7 +182,7 @@ public class ValidatingClientStoreTests
             _errorMessage = errorMessage;
         }
 
-        public Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct)
+        public Task ValidateAsync(ClientConfigurationValidationContext context, Ct _)
         {
             var isValid = _validationFunc != null ? _validationFunc(context.Client) : _isValid;
 
@@ -201,7 +201,7 @@ public class ValidatingClientStoreTests
 
         public bool CanRaiseEventType(EventTypes evtType) => true;
 
-        public Task RaiseAsync(Event evt, Ct ct)
+        public Task RaiseAsync(Event evt, Ct _)
         {
             RaisedEventCount++;
             return Task.CompletedTask;

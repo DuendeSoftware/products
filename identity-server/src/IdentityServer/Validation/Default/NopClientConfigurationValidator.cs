@@ -17,7 +17,7 @@ public class NopClientConfigurationValidator : IClientConfigurationValidator
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct)
+    public Task ValidateAsync(ClientConfigurationValidationContext context, Ct _)
     {
         context.IsValid = true;
         return Task.CompletedTask;

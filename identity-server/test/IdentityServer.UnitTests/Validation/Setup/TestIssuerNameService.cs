@@ -12,5 +12,5 @@ internal class TestIssuerNameService : IIssuerNameService
 
     public TestIssuerNameService(string value = null) => _value = value ?? "https://identityserver";
 
-    public Task<string> GetCurrentAsync(Ct ct) => Task.FromResult(_value);
+    public Task<string> GetCurrentAsync(Ct _) => Task.FromResult(_value);
 }

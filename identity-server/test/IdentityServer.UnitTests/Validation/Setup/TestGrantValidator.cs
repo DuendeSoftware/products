@@ -28,7 +28,7 @@ internal class TestGrantValidator : IExtensionGrantValidator
         return Task.FromResult(new GrantValidationResult("bob", "CustomGrant"));
     }
 
-    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct)
+    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct _)
     {
         if (_isInvalid)
         {

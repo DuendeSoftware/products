@@ -1702,7 +1702,7 @@ public class MockAuthzInteractionService : IAuthorizeInteractionResponseGenerato
     public InteractionResponse Response { get; set; } = new InteractionResponse();
     public ValidatedAuthorizeRequest Request { get; internal set; }
 
-    public Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, Ct ct)
+    public Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, Ct _)
     {
         Request = request;
         return Task.FromResult(Response);

@@ -28,7 +28,7 @@ public class NotSupportedResourceOwnerPasswordValidator : IResourceOwnerPassword
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <inheritdoc/>
-    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct ct)
+    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct _)
     {
         context.Result = new GrantValidationResult(TokenRequestErrors.UnsupportedGrantType);
 

@@ -14,13 +14,13 @@ internal class MockSigningKeyStoreCache : ISigningKeyStoreCache
     public bool StoreKeysAsyncWasCalled { get; set; }
     public TimeSpan StoreKeysAsyncDuration { get; set; }
 
-    public Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct ct)
+    public Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct _)
     {
         GetKeysAsyncWasCalled = true;
         return Task.FromResult(Cache.AsEnumerable());
     }
 
-    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct ct)
+    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct _)
     {
         StoreKeysAsyncWasCalled = true;
         StoreKeysAsyncDuration = duration;

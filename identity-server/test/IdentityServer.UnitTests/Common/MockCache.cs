@@ -12,7 +12,7 @@ public class MockCache<T> : ICache<T>
     public Dictionary<string, T> Items { get; set; } = new Dictionary<string, T>();
 
 
-    public Task<T> GetAsync(string key, Ct ct)
+    public Task<T> GetAsync(string key, Ct _)
     {
         Items.TryGetValue(key, out var item);
         return Task.FromResult(item);
@@ -29,13 +29,13 @@ public class MockCache<T> : ICache<T>
         return item;
     }
 
-    public Task RemoveAsync(string key, Ct ct)
+    public Task RemoveAsync(string key, Ct _)
     {
         Items.Remove(key);
         return Task.CompletedTask;
     }
 
-    public Task SetAsync(string key, T item, TimeSpan expiration, Ct ct)
+    public Task SetAsync(string key, T item, TimeSpan expiration, Ct _)
     {
         Items[key] = item;
         return Task.CompletedTask;

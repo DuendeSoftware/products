@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class DynamicParameterExtensionGrantValidator : IExtensionGrantValidator
 {
-    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct)
+    public Task ValidateAsync(ExtensionGrantValidationContext context, Ct _)
     {
         var impersonatedClient = context.Request.Raw.Get("impersonated_client");
         var lifetime = context.Request.Raw.Get("lifetime");

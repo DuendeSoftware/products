@@ -24,7 +24,7 @@ public class InMemoryClientConfigurationStore : IClientConfigurationStore
     /// registered in the DI system as an ICollection.</param>
     public InMemoryClientConfigurationStore(ICollection<Client> clients) => _clients = clients;
     /// <inheritdoc/>
-    public Task AddAsync(Client client, Ct ct)
+    public Task AddAsync(Client client, Ct _)
     {
         if (_clients.Select(c => c.ClientId).Contains(client.ClientId))
         {

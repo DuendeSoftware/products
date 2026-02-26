@@ -13,13 +13,13 @@ public class TestReplayCache : IReplayCache
 
     public TestReplayCache(TimeProvider clock) => _timeProvider = clock;
 
-    public Task AddAsync(string purpose, string handle, DateTimeOffset expiration, Ct ct)
+    public Task AddAsync(string purpose, string handle, DateTimeOffset expiration, Ct _)
     {
         _values[purpose + handle] = expiration;
         return Task.CompletedTask;
     }
 
-    public Task<bool> ExistsAsync(string purpose, string handle, Ct ct)
+    public Task<bool> ExistsAsync(string purpose, string handle, Ct _)
     {
         if (_values.TryGetValue(purpose + handle, out var expiration))
         {

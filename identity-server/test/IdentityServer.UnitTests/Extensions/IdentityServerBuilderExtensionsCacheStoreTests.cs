@@ -22,15 +22,15 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
 
     private class CustomResourceStore : IResourceStore
     {
-        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct _) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct _) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct _) => throw new System.NotImplementedException();
 
-        public Task<Resources> GetAllResourcesAsync(Ct ct) => throw new System.NotImplementedException();
+        public Task<Resources> GetAllResourcesAsync(Ct _) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct) => throw new System.NotImplementedException();
+        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct _) => throw new System.NotImplementedException();
     }
 
     [Fact]

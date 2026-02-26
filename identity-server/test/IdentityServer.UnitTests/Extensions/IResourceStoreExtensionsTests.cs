@@ -148,7 +148,7 @@ public class IResourceStoreExtensionsTests
         public List<ApiResource> ApiResources { get; set; } = new List<ApiResource>();
         public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct ct)
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct _)
         {
             var apis = from a in ApiResources
                        where names.Contains(a.Name)
@@ -156,7 +156,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(apis);
         }
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> names, Ct ct)
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
         {
             ArgumentNullException.ThrowIfNull(names);
 
@@ -167,7 +167,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(api);
         }
 
-        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> names, Ct ct)
+        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
         {
             ArgumentNullException.ThrowIfNull(names);
 
@@ -178,7 +178,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(identity);
         }
 
-        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
+        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct _)
         {
             var q = from x in ApiScopes
                     where scopeNames.Contains(x.Name)
@@ -186,7 +186,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(q);
         }
 
-        public Task<Resources> GetAllResourcesAsync(Ct ct)
+        public Task<Resources> GetAllResourcesAsync(Ct _)
         {
             var result = new Resources(IdentityResources, ApiResources, ApiScopes);
             return Task.FromResult(result);
