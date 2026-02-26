@@ -19,7 +19,7 @@ internal sealed class DocsSearchTool(McpDb db)
         [Description("The search query. Keep it concise and specific to increase the likelihood of a match.")] string query)
     {
         var results = await db.FTSDocsArticle
-            .FromSqlRaw("SELECt * FROM FTSDocsArticle WHERE Title MATCH {0} OR Content MATCH {0} OR Product MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query))
+            .FromSqlRaw("SELECT * FROM FTSDocsArticle WHERE Title MATCH {0} OR Content MATCH {0} OR Product MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query))
             .AsNoTracking()
             .Take(6)
             .ToListAsync();
@@ -49,7 +49,7 @@ internal sealed class DocsSearchTool(McpDb db)
         [Description("The document id.")] string id)
     {
         var result = await db.FTSDocsArticle
-            .FromSqlRaw("SELECt * FROM FTSDocsArticle WHERE Id = {0} ORDER BY rank", id)
+            .FromSqlRaw("SELECT * FROM FTSDocsArticle WHERE Id = {0} ORDER BY rank", id)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 

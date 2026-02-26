@@ -80,7 +80,7 @@ public class ConformanceReportIntegrationTests : IAsyncLifetime
 
         var html = await response.Content.ReadAsStringAsync();
         html.ShouldNotBeEmpty();
-        html.ShouldContain("<!DOCtYPE html>");
+        html.ShouldContain("<!DOCTYPE html>");
         html.ShouldContain("OAuth 2.1");
         html.ShouldContain("FAPI 2.0");
     }

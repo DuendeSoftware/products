@@ -111,7 +111,7 @@ internal static class NameValueCollectionExtensions
             {
                 if (nameFilter.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
-                    value = "***REDACtED***";
+                    value = "***REDACTED***";
                 }
                 dict.Add(name, value);
             }

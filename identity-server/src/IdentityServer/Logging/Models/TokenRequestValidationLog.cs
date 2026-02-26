@@ -50,7 +50,7 @@ internal class TokenRequestValidationLog
         }
         else if (request.UserName.IsPresent())
         {
-            UserName = "***REDACtED***";
+            UserName = "***REDACTED***";
         }
     }
 
