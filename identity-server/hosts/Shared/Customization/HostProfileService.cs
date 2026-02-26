@@ -14,7 +14,7 @@ public class HostProfileService(TestUserStore users, ILogger<TestUserProfileServ
         ArgumentNullException.ThrowIfNull(context);
         await base.GetProfileDataAsync(context, ct);
 
-        var transaction = context.RequestedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == "transaction");
+        var transaction = context.RequestedResources?.ParsedScopes.FirstOrDefault(x => x.ParsedName == "transaction");
         if (transaction?.ParsedParameter != null)
         {
             context.IssuedClaims.Add(new Claim("transaction_id", transaction.ParsedParameter));

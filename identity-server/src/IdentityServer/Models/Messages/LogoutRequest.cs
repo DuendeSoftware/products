@@ -7,6 +7,7 @@
 using System.Collections.Specialized;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Saml.Models;
 using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Models;
@@ -47,6 +48,7 @@ public class LogoutMessage
             SubjectId = request.Subject?.GetSubjectId();
             SessionId = request.SessionId;
             ClientIds = request.ClientIds;
+            SamlSessions = request.SamlSessions;
             UiLocales = request.UiLocales;
 
             if (request.PostLogOutUri != null)
@@ -91,6 +93,30 @@ public class LogoutMessage
     public IEnumerable<string>? ClientIds { get; set; }
 
     /// <summary>
+    /// Gets or sets the EntityId of the SAML Service Provider that initiated logout.
+    /// Null if this is not a SAML-initiated logout.
+    /// </summary>
+    public string? SamlServiceProviderEntityId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the ID of the SAML LogoutRequest being responded to.
+    /// Null if this is not a SAML-initiated logout.
+    /// </summary>
+    public string? SamlLogoutRequestId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SAML RelayState parameter to return to the SP.
+    /// Null if this is not a SAML-initiated logout or no RelayState was provided.
+    /// </summary>
+    public string? SamlRelayState { get; set; }
+
+    /// <summary>
+    /// SAML Service Provider sessions for the user at logout time.
+    /// Contains full session data required for logout notifications.
+    /// </summary>
+    public IEnumerable<SamlSpSessionData>? SamlSessions { get; set; }
+
+    /// <summary>
     /// The UI locales.
     /// </summary>
     public string? UiLocales { get; set; }
@@ -103,7 +129,10 @@ public class LogoutMessage
     /// <summary>
     ///  Flag to indicate if the payload contains useful information or not to avoid serialization.
     /// </summary>
-    internal bool ContainsPayload => ClientId.IsPresent() || ClientIds?.Any() == true;
+    internal bool ContainsPayload => ClientId.IsPresent()
+        || ClientIds?.Any() == true
+        || SamlServiceProviderEntityId.IsPresent()
+        || SamlSessions?.Any() == true;
 }
 
 /// <summary>
@@ -127,6 +156,10 @@ public class LogoutRequest
             SessionId = message.SessionId;
             ClientIds = message.ClientIds;
             UiLocales = message.UiLocales;
+            SamlServiceProviderEntityId = message.SamlServiceProviderEntityId;
+            SamlLogoutRequestId = message.SamlLogoutRequestId;
+            SamlRelayState = message.SamlRelayState;
+            SamlSessions = message.SamlSessions;
             Parameters = message.Parameters.FromFullDictionary();
         }
 
@@ -162,6 +195,30 @@ public class LogoutRequest
     ///  Ids of clients known to have an authentication session for user at end session time
     /// </summary>
     public IEnumerable<string>? ClientIds { get; set; }
+
+    /// <summary>
+    /// Gets or sets the EntityId of the SAML Service Provider that initiated logout.
+    /// Null if this is not a SAML-initiated logout.
+    /// </summary>
+    public string? SamlServiceProviderEntityId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the ID of the SAML LogoutRequest being responded to.
+    /// Null if this is not a SAML-initiated logout.
+    /// </summary>
+    public string? SamlLogoutRequestId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SAML RelayState parameter to return to the SP.
+    /// Null if this is not a SAML-initiated logout or no RelayState was provided.
+    /// </summary>
+    public string? SamlRelayState { get; set; }
+
+    /// <summary>
+    /// SAML Service Provider sessions for the user at logout time.
+    /// Contains full session data required for logout notifications.
+    /// </summary>
+    public IEnumerable<SamlSpSessionData>? SamlSessions { get; set; }
 
     /// <summary>
     /// The UI locales.

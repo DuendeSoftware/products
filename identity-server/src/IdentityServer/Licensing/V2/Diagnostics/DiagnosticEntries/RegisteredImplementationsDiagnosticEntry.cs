@@ -6,7 +6,10 @@ using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Internal;
+using Duende.IdentityServer.Internal.Saml;
+using Duende.IdentityServer.Internal.Saml.SingleLogout;
 using Duende.IdentityServer.ResponseHandling;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Services.KeyManagement;
@@ -50,6 +53,15 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(ITokenResponseGenerator), [typeof(TokenResponseGenerator)]),
                 new(typeof(ITokenRevocationResponseGenerator), [typeof(TokenRevocationResponseGenerator)]),
                 new(typeof(IUserInfoResponseGenerator), [typeof(UserInfoResponseGenerator)]),
+            ]
+        },
+        {
+            "SAML", [
+                new(typeof(ISamlClaimsMapper), []),
+                new(typeof(ISamlFrontChannelLogout), [typeof(SamlHttpPostFrontChannelLogout), typeof(SamlHttpRedirectFrontChannelLogout)]),
+                new(typeof(ISamlInteractionService),[]),
+                new(typeof(ISamlLogoutNotificationService), [typeof(NopSamlLogoutNotificationService)]),
+                new(typeof(ISamlSigninInteractionResponseGenerator),[]),
             ]
         },
         {
@@ -112,6 +124,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IReferenceTokenStore), [typeof(DefaultReferenceTokenStore)]),
                 new(typeof(IRefreshTokenStore), [typeof(DefaultRefreshTokenStore)]),
                 new(typeof(IResourceStore), [typeof(EmptyResourceStore)]),
+                new(typeof(ISamlServiceProviderStore), [typeof(EmptySamlServiceProviderStore)]),
                 new(typeof(IServerSideSessionsMarker), []),
                 new(typeof(IServerSideSessionStore),[]),
                 new(typeof(IServerSideTicketStore),[]),

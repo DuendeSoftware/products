@@ -8,8 +8,10 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Endpoints.Results;
@@ -29,7 +31,7 @@ public class EndSessionCallbackResultTests
         _context.Request.Host = new HostString("server");
         _context.Response.Body = new MemoryStream();
 
-        _subject = new EndSessionCallbackHttpWriter(_options);
+        _subject = new EndSessionCallbackHttpWriter(_options, new FakeLogger<EndSessionCallbackHttpWriter>());
     }
 
     [Fact]
@@ -112,5 +114,145 @@ public class EndSessionCallbackResultTests
 
         _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"style-src '{IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle}'");
         _context.Response.Headers["X-Content-Security-Policy"].ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task saml_http_redirect_logout_should_render_iframe()
+    {
+        _result.IsError = false;
+        _result.SamlFrontChannelLogouts =
+        [
+            new MockSamlFrontChannelLogout
+            {
+                SamlBinding = SamlBinding.HttpRedirect,
+                Destination = new Uri("https://sp.example.com/slo"),
+                EncodedContent = "SAMLRequest=abc123&SigAlg=xyz&Signature=sig",
+                RelayState = null
+            }
+        ];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        html.ShouldContain("<iframe loading='eager' allow='' src='https://sp.example.com/slo?SAMLRequest=abc123&amp;SigAlg=xyz&amp;Signature=sig'></iframe>");
+    }
+
+    [Fact]
+    public async Task saml_http_post_logout_should_render_iframe_with_srcdoc()
+    {
+        _result.IsError = false;
+        _result.SamlFrontChannelLogouts =
+        [
+            new MockSamlFrontChannelLogout
+            {
+                SamlBinding = SamlBinding.HttpPost,
+                Destination = new Uri("https://sp.example.com/slo"),
+                EncodedContent = "base64encodedlogoutrequest",
+                RelayState = "state123"
+            }
+        ];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        html.ShouldContain("<iframe sandbox=");
+        html.ShouldContain("srcdoc=");
+        html.ShouldContain("https://sp.example.com/slo");
+    }
+
+    [Fact]
+    public async Task mixed_oidc_and_saml_logouts_should_render_all_iframes()
+    {
+        _result.IsError = false;
+        _result.FrontChannelLogoutUrls = ["http://oidc-client.com/logout"];
+        _result.SamlFrontChannelLogouts =
+        [
+            new MockSamlFrontChannelLogout
+            {
+                SamlBinding = SamlBinding.HttpRedirect,
+                Destination = new Uri("https://sp.example.com/slo"),
+                EncodedContent = "SAMLRequest=abc",
+                RelayState = null
+            }
+        ];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        html.ShouldContain("<iframe loading='eager' allow='' src='http://oidc-client.com/logout'></iframe>");
+        html.ShouldContain("<iframe loading='eager' allow='' src='https://sp.example.com/slo?SAMLRequest=abc'></iframe>");
+    }
+
+    [Fact]
+    public async Task multiple_saml_logouts_should_render_multiple_iframes()
+    {
+        _result.IsError = false;
+        _result.SamlFrontChannelLogouts =
+        [
+            new MockSamlFrontChannelLogout
+            {
+                SamlBinding = SamlBinding.HttpRedirect,
+                Destination = new Uri("https://sp1.example.com/slo"),
+                EncodedContent = "SAMLRequest=sp1",
+                RelayState = null
+            },
+            new MockSamlFrontChannelLogout
+            {
+                SamlBinding = SamlBinding.HttpPost,
+                Destination = new Uri("https://sp2.example.com/slo"),
+                EncodedContent = "base64sp2",
+                RelayState = null
+            }
+        ];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        html.ShouldContain("https://sp1.example.com/slo");
+        html.ShouldContain("https://sp2.example.com/slo");
+    }
+
+    [Fact]
+    public async Task saml_logout_with_unknown_binding_should_be_skipped()
+    {
+        _result.IsError = false;
+        _result.SamlFrontChannelLogouts =
+        [
+            new MockSamlFrontChannelLogout
+            {
+                SamlBinding = (SamlBinding)999, // Unknown binding
+                Destination = new Uri("https://sp.example.com/slo"),
+                EncodedContent = "content",
+                RelayState = null
+            }
+        ];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        html.ShouldNotContain("https://sp.example.com/slo");
+    }
+
+    private class MockSamlFrontChannelLogout : ISamlFrontChannelLogout
+    {
+        public required SamlBinding SamlBinding { get; init; }
+        public required Uri Destination { get; init; }
+        public required string EncodedContent { get; init; }
+        public required string RelayState { get; init; }
     }
 }

@@ -118,6 +118,7 @@ void ConfigureWebClients()
     RegisterClientIfEnabled<Projects.MvcHybridBackChannel>("mvc-hybrid-backchannel");
     RegisterClientIfEnabled<Projects.MvcJarJwt>("mvc-jar-jwt");
     RegisterClientIfEnabled<Projects.MvcJarUriJwt>("mvc-jar-uri-jwt");
+    RegisterClientIfEnabled<Projects.MvcSaml>("mvc-saml");
     RegisterClientIfEnabled<Projects.Web>("web");
     RegisterTemplateIfEnabled<Projects.IdentityServerTemplate>("template-is", 7001);
     RegisterTemplateIfEnabled<Projects.IdentityServerEmpty>("template-is-empty", 7002);

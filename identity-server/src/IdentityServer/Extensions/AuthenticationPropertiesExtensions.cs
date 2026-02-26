@@ -4,6 +4,7 @@
 
 using System.Buffers.Text;
 using System.Text;
+using Duende.IdentityServer.Saml.Models;
 using Microsoft.AspNetCore.Authentication;
 
 namespace Duende.IdentityServer.Extensions;
@@ -15,6 +16,7 @@ public static class AuthenticationPropertiesExtensions
 {
     internal const string SessionIdKey = "session_id";
     internal const string ClientListKey = "client_list";
+    internal const string SamlSessionListKey = "saml_session_list";
 
     /// <summary>
     /// Gets the user's session identifier.
@@ -86,7 +88,6 @@ public static class AuthenticationPropertiesExtensions
         }
     }
 
-
     private static IEnumerable<string> DecodeList(string value)
     {
         if (value.IsPresent())
@@ -107,6 +108,102 @@ public static class AuthenticationPropertiesExtensions
             var bytes = Encoding.UTF8.GetBytes(value);
             value = Base64Url.EncodeToString(bytes);
             return value;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Gets the list of SAML SP sessions from the authentication properties.
+    /// </summary>
+    /// <param name="properties"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// For production deployments with many SAML service providers, enable server-side sessions
+    /// to avoid cookie size limitations. Without server-side sessions, the practical limit is
+    /// approximately 5-10 SAML sessions depending on the number of OIDC clients.
+    /// </remarks>
+    public static IEnumerable<SamlSpSessionData> GetSamlSessionList(this AuthenticationProperties properties)
+    {
+        if (properties?.Items.TryGetValue(SamlSessionListKey, out var value) == true && value != null)
+        {
+            return DecodeSamlSessionList(value);
+        }
+
+        return [];
+    }
+
+    /// <summary>
+    /// Sets the list of SAML SP sessions in the authentication properties.
+    /// </summary>
+    /// <param name="properties"></param>
+    /// <param name="sessions"></param>
+    public static void SetSamlSessionList(this AuthenticationProperties properties, IEnumerable<SamlSpSessionData> sessions)
+    {
+        var value = EncodeSamlSessionList(sessions);
+        if (value == null)
+        {
+            properties.Items.Remove(SamlSessionListKey);
+        }
+        else
+        {
+            properties.Items[SamlSessionListKey] = value;
+        }
+    }
+
+    /// <summary>
+    /// Adds a SAML session to the authentication properties.
+    /// This is an upsert operation - if a session for the same EntityId already exists, it is replaced.
+    /// </summary>
+    /// <param name="properties"></param>
+    /// <param name="session"></param>
+    public static void AddSamlSession(this AuthenticationProperties properties, SamlSpSessionData session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        var sessions = properties.GetSamlSessionList().ToList();
+
+        // Remove existing session for this SP if present
+        sessions.RemoveAll(s => s.EntityId == session.EntityId);
+
+        // Add the (potentially updated) session
+        sessions.Add(session);
+        properties.SetSamlSessionList(sessions);
+    }
+
+    /// <summary>
+    /// Removes a SAML session from the authentication properties by EntityId.
+    /// </summary>
+    /// <param name="properties"></param>
+    /// <param name="entityId"></param>
+    public static void RemoveSamlSession(this AuthenticationProperties properties, string entityId)
+    {
+        var sessions = properties.GetSamlSessionList()
+            .Where(s => s.EntityId != entityId)
+            .ToList();
+
+        properties.SetSamlSessionList(sessions);
+    }
+
+    private static SamlSpSessionData[] DecodeSamlSessionList(string value)
+    {
+        if (value.IsPresent())
+        {
+            var bytes = Base64Url.DecodeFromChars(value);
+            var json = Encoding.UTF8.GetString(bytes);
+            return ObjectSerializer.FromString<SamlSpSessionData[]>(json) ?? [];
+        }
+
+        return [];
+    }
+
+    private static string EncodeSamlSessionList(IEnumerable<SamlSpSessionData> list)
+    {
+        if (list != null && list.Any())
+        {
+            var json = ObjectSerializer.ToString(list);
+            var bytes = Encoding.UTF8.GetBytes(json);
+            return Base64Url.EncodeToString(bytes);
         }
 
         return null;

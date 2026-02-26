@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MvcSaml</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; }
+        nav { background: #1a1a2e; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; }
+        nav a { color: #eee; text-decoration: none; font-size: 0.95rem; }
+        nav a:hover { color: #fff; text-decoration: underline; }
+        nav .brand { font-weight: 600; font-size: 1.1rem; color: #fff; }
+        main { padding: 2rem 1.5rem; max-width: 900px; margin: 0 auto; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.875rem; }
+        th { background: #f5f5f5; font-weight: 600; }
+        tr:nth-child(even) td { background: #fafafa; }
+        .btn { display: inline-block; padding: 0.4rem 1rem; background: #1a1a2e; color: #fff; border-radius: 4px; text-decoration: none; font-size: 0.875rem; }
+        .btn:hover { background: #2d2d50; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a class="brand" asp-controller="Home" asp-action="Index">MvcSaml</a>
+        <a asp-controller="Home" asp-action="Index">Home</a>
+        <a asp-controller="Home" asp-action="Secure">Secure</a>
+        @if (Context.User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Home" asp-action="Logout">Logout</a>
+        }
+    </nav>
+    <main>
+        @RenderBody()
+    </main>
+</body>
+</html>

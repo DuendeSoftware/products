@@ -82,14 +82,16 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         if (user != null)
         {
             var clientIds = await _userSession.GetClientListAsync(ct);
-            if (clientIds.Any())
+            var samlSessions = await _userSession.GetSamlSessionListAsync(ct);
+            if (clientIds.Any() || samlSessions.Any())
             {
                 var sid = await _userSession.GetSessionIdAsync(ct);
                 var msg = new Message<LogoutMessage>(new LogoutMessage
                 {
                     SubjectId = user.GetSubjectId(),
                     SessionId = sid,
-                    ClientIds = clientIds
+                    ClientIds = clientIds,
+                    SamlSessions = samlSessions
                 }, _timeProvider.GetUtcNow().UtcDateTime);
                 var id = await _logoutMessageStore.WriteAsync(msg, ct);
                 return id;

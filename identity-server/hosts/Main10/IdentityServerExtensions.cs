@@ -78,7 +78,9 @@ internal static class IdentityServerExtensions
                     Scope = "openid profile"
                 }
             ])
-            .AddLicenseSummary();
+            .AddLicenseSummary()
+            .AddSaml()
+            .AddInMemorySamlServiceProviders(SamlServiceProviders.Get());
 
         builder.Services.AddIdentityServerConfiguration(opt => { })
             .AddInMemoryClientConfigurationStore();

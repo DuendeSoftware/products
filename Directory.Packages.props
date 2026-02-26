@@ -98,6 +98,7 @@
     <PackageVersion Include="SimpleFeedReader" Version="2.0.4" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Json" Version="0.53.0" />
+    <PackageVersion Include="Sustainsys.Saml2.AspNetCore2" Version="2.11.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />

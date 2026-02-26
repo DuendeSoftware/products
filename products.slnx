@@ -132,6 +132,7 @@
     <Project Path="identity-server/clients/src/MvcHybridBackChannel/MvcHybridBackChannel.csproj" />
     <Project Path="identity-server/clients/src/MvcJarJwt/MvcJarJwt.csproj" />
     <Project Path="identity-server/clients/src/MvcJarUriJwt/MvcJarUriJwt.csproj" />
+    <Project Path="identity-server/clients/src/MvcSaml/MvcSaml.csproj" />
     <Project Path="identity-server/clients/src/Web/Web.csproj" />
     <Project Path="identity-server/clients/src/WindowsConsoleSystemBrowser/WindowsConsoleSystemBrowser.csproj" />
   </Folder>
@@ -165,6 +166,7 @@
     <Project Path="identity-server/src/Configuration/IdentityServer.Configuration.csproj" />
     <Project Path="identity-server/src/EntityFramework.Storage/IdentityServer.EntityFramework.Storage.csproj" />
     <Project Path="identity-server/src/EntityFramework/IdentityServer.EntityFramework.csproj" />
+    <Project Path="identity-server/src/IdentityServer.ConformanceReport/IdentityServer.ConformanceReport.csproj" />
     <Project Path="identity-server/src/IdentityServer/IdentityServer.csproj" />
     <Project Path="identity-server/src/Storage/IdentityServer.Storage.csproj" />
   </Folder>

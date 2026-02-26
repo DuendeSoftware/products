@@ -16,6 +16,7 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Hosting.FederatedSignOut;
 using Duende.IdentityServer.Internal;
+using Duende.IdentityServer.Internal.Saml;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
@@ -23,6 +24,7 @@ using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Services.KeyManagement;
@@ -209,6 +211,12 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserValidator, NopBackchannelAuthenticationUserValidator>();
+
+        // Register no-op SAML services for services used in logout paths
+        // These are replaced by actual implementations in AddSaml and ISamlServiceProviderStore
+        // can be replaced with a call to AddSamlServiceProviderStore
+        builder.Services.TryAddTransient<ISamlServiceProviderStore, EmptySamlServiceProviderStore>();
+        builder.Services.TryAddScoped<ISamlLogoutNotificationService, NopSamlLogoutNotificationService>();
 
         builder.Services.TryAddSingleton(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
 
