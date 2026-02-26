@@ -18,15 +18,16 @@ public static class SecurityStampValidatorCallback
     /// <param name="sessionClaimsFilter">Instance of session claims filter used to filter the claims from the ClaimsPrincipal to
     /// those that are session claims which are not persisted by ASP.NET Identity and would otherwise bee lost when the principal
     /// is updated.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task UpdatePrincipal(SecurityStampRefreshingPrincipalContext context, ISessionClaimsFilter sessionClaimsFilter)
+    public static async Task UpdatePrincipal(SecurityStampRefreshingPrincipalContext context, ISessionClaimsFilter sessionClaimsFilter, Ct ct)
     {
         if (context.NewPrincipal == null || !context.NewPrincipal.Identities.Any())
         {
             return;
         }
 
-        var currentClaimsToKeep = await sessionClaimsFilter.FilterToSessionClaimsAsync(context, default);
+        var currentClaimsToKeep = await sessionClaimsFilter.FilterToSessionClaimsAsync(context, ct);
 
         var id = context.NewPrincipal.Identities.First();
         id.AddClaims(currentClaimsToKeep);
