@@ -189,4 +189,10 @@ internal static partial class Log
         EventName = nameof(SamlSigninProtocolError),
         Message = $"SAML signin protocol error: {{statusCode}} - {{{SamlLogParameters.ErrorMessage}}}")]
     internal static partial void SamlSigninProtocolError(this ILogger logger, LogLevel level, string statusCode, string errorMessage);
+
+    [LoggerMessage(
+        EventName = nameof(SamlRequestContainedInvalidXml),
+        Level = LogLevel.Warning,
+        Message = $"SAML request contained invalid XML: {{{SamlLogParameters.ErrorMessage}}}")]
+    internal static partial void SamlRequestContainedInvalidXml(this ILogger logger, Exception exception, string errorMessage);
 }

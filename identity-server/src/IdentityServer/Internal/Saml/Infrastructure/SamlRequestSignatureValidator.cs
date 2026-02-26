@@ -9,13 +9,16 @@ using System.Xml;
 using System.Xml.Linq;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Internal.Saml.Infrastructure;
 
 /// <summary>
 /// Validates signatures on SAML request messages for both HTTP-Redirect and HTTP-POST bindings.
 /// </summary>
-internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvider timeProvider)
+internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(
+    TimeProvider timeProvider,
+    ILogger<SamlRequestSignatureValidator<TRequest, TSamlRequest>> logger)
     where TRequest : SamlRequestBase<TSamlRequest>
     where TSamlRequest : ISamlRequest
 {
@@ -105,7 +108,8 @@ internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvide
         }
         catch (XmlException ex)
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = $"Invalid XML: {ex.Message}" });
+            logger.SamlRequestContainedInvalidXml(ex, ex.Message);
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = "The SAML request contained invalid XML" });
         }
 
         // Find signature element
