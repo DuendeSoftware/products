@@ -27,7 +27,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
@@ -45,7 +45,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
             { OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Select(x => x.Name).ShouldBe(["api", "urn:api1", "urn:api2", "urn:api3"]);
@@ -63,7 +63,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "unknown");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -80,7 +80,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource unknown");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -97,7 +97,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource2");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -114,7 +114,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource resource2");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -133,7 +133,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
             { OidcConstants.TokenRequest.Scope, "openid" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -150,7 +150,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource offline_access");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -170,7 +170,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1" + new string('x', 512);
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidTarget);
@@ -178,7 +178,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         {
             parameters[OidcConstants.TokenRequest.Resource] = "api";
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -186,7 +186,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1";
             parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api2");
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }

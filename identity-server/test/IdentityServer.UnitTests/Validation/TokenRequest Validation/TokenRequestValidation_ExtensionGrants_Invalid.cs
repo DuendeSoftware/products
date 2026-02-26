@@ -29,7 +29,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
             { OidcConstants.TokenRequest.Scope, "resource" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
@@ -49,7 +49,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
             { OidcConstants.TokenRequest.Scope, "resource" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
@@ -69,7 +69,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
             { OidcConstants.TokenRequest.Scope, "resource" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -93,7 +93,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(
             parameters,
-            client.ToValidationResult());
+            client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
     }

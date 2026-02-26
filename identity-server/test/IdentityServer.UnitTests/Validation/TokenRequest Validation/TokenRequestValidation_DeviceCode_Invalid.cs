@@ -44,7 +44,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.DeviceCode}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
     }
@@ -65,7 +65,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {"device_code", longCode}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
@@ -84,7 +84,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {"device_code", Guid.NewGuid().ToString()}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
@@ -103,7 +103,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {"device_code", Guid.NewGuid().ToString()}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldNotBeNull();
     }
@@ -123,7 +123,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             { OidcConstants.TokenRequest.Resource, "api" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
     }
@@ -143,7 +143,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             { OidcConstants.TokenRequest.Resource, "urn:api1" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
     }

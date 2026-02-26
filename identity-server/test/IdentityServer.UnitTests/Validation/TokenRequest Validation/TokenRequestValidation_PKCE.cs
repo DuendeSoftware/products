@@ -60,7 +60,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -100,7 +100,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -144,7 +144,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -180,7 +180,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -220,7 +220,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, "x".Repeat(lengths.CodeVerifierMinLength));
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -263,7 +263,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier + "invalid");
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -308,7 +308,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier + "invalid");
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);

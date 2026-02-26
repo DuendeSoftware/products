@@ -26,7 +26,7 @@ public class TokenRequestValidation_General_Invalid
     {
         var validator = Factory.CreateTokenRequestValidator();
 
-        Func<Task> act = () => validator.ValidateRequestAsync(null, null);
+        Func<Task> act = () => validator.ValidateRequestAsync(null, null, _ct);
 
         await act.ShouldThrowAsync<ArgumentNullException>();
     }
@@ -42,7 +42,7 @@ public class TokenRequestValidation_General_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, "valid");
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        Func<Task> act = () => validator.ValidateRequestAsync(parameters, null);
+        Func<Task> act = () => validator.ValidateRequestAsync(parameters, null, _ct);
 
         await act.ShouldThrowAsync<ArgumentNullException>();
     }
@@ -74,7 +74,7 @@ public class TokenRequestValidation_General_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
@@ -93,7 +93,7 @@ public class TokenRequestValidation_General_Invalid
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, "client_credentials");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
@@ -125,7 +125,7 @@ public class TokenRequestValidation_General_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);

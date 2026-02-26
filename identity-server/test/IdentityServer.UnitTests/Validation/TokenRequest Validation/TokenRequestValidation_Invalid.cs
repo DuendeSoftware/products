@@ -52,7 +52,7 @@ public class TokenRequestValidation_Invalid
             { OidcConstants.TokenRequest.RefreshToken, handle }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
     }

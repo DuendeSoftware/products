@@ -34,7 +34,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, "nonexistent");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -54,7 +54,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, longRefreshToken);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -82,7 +82,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -109,7 +109,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -138,7 +138,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -171,7 +171,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -203,7 +203,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
 
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1" + new string('x', 512);
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidTarget);
@@ -211,7 +211,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         {
             parameters[OidcConstants.TokenRequest.Resource] = "api";
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -219,7 +219,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1";
             parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api2");
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -255,7 +255,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             {
                 InvalidScopes = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client);
+            var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_scope");
@@ -281,7 +281,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             {
                 InvalidResourceIndicators = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client);
+            var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
@@ -313,7 +313,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
         parameters.Add("resource", "urn:api3");
 
-        var result = await validator.ValidateRequestAsync(parameters, client);
+        var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");

@@ -30,7 +30,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.Password);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
@@ -49,7 +49,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -68,7 +68,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -87,7 +87,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -106,7 +106,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
@@ -123,7 +123,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.Password);
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -141,7 +141,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -160,7 +160,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "notbob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -179,7 +179,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.Scope, "resource");
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob_with_password");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
     }
@@ -197,7 +197,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
@@ -217,7 +217,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "bob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -236,7 +236,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
         parameters.Add(OidcConstants.TokenRequest.UserName, "bob");
         parameters.Add(OidcConstants.TokenRequest.Password, "notbob");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -263,7 +263,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
             {
                 InvalidScopes = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client);
+            var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_scope");
@@ -274,7 +274,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
             {
                 InvalidResourceIndicators = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client);
+            var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
