@@ -49,7 +49,7 @@ var ecKey =
         {
             "kty":"EC",
             "crv":"P-256",
-            "x":"MKBCtNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+            "x":"MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
             "y":"4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
             "d":"870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE",
             "use":"enc",
