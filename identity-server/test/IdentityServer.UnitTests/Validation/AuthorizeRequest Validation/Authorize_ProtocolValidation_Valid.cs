@@ -12,6 +12,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ProtocolValidation_Valid
 {
     private const string Category = "AuthorizeRequest Protocol Validation - Valid";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
@@ -24,7 +25,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBe(false);
     }
@@ -40,7 +41,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -56,7 +57,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -72,7 +73,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Token);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -89,7 +90,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -106,7 +107,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -124,7 +125,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -142,7 +143,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -158,7 +159,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.CodeToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -175,7 +176,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Fragment);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -193,7 +194,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Prompt, OidcConstants.PromptModes.None);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.ValidatedRequest.SessionId.ShouldNotBeNull();
     }
@@ -211,7 +212,7 @@ public class Authorize_ProtocolValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Prompt, OidcConstants.PromptModes.Consent + ' ' + OidcConstants.PromptModes.Login);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.ValidatedRequest.PromptModes.Count().ShouldBe(2);
         result.ValidatedRequest.PromptModes.ShouldContain(OidcConstants.PromptModes.Login);
@@ -233,13 +234,13 @@ public class Authorize_ProtocolValidation_Valid
 
         {
             parameters[OidcConstants.AuthorizeRequest.Prompt] = "consent login";
-            var result = await validator.ValidateAsync(parameters);
+            var result = await validator.ValidateAsync(parameters, _ct);
             result.ValidatedRequest.PromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login]);
         }
         {
             parameters[OidcConstants.AuthorizeRequest.Prompt] = "consent login";
             parameters[Constants.ProcessedPrompt] = "login";
-            var result = await validator.ValidateAsync(parameters);
+            var result = await validator.ValidateAsync(parameters, _ct);
             result.ValidatedRequest.PromptModes.ShouldBe([OidcConstants.PromptModes.Consent]);
             result.ValidatedRequest.OriginalPromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login]);
             result.ValidatedRequest.ProcessedPromptModes.ShouldBe([OidcConstants.PromptModes.Login]);
@@ -247,7 +248,7 @@ public class Authorize_ProtocolValidation_Valid
         {
             parameters[OidcConstants.AuthorizeRequest.Prompt] = "consent login";
             parameters[Constants.ProcessedPrompt] = "login consent";
-            var result = await validator.ValidateAsync(parameters);
+            var result = await validator.ValidateAsync(parameters, _ct);
             result.ValidatedRequest.PromptModes.ShouldBeEmpty();
             result.ValidatedRequest.OriginalPromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login]);
             result.ValidatedRequest.ProcessedPromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login], true);

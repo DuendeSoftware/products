@@ -79,7 +79,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
         _logger.LogDebug("Start device authorize request.");
 
         // validate client
-        var clientResult = await _clientValidator.ValidateAsync(context);
+        var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var error = clientResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
@@ -88,21 +88,21 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
         }
 
         // validate request
-        var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
-        var requestResult = await _requestValidator.ValidateAsync(form, clientResult);
+        var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
+        var requestResult = await _requestValidator.ValidateAsync(form, clientResult, context.RequestAborted);
 
         if (requestResult.IsError)
         {
-            await _events.RaiseAsync(new DeviceAuthorizationFailureEvent(requestResult));
+            await _events.RaiseAsync(new DeviceAuthorizationFailureEvent(requestResult), context.RequestAborted);
             Telemetry.Metrics.DeviceAuthenticationFailure(clientResult.Client.ClientId, requestResult.Error);
             return Error(requestResult.Error, requestResult.ErrorDescription);
         }
 
         // create response
         _logger.LogTrace("Calling into device authorize response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult, _urls.BaseUrl);
+        var response = await _responseGenerator.ProcessAsync(requestResult, _urls.BaseUrl, context.RequestAborted);
 
-        await _events.RaiseAsync(new DeviceAuthorizationSuccessEvent(response, requestResult));
+        await _events.RaiseAsync(new DeviceAuthorizationSuccessEvent(response, requestResult), context.RequestAborted);
         Telemetry.Metrics.DeviceAuthentication(clientResult.Client.ClientId);
 
         // return result

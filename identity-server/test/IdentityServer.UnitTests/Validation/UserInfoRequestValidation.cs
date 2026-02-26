@@ -14,6 +14,7 @@ namespace UnitTests.Validation;
 public class UserInfoRequestValidation
 {
     private const string Category = "UserInfo Request Validation Tests";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private IClientStore _clients = new InMemoryClientStore(TestClients.Get());
 
     [Fact]
@@ -23,7 +24,7 @@ public class UserInfoRequestValidation
         var tokenResult = new TokenValidationResult
         {
             IsError = false,
-            Client = await _clients.FindEnabledClientByIdAsync("codeclient"),
+            Client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct),
             Claims = new List<Claim>()
         };
 
@@ -32,7 +33,7 @@ public class UserInfoRequestValidation
             new TestProfileService(shouldBeActive: true),
             TestLogger.Create<UserInfoRequestValidator>());
 
-        var result = await validator.ValidateRequestAsync("token");
+        var result = await validator.ValidateRequestAsync("token", _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -45,7 +46,7 @@ public class UserInfoRequestValidation
         var tokenResult = new TokenValidationResult
         {
             IsError = false,
-            Client = await _clients.FindEnabledClientByIdAsync("codeclient"),
+            Client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct),
             Claims = new List<Claim>
             {
                 new Claim("sub", "123")
@@ -57,7 +58,7 @@ public class UserInfoRequestValidation
             new TestProfileService(shouldBeActive: true),
             TestLogger.Create<UserInfoRequestValidator>());
 
-        var result = await validator.ValidateRequestAsync("token");
+        var result = await validator.ValidateRequestAsync("token", _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -69,7 +70,7 @@ public class UserInfoRequestValidation
         var tokenResult = new TokenValidationResult
         {
             IsError = false,
-            Client = await _clients.FindEnabledClientByIdAsync("codeclient"),
+            Client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct),
             Claims = new List<Claim>
             {
                 new Claim("sub", "123")
@@ -81,7 +82,7 @@ public class UserInfoRequestValidation
             new TestProfileService(shouldBeActive: false),
             TestLogger.Create<UserInfoRequestValidator>());
 
-        var result = await validator.ValidateRequestAsync("token");
+        var result = await validator.ValidateRequestAsync("token", _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);

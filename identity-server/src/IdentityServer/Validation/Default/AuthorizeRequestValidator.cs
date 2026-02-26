@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 using System.Collections.Specialized;
 using System.Security.Claims;
@@ -67,7 +68,8 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
 
     public async Task<AuthorizeRequestValidationResult> ValidateAsync(
         NameValueCollection parameters,
-        ClaimsPrincipal subject = null,
+        Ct ct,
+        ClaimsPrincipal? subject = null,
         AuthorizeRequestType authorizeRequestType = AuthorizeRequestType.Authorize)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeRequestValidator.Validate");
@@ -77,7 +79,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         var request = new ValidatedAuthorizeRequest
         {
             Options = _options,
-            IssuerName = await _issuerNameService.GetCurrentAsync(),
+            IssuerName = await _issuerNameService.GetCurrentAsync(ct),
             Subject = subject ?? Principal.Anonymous,
             Raw = parameters ?? throw new ArgumentNullException(nameof(parameters)),
             AuthorizeRequestType = authorizeRequestType
@@ -92,21 +94,21 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
 
         // load client_id
         // client_id must always be present on the request
-        var loadClientResult = await LoadClientAsync(request);
+        var loadClientResult = await LoadClientAsync(request, ct);
         if (loadClientResult.IsError)
         {
             return loadClientResult;
         }
 
         // load request object
-        var roLoadResult = await _requestObjectValidator.LoadRequestObjectAsync(request);
+        var roLoadResult = await _requestObjectValidator.LoadRequestObjectAsync(request, ct);
         if (roLoadResult.IsError)
         {
             return roLoadResult;
         }
 
         // validate request object
-        var roValidationResult = await _requestObjectValidator.ValidateRequestObjectAsync(request);
+        var roValidationResult = await _requestObjectValidator.ValidateRequestObjectAsync(request, ct);
         if (roValidationResult.IsError)
         {
             return roValidationResult;
@@ -120,7 +122,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         // validate client_id and redirect_uri
-        var clientResult = await ValidateClientAsync(request);
+        var clientResult = await ValidateClientAsync(request, ct);
         if (clientResult.IsError)
         {
             return clientResult;
@@ -134,14 +136,14 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         // scope, scope restrictions and plausibility, and resource indicators
-        var scopeResult = await ValidateScopeAndResourceAsync(request);
+        var scopeResult = await ValidateScopeAndResourceAsync(request, ct);
         if (scopeResult.IsError)
         {
             return scopeResult;
         }
 
         // nonce, prompt, acr_values, login_hint etc.
-        var optionalResult = await ValidateOptionalParametersAsync(request);
+        var optionalResult = await ValidateOptionalParametersAsync(request, ct);
         if (optionalResult.IsError)
         {
             return optionalResult;
@@ -153,13 +155,13 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         {
             Result = new AuthorizeRequestValidationResult(request)
         };
-        await _customValidator.ValidateAsync(context);
+        await _customValidator.ValidateAsync(context, ct);
 
         var customResult = context.Result;
         if (customResult.IsError)
         {
             LogError("Error in custom validation", customResult.Error, request);
-            return Invalid(request, customResult.Error, customResult.ErrorDescription);
+            return Invalid(request, customResult.Error ?? OidcConstants.AuthorizeErrors.InvalidRequest, customResult.ErrorDescription);
         }
 
         _sanitizedLogger.LogTrace("Authorize request protocol validation successful");
@@ -194,7 +196,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> LoadClientAsync(ValidatedAuthorizeRequest request)
+    private async Task<AuthorizeRequestValidationResult> LoadClientAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // client_id must be present
@@ -207,12 +209,12 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             return Invalid(request, description: "Invalid client_id");
         }
 
-        request.ClientId = clientId;
+        request.ClientId = clientId!;
 
         //////////////////////////////////////////////////////////
         // check for valid client
         //////////////////////////////////////////////////////////
-        var client = await _clients.FindEnabledClientByIdAsync(request.ClientId);
+        var client = await _clients.FindEnabledClientByIdAsync(request.ClientId, ct);
         if (client == null)
         {
             LogError("Unknown client or not enabled", request.ClientId, request);
@@ -224,7 +226,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> ValidateClientAsync(ValidatedAuthorizeRequest request)
+    private async Task<AuthorizeRequestValidationResult> ValidateClientAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // check request object requirement
@@ -248,7 +250,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             return Invalid(request, description: "Invalid redirect_uri");
         }
 
-        if (!redirectUri.IsUri())
+        if (!redirectUri!.IsUri())
         {
             LogError("malformed redirect_uri", redirectUri, request);
             return Invalid(request, description: "Invalid redirect_uri");
@@ -266,14 +268,14 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         // check if redirect_uri is valid
         //////////////////////////////////////////////////////////
-        var uriContext = new RedirectUriValidationContext(redirectUri, request);
-        if (await _uriValidator.IsRedirectUriValidAsync(uriContext) == false)
+        var uriContext = new RedirectUriValidationContext(redirectUri!, request);
+        if (await _uriValidator.IsRedirectUriValidAsync(uriContext, ct) == false)
         {
             LogError("Invalid redirect_uri", redirectUri, request);
             return Invalid(request, OidcConstants.AuthorizeErrors.InvalidRequest, "Invalid redirect_uri");
         }
 
-        request.RedirectUri = redirectUri;
+        request.RedirectUri = redirectUri!;
 
         return Valid(request);
     }
@@ -473,7 +475,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> ValidateScopeAndResourceAsync(ValidatedAuthorizeRequest request)
+    private async Task<AuthorizeRequestValidationResult> ValidateScopeAndResourceAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // scope must be present
@@ -547,7 +549,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             Client = request.Client,
             Scopes = request.RequestedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -562,7 +564,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             }
         }
 
-        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators);
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators!);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(resourceIndicators);
 
         if (validatedResources.Resources.IdentityResources.Count > 0 && !request.IsOpenIdRequest)
@@ -615,7 +617,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private async Task<AuthorizeRequestValidationResult> ValidateOptionalParametersAsync(ValidatedAuthorizeRequest request)
+    private async Task<AuthorizeRequestValidationResult> ValidateOptionalParametersAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // check nonce
@@ -796,7 +798,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         if (request.Subject.IsAuthenticated())
         {
-            var sessionId = await _userSession.GetSessionIdAsync();
+            var sessionId = await _userSession.GetSessionIdAsync(ct);
             if (sessionId.IsPresent())
             {
                 request.SessionId = sessionId;
@@ -840,7 +842,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return true;
     }
 
-    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new AuthorizeRequestValidationResult(request, error, description);
+    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null) => new AuthorizeRequestValidationResult(request, error, description);
 
     private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
 
@@ -850,7 +852,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _sanitizedLogger.LogError(message + "\n{@requestDetails}", requestDetails);
     }
 
-    private void LogError(string message, string detail, ValidatedAuthorizeRequest request)
+    private void LogError(string message, string? detail, ValidatedAuthorizeRequest request)
     {
         var requestDetails = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
         _sanitizedLogger.LogError(message + ": {detail}\n{@requestDetails}", detail, requestDetails);

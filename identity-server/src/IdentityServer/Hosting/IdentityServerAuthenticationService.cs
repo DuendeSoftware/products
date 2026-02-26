@@ -61,7 +61,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
             AugmentPrincipal(principal);
 
             properties ??= new AuthenticationProperties();
-            await _session.CreateSessionIdAsync(principal, properties);
+            await _session.CreateSessionIdAsync(principal, properties, context.RequestAborted);
         }
 
         await _inner.SignInAsync(context, scheme, principal, properties);
@@ -96,22 +96,22 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
                     _logger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
 
                     // back channel logout
-                    var user = await _session.GetUserAsync();
+                    var user = await _session.GetUserAsync(context.RequestAborted);
                     if (user != null)
                     {
                         var session = new UserSession
                         {
                             SubjectId = user.GetSubjectId(),
-                            SessionId = await _session.GetSessionIdAsync(),
+                            SessionId = await _session.GetSessionIdAsync(context.RequestAborted),
                             DisplayName = user.GetDisplayName(),
-                            ClientIds = (await _session.GetClientListAsync()).ToList(),
-                            Issuer = await _issuerNameService.GetCurrentAsync()
+                            ClientIds = (await _session.GetClientListAsync(context.RequestAborted)).ToList(),
+                            Issuer = await _issuerNameService.GetCurrentAsync(context.RequestAborted)
                         };
-                        await _sessionCoordinationService.ProcessLogoutAsync(session);
+                        await _sessionCoordinationService.ProcessLogoutAsync(session, context.RequestAborted);
                     }
 
                     // this clears our session id cookie so JS clients can detect the user has signed out
-                    await _session.RemoveSessionIdCookieAsync();
+                    await _session.RemoveSessionIdCookieAsync(context.RequestAborted);
                 });
 
                 context.SetBackChannelLogoutTriggered();

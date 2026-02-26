@@ -31,14 +31,16 @@ public class SecretParser : ISecretsListParser
     /// Checks the context to find a secret.
     /// </summary>
     /// <param name="context">The HTTP context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context)
+    /// <inheritdoc/>
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         // see if a registered parser finds a secret on the request
         ParsedSecret bestSecret = null;
         foreach (var parser in _parsers)
         {
-            var parsedSecret = await parser.ParseAsync(context);
+            var parsedSecret = await parser.ParseAsync(context, ct);
             if (parsedSecret != null)
             {
                 _logger.LogDebug("Parser found secret: {type}", parser.GetType().Name);

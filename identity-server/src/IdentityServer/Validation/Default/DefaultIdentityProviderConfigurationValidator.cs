@@ -21,7 +21,7 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
     public DefaultIdentityProviderConfigurationValidator(IdentityServerOptions options) => _options = options;
 
     /// <inheritdoc/>
-    public virtual async Task ValidateAsync(IdentityProviderConfigurationValidationContext context)
+    public virtual async Task ValidateAsync(IdentityProviderConfigurationValidationContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultIdentityProviderConfigurationValidator.Validate");
 

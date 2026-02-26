@@ -11,7 +11,7 @@ internal class MockCibaUserValidator : IBackchannelAuthenticationUserValidator
     public BackchannelAuthenticationUserValidationResult Result { get; set; } = new BackchannelAuthenticationUserValidationResult();
     public BackchannelAuthenticationUserValidatorContext UserValidatorContext { get; set; }
 
-    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext)
+    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext, Ct _)
     {
         UserValidatorContext = userValidatorContext;
         return Task.FromResult(Result);

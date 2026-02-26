@@ -13,13 +13,8 @@ internal class NopKeyStoreCache : ISigningKeyStoreCache
     /// Returns null.
     /// </summary>
     /// <returns></returns>
-    public Task<IEnumerable<KeyContainer>> GetKeysAsync() => Task.FromResult<IEnumerable<KeyContainer>>(null);
+    public Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct _) => Task.FromResult<IEnumerable<KeyContainer>>(null);
 
-    /// <summary>
-    /// Does not cache keys.
-    /// </summary>
-    /// <param name="keys"></param>
-    /// <param name="duration"></param>
-    /// <returns></returns>
-    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration) => Task.CompletedTask;
+    /// <inheritdoc/>
+    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct _) => Task.CompletedTask;
 }

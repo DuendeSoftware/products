@@ -11,7 +11,7 @@ internal class StubBackChannelLogoutClient : IBackChannelLogoutService
 {
     public bool SendLogoutsWasCalled { get; set; }
 
-    public Task SendLogoutNotificationsAsync(LogoutNotificationContext context)
+    public Task SendLogoutNotificationsAsync(LogoutNotificationContext context, Ct _)
     {
         SendLogoutsWasCalled = true;
         return Task.CompletedTask;

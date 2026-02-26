@@ -13,6 +13,8 @@ namespace IdentityServer.UnitTests.Caches;
 
 public class ResourceStoreCacheTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private List<Client> _clients { get; set; } = new List<Client>();
     private List<IdentityResource> _identityResources { get; set; } = new List<IdentityResource>();
     private List<ApiResource> _resources { get; set; } = new List<ApiResource>();
@@ -55,7 +57,7 @@ public class ResourceStoreCacheTests
         var store = _provider.GetRequiredService<IResourceStore>();
         cache.CacheItems.Count.ShouldBe(0);
 
-        var results = await store.FindIdentityResourcesByScopeNameAsync(new[] { "profile" });
+        var results = await store.FindIdentityResourcesByScopeNameAsync(new[] { "profile" }, _ct);
 
         cache.CacheItems.Count.ShouldBe(1);
         cache.CacheItems.First().Value.Value.Name.ShouldBe("profile");
@@ -69,7 +71,7 @@ public class ResourceStoreCacheTests
         var store = _provider.GetRequiredService<IResourceStore>();
         cache.CacheItems.Count.ShouldBe(0);
 
-        var results = await store.FindApiResourcesByScopeNameAsync(new[] { "scope1" });
+        var results = await store.FindApiResourcesByScopeNameAsync(new[] { "scope1" }, _ct);
 
         cache.CacheItems.Count.ShouldBe(1);
         cache.CacheItems.First().Value.Value.Names.Single().ShouldBe("urn:api1");
@@ -82,7 +84,7 @@ public class ResourceStoreCacheTests
         var store = _provider.GetRequiredService<IResourceStore>();
         cache.CacheItems.Count.ShouldBe(0);
 
-        var results = await store.FindApiScopesByNameAsync(new[] { "scope1" });
+        var results = await store.FindApiScopesByNameAsync(new[] { "scope1" }, _ct);
 
         cache.CacheItems.Count.ShouldBe(1);
         cache.CacheItems.First().Value.Value.Name.ShouldBe("scope1");

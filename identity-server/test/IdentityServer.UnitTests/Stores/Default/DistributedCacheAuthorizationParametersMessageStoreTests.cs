@@ -13,6 +13,7 @@ public class DistributedCacheAuthorizationParametersMessageStoreTests
 {
     private MockDistributedCache _mockCache = new MockDistributedCache();
     private DistributedCacheAuthorizationParametersMessageStore _subject;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     public DistributedCacheAuthorizationParametersMessageStoreTests() => _subject = new DistributedCacheAuthorizationParametersMessageStore(_mockCache, new DefaultHandleGenerationService());
 
     [Fact]
@@ -21,11 +22,11 @@ public class DistributedCacheAuthorizationParametersMessageStoreTests
         _mockCache.Items.Count.ShouldBe(0);
 
         var msg = new Message<IDictionary<string, string[]>>(new Dictionary<string, string[]>());
-        var id = await _subject.WriteAsync(msg);
+        var id = await _subject.WriteAsync(msg, _ct);
 
         _mockCache.Items.Count.ShouldBe(1);
 
-        await _subject.DeleteAsync(id);
+        await _subject.DeleteAsync(id, _ct);
 
         _mockCache.Items.Count.ShouldBe(0);
     }

@@ -11,5 +11,6 @@ namespace Duende.IdentityServer.Validation;
 public class DefaultCustomBackchannelAuthenticationValidator : ICustomBackchannelAuthenticationValidator
 {
     /// <inheritdoc/>
-    public Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext) => Task.CompletedTask;
+    /// <inheritdoc/>
+    public Task ValidateAsync(CustomBackchannelAuthenticationRequestValidationContext customValidationContext, Ct _) => Task.CompletedTask;
 }

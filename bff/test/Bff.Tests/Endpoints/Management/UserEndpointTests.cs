@@ -33,7 +33,7 @@ public class UserEndpointTests : BffTestBase
 
     private class TestClaimsEnricher(IHttpClientFactory factory) : IUserEndpointClaimsEnricher
     {
-        public async Task<IReadOnlyList<ClaimRecord>> EnrichClaimsAsync(AuthenticateResult authenticateResult, IReadOnlyList<ClaimRecord> claims, CT ct = default)
+        public async Task<IReadOnlyList<ClaimRecord>> EnrichClaimsAsync(AuthenticateResult authenticateResult, IReadOnlyList<ClaimRecord> claims, Ct ct = default)
         {
             var client = factory.CreateClient("c1");
 

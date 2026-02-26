@@ -18,6 +18,7 @@ public class AuthorizeInteractionResponseGeneratorTests
     private Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public AuthorizeInteractionResponseGeneratorTests() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
@@ -48,7 +49,7 @@ public class AuthorizeInteractionResponseGeneratorTests
             PromptModes = new[] { PromptModes.None },
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.IsLogin.ShouldBeFalse();
@@ -75,7 +76,7 @@ public class AuthorizeInteractionResponseGeneratorTests
             MaxAge = 3600
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.IsLogin.ShouldBeFalse();
@@ -98,7 +99,7 @@ public class AuthorizeInteractionResponseGeneratorTests
             PromptModes = new[] { PromptModes.None }
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.IsLogin.ShouldBeFalse();
@@ -122,7 +123,7 @@ public class AuthorizeInteractionResponseGeneratorTests
             PromptModes = new[] { PromptModes.None }
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.IsLogin.ShouldBeFalse();
@@ -145,7 +146,7 @@ public class AuthorizeInteractionResponseGeneratorTests
             PromptModes = new[] { PromptModes.None }
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.IsLogin.ShouldBeFalse();

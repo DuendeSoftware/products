@@ -58,7 +58,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(ticket);
 
-        ticket.SetIssuer(await _issuerNameService.GetCurrentAsync());
+        ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
 
         var key = CryptoRandom.CreateUniqueId(format: CryptoRandom.OutputFormat.Hex);
 
@@ -84,7 +84,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             Ticket = ticket.Serialize(_protector)
         };
 
-        await _store.CreateSessionAsync(session);
+        await _store.CreateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
     }
 
     /// <inheritdoc />
@@ -96,7 +96,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         _logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
 
-        var session = await _store.GetSessionAsync(key);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session == null)
         {
             _logger.LogDebug("No ticket found in store for {key}", key);
@@ -124,7 +124,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(ticket);
 
-        var session = await _store.GetSessionAsync(key);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session == null)
         {
             // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
@@ -149,14 +149,14 @@ public class ServerSideTicketStore : IServerSideTicketStore
         if (ticket.GetIssuer() == null)
         {
             // when issuing a new cookie on top of an existing cookie, the AuthenticationTicket passed above is new (and not the prior one loaded from the ticket store)
-            ticket.SetIssuer(await _issuerNameService.GetCurrentAsync());
+            ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
         }
         session.Renewed = ticket.GetIssued();
         session.Expires = ticket.GetExpiration();
         session.DisplayName = name;
         session.Ticket = ticket.Serialize(_protector);
 
-        await _store.UpdateSessionAsync(session);
+        await _store.UpdateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
     }
 
     /// <inheritdoc />
@@ -171,7 +171,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         // There is a somewhat rare scenario where a session has expired and a request to IdentityServer happens prior
         // to the cleanup job running. When that happens, the session is removed but none of the processing to trigger
         // backchannel logouts, etc. happens so we need a way to kick that off and are doing so here.
-        var session = await _store.GetSessionAsync(key);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session != null)
         {
             var userSession = AsUserSessions([session]).SingleOrDefault();
@@ -181,11 +181,11 @@ public class ServerSideTicketStore : IServerSideTicketStore
             }
         }
 
-        await _store.DeleteSessionAsync(key);
+        await _store.DeleteSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CT ct = default)
+    public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetSessions");
 
@@ -196,11 +196,11 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc />
-    public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
+    public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.QuerySessions");
 
-        var results = await _store.QuerySessionsAsync(filter, ct);
+        var results = await _store.QuerySessionsAsync(ct, filter);
 
         var tickets = AsUserSessions(results.Results);
 
@@ -219,7 +219,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct = default)
+    public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetAndRemoveExpiredSessions");
 

@@ -13,6 +13,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ClientValidation_Token
 {
     private const string Category = "AuthorizeRequest Client Validation - Token";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options = TestIdentityServerOptions.Create();
 
@@ -27,7 +28,7 @@ public class Authorize_ClientValidation_Token
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Token);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
@@ -45,7 +46,7 @@ public class Authorize_ClientValidation_Token
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -64,7 +65,7 @@ public class Authorize_ClientValidation_Token
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.CodeIdTokenToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);

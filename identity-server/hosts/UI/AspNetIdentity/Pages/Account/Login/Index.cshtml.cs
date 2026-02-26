@@ -50,7 +50,7 @@ public class Index : PageModel
 
     public async Task<IActionResult> OnGet(string? returnUrl)
     {
-        await BuildModelAsync(returnUrl);
+        await BuildModelAsync(returnUrl, HttpContext.RequestAborted);
 
         if (View.IsExternalLoginOnly)
         {
@@ -64,7 +64,7 @@ public class Index : PageModel
     public async Task<IActionResult> OnPost()
     {
         // check if we are in the context of an authorization request
-        var context = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
+        var context = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl, HttpContext.RequestAborted);
 
         // the user clicked the "cancel" button
         if (Input.Button != "login")
@@ -77,7 +77,7 @@ public class Index : PageModel
                 // if the user cancels, send a result back into IdentityServer as if they
                 // denied the consent (even if this client does not require consent).
                 // this will send back an access denied OIDC error response to the client.
-                await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+                await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied, HttpContext.RequestAborted);
 
                 // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                 if (context.IsNativeClient())
@@ -105,7 +105,7 @@ public class Index : PageModel
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByNameAsync(Input.Username!);
-                await _events.RaiseAsync(new UserLoginSuccessEvent(user!.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user!.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId), HttpContext.RequestAborted);
                 Duende.IdentityServer.UI.Pages.Telemetry.Metrics.UserLogin(context?.Client.ClientId, IdentityServerConstants.LocalIdentityProvider);
 
                 if (context != null)
@@ -141,24 +141,24 @@ public class Index : PageModel
             }
 
             const string error = "invalid credentials";
-            await _events.RaiseAsync(new UserLoginFailureEvent(Input.Username, error, clientId: context?.Client.ClientId));
+            await _events.RaiseAsync(new UserLoginFailureEvent(Input.Username, error, clientId: context?.Client.ClientId), HttpContext.RequestAborted);
             Duende.IdentityServer.UI.Pages.Telemetry.Metrics.UserLoginFailure(context?.Client.ClientId, IdentityServerConstants.LocalIdentityProvider, error);
             ModelState.AddModelError(string.Empty, LoginOptions.InvalidCredentialsErrorMessage);
         }
 
         // something went wrong, show form with error
-        await BuildModelAsync(Input.ReturnUrl);
+        await BuildModelAsync(Input.ReturnUrl, HttpContext.RequestAborted);
         return Page();
     }
 
-    private async Task BuildModelAsync(string? returnUrl)
+    private async Task BuildModelAsync(string? returnUrl, Ct ct)
     {
         Input = new InputModel
         {
             ReturnUrl = returnUrl
         };
 
-        var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+        var context = await _interaction.GetAuthorizationContextAsync(returnUrl, HttpContext.RequestAborted);
         if (context?.IdP != null)
         {
             var scheme = await _schemeProvider.GetSchemeAsync(context.IdP);
@@ -193,7 +193,7 @@ public class Index : PageModel
                 displayName: x.DisplayName ?? x.Name
             )).ToList();
 
-        var dynamicSchemes = (await _identityProviderStore.GetAllSchemeNamesAsync())
+        var dynamicSchemes = (await _identityProviderStore.GetAllSchemeNamesAsync(ct))
             .Where(x => x.Enabled)
             .Select(x => new ViewModel.ExternalProvider
             (

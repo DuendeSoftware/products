@@ -25,7 +25,7 @@ public static class ConformanceReportEndpointExtensions
         var group = endpoints.MapGroup(basePath);
 
         // HTML endpoint - requires custom authorization policy
-        _ = group.MapGet("", async (ConformanceReportEndpoint endpoint, HttpContext context, CT ct) =>
+        _ = group.MapGet("", async (ConformanceReportEndpoint endpoint, HttpContext context, Ct ct) =>
             await endpoint.GetHtmlReportAsync(context, ct))
             .RequireAuthorization(options.AuthorizationPolicyName)
             .WithName("GetConformanceHtmlReport")

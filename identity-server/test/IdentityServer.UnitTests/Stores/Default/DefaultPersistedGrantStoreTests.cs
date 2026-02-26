@@ -22,6 +22,7 @@ public class DefaultPersistedGrantStoreTests
     private StubHandleGenerationService _stubHandleGenerationService = new StubHandleGenerationService();
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public DefaultPersistedGrantStoreTests()
     {
@@ -58,8 +59,8 @@ public class DefaultPersistedGrantStoreTests
             RequestedScopes = new string[] { "scope1", "scope2" }
         };
 
-        var handle = await _codes.StoreAuthorizationCodeAsync(code1);
-        var code2 = await _codes.GetAuthorizationCodeAsync(handle);
+        var handle = await _codes.StoreAuthorizationCodeAsync(code1, _ct);
+        var code2 = await _codes.GetAuthorizationCodeAsync(handle, _ct);
 
         code1.ClientId.ShouldBe(code2.ClientId);
         code1.CreationTime.ShouldBe(code2.CreationTime);
@@ -86,9 +87,9 @@ public class DefaultPersistedGrantStoreTests
             RequestedScopes = new string[] { "scope1", "scope2" }
         };
 
-        var handle = await _codes.StoreAuthorizationCodeAsync(code1);
-        await _codes.RemoveAuthorizationCodeAsync(handle);
-        var code2 = await _codes.GetAuthorizationCodeAsync(handle);
+        var handle = await _codes.StoreAuthorizationCodeAsync(code1, _ct);
+        await _codes.RemoveAuthorizationCodeAsync(handle, _ct);
+        var code2 = await _codes.GetAuthorizationCodeAsync(handle, _ct);
         code2.ShouldBeNull();
     }
 
@@ -119,8 +120,8 @@ public class DefaultPersistedGrantStoreTests
             Version = 4
         };
 
-        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle);
+        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle, _ct);
 
         token2.Version.ShouldBe(5);
 
@@ -160,8 +161,8 @@ public class DefaultPersistedGrantStoreTests
             }
         });
 
-        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle);
+        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle, _ct);
 
         token1.ClientId.ShouldBe(token2.ClientId);
         token1.CreationTime.ShouldBe(token2.CreationTime);
@@ -186,9 +187,9 @@ public class DefaultPersistedGrantStoreTests
         };
 
 
-        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        await _refreshTokens.RemoveRefreshTokenAsync(handle);
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle);
+        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        await _refreshTokens.RemoveRefreshTokenAsync(handle, _ct);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle, _ct);
         token2.ShouldBeNull();
     }
 
@@ -204,13 +205,13 @@ public class DefaultPersistedGrantStoreTests
             Lifetime = 10,
         };
 
-        var handle1 = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        var handle2 = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        await _refreshTokens.RemoveRefreshTokensAsync("123", "client");
+        var handle1 = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        var handle2 = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        await _refreshTokens.RemoveRefreshTokensAsync("123", "client", _ct);
 
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle1);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle1, _ct);
         token2.ShouldBeNull();
-        token2 = await _refreshTokens.GetRefreshTokenAsync(handle2);
+        token2 = await _refreshTokens.GetRefreshTokenAsync(handle2, _ct);
         token2.ShouldBeNull();
     }
 
@@ -232,8 +233,8 @@ public class DefaultPersistedGrantStoreTests
             Version = 1
         };
 
-        var handle = await _referenceTokens.StoreReferenceTokenAsync(token1);
-        var token2 = await _referenceTokens.GetReferenceTokenAsync(handle);
+        var handle = await _referenceTokens.StoreReferenceTokenAsync(token1, _ct);
+        var token2 = await _referenceTokens.GetReferenceTokenAsync(handle, _ct);
 
         token1.ClientId.ShouldBe(token2.ClientId);
         token1.Audiences.Count.ShouldBe(1);
@@ -261,9 +262,9 @@ public class DefaultPersistedGrantStoreTests
             Version = 1
         };
 
-        var handle = await _referenceTokens.StoreReferenceTokenAsync(token1);
-        await _referenceTokens.RemoveReferenceTokenAsync(handle);
-        var token2 = await _referenceTokens.GetReferenceTokenAsync(handle);
+        var handle = await _referenceTokens.StoreReferenceTokenAsync(token1, _ct);
+        await _referenceTokens.RemoveReferenceTokenAsync(handle, _ct);
+        var token2 = await _referenceTokens.GetReferenceTokenAsync(handle, _ct);
         token2.ShouldBeNull();
     }
 
@@ -284,13 +285,13 @@ public class DefaultPersistedGrantStoreTests
             Version = 1
         };
 
-        var handle1 = await _referenceTokens.StoreReferenceTokenAsync(token1);
-        var handle2 = await _referenceTokens.StoreReferenceTokenAsync(token1);
-        await _referenceTokens.RemoveReferenceTokensAsync("123", "client");
+        var handle1 = await _referenceTokens.StoreReferenceTokenAsync(token1, _ct);
+        var handle2 = await _referenceTokens.StoreReferenceTokenAsync(token1, _ct);
+        await _referenceTokens.RemoveReferenceTokensAsync("123", "client", null, _ct);
 
-        var token2 = await _referenceTokens.GetReferenceTokenAsync(handle1);
+        var token2 = await _referenceTokens.GetReferenceTokenAsync(handle1, _ct);
         token2.ShouldBeNull();
-        token2 = await _referenceTokens.GetReferenceTokenAsync(handle2);
+        token2 = await _referenceTokens.GetReferenceTokenAsync(handle2, _ct);
         token2.ShouldBeNull();
     }
 
@@ -305,8 +306,8 @@ public class DefaultPersistedGrantStoreTests
             Scopes = new string[] { "foo", "bar" }
         };
 
-        await _userConsent.StoreUserConsentAsync(consent1);
-        var consent2 = await _userConsent.GetUserConsentAsync("123", "client");
+        await _userConsent.StoreUserConsentAsync(consent1, _ct);
+        var consent2 = await _userConsent.GetUserConsentAsync("123", "client", _ct);
 
         consent2.ClientId.ShouldBe(consent1.ClientId);
         consent2.SubjectId.ShouldBe(consent1.SubjectId);
@@ -324,9 +325,9 @@ public class DefaultPersistedGrantStoreTests
             Scopes = new string[] { "foo", "bar" }
         };
 
-        await _userConsent.StoreUserConsentAsync(consent1);
-        await _userConsent.RemoveUserConsentAsync("123", "client");
-        var consent2 = await _userConsent.GetUserConsentAsync("123", "client");
+        await _userConsent.StoreUserConsentAsync(consent1, _ct);
+        await _userConsent.RemoveUserConsentAsync("123", "client", _ct);
+        var consent2 = await _userConsent.GetUserConsentAsync("123", "client", _ct);
         consent2.ShouldBeNull();
     }
 
@@ -348,7 +349,7 @@ public class DefaultPersistedGrantStoreTests
                 new Claim("scope", "bar1"),
                 new Claim("scope", "bar2")
             }
-        });
+        }, _ct);
 
         await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
@@ -356,7 +357,7 @@ public class DefaultPersistedGrantStoreTests
             Subject = _user,
             CreationTime = DateTime.UtcNow,
             Lifetime = 20,
-        });
+        }, _ct);
 
         await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -368,11 +369,11 @@ public class DefaultPersistedGrantStoreTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux1", "quux2" }
-        });
+        }, _ct);
 
         // the -1 is needed because internally we append a version/suffix the handle for encoding
-        (await _codes.GetAuthorizationCodeAsync("key-1")).Lifetime.ShouldBe(30);
-        (await _refreshTokens.GetRefreshTokenAsync("key-1")).Lifetime.ShouldBe(20);
-        (await _referenceTokens.GetReferenceTokenAsync("key-1")).Lifetime.ShouldBe(10);
+        (await _codes.GetAuthorizationCodeAsync("key-1", _ct)).Lifetime.ShouldBe(30);
+        (await _refreshTokens.GetRefreshTokenAsync("key-1", _ct)).Lifetime.ShouldBe(20);
+        (await _referenceTokens.GetReferenceTokenAsync("key-1", _ct)).Lifetime.ShouldBe(10);
     }
 }

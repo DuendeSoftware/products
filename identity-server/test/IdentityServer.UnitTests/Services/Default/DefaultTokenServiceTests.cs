@@ -17,6 +17,7 @@ namespace UnitTests.Services.Default;
 public class DefaultTokenServiceTests
 {
     private DefaultTokenService _subject;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private MockClaimsService _mockClaimsService = new MockClaimsService();
     private MockReferenceTokenStore _mockReferenceTokenStore = new MockReferenceTokenStore();
@@ -71,7 +72,7 @@ public class DefaultTokenServiceTests
             }
         };
 
-        var result = await _subject.CreateAccessTokenAsync(request);
+        var result = await _subject.CreateAccessTokenAsync(request, _ct);
 
         result.Audiences.Count.ShouldBe(3);
         result.Audiences.ShouldBe(["api1", "api2", "api3"]);
@@ -106,7 +107,7 @@ public class DefaultTokenServiceTests
             }
         };
 
-        var result = await _subject.CreateAccessTokenAsync(request);
+        var result = await _subject.CreateAccessTokenAsync(request, _ct);
 
         result.Audiences.Count.ShouldBe(0);
     }
@@ -124,7 +125,7 @@ public class DefaultTokenServiceTests
             }
         };
 
-        var result = await _subject.CreateAccessTokenAsync(request);
+        var result = await _subject.CreateAccessTokenAsync(request, _ct);
 
         result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).ShouldBeNull();
     }
@@ -142,7 +143,7 @@ public class DefaultTokenServiceTests
             }
         };
 
-        var result = await _subject.CreateAccessTokenAsync(request);
+        var result = await _subject.CreateAccessTokenAsync(request, _ct);
 
         result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).Value.ShouldBe("123");
     }
@@ -158,28 +159,28 @@ public class DefaultTokenServiceTests
         {
             token.IncludeJwtId = false;
             token.Type = OidcConstants.TokenTypes.IdentityToken;
-            var result = await _subject.CreateSecurityTokenAsync(token);
+            var result = await _subject.CreateSecurityTokenAsync(token, _ct);
             _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.IncludeJwtId = false;
             token.Type = OidcConstants.TokenTypes.AccessToken;
-            var result = await _subject.CreateSecurityTokenAsync(token);
+            var result = await _subject.CreateSecurityTokenAsync(token, _ct);
             _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.IncludeJwtId = true;
             token.Type = OidcConstants.TokenTypes.IdentityToken;
-            var result = await _subject.CreateSecurityTokenAsync(token);
+            var result = await _subject.CreateSecurityTokenAsync(token, _ct);
             _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.IncludeJwtId = true;
             token.Type = OidcConstants.TokenTypes.AccessToken;
-            var result = await _subject.CreateSecurityTokenAsync(token);
+            var result = await _subject.CreateSecurityTokenAsync(token, _ct);
             _mockTokenCreationService.Token.Claims.ShouldContain(x => x.Type == "jti");
         }
     }
@@ -198,14 +199,14 @@ public class DefaultTokenServiceTests
         };
 
         {
-            var result = await _subject.CreateSecurityTokenAsync(token);
+            var result = await _subject.CreateSecurityTokenAsync(token, _ct);
             _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.Claims.Add(new Claim("jti", "xoxo"));
             token.Type = OidcConstants.TokenTypes.AccessToken;
-            var result = await _subject.CreateSecurityTokenAsync(token);
+            var result = await _subject.CreateSecurityTokenAsync(token, _ct);
             _mockTokenCreationService.Token.Claims.ShouldContain(x => x.Type == "jti");
             _mockTokenCreationService.Token.Claims.Single(x => x.Type == "jti").Value.ShouldNotBe("xoxo");
         }

@@ -285,7 +285,7 @@ internal static class Factory
             new LoggerFactory().CreateLogger<JwtRequestValidator>());
         jwtRequestUriHttpClient ??= new DefaultJwtRequestUriHttpClient(
             new HttpClient(new NetworkHandler(new Exception("no jwt request uri response configured"))), options,
-            new LoggerFactory(), new NoneCancellationTokenProvider());
+            new LoggerFactory());
         pushedAuthorizationService ??= new TestPushedAuthorizationService();
         options ??= TestIdentityServerOptions.Create();
 

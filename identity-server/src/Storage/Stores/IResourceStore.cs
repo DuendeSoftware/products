@@ -16,25 +16,34 @@ public interface IResourceStore
     /// <summary>
     /// Gets identity resources by scope name.
     /// </summary>
-    Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames);
+    /// <param name="scopeNames">The scope names.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct);
 
     /// <summary>
     /// Gets API scopes by scope name.
     /// </summary>
-    Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames);
+    /// <param name="scopeNames">The scope names.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct);
 
     /// <summary>
     /// Gets API resources by scope name.
     /// </summary>
-    Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames);
+    /// <param name="scopeNames">The scope names.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct);
 
     /// <summary>
     /// Gets API resources by API resource name.
     /// </summary>
-    Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames);
+    /// <param name="apiResourceNames">The API resource names.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct);
 
     /// <summary>
     /// Gets all resources.
     /// </summary>
-    Task<Resources> GetAllResourcesAsync();
+    /// <param name="ct">The cancellation token.</param>
+    Task<Resources> GetAllResourcesAsync(Ct ct);
 }

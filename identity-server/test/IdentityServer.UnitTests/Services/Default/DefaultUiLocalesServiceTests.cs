@@ -15,6 +15,7 @@ namespace UnitTests.Services.Default;
 
 public class DefaultUiLocalesServiceTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly DefaultHttpContext _httpContext;
     private readonly HttpContextAccessor _httpContextAccessor;
     private readonly RequestLocalizationOptions _requestLocalizationOptions;
@@ -34,7 +35,7 @@ public class DefaultUiLocalesServiceTests
     {
         _httpContextAccessor.HttpContext = null;
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US", _ct);
 
         var setCookieHeader = _httpContext.Response.Headers.Where(x => x.Key == "Set-Cookie");
         setCookieHeader.ShouldBeEmpty();
@@ -45,7 +46,7 @@ public class DefaultUiLocalesServiceTests
     {
         _requestLocalizationOptions.RequestCultureProviders.Clear();
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US", _ct);
 
         var setCookieHeader = _httpContext.Response.Headers.Where(x => x.Key == "Set-Cookie");
         setCookieHeader.ShouldBeEmpty();
@@ -56,7 +57,7 @@ public class DefaultUiLocalesServiceTests
     {
         _requestLocalizationOptions.SupportedUICultures = new List<CultureInfo> { new("fr-FR") };
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US", _ct);
 
         var setCookieHeader = _httpContext.Response.Headers.Where(x => x.Key == "Set-Cookie");
         setCookieHeader.ShouldBeEmpty();
@@ -67,7 +68,7 @@ public class DefaultUiLocalesServiceTests
     {
         _requestLocalizationOptions.SupportedUICultures = new List<CultureInfo> { new("fr-FR") };
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US nb-NO");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US nb-NO", _ct);
 
         var setCookieHeader = _httpContext.Response.Headers.Where(x => x.Key == "Set-Cookie");
         setCookieHeader.ShouldBeEmpty();
@@ -79,7 +80,7 @@ public class DefaultUiLocalesServiceTests
     [InlineData(" ")]
     public async Task StoreUiLocalesForRedirectAsync_NullOrWhitespaceUiLocales_DoesNothing(string? uiLocales)
     {
-        await _subject.StoreUiLocalesForRedirectAsync(uiLocales);
+        await _subject.StoreUiLocalesForRedirectAsync(uiLocales, _ct);
 
         var setCookieHeader = _httpContext.Response.Headers.Where(x => x.Key == "Set-Cookie");
         setCookieHeader.ShouldBeEmpty();
@@ -90,7 +91,7 @@ public class DefaultUiLocalesServiceTests
     {
         _requestLocalizationOptions.SupportedUICultures = new List<CultureInfo>();
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US", _ct);
 
         var setCookieHeader = _httpContext.Response.Headers.Where(x => x.Key == "Set-Cookie");
         setCookieHeader.ShouldBeEmpty();
@@ -102,7 +103,7 @@ public class DefaultUiLocalesServiceTests
         var expectedSetCookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("en-US")));
         _requestLocalizationOptions.SupportedUICultures = new List<CultureInfo> { new("en-US") };
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US", _ct);
 
         var cookieContainer = new CookieContainer();
         var cookies = _httpContext.HttpContext.Response.Headers.Where(x => x.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)).Select(x => x.Value);
@@ -122,7 +123,7 @@ public class DefaultUiLocalesServiceTests
             new("de-DE")
         };
 
-        await _subject.StoreUiLocalesForRedirectAsync("en-US fr-FR");
+        await _subject.StoreUiLocalesForRedirectAsync("en-US fr-FR", _ct);
 
         var cookieContainer = new CookieContainer();
         var cookies = _httpContext.HttpContext.Response.Headers.Where(x => x.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)).Select(x => x.Value);
@@ -142,7 +143,7 @@ public class DefaultUiLocalesServiceTests
             new("de-DE")
         };
 
-        await _subject.StoreUiLocalesForRedirectAsync("fr-FR en-US");
+        await _subject.StoreUiLocalesForRedirectAsync("fr-FR en-US", _ct);
 
         var cookieContainer = new CookieContainer();
         var cookies = _httpContext.HttpContext.Response.Headers.Where(x => x.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)).Select(x => x.Value);

@@ -27,11 +27,13 @@ public class PlainTextSharedSecretValidator : ISecretValidator
     /// </summary>
     /// <param name="secrets">The stored secrets.</param>
     /// <param name="parsedSecret">The received secret.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// A validation result
     /// </returns>
     /// <exception cref="System.ArgumentException">id or credential is missing.</exception>
-    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+    /// <inheritdoc/>
+    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var fail = Task.FromResult(new SecretValidationResult { Success = false });
         var success = Task.FromResult(new SecretValidationResult { Success = true });

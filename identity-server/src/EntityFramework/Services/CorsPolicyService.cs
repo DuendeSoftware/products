@@ -21,11 +21,6 @@ public class CorsPolicyService : ICorsPolicyService
     protected readonly IConfigurationDbContext DbContext;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<CorsPolicyService> Logger;
@@ -36,21 +31,15 @@ public class CorsPolicyService : ICorsPolicyService
     /// </summary>
     /// <param name="dbContext">The DbContext</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public CorsPolicyService(IConfigurationDbContext dbContext, ILogger<CorsPolicyService> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public CorsPolicyService(IConfigurationDbContext dbContext, ILogger<CorsPolicyService> logger)
     {
         DbContext = dbContext;
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
-    /// <summary>
-    /// Determines whether origin is allowed.
-    /// </summary>
-    /// <param name="origin">The origin.</param>
-    /// <returns></returns>
-    public async Task<bool> IsOriginAllowedAsync(string origin)
+    /// <inheritdoc/>
+    public async Task<bool> IsOriginAllowedAsync(string origin, Ct ct)
     {
 #pragma warning disable CA1308 // this has historically been normalized to lower case and RFC 3986 instructs to normalize to lowercase
         origin = origin.ToLowerInvariant();
@@ -60,7 +49,7 @@ public class CorsPolicyService : ICorsPolicyService
                     where o.Origin == origin
                     select o;
 
-        var isAllowed = await query.AnyAsync(CancellationTokenProvider.CancellationToken);
+        var isAllowed = await query.AnyAsync(ct);
 
         Logger.LogDebug("Origin {origin} is allowed: {originAllowed}", origin, isAllowed);
 

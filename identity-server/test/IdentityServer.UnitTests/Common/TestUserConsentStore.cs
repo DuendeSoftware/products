@@ -20,9 +20,9 @@ public class TestUserConsentStore : IUserConsentStore
             new DefaultHandleGenerationService(),
             TestLogger.Create<DefaultUserConsentStore>());
 
-    public Task StoreUserConsentAsync(Consent consent) => _userConsentStore.StoreUserConsentAsync(consent);
+    public Task StoreUserConsentAsync(Consent consent, Ct ct) => _userConsentStore.StoreUserConsentAsync(consent, ct);
 
-    public Task<Consent> GetUserConsentAsync(string subjectId, string clientId) => _userConsentStore.GetUserConsentAsync(subjectId, clientId);
+    public Task<Consent> GetUserConsentAsync(string subjectId, string clientId, Ct ct) => _userConsentStore.GetUserConsentAsync(subjectId, clientId, ct);
 
-    public Task RemoveUserConsentAsync(string subjectId, string clientId) => _userConsentStore.RemoveUserConsentAsync(subjectId, clientId);
+    public Task RemoveUserConsentAsync(string subjectId, string clientId, Ct ct) => _userConsentStore.RemoveUserConsentAsync(subjectId, clientId, ct);
 }

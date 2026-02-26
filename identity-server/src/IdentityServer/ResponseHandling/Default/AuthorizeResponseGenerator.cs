@@ -82,27 +82,22 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         Events = events;
     }
 
-    /// <summary>
-    /// Creates the response
-    /// </summary>
-    /// <param name="request">The request.</param>
-    /// <returns></returns>
-    /// <exception cref="System.InvalidOperationException">invalid grant type: " + request.GrantType</exception>
-    public virtual async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request)
+    /// <inheritdoc/>
+    public virtual async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeResponseGenerator.CreateResponse");
 
         if (request.GrantType == GrantType.AuthorizationCode)
         {
-            return await CreateCodeFlowResponseAsync(request);
+            return await CreateCodeFlowResponseAsync(request, ct);
         }
         if (request.GrantType == GrantType.Implicit)
         {
-            return await CreateImplicitFlowResponseAsync(request);
+            return await CreateImplicitFlowResponseAsync(request, ct);
         }
         if (request.GrantType == GrantType.Hybrid)
         {
-            return await CreateHybridFlowResponseAsync(request);
+            return await CreateHybridFlowResponseAsync(request, ct);
         }
 
         Logger.LogError("Unsupported grant type: {GrantType}", request.GrantType);
@@ -113,15 +108,16 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a hybrid flow request
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request)
+    protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         Logger.LogDebug("Creating Hybrid Flow response.");
 
-        var code = await CreateCodeAsync(request);
-        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code);
+        var code = await CreateCodeAsync(request, ct);
+        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code, ct);
 
-        var response = await CreateImplicitFlowResponseAsync(request, id);
+        var response = await CreateImplicitFlowResponseAsync(request, ct, id);
         response.Code = id;
 
         return response;
@@ -131,13 +127,14 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a code flow request
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request)
+    protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         Logger.LogDebug("Creating Authorization Code Flow response.");
 
-        var code = await CreateCodeAsync(request);
-        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code);
+        var code = await CreateCodeAsync(request, ct);
+        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code, ct);
 
         var response = new AuthorizeResponse
         {
@@ -154,9 +151,10 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a implicit flow request
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="authorizationCode"></param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateImplicitFlowResponseAsync(ValidatedAuthorizeRequest request, string authorizationCode = null)
+    protected virtual async Task<AuthorizeResponse> CreateImplicitFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct, string authorizationCode = null)
     {
         Logger.LogDebug("Creating Implicit Flow response.");
 
@@ -176,10 +174,10 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
                 ValidatedRequest = request
             };
 
-            var accessToken = await TokenService.CreateAccessTokenAsync(tokenRequest);
+            var accessToken = await TokenService.CreateAccessTokenAsync(tokenRequest, ct);
             accessTokenLifetime = accessToken.Lifetime;
 
-            accessTokenValue = await TokenService.CreateSecurityTokenAsync(accessToken);
+            accessTokenValue = await TokenService.CreateSecurityTokenAsync(accessToken, ct);
         }
 
         string jwt = null;
@@ -189,7 +187,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
 
             if (Options.EmitStateHash && request.State.IsPresent())
             {
-                var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms);
+                var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms, ct);
                 if (credential == null)
                 {
                     throw new InvalidOperationException("No signing credential is configured.");
@@ -211,8 +209,8 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
                 StateHash = stateHash
             };
 
-            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest);
-            jwt = await TokenService.CreateSecurityTokenAsync(idToken);
+            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest, ct);
+            jwt = await TokenService.CreateSecurityTokenAsync(idToken, ct);
         }
 
         var response = new AuthorizeResponse
@@ -231,13 +229,14 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates an authorization code
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizationCode> CreateCodeAsync(ValidatedAuthorizeRequest request)
+    protected virtual async Task<AuthorizationCode> CreateCodeAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         string stateHash = null;
         if (Options.EmitStateHash && request.State.IsPresent())
         {
-            var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms);
+            var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms, ct);
             if (credential == null)
             {
                 throw new InvalidOperationException("No signing credential is configured.");

@@ -134,7 +134,7 @@ public class StubCorePolicyProvider : ICorsPolicyService
     public bool Result;
     public bool WasCalled;
 
-    public Task<bool> IsOriginAllowedAsync(string origin)
+    public Task<bool> IsOriginAllowedAsync(string origin, Ct _)
     {
         WasCalled = true;
         return Task.FromResult(Result);

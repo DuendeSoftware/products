@@ -13,7 +13,7 @@ internal class MockSigningKeyStore : ISigningKeyStore
     public bool LoadKeysAsyncWasCalled { get; set; }
     public bool DeleteWasCalled { get; set; }
 
-    public Task DeleteKeyAsync(string id)
+    public Task DeleteKeyAsync(string id, Ct _)
     {
         DeleteWasCalled = true;
         if (Keys != null)
@@ -23,13 +23,13 @@ internal class MockSigningKeyStore : ISigningKeyStore
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<SerializedKey>> LoadKeysAsync()
+    public Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct _)
     {
         LoadKeysAsyncWasCalled = true;
         return Task.FromResult<IEnumerable<SerializedKey>>(Keys);
     }
 
-    public Task StoreKeyAsync(SerializedKey key)
+    public Task StoreKeyAsync(SerializedKey key, Ct _)
     {
         if (Keys == null)
         {

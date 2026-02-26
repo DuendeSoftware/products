@@ -8,5 +8,5 @@ namespace UnitTests.Common;
 
 public class MockUiLocaleService : IUiLocalesService
 {
-    public Task StoreUiLocalesForRedirectAsync(string? uiLocales) => Task.CompletedTask;
+    public Task StoreUiLocalesForRedirectAsync(string? uiLocales, Ct _) => Task.CompletedTask;
 }

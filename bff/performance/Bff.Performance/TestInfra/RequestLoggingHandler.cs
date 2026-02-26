@@ -12,7 +12,7 @@ public class RequestLoggingHandler(
     : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CT ct)
+        Ct ct)
     {
         if (!shouldLog(request))
         {

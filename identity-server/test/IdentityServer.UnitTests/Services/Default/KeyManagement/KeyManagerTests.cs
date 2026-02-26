@@ -18,6 +18,8 @@ public class KeyManagerTests
 {
     private KeyManager _subject;
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private SigningAlgorithmOptions _rsaOptions = new SigningAlgorithmOptions("RS256");
 
     private IdentityServerOptions _options = new IdentityServerOptions();
@@ -119,7 +121,7 @@ public class KeyManagerTests
     {
         var id = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromHours(1)));
 
-        var keys = await _subject.GetCurrentKeysAsync();
+        var keys = await _subject.GetCurrentKeysAsync(_ct);
         var key = keys.Single();
         key.Id.ShouldBe(id);
     }
@@ -131,7 +133,7 @@ public class KeyManagerTests
     {
         var id = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromHours(1)));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
         key.Id.ShouldBe(id);
@@ -142,7 +144,7 @@ public class KeyManagerTests
     {
         var id = CreateAndStoreKey(TimeSpan.FromSeconds(5));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -156,7 +158,7 @@ public class KeyManagerTests
     {
         var id = CreateAndStoreKey(-TimeSpan.FromSeconds(5));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -168,7 +170,7 @@ public class KeyManagerTests
     [Fact]
     public async Task GetAllKeysInternalAsync_when_no_keys_should_create_key()
     {
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -182,7 +184,7 @@ public class KeyManagerTests
     {
         _mockKeyStore.Keys = null;
 
-        var (keys, key) = await _subject.GetAllKeysInternalAsync();
+        var (keys, key) = await _subject.GetAllKeysInternalAsync(_ct);
 
         keys.ShouldNotBeEmpty();
     }
@@ -192,7 +194,7 @@ public class KeyManagerTests
     {
         var id = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(5)));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -207,7 +209,7 @@ public class KeyManagerTests
         var id1 = CreateCacheAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(5)));
         var id2 = CreateAndStoreKey();
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -223,7 +225,7 @@ public class KeyManagerTests
         var key3 = CreateAndStoreKey(-TimeSpan.FromSeconds(5));
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(5)));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -238,7 +240,7 @@ public class KeyManagerTests
         var key1 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Subtract(TimeSpan.FromSeconds(10)));
         var key2 = CreateAndStoreKey(-TimeSpan.FromSeconds(5));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -256,7 +258,7 @@ public class KeyManagerTests
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(5)));
         var key5 = CreateAndStoreKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(5)));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         allKeys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
@@ -272,7 +274,7 @@ public class KeyManagerTests
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(5)));
         var key5 = CreateAndStoreKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(5)));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         allKeys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
@@ -282,7 +284,7 @@ public class KeyManagerTests
     {
         var key = CreateAndStoreKey();
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         allKeys.Count().ShouldBe(1);
         allKeys.Single().Id.ShouldBe(key);
@@ -300,7 +302,7 @@ public class KeyManagerTests
             key
         };
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         allKeys.Count().ShouldBe(1);
         allKeys.Single().Id.ShouldBe(key.Id);
@@ -312,7 +314,7 @@ public class KeyManagerTests
     {
         var key1 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Subtract(TimeSpan.FromSeconds(1)));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -327,7 +329,7 @@ public class KeyManagerTests
         var key1 = CreateCacheAndStoreKey(_options.KeyManagement.RotationInterval.Subtract(TimeSpan.FromSeconds(1)));
         var key2 = CreateAndStoreKey();
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         _mockKeyStore.Keys.Count.ShouldBe(2);
     }
@@ -337,7 +339,7 @@ public class KeyManagerTests
     {
         var key1 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Subtract(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromSeconds(1))));
 
-        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
+        var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync(_ct);
 
         var key = signgingKeys.Single();
 
@@ -352,7 +354,7 @@ public class KeyManagerTests
     {
         var id = CreateCacheAndStoreKey();
 
-        var keys = await _subject.GetAllKeysFromCacheAsync();
+        var keys = await _subject.GetAllKeysFromCacheAsync(_ct);
 
         keys.Count().ShouldBe(1);
         keys.Single().Id.ShouldBe(id);
@@ -477,7 +479,7 @@ public class KeyManagerTests
         var key5 = CreateSerializedKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateSerializedKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
 
-        var result = await _subject.FilterAndDeleteRetiredKeysAsync([key1, key2, key3, key4, key5, key6]);
+        var result = await _subject.FilterAndDeleteRetiredKeysAsync([key1, key2, key3, key4, key5, key6], _ct);
 
         result.Select(x => x.Id).ShouldBe([key3.Id, key4.Id, key5.Id, key6.Id]);
     }
@@ -494,7 +496,7 @@ public class KeyManagerTests
         var key5 = CreateAndStoreKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
 
-        var keys = await _subject.GetAllKeysAsync();
+        var keys = await _subject.GetAllKeysAsync(_ct);
 
         _mockKeyStore.DeleteWasCalled.ShouldBeTrue();
         _mockKeyStore.Keys.Select(x => x.Id).ShouldBe([key3, key4, key5, key6]);
@@ -512,7 +514,7 @@ public class KeyManagerTests
         var key5 = CreateAndStoreKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
 
-        var keys = await _subject.GetAllKeysAsync();
+        var keys = await _subject.GetAllKeysAsync(_ct);
 
         _mockKeyStore.DeleteWasCalled.ShouldBeFalse();
         _mockKeyStore.Keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4, key5, key6]);
@@ -541,13 +543,13 @@ public class KeyManagerTests
     public async Task CacheKeysAsync_should_not_store_empty_keys()
     {
         {
-            await _subject.CacheKeysAsync(null);
+            await _subject.CacheKeysAsync(null, _ct);
 
             _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeFalse();
         }
 
         {
-            await _subject.CacheKeysAsync(new RsaKeyContainer[0]);
+            await _subject.CacheKeysAsync(new RsaKeyContainer[0], _ct);
 
             _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeFalse();
         }
@@ -559,7 +561,7 @@ public class KeyManagerTests
         var key1 = CreateKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromMinutes(5)));
         var key2 = CreateKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromMinutes(10)));
 
-        await _subject.CacheKeysAsync(new[] { key1, key2 });
+        await _subject.CacheKeysAsync(new[] { key1, key2 }, _ct);
 
         _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
         _mockKeyStoreCache.StoreKeysAsyncDuration.ShouldBe(_options.KeyManagement.KeyCacheDuration);
@@ -572,7 +574,7 @@ public class KeyManagerTests
     {
         var key1 = CreateKey();
 
-        await _subject.CacheKeysAsync(new[] { key1 });
+        await _subject.CacheKeysAsync(new[] { key1 }, _ct);
 
         _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
         _mockKeyStoreCache.StoreKeysAsyncDuration.ShouldBe(_options.KeyManagement.InitializationKeyCacheDuration);
@@ -585,7 +587,7 @@ public class KeyManagerTests
     {
         var key = CreateAndStoreKey();
 
-        var keys = await _subject.GetAllKeysFromStoreAsync();
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.ShouldNotBeNull();
         keys.Single().Id.ShouldBe(key);
@@ -601,7 +603,7 @@ public class KeyManagerTests
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(1)));
         var key5 = CreateAndStoreKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(5)));
 
-        var keys = await _subject.GetAllKeysFromStoreAsync();
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
@@ -615,12 +617,12 @@ public class KeyManagerTests
         var key4 = CreateAndStoreKey(_options.KeyManagement.RotationInterval.Add(TimeSpan.FromSeconds(1)));
         var key5 = CreateAndStoreKeyThatCannotBeUnprotected(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(5)));
 
-        var keys = await _subject.GetAllKeysFromStoreAsync();
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
 
         _mockKeyStore.DeleteWasCalled.ShouldBeTrue();
-        var keysInStore = await _mockKeyStore.LoadKeysAsync();
+        var keysInStore = await _mockKeyStore.LoadKeysAsync(_ct);
         keysInStore.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
 
@@ -630,7 +632,7 @@ public class KeyManagerTests
         var key1 = CreateAndStoreKey(TimeSpan.FromSeconds(10));
         _mockKeyStore.Keys.Add(null);
 
-        var keys = await _subject.GetAllKeysFromStoreAsync();
+        var keys = await _subject.GetAllKeysFromStoreAsync(_ct);
 
         keys.Select(x => x.Id).ShouldBe([key1]);
     }
@@ -640,7 +642,7 @@ public class KeyManagerTests
     [Fact]
     public async Task CreateNewKeyAndAddToCacheAsync_when_no_keys_should_store_and_return_new_key()
     {
-        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
+        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync(_ct);
         var key = signingKeys.Single();
         _mockKeyStore.Keys.Single().Id.ShouldBe(key.Id);
     }
@@ -650,7 +652,7 @@ public class KeyManagerTests
     {
         var key1 = CreateCacheAndStoreKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromSeconds(1)));
 
-        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
+        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync(_ct);
         var key = signingKeys.Single();
 
         allKeys.Count().ShouldBe(2);
@@ -664,7 +666,7 @@ public class KeyManagerTests
     {
         var key1 = CreateCacheAndStoreKey();
 
-        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
+        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync(_ct);
 
         allKeys.Select(x => x.Id).ShouldBe(_mockKeyStore.Keys.Select(x => x.Id));
     }
@@ -678,7 +680,7 @@ public class KeyManagerTests
 
         var sw = new Stopwatch();
         sw.Start();
-        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
+        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync(_ct);
         sw.Stop();
 
         sw.Elapsed.ShouldBeGreaterThanOrEqualTo(_options.KeyManagement.InitializationSynchronizationDelay);
@@ -695,7 +697,7 @@ public class KeyManagerTests
 
         var sw = new Stopwatch();
         sw.Start();
-        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
+        var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync(_ct);
         sw.Stop();
 
         sw.Elapsed.ShouldBeLessThan(_options.KeyManagement.InitializationSynchronizationDelay);
@@ -925,7 +927,7 @@ public class KeyManagerTests
     [Fact]
     public async Task CreateAndStoreNewKeyAsync_should_create_and_store_and_return_key()
     {
-        var result = await _subject.CreateAndStoreNewKeyAsync(_rsaOptions);
+        var result = await _subject.CreateAndStoreNewKeyAsync(_rsaOptions, _ct);
 
         _mockKeyProtector.ProtectWasCalled.ShouldBeTrue();
         _mockKeyStore.Keys.Count.ShouldBe(1);

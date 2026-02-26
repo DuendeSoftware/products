@@ -6,5 +6,10 @@ namespace Duende.IdentityServer.Services;
 
 public interface IUiLocalesService
 {
-    Task StoreUiLocalesForRedirectAsync(string? uiLocales);
+    /// <summary>
+    /// Stores the UI locales for redirect.
+    /// </summary>
+    /// <param name="uiLocales"></param>
+    /// <param name="ct">The cancellation token.</param>
+    Task StoreUiLocalesForRedirectAsync(string? uiLocales, Ct ct);
 }

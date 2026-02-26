@@ -23,7 +23,7 @@ internal class SessionCleanupHost(
 
     private TimeSpan CleanupInterval => _options.SessionCleanupInterval;
 
-    public override Task StartAsync(CT ct)
+    public override Task StartAsync(Ct ct)
     {
         if (!IsIUserSessionStoreCleanupRegistered())
         {
@@ -34,7 +34,7 @@ internal class SessionCleanupHost(
         return base.StartAsync(ct);
     }
 
-    protected override async Task ExecuteAsync(CT ct)
+    protected override async Task ExecuteAsync(Ct ct)
     {
         while (true)
         {
@@ -70,7 +70,7 @@ internal class SessionCleanupHost(
         }
     }
 
-    internal async Task RunAsync(CT ct = default)
+    internal async Task RunAsync(Ct ct = default)
     {
         try
         {

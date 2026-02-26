@@ -88,7 +88,7 @@ internal class TokenEndpoint : IEndpointHandler
         _logger.LogDebug("Start token request.");
 
         // validate client
-        var clientResult = await _clientValidator.ValidateAsync(context);
+        var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var errorMsg = clientResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
@@ -97,7 +97,7 @@ internal class TokenEndpoint : IEndpointHandler
         }
 
         // validate request
-        var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+        var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
         _logger.LogTrace("Calling into token request validator: {type}", _requestValidator.GetType().FullName);
 
         var requestContext = new TokenRequestValidationContext
@@ -113,7 +113,7 @@ internal class TokenEndpoint : IEndpointHandler
             return error;
         }
 
-        var requestResult = await _requestValidator.ValidateRequestAsync(requestContext);
+        var requestResult = await _requestValidator.ValidateRequestAsync(requestContext, context.RequestAborted);
         if (requestResult.IsError)
         {
             // Note: this is an expected case in the normal DPoP flow and is not a real failure event.
@@ -124,7 +124,7 @@ internal class TokenEndpoint : IEndpointHandler
             }
             else
             {
-                await _events.RaiseAsync(new TokenIssuedFailureEvent(requestResult));
+                await _events.RaiseAsync(new TokenIssuedFailureEvent(requestResult), context.RequestAborted);
             }
 
             Telemetry.Metrics.TokenIssuedFailure(
@@ -136,9 +136,9 @@ internal class TokenEndpoint : IEndpointHandler
 
         // create response
         _logger.LogTrace("Calling into token request response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult);
+        var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
-        await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
+        await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult), context.RequestAborted);
 
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null,
             response.AccessToken.IsPresent(), response.AccessTokenType.IsPresent() ? requestResult.ValidatedRequest.AccessTokenType : null, response.RefreshToken.IsPresent(),
@@ -153,7 +153,7 @@ internal class TokenEndpoint : IEndpointHandler
     private async Task<TokenErrorResult> TryReadProofTokens(HttpContext context, TokenRequestValidationContext tokenRequest)
     {
         // mTLS cert
-        tokenRequest.ClientCertificate = await context.Connection.GetClientCertificateAsync();
+        tokenRequest.ClientCertificate = await context.Connection.GetClientCertificateAsync(context.RequestAborted);
 
         // DPoP header value
         if (context.Request.Headers.TryGetValue(OidcConstants.HttpHeaders.DPoP, out var dpopHeader))

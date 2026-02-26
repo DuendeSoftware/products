@@ -66,7 +66,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
             if (logoutMessage.ContainsPayload)
             {
                 var msg = new Message<LogoutMessage>(logoutMessage, _timeProvider.GetUtcNow().UtcDateTime);
-                id = await _logoutMessageStore.WriteAsync(msg);
+                id = await _logoutMessageStore.WriteAsync(msg, context.RequestAborted);
             }
         }
 
@@ -75,7 +75,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
         if (redirect.IsLocalUrl())
         {
             redirect = _urls.GetIdentityServerRelativeUrl(redirect);
-            await _localesService.StoreUiLocalesForRedirectAsync(result.Result.ValidatedRequest?.UiLocales);
+            await _localesService.StoreUiLocalesForRedirectAsync(result.Result.ValidatedRequest?.UiLocales, context.RequestAborted);
         }
 
         if (id != null)

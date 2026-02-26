@@ -51,7 +51,7 @@ internal static class HttpContextExtensions
         this HttpContext context,
         RequiredTokenType requiredTokenType,
         BffUserAccessTokenParameters? userAccessTokenParameters = null,
-        CT ct = default)
+        Ct ct = default)
     {
         if (requiredTokenType == RequiredTokenType.None)
         {

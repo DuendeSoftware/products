@@ -28,69 +28,47 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
         _handleGenerationService = handleGenerationService;
     }
 
-    /// <summary>
-    /// Stores the device authorization request.
-    /// </summary>
-    /// <param name="userCode">The user code.</param>
-    /// <param name="data">The data.</param>
-    /// <returns></returns>
-    public async Task<string> StoreDeviceAuthorizationAsync(string userCode, DeviceCode data)
+    /// <inheritdoc/>
+    public async Task<string> StoreDeviceAuthorizationAsync(string userCode, DeviceCode data, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.SendLogoutNotifStoreDeviceAuthorization");
 
-        var deviceCode = await _handleGenerationService.GenerateAsync();
+        var deviceCode = await _handleGenerationService.GenerateAsync(ct);
 
-        await _store.StoreDeviceAuthorizationAsync(deviceCode.Sha256(), userCode.Sha256(), data);
+        await _store.StoreDeviceAuthorizationAsync(deviceCode.Sha256(), userCode.Sha256(), data, ct);
 
         return deviceCode;
     }
 
-    /// <summary>
-    /// Finds device authorization by user code.
-    /// </summary>
-    /// <param name="userCode">The user code.</param>
-    /// <returns></returns>
-    public Task<DeviceCode> FindByUserCodeAsync(string userCode)
+    /// <inheritdoc/>
+    public Task<DeviceCode> FindByUserCodeAsync(string userCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.FindByUserCode");
 
-        return _store.FindByUserCodeAsync(userCode.Sha256());
+        return _store.FindByUserCodeAsync(userCode.Sha256(), ct);
     }
 
-    /// <summary>
-    /// Finds device authorization by device code.
-    /// </summary>
-    /// <param name="deviceCode">The device code.</param>
-    /// <returns></returns>
-    public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
+    /// <inheritdoc/>
+    public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.FindByDeviceCode");
 
-        return _store.FindByDeviceCodeAsync(deviceCode.Sha256());
+        return _store.FindByDeviceCodeAsync(deviceCode.Sha256(), ct);
     }
 
-    /// <summary>
-    /// Updates device authorization, searching by user code.
-    /// </summary>
-    /// <param name="userCode">The user code.</param>
-    /// <param name="data">The data.</param>
-    /// <returns></returns>
-    public Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
+    /// <inheritdoc/>
+    public Task UpdateByUserCodeAsync(string userCode, DeviceCode data, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.UpdateByUserCode");
 
-        return _store.UpdateByUserCodeAsync(userCode.Sha256(), data);
+        return _store.UpdateByUserCodeAsync(userCode.Sha256(), data, ct);
     }
 
-    /// <summary>
-    /// Removes the device authorization, searching by device code.
-    /// </summary>
-    /// <param name="deviceCode">The device code.</param>
-    /// <returns></returns>
-    public Task RemoveByDeviceCodeAsync(string deviceCode)
+    /// <inheritdoc/>
+    public Task RemoveByDeviceCodeAsync(string deviceCode, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.RemoveByDeviceCode");
 
-        return _store.RemoveByDeviceCodeAsync(deviceCode.Sha256());
+        return _store.RemoveByDeviceCodeAsync(deviceCode.Sha256(), ct);
     }
 }

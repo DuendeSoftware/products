@@ -17,8 +17,9 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
     /// <summary>
     /// Gets all the signing credentials.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync();
+    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct);
 }
 
 /// <summary>
@@ -27,13 +28,13 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
 internal class NopAutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
 {
     /// <inheritdoc/>
-    public Task<SigningCredentials> GetSigningCredentialsAsync() => Task.FromResult<SigningCredentials>(null);
+    public Task<SigningCredentials> GetSigningCredentialsAsync(Ct _) => Task.FromResult<SigningCredentials>(null);
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync() => Task.FromResult(Enumerable.Empty<SigningCredentials>());
+    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct _) => Task.FromResult(Enumerable.Empty<SigningCredentials>());
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync() => Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
+    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct _) => Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
 }
 
 /// <summary>
@@ -56,41 +57,41 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     }
 
     /// <inheritdoc/>
-    public async Task<SigningCredentials> GetSigningCredentialsAsync()
+    public async Task<SigningCredentials> GetSigningCredentialsAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
             return null;
         }
 
-        var credentials = await GetAllSigningCredentialsAsync();
+        var credentials = await GetAllSigningCredentialsAsync(ct);
         var alg = _options.DefaultSigningAlgorithm;
         var credential = credentials.FirstOrDefault(x => alg == x.Algorithm);
         return credential;
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync()
+    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
             return Enumerable.Empty<SigningCredentials>();
         }
 
-        var keyContainers = await _keyManager.GetCurrentKeysAsync();
+        var keyContainers = await _keyManager.GetCurrentKeysAsync(ct);
         var credentials = keyContainers.Select(x => new SigningCredentials(x.ToSecurityKey(), x.Algorithm));
         return credentials;
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
+    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
             return Enumerable.Empty<SecurityKeyInfo>();
         }
 
-        var containers = await _keyManager.GetAllKeysAsync();
+        var containers = await _keyManager.GetAllKeysAsync(ct);
         var keys = containers.Select(x => new SecurityKeyInfo
         {
             Key = x.ToSecurityKey(),

@@ -15,6 +15,7 @@ public interface ITokenRevocationResponseGenerator
     /// Creates the revocation endpoint response and processes the revocation request.
     /// </summary>
     /// <param name="validationResult">The userinfo request validation result.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult);
+    Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult, Ct ct);
 }

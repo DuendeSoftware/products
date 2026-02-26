@@ -15,7 +15,7 @@ internal class DiagnosticSummary(
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.BFF.Diagnostics.Summary");
 
-    public async Task PrintSummaryAsync(CT ct = default)
+    public async Task PrintSummaryAsync(Ct ct = default)
     {
         var bffOptions = options.Value;
         var jsonMemory = await diagnosticDataService.GetJsonBytesAsync(ct);

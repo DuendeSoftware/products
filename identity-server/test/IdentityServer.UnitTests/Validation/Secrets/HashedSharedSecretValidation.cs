@@ -17,13 +17,14 @@ public class HashedSharedSecretValidation
 
     private ISecretValidator _validator = new HashedSharedSecretValidator(new Logger<HashedSharedSecretValidator>(new LoggerFactory()));
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Valid_Single_Secret()
     {
         var clientId = "single_secret_hashed_no_expiration";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -32,7 +33,7 @@ public class HashedSharedSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeTrue();
     }
@@ -42,7 +43,7 @@ public class HashedSharedSecretValidation
     public async Task Invalid_Credential_Type()
     {
         var clientId = "single_secret_hashed_no_expiration";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -51,7 +52,7 @@ public class HashedSharedSecretValidation
             Type = "invalid"
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -61,7 +62,7 @@ public class HashedSharedSecretValidation
     public async Task Valid_Multiple_Secrets()
     {
         var clientId = "multiple_secrets_hashed";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -70,19 +71,19 @@ public class HashedSharedSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
 
         secret.Credential = "foobar";
-        result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
 
         secret.Credential = "quux";
-        result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
 
         secret.Credential = "notexpired";
-        result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeTrue();
     }
 
@@ -91,7 +92,7 @@ public class HashedSharedSecretValidation
     public async Task Invalid_Single_Secret()
     {
         var clientId = "single_secret_hashed_no_expiration";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -100,7 +101,7 @@ public class HashedSharedSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -110,7 +111,7 @@ public class HashedSharedSecretValidation
     public async Task Invalid_Multiple_Secrets()
     {
         var clientId = "multiple_secrets_hashed";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -119,7 +120,7 @@ public class HashedSharedSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeFalse();
     }
 
@@ -128,7 +129,7 @@ public class HashedSharedSecretValidation
     public async Task Client_with_no_Secret_Should_Fail()
     {
         var clientId = "no_secret_client";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -136,7 +137,7 @@ public class HashedSharedSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeFalse();
     }
 
@@ -145,7 +146,7 @@ public class HashedSharedSecretValidation
     public async Task Client_with_null_Secret_Should_Fail()
     {
         var clientId = "null_secret_client";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -154,7 +155,7 @@ public class HashedSharedSecretValidation
             Credential = "secret"
         };
 
-        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         result.Success.ShouldBeFalse();
     }
 }

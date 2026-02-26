@@ -19,22 +19,27 @@ public interface IRefreshTokenService
     /// </summary>
     /// <param name="token">The refresh token.</param>
     /// <param name="client">The client.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenValidationResult> ValidateRefreshTokenAsync(string token, Client client);
+    Task<TokenValidationResult> ValidateRefreshTokenAsync(string token, Client client, Ct ct);
 
     /// <summary>
     /// Creates the refresh token.
     /// </summary>
+    /// <param name="request">The refresh token creation request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The refresh token handle
     /// </returns>
-    Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request);
+    Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, Ct ct);
 
     /// <summary>
     /// Updates the refresh token.
     /// </summary>
+    /// <param name="request">The refresh token update request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The refresh token handle
     /// </returns>
-    Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request);
+    Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, Ct ct);
 }

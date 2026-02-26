@@ -27,7 +27,7 @@ internal class RoutingMessageHandler : HttpMessageHandler
 
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
-        CT ct)
+        Ct ct)
     {
         var host = $"{request.RequestUri?.Host}:{request.RequestUri?.Port}";
 
@@ -46,7 +46,7 @@ internal class RoutingMessageHandler : HttpMessageHandler
     {
         internal Task<HttpResponseMessage> SuppressedSend(
             HttpRequestMessage request,
-            CT ct)
+            Ct ct)
         {
             Task<HttpResponseMessage> t;
             if (ExecutionContext.IsFlowSuppressed())

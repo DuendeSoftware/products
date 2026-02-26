@@ -12,12 +12,14 @@ public interface IKeyManager
     /// <summary>
     /// Returns the current signing keys.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetCurrentKeysAsync();
+    Task<IEnumerable<KeyContainer>> GetCurrentKeysAsync(Ct ct);
 
     /// <summary>
     /// Returns all the validation keys.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetAllKeysAsync();
+    Task<IEnumerable<KeyContainer>> GetAllKeysAsync(Ct ct);
 }

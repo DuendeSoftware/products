@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class ConfirmationSecretValidator : ISecretValidator
 {
-    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct _)
     {
         if (secrets.Any())
         {

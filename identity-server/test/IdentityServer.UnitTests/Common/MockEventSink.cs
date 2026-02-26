@@ -11,7 +11,7 @@ internal class MockEventSink : IEventSink
 {
     public List<Event> Events { get; } = [];
 
-    public Task PersistAsync(Event evt)
+    public Task PersistAsync(Event evt, Ct _)
     {
         Events.Add(evt);
         return Task.CompletedTask;

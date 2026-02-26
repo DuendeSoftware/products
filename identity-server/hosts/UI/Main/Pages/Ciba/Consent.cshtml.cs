@@ -53,7 +53,7 @@ public class Consent : PageModel
     public async Task<IActionResult> OnPost()
     {
         // validate return url is still valid
-        var request = await _interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)));
+        var request = await _interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)), HttpContext.RequestAborted);
         if (request == null || request.Subject.GetSubjectId() != User.GetSubjectId())
         {
             _logger.InvalidId(Input.Id);
@@ -68,7 +68,7 @@ public class Consent : PageModel
             result = new CompleteBackchannelLoginRequest(Input.Id);
 
             // emit event
-            await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
+            await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues), HttpContext.RequestAborted);
             Telemetry.Metrics.ConsentDenied(request.Client.ClientId, request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName));
         }
         // user clicked 'yes' - validate the data
@@ -90,7 +90,7 @@ public class Consent : PageModel
                 };
 
                 // emit event
-                await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, result.ScopesValuesConsented, false));
+                await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, result.ScopesValuesConsented, false), HttpContext.RequestAborted);
                 Telemetry.Metrics.ConsentGranted(request.Client.ClientId, result.ScopesValuesConsented, false);
                 var denied = request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName).Except(result.ScopesValuesConsented);
                 Telemetry.Metrics.ConsentDenied(request.Client.ClientId, denied);
@@ -108,7 +108,7 @@ public class Consent : PageModel
         if (result != null)
         {
             // communicate outcome of consent back to identityserver
-            await _interaction.CompleteLoginRequestAsync(result);
+            await _interaction.CompleteLoginRequestAsync(result, HttpContext.RequestAborted);
 
             return RedirectToPage("/Ciba/All");
         }
@@ -125,7 +125,7 @@ public class Consent : PageModel
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        var request = await _interaction.GetLoginRequestByInternalIdAsync(id);
+        var request = await _interaction.GetLoginRequestByInternalIdAsync(id, HttpContext.RequestAborted);
         if (request != null && request.Subject.GetSubjectId() == User.GetSubjectId())
         {
             View = CreateConsentViewModel(request);

@@ -15,6 +15,7 @@ public interface IUserCodeService
     /// Gets the user code generator.
     /// </summary>
     /// <param name="userCodeType">Type of user code.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IUserCodeGenerator?> GetGenerator(string userCodeType);
+    Task<IUserCodeGenerator?> GetGenerator(string userCodeType, Ct ct);
 }

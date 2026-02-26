@@ -13,6 +13,8 @@ namespace UnitTests.Validation;
 
 public class IsLocalUrlTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     private const string queryParameters = "?client_id=mvc.code" +
         "&redirect_uri=https%3A%2F%2Flocalhost%3A44302%2Fsignin-oidc" +
         "&response_type=code" +
@@ -65,7 +67,7 @@ public class IsLocalUrlTests
     {
         var interactionService = new DefaultIdentityServerInteractionService(null, null, null, null, null, null, null,
             GetReturnUrlParser(), new LoggerFactory().CreateLogger<DefaultIdentityServerInteractionService>());
-        var actual = await interactionService.GetAuthorizationContextAsync(returnUrl);
+        var actual = await interactionService.GetAuthorizationContextAsync(returnUrl, _ct);
         if (expected)
         {
             actual.ShouldNotBeNull();
@@ -105,7 +107,7 @@ public class IsLocalUrlTests
     public async Task OidcReturnUrlParser_ParseAsync(string returnUrl, bool expected)
     {
         var oidcParser = GetOidcReturnUrlParser();
-        var actual = await oidcParser.ParseAsync(returnUrl);
+        var actual = await oidcParser.ParseAsync(returnUrl, _ct);
         if (expected)
         {
             actual.ShouldNotBeNull();
@@ -138,7 +140,7 @@ public class IsLocalUrlTests
     public async Task ReturnUrlParser_ParseAsync(string returnUrl, bool expected)
     {
         var parser = GetReturnUrlParser();
-        var actual = await parser.ParseAsync(returnUrl);
+        var actual = await parser.ParseAsync(returnUrl, _ct);
         if (expected)
         {
             actual.ShouldNotBeNull();

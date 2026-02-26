@@ -12,10 +12,6 @@ namespace Duende.IdentityServer.Services;
 /// <seealso cref="IHandleGenerationService" />
 public class DefaultHandleGenerationService : IHandleGenerationService
 {
-    /// <summary>
-    /// Generates a handle.
-    /// </summary>
-    /// <param name="length">The length.</param>
-    /// <returns></returns>
-    public Task<string> GenerateAsync(int length) => Task.FromResult(CryptoRandom.CreateUniqueId(length, CryptoRandom.OutputFormat.Hex));
+    /// <inheritdoc/>
+    public Task<string> GenerateAsync(Ct _, int length = 32) => Task.FromResult(CryptoRandom.CreateUniqueId(length, CryptoRandom.OutputFormat.Hex));
 }

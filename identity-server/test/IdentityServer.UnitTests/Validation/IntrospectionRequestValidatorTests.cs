@@ -15,6 +15,7 @@ namespace UnitTests.Validation;
 public class IntrospectionRequestValidatorTests
 {
     private const string Category = "Introspection request validation";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IntrospectionRequestValidator _subject;
     private IReferenceTokenStore _referenceTokenStore;
@@ -44,7 +45,7 @@ public class IntrospectionRequestValidatorTests
                 new System.Security.Claims.Claim("scope", "b")
             }
         };
-        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token);
+        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token, _ct);
 
         var param = new NameValueCollection()
         {
@@ -56,7 +57,8 @@ public class IntrospectionRequestValidatorTests
             {
                 Parameters = param,
                 Api = new ApiResource("api")
-            }
+            },
+            _ct
         );
 
         result.IsError.ShouldBe(false);
@@ -83,7 +85,7 @@ public class IntrospectionRequestValidatorTests
         {
             Parameters = param,
             Api = new ApiResource("api")
-        });
+        }, _ct);
 
         result.IsError.ShouldBe(true);
         result.Error.ShouldBe("missing_token");
@@ -105,7 +107,7 @@ public class IntrospectionRequestValidatorTests
         {
             Parameters = param,
             Api = new ApiResource("api")
-        });
+        }, _ct);
 
         result.IsError.ShouldBe(false);
         result.IsActive.ShouldBe(false);
@@ -133,7 +135,7 @@ public class IntrospectionRequestValidatorTests
             }
         };
 
-        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token);
+        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token, _ct);
         var param = new NameValueCollection
         {
             { "token", handle }
@@ -144,7 +146,8 @@ public class IntrospectionRequestValidatorTests
             {
                 Parameters = param,
                 Api = new ApiResource("api")
-            }
+            },
+            _ct
         );
 
         var claims = result.Claims.Where(c => c.Type == claimType).ToArray();

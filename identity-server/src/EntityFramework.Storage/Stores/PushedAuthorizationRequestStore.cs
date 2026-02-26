@@ -4,7 +4,6 @@
 
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,11 +19,6 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     protected readonly IPersistedGrantDbContext Context;
 
     /// <summary>
-    /// The CancellationToken service.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger Logger;
@@ -34,22 +28,20 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
-    public PushedAuthorizationRequestStore(IPersistedGrantDbContext context, ILogger<PushedAuthorizationRequestStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public PushedAuthorizationRequestStore(IPersistedGrantDbContext context, ILogger<PushedAuthorizationRequestStore> logger)
     {
         Context = context;
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <inheritdoc />
-    public async Task ConsumeByHashAsync(string referenceValueHash)
+    public async Task ConsumeByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Remove");
         Logger.LogDebug("removing {referenceValueHash} pushed authorization from database", referenceValueHash);
         var numDeleted = await Context.PushedAuthorizationRequests
             .Where(par => par.ReferenceValueHash == referenceValueHash)
-            .ExecuteDeleteAsync(CancellationTokenProvider.CancellationToken);
+            .ExecuteDeleteAsync(ct);
         if (numDeleted != 1)
         {
             Logger.LogWarning("attempted to remove {referenceValueHash} pushed authorization request because it was consumed, but no records were actually deleted.", referenceValueHash);
@@ -57,13 +49,13 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     }
 
     /// <inheritdoc />
-    public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash)
+    public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationRequestStore.Get");
 
         var par = (await Context.PushedAuthorizationRequests
                 .AsNoTracking().Where(x => x.ReferenceValueHash == referenceValueHash)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
                 .SingleOrDefault(x => x.ReferenceValueHash == referenceValueHash);
         var model = par?.ToModel();
 
@@ -74,14 +66,14 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
 
 
     /// <inheritdoc />
-    public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par)
+    public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationStore.Store");
 
         Context.PushedAuthorizationRequests.Add(par.ToEntity());
         try
         {
-            await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+            await Context.SaveChangesAsync(ct);
         }
         // REVIEW - Is this exception possible, since we don't try to load (and then update) an existing entity?
         // I think it isn't, but what happens if we somehow two calls to StoreAsync with the same PAR are made?

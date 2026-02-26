@@ -9,6 +9,8 @@ namespace UnitTests.Extensions;
 
 public class IResourceStoreExtensionsTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task GetAllEnabledResourcesAsync_on_duplicate_identity_scopes_should_fail()
     {
@@ -19,7 +21,7 @@ public class IResourceStoreExtensionsTests
                 new IdentityResource { Name = "A" } }
         };
 
-        Func<Task> a = () => store.GetAllEnabledResourcesAsync();
+        Func<Task> a = () => store.GetAllEnabledResourcesAsync(_ct);
         var exception = await a.ShouldThrowAsync<Exception>();
         exception.Message.ShouldMatch("Duplicate identity scopes*");
     }
@@ -34,7 +36,7 @@ public class IResourceStoreExtensionsTests
                 new IdentityResource { Name = "B" } }
         };
 
-        await store.GetAllEnabledResourcesAsync();
+        await store.GetAllEnabledResourcesAsync(_ct);
     }
 
     [Fact]
@@ -45,7 +47,7 @@ public class IResourceStoreExtensionsTests
             ApiResources = { new ApiResource { Name = "a" }, new ApiResource { Name = "a" } }
         };
 
-        Func<Task> a = () => store.GetAllEnabledResourcesAsync();
+        Func<Task> a = () => store.GetAllEnabledResourcesAsync(_ct);
         var exception = await a.ShouldThrowAsync<Exception>();
         exception.Message.ShouldMatch("Duplicate api resources*");
     }
@@ -58,7 +60,7 @@ public class IResourceStoreExtensionsTests
             ApiResources = { new ApiResource("A"), new ApiResource("B") }
         };
 
-        await store.GetAllEnabledResourcesAsync();
+        await store.GetAllEnabledResourcesAsync(_ct);
     }
 
     [Fact]
@@ -71,7 +73,7 @@ public class IResourceStoreExtensionsTests
                 new IdentityResource { Name = "A" } }
         };
 
-        Func<Task> a = () => store.FindResourcesByScopeAsync(new string[] { "A" });
+        Func<Task> a = () => store.FindResourcesByScopeAsync(new string[] { "A" }, _ct);
         var exception = await a.ShouldThrowAsync<Exception>();
         exception.Message.ShouldMatch("Duplicate identity scopes*");
     }
@@ -86,7 +88,7 @@ public class IResourceStoreExtensionsTests
                 new IdentityResource { Name = "B" } }
         };
 
-        await store.FindResourcesByScopeAsync(new string[] { "A" });
+        await store.FindResourcesByScopeAsync(new string[] { "A" }, _ct);
     }
 
     [Fact]
@@ -103,7 +105,7 @@ public class IResourceStoreExtensionsTests
             }
         };
 
-        var result = await store.FindResourcesByScopeAsync(new string[] { "a" });
+        var result = await store.FindResourcesByScopeAsync(new string[] { "a" }, _ct);
         result.ApiResources.Count.ShouldBe(2);
         result.ApiScopes.Count.ShouldBe(1);
         result.ApiResources.Select(x => x.Name).ShouldBe(["api1", "api2"]);
@@ -118,7 +120,7 @@ public class IResourceStoreExtensionsTests
             ApiResources = { new ApiResource("A"), new ApiResource("B") }
         };
 
-        await store.FindResourcesByScopeAsync(new string[] { "A" });
+        await store.FindResourcesByScopeAsync(new string[] { "A" }, _ct);
     }
 
     [Fact]
@@ -136,7 +138,7 @@ public class IResourceStoreExtensionsTests
             }
         };
 
-        var result = await store.FindResourcesByScopeAsync(new string[] { "a" });
+        var result = await store.FindResourcesByScopeAsync(new string[] { "a" }, _ct);
         result.ApiResources.Count.ShouldBe(1);
     }
 
@@ -146,7 +148,7 @@ public class IResourceStoreExtensionsTests
         public List<ApiResource> ApiResources { get; set; } = new List<ApiResource>();
         public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names)
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct _)
         {
             var apis = from a in ApiResources
                        where names.Contains(a.Name)
@@ -154,7 +156,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(apis);
         }
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> names)
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
         {
             ArgumentNullException.ThrowIfNull(names);
 
@@ -165,7 +167,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(api);
         }
 
-        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> names)
+        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
         {
             ArgumentNullException.ThrowIfNull(names);
 
@@ -176,7 +178,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(identity);
         }
 
-        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
+        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct _)
         {
             var q = from x in ApiScopes
                     where scopeNames.Contains(x.Name)
@@ -184,7 +186,7 @@ public class IResourceStoreExtensionsTests
             return Task.FromResult(q);
         }
 
-        public Task<Resources> GetAllResourcesAsync()
+        public Task<Resources> GetAllResourcesAsync(Ct _)
         {
             var result = new Resources(IdentityResources, ApiResources, ApiScopes);
             return Task.FromResult(result);

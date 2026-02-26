@@ -5,7 +5,6 @@
 using Duende.IdentityServer.EntityFramework.Extensions;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,11 +23,6 @@ public class ServerSideSessionStore : IServerSideSessionStore
     protected readonly IPersistedGrantDbContext Context;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<ServerSideSessionStore> Logger;
@@ -38,23 +32,19 @@ public class ServerSideSessionStore : IServerSideSessionStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public ServerSideSessionStore(IPersistedGrantDbContext context, ILogger<ServerSideSessionStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public ServerSideSessionStore(IPersistedGrantDbContext context, ILogger<ServerSideSessionStore> logger)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
 
 
     /// <inheritdoc/>
-    public virtual async Task CreateSessionAsync(ServerSideSession session, CT ct = default)
+    public virtual async Task CreateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.CreateSession");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         var entity = new Entities.ServerSideSession
         {
@@ -82,11 +72,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<ServerSideSession> GetSessionAsync(string key, CT ct = default)
+    public virtual async Task<ServerSideSession> GetSessionAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetSession");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         var entity = (await Context.ServerSideSessions.AsNoTracking().Where(x => x.Key == key)
             .ToArrayAsync(ct))
@@ -115,11 +103,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task UpdateSessionAsync(ServerSideSession session, CT ct = default)
+    public virtual async Task UpdateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.UpdateSession");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         var entity = (await Context.ServerSideSessions.Where(x => x.Key == session.Key)
                 .ToArrayAsync(ct))
@@ -152,11 +138,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task DeleteSessionAsync(string key, CT ct = default)
+    public virtual async Task DeleteSessionAsync(string key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.DeleteSession");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         var entity = (await Context.ServerSideSessions.Where(x => x.Key == key)
                         .ToArrayAsync(ct))
@@ -184,11 +168,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc/>
-    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, CT ct = default)
+    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetSessions");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         filter.Validate();
 
@@ -215,11 +197,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task DeleteSessionsAsync(SessionFilter filter, CT ct = default)
+    public virtual async Task DeleteSessionsAsync(SessionFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.DeleteSessions");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         filter.Validate();
 
@@ -256,11 +236,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc/>
-    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct = default)
+    public virtual async Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetAndRemoveExpiredSessions");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         var entities = await Context.ServerSideSessions
                             .Where(x => x.Expires < DateTime.UtcNow)
@@ -295,11 +273,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task<QueryResult<ServerSideSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
+    public virtual async Task<QueryResult<ServerSideSession>> QuerySessionsAsync(Ct ct, SessionQuery filter = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.QuerySessions");
-
-        ct = ct == CT.None ? CancellationTokenProvider.CancellationToken : ct;
 
         // it's possible that this implementation could have been done differently (e.g. use the page number for the token)
         // but it was done deliberately in such a way to allow document databases to mimic the logic
@@ -338,7 +314,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
                 // we need to start over and re-query from the beginning.
                 filter.ResultsToken = null;
                 filter.RequestPriorResults = false;
-                return await QuerySessionsAsync(filter, ct);
+                return await QuerySessionsAsync(ct, filter);
             }
         }
         else
@@ -401,7 +377,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         Ticket = entity.Data,
     }).ToArray();
 
-    private static async Task NextPage(IQueryable<Entities.ServerSideSession> query, int last, SessionPaginationContext pagination, CT ct)
+    private static async Task NextPage(IQueryable<Entities.ServerSideSession> query, int last, SessionPaginationContext pagination, Ct ct)
     {
         pagination.Items = await query.OrderBy(x => x.Id)
             // if lastResultsId is zero, then this will just start at beginning
@@ -429,7 +405,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }
     }
 
-    private static async Task PreviousPage(IQueryable<Entities.ServerSideSession> query, int first, SessionPaginationContext pagination, CT ct)
+    private static async Task PreviousPage(IQueryable<Entities.ServerSideSession> query, int first, SessionPaginationContext pagination, Ct ct)
     {
         // sets query at the prior record from the last results, but in reverse order
         pagination.Items = await query.OrderByDescending(x => x.Id)

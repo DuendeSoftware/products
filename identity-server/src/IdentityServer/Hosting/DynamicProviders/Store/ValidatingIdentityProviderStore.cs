@@ -38,19 +38,19 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync() => _inner.GetAllSchemeNamesAsync();
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct) => _inner.GetAllSchemeNamesAsync(ct);
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)
     {
-        var idp = await _inner.GetBySchemeAsync(scheme);
+        var idp = await _inner.GetBySchemeAsync(scheme, ct);
 
         if (idp != null)
         {
             _logger.LogTrace("Calling into identity provider configuration validator: {validatorType}", _validatorType);
 
             var context = new IdentityProviderConfigurationValidationContext(idp);
-            await _validator.ValidateAsync(context);
+            await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {
@@ -61,7 +61,7 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
 
             _logger.LogError("Invalid IdentityProvider configuration for scheme {scheme}: {errorMessage}", scheme, context.ErrorMessage);
             Telemetry.Metrics.DynamicIdentityProviderValidationFailure(scheme, context.ErrorMessage);
-            await _events.RaiseAsync(new InvalidIdentityProviderConfiguration(idp, context.ErrorMessage));
+            await _events.RaiseAsync(new InvalidIdentityProviderConfiguration(idp, context.ErrorMessage), ct);
 
             return null;
         }

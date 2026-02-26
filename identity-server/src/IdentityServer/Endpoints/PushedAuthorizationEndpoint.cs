@@ -56,7 +56,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         NameValueCollection values;
         if (HttpMethods.IsPost(context.Request.Method))
         {
-            var form = await context.Request.ReadFormAsync();
+            var form = await context.Request.ReadFormAsync(context.RequestAborted);
             values = form.AsNameValueCollection();
         }
         else
@@ -65,7 +65,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         }
 
         // Authenticate Client
-        var client = await _clientValidator.ValidateAsync(context);
+        var client = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (client.IsError)
         {
             return CreateErrorResult(
@@ -87,11 +87,11 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
             validationContext.DPoPProofToken = dpopHeader.First();
             //Note: if the client authenticated with mTLS, we need to know to properly validate the htu of the DPoP proof token
-            validationContext.ClientCertificate = await context.Connection.GetClientCertificateAsync();
+            validationContext.ClientCertificate = await context.Connection.GetClientCertificateAsync(context.RequestAborted);
         }
 
         // Perform validations specific to PAR, as well as validation of the pushed parameters
-        var parValidationResult = await _parValidator.ValidateAsync(validationContext);
+        var parValidationResult = await _parValidator.ValidateAsync(validationContext, context.RequestAborted);
         if (parValidationResult.IsError)
         {
             return CreateErrorResult(
@@ -110,7 +110,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
             throw new InvalidOperationException("Invalid PAR validation result: success without a validated request");
         }
 
-        var response = await _responseGenerator.CreateResponseAsync(parValidationResult.ValidatedRequest);
+        var response = await _responseGenerator.CreateResponseAsync(parValidationResult.ValidatedRequest, context.RequestAborted);
 
         switch (response)
         {

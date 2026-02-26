@@ -13,6 +13,8 @@ namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class DiagnosticSummaryTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task PrintSummary_ShouldCallWriteAsyncOnEveryDiagnosticEntry()
     {
@@ -29,7 +31,7 @@ public class DiagnosticSummaryTests
         var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries);
         var summary = new DiagnosticSummary(diagnosticService, new IdentityServerOptions(), new StubLoggerFactory(logger));
 
-        await summary.PrintSummary();
+        await summary.PrintSummary(_ct);
 
         firstDiagnosticEntry.WasCalled.ShouldBeTrue();
         secondDiagnosticEntry.WasCalled.ShouldBeTrue();
@@ -47,7 +49,7 @@ public class DiagnosticSummaryTests
         var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
-        await summary.PrintSummary();
+        await summary.PrintSummary(_ct);
 
         var logSnapshot = logger.Collector.GetSnapshot().Select(x => x.Message);
         logSnapshot.ShouldBe([
@@ -68,7 +70,7 @@ public class DiagnosticSummaryTests
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
 
-        await summary.PrintSummary();
+        await summary.PrintSummary(_ct);
 
         var logSnapshot = logger.Collector.GetSnapshot().Select(x => x.Message);
         logSnapshot.ShouldBe(["Diagnostic data (1 of 3): {\"test\":", "Diagnostic data (2 of 3): \"\\u20AC\\", "Diagnostic data (3 of 3): u20AC\"}"]);
@@ -85,7 +87,7 @@ public class DiagnosticSummaryTests
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
 
-        await summary.PrintSummary();
+        await summary.PrintSummary(_ct);
         foreach (var entry in logger.Collector.GetSnapshot())
         {
             entry.Message.Length.ShouldBeLessThanOrEqualTo(1024 * 8);
@@ -101,7 +103,7 @@ public class DiagnosticSummaryTests
         var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
-        await summary.PrintSummary();
+        await summary.PrintSummary(_ct);
 
         var logSnapshot = logger.Collector.GetSnapshot();
         logSnapshot.Count.ShouldBeGreaterThan(0);

@@ -17,13 +17,15 @@ public interface ILogoutNotificationService
     /// Builds the URLs needed for front-channel logout notification.
     /// </summary>
     /// <param name="context">The context for the logout notification.</param>
-    Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context);
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context, Ct ct);
 
     /// <summary>
     /// Builds the http back-channel logout request data for the collection of clients.
     /// </summary>
     /// <param name="context">The context for the logout notification.</param>
-    Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context);
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, Ct ct);
 }
 
 /// <summary>

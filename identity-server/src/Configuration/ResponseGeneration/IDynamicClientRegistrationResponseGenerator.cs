@@ -20,32 +20,37 @@ public interface IDynamicClientRegistrationResponseGenerator
     /// <param name="context">The HTTP context to write the response to.</param>
     /// <param name="statusCode">The status code to set in the response.</param>
     /// <param name="response">The response object to write to the response.</param>
-    Task WriteResponse<T>(HttpContext context, int statusCode, T response)
+    /// <param name="ct">The cancellation token.</param>
+    Task WriteResponse<T>(HttpContext context, int statusCode, T response, Ct ct)
         where T : IDynamicClientRegistrationResponse;
 
     /// <summary>
     /// Writes a content type error to the HTTP response.
     /// </summary>
     /// <param name="response">The HTTP context to write the error to.</param>
-    Task WriteContentTypeError(HttpContext response);
+    /// <param name="ct">The cancellation token.</param>
+    Task WriteContentTypeError(HttpContext response, Ct ct);
 
     /// <summary>
     /// Writes a bad request error to the HTTP context.
     /// </summary>
     /// <param name="context">The HTTP context to write the error to.</param>
-    Task WriteBadRequestError(HttpContext context);
+    /// <param name="ct">The cancellation token.</param>
+    Task WriteBadRequestError(HttpContext context, Ct ct);
 
     /// <summary>
     /// Writes a success response to the HTTP context.
     /// </summary>
     /// <param name="context">The HTTP context to write the response to.</param>
     /// <param name="response">The dynamic client registration response.</param>
-    Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response);
+    /// <param name="ct">The cancellation token.</param>
+    Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response, Ct ct);
 
     /// <summary>
     /// Writes a validation or processing step's error to the HTTP context.
     /// </summary>
     /// <param name="context">The HTTP context to write the error to.</param>
     /// <param name="error">The dynamic client registration validation error.</param>
-    Task WriteError(HttpContext context, DynamicClientRegistrationError error);
+    /// <param name="ct">The cancellation token.</param>
+    Task WriteError(HttpContext context, DynamicClientRegistrationError error, Ct ct);
 }

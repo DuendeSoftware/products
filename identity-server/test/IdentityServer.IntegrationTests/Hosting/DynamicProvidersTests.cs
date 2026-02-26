@@ -19,6 +19,7 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class DynamicProvidersTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private GenericHost _host;
     private GenericHost _idp1;
     private GenericHost _idp2;
@@ -85,7 +86,7 @@ public class DynamicProvidersTests
             app.MapGet("/account/logout", async ctx =>
             {
                 var isis = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
-                var logoutCtx = await isis.GetLogoutContextAsync(ctx.Request.Query["logoutId"]);
+                var logoutCtx = await isis.GetLogoutContextAsync(ctx.Request.Query["logoutId"], ctx.RequestAborted);
                 Idp1FrontChannelLogoutUri = logoutCtx.SignOutIFrameUrl;
                 await ctx.SignOutAsync();
             });
@@ -321,7 +322,7 @@ public class DynamicProvidersTests
         redirectUri.ShouldStartWith("https://server/federation/idp1/signin");
 
         var cache = _host.Resolve<ICache<IdentityProvider>>() as DefaultCache<IdentityProvider>;
-        await cache.RemoveAsync("test");
+        await cache.RemoveAsync("test", _ct);
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
 

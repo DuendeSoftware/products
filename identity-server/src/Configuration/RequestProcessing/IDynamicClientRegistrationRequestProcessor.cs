@@ -22,5 +22,5 @@ public interface IDynamicClientRegistrationRequestProcessor
     /// properties of the client that are not specified in the request, and
     /// storing the new client in the <see cref="IClientConfigurationStore"/>.
     /// </summary>
-    Task<IDynamicClientRegistrationResponse> ProcessAsync(DynamicClientRegistrationContext validatedRequest);
+    Task<IDynamicClientRegistrationResponse> ProcessAsync(DynamicClientRegistrationContext validatedRequest, Ct ct);
 }

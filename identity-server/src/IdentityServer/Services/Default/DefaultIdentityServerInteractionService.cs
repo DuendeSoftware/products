@@ -44,11 +44,12 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         _logger = logger;
     }
 
-    public async Task<AuthorizationRequest> GetAuthorizationContextAsync(string returnUrl)
+    /// <inheritdoc/>
+    public async Task<AuthorizationRequest> GetAuthorizationContextAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAuthorizationContext");
 
-        var result = await _returnUrlParser.ParseAsync(returnUrl);
+        var result = await _returnUrlParser.ParseAsync(returnUrl, ct);
 
         if (result != null)
         {
@@ -62,33 +63,35 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         return result;
     }
 
-    public async Task<LogoutRequest> GetLogoutContextAsync(string logoutId)
+    /// <inheritdoc/>
+    public async Task<LogoutRequest> GetLogoutContextAsync(string logoutId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetLogoutContext");
 
-        var msg = await _logoutMessageStore.ReadAsync(logoutId);
+        var msg = await _logoutMessageStore.ReadAsync(logoutId, ct);
         var iframeUrl = await _context.HttpContext.GetIdentityServerSignoutFrameCallbackUrlAsync(msg?.Data);
         return new LogoutRequest(iframeUrl, msg?.Data);
     }
 
-    public async Task<string> CreateLogoutContextAsync()
+    /// <inheritdoc/>
+    public async Task<string> CreateLogoutContextAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.CreateLogoutContext");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(ct);
         if (user != null)
         {
-            var clientIds = await _userSession.GetClientListAsync();
+            var clientIds = await _userSession.GetClientListAsync(ct);
             if (clientIds.Any())
             {
-                var sid = await _userSession.GetSessionIdAsync();
+                var sid = await _userSession.GetSessionIdAsync(ct);
                 var msg = new Message<LogoutMessage>(new LogoutMessage
                 {
                     SubjectId = user.GetSubjectId(),
                     SessionId = sid,
                     ClientIds = clientIds
                 }, _timeProvider.GetUtcNow().UtcDateTime);
-                var id = await _logoutMessageStore.WriteAsync(msg);
+                var id = await _logoutMessageStore.WriteAsync(msg, ct);
                 return id;
             }
         }
@@ -96,13 +99,14 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         return null;
     }
 
-    public async Task<ErrorMessage> GetErrorContextAsync(string errorId)
+    /// <inheritdoc/>
+    public async Task<ErrorMessage> GetErrorContextAsync(string errorId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetErrorContext");
 
         if (errorId != null)
         {
-            var result = await _errorMessageStore.ReadAsync(errorId);
+            var result = await _errorMessageStore.ReadAsync(errorId, ct);
             var data = result?.Data;
             if (data != null)
             {
@@ -120,13 +124,14 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         return null;
     }
 
-    public async Task GrantConsentAsync(AuthorizationRequest request, ConsentResponse consent, string subject = null)
+    /// <inheritdoc/>
+    public async Task GrantConsentAsync(AuthorizationRequest request, ConsentResponse consent, Ct ct, string subject = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GrantConsent");
 
         if (subject == null)
         {
-            var user = await _userSession.GetUserAsync();
+            var user = await _userSession.GetUserAsync(ct);
             subject = user?.GetSubjectId();
         }
 
@@ -136,10 +141,11 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         }
 
         var consentRequest = new ConsentRequest(request, subject);
-        await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _timeProvider.GetUtcNow().UtcDateTime));
+        await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _timeProvider.GetUtcNow().UtcDateTime), ct);
     }
 
-    public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, string errorDescription = null)
+    /// <inheritdoc/>
+    public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, Ct ct, string errorDescription = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.DenyAuthorization");
 
@@ -148,7 +154,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
             Error = error,
             ErrorDescription = errorDescription
         };
-        return GrantConsentAsync(request, response);
+        return GrantConsentAsync(request, response, ct);
     }
 
     public bool IsValidReturnUrl(string returnUrl)
@@ -169,42 +175,45 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         return result;
     }
 
-    public async Task<IEnumerable<Grant>> GetAllUserGrantsAsync()
+    /// <inheritdoc/>
+    public async Task<IEnumerable<Grant>> GetAllUserGrantsAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAllUserGrants");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(ct);
         if (user != null)
         {
             var subject = user.GetSubjectId();
-            return await _grants.GetAllGrantsAsync(subject);
+            return await _grants.GetAllGrantsAsync(subject, ct);
         }
 
         return Enumerable.Empty<Grant>();
     }
 
-    public async Task RevokeUserConsentAsync(string clientId)
+    /// <inheritdoc/>
+    public async Task RevokeUserConsentAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeUserConsent");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(ct);
         if (user != null)
         {
             var subject = user.GetSubjectId();
-            await _grants.RemoveAllGrantsAsync(subject, clientId);
+            await _grants.RemoveAllGrantsAsync(subject, ct, clientId);
         }
     }
 
-    public async Task RevokeTokensForCurrentSessionAsync()
+    /// <inheritdoc/>
+    public async Task RevokeTokensForCurrentSessionAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeTokensForCurrentSession");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(ct);
         if (user != null)
         {
             var subject = user.GetSubjectId();
-            var sessionId = await _userSession.GetSessionIdAsync();
-            await _grants.RemoveAllGrantsAsync(subject, sessionId: sessionId);
+            var sessionId = await _userSession.GetSessionIdAsync(ct);
+            await _grants.RemoveAllGrantsAsync(subject, ct, sessionId: sessionId);
         }
     }
 }

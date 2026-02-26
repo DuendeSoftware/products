@@ -15,6 +15,7 @@ public interface IIdentityProviderConfigurationValidator
     /// Determines whether the configuration of an identity provider is valid.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ValidateAsync(IdentityProviderConfigurationValidationContext context);
+    Task ValidateAsync(IdentityProviderConfigurationValidationContext context, Ct ct);
 }

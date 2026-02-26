@@ -16,6 +16,7 @@ public interface ISessionClaimsFilter
     /// </summary>
     /// <param name="context">The SecurityStampRefreshingPrincipalContext <see cref="SecurityStampRefreshingPrincipalContext.SecurityStampRefreshingPrincipalContext"/>
     /// in the call to <see cref="SecurityStampValidatorOptions.OnRefreshingPrincipal"/>.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The claims of the ClaimsPrincipal which should be persisted for the session.</returns>
-    public Task<IReadOnlyCollection<Claim>> FilterToSessionClaimsAsync(SecurityStampRefreshingPrincipalContext context);
+    public Task<IReadOnlyCollection<Claim>> FilterToSessionClaimsAsync(SecurityStampRefreshingPrincipalContext context, Ct ct);
 }

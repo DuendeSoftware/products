@@ -29,14 +29,14 @@ public class JwtRequestValidator : IJwtRequestValidator
     /// <summary>
     /// The audience URI to use
     /// </summary>
-    protected async Task<string> GetAudienceUri()
+    protected async Task<string> GetAudienceUri(Ct ct)
     {
         if (_audienceUri.IsPresent())
         {
             return _audienceUri;
         }
 
-        return await IssuerNameService.GetCurrentAsync();
+        return await IssuerNameService.GetCurrentAsync(ct);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     }
 
     /// <inheritdoc/>
-    public virtual async Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context)
+    public virtual async Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("JwtRequestValidator.Validate");
 
@@ -119,7 +119,7 @@ public class JwtRequestValidator : IJwtRequestValidator
         JsonWebToken jwtSecurityToken;
         try
         {
-            jwtSecurityToken = await ValidateJwtAsync(context, trustedKeys);
+            jwtSecurityToken = await ValidateJwtAsync(context, trustedKeys, ct);
         }
         catch (Exception e)
         {
@@ -156,7 +156,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     /// <summary>
     /// Validates the JWT token
     /// </summary>
-    protected virtual async Task<JsonWebToken> ValidateJwtAsync(JwtRequestValidationContext context, IEnumerable<SecurityKey> keys)
+    protected virtual async Task<JsonWebToken> ValidateJwtAsync(JwtRequestValidationContext context, IEnumerable<SecurityKey> keys, Ct ct)
     {
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -166,7 +166,7 @@ public class JwtRequestValidator : IJwtRequestValidator
             ValidIssuer = context.Client.ClientId,
             ValidateIssuer = true,
 
-            ValidAudience = await GetAudienceUri(),
+            ValidAudience = await GetAudienceUri(ct),
             ValidateAudience = true,
 
             RequireSignedTokens = true,

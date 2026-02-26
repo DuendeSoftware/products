@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class ParameterizedScopeTokenRequestValidator : ICustomTokenRequestValidator
 {
-    public Task ValidateAsync(CustomTokenRequestValidationContext context)
+    public Task ValidateAsync(CustomTokenRequestValidationContext context, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(context);
         var transaction = context.Result?.ValidatedRequest.ValidatedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == "transaction");

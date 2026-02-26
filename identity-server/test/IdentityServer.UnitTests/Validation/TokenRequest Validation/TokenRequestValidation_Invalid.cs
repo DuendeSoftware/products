@@ -16,6 +16,7 @@ public class TokenRequestValidation_Invalid
     private const string Category = "TokenRequest Validation - General - Invalid";
 
     private readonly IClientStore _clients = Factory.CreateClientStore();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
@@ -39,9 +40,9 @@ public class TokenRequestValidation_Invalid
         });
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(refreshTokenStore: grants);
 
@@ -51,7 +52,7 @@ public class TokenRequestValidation_Invalid
             { OidcConstants.TokenRequest.RefreshToken, handle }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
     }

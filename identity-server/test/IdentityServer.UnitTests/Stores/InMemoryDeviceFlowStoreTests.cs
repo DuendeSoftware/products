@@ -10,6 +10,7 @@ namespace UnitTests.Stores;
 
 public class InMemoryDeviceFlowStoreTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private InMemoryDeviceFlowStore _store = new InMemoryDeviceFlowStore();
 
     [Fact]
@@ -28,8 +29,8 @@ public class InMemoryDeviceFlowStoreTests
             RequestedScopes = new[] { "scope1", "scope2" }
         };
 
-        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
-        var foundData = await _store.FindByUserCodeAsync(userCode);
+        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data, _ct);
+        var foundData = await _store.FindByUserCodeAsync(userCode, _ct);
 
         foundData.ClientId.ShouldBe(data.ClientId);
         foundData.CreationTime.ShouldBe(data.CreationTime);
@@ -56,8 +57,8 @@ public class InMemoryDeviceFlowStoreTests
             RequestedScopes = new[] { "scope1", "scope2" }
         };
 
-        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
-        var foundData = await _store.FindByDeviceCodeAsync(deviceCode);
+        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data, _ct);
+        var foundData = await _store.FindByDeviceCodeAsync(deviceCode, _ct);
 
         foundData.ClientId.ShouldBe(data.ClientId);
         foundData.CreationTime.ShouldBe(data.CreationTime);
@@ -84,7 +85,7 @@ public class InMemoryDeviceFlowStoreTests
             RequestedScopes = new[] { "scope1", "scope2" }
         };
 
-        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, initialData);
+        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, initialData, _ct);
 
         var updatedData = new DeviceCode
         {
@@ -97,9 +98,9 @@ public class InMemoryDeviceFlowStoreTests
             RequestedScopes = new[] { "api1", "api2" }
         };
 
-        await _store.UpdateByUserCodeAsync(userCode, updatedData);
+        await _store.UpdateByUserCodeAsync(userCode, updatedData, _ct);
 
-        var foundData = await _store.FindByUserCodeAsync(userCode);
+        var foundData = await _store.FindByUserCodeAsync(userCode, _ct);
 
         foundData.ClientId.ShouldBe(updatedData.ClientId);
         foundData.CreationTime.ShouldBe(updatedData.CreationTime);
@@ -126,9 +127,9 @@ public class InMemoryDeviceFlowStoreTests
             RequestedScopes = new[] { "scope1", "scope2" }
         };
 
-        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
-        await _store.RemoveByDeviceCodeAsync(deviceCode);
-        var foundData = await _store.FindByUserCodeAsync(userCode);
+        await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data, _ct);
+        await _store.RemoveByDeviceCodeAsync(deviceCode, _ct);
+        var foundData = await _store.FindByUserCodeAsync(userCode, _ct);
 
         foundData.ShouldBeNull();
     }

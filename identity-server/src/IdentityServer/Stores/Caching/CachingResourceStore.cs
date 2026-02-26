@@ -80,7 +80,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
     /// <inheritdoc/>
-    public async Task<Resources> GetAllResourcesAsync()
+    public async Task<Resources> GetAllResourcesAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.GetAllResources");
 
@@ -88,13 +88,14 @@ public class CachingResourceStore<T> : IResourceStore
 
         var all = await _allCache.GetOrAddAsync(key,
             _options.Caching.ResourceStoreExpiration,
-            async () => await _inner.GetAllResourcesAsync());
+            async () => await _inner.GetAllResourcesAsync(ct),
+            ct);
 
         return all;
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
+    public async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindApiResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -103,7 +104,7 @@ public class CachingResourceStore<T> : IResourceStore
         var uncachedScopes = new List<string>();
         foreach (var scope in scopeNames)
         {
-            var apiResourceName = await _apiResourceNames.GetAsync(scope);
+            var apiResourceName = await _apiResourceNames.GetAsync(scope, ct);
             if (apiResourceName != null)
             {
                 foreach (var name in apiResourceName.Names)
@@ -133,9 +134,9 @@ public class CachingResourceStore<T> : IResourceStore
             // do the cache/DB lookup
             var resources = await _allCache.GetOrAddAsync(allCacheItemsKey, itemsDuration, async () =>
             {
-                var results = await _inner.FindApiResourcesByScopeNameAsync(uncachedScopes);
+                var results = await _inner.FindApiResourcesByScopeNameAsync(uncachedScopes, ct);
                 return new Resources(null, results, null);
-            });
+            }, ct);
 
             // get the specific items from the Resources object
             var uncachedItems = resources.ApiResources;
@@ -145,14 +146,14 @@ public class CachingResourceStore<T> : IResourceStore
             {
                 var names = uncachedItems.Where(x => x.Scopes.Contains(scope)).Select(x => x.Name).ToArray();
                 var apiResourceNamesCacheItem = new ApiResourceNames { Names = names };
-                await _apiResourceNames.SetAsync(scope, apiResourceNamesCacheItem, _options.Caching.ResourceStoreExpiration);
+                await _apiResourceNames.SetAsync(scope, apiResourceNamesCacheItem, _options.Caching.ResourceStoreExpiration, ct);
             }
 
             // add each one to the specific cache
             foreach (var item in uncachedItems)
             {
                 // this adds to the ApiResource cache in the same way when FindApiResourcesByNameAsync is used
-                await _apiResourceCache.SetAsync(item.Name, item, _options.Caching.ResourceStoreExpiration);
+                await _apiResourceCache.SetAsync(item.Name, item, _options.Caching.ResourceStoreExpiration, ct);
 
                 // add this name
                 apiResourceNames.Add(item.Name);
@@ -160,51 +161,52 @@ public class CachingResourceStore<T> : IResourceStore
         }
 
         // now that we have all the ApiResource names, just use our other API (that should find the cacted items)
-        return await FindApiResourcesByNameAsync(apiResourceNames);
+        return await FindApiResourcesByNameAsync(apiResourceNames, ct);
     }
 
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames)
+    public async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindApiResourcesByName");
         activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
 
         return await FindItemsAsync(apiResourceNames, _apiResourceCache,
-            async names => new Resources(null, await _inner.FindApiResourcesByNameAsync(names), null),
-            x => x.ApiResources, x => x.Name, "ApiResources-");
+            async (names, innerCt) => new Resources(null, await _inner.FindApiResourcesByNameAsync(names, innerCt), null),
+            x => x.ApiResources, x => x.Name, "ApiResources-", ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
+    public async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindIdentityResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
 
         return await FindItemsAsync(scopeNames, _identityCache,
-            async names => new Resources(await _inner.FindIdentityResourcesByScopeNameAsync(names), null, null),
-            x => x.IdentityResources, x => x.Name, "IdentityResources-");
+            async (names, innerCt) => new Resources(await _inner.FindIdentityResourcesByScopeNameAsync(names, innerCt), null, null),
+            x => x.IdentityResources, x => x.Name, "IdentityResources-", ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
+    public async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindApiScopesByName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
 
         return await FindItemsAsync(scopeNames, _apiScopeCache,
-            async names => new Resources(null, null, await _inner.FindApiScopesByNameAsync(names)),
-            x => x.ApiScopes, x => x.Name, "ApiScopes-");
+            async (names, innerCt) => new Resources(null, null, await _inner.FindApiScopesByNameAsync(names, innerCt)),
+            x => x.ApiScopes, x => x.Name, "ApiScopes-", ct);
     }
 
 
     private async Task<IEnumerable<TItem>> FindItemsAsync<TItem>(
         IEnumerable<string> names,
         ICache<TItem> cache,
-        Func<IEnumerable<string>, Task<Resources>> getResourcesFunc,
+        Func<IEnumerable<string>, Ct, Task<Resources>> getResourcesFunc,
         Func<Resources, IEnumerable<TItem>> getFromResourcesFunc,
         Func<TItem, string> getNameFunc,
-        string allCachePrefix
+        string allCachePrefix,
+        Ct ct
     )
         where TItem : class
     {
@@ -212,7 +214,7 @@ public class CachingResourceStore<T> : IResourceStore
         var cachedItems = new List<TItem>();
         foreach (var name in names)
         {
-            var item = await cache.GetAsync(name);
+            var item = await cache.GetAsync(name, ct);
             if (item != null)
             {
                 cachedItems.Add(item);
@@ -237,14 +239,14 @@ public class CachingResourceStore<T> : IResourceStore
             // expire this entry much faster than the normal items
             var itemsDuration = _options.Caching.ResourceStoreExpiration / 20;
             // do the cache/DB lookup
-            var resources = await _allCache.GetOrAddAsync(allCacheItemsKey, itemsDuration, async () => await getResourcesFunc(uncachedNames));
+            var resources = await _allCache.GetOrAddAsync(allCacheItemsKey, itemsDuration, async () => await getResourcesFunc(uncachedNames, ct), ct);
 
             // get the specific items from the Resources object
             var uncachedItems = getFromResourcesFunc(resources);
             // add each one to the specific cache
             foreach (var item in uncachedItems)
             {
-                await cache.SetAsync(getNameFunc(item), item, _options.Caching.ResourceStoreExpiration);
+                await cache.SetAsync(getNameFunc(item), item, _options.Caching.ResourceStoreExpiration, ct);
             }
 
             // add these to our result

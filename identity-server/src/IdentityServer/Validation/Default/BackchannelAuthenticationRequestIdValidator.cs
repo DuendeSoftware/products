@@ -37,11 +37,11 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
     }
 
     /// <inheritdoc/>
-    public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context)
+    public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestIdValidator.Validate");
 
-        var request = await _backchannelAuthenticationStore.GetByAuthenticationRequestIdAsync(context.AuthenticationRequestId);
+        var request = await _backchannelAuthenticationStore.GetByAuthenticationRequestIdAsync(context.AuthenticationRequestId, ct);
 
         if (request == null)
         {
@@ -58,7 +58,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
             return;
         }
 
-        if (await _throttlingService.ShouldSlowDown(context.AuthenticationRequestId, request))
+        if (await _throttlingService.ShouldSlowDown(context.AuthenticationRequestId, request, ct))
         {
             _logger.LogError("Client {ClientId} is polling too fast", request.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);
@@ -79,7 +79,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
         {
             _logger.LogError("No scopes authorized for backchannel authentication request. Access denied");
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.AccessDenied);
-            await _backchannelAuthenticationStore.RemoveByInternalIdAsync(request.InternalId);
+            await _backchannelAuthenticationStore.RemoveByInternalIdAsync(request.InternalId, ct);
             return;
         }
 
@@ -92,7 +92,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         // make sure user is enabled
         var isActiveCtx = new IsActiveContext(request.Subject, context.Request.Client, IdentityServerConstants.ProfileIsActiveCallers.BackchannelAuthenticationRequestIdValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, ct);
 
         if (isActiveCtx.IsActive == false)
         {
@@ -107,7 +107,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         context.Result = new TokenRequestValidationResult(context.Request);
 
-        await _backchannelAuthenticationStore.RemoveByInternalIdAsync(request.InternalId);
+        await _backchannelAuthenticationStore.RemoveByInternalIdAsync(request.InternalId, ct);
 
         _logger.LogDebug("Success validating backchannel authentication request id.");
     }

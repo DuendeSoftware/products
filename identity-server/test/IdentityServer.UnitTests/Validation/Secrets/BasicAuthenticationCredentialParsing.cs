@@ -16,6 +16,7 @@ namespace UnitTests.Validation.Secrets;
 public class BasicAuthenticationSecretParsing
 {
     private const string Category = "Secrets - Basic Authentication Secret Parsing";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options;
     private BasicAuthenticationSecretParser _parser;
@@ -32,7 +33,7 @@ public class BasicAuthenticationSecretParsing
     {
         var context = new DefaultHttpContext();
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -48,7 +49,7 @@ public class BasicAuthenticationSecretParsing
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
         secret.Id.ShouldBe("client");
@@ -79,7 +80,7 @@ public class BasicAuthenticationSecretParsing
         var headerValue = $"Basic {Convert.ToBase64String(encoding.GetBytes(credential))}";
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
         secret.Id.ShouldBe(userName);
@@ -104,7 +105,7 @@ public class BasicAuthenticationSecretParsing
         var headerValue = $"Basic {credential}";
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
         secret.Id.ShouldBe(userName);
@@ -121,7 +122,7 @@ public class BasicAuthenticationSecretParsing
             Convert.ToBase64String(Encoding.UTF8.GetBytes("client:")));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.NoSecret);
         secret.Id.ShouldBe("client");
@@ -136,7 +137,7 @@ public class BasicAuthenticationSecretParsing
 
         context.Request.Headers.Append("Authorization", new StringValues(string.Empty));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -154,7 +155,7 @@ public class BasicAuthenticationSecretParsing
             Convert.ToBase64String(Encoding.UTF8.GetBytes(credential)));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
         secret.ShouldBeNull();
     }
 
@@ -171,7 +172,7 @@ public class BasicAuthenticationSecretParsing
             Convert.ToBase64String(Encoding.UTF8.GetBytes(credential)));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
         secret.ShouldBeNull();
     }
 
@@ -200,7 +201,7 @@ public class BasicAuthenticationSecretParsing
             Convert.ToBase64String(Encoding.UTF8.GetBytes(credential)));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await parser.ParseAsync(context);
+        var secret = await parser.ParseAsync(context, _ct);
         secret.Id.ShouldBe(clientId);
         secret.Credential.ShouldBe(clientSecret);
     }
@@ -244,7 +245,7 @@ public class BasicAuthenticationSecretParsing
             Convert.ToBase64String(Encoding.UTF8.GetBytes(credential)));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await parser.ParseAsync(context);
+        var secret = await parser.ParseAsync(context, _ct);
         secret.ShouldBeNull();
     }
 
@@ -256,7 +257,7 @@ public class BasicAuthenticationSecretParsing
 
         context.Request.Headers.Append("Authorization", new StringValues("Basic "));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -269,7 +270,7 @@ public class BasicAuthenticationSecretParsing
 
         context.Request.Headers.Append("Authorization", new StringValues("Unknown"));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -282,7 +283,7 @@ public class BasicAuthenticationSecretParsing
 
         context.Request.Headers.Append("Authorization", new StringValues("Basic somerandomdata"));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -297,7 +298,7 @@ public class BasicAuthenticationSecretParsing
             Convert.ToBase64String(Encoding.UTF8.GetBytes("client")));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }

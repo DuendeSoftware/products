@@ -17,12 +17,16 @@ public interface ISessionManagementService
     /// <summary>
     /// Queries all the session related data for a user.
     /// </summary>
-    Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery? filter = null, CT ct = default);
+    /// <param name="filter">The session query filter.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery? filter, Ct ct);
 
     /// <summary>
     /// Removes all the session related data for a user.
     /// </summary>
-    Task RemoveSessionsAsync(RemoveSessionsContext context, CT ct = default);
+    /// <param name="context">The context describing what to remove.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task RemoveSessionsAsync(RemoveSessionsContext context, Ct ct);
 }
 
 /// <summary>

@@ -13,9 +13,9 @@ internal class CustomProfileService : TestUserProfileService
     public CustomProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : base(users, logger)
     { }
 
-    public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public override async Task GetProfileDataAsync(ProfileDataRequestContext context, Ct ct)
     {
-        await base.GetProfileDataAsync(context);
+        await base.GetProfileDataAsync(context, ct);
 
         if (context.Subject.Identity.AuthenticationType == "custom")
         {

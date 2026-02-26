@@ -13,9 +13,9 @@ internal class MockKeyMaterialService : IKeyMaterialService
     public List<SigningCredentials> SigningCredentials = new List<SigningCredentials>();
     public List<SecurityKeyInfo> ValidationKeys = new List<SecurityKeyInfo>();
 
-    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync() => Task.FromResult(SigningCredentials.AsEnumerable());
+    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct _) => Task.FromResult(SigningCredentials.AsEnumerable());
 
-    public Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string> allowedAlgorithms = null) => Task.FromResult(SigningCredentials.FirstOrDefault());
+    public Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string> allowedAlgorithms, Ct _) => Task.FromResult(SigningCredentials.FirstOrDefault());
 
-    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync() => Task.FromResult(ValidationKeys.AsEnumerable());
+    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct _) => Task.FromResult(ValidationKeys.AsEnumerable());
 }

@@ -36,7 +36,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
     }
 
 
-    public async Task<AuthorizeRequestValidationResult> LoadRequestObjectAsync(ValidatedAuthorizeRequest request)
+    public async Task<AuthorizeRequestValidationResult> LoadRequestObjectAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         var requestObject = request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
         var requestUri = request.Raw.Get(OidcConstants.AuthorizeRequest.RequestUri);
@@ -64,7 +64,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         {
             if (IsParRequestUri(requestUri))
             {
-                var validationError = await ValidatePushedAuthorizationRequest(request);
+                var validationError = await ValidatePushedAuthorizationRequest(request, ct);
                 if (validationError != null)
                 {
                     return validationError;
@@ -82,7 +82,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
                     return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequestUri, description: "request_uri is too long");
                 }
 
-                var jwt = await _jwtRequestUriHttpClient.GetJwtAsync(requestUri, request.Client);
+                var jwt = await _jwtRequestUriHttpClient.GetJwtAsync(requestUri, request.Client, ct);
                 if (jwt.IsMissing())
                 {
                     LogError("no value returned from request_uri", request);
@@ -116,7 +116,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
 
     private static string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
 
-    public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request)
+    public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request, Ct ct)
     {
         // Check that the endpoint is still enabled at the time of validation, in case an existing PAR record
         // is used after PAR is disabled.
@@ -127,7 +127,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
                     description: "Pushed authorization is disabled.");
             }
         }
-        var pushedAuthorizationRequest = await GetPushedAuthorizationRequestAsync(request);
+        var pushedAuthorizationRequest = await GetPushedAuthorizationRequestAsync(request, ct);
         if (pushedAuthorizationRequest == null)
         {
             {
@@ -193,12 +193,12 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    private async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(ValidatedAuthorizeRequest request)
+    private async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         var referenceValue = GetReferenceValue(request);
         if (referenceValue != null)
         {
-            return await _pushedAuthorizationService.GetPushedAuthorizationRequestAsync(referenceValue);
+            return await _pushedAuthorizationService.GetPushedAuthorizationRequestAsync(referenceValue, ct);
         }
         return null;
     }
@@ -217,7 +217,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    public async Task<AuthorizeRequestValidationResult> ValidateRequestObjectAsync(ValidatedAuthorizeRequest request)
+    public async Task<AuthorizeRequestValidationResult> ValidateRequestObjectAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // validate request object
@@ -229,7 +229,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
             {
                 Client = request.Client,
                 JwtTokenString = request.RequestObject
-            });
+            }, ct);
             if (jwtRequestValidationResult.IsError)
             {
                 LogError("request JWT validation failure", request);

@@ -42,10 +42,12 @@ public class PostBodySecretParser : ISecretParser
     /// Tries to find a secret on the context that can be used for authentication
     /// </summary>
     /// <param name="context">The HTTP context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// A parsed secret
     /// </returns>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context)
+    /// <inheritdoc/>
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         _logger.LogDebug("Start parsing for secret in post body");
 
@@ -55,7 +57,7 @@ public class PostBodySecretParser : ISecretParser
             return null;
         }
 
-        var body = await context.Request.ReadFormAsync();
+        var body = await context.Request.ReadFormAsync(ct);
 
         if (body != null)
         {

@@ -25,8 +25,9 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Determines whether the configuration of a client is valid.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task ValidateAsync(ClientConfigurationValidationContext context)
+    public async Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultClientConfigurationValidator.Validate");
 

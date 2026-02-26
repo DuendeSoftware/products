@@ -18,6 +18,7 @@ public interface ISecretsListValidator
     /// </summary>
     /// <param name="secrets">The stored secrets.</param>
     /// <param name="parsedSecret">The received secret.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A validation result</returns>
-    Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret);
+    Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct);
 }

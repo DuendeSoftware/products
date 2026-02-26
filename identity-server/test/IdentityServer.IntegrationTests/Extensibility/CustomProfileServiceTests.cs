@@ -82,7 +82,7 @@ public class CustomProfileServiceTests
 
 public class CustomProfileService : IProfileService
 {
-    public Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public Task GetProfileDataAsync(ProfileDataRequestContext context, Ct _)
     {
         var claims = new Claim[]
         {
@@ -92,7 +92,7 @@ public class CustomProfileService : IProfileService
         return Task.CompletedTask;
     }
 
-    public Task IsActiveAsync(IsActiveContext context)
+    public Task IsActiveAsync(IsActiveContext context, Ct _)
     {
         context.IsActive = true;
         return Task.CompletedTask;

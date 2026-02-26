@@ -21,6 +21,7 @@ public class TokenRequestValidation_PKCE
 
     private IClientStore _clients = Factory.CreateClientStore();
     private InputLengthRestrictions lengths = new InputLengthRestrictions();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Theory]
     [InlineData("codeclient.pkce")]
@@ -28,7 +29,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task valid_pkce_token_request_with_plain_method_should_succeed(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
 
@@ -48,7 +49,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -59,7 +60,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -68,7 +69,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task valid_pkce_token_request_with_plain_method_should_succeed_hybrid()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("hybridclient.pkce");
+        var client = await _clients.FindEnabledClientByIdAsync("hybridclient.pkce", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
 
@@ -88,7 +89,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -99,7 +100,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -110,7 +111,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task valid_pkce_token_request_with_sha256_method_should_succeed(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
@@ -132,7 +133,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -143,7 +144,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -153,7 +154,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_missing_code_challenge_and_verifier_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -169,7 +170,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -179,7 +180,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -191,7 +192,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_missing_code_challenge_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -208,7 +209,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -219,7 +220,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, "x".Repeat(lengths.CodeVerifierMinLength));
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -231,7 +232,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_invalid_verifier_plain_method_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
 
@@ -251,7 +252,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -262,7 +263,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier + "invalid");
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -274,7 +275,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_invalid_verifier_sha256_method_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
@@ -296,7 +297,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -307,7 +308,7 @@ public class TokenRequestValidation_PKCE
         parameters.Add(OidcConstants.TokenRequest.CodeVerifier, verifier + "invalid");
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);

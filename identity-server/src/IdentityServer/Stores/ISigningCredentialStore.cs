@@ -14,6 +14,7 @@ public interface ISigningCredentialStore
     /// <summary>
     /// Gets the signing credentials.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<SigningCredentials> GetSigningCredentialsAsync();
+    Task<SigningCredentials> GetSigningCredentialsAsync(Ct ct);
 }

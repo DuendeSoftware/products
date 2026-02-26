@@ -45,7 +45,8 @@ public class BasicAuthenticationSecretParser : ISecretParser
     /// <returns>
     /// A parsed secret
     /// </returns>
-    public Task<ParsedSecret> ParseAsync(HttpContext context)
+    /// <inheritdoc/>
+    public Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         _logger.LogDebug("Start parsing Basic Authentication secret");
 

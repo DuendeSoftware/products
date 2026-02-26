@@ -25,20 +25,20 @@ internal abstract class BaseDiscoveryEndpoint(
             var distributedCache = context.RequestServices.GetRequiredService<IDistributedCache>();
             if (distributedCache is not null)
             {
-                return await GetCachedDiscoveryDocument(distributedCache, baseUrl, issuerUri);
+                return await GetCachedDiscoveryDocument(distributedCache, baseUrl, issuerUri, context.RequestAborted);
             }
             // fall through to default implementation if there is no cache provider registered
         }
 
-        var response = await ResponseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
+        var response = await ResponseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri, context.RequestAborted);
         return new DiscoveryDocumentResult(response, Options.Discovery.ResponseCacheInterval);
     }
 
     private async Task<IEndpointResult> GetCachedDiscoveryDocument(IDistributedCache cache, string baseUrl,
-        string issuerUri)
+        string issuerUri, Ct ct)
     {
         var key = $"discoveryDocument/{baseUrl}/{issuerUri}";
-        var json = await cache.GetStringAsync(key);
+        var json = await cache.GetStringAsync(key, ct);
 
         if (json is not null)
         {
@@ -49,7 +49,7 @@ internal abstract class BaseDiscoveryEndpoint(
         }
 
         var entries =
-            await ResponseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
+            await ResponseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri, ct);
 
         var expirationFromNow = Options.Preview.DiscoveryDocumentCacheDuration;
 
@@ -62,7 +62,7 @@ internal abstract class BaseDiscoveryEndpoint(
         await cache.SetStringAsync(key, result.Json, new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = expirationFromNow,
-        });
+        }, ct);
 
         return result;
     }

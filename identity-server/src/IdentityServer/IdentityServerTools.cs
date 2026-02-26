@@ -27,6 +27,7 @@ public interface IIdentityServerTools
     /// the exp claim of the token.</param>
     /// <param name="claims">A collection of additional claims to include in the
     /// token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A JWT that expires after the specified lifetime and contains
     /// the given claims.</returns>
     /// <remarks>Typical implementations depend on the <see cref="HttpContext"/>
@@ -34,7 +35,7 @@ public interface IIdentityServerTools
     /// of the token. Ensure that calls to this method will only occur if there
     /// is an incoming HTTP request or with the option set.
     /// </remarks>
-    Task<string> IssueJwtAsync(int lifetime, IEnumerable<Claim> claims);
+    Task<string> IssueJwtAsync(int lifetime, IEnumerable<Claim> claims, Ct ct);
 
     /// <summary>
     /// Issues a JWT with a specific lifetime, issuer, and set of claims.
@@ -45,9 +46,10 @@ public interface IIdentityServerTools
     /// claim.</param>
     /// <param name="claims">A collection of additional claims to include in the
     /// token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A JWT with the specified lifetime, issuer and additional
     /// claims.</returns>
-    Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims);
+    Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims, Ct ct);
 
     /// <summary>
     /// Issues a JWT with a specific lifetime, issuer, token type, and set of
@@ -61,9 +63,10 @@ public interface IIdentityServerTools
     /// "id_token", set in the typ claim.</param>
     /// <param name="claims">A collection of additional claims to include in the
     /// token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A JWT with the specified lifetime, issuer, token type, and
     /// additional claims.</returns>
-    Task<string> IssueJwtAsync(int lifetime, string issuer, string tokenType, IEnumerable<Claim> claims);
+    Task<string> IssueJwtAsync(int lifetime, string issuer, string tokenType, IEnumerable<Claim> claims, Ct ct);
 
     /// <summary>
     /// Issues a JWT access token for a particular client.
@@ -72,6 +75,7 @@ public interface IIdentityServerTools
     /// claim.</param>
     /// <param name="lifetime">The lifetime, in seconds, which will determine
     /// the exp claim of the token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="scopes">A collection of scopes, which will be added to the
     /// token as claims with the "scope" type.</param>
     /// <param name="audiences">A collection of audiences, which will be added
@@ -88,6 +92,7 @@ public interface IIdentityServerTools
     Task<string> IssueClientJwtAsync(
         string clientId,
         int lifetime,
+        Ct ct,
         IEnumerable<string>? scopes = null,
         IEnumerable<string>? audiences = null,
         IEnumerable<Claim>? additionalClaims = null);
@@ -113,21 +118,21 @@ public class IdentityServerTools : IIdentityServerTools
     }
 
     /// <inheritdoc/>
-    public virtual async Task<string> IssueJwtAsync(int lifetime, IEnumerable<Claim> claims)
+    public virtual async Task<string> IssueJwtAsync(int lifetime, IEnumerable<Claim> claims, Ct ct)
     {
-        var issuer = await _issuerNameService.GetCurrentAsync();
-        return await IssueJwtAsync(lifetime, issuer, claims);
+        var issuer = await _issuerNameService.GetCurrentAsync(ct);
+        return await IssueJwtAsync(lifetime, issuer, claims, ct);
     }
 
     /// <inheritdoc/>
-    public virtual Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims)
+    public virtual Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims, Ct ct)
     {
         var tokenType = OidcConstants.TokenTypes.AccessToken;
-        return IssueJwtAsync(lifetime, issuer, tokenType, claims);
+        return IssueJwtAsync(lifetime, issuer, tokenType, claims, ct);
     }
 
     /// <inheritdoc/>
-    public virtual async Task<string> IssueJwtAsync(int lifetime, string issuer, string tokenType, IEnumerable<Claim> claims)
+    public virtual async Task<string> IssueJwtAsync(int lifetime, string issuer, string tokenType, IEnumerable<Claim> claims, Ct ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(issuer);
         ArgumentException.ThrowIfNullOrWhiteSpace(tokenType);
@@ -142,13 +147,14 @@ public class IdentityServerTools : IIdentityServerTools
             Claims = new HashSet<Claim>(claims, new ClaimComparer())
         };
 
-        return await _tokenCreation.CreateTokenAsync(token);
+        return await _tokenCreation.CreateTokenAsync(token, ct);
     }
 
     /// <inheritdoc/>
     public virtual async Task<string> IssueClientJwtAsync(
         string clientId,
         int lifetime,
+        Ct ct,
         IEnumerable<string>? scopes = null,
         IEnumerable<string>? audiences = null,
         IEnumerable<Claim>? additionalClaims = null)
@@ -178,7 +184,7 @@ public class IdentityServerTools : IIdentityServerTools
             claims.Add(new Claim(
                 JwtClaimTypes.Audience,
 #pragma warning disable CA1863 // Would require changing a public const on a public class and be a breaking change
-                string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash())));
+                string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync(ct)).EnsureTrailingSlash())));
 #pragma warning restore CA1863
         }
 
@@ -190,6 +196,6 @@ public class IdentityServerTools : IIdentityServerTools
             }
         }
 
-        return await IssueJwtAsync(lifetime, claims);
+        return await IssueJwtAsync(lifetime, claims, ct);
     }
 }

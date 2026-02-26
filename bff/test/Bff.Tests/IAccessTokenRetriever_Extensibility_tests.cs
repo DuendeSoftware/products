@@ -92,7 +92,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
         {
         }
 
-        public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CT ct = default)
+        public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, Ct ct = default)
         {
             UsedContext = context;
             if (context.Metadata.TokenType.HasValue)

@@ -5,7 +5,6 @@
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -26,11 +25,6 @@ public class SigningKeyStore : ISigningKeyStore
     protected readonly IPersistedGrantDbContext Context;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<SigningKeyStore> Logger;
@@ -40,26 +34,25 @@ public class SigningKeyStore : ISigningKeyStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public SigningKeyStore(IPersistedGrantDbContext context, ILogger<SigningKeyStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public SigningKeyStore(IPersistedGrantDbContext context, ILogger<SigningKeyStore> logger)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <summary>
     /// Loads all keys from store.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync()
+    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.LoadKeys");
 
         var entities = await Context.Keys.Where(x => x.Use == Use)
             .AsNoTracking()
-            .ToArrayAsync(CancellationTokenProvider.CancellationToken);
+            .ToArrayAsync(ct);
         return entities.Select(key => new SerializedKey
         {
             Id = key.Id,
@@ -76,8 +69,9 @@ public class SigningKeyStore : ISigningKeyStore
     /// Persists new key in store.
     /// </summary>
     /// <param name="key"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task StoreKeyAsync(SerializedKey key)
+    public async Task StoreKeyAsync(SerializedKey key, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.StoreKey");
 
@@ -93,26 +87,27 @@ public class SigningKeyStore : ISigningKeyStore
             IsX509Certificate = key.IsX509Certificate
         };
         Context.Keys.Add(entity);
-        await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+        await Context.SaveChangesAsync(ct);
     }
 
     /// <summary>
     /// Deletes key from storage.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task DeleteKeyAsync(string id)
+    public async Task DeleteKeyAsync(string id, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.DeleteKey");
 
         var item = await Context.Keys.Where(x => x.Use == Use && x.Id == id)
-            .FirstOrDefaultAsync(CancellationTokenProvider.CancellationToken);
+            .FirstOrDefaultAsync(ct);
         if (item != null)
         {
             try
             {
                 Context.Keys.Remove(item);
-                await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+                await Context.SaveChangesAsync(ct);
             }
             catch (DbUpdateConcurrencyException ex)
             {

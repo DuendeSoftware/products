@@ -39,9 +39,9 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
 
     /// <inheritdoc />
     public virtual async Task<IDynamicClientRegistrationResponse> ProcessAsync(
-        DynamicClientRegistrationContext context)
+        DynamicClientRegistrationContext context, Ct ct)
     {
-        var clientIdResult = await AddClientId(context);
+        var clientIdResult = await AddClientId(context, ct);
         if (clientIdResult is DynamicClientRegistrationError clientIdFailure)
         {
             return clientIdFailure;
@@ -64,7 +64,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
             }
         }
 
-        await Store.AddAsync(context.Client);
+        await Store.AddAsync(context.Client, ct);
 
         return new DynamicClientRegistrationResponse(context.Request, context.Client)
         {
@@ -133,9 +133,10 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model, the DCR request, and other contextual
     /// information.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual Task<IStepResult> AddClientId(
-        DynamicClientRegistrationContext context)
+        DynamicClientRegistrationContext context, Ct ct)
     {
         context.Client.ClientId = CryptoRandom.CreateUniqueId();
         return StepResult.Success();

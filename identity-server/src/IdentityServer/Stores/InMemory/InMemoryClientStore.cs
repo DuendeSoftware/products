@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 
@@ -30,10 +31,11 @@ public class InMemoryClientStore : IClientStore
     /// Finds a client by id
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="_">The cancellation token (unused).</param>
     /// <returns>
     /// The client
     /// </returns>
-    public Task<Client> FindClientByIdAsync(string clientId)
+    public Task<Client> FindClientByIdAsync(string clientId, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
@@ -47,7 +49,7 @@ public class InMemoryClientStore : IClientStore
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<Client> GetAllClientsAsync()
+    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.GetAllClients");
 

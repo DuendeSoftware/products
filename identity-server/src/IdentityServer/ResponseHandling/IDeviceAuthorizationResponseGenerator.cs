@@ -16,6 +16,7 @@ public interface IDeviceAuthorizationResponseGenerator
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
     /// <param name="baseUrl">The base URL.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl);
+    Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl, Ct ct);
 }

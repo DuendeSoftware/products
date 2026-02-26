@@ -18,8 +18,9 @@ public interface IPushedAuthorizationRequestStore
     /// Stores the pushed authorization request.
     /// </summary>
     /// <param name="pushedAuthorizationRequest">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest);
+    Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, Ct ct);
 
     /// <summary>
     /// Consumes the pushed authorization request, indicating that it should not
@@ -31,8 +32,9 @@ public interface IPushedAuthorizationRequestStore
     /// <param name="referenceValueHash">The hash of the reference value of the
     /// pushed authorization request. The reference value is the identifier
     /// within the request_uri parameter.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task ConsumeByHashAsync(string referenceValueHash);
+    Task ConsumeByHashAsync(string referenceValueHash, Ct ct);
 
     /// <summary>
     /// Gets the pushed authorization request.
@@ -40,8 +42,9 @@ public interface IPushedAuthorizationRequestStore
     /// <param name="referenceValueHash">The hash of the reference value of the
     /// pushed authorization request. The reference value is the identifier
     /// within the request_uri parameter.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The pushed authorization request, or null if the request does
     /// not exist or was previously consumed.
     /// </returns>
-    Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash);
+    Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash, Ct ct);
 }

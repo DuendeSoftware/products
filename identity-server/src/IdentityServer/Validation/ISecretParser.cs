@@ -18,10 +18,11 @@ public interface ISecretParser
     /// Tries to find a secret on the context that can be used for authentication
     /// </summary>
     /// <param name="context">The HTTP context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// A parsed secret
     /// </returns>
-    Task<ParsedSecret?> ParseAsync(HttpContext context);
+    Task<ParsedSecret?> ParseAsync(HttpContext context, Ct ct);
 
     /// <summary>
     /// Returns the authentication method name that this parser implements

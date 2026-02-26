@@ -17,22 +17,25 @@ public interface IUserConsentStore
     /// Stores the user consent.
     /// </summary>
     /// <param name="consent">The consent.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreUserConsentAsync(Consent consent);
+    Task StoreUserConsentAsync(Consent consent, Ct ct);
 
     /// <summary>
     /// Gets the user consent.
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Consent?> GetUserConsentAsync(string subjectId, string clientId);
+    Task<Consent?> GetUserConsentAsync(string subjectId, string clientId, Ct ct);
 
     /// <summary>
     /// Removes the user consent.
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveUserConsentAsync(string subjectId, string clientId);
+    Task RemoveUserConsentAsync(string subjectId, string clientId, Ct ct);
 }

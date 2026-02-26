@@ -49,19 +49,16 @@ public class CachingCorsPolicyService<T> : ICorsPolicyService
         CorsCache = corsCache;
     }
 
-    /// <summary>
-    /// Determines whether origin is allowed.
-    /// </summary>
-    /// <param name="origin">The origin.</param>
-    /// <returns></returns>
-    public virtual async Task<bool> IsOriginAllowedAsync(string origin)
+    /// <inheritdoc/>
+    public virtual async Task<bool> IsOriginAllowedAsync(string origin, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingCorsPolicyService.IsOriginAllowed");
         activity?.SetTag(Tracing.Properties.Origin, origin);
 
         var entry = await CorsCache.GetOrAddAsync(origin,
             Options.Caching.CorsExpiration,
-            async () => new CorsCacheEntry(await Inner.IsOriginAllowedAsync(origin)));
+            async () => new CorsCacheEntry(await Inner.IsOriginAllowedAsync(origin, ct)),
+            ct);
 
         return entry.Allowed;
     }

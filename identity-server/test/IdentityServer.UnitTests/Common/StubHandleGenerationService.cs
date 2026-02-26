@@ -10,13 +10,13 @@ public class StubHandleGenerationService : DefaultHandleGenerationService, IHand
 {
     public string Handle { get; set; }
 
-    public new Task<string> GenerateAsync(int length)
+    public new Task<string> GenerateAsync(Ct ct, int length = 32)
     {
         if (Handle != null)
         {
             return Task.FromResult(Handle);
         }
 
-        return base.GenerateAsync(length);
+        return base.GenerateAsync(ct, length);
     }
 }

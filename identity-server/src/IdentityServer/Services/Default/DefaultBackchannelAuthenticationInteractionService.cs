@@ -45,14 +45,14 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         _logger = logger;
     }
 
-    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request)
+    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request, Ct ct)
     {
         if (request == null)
         {
             return null;
         }
 
-        var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
+        var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId, ct);
         if (client == null)
         {
             return null;
@@ -63,7 +63,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
             Client = client,
             Scopes = request.RequestedScopes,
             ResourceIndicators = request.RequestedResourceIndicators,
-        });
+        }, ct);
 
         return new BackchannelUserLoginRequest
         {
@@ -79,32 +79,32 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task<BackchannelUserLoginRequest> GetLoginRequestByInternalIdAsync(string id)
+    public async Task<BackchannelUserLoginRequest> GetLoginRequestByInternalIdAsync(string id, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetLoginRequestByInternalId");
 
-        var request = await _requestStore.GetByInternalIdAsync(id);
-        return await CreateAsync(request);
+        var request = await _requestStore.GetByInternalIdAsync(id, ct);
+        return await CreateAsync(request, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync()
+    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetPendingLoginRequestsForCurrentUser");
 
         var list = new List<BackchannelUserLoginRequest>();
 
-        var user = await _session.GetUserAsync();
+        var user = await _session.GetUserAsync(ct);
         if (user != null)
         {
             _logger.LogDebug("No user present");
 
-            var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId());
+            var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId(), ct);
             foreach (var item in items)
             {
                 if (!item.IsComplete)
                 {
-                    var req = await CreateAsync(item);
+                    var req = await CreateAsync(item, ct);
                     if (req != null)
                     {
                         list.Add(req);
@@ -117,19 +117,19 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest)
+    public async Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.CompleteLoginRequest");
 
         ArgumentNullException.ThrowIfNull(completionRequest);
 
-        var request = await _requestStore.GetByInternalIdAsync(completionRequest.InternalId);
+        var request = await _requestStore.GetByInternalIdAsync(completionRequest.InternalId, ct);
         if (request == null)
         {
             throw new InvalidOperationException("Invalid backchannel authentication request id.");
         }
 
-        var subject = completionRequest.Subject ?? await _session.GetUserAsync();
+        var subject = completionRequest.Subject ?? await _session.GetUserAsync(ct);
         if (subject == null)
         {
             throw new InvalidOperationException("Invalid subject.");
@@ -141,7 +141,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         }
 
         var sid = (completionRequest.Subject == null) ?
-            await _session.GetSessionIdAsync() :
+            await _session.GetSessionIdAsync(ct) :
             completionRequest.SessionId;
 
         if (completionRequest.ScopesValuesConsented != null)
@@ -170,7 +170,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         request.AuthorizedScopes = completionRequest.ScopesValuesConsented;
         request.Description = completionRequest.Description;
 
-        await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request);
+        await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request, ct);
 
         _logger.LogDebug("Successful update for backchannel authentication request id {id}", completionRequest.InternalId);
     }

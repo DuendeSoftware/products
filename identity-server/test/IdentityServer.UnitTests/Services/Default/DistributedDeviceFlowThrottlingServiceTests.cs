@@ -16,6 +16,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 {
     private TestCache cache = new TestCache();
     private InMemoryClientStore _store;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private readonly IdentityServerOptions options = new IdentityServerOptions { DeviceFlow = new DeviceFlowOptions { Interval = 5 } };
     private readonly DeviceCode deviceCode = new DeviceCode
@@ -35,7 +36,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
         var handle = Guid.NewGuid().ToString();
         var service = new DistributedDeviceFlowThrottlingService(cache, _store, new FakeTimeProvider(testDate), options);
 
-        var result = await service.ShouldSlowDown(handle, deviceCode);
+        var result = await service.ShouldSlowDown(handle, deviceCode, _ct);
 
         result.ShouldBeFalse();
 
@@ -50,7 +51,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         await cache.SetAsync(CacheKey + handle, Encoding.UTF8.GetBytes(testDate.AddSeconds(-1).ToString("O")));
 
-        var result = await service.ShouldSlowDown(handle, deviceCode);
+        var result = await service.ShouldSlowDown(handle, deviceCode, _ct);
 
         result.ShouldBeTrue();
 
@@ -66,7 +67,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         await cache.SetAsync($"devicecode_{handle}", Encoding.UTF8.GetBytes(testDate.AddSeconds(-deviceCode.Lifetime - 1).ToString("O")));
 
-        var result = await service.ShouldSlowDown(handle, deviceCode);
+        var result = await service.ShouldSlowDown(handle, deviceCode, _ct);
 
         result.ShouldBeFalse();
 
@@ -84,7 +85,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var service = new DistributedDeviceFlowThrottlingService(cache, _store, new FakeTimeProvider(testDate), options);
 
-        var result = await service.ShouldSlowDown(handle, deviceCode);
+        var result = await service.ShouldSlowDown(handle, deviceCode, _ct);
 
         result.ShouldBeFalse();
 

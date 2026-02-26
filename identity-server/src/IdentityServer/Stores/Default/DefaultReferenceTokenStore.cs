@@ -31,34 +31,34 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     }
 
     /// <inheritdoc/>
-    public Task<string> StoreReferenceTokenAsync(Token token)
+    public Task<string> StoreReferenceTokenAsync(Token token, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.StoreReferenceToken");
 
-        return CreateItemAsync(token, token.ClientId, token.SubjectId, token.SessionId, token.Description, token.CreationTime, token.Lifetime);
+        return CreateItemAsync(token, token.ClientId, token.SubjectId, token.SessionId, token.Description, token.CreationTime, token.Lifetime, ct);
     }
 
     /// <inheritdoc/>
-    public Task<Token> GetReferenceTokenAsync(string handle)
+    public Task<Token> GetReferenceTokenAsync(string handle, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.GetReferenceToken");
 
-        return GetItemAsync(handle);
+        return GetItemAsync(handle, ct);
     }
 
     /// <inheritdoc/>
-    public Task RemoveReferenceTokenAsync(string handle)
+    public Task RemoveReferenceTokenAsync(string handle, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.RemoveReferenceToken");
 
-        return RemoveItemAsync(handle);
+        return RemoveItemAsync(handle, ct);
     }
 
     /// <inheritdoc/>
-    public Task RemoveReferenceTokensAsync(string subjectId, string clientId, string sessionId = null)
+    public Task RemoveReferenceTokensAsync(string subjectId, string clientId, string sessionId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.RemoveReferenceTokens");
 
-        return RemoveAllAsync(subjectId, clientId, sessionId);
+        return RemoveAllAsync(subjectId, clientId, ct, sessionId);
     }
 }

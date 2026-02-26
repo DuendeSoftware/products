@@ -7,7 +7,7 @@ namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 
 public static class IdentityServerPageExtensions
 {
-    public static async Task Login(this IPage page, string userName = "alice", string password = "alice", CancellationToken ct = default)
+    public static async Task Login(this IPage page, string userName = "alice", string password = "alice")
     {
         await page.GetLink("Secure").ClickAsync();
         await page.GetByLabel("Username").FillAsync(userName);

@@ -8,7 +8,7 @@ namespace Duende.Bff.Diagnostics;
 
 internal class DiagnosticDataService(DateTime serverStartTime, IEnumerable<IDiagnosticEntry> entries)
 {
-    public async Task<ReadOnlyMemory<byte>> GetJsonBytesAsync(CT ct = default)
+    public async Task<ReadOnlyMemory<byte>> GetJsonBytesAsync(Ct ct = default)
     {
         var bufferWriter = new ArrayBufferWriter<byte>();
         await using var writer = new Utf8JsonWriter(bufferWriter, new JsonWriterOptions { Indented = false });

@@ -94,9 +94,9 @@ public class CustomAuthorizeResponseGenerator(
     : AuthorizeResponseGenerator(options, timeProvider, tokenService, keyMaterialService, authorizationCodeStore, logger,
         events)
 {
-    public override async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request)
+    public override async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
-        var baseResponse = await base.CreateResponseAsync(request).ConfigureAwait(false);
+        var baseResponse = await base.CreateResponseAsync(request, ct).ConfigureAwait(false);
         if (!baseResponse.IsError)
         {
             baseResponse.CustomParameters.Add("custom_parameter", "custom_value");

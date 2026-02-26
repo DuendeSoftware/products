@@ -7,7 +7,6 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -15,6 +14,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     public IdentityProviderStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -42,8 +43,8 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>(), new NoneCancellationTokenProvider());
-            var item = await store.GetBySchemeAsync("scheme1");
+            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>());
+            var item = await store.GetBySchemeAsync("scheme1", _ct);
 
             item.ShouldNotBeNull();
         }
@@ -66,8 +67,8 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>(), new NoneCancellationTokenProvider());
-            var item = await store.GetBySchemeAsync("scheme2");
+            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>());
+            var item = await store.GetBySchemeAsync("scheme2", _ct);
 
             item.ShouldBeNull();
         }
@@ -89,8 +90,8 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>(), new NoneCancellationTokenProvider());
-            var item = await store.GetBySchemeAsync("scheme3");
+            var store = new IdentityProviderStore(context, new NullLogger<IdentityProviderStore>());
+            var item = await store.GetBySchemeAsync("scheme3", _ct);
 
             item.ShouldBeNull();
         }

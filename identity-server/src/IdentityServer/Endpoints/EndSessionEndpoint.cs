@@ -59,7 +59,7 @@ internal class EndSessionEndpoint : IEndpointHandler
         }
         else if (HttpMethods.IsPost(context.Request.Method))
         {
-            parameters = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+            parameters = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
         }
         else
         {
@@ -67,11 +67,11 @@ internal class EndSessionEndpoint : IEndpointHandler
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(context.RequestAborted);
 
         _logger.LogDebug("Processing signout request for {subjectId}", user?.GetSubjectId() ?? "anonymous");
 
-        var result = await _endSessionRequestValidator.ValidateAsync(parameters, user);
+        var result = await _endSessionRequestValidator.ValidateAsync(parameters, user, context.RequestAborted);
 
         if (result.IsError)
         {

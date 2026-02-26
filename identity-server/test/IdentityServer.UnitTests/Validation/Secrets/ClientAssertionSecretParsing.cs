@@ -18,6 +18,7 @@ public class ClientAssertionSecretParsing
 {
     private IdentityServerOptions _options;
     private JwtBearerClientAssertionSecretParser _parser;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public ClientAssertionSecretParsing()
     {
@@ -32,7 +33,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream();
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -50,7 +51,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldNotBeNull();
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.JwtBearer);
@@ -68,7 +69,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -83,7 +84,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -97,7 +98,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -113,7 +114,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -129,7 +130,7 @@ public class ClientAssertionSecretParsing
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }

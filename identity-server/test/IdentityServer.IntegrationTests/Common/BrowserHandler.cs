@@ -22,7 +22,7 @@ public class BrowserHandler : DelegatingHandler
     {
     }
 
-    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
+    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
     {
         var response = await SendCookiesAsync(request, ct);
 
@@ -64,7 +64,7 @@ public class BrowserHandler : DelegatingHandler
         }
     }
 
-    protected async Task<HttpResponseMessage> SendCookiesAsync(HttpRequestMessage request, CT ct)
+    protected async Task<HttpResponseMessage> SendCookiesAsync(HttpRequestMessage request, Ct ct)
     {
         if (AllowCookies)
         {

@@ -29,11 +29,8 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     /// </value>
     public int RetryLimit => 5;
 
-    /// <summary>
-    /// Generates the user code.
-    /// </summary>
-    /// <returns></returns>
-    public Task<string> GenerateAsync()
+    /// <inheritdoc/>
+    public Task<string> GenerateAsync(Ct _)
     {
         var next = RandomNumberGenerator.GetInt32(100000000, 1000000000);
         return Task.FromResult(next.ToString(CultureInfo.InvariantCulture));

@@ -26,9 +26,9 @@ public class NopBackchannelAuthenticationUserNotificationService : IBackchannelA
     }
 
     /// <inheritdoc/>
-    public async Task SendLoginRequestAsync(BackchannelUserLoginRequest request)
+    public async Task SendLoginRequestAsync(BackchannelUserLoginRequest request, Ct ct)
     {
-        var url = await _issuerNameService.GetCurrentAsync();
+        var url = await _issuerNameService.GetCurrentAsync(ct);
         url += "/ciba?id=" + request.InternalId;
         _sanitizedLogger.LogWarning("IBackchannelAuthenticationUserNotificationService not implemented. But for testing, visit {url} to simulate what a user might need to do to complete the request.", url);
     }

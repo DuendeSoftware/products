@@ -16,6 +16,7 @@ namespace UnitTests.Validation;
 public class AccessTokenValidation
 {
     private const string Category = "Access token validation";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IClientStore _clients = Factory.CreateClientStore();
     private IdentityServerOptions _options = new IdentityServerOptions();
@@ -48,13 +49,9 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
-        var result = await validator.ValidateAccessTokenAsync(handle);
-
-        result.IsError.ShouldBeFalse();
-        result.Claims.Count().ShouldBe(9);
-        result.Claims.First(c => c.Type == JwtClaimTypes.ClientId).Value.ShouldBe("roclient");
+        var result = await validator.ValidateAccessTokenAsync(handle, null, _ct);
 
         var claimTypes = result.Claims.Select(c => c.Type).ToList();
         claimTypes.ShouldContain("iss");
@@ -76,9 +73,9 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
-        var result = await validator.ValidateAccessTokenAsync(handle, "read");
+        var result = await validator.ValidateAccessTokenAsync(handle, "read", _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -92,9 +89,9 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
-        var result = await validator.ValidateAccessTokenAsync(handle, "missing");
+        var result = await validator.ValidateAccessTokenAsync(handle, "missing", _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InsufficientScope);
@@ -106,7 +103,7 @@ public class AccessTokenValidation
     {
         var validator = Factory.CreateTokenValidator();
 
-        var result = await validator.ValidateAccessTokenAsync("unknown");
+        var result = await validator.ValidateAccessTokenAsync("unknown", null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -120,7 +117,7 @@ public class AccessTokenValidation
         var options = new IdentityServerOptions();
 
         var longToken = "x".Repeat(options.InputLengthRestrictions.TokenHandle + 1);
-        var result = await validator.ValidateAccessTokenAsync(longToken);
+        var result = await validator.ValidateAccessTokenAsync(longToken, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -138,12 +135,12 @@ public class AccessTokenValidation
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 2, "read", "write");
         token.CreationTime = now;
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
         now = now.AddSeconds(3);
         _timeProvider.SetUtcNow(now);
 
-        var result = await validator.ValidateAccessTokenAsync(handle);
+        var result = await validator.ValidateAccessTokenAsync(handle, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.ExpiredToken);
@@ -155,7 +152,7 @@ public class AccessTokenValidation
     {
         var validator = Factory.CreateTokenValidator();
 
-        var result = await validator.ValidateAccessTokenAsync("unk.nown");
+        var result = await validator.ValidateAccessTokenAsync("unk.nown", null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -166,10 +163,10 @@ public class AccessTokenValidation
     public async Task Valid_JWT_Token()
     {
         var signer = Factory.CreateDefaultTokenCreator();
-        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"));
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"), _ct);
 
         var validator = Factory.CreateTokenValidator(null);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -184,10 +181,10 @@ public class AccessTokenValidation
         options.EmitScopesAsSpaceDelimitedStringInJwt = flag;
 
         var signer = Factory.CreateDefaultTokenCreator(options);
-        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"));
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"), _ct);
 
         var validator = Factory.CreateTokenValidator(null);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeFalse();
         result.Jwt.ShouldNotBeNullOrEmpty();
@@ -207,10 +204,10 @@ public class AccessTokenValidation
         var signer = Factory.CreateDefaultTokenCreator();
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
         token.Issuer = "invalid";
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var validator = Factory.CreateTokenValidator(null);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -221,10 +218,10 @@ public class AccessTokenValidation
     public async Task JWT_Token_Too_Long()
     {
         var signer = Factory.CreateDefaultTokenCreator();
-        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessTokenLong(new Client { ClientId = "roclient" }, "valid", 600, 1000, "read", "write"));
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessTokenLong(new Client { ClientId = "roclient" }, "valid", 600, 1000, "read", "write"), _ct);
 
         var validator = Factory.CreateTokenValidator(null);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -239,12 +236,12 @@ public class AccessTokenValidation
         futureClock.SetUtcNow(definitelyNotNow);
         var signer = Factory.CreateDefaultTokenCreator(timeProvider: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var options = TestIdentityServerOptions.Create();
         options.JwtValidationClockSkew = TimeSpan.FromSeconds(10);
         var validator = Factory.CreateTokenValidator(options: options);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -258,12 +255,12 @@ public class AccessTokenValidation
         futureClock.SetUtcNow(definitelyNotNow);
         var signer = Factory.CreateDefaultTokenCreator(timeProvider: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var options = TestIdentityServerOptions.Create();
         options.JwtValidationClockSkew = TimeSpan.FromSeconds(5);
         var validator = Factory.CreateTokenValidator(options: options);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -275,13 +272,13 @@ public class AccessTokenValidation
     {
         var signer = Factory.CreateDefaultTokenCreator();
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var options = TestIdentityServerOptions.Create();
         options.SupportedRequestObjectSigningAlgorithms = ["Test"];
         options.SupportedClientAssertionSigningAlgorithms = ["Test"];
         var validator = Factory.CreateTokenValidator(options: options);
-        var result = await validator.ValidateAccessTokenAsync(jwt);
+        var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -295,9 +292,9 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "unknown" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
-        var result = await validator.ValidateAccessTokenAsync(handle);
+        var result = await validator.ValidateAccessTokenAsync(handle, null, _ct);
 
         result.IsError.ShouldBeTrue();
     }

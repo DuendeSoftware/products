@@ -56,7 +56,7 @@ public class IdentityServerMiddleware
     {
         // this will check the authentication session and from it emit the check session
         // cookie needed from JS-based signout clients.
-        await userSession.EnsureSessionIdCookieAsync();
+        await userSession.EnsureSessionIdCookieAsync(context.RequestAborted);
 
         context.Response.OnStarting(async () =>
         {
@@ -64,7 +64,7 @@ public class IdentityServerMiddleware
             {
                 _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
 
-                await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession);
+                await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession, context.RequestAborted);
             }
         });
 
@@ -90,7 +90,7 @@ public class IdentityServerMiddleware
                     using var activity = Tracing.BasicActivitySource.StartActivity("IdentityServerProtocolRequest");
                     activity?.SetTag(Tracing.Properties.EndpointType, endpointType);
 
-                    var issuer = await issuerNameService.GetCurrentAsync();
+                    var issuer = await issuerNameService.GetCurrentAsync(context.RequestAborted);
                     var licenseUsage = context.RequestServices.GetRequiredService<LicenseUsageTracker>();
                     licenseUsage.IssuerUsed(issuer);
                     IdentityServerLicenseValidator.Instance.ValidateIssuer(issuer);
@@ -115,7 +115,7 @@ public class IdentityServerMiddleware
         }
         catch (Exception ex) when (options.Logging.InvokeUnhandledExceptionLoggingFilter(context, ex) is not false)
         {
-            await events.RaiseAsync(new UnhandledExceptionEvent(ex));
+            await events.RaiseAsync(new UnhandledExceptionEvent(ex), context.RequestAborted);
             Telemetry.Metrics.UnHandledException(ex);
             _sanitizedLogger.LogCritical(ex, "Unhandled exception: {exception}", ex.Message);
 

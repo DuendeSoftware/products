@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -43,21 +44,22 @@ public class ValidatingClientStore<T> : IClientStore
     /// Finds a client by id (and runs the validation logic)
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The client or an InvalidOperationException
     /// </returns>
-    public async Task<Client> FindClientByIdAsync(string clientId)
+    public async Task<Client> FindClientByIdAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.FindClientById");
 
-        var client = await _inner.FindClientByIdAsync(clientId);
+        var client = await _inner.FindClientByIdAsync(clientId, ct);
 
         if (client != null)
         {
             _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
 
             var context = new ClientConfigurationValidationContext(client);
-            await _validator.ValidateAsync(context);
+            await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {
@@ -68,7 +70,7 @@ public class ValidatingClientStore<T> : IClientStore
 
             _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
             Telemetry.Metrics.ClientValidationFailure(clientId, context.ErrorMessage);
-            await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage));
+            await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage), ct);
 
             return null;
         }
@@ -79,14 +81,14 @@ public class ValidatingClientStore<T> : IClientStore
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<Client> GetAllClientsAsync()
+    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.GetAllClients");
-        await foreach (var client in _inner.GetAllClientsAsync())
+        await foreach (var client in _inner.GetAllClientsAsync(ct))
         {
             _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
             var context = new ClientConfigurationValidationContext(client);
-            await _validator.ValidateAsync(context);
+            await _validator.ValidateAsync(context, ct);
             if (context.IsValid)
             {
                 _logger.LogDebug("client configuration validation for client {clientId} succeeded.", client.ClientId);
@@ -97,7 +99,7 @@ public class ValidatingClientStore<T> : IClientStore
             {
                 _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
                 Telemetry.Metrics.ClientValidationFailure(client.ClientId, context.ErrorMessage);
-                await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage));
+                await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage), ct);
                 // Skip invalid clients - do not yield
             }
         }

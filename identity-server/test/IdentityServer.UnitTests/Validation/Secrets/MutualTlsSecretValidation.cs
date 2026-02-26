@@ -17,6 +17,7 @@ public class MutualTlsSecretValidation
     private const string Category = "Secrets - MutualTls Secret Validation";
 
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     ///////////////////
     // thumbprints
@@ -29,7 +30,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509ThumbprintSecretValidator(new Logger<X509ThumbprintSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -38,7 +39,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -50,7 +51,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509ThumbprintSecretValidator(new Logger<X509ThumbprintSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -59,7 +60,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret);
+        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
@@ -70,7 +71,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509ThumbprintSecretValidator(new Logger<X509ThumbprintSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -79,7 +80,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -91,7 +92,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509ThumbprintSecretValidator(new Logger<X509ThumbprintSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -100,7 +101,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeTrue();
     }
@@ -116,7 +117,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509NameSecretValidator(new Logger<X509NameSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -125,7 +126,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -137,7 +138,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509NameSecretValidator(new Logger<X509NameSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -146,7 +147,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret);
+        Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
         await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
@@ -157,7 +158,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509NameSecretValidator(new Logger<X509NameSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -166,7 +167,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeFalse();
     }
@@ -178,7 +179,7 @@ public class MutualTlsSecretValidation
         ISecretValidator validator = new X509NameSecretValidator(new Logger<X509NameSecretValidator>(new LoggerFactory()));
 
         var clientId = "mtls_client_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -187,7 +188,7 @@ public class MutualTlsSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
-        var result = await validator.ValidateAsync(client.ClientSecrets, secret);
+        var result = await validator.ValidateAsync(client.ClientSecrets, secret, _ct);
 
         result.Success.ShouldBeTrue();
     }

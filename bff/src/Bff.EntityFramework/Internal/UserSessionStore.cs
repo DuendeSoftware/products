@@ -18,7 +18,7 @@ internal sealed class UserSessionStore(
     : IUserSessionStore, IUserSessionStoreCleanup
 {
     /// <inheritdoc/>
-    public async Task CreateUserSessionAsync(UserSession session, CT ct)
+    public async Task CreateUserSessionAsync(UserSession session, Ct ct)
     {
         if (!session.PartitionKey.HasValue)
         {
@@ -67,7 +67,7 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task DeleteUserSessionAsync(UserSessionKey key, CT ct)
+    public async Task DeleteUserSessionAsync(UserSessionKey key, Ct ct)
     {
         var userKey = key.UserKey;
         var partitionKey = key.PartitionKey;
@@ -104,7 +104,7 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct)
+    public async Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, Ct ct)
     {
         filter.Validate();
         var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
@@ -152,7 +152,7 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task<UserSession?> GetUserSessionAsync(UserSessionKey key, CT ct)
+    public async Task<UserSession?> GetUserSessionAsync(UserSessionKey key, Ct ct)
     {
         var userKey = key.UserKey;
         var partitionKey = key.PartitionKey;
@@ -175,7 +175,7 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct)
+    public async Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, Ct ct)
     {
         filter.Validate();
         var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
@@ -213,7 +213,7 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, CT ct)
+    public async Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, Ct ct)
     {
         var userKey = key.UserKey;
         var partitionKey = key.PartitionKey;
@@ -235,7 +235,7 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task<int> DeleteExpiredSessionsAsync(CT ct = default)
+    public async Task<int> DeleteExpiredSessionsAsync(Ct ct = default)
     {
         var removed = 0;
 

@@ -15,6 +15,7 @@ public interface IUserInfoResponseGenerator
     /// Creates the response.
     /// </summary>
     /// <param name="validationResult">The userinfo request validation result.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult);
+    Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult, Ct ct);
 }

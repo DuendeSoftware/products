@@ -22,6 +22,7 @@ public class DefaultPersistedGrantServiceTests
     private IUserConsentStore _userConsent;
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public DefaultPersistedGrantServiceTests()
     {
@@ -56,21 +57,21 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             CreationTime = DateTime.UtcNow,
             ClientId = "client2",
             SubjectId = "123",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             CreationTime = DateTime.UtcNow,
             ClientId = "client1",
             SubjectId = "456",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
 
         var handle1 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -84,7 +85,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("scope", "bar1"),
                 new Claim("scope", "bar2")
             }
-        });
+        }, _ct);
 
         var handle2 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -97,7 +98,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "123"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle3 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -110,7 +111,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "456"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle4 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
@@ -119,7 +120,7 @@ public class DefaultPersistedGrantServiceTests
             AuthorizedScopes = new[] { "baz1", "baz2" },
             CreationTime = DateTime.UtcNow,
             Lifetime = 10,
-        });
+        }, _ct);
         var handle5 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
             ClientId = "client1",
@@ -127,7 +128,7 @@ public class DefaultPersistedGrantServiceTests
             AuthorizedScopes = new[] { "baz3" },
             CreationTime = DateTime.UtcNow,
             Lifetime = 10,
-        });
+        }, _ct);
         var handle6 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
             ClientId = "client2",
@@ -135,7 +136,7 @@ public class DefaultPersistedGrantServiceTests
             AuthorizedScopes = new[] { "baz3" },
             CreationTime = DateTime.UtcNow,
             Lifetime = 10,
-        });
+        }, _ct);
 
         var handle7 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -147,7 +148,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux1", "quux2" }
-        });
+        }, _ct);
 
         var handle8 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -159,7 +160,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         var handle9 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -171,9 +172,9 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
-        var grants = await _subject.GetAllGrantsAsync("123");
+        var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(2);
         var grant1 = grants.First(x => x.ClientId == "client1");
@@ -195,19 +196,19 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             ClientId = "client2",
             SubjectId = "123",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             ClientId = "client1",
             SubjectId = "456",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
 
         var handle1 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -222,7 +223,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("scope", "bar1"),
                 new Claim("scope", "bar2")
             }
-        });
+        }, _ct);
 
         var handle2 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -236,7 +237,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "123"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle3 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -250,7 +251,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "456"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle4 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
@@ -259,7 +260,7 @@ public class DefaultPersistedGrantServiceTests
             AuthorizedScopes = new[] { "baz1", "baz2" },
             CreationTime = DateTime.UtcNow,
             Lifetime = 10,
-        });
+        }, _ct);
         var handle5 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
             ClientId = "client1",
@@ -267,7 +268,7 @@ public class DefaultPersistedGrantServiceTests
             AuthorizedScopes = new[] { "baz3" },
             CreationTime = DateTime.UtcNow,
             Lifetime = 10,
-        });
+        }, _ct);
         var handle6 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
             ClientId = "client2",
@@ -275,7 +276,7 @@ public class DefaultPersistedGrantServiceTests
             AuthorizedScopes = new[] { "baz3" },
             CreationTime = DateTime.UtcNow,
             Lifetime = 10,
-        });
+        }, _ct);
 
         var handle7 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -287,7 +288,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux1", "quux2" }
-        });
+        }, _ct);
 
         var handle8 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -299,7 +300,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         var handle9 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -311,19 +312,19 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
-        await _subject.RemoveAllGrantsAsync("123", "client1");
+        await _subject.RemoveAllGrantsAsync("123", _ct, "client1");
 
-        (await _referenceTokens.GetReferenceTokenAsync(handle1)).ShouldBeNull();
-        (await _referenceTokens.GetReferenceTokenAsync(handle2)).ShouldNotBeNull();
-        (await _referenceTokens.GetReferenceTokenAsync(handle3)).ShouldNotBeNull();
-        (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldBeNull();
-        (await _refreshTokens.GetRefreshTokenAsync(handle5)).ShouldNotBeNull();
-        (await _refreshTokens.GetRefreshTokenAsync(handle6)).ShouldNotBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle7)).ShouldBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle8)).ShouldNotBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle9)).ShouldNotBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle1, _ct)).ShouldBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle2, _ct)).ShouldNotBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle3, _ct)).ShouldNotBeNull();
+        (await _refreshTokens.GetRefreshTokenAsync(handle4, _ct)).ShouldBeNull();
+        (await _refreshTokens.GetRefreshTokenAsync(handle5, _ct)).ShouldNotBeNull();
+        (await _refreshTokens.GetRefreshTokenAsync(handle6, _ct)).ShouldNotBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle7, _ct)).ShouldBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle8, _ct)).ShouldNotBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle9, _ct)).ShouldNotBeNull();
     }
     [Fact]
     public async Task RemoveAllGrantsAsync_should_filter_on_session_id()
@@ -337,7 +338,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle2 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client2",
@@ -346,7 +347,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle3 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client3",
@@ -355,16 +356,16 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
 
-            await _subject.RemoveAllGrantsAsync("123");
+            await _subject.RemoveAllGrantsAsync("123", _ct);
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldBeNull();
-            await _refreshTokens.RemoveRefreshTokenAsync(handle1);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle2);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle3);
+            (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3, _ct)).ShouldBeNull();
+            await _refreshTokens.RemoveRefreshTokenAsync(handle1, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle2, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle3, _ct);
         }
         {
             var handle1 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
@@ -375,7 +376,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle2 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client2",
@@ -384,7 +385,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle3 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client3",
@@ -393,16 +394,16 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
 
-            await _subject.RemoveAllGrantsAsync("123", "client1");
+            await _subject.RemoveAllGrantsAsync("123", _ct, "client1");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldNotBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldNotBeNull();
-            await _refreshTokens.RemoveRefreshTokenAsync(handle1);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle2);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle3);
+            (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldNotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3, _ct)).ShouldNotBeNull();
+            await _refreshTokens.RemoveRefreshTokenAsync(handle1, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle2, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle3, _ct);
         }
         {
             var handle1 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
@@ -413,7 +414,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle2 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client2",
@@ -422,7 +423,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle3 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client3",
@@ -431,7 +432,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle4 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client1",
@@ -440,17 +441,17 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
-            await _subject.RemoveAllGrantsAsync("123", "client1", "session1");
+            }, _ct);
+            await _subject.RemoveAllGrantsAsync("123", _ct, "client1", "session1");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldNotBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldNotBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldNotBeNull();
-            await _refreshTokens.RemoveRefreshTokenAsync(handle1);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle2);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle3);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle4);
+            (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldNotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3, _ct)).ShouldNotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle4, _ct)).ShouldNotBeNull();
+            await _refreshTokens.RemoveRefreshTokenAsync(handle1, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle2, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle3, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle4, _ct);
         }
         {
             var handle1 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
@@ -461,7 +462,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle2 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client2",
@@ -470,7 +471,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle3 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client3",
@@ -479,7 +480,7 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
+            }, _ct);
             var handle4 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
             {
                 ClientId = "client1",
@@ -488,17 +489,17 @@ public class DefaultPersistedGrantServiceTests
                 AuthorizedScopes = new[] { "baz" },
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
-            });
-            await _subject.RemoveAllGrantsAsync("123", sessionId: "session1");
+            }, _ct);
+            await _subject.RemoveAllGrantsAsync("123", _ct, sessionId: "session1");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldNotBeNull();
-            await _refreshTokens.RemoveRefreshTokenAsync(handle1);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle2);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle3);
-            await _refreshTokens.RemoveRefreshTokenAsync(handle4);
+            (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3, _ct)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle4, _ct)).ShouldNotBeNull();
+            await _refreshTokens.RemoveRefreshTokenAsync(handle1, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle2, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle3, _ct);
+            await _refreshTokens.RemoveRefreshTokenAsync(handle4, _ct);
         }
     }
 
@@ -510,9 +511,9 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
 
-        var grants = await _subject.GetAllGrantsAsync("123");
+        var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(1);
         grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
@@ -527,9 +528,9 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
-        grants = await _subject.GetAllGrantsAsync("123");
+        grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(1);
         grants.First().Scopes.ShouldBe(["foo1", "foo2", "quux3"]);
@@ -553,15 +554,15 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             ClientId = "client2",
             SubjectId = "123",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
 
-        var grants = await _subject.GetAllGrantsAsync("123");
+        var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(1);
         grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
@@ -575,9 +576,9 @@ public class DefaultPersistedGrantServiceTests
 
         public CorruptingPersistedGrantStore(IPersistedGrantStore inner) => _inner = inner;
 
-        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
+        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
         {
-            var items = await _inner.GetAllAsync(filter);
+            var items = await _inner.GetAllAsync(filter, ct);
             if (ClientIdToCorrupt != null)
             {
                 var itemsToCorrupt = items.Where(x => x.ClientId == ClientIdToCorrupt);
@@ -589,12 +590,12 @@ public class DefaultPersistedGrantServiceTests
             return items;
         }
 
-        public Task<PersistedGrant> GetAsync(string key) => _inner.GetAsync(key);
+        public Task<PersistedGrant> GetAsync(string key, Ct ct) => _inner.GetAsync(key, ct);
 
-        public Task RemoveAllAsync(PersistedGrantFilter filter) => _inner.RemoveAllAsync(filter);
+        public Task RemoveAllAsync(PersistedGrantFilter filter, Ct ct) => _inner.RemoveAllAsync(filter, ct);
 
-        public Task RemoveAsync(string key) => _inner.RemoveAsync(key);
+        public Task RemoveAsync(string key, Ct ct) => _inner.RemoveAsync(key, ct);
 
-        public Task StoreAsync(PersistedGrant grant) => _inner.StoreAsync(grant);
+        public Task StoreAsync(PersistedGrant grant, Ct ct) => _inner.StoreAsync(grant, ct);
     }
 }

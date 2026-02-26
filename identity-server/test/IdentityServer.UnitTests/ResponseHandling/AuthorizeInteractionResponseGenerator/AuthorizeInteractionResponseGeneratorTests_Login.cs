@@ -19,6 +19,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
     private Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public AuthorizeInteractionResponseGeneratorTests_Login() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
@@ -36,7 +37,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             Subject = Principal.Anonymous
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -55,7 +56,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }.CreatePrincipal()
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsLogin.ShouldBeFalse();
     }
@@ -79,7 +80,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeFalse();
     }
@@ -104,7 +105,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -125,7 +126,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }.CreatePrincipal()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeFalse();
     }
@@ -146,7 +147,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }.CreatePrincipal()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -168,7 +169,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }.CreatePrincipal()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeFalse();
     }
@@ -190,7 +191,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }.CreatePrincipal()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -211,7 +212,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }.CreatePrincipal()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -227,7 +228,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             Raw = new NameValueCollection()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -243,7 +244,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             Raw = new NameValueCollection()
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         result.IsLogin.ShouldBeTrue();
     }
@@ -262,7 +263,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             }
         };
 
-        var result = await _subject.ProcessLoginAsync(request);
+        var result = await _subject.ProcessLoginAsync(request, _ct);
 
         request.Raw.AllKeys.ShouldContain(Constants.ProcessedPrompt);
     }

@@ -16,5 +16,7 @@ public interface IResourceValidator
     /// <summary>
     /// Validates the requested resources for the client.
     /// </summary>
-    Task<ResourceValidationResult> ValidateRequestedResourcesAsync(ResourceValidationRequest request);
+    /// <param name="request">The resource validation request.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<ResourceValidationResult> ValidateRequestedResourcesAsync(ResourceValidationRequest request, Ct ct);
 }

@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class TestCustomTokenRequestValidator : ICustomTokenRequestValidator
 {
-    public Task ValidateAsync(CustomTokenRequestValidationContext context)
+    public Task ValidateAsync(CustomTokenRequestValidationContext context, Ct _)
     {
         context.Result.CustomResponse = new Dictionary<string, object>
         {

@@ -84,7 +84,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     }
 
     /// <inheritdoc />
-    public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject)
+    public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("EndSessionRequestValidator.Validate");
 
@@ -120,7 +120,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         if (idTokenHint.IsPresent())
         {
             // validate id_token - no need to validate token life time
-            var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, null, false);
+            var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, null, false, ct);
             if (tokenValidationResult.IsError)
             {
                 return Invalid("Error validating id token hint", validatedRequest);
@@ -138,14 +138,14 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 }
 
                 validatedRequest.Subject = subject;
-                validatedRequest.SessionId = await UserSession.GetSessionIdAsync();
-                validatedRequest.ClientIds = await UserSession.GetClientListAsync();
+                validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
+                validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
             }
 
             var redirectUri = parameters.Get(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
             if (redirectUri.IsPresent())
             {
-                if (await UriValidator.IsPostLogoutRedirectUriValidAsync(redirectUri, validatedRequest.Client))
+                if (await UriValidator.IsPostLogoutRedirectUriValidAsync(redirectUri, validatedRequest.Client, ct))
                 {
                     validatedRequest.PostLogOutUri = redirectUri;
                 }
@@ -168,8 +168,8 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         {
             // no id_token to authenticate the client, but we do have a user and a user session
             validatedRequest.Subject = subject;
-            validatedRequest.SessionId = await UserSession.GetSessionIdAsync();
-            validatedRequest.ClientIds = await UserSession.GetClientListAsync();
+            validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
+            validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
         }
 
         LogSuccess(validatedRequest);
@@ -222,7 +222,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     }
 
     /// <inheritdoc />
-    public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters)
+    public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, Ct ct)
     {
         var result = new EndSessionCallbackValidationResult
         {
@@ -230,11 +230,11 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         };
 
         var endSessionId = parameters[Constants.UIConstants.DefaultRoutePathParams.EndSessionCallback];
-        var endSessionMessage = await EndSessionMessageStore.ReadAsync(endSessionId);
+        var endSessionMessage = await EndSessionMessageStore.ReadAsync(endSessionId, ct);
         if (endSessionMessage?.Data?.ClientIds?.Any() == true)
         {
             result.IsError = false;
-            result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data);
+            result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data, ct);
         }
         else
         {

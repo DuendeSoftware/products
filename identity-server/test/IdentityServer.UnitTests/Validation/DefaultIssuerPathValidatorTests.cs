@@ -17,7 +17,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = "/foo";
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeTrue();
     }
@@ -30,7 +30,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = string.Empty;
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeTrue();
     }
@@ -42,7 +42,7 @@ public class DefaultIssuerPathValidatorTests
         var logger = new FakeLogger<DefaultIssuerPathValidator>();
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
 
-        var result = await subject.ValidateAsync(null);
+        var result = await subject.ValidateAsync(null, default);
 
         result.ShouldBeTrue();
     }
@@ -55,7 +55,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = "/foo";
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeTrue();
     }
@@ -68,7 +68,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = "/foo";
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeTrue();
     }
@@ -81,7 +81,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = "/foo/bar";
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeTrue();
     }
@@ -94,7 +94,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = "/foo";
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeFalse();
     }
@@ -107,7 +107,7 @@ public class DefaultIssuerPathValidatorTests
         var subject = new DefaultIssuerPathValidator(issuerNameService, logger);
         var path = "/foo";
 
-        var result = await subject.ValidateAsync(path);
+        var result = await subject.ValidateAsync(path, default);
 
         result.ShouldBeFalse();
     }

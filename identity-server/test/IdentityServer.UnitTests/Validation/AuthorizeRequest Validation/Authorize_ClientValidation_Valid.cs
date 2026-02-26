@@ -13,6 +13,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ClientValidation_Valid
 {
     private const string Category = "AuthorizeRequest Client Validation - Valid";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options = TestIdentityServerOptions.Create();
 
@@ -27,7 +28,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -43,7 +44,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -59,7 +60,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -75,7 +76,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -92,7 +93,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.CodeIdToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -109,7 +110,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.CodeIdTokenToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -126,7 +127,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.CodeIdToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -143,7 +144,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.CodeIdTokenToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -160,7 +161,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -177,7 +178,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -194,7 +195,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -210,7 +211,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Token);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -227,7 +228,7 @@ public class Authorize_ClientValidation_Valid
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeFalse();
     }

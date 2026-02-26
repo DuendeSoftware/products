@@ -23,7 +23,7 @@ public class AntiForgeryHandlerTests
 
         var client = new HttpClient(sut);
 
-        await client.SendAsync(request, CT.None);
+        await client.SendAsync(request, Ct.None);
 
         request.Headers.ShouldContain(h => h.Key == "X-CSRF" && h.Value.Contains("1"));
     }
@@ -31,5 +31,5 @@ public class AntiForgeryHandlerTests
 
 public class NoOpHttpMessageHandler : HttpMessageHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
 }

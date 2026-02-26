@@ -24,7 +24,7 @@ internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
         }
     }
 
-    public async Task Add(string handle, TimeSpan expiration, CT ct)
+    public async Task Add(string handle, TimeSpan expiration, Ct ct)
     {
         using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Add");
 
@@ -43,14 +43,14 @@ internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
                 | HybridCacheEntryFlags.DisableUnderlyingData
     };
 
-    public async Task<bool> Exists(string handle, CT ct)
+    public async Task<bool> Exists(string handle, Ct ct)
     {
         using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Exists");
 
+        // The factory will never be invoked because the ReadOnlyEntryOptions set the DisableUnderlyingData flag
         return await Cache.GetOrCreateAsync<bool>(
             Prefix + handle,
-            // The factory will never be invoked because the ReadOnlyEntryOptions set the DisableUnderlyingData flag
-            cancel => throw new InvalidOperationException("Can't Happen"),
+            _ => throw new InvalidOperationException("Can't Happen"),
             ReadOnlyEntryOptions,
             cancellationToken: ct);
     }

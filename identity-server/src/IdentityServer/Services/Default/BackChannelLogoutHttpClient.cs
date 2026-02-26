@@ -14,19 +14,16 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
 {
     private readonly HttpClient _client;
     private readonly ILogger<DefaultBackChannelLogoutHttpClient> _logger;
-    private readonly ICancellationTokenProvider _cancellationTokenProvider;
 
     /// <summary>
     /// Constructor for BackChannelLogoutHttpClient.
     /// </summary>
     /// <param name="client"></param>
     /// <param name="loggerFactory"></param>
-    /// <param name="cancellationTokenProvider"></param>
-    public DefaultBackChannelLogoutHttpClient(HttpClient client, ILoggerFactory loggerFactory, ICancellationTokenProvider cancellationTokenProvider)
+    public DefaultBackChannelLogoutHttpClient(HttpClient client, ILoggerFactory loggerFactory)
     {
         _client = client;
         _logger = loggerFactory.CreateLogger<DefaultBackChannelLogoutHttpClient>();
-        _cancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <summary>
@@ -34,15 +31,16 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
     /// </summary>
     /// <param name="url"></param>
     /// <param name="payload"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task PostAsync(string url, Dictionary<string, string> payload)
+    public async Task PostAsync(string url, Dictionary<string, string> payload, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutHttpClient.Post");
 
         try
         {
             using var formEncodedContent = new FormUrlEncodedContent(payload);
-            var response = await _client.PostAsync(url, formEncodedContent, _cancellationTokenProvider.CancellationToken);
+            var response = await _client.PostAsync(url, formEncodedContent, ct);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug("Response from back-channel logout endpoint: {url} status code: {status}", url, (int)response.StatusCode);
@@ -51,7 +49,7 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
             {
                 BackChannelError err = null;
 
-                var errorjson = await response.Content.ReadAsStringAsync();
+                var errorjson = await response.Content.ReadAsStringAsync(ct);
                 try
                 {
                     err = JsonSerializer.Deserialize<BackChannelError>(errorjson);

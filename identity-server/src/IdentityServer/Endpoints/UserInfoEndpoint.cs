@@ -79,7 +79,7 @@ internal class UserInfoEndpoint : IEndpointHandler
 
         // validate the request
         _logger.LogTrace("Calling into userinfo request validator: {type}", _requestValidator.GetType().FullName);
-        var validationResult = await _requestValidator.ValidateRequestAsync(tokenUsageResult.Token);
+        var validationResult = await _requestValidator.ValidateRequestAsync(tokenUsageResult.Token, context.RequestAborted);
 
         if (validationResult.IsError)
         {
@@ -89,7 +89,7 @@ internal class UserInfoEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into userinfo response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(validationResult);
+        var response = await _responseGenerator.ProcessAsync(validationResult, context.RequestAborted);
 
         _logger.LogDebug("End userinfo request");
         return new UserInfoResult(response);

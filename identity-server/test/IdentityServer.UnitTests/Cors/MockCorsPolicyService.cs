@@ -11,7 +11,7 @@ public class MockCorsPolicyService : ICorsPolicyService
     public bool WasCalled { get; set; }
     public bool Response { get; set; }
 
-    public Task<bool> IsOriginAllowedAsync(string origin)
+    public Task<bool> IsOriginAllowedAsync(string origin, Ct _)
     {
         WasCalled = true;
         return Task.FromResult(Response);

@@ -13,6 +13,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ClientValidation_Invalid
 {
     private const string Category = "AuthorizeRequest Client Validation - Invalid";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options = TestIdentityServerOptions.Create();
 
@@ -27,7 +28,7 @@ public class Authorize_ClientValidation_Invalid
         parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.IdToken);
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);

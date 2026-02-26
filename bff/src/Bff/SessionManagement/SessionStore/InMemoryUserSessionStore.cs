@@ -19,7 +19,7 @@ internal class InMemoryUserSessionStore(
     // A dictionary of dictionaries, where the outer dictionary is keyed by partition key
     private readonly ConcurrentDictionary<PartitionKey, UserSessionDictionary> _store = new();
 
-    public Task CreateUserSessionAsync(UserSession session, CT ct = default)
+    public Task CreateUserSessionAsync(UserSession session, Ct ct = default)
     {
         if (!session.PartitionKey.HasValue)
         {
@@ -47,7 +47,7 @@ internal class InMemoryUserSessionStore(
         return partition;
     }
 
-    public Task<UserSession?> GetUserSessionAsync(UserSessionKey key, CT ct = default)
+    public Task<UserSession?> GetUserSessionAsync(UserSessionKey key, Ct ct = default)
     {
         var partition = GetPartition(key.PartitionKey);
         partition.TryGetValue(key.UserKey, out var item);
@@ -55,7 +55,7 @@ internal class InMemoryUserSessionStore(
         return Task.FromResult(item?.Clone());
     }
 
-    public Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, CT ct = default)
+    public Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, Ct ct = default)
     {
         var partition = GetPartition(key.PartitionKey);
         if (!partition.TryGetValue(key.UserKey, out var existing))
@@ -70,14 +70,14 @@ internal class InMemoryUserSessionStore(
         return Task.CompletedTask;
     }
 
-    public Task DeleteUserSessionAsync(UserSessionKey key, CT ct = default)
+    public Task DeleteUserSessionAsync(UserSessionKey key, Ct ct = default)
     {
         var partition = GetPartition(key.PartitionKey);
         partition.TryRemove(key.UserKey, out _);
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default)
+    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, Ct ct = default)
     {
         filter.Validate();
         var partition = GetPartition(partitionKey);
@@ -97,7 +97,7 @@ internal class InMemoryUserSessionStore(
         return Task.FromResult((IReadOnlyCollection<UserSession>)results);
     }
 
-    public Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default)
+    public Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, Ct ct = default)
     {
         filter.Validate();
         var partition = GetPartition(partitionKey);

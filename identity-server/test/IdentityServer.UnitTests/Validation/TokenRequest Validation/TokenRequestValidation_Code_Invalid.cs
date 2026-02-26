@@ -19,6 +19,7 @@ public class TokenRequestValidation_Code_Invalid
 {
     private IClientStore _clients = Factory.CreateClientStore();
     private const string Category = "TokenRequest Validation - AuthorizationCode - Invalid";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private ClaimsPrincipal _subject = new IdentityServerUser("bob").CreatePrincipal();
 
@@ -26,7 +27,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Missing_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -39,7 +40,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -48,7 +49,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.AuthorizationCode);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -58,7 +59,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -71,7 +72,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -81,7 +82,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, "invalid");
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -91,7 +92,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task AuthorizationCodeTooLong()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
         var options = new IdentityServerOptions();
 
@@ -105,7 +106,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -116,7 +117,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, longCode);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -126,7 +127,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task No_Scopes_for_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -139,7 +140,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -149,7 +150,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         OidcConstants.TokenErrors.InvalidRequest.ShouldBe(result.Error);
@@ -159,7 +160,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Client_Not_Authorized_For_AuthorizationCode_Flow()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("implicitclient");
+        var client = await _clients.FindEnabledClientByIdAsync("implicitclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -172,7 +173,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -182,7 +183,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
@@ -192,8 +193,8 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Client_Trying_To_Request_Token_Using_Another_Clients_Code()
     {
-        var client1 = await _clients.FindEnabledClientByIdAsync("codeclient");
-        var client2 = await _clients.FindEnabledClientByIdAsync("codeclient_restricted");
+        var client1 = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
+        var client2 = await _clients.FindEnabledClientByIdAsync("codeclient_restricted", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -206,7 +207,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -216,7 +217,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client2.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client2.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -226,7 +227,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Missing_RedirectUri()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -239,7 +240,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -248,7 +249,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.AuthorizationCode);
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
@@ -258,7 +259,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Different_RedirectUri_Between_Authorize_And_Token_Request()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -271,7 +272,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -281,7 +282,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server2/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -291,7 +292,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Expired_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -304,7 +305,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -314,7 +315,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -324,7 +325,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Reused_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -341,7 +342,7 @@ public class TokenRequestValidation_Code_Invalid
             }
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -352,7 +353,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
         // request first time
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -360,7 +361,7 @@ public class TokenRequestValidation_Code_Invalid
         validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
 
-        result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -370,7 +371,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Code_Request_with_disabled_User()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -386,7 +387,7 @@ public class TokenRequestValidation_Code_Invalid
             }
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store,
@@ -397,7 +398,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Code, handle);
         parameters.Add(OidcConstants.TokenRequest.RedirectUri, "https://server/cb");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -407,7 +408,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_resource_indicator()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -424,7 +425,7 @@ public class TokenRequestValidation_Code_Invalid
             RequestedResourceIndicators = new[] { "urn:api1", "urn:api2" }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -436,7 +437,7 @@ public class TokenRequestValidation_Code_Invalid
         parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api1" + new string('x', 512));
 
         {
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
@@ -444,14 +445,14 @@ public class TokenRequestValidation_Code_Invalid
         {
             parameters[OidcConstants.TokenRequest.Resource] = "api";
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api3";
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -459,7 +460,7 @@ public class TokenRequestValidation_Code_Invalid
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1";
             parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api2");
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -470,7 +471,7 @@ public class TokenRequestValidation_Code_Invalid
     public async Task failed_resource_validation_should_fail()
     {
         var mockResourceValidator = new MockResourceValidator();
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         {
@@ -488,7 +489,7 @@ public class TokenRequestValidation_Code_Invalid
                 RequestedResourceIndicators = new[] { "urn:api1", "urn:api2" }
             };
 
-            var handle = await grants.StoreAuthorizationCodeAsync(code);
+            var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
             var validator = Factory.CreateTokenRequestValidator(resourceValidator: mockResourceValidator, authorizationCodeStore: grants);
 
             var parameters = new NameValueCollection();
@@ -501,7 +502,7 @@ public class TokenRequestValidation_Code_Invalid
             {
                 InvalidScopes = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_scope");
@@ -522,7 +523,7 @@ public class TokenRequestValidation_Code_Invalid
                 RequestedResourceIndicators = new[] { "urn:api1", "urn:api2" }
             };
 
-            var handle = await grants.StoreAuthorizationCodeAsync(code);
+            var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
             var validator = Factory.CreateTokenRequestValidator(resourceValidator: mockResourceValidator, authorizationCodeStore: grants);
 
             var parameters = new NameValueCollection();
@@ -535,7 +536,7 @@ public class TokenRequestValidation_Code_Invalid
             {
                 InvalidResourceIndicators = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");

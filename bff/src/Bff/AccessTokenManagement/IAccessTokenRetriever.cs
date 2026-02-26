@@ -15,5 +15,5 @@ public interface IAccessTokenRetriever
     /// <returns>A task that contains the access token result, which is an
     /// object model that can represent various types of tokens (bearer, dpop),
     /// the absence of an optional token, or an error. </returns>
-    public Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CT ct = default);
+    public Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, Ct ct = default);
 }

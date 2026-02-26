@@ -24,7 +24,7 @@ internal class DefaultDiagnosticsEndpoint(IWebHostEnvironment environment, IOpti
     };
 
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         if (options.Value.DiagnosticsEnvironments?.Contains(environment.EnvironmentName) is null or false)
         {

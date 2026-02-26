@@ -31,15 +31,15 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     public DynamicClientRegistrationResponseGenerator(ILogger<DynamicClientRegistrationResponseGenerator> logger) => Logger = logger;
 
     /// <inheritdoc/>
-    public virtual async Task WriteResponse<T>(HttpContext context, int statusCode, T response)
+    public virtual async Task WriteResponse<T>(HttpContext context, int statusCode, T response, Ct ct)
         where T : IDynamicClientRegistrationResponse
     {
         context.Response.StatusCode = statusCode;
-        await context.Response.WriteAsJsonAsync(response, SerializerOptions);
+        await context.Response.WriteAsJsonAsync(response, SerializerOptions, ct);
     }
 
     /// <inheritdoc/>
-    public virtual Task WriteContentTypeError(HttpContext context)
+    public virtual Task WriteContentTypeError(HttpContext context, Ct ct)
     {
         Logger.LogDebug("Invalid content type in dynamic client registration request");
         context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
@@ -47,19 +47,20 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     }
 
     /// <inheritdoc/>
-    public virtual async Task WriteBadRequestError(HttpContext context) =>
+    public virtual async Task WriteBadRequestError(HttpContext context, Ct ct) =>
         await WriteResponse(context, StatusCodes.Status400BadRequest,
             new DynamicClientRegistrationError(
                 DynamicClientRegistrationErrors.InvalidClientMetadata,
-                "malformed metadata document")
+                "malformed metadata document"),
+            ct
         );
 
     /// <inheritdoc/>
-    public virtual async Task WriteError(HttpContext context, DynamicClientRegistrationError error) =>
-        await WriteResponse(context, StatusCodes.Status400BadRequest, error);
+    public virtual async Task WriteError(HttpContext context, DynamicClientRegistrationError error, Ct ct) =>
+        await WriteResponse(context, StatusCodes.Status400BadRequest, error, ct);
 
 
     /// <inheritdoc/>
-    public virtual async Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response) =>
-        await WriteResponse(context, StatusCodes.Status201Created, response);
+    public virtual async Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response, Ct ct) =>
+        await WriteResponse(context, StatusCodes.Status201Created, response, ct);
 }

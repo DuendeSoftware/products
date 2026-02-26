@@ -23,7 +23,8 @@ public class X509ThumbprintSecretValidator : ISecretValidator
     public X509ThumbprintSecretValidator(ILogger<X509ThumbprintSecretValidator> logger) => _logger = logger;
 
     /// <inheritdoc/>
-    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+    /// <inheritdoc/>
+    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var fail = Task.FromResult(new SecretValidationResult { Success = false });
 

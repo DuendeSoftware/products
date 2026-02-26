@@ -17,15 +17,15 @@ public interface IOperationalStoreNotification
     /// Notification for persisted grants being removed.
     /// </summary>
     /// <param name="persistedGrants"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CT ct = default);
+    Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, Ct ct);
 
     /// <summary>
     /// Notification for device codes being removed.
     /// </summary>
-    /// <param name="deviceCodes"></param>
-    /// <param name="ct"></param>
+    /// <param name="deviceCodes">The device codes being removed.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CT ct = default);
+    Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, Ct ct);
 }

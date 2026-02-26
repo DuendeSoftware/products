@@ -17,6 +17,7 @@ public class DefaultClaimsServiceTests
 {
     private DefaultClaimsService _subject;
     private MockProfileService _mockMockProfileService = new MockProfileService();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private ClaimsPrincipal _user;
     private Client _client;
@@ -58,7 +59,7 @@ public class DefaultClaimsServiceTests
     [Fact]
     public async Task GetIdentityTokenClaimsAsync_should_return_standard_user_claims()
     {
-        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, false, _validatedRequest);
+        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, false, _validatedRequest, _ct);
 
         var types = claims.Select(x => x.Type);
         types.ShouldContain(JwtClaimTypes.Subject);
@@ -73,7 +74,7 @@ public class DefaultClaimsServiceTests
     {
         _resources.IdentityResources.Add(new IdentityResource("id_scope", new[] { "foo" }));
 
-        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, false, _validatedRequest);
+        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, false, _validatedRequest, _ct);
 
         _mockMockProfileService.GetProfileWasCalled.ShouldBeFalse();
     }
@@ -84,7 +85,7 @@ public class DefaultClaimsServiceTests
         _resources.IdentityResources.Add(new IdentityResource("id_scope", new[] { "foo" }));
         _mockMockProfileService.ProfileClaims.Add(new Claim("foo", "foo1"));
 
-        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, true, _validatedRequest);
+        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, true, _validatedRequest, _ct);
 
         _mockMockProfileService.GetProfileWasCalled.ShouldBeTrue();
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldContain("foo");
@@ -98,7 +99,7 @@ public class DefaultClaimsServiceTests
         _resources.IdentityResources.Add(new IdentityResource("id_scope", new[] { "foo" }));
         _mockMockProfileService.ProfileClaims.Add(new Claim("foo", "foo1"));
 
-        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, false, _validatedRequest);
+        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, false, _validatedRequest, _ct);
 
         _mockMockProfileService.GetProfileWasCalled.ShouldBeTrue();
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldContain("foo");
@@ -110,7 +111,7 @@ public class DefaultClaimsServiceTests
         _resources.IdentityResources.Add(new IdentityResource("id_scope", new[] { "foo" }));
         _mockMockProfileService.ProfileClaims.Add(new Claim("aud", "bar"));
 
-        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, true, _validatedRequest);
+        var claims = await _subject.GetIdentityTokenClaimsAsync(_user, ResourceValidationResult, true, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == "aud" && x.Value == "bar").ShouldBe(0);
     }
@@ -118,7 +119,7 @@ public class DefaultClaimsServiceTests
     [Fact]
     public async Task GetAccessTokenClaimsAsync_should_contain_client_id()
     {
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == JwtClaimTypes.ClientId && x.Value == _client.ClientId).ShouldBe(1);
     }
@@ -126,7 +127,7 @@ public class DefaultClaimsServiceTests
     [Fact]
     public async Task GetAccessTokenClaimsAsync_client_claims_should_be_prefixed_with_default_value()
     {
-        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == "client_some_claim" && x.Value == "some_claim_value").ShouldBe(1);
     }
@@ -135,7 +136,7 @@ public class DefaultClaimsServiceTests
     public async Task GetAccessTokenClaimsAsync_client_claims_should_be_prefixed_with_custom_value()
     {
         _validatedRequest.Client.ClientClaimsPrefix = "custom_prefix_";
-        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == "custom_prefix_some_claim" && x.Value == "some_claim_value").ShouldBe(1);
     }
@@ -144,7 +145,7 @@ public class DefaultClaimsServiceTests
     public async Task GetAccessTokenClaimsAsync_should_contain_client_claims_when_no_subject()
     {
         _validatedRequest.Client.ClientClaimsPrefix = null;
-        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == "some_claim" && x.Value == "some_claim_value").ShouldBe(1);
     }
@@ -155,7 +156,7 @@ public class DefaultClaimsServiceTests
         _validatedRequest.Client.ClientClaimsPrefix = null;
         _validatedRequest.Client.AlwaysSendClientClaims = true;
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == "some_claim" && x.Value == "some_claim_value").ShouldBe(1);
     }
@@ -168,7 +169,7 @@ public class DefaultClaimsServiceTests
         _resources.ApiScopes.Add(new ApiScope("api1"));
         _resources.ApiScopes.Add(new ApiScope("api2"));
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.Count().ShouldBe(4);
@@ -185,7 +186,7 @@ public class DefaultClaimsServiceTests
             ParsedScopes = { new ParsedScopeValue("api:123", "api", "123") }
         };
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, resourceResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, resourceResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.Count().ShouldBe(1);
@@ -197,7 +198,7 @@ public class DefaultClaimsServiceTests
     {
         _resources.ApiResources.Add(new ApiResource("api1"));
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.Count().ShouldBe(0);
@@ -215,7 +216,7 @@ public class DefaultClaimsServiceTests
             ParsedScopes = { new ParsedScopeValue("api2") }
         };
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, resourceResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, resourceResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.Count().ShouldBe(1);
@@ -235,7 +236,7 @@ public class DefaultClaimsServiceTests
         _resources.ApiResources.Add(new ApiResource { Name = "api3", Scopes = { "resource" } });
         _resources.ApiScopes.Add(new ApiScope("resource"));
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.Count().ShouldBe(1);
@@ -251,7 +252,7 @@ public class DefaultClaimsServiceTests
         _resources.ApiResources.Add(new ApiResource("api2"));
         _resources.OfflineAccess = true;
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.ShouldContain(IdentityServerConstants.StandardScopes.OfflineAccess);
@@ -266,7 +267,7 @@ public class DefaultClaimsServiceTests
         _resources.ApiResources.Add(new ApiResource("api2"));
         _resources.OfflineAccess = true;
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(null, ResourceValidationResult, _validatedRequest, _ct);
 
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.ShouldNotContain(IdentityServerConstants.StandardScopes.OfflineAccess);
@@ -275,7 +276,7 @@ public class DefaultClaimsServiceTests
     [Fact]
     public async Task GetAccessTokenClaimsAsync_should_return_standard_user_claims()
     {
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         var types = claims.Select(x => x.Type);
         types.ShouldContain(JwtClaimTypes.Subject);
@@ -291,7 +292,7 @@ public class DefaultClaimsServiceTests
         _resources.IdentityResources.Add(new IdentityResource("id1", new[] { "foo" }));
         _resources.ApiResources.Add(new ApiResource("api1", new string[] { "bar" }));
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         _mockMockProfileService.GetProfileWasCalled.ShouldBeTrue();
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldNotContain("foo");
@@ -304,7 +305,7 @@ public class DefaultClaimsServiceTests
         _resources.ApiResources.Add(new ApiResource("api1", new[] { "foo" }));
         _mockMockProfileService.ProfileClaims.Add(new Claim("aud", "bar"));
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         claims.Count(x => x.Type == "aud" && x.Value == "bar").ShouldBe(0);
     }
@@ -314,7 +315,7 @@ public class DefaultClaimsServiceTests
     {
         _resources.ApiResources.Add(new ApiResource("api1", new[] { "foo" }));
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldContain("foo");
     }
@@ -335,7 +336,7 @@ public class DefaultClaimsServiceTests
             }
         );
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldContain("foo");
     }
@@ -357,7 +358,7 @@ public class DefaultClaimsServiceTests
             }
         );
 
-        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest);
+        var claims = await _subject.GetAccessTokenClaimsAsync(_user, ResourceValidationResult, _validatedRequest, _ct);
 
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldContain("foo");
         _mockMockProfileService.ProfileContext.RequestedClaimTypes.ShouldContain("bar");

@@ -32,7 +32,7 @@ internal class ServerSideTokenStore(
         ?? throw new ArgumentException("AuthenticationStateProvider must implement IHostEnvironmentAuthenticationStateProvider");
 
     public async Task<TokenResult<TokenForParameters>> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null,
-        CT ct = default)
+        Ct ct = default)
     {
         logger.RetrievingTokenForUser(LogLevel.Debug, user.Identity?.Name);
         var session = await GetSession(user);
@@ -83,7 +83,7 @@ internal class ServerSideTokenStore(
     }
 
     public async Task StoreTokenAsync(ClaimsPrincipal user, UserToken token,
-        UserTokenRequestParameters? parameters = null, CT ct = default)
+        UserTokenRequestParameters? parameters = null, Ct ct = default)
     {
         logger.StoringTokenForUser(LogLevel.Debug, user.Identity?.Name);
         await UpdateTicket(user,
@@ -91,7 +91,7 @@ internal class ServerSideTokenStore(
     }
 
 
-    public async Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null, CT ct = default)
+    public async Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null, Ct ct = default)
     {
         logger.RemovingTokenForUser(LogLevel.Debug, user.Identity?.Name);
         await UpdateTicket(user, ticket =>

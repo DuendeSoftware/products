@@ -15,5 +15,6 @@ public interface ICustomAuthorizeRequestValidator
     /// Custom validation logic for the authorize request.
     /// </summary>
     /// <param name="context">The context.</param>
-    Task ValidateAsync(CustomAuthorizeRequestValidationContext context);
+    /// <param name="ct">The cancellation token.</param>
+    Task ValidateAsync(CustomAuthorizeRequestValidationContext context, Ct ct);
 }

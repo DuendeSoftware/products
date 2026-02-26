@@ -20,12 +20,13 @@ public class TokenRequestValidation_RefreshToken_Invalid
     private const string Category = "TokenRequest Validation - RefreshToken - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Non_existing_RefreshToken()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -33,7 +34,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, "nonexistent");
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -43,7 +44,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
     [Trait("Category", Category)]
     public async Task RefreshTokenTooLong()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var options = new IdentityServerOptions();
 
         var validator = Factory.CreateTokenRequestValidator();
@@ -53,7 +54,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, longRefreshToken);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -70,9 +71,9 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             refreshTokenStore: grants);
@@ -81,7 +82,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -97,9 +98,9 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             refreshTokenStore: grants);
@@ -108,7 +109,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -126,9 +127,9 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             refreshTokenStore: grants);
@@ -137,7 +138,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -158,9 +159,9 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             refreshTokenStore: grants,
@@ -170,7 +171,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -190,9 +191,9 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(refreshTokenStore: grants);
 
@@ -202,7 +203,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
 
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1" + new string('x', 512);
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidTarget);
@@ -210,7 +211,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         {
             parameters[OidcConstants.TokenRequest.Resource] = "api";
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -218,7 +219,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1";
             parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api2");
 
-            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+            var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
         }
@@ -230,7 +231,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
     {
         var mockResourceValidator = new MockResourceValidator();
         var grants = Factory.CreateRefreshTokenStore();
-        var client = (await _clients.FindEnabledClientByIdAsync("roclient")).ToValidationResult();
+        var client = (await _clients.FindEnabledClientByIdAsync("roclient", _ct)).ToValidationResult();
 
         var validator = Factory.CreateTokenRequestValidator(refreshTokenStore: grants, resourceValidator: mockResourceValidator);
 
@@ -243,7 +244,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
                 CreationTime = DateTime.UtcNow,
                 AuthorizedScopes = new[] { "scope1" }
             };
-            var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+            var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
             var parameters = new NameValueCollection();
             parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
@@ -254,7 +255,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             {
                 InvalidScopes = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client);
+            var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_scope");
@@ -269,7 +270,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
                 CreationTime = DateTime.UtcNow,
                 AuthorizedScopes = new[] { "scope1" }
             };
-            var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+            var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
             var parameters = new NameValueCollection();
             parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
@@ -280,7 +281,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             {
                 InvalidResourceIndicators = { "foo" }
             };
-            var result = await validator.ValidateRequestAsync(parameters, client);
+            var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
             result.IsError.ShouldBeTrue();
             result.Error.ShouldBe("invalid_target");
@@ -292,7 +293,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
     public async Task resource_indicator_requested_not_in_original_request_should_fail()
     {
         var grants = Factory.CreateRefreshTokenStore();
-        var client = (await _clients.FindEnabledClientByIdAsync("roclient")).ToValidationResult();
+        var client = (await _clients.FindEnabledClientByIdAsync("roclient", _ct)).ToValidationResult();
 
         var validator = Factory.CreateTokenRequestValidator(refreshTokenStore: grants);
 
@@ -305,14 +306,14 @@ public class TokenRequestValidation_RefreshToken_Invalid
             AuthorizedScopes = new[] { "scope1" },
             AuthorizedResourceIndicators = new[] { "urn:api1", "urn:api2" }
         };
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
         parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
         parameters.Add("resource", "urn:api3");
 
-        var result = await validator.ValidateRequestAsync(parameters, client);
+        var result = await validator.ValidateRequestAsync(parameters, client, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");

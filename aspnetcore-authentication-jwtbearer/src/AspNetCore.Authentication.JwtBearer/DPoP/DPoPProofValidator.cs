@@ -70,7 +70,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the DPoP proof.
     /// </summary>
-    public async Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CT ct = default)
+    public async Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, Ct ct = default)
     {
         using var activity = Tracing.ActivitySource.StartActivity("DPoPProofValidator.Validate");
 
@@ -368,7 +368,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     internal async Task ValidateReplay(
         DPoPProofValidationContext context,
         DPoPProofValidationResult result,
-        CT ct = default)
+        Ct ct = default)
     {
         var dPoPOptions = OptionsMonitor.Get(context.Scheme);
 

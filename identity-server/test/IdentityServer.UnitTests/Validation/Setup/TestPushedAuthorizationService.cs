@@ -15,19 +15,19 @@ internal class TestPushedAuthorizationService : IPushedAuthorizationService
     private Dictionary<string, DeserializedPushedAuthorizationRequest> pushedRequests = new();
 
 
-    public Task ConsumeAsync(string referenceValue)
+    public Task ConsumeAsync(string referenceValue, Ct _)
     {
         pushedRequests.Remove(referenceValue);
         return Task.CompletedTask;
     }
 
-    public Task<DeserializedPushedAuthorizationRequest> GetPushedAuthorizationRequestAsync(string referenceValue)
+    public Task<DeserializedPushedAuthorizationRequest> GetPushedAuthorizationRequestAsync(string referenceValue, Ct _)
     {
         pushedRequests.TryGetValue(referenceValue, out var par);
         return Task.FromResult(par);
     }
 
-    public Task StoreAsync(DeserializedPushedAuthorizationRequest request)
+    public Task StoreAsync(DeserializedPushedAuthorizationRequest request, Ct _)
     {
         pushedRequests[request.ReferenceValue] = request;
         return Task.CompletedTask;

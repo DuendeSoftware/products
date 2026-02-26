@@ -38,8 +38,10 @@ public class MutualTlsSecretParser : ISecretParser
     /// Parses the HTTP context
     /// </summary>
     /// <param name="context"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<ParsedSecret> ParseAsync(HttpContext context)
+    /// <inheritdoc/>
+    public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
         _logger.LogDebug("Start parsing for client id in post body");
 
@@ -49,7 +51,7 @@ public class MutualTlsSecretParser : ISecretParser
             return null;
         }
 
-        var body = await context.Request.ReadFormAsync();
+        var body = await context.Request.ReadFormAsync(ct);
 
         if (body != null)
         {
@@ -64,7 +66,7 @@ public class MutualTlsSecretParser : ISecretParser
                     return null;
                 }
 
-                var clientCertificate = await context.Connection.GetClientCertificateAsync();
+                var clientCertificate = await context.Connection.GetClientCertificateAsync(ct);
 
                 if (clientCertificate is null)
                 {

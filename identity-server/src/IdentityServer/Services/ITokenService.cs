@@ -17,20 +17,23 @@ public interface ITokenService
     /// Creates an identity token.
     /// </summary>
     /// <param name="request">The token creation request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>An identity token</returns>
-    Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request);
+    Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request, Ct ct);
 
     /// <summary>
     /// Creates an access token.
     /// </summary>
     /// <param name="request">The token creation request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>An access token</returns>
-    Task<Token> CreateAccessTokenAsync(TokenCreationRequest request);
+    Task<Token> CreateAccessTokenAsync(TokenCreationRequest request, Ct ct);
 
     /// <summary>
     /// Creates a serialized and protected security token.
     /// </summary>
     /// <param name="token">The token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A security token in serialized form</returns>
-    Task<string> CreateSecurityTokenAsync(Token token);
+    Task<string> CreateSecurityTokenAsync(Token token, Ct ct);
 }

@@ -39,12 +39,8 @@ public class ClientSecretValidator : IClientSecretValidator
         _logger = logger;
     }
 
-    /// <summary>
-    /// Validates the current request.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns></returns>
-    public async Task<ClientSecretValidationResult> ValidateAsync(HttpContext context)
+    /// <inheritdoc/>
+    public async Task<ClientSecretValidationResult> ValidateAsync(HttpContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ClientSecretValidator.Validate");
 
@@ -56,10 +52,10 @@ public class ClientSecretValidator : IClientSecretValidator
             Error = IdentityModel.OidcConstants.TokenErrors.InvalidClient
         };
 
-        var parsedSecret = await _parser.ParseAsync(context);
+        var parsedSecret = await _parser.ParseAsync(context, ct);
         if (parsedSecret == null)
         {
-            await RaiseFailureEventAsync("unknown", "No client id found");
+            await RaiseFailureEventAsync("unknown", "No client id found", ct);
 
             _logger.LogError("No client identifier found");
 
@@ -68,10 +64,10 @@ public class ClientSecretValidator : IClientSecretValidator
         }
 
         // load client
-        var client = await _clients.FindEnabledClientByIdAsync(parsedSecret.Id);
+        var client = await _clients.FindEnabledClientByIdAsync(parsedSecret.Id, ct);
         if (client == null)
         {
-            await RaiseFailureEventAsync(parsedSecret.Id, "Unknown client");
+            await RaiseFailureEventAsync(parsedSecret.Id, "Unknown client", ct);
 
             _logger.LogError("No client with id '{clientId}' found. aborting", parsedSecret.Id);
             return fail;
@@ -84,10 +80,10 @@ public class ClientSecretValidator : IClientSecretValidator
         }
         else
         {
-            secretValidationResult = await _validator.ValidateAsync(client.ClientSecrets, parsedSecret);
+            secretValidationResult = await _validator.ValidateAsync(client.ClientSecrets, parsedSecret, ct);
             if (secretValidationResult.Success == false)
             {
-                await RaiseFailureEventAsync(client.ClientId, "Invalid client secret");
+                await RaiseFailureEventAsync(client.ClientId, "Invalid client secret", ct);
                 _logger.LogError("Client secret validation failed for client: {clientId}.", client.ClientId);
 
                 return fail;
@@ -104,19 +100,19 @@ public class ClientSecretValidator : IClientSecretValidator
             Confirmation = secretValidationResult?.Confirmation
         };
 
-        await RaiseSuccessEventAsync(client.ClientId, parsedSecret.Type);
+        await RaiseSuccessEventAsync(client.ClientId, parsedSecret.Type, ct);
         return success;
     }
 
-    private Task RaiseSuccessEventAsync(string clientId, string authMethod)
+    private Task RaiseSuccessEventAsync(string clientId, string authMethod, Ct ct)
     {
         Telemetry.Metrics.ClientSecretValidation(clientId, authMethod);
-        return _events.RaiseAsync(new ClientAuthenticationSuccessEvent(clientId, authMethod));
+        return _events.RaiseAsync(new ClientAuthenticationSuccessEvent(clientId, authMethod), ct);
     }
 
-    private Task RaiseFailureEventAsync(string clientId, string message)
+    private Task RaiseFailureEventAsync(string clientId, string message, Ct ct)
     {
         Telemetry.Metrics.ClientSecretValidationFailure(clientId, message);
-        return _events.RaiseAsync(new ClientAuthenticationFailureEvent(clientId, message));
+        return _events.RaiseAsync(new ClientAuthenticationFailureEvent(clientId, message), ct);
     }
 }

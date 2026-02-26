@@ -81,14 +81,14 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     };
 
     /// <inheritdoc/>
-    public virtual async Task ProcessLogoutAsync(UserSession session)
+    public virtual async Task ProcessLogoutAsync(UserSession session, Ct ct)
     {
         if (session.ClientIds.Count > 0)
         {
             var clientsToCoordinate = new List<string>();
             foreach (var clientId in session.ClientIds)
             {
-                var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+                var client = await ClientStore.FindClientByIdAsync(clientId, ct); // i don't think we care if it's an enabled client at this point
                 if (client != null)
                 {
                     var shouldCoordinate =
@@ -112,7 +112,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                     SessionId = session.SessionId,
                     ClientIds = clientsToCoordinate,
                     Types = PersistedGrantTokenTypes
-                });
+                }, ct);
             }
 
             Logger.LogDebug("Due to user logout, invoking backchannel logout for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
@@ -126,19 +126,19 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 ClientIds = session.ClientIds,
                 Issuer = session.Issuer,
                 LogoutReason = LogoutNotificationReason.UserLogout
-            });
+            }, ct);
         }
     }
 
 
     /// <inheritdoc/>
-    public virtual async Task ProcessExpirationAsync(UserSession session)
+    public virtual async Task ProcessExpirationAsync(UserSession session, Ct ct)
     {
         var clientsToCoordinate = new List<string>();
 
         foreach (var clientId in session.ClientIds)
         {
-            var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+            var client = await ClientStore.FindClientByIdAsync(clientId, ct); // i don't think we care if it's an enabled client at this point
 
             if (client != null)
             {
@@ -164,7 +164,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 SessionId = session.SessionId,
                 Types = PersistedGrantTokenTypes,
                 ClientIds = clientsToCoordinate
-            });
+            }, ct);
         }
 
         if (Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout || clientsToCoordinate.Count > 0)
@@ -187,14 +187,14 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                     Issuer = session.Issuer,
                     ClientIds = clientsToContact,
                     LogoutReason = LogoutNotificationReason.SessionExpiration,
-                });
+                }, ct);
             }
         }
     }
 
 
     /// <inheritdoc/>
-    public virtual async Task<bool> ValidateSessionAsync(SessionValidationRequest request)
+    public virtual async Task<bool> ValidateSessionAsync(SessionValidationRequest request, Ct ct)
     {
         if (ServerSideSessionStore != null)
         {
@@ -208,7 +208,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 {
                     SubjectId = request.SubjectId,
                     SessionId = request.SessionId
-                });
+                }, ct);
 
                 var valid = sessions.Count > 0 &&
                     sessions.Any(x => x.Expires == null || DateTime.UtcNow < x.Expires.Value);
@@ -238,6 +238,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                         //result in the cookie never being renewed and expiring in a surprising way. Renewing
                         //the ticket also updates the session, so we don't need to do both.
                         if (Options.Authentication.CookieSlidingExpiration &&
+#pragma warning disable CA2016 // ITicketStore interface has no Ct parameter
                             await ServerSideTicketStore.RetrieveAsync(session.Key) is
                             { Properties: { IsPersistent: true, AllowRefresh: null or true } } ticket)
                         {
@@ -245,10 +246,11 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                             ticket.Properties.IssuedUtc = session.Renewed;
                             ticket.Properties.ExpiresUtc = session.Expires;
                             await ServerSideTicketStore.RenewAsync(session.Key, ticket);
+#pragma warning restore CA2016
                         }
                         else
                         {
-                            await ServerSideSessionStore.UpdateSessionAsync(session);
+                            await ServerSideSessionStore.UpdateSessionAsync(session, ct);
                         }
                     }
                 }

@@ -47,12 +47,13 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
     /// Validates the device code.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task ValidateAsync(DeviceCodeValidationContext context)
+    public async Task ValidateAsync(DeviceCodeValidationContext context, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceCodeValidator.Validate");
 
-        var deviceCode = await _devices.FindByDeviceCodeAsync(context.DeviceCode);
+        var deviceCode = await _devices.FindByDeviceCodeAsync(context.DeviceCode, ct);
 
         if (deviceCode == null)
         {
@@ -69,7 +70,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
             return;
         }
 
-        if (await _throttlingService.ShouldSlowDown(context.DeviceCode, deviceCode))
+        if (await _throttlingService.ShouldSlowDown(context.DeviceCode, deviceCode, ct))
         {
             _logger.LogError("Client {ClientId} is polling too fast", deviceCode.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);
@@ -102,7 +103,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
 
         // make sure user is enabled
         var isActiveCtx = new IsActiveContext(deviceCode.Subject, context.Request.Client, IdentityServerConstants.ProfileIsActiveCallers.DeviceCodeValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, ct);
 
         if (isActiveCtx.IsActive == false)
         {
@@ -115,6 +116,6 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         context.Request.SessionId = deviceCode.SessionId;
 
         context.Result = new TokenRequestValidationResult(context.Request);
-        await _devices.RemoveByDeviceCodeAsync(context.DeviceCode);
+        await _devices.RemoveByDeviceCodeAsync(context.DeviceCode, ct);
     }
 }

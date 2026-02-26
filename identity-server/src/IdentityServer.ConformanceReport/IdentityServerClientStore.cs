@@ -14,10 +14,10 @@ internal sealed class IdentityServerClientStore(IClientStore clientStore) : ICon
 #pragma warning restore CA1812
 {
     public async Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(
-        CancellationToken ct = default)
+        CancellationToken ct)
     {
         var clients = new List<ConformanceReportClient>();
-        await foreach (var client in clientStore.GetAllClientsAsync().WithCancellation(ct))
+        await foreach (var client in clientStore.GetAllClientsAsync(ct))
         {
             clients.Add(client.ToConformanceReportClient());
         }

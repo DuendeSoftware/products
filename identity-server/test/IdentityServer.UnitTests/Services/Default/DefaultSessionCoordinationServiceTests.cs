@@ -13,6 +13,7 @@ namespace UnitTests.Services.Default;
 public class DefaultSessionCoordinationServiceTests
 {
     public DefaultSessionCoordinationService Service;
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task Handles_missing_client_null_reference()
@@ -30,7 +31,7 @@ public class DefaultSessionCoordinationServiceTests
             ClientIds = ["not_found"],
             SessionId = "1",
             SubjectId = "1"
-        });
+        }, _ct);
 
         stubBackChannelLogoutClient
             .SendLogoutsWasCalled

@@ -10,7 +10,7 @@ public class MockSessionRevocationService : ISessionRevocationService
 {
     public bool DeleteUserSessionsWasCalled { get; set; }
     public UserSessionsFilter? DeleteUserSessionsFilter { get; set; }
-    public Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct)
+    public Task RevokeSessionsAsync(UserSessionsFilter filter, Ct ct)
     {
         DeleteUserSessionsWasCalled = true;
         DeleteUserSessionsFilter = filter;

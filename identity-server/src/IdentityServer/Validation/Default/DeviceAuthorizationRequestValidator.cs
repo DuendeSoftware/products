@@ -28,7 +28,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         _logger = logger;
     }
 
-    public async Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult)
+    public async Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationRequestValidator.Validate");
 
@@ -46,7 +46,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
             return clientResult;
         }
 
-        var scopeResult = await ValidateScopeAsync(request);
+        var scopeResult = await ValidateScopeAsync(request, ct);
         if (scopeResult.IsError)
         {
             return scopeResult;
@@ -101,7 +101,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         return Valid(request);
     }
 
-    private async Task<DeviceAuthorizationRequestValidationResult> ValidateScopeAsync(ValidatedDeviceAuthorizationRequest request)
+    private async Task<DeviceAuthorizationRequestValidationResult> ValidateScopeAsync(ValidatedDeviceAuthorizationRequest request, Ct ct)
     {
         //////////////////////////////////////////////////////////
         // scope must be present
@@ -148,7 +148,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         {
             Client = request.Client,
             Scopes = request.RequestedScopes
-        });
+        }, ct);
 
         if (!validatedResources.Succeeded)
         {

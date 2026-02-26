@@ -18,6 +18,7 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.TokenCl
 
 public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGrantDbContext, OperationalStoreOptions>
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     public TokenCleanupTests(DatabaseProviderFixture<PersistedGrantDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -57,7 +58,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -84,7 +85,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -128,7 +129,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -159,7 +160,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -187,7 +188,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -216,7 +217,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options, removeConsumedTokens: true).CleanupGrantsAsync();
+        await CreateSut(options, removeConsumedTokens: true).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -244,7 +245,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options, removeConsumedTokens: false).CleanupGrantsAsync();
+        await CreateSut(options, removeConsumedTokens: false).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -287,7 +288,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await CreateSut(options, svcs =>
         {
             svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
-        }).CleanupGrantsAsync();
+        }).CleanupGrantsAsync(_ct);
 
         // The right number of batches executed
         mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount);
@@ -356,7 +357,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await CreateSut(options, svcs =>
         {
             svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
-        }).CleanupGrantsAsync();
+        }).CleanupGrantsAsync(_ct);
 
         // Each batch created an extra grant, so we do an extra batch to clean up
         // the extras
@@ -417,7 +418,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             await context.SaveChangesAsync();
         }
 
-        await CreateSut(options, removeConsumedTokens: true, delay).CleanupGrantsAsync();
+        await CreateSut(options, removeConsumedTokens: true, delay).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {

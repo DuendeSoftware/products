@@ -21,12 +21,8 @@ public class NotSupportedResourceOwnerPasswordValidator : IResourceOwnerPassword
     /// <param name="logger">The logger.</param>
     public NotSupportedResourceOwnerPasswordValidator(ILogger<NotSupportedResourceOwnerPasswordValidator> logger) => _logger = logger;
 
-    /// <summary>
-    /// Validates the resource owner password credential
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns></returns>
-    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
+    /// <inheritdoc/>
+    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct _)
     {
         context.Result = new GrantValidationResult(TokenRequestErrors.UnsupportedGrantType);
 

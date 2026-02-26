@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,11 +23,6 @@ public class ClientStore : IClientStore
     protected readonly IConfigurationDbContext Context;
 
     /// <summary>
-    /// The CancellationToken provider.
-    /// </summary>
-    protected readonly ICancellationTokenProvider CancellationTokenProvider;
-
-    /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<ClientStore> Logger;
@@ -37,23 +32,22 @@ public class ClientStore : IClientStore
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    /// <param name="cancellationTokenProvider"></param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public ClientStore(IConfigurationDbContext context, ILogger<ClientStore> logger, ICancellationTokenProvider cancellationTokenProvider)
+    public ClientStore(IConfigurationDbContext context, ILogger<ClientStore> logger)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
-        CancellationTokenProvider = cancellationTokenProvider;
     }
 
     /// <summary>
     /// Finds a client by id
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The client
     /// </returns>
-    public virtual async Task<Duende.IdentityServer.Models.Client> FindClientByIdAsync(string clientId)
+    public virtual async Task<Duende.IdentityServer.Models.Client> FindClientByIdAsync(string clientId, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
@@ -72,7 +66,7 @@ public class ClientStore : IClientStore
           .AsNoTracking()
           .AsSplitQuery();
 
-        var client = (await query.ToArrayAsync(CancellationTokenProvider.CancellationToken)).
+        var client = (await query.ToArrayAsync(ct)).
             SingleOrDefault(x => x.ClientId == clientId);
         if (client == null)
         {
@@ -87,7 +81,7 @@ public class ClientStore : IClientStore
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync()
+    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync([EnumeratorCancellation] Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.GetAllClients");
 
@@ -105,7 +99,7 @@ public class ClientStore : IClientStore
             .AsSplitQuery();
 
         var clientCount = 0;
-        await foreach (var client in query.AsAsyncEnumerable().WithCancellation(CancellationTokenProvider.CancellationToken))
+        await foreach (var client in query.AsAsyncEnumerable().WithCancellation(ct))
         {
             clientCount++;
             yield return client.ToModel();

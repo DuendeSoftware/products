@@ -44,8 +44,9 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// <summary>
     /// Returns all the keys in storage.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync()
+    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct ct)
     {
         var list = new List<SerializedKey>();
 
@@ -62,7 +63,7 @@ public class FileSystemKeyStore : ISigningKeyStore
             {
                 using (var reader = new StreamReader(file.OpenRead()))
                 {
-                    var json = await reader.ReadToEndAsync();
+                    var json = await reader.ReadToEndAsync(ct);
                     var item = KeySerializer.Deserialize<SerializedKey>(json);
                     list.Add(item);
                 }
@@ -80,8 +81,9 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// Persists new key in storage.
     /// </summary>
     /// <param name="key"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task StoreKeyAsync(SerializedKey key)
+    public async Task StoreKeyAsync(SerializedKey key, Ct ct)
     {
         if (!_directory.Exists)
         {
@@ -91,15 +93,16 @@ public class FileSystemKeyStore : ISigningKeyStore
         var json = KeySerializer.Serialize(key);
 
         var path = Path.Combine(_directory.FullName, KeyFilePrefix + key.Id + KeyFileExtension);
-        await File.WriteAllTextAsync(path, json, Encoding.UTF8);
+        await File.WriteAllTextAsync(path, json, Encoding.UTF8, ct);
     }
 
     /// <summary>
     /// Deletes key from storage.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public Task DeleteKeyAsync(string id)
+    public Task DeleteKeyAsync(string id, Ct ct)
     {
         var path = Path.Combine(_directory.FullName, KeyFilePrefix + id + KeyFileExtension);
         try

@@ -70,7 +70,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         _logger.LogDebug("Start backchannel authentication request.");
 
         // validate client
-        var clientResult = await _clientValidator.ValidateAsync(context);
+        var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var error = clientResult.Error ?? OidcConstants.BackchannelAuthenticationRequestErrors.InvalidClient;
@@ -80,22 +80,22 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         }
 
         // validate request
-        var form = (await context.Request.ReadFormAsync()).AsNameValueCollection();
+        var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
         _logger.LogTrace("Calling into backchannel authentication request validator: {type}", _requestValidator.GetType().FullName);
-        var requestResult = await _requestValidator.ValidateRequestAsync(form, clientResult);
+        var requestResult = await _requestValidator.ValidateRequestAsync(form, clientResult, context.RequestAborted);
 
         if (requestResult.IsError)
         {
-            await _events.RaiseAsync(new BackchannelAuthenticationFailureEvent(requestResult));
+            await _events.RaiseAsync(new BackchannelAuthenticationFailureEvent(requestResult), context.RequestAborted);
             Telemetry.Metrics.BackChannelAuthenticationFailure(clientResult.Client?.ClientId, requestResult.Error);
             return Error(requestResult.Error, requestResult.ErrorDescription);
         }
 
         // create response
         _logger.LogTrace("Calling into backchannel authentication request response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult);
+        var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
-        await _events.RaiseAsync(new BackchannelAuthenticationSuccessEvent(requestResult));
+        await _events.RaiseAsync(new BackchannelAuthenticationSuccessEvent(requestResult), context.RequestAborted);
         Telemetry.Metrics.BackChannelAuthentication(clientResult.Client.ClientId);
         LogResponse(response, requestResult);
 

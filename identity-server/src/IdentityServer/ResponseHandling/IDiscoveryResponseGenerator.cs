@@ -16,10 +16,12 @@ public interface IDiscoveryResponseGenerator
     /// </summary>
     /// <param name="baseUrl">The base URL.</param>
     /// <param name="issuerUri">The issuer URI.</param>
-    Task<Dictionary<string, object>> CreateDiscoveryDocumentAsync(string baseUrl, string issuerUri);
+    /// <param name="ct">The cancellation token.</param>
+    Task<Dictionary<string, object>> CreateDiscoveryDocumentAsync(string baseUrl, string issuerUri, Ct ct);
 
     /// <summary>
     /// Creates the JWK document.
     /// </summary>
-    Task<IEnumerable<JsonWebKey>> CreateJwkDocumentAsync();
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<JsonWebKey>> CreateJwkDocumentAsync(Ct ct);
 }

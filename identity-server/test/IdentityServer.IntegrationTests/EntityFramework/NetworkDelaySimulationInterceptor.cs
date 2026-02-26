@@ -12,7 +12,7 @@ public class NetworkDelaySimulationInterceptor(TimeSpan delay) : DbCommandInterc
         DbCommand command,
         CommandEventData eventData,
         InterceptionResult<DbDataReader> result,
-        CT ct = default)
+        Ct ct = default)
     {
         await Task.Delay(delay, ct);
         return result;

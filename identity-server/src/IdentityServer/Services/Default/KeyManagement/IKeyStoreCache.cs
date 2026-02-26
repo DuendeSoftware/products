@@ -12,14 +12,16 @@ public interface ISigningKeyStoreCache
     /// <summary>
     /// Returns cached keys.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetKeysAsync();
+    Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct ct);
 
     /// <summary>
     /// Caches keys for duration.
     /// </summary>
     /// <param name="keys"></param>
     /// <param name="duration"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration);
+    Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct ct);
 }

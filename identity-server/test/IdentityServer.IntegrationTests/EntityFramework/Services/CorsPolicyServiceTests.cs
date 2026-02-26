@@ -7,7 +7,6 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Services;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -15,6 +14,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Services;
 
 public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+
     public CorsPolicyServiceTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -49,8 +50,8 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         bool result;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
-            result = await service.IsOriginAllowedAsync(testCorsOrigin);
+            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>());
+            result = await service.IsOriginAllowedAsync(testCorsOrigin, _ct);
         }
 
         result.ShouldBeTrue();
@@ -73,8 +74,8 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         bool result;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
-            result = await service.IsOriginAllowedAsync("InvalidOrigin");
+            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>());
+            result = await service.IsOriginAllowedAsync("InvalidOrigin", _ct);
         }
 
         result.ShouldBeFalse();

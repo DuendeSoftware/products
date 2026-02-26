@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Validation;
 
 public class DefaultIssuerPathValidator(IIssuerNameService issuerNameService, ILogger<DefaultIssuerPathValidator> logger) : IIssuerPathValidator
 {
-    public async Task<bool> ValidateAsync(string path)
+    public async Task<bool> ValidateAsync(string path, Ct ct)
     {
         //if there is no path, this is fine since the default issuer is probably being used
         if (path.IsMissing())
@@ -18,7 +18,7 @@ public class DefaultIssuerPathValidator(IIssuerNameService issuerNameService, IL
         }
 
         //if there is a path, then we should be matching against an explicitly configured issuer
-        var currentIssuer = await issuerNameService.GetCurrentAsync();
+        var currentIssuer = await issuerNameService.GetCurrentAsync(ct);
         if (!Uri.TryCreate(currentIssuer, UriKind.Absolute, out var uri))
         {
             logger.LogDebug("Current issuer is not a valid absolute URI: {Issuer}", currentIssuer.SanitizeLogParameter());

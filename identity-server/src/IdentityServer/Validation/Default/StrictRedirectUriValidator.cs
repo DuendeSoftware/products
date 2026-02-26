@@ -50,24 +50,11 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// </returns>
     public virtual Task<bool> IsRedirectUriValidAsync(string requestedUri, Client client) => Task.FromResult(StringCollectionContainsString(client.RedirectUris, requestedUri));
 
-    /// <summary>
-    /// Determines whether a post logout URI is valid for a client.
-    /// </summary>
-    /// <param name="requestedUri">The requested URI.</param>
-    /// <param name="client">The client.</param>
-    /// <returns>
-    ///   <c>true</c> is the URI is valid; <c>false</c> otherwise.
-    /// </returns>
-    public virtual Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client) => Task.FromResult(StringCollectionContainsString(client.PostLogoutRedirectUris, requestedUri));
+    /// <inheritdoc/>
+    public virtual Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, Ct _) => Task.FromResult(StringCollectionContainsString(client.PostLogoutRedirectUris, requestedUri));
 
-    /// <summary>
-    /// Determines whether a redirect uri is valid for a context.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns>
-    ///   <c>true</c> is the URI is valid; <c>false</c> otherwise.
-    /// </returns>
-    public virtual Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context)
+    /// <inheritdoc/>
+    public virtual Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context, Ct _)
     {
         // Check if special case handling for PAR is enabled and that the client
         // is a confidential client. If so, any pushed redirect uri is allowed

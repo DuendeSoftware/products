@@ -16,6 +16,7 @@ public interface IBackchannelAuthenticationRequestValidator
     /// </summary>
     /// <param name="parameters">The parameters.</param>
     /// <param name="clientValidationResult">The client validation result.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult);
+    Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, Ct ct);
 }

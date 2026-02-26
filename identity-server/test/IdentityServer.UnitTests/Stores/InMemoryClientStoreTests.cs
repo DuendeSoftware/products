@@ -9,6 +9,7 @@ namespace UnitTests.Stores;
 
 public class InMemoryClientStoreTests
 {
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     [Fact]
     public void InMemoryClient_should_throw_if_contain_duplicate_client_ids()
     {
@@ -49,7 +50,7 @@ public class InMemoryClientStoreTests
         var store = new InMemoryClientStore(clients);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }
@@ -69,7 +70,7 @@ public class InMemoryClientStoreTests
         var store = new InMemoryClientStore(clients);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }

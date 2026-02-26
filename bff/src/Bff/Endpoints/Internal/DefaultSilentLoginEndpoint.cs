@@ -23,7 +23,7 @@ internal class DefaultSilentLoginEndpoint(IOptions<BffOptions> options, ILogger<
     private readonly BffOptions _options = options.Value;
 
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
+    public async Task ProcessRequestAsync(HttpContext context, Ct ct = default)
     {
         logger.ProcessingSilentLoginRequest(LogLevel.Debug);
 

@@ -23,14 +23,15 @@ public class ReturnUrlParser
     /// Parses the return URL.
     /// </summary>
     /// <param name="returnUrl">The return URL.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<AuthorizationRequest> ParseAsync(string returnUrl)
+    public virtual async Task<AuthorizationRequest> ParseAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ReturnUrlParser.Parse");
 
         foreach (var parser in _parsers)
         {
-            var result = await parser.ParseAsync(returnUrl);
+            var result = await parser.ParseAsync(returnUrl, ct);
             if (result != null)
             {
                 return result;

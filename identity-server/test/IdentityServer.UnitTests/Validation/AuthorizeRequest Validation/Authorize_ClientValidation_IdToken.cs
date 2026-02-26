@@ -13,6 +13,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 public class Authorize_ClientValidation_IdToken
 {
     private IdentityServerOptions _options = TestIdentityServerOptions.Create();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", "AuthorizeRequest Client Validation - IdToken")]
@@ -26,7 +27,7 @@ public class Authorize_ClientValidation_IdToken
         parameters.Add(OidcConstants.AuthorizeRequest.Nonce, "abc");
 
         var validator = Factory.CreateAuthorizeRequestValidator();
-        var result = await validator.ValidateAsync(parameters);
+        var result = await validator.ValidateAsync(parameters, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);

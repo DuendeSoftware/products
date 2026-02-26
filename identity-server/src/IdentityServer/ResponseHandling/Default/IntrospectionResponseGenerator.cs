@@ -45,8 +45,9 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult)
+    public virtual async Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("IntrospectionResponseGenerator.Process");
 
@@ -65,7 +66,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         {
             Logger.LogDebug("Creating introspection response for inactive token.");
             Telemetry.Metrics.Introspection(callerName, false);
-            await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult));
+            await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult), ct);
 
             return response;
         }
@@ -76,7 +77,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         if (validationResult.Api != null)
         {
             // expected scope not present
-            if (await AreExpectedScopesPresentAsync(validationResult) == false)
+            if (await AreExpectedScopesPresentAsync(validationResult, ct) == false)
             {
                 return response;
             }
@@ -98,7 +99,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         response.Add("scope", scopes.ToSpaceSeparatedString());
 
         Telemetry.Metrics.Introspection(callerName, true);
-        await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult));
+        await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult), ct);
         return response;
     }
 
@@ -106,8 +107,9 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// Checks if the API resource is allowed to introspect the scopes.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<bool> AreExpectedScopesPresentAsync(IntrospectionRequestValidationResult validationResult)
+    protected virtual async Task<bool> AreExpectedScopesPresentAsync(IntrospectionRequestValidationResult validationResult, Ct ct)
     {
         var apiScopes = validationResult.Api.Scopes;
         var tokenScopes = validationResult.Claims.Where(c => c.Type == JwtClaimTypes.Scope);
@@ -129,7 +131,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
             const string errorMessage = "Expected scopes are missing";
             var callerName = validationResult.Api?.Name ?? validationResult.Client.ClientId;
             Telemetry.Metrics.IntrospectionFailure(callerName, errorMessage);
-            await Events.RaiseAsync(new TokenIntrospectionFailureEvent(validationResult.Api.Name, errorMessage, validationResult.Token, apiScopes, tokenScopes.Select(s => s.Value)));
+            await Events.RaiseAsync(new TokenIntrospectionFailureEvent(validationResult.Api.Name, errorMessage, validationResult.Token, apiScopes, tokenScopes.Select(s => s.Value)), ct);
         }
 
         return result;

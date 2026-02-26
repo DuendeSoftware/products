@@ -11,7 +11,7 @@ public class BffWithoutExplicitFrontendTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/secret", (HttpContext c, CT ct) =>
+            app.MapGet("/secret", (HttpContext c, Ct ct) =>
             {
                 if (!c.User.IsAuthenticated())
                 {

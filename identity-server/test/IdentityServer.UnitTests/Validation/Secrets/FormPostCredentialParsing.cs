@@ -15,6 +15,7 @@ namespace UnitTests.Validation.Secrets;
 public class FormPostCredentialExtraction
 {
     private const string Category = "Secrets - Form Post Secret Parsing";
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private IdentityServerOptions _options;
     private PostBodySecretParser _parser;
@@ -32,7 +33,7 @@ public class FormPostCredentialExtraction
         var context = new DefaultHttpContext();
         context.Request.Body = new MemoryStream();
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -48,7 +49,7 @@ public class FormPostCredentialExtraction
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
         secret.Id.ShouldBe("client");
@@ -67,7 +68,7 @@ public class FormPostCredentialExtraction
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -84,7 +85,7 @@ public class FormPostCredentialExtraction
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -100,7 +101,7 @@ public class FormPostCredentialExtraction
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }
@@ -116,7 +117,7 @@ public class FormPostCredentialExtraction
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldNotBeNull();
         secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.NoSecret);
@@ -133,7 +134,7 @@ public class FormPostCredentialExtraction
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
-        var secret = await _parser.ParseAsync(context);
+        var secret = await _parser.ParseAsync(context, _ct);
 
         secret.ShouldBeNull();
     }

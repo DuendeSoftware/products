@@ -21,7 +21,7 @@ public class MockUserSession : IUserSession
     public AuthenticationProperties Properties { get; set; }
 
 
-    public Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties)
+    public Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties, Ct _)
     {
         CreateSessionIdWasCalled = true;
         User = principal;
@@ -29,25 +29,25 @@ public class MockUserSession : IUserSession
         return Task.FromResult(SessionId);
     }
 
-    public Task<ClaimsPrincipal> GetUserAsync() => Task.FromResult(User);
+    public Task<ClaimsPrincipal> GetUserAsync(Ct _) => Task.FromResult(User);
 
-    Task<string> IUserSession.GetSessionIdAsync() => Task.FromResult(SessionId);
+    Task<string> IUserSession.GetSessionIdAsync(Ct _) => Task.FromResult(SessionId);
 
-    public Task EnsureSessionIdCookieAsync()
+    public Task EnsureSessionIdCookieAsync(Ct _)
     {
         EnsureSessionIdCookieWasCalled = true;
         return Task.CompletedTask;
     }
 
-    public Task RemoveSessionIdCookieAsync()
+    public Task RemoveSessionIdCookieAsync(Ct _)
     {
         RemoveSessionIdCookieWasCalled = true;
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<string>> GetClientListAsync() => Task.FromResult<IEnumerable<string>>(Clients);
+    public Task<IEnumerable<string>> GetClientListAsync(Ct _) => Task.FromResult<IEnumerable<string>>(Clients);
 
-    public Task AddClientIdAsync(string clientId)
+    public Task AddClientIdAsync(string clientId, Ct _)
     {
         Clients.Add(clientId);
         return Task.CompletedTask;

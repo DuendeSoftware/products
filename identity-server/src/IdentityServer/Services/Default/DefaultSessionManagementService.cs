@@ -33,7 +33,7 @@ public class DefaultSessionManagementService : ISessionManagementService
     }
 
     /// <inheritdoc/>
-    public Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
+    public Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSessionManagementService.QuerySessions");
 
@@ -48,7 +48,7 @@ public class DefaultSessionManagementService : ISessionManagementService
     };
 
     /// <inheritdoc/>
-    public async Task RemoveSessionsAsync(RemoveSessionsContext context, CT ct = default)
+    public async Task RemoveSessionsAsync(RemoveSessionsContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSessionManagementService.RemoveSessions");
 
@@ -78,7 +78,7 @@ public class DefaultSessionManagementService : ISessionManagementService
                 }
             }
 
-            await _persistedGrantStore.RemoveAllAsync(grantFilter);
+            await _persistedGrantStore.RemoveAllAsync(grantFilter, ct);
         }
 
         // send back channel SLO
@@ -102,7 +102,7 @@ public class DefaultSessionManagementService : ISessionManagementService
                     Issuer = session.Issuer,
                     ClientIds = session.ClientIds.Where(x => context.ClientIds == null || context.ClientIds.Contains(x)),
                     LogoutReason = LogoutNotificationReason.Terminated
-                });
+                }, ct);
             }
         }
 

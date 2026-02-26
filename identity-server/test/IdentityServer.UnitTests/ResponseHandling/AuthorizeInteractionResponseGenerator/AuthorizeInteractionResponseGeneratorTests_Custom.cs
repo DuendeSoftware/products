@@ -27,24 +27,24 @@ public class CustomAuthorizeInteractionResponseGenerator : Duende.IdentityServer
     }
 
     public InteractionResponse ProcessLoginResponse { get; set; }
-    protected internal override Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request)
+    protected internal override Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
         if (ProcessLoginResponse != null)
         {
             return Task.FromResult(ProcessLoginResponse);
         }
 
-        return base.ProcessLoginAsync(request);
+        return base.ProcessLoginAsync(request, ct);
     }
 
     public InteractionResponse ProcessConsentResponse { get; set; }
-    protected internal override Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
+    protected internal override Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, Ct ct)
     {
         if (ProcessConsentResponse != null)
         {
             return Task.FromResult(ProcessConsentResponse);
         }
-        return base.ProcessConsentAsync(request, consent);
+        return base.ProcessConsentAsync(request, consent, ct);
     }
 }
 
@@ -54,6 +54,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
     private CustomAuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public AuthorizeInteractionResponseGeneratorTests_Custom() => _subject = new CustomAuthorizeInteractionResponseGenerator(
             _options,
@@ -83,7 +84,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
             RedirectUrl = "/custom"
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsRedirect.ShouldBeTrue();
         result.RedirectUrl.ShouldBe("/custom");
@@ -110,7 +111,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
             IsLogin = true
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("login_required");
@@ -137,7 +138,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
             RedirectUrl = "/custom"
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("interaction_required");
@@ -165,7 +166,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
             IsConsent = true
         };
 
-        var result = await _subject.ProcessInteractionAsync(request);
+        var result = await _subject.ProcessInteractionAsync(request, null, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("consent_required");

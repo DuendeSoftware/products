@@ -47,7 +47,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         _licenseUsage = licenseUsage;
     }
 
-    public async Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult)
+    public async Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestValidator.ValidateRequest");
 
@@ -94,7 +94,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         //////////////////////////////////////////////////////////
         // validate request object
         //////////////////////////////////////////////////////////
-        var roValidationResult = await TryValidateRequestObjectAsync();
+        var roValidationResult = await TryValidateRequestObjectAsync(ct);
         if (!roValidationResult.Success)
         {
             return roValidationResult.ErrorResult;
@@ -165,7 +165,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.RequestedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -338,7 +338,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest, "Invalid id_token_hint");
             }
 
-            var idTokenHintValidationResult = await _tokenValidator.ValidateIdentityTokenAsync(idTokenHint, _validatedRequest.ClientId, false);
+            var idTokenHintValidationResult = await _tokenValidator.ValidateIdentityTokenAsync(idTokenHint, _validatedRequest.ClientId, false, ct);
             if (idTokenHintValidationResult.IsError)
             {
                 LogError("id token hint failed to validate: " + idTokenHintValidationResult.Error, idTokenHintValidationResult.ErrorDescription);
@@ -391,7 +391,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             IdTokenHintClaims = _validatedRequest.IdTokenHintClaims,
             UserCode = _validatedRequest.UserCode,
             BindingMessage = _validatedRequest.BindingMessage
-        });
+        }, ct);
 
         if (userResult.IsError)
         {
@@ -440,7 +440,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         var result = new BackchannelAuthenticationRequestValidationResult(_validatedRequest);
 
         var customValidationContext = new CustomBackchannelAuthenticationRequestValidationContext(result);
-        await _customValidator.ValidateAsync(customValidationContext);
+        await _customValidator.ValidateAsync(customValidationContext, ct);
         if (customValidationContext.ValidationResult.IsError)
         {
             LogError("Custom validation of backchannel authorize request failed");
@@ -451,7 +451,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         return result;
     }
 
-    private async Task<(bool Success, BackchannelAuthenticationRequestValidationResult ErrorResult)> TryValidateRequestObjectAsync()
+    private async Task<(bool Success, BackchannelAuthenticationRequestValidationResult ErrorResult)> TryValidateRequestObjectAsync(Ct ct)
     {
         //////////////////////////////////////////////////////////
         // validate request object
@@ -465,7 +465,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 JwtTokenString = _validatedRequest.RequestObject,
                 StrictJarValidation = false,
                 IncludeJti = true
-            });
+            }, ct);
             if (jwtRequestValidationResult.IsError)
             {
                 LogError("request JWT validation failure", jwtRequestValidationResult.Error);

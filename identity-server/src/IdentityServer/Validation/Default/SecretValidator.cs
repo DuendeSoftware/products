@@ -35,8 +35,10 @@ public class SecretValidator : ISecretsListValidator
     /// </summary>
     /// <param name="parsedSecret">The parsed secret.</param>
     /// <param name="secrets">The secrets.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+    /// <inheritdoc/>
+    public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, Ct ct)
     {
         var secretsArray = secrets as Secret[] ?? secrets.ToArray();
 
@@ -50,7 +52,7 @@ public class SecretValidator : ISecretsListValidator
         // see if a registered validator can validate the secret
         foreach (var validator in _validators)
         {
-            var secretValidationResult = await validator.ValidateAsync(currentSecrets, parsedSecret);
+            var secretValidationResult = await validator.ValidateAsync(currentSecrets, parsedSecret, ct);
 
             if (secretValidationResult.Success)
             {

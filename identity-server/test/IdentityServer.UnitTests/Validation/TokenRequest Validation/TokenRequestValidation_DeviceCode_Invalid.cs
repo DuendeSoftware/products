@@ -17,6 +17,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
 {
     private const string Category = "TokenRequest Validation - DeviceCode - Invalid";
 
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly IClientStore _clients = Factory.CreateClientStore();
 
     private readonly DeviceCode deviceCode = new DeviceCode
@@ -34,7 +35,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
     [Trait("Category", Category)]
     public async Task Missing_DeviceCode()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -43,7 +44,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.DeviceCode}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
     }
@@ -52,7 +53,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
     [Trait("Category", Category)]
     public async Task DeviceCode_Too_Long()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
 
         var longCode = "x".Repeat(new IdentityServerOptions().InputLengthRestrictions.AuthorizationCode + 1);
 
@@ -64,7 +65,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {"device_code", longCode}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
@@ -73,7 +74,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_Grant_For_Client()
     {
-        var client = await _clients.FindClientByIdAsync("codeclient");
+        var client = await _clients.FindClientByIdAsync("codeclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -83,7 +84,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {"device_code", Guid.NewGuid().ToString()}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
@@ -92,7 +93,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
     [Trait("Category", Category)]
     public async Task DeviceCodeValidator_Failure()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(deviceCodeValidator: new TestDeviceCodeValidator(true));
 
@@ -102,7 +103,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             {"device_code", Guid.NewGuid().ToString()}
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldNotBeNull();
     }
@@ -111,7 +112,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_resource_indicator()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(deviceCodeValidator: new TestDeviceCodeValidator(true));
 
@@ -122,7 +123,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             { OidcConstants.TokenRequest.Resource, "api" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
     }
@@ -131,7 +132,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
     [Trait("Category", Category)]
     public async Task resource_indicator_should_not_be_allowed()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(deviceCodeValidator: new TestDeviceCodeValidator(true));
 
@@ -142,7 +143,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
             { OidcConstants.TokenRequest.Resource, "urn:api1" }
         };
 
-        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
+        var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult(), _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_target");
     }

@@ -68,7 +68,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
     /// <inheritdoc />
     public async Task WriteHttpResponse(AuthorizeResult result, HttpContext context)
     {
-        await ConsumePushedAuthorizationRequest(result);
+        await ConsumePushedAuthorizationRequest(result, context.RequestAborted);
 
         if (result.Response.IsError)
         {
@@ -80,12 +80,12 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         }
     }
 
-    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result)
+    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result, Ct ct)
     {
         var referenceValue = result.Response?.Request?.PushedAuthorizationReferenceValue;
         if (referenceValue.IsPresent())
         {
-            await _pushedAuthorizationService.ConsumeAsync(referenceValue);
+            await _pushedAuthorizationService.ConsumeAsync(referenceValue, ct);
         }
     }
 
@@ -119,7 +119,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         {
             // success response -- track client authorization for sign-out
             //_logger.LogDebug("Adding client {0} to client list cookie for subject {1}", request.ClientId, request.Subject.GetSubjectId());
-            await _userSession.AddClientIdAsync(response.Request.ClientId);
+            await _userSession.AddClientIdAsync(response.Request.ClientId, context.RequestAborted);
         }
 
         await RenderAuthorizeResponseAsync(response, context);
@@ -221,13 +221,13 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         var uiLocalesService = context.RequestServices.GetService<IUiLocalesService>();
         if (uiLocalesService != null)
         {
-            await uiLocalesService.StoreUiLocalesForRedirectAsync(response.Request?.UiLocales);
+            await uiLocalesService.StoreUiLocalesForRedirectAsync(response.Request?.UiLocales, context.RequestAborted);
         }
 
         var errorModel = await CreateErrorMessage(response, context);
 
         var message = new Message<ErrorMessage>(errorModel, _timeProvider.GetUtcNow().UtcDateTime);
-        var id = await _errorMessageStore.WriteAsync(message);
+        var id = await _errorMessageStore.WriteAsync(message, context.RequestAborted);
 
         var errorUrl = _options.UserInteraction.ErrorUrl;
 

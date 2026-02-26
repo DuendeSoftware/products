@@ -59,15 +59,8 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
         Logger = logger;
     }
 
-    /// <summary>
-    /// Processes the response.
-    /// </summary>
-    /// <param name="validationResult">The validation result.</param>
-    /// <param name="baseUrl">The base URL.</param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException">validationResult or Client</exception>
-    /// <exception cref="ArgumentException">Value cannot be null or whitespace. - baseUrl</exception>
-    public virtual async Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl)
+    /// <inheritdoc/>
+    public virtual async Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationResponseGenerator.Process");
 
@@ -89,15 +82,15 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
         // generate user_code
         var userCodeGenerator = await UserCodeService.GetGenerator(
             validationResult.ValidatedRequest.Client.UserCodeType ??
-            Options.DeviceFlow.DefaultUserCodeType);
+            Options.DeviceFlow.DefaultUserCodeType, ct);
 
         var retryCount = 0;
 
         while (retryCount < userCodeGenerator.RetryLimit)
         {
-            var userCode = await userCodeGenerator.GenerateAsync();
+            var userCode = await userCodeGenerator.GenerateAsync(ct);
 
-            var deviceCode = await DeviceFlowCodeService.FindByUserCodeAsync(userCode);
+            var deviceCode = await DeviceFlowCodeService.FindByUserCodeAsync(userCode, ct);
             if (deviceCode == null)
             {
                 response.UserCode = userCode;
@@ -141,7 +134,7 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
             Lifetime = response.DeviceCodeLifetime,
             CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
             RequestedScopes = validationResult.ValidatedRequest.ValidatedResources.RawScopeValues
-        });
+        }, ct);
 
         return response;
     }

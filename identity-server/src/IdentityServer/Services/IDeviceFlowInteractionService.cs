@@ -17,14 +17,16 @@ public interface IDeviceFlowInteractionService
     /// Gets the authorization context asynchronously.
     /// </summary>
     /// <param name="userCode">The user code.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<DeviceFlowAuthorizationRequest?> GetAuthorizationContextAsync(string userCode);
+    Task<DeviceFlowAuthorizationRequest?> GetAuthorizationContextAsync(string userCode, Ct ct);
 
     /// <summary>
     /// Handles the request asynchronously.
     /// </summary>
     /// <param name="userCode">The user code.</param>
     /// <param name="consent">The consent.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent);
+    Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, Ct ct);
 }
