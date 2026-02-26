@@ -9,11 +9,6 @@ namespace Duende.IdentityServer.Validation;
 /// </summary>
 internal class DefaultCustomAuthorizeRequestValidator : ICustomAuthorizeRequestValidator
 {
-    /// <summary>
-    /// Custom validation logic for the authorize request.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="ct">The cancellation token.</param>
     /// <inheritdoc/>
     public Task ValidateAsync(CustomAuthorizeRequestValidationContext context, Ct _) => Task.CompletedTask;
 }

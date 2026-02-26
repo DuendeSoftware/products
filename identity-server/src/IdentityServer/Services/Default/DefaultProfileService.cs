@@ -25,12 +25,7 @@ public class DefaultProfileService : IProfileService
     /// <param name="logger">The logger.</param>
     public DefaultProfileService(ILogger<DefaultProfileService> logger) => Logger = logger;
 
-    /// <summary>
-    /// This method is called whenever claims about the user are requested (e.g. during token creation or via the userinfo endpoint)
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public virtual Task GetProfileDataAsync(ProfileDataRequestContext context, Ct _)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.GetProfileData");
@@ -42,13 +37,7 @@ public class DefaultProfileService : IProfileService
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// This method gets called whenever identity server needs to determine if the user is valid or active (e.g. if the user's account has been deactivated since they logged in).
-    /// (e.g. during token issuance or validation).
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public virtual Task IsActiveAsync(IsActiveContext context, Ct _)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.IsActive");

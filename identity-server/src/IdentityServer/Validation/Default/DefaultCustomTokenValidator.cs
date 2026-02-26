@@ -28,14 +28,6 @@ public class DefaultCustomTokenValidator : ICustomTokenValidator
     /// </summary>
     protected readonly IClientStore Clients;
 
-    /// <summary>
-    /// Custom validation logic for access tokens.
-    /// </summary>
-    /// <param name="result">The validation result so far.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>
-    /// The validation result
-    /// </returns>
     /// <inheritdoc/>
     public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result, Ct _) => Task.FromResult(result);
 

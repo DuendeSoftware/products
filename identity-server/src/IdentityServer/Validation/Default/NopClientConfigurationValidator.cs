@@ -10,12 +10,6 @@ namespace Duende.IdentityServer.Validation;
 /// <seealso cref="IClientConfigurationValidator" />
 public class NopClientConfigurationValidator : IClientConfigurationValidator
 {
-    /// <summary>
-    /// Determines whether the configuration of a client is valid.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     /// <inheritdoc/>
     public Task ValidateAsync(ClientConfigurationValidationContext context, Ct _)
     {

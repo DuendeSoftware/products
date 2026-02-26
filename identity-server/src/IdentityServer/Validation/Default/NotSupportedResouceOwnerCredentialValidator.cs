@@ -21,12 +21,6 @@ public class NotSupportedResourceOwnerPasswordValidator : IResourceOwnerPassword
     /// <param name="logger">The logger.</param>
     public NotSupportedResourceOwnerPasswordValidator(ILogger<NotSupportedResourceOwnerPasswordValidator> logger) => _logger = logger;
 
-    /// <summary>
-    /// Validates the resource owner password credential
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     /// <inheritdoc/>
     public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, Ct _)
     {

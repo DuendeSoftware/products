@@ -29,11 +29,7 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     /// </value>
     public int RetryLimit => 5;
 
-    /// <summary>
-    /// Generates the user code.
-    /// </summary>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public Task<string> GenerateAsync(Ct _)
     {
         var next = RandomNumberGenerator.GetInt32(100000000, 1000000000);

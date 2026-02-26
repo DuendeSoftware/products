@@ -9,14 +9,6 @@ namespace Duende.IdentityServer.Validation;
 /// </summary>
 internal class DefaultCustomTokenRequestValidator : ICustomTokenRequestValidator
 {
-    /// <summary>
-    /// Custom validation logic for a token request.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>
-    /// The validation result
-    /// </returns>
     /// <inheritdoc/>
     public Task ValidateAsync(CustomTokenRequestValidationContext context, Ct _) => Task.CompletedTask;
 }
