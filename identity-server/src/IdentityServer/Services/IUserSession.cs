@@ -68,21 +68,24 @@ public interface IUserSession
     /// Adds a SAML SP session to the user's session.
     /// </summary>
     /// <param name="session">The SAML session data.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <remarks>
     /// Session data is stored in AuthenticationProperties. For deployments with many SAML service providers,
     /// server-side sessions should be enabled to avoid cookie size limitations.
     /// See <see cref="SamlSpSessionData"/> for details.
     /// </remarks>
-    Task AddSamlSessionAsync(SamlSpSessionData session);
+    Task AddSamlSessionAsync(SamlSpSessionData session, Ct ct);
 
     /// <summary>
     /// Gets the list of SAML SP sessions for the user's session.
     /// </summary>
-    Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync();
+    /// <param name="ct">The cancellation token.</param>
+    Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync(Ct ct);
 
     /// <summary>
     /// Removes a SAML SP session by EntityId.
     /// </summary>
     /// <param name="entityId">The SP's entity ID.</param>
-    Task RemoveSamlSessionAsync(string entityId);
+    /// <param name="ct">The cancellation token.</param>
+    Task RemoveSamlSessionAsync(string entityId, Ct ct);
 }

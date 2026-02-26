@@ -150,7 +150,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
                 validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
 
-                var samlSessions = await UserSession.GetSamlSessionListAsync();
+                var samlSessions = await UserSession.GetSamlSessionListAsync(ct);
                 validatedRequest.SamlSessions = samlSessions;
             }
 
@@ -183,7 +183,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
             validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
 
-            var samlSessions = await UserSession.GetSamlSessionListAsync();
+            var samlSessions = await UserSession.GetSamlSessionListAsync(ct);
             validatedRequest.SamlSessions = samlSessions;
         }
 

@@ -82,7 +82,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         if (user != null)
         {
             var clientIds = await _userSession.GetClientListAsync(ct);
-            var samlSessions = await _userSession.GetSamlSessionListAsync();
+            var samlSessions = await _userSession.GetSamlSessionListAsync(ct);
             if (clientIds.Any() || samlSessions.Any())
             {
                 var sid = await _userSession.GetSessionIdAsync(ct);

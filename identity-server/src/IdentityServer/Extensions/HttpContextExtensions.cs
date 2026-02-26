@@ -66,7 +66,7 @@ public static class HttpContextExtensions
             if (currentSubId == logoutMessage.SubjectId)
             {
                 clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted));
-                var currentSamlSessions = await userSession.GetSamlSessionListAsync();
+                var currentSamlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
                 samlSessions = samlSessions.Union(currentSamlSessions).ToList();
             }
 
@@ -86,7 +86,7 @@ public static class HttpContextExtensions
         {
             // see if current user has any clients they need to signout of
             var clientIds = await userSession.GetClientListAsync(context.RequestAborted);
-            var samlSessions = await userSession.GetSamlSessionListAsync();
+            var samlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
             var samlEntityIds = samlSessions.Select(s => s.EntityId);
 
             if ((clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds)) ||
