@@ -14,6 +14,7 @@ using Duende.IdentityServer.Internal.Saml.SingleSignin;
 using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Duende.IdentityServer.IdentityServerConstants;
 
@@ -128,7 +129,38 @@ public static class IdentityServerBuilderExtensionsSaml
     public static IIdentityServerBuilder AddSamlServiceProviderStore<T>(this IIdentityServerBuilder builder)
         where T : class, ISamlServiceProviderStore
     {
-        builder.Services.AddTransient<ISamlServiceProviderStore, T>();
+        builder.Services.TryAddTransient<T>();
+        builder.Services.AddTransient<ISamlServiceProviderStore, ValidatingSamlServiceProviderStore<T>>();
+        return builder;
+    }
+
+    /// <summary>
+    /// Adds the SAML service provider store cache.
+    /// </summary>
+    /// <typeparam name="T">The type of the <see cref="ISamlServiceProviderStore"/> implementation.</typeparam>
+    /// <param name="builder">The builder.</param>
+    /// <returns></returns>
+    public static IIdentityServerBuilder AddSamlServiceProviderStoreCache<T>(this IIdentityServerBuilder builder)
+        where T : class, ISamlServiceProviderStore
+    {
+        builder.Services.TryAddTransient<T>();
+        builder.Services.AddTransient<ValidatingSamlServiceProviderStore<T>>();
+        builder.Services.AddTransient<ISamlServiceProviderStore,
+            CachingSamlServiceProviderStore<ValidatingSamlServiceProviderStore<T>>>();
+        return builder;
+    }
+
+    /// <summary>
+    /// Adds a SAML service provider configuration validator.
+    /// </summary>
+    /// <typeparam name="T">The type of the <see cref="ISamlServiceProviderConfigurationValidator"/> implementation.</typeparam>
+    /// <param name="builder">The builder.</param>
+    /// <returns></returns>
+    public static IIdentityServerBuilder AddSamlServiceProviderConfigurationValidator<T>(
+        this IIdentityServerBuilder builder)
+        where T : class, ISamlServiceProviderConfigurationValidator
+    {
+        builder.Services.AddTransient<ISamlServiceProviderConfigurationValidator, T>();
         return builder;
     }
 }

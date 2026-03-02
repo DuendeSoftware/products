@@ -160,6 +160,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IRedirectUriValidator), [typeof(StrictRedirectUriValidator)]),
                 new(typeof(IResourceOwnerPasswordValidator), [typeof(NotSupportedResourceOwnerPasswordValidator)]),
                 new(typeof(IResourceValidator), [typeof(DefaultResourceValidator)]),
+                new(typeof(ISamlServiceProviderConfigurationValidator), [typeof(DefaultSamlServiceProviderConfigurationValidator)]),
                 new(typeof(IScopeParser), [typeof(DefaultScopeParser)]),
                 new(typeof(ISecretParser), [typeof(BasicAuthenticationSecretParser), typeof(PostBodySecretParser)]),
                 new(typeof(ISecretsListParser), [typeof(SecretParser)]),

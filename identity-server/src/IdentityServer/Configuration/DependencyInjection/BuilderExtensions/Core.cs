@@ -374,6 +374,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<IUserInfoRequestValidator, UserInfoRequestValidator>();
         builder.Services.TryAddTransient<IClientConfigurationValidator, DefaultClientConfigurationValidator>();
         builder.Services.TryAddTransient<IIdentityProviderConfigurationValidator, DefaultIdentityProviderConfigurationValidator>();
+        builder.Services.TryAddTransient<ISamlServiceProviderConfigurationValidator, DefaultSamlServiceProviderConfigurationValidator>();
         builder.Services.TryAddTransient<IDeviceAuthorizationRequestValidator, DeviceAuthorizationRequestValidator>();
         builder.Services.TryAddTransient<IDeviceCodeValidator, DeviceCodeValidator>();
         builder.Services.TryAddTransient<IBackchannelAuthenticationRequestIdValidator, BackchannelAuthenticationRequestIdValidator>();

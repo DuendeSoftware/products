@@ -44,4 +44,9 @@ public class CachingOptions
     /// The timeout for concurrency locking in the default cache.
     /// </summary>
     public TimeSpan CacheLockTimeout { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// Gets or sets the SAML service provider store expiration.
+    /// </summary>
+    public TimeSpan SamlServiceProviderStoreExpiration { get; set; } = Default;
 }

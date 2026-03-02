@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Internal.Saml.SingleLogout;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
@@ -261,6 +262,14 @@ public class SamlLogoutCallbackProcessorTests
         {
             ServiceProviders.TryGetValue(entityId, out var sp);
             return Task.FromResult(sp);
+        }
+
+        public async IAsyncEnumerable<SamlServiceProvider> GetAllSamlServiceProvidersAsync([EnumeratorCancellation] Ct _)
+        {
+            foreach (var sp in ServiceProviders.Values)
+            {
+                yield return sp;
+            }
         }
     }
 

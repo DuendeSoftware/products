@@ -19,4 +19,9 @@ public interface ISamlServiceProviderStore
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The Service Provider, or null if not found.</returns>
     Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId, Ct ct);
+
+    /// <summary>
+    /// Returns all SAML service providers for enumeration purposes.
+    /// </summary>
+    IAsyncEnumerable<SamlServiceProvider> GetAllSamlServiceProvidersAsync(Ct ct);
 }

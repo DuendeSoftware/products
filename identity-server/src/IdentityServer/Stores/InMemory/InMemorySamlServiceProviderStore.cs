@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 
@@ -30,9 +32,9 @@ public class InMemorySamlServiceProviderStore : ISamlServiceProviderStore
     /// Finds a SAML Service Provider by its entity identifier.
     /// </summary>
     /// <param name="entityId">The entity identifier of the Service Provider.</param>
-    /// <param name="ct">The cancellation token.</param>
+    /// <param name="_">The cancellation token.</param>
     /// <returns>The Service Provider, or null if not found.</returns>
-    public Task<SamlServiceProvider> FindByEntityIdAsync(string entityId, Ct ct)
+    public Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId, Ct _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemorySamlServiceProviderStore.FindByEntityId");
         activity?.SetTag(Tracing.Properties.SamlEntityId, entityId);
@@ -43,5 +45,15 @@ public class InMemorySamlServiceProviderStore : ISamlServiceProviderStore
             select sp;
 
         return Task.FromResult(query.SingleOrDefault());
+    }
+
+    /// <inheritdoc/>
+    public async IAsyncEnumerable<SamlServiceProvider> GetAllSamlServiceProvidersAsync([EnumeratorCancellation] Ct _)
+    {
+        using var activity = Tracing.StoreActivitySource.StartActivity("InMemorySamlServiceProviderStore.GetAllSamlServiceProviders");
+        foreach (var sp in _serviceProviders)
+        {
+            yield return sp;
+        }
     }
 }
