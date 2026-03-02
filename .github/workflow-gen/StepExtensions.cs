@@ -195,7 +195,7 @@ public static class StepExtensions
 
     public static WorkflowDispatch InputVersionBranchAndTagOverride(this WorkflowDispatch workflow) =>
         workflow.Inputs(
-            new StringInput("version", "Version in format X.Y.Z, X.Y.Z-preview.N, or X.Y.Z-rc.N", true, "0.0.0"),
+            new StringInput("version", "Version in format X.Y.Z or X.Y.Z-{alpha,beta,preview,rc}.N", true, "0.0.0"),
             new StringInput("branch", "(Optional) the name of the branch to release from", false, "main"),
             new BooleanInput("remove-tag-if-exists", "If set, will remove the existing tag. Use this if you have issues with the previous release action", false, false));
 
