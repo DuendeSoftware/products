@@ -38,6 +38,7 @@ public static class StepExtensions
     public static void StepDotNetDevCerts(this Job job)
         => job.Step()
             .Name("Dotnet devcerts")
+            .Env(("SSL_CERT_DIR", "${{ env.HOME }}/.aspnet/dev-certs/trust"))
             .Run("dotnet dev-certs https --trust");
 
     public static void CachePlaywrightAssets(this Job job)

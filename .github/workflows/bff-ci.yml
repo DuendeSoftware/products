@@ -94,6 +94,8 @@ jobs:
       run: dotnet build bff.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
+      env:
+        SSL_CERT_DIR: ${{ env.HOME }}/.aspnet/dev-certs/trust
     - name: Test - test/Bff.Tests
       run: dotnet test test/Bff.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Tests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-Bff-Tests
@@ -153,6 +155,8 @@ jobs:
       run: pwsh test/Hosts.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
+      env:
+        SSL_CERT_DIR: ${{ env.HOME }}/.aspnet/dev-certs/trust
     - name: Test - test/Hosts.Tests
       run: dotnet test test/Hosts.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Hosts.Tests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-Hosts-Tests

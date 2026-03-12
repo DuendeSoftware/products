@@ -94,6 +94,8 @@ jobs:
       run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
+      env:
+        SSL_CERT_DIR: ${{ env.HOME }}/.aspnet/dev-certs/trust
     - name: Test - test/AspNetCore.Authentication.JwtBearer.Tests
       run: dotnet test test/AspNetCore.Authentication.JwtBearer.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/AspNetCore.Authentication.JwtBearer.Tests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-AspNetCore-Authentication-JwtBearer-Tests
