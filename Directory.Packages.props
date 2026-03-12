@@ -21,7 +21,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0'">
-    <FrameworkVersion>10.0.0</FrameworkVersion>
+    <FrameworkVersion>10.0.4</FrameworkVersion>
     <EFCoreVersion>10.0.0</EFCoreVersion>
     <IdentityEFCoreVersion>10.0.0</IdentityEFCoreVersion>
     <MvcRazorRuntimeCompilationVersion>10.0.0</MvcRazorRuntimeCompilationVersion>
