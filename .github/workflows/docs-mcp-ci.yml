@@ -93,9 +93,7 @@ jobs:
     - name: Build
       run: dotnet build docs-mcp.slnf --no-restore -c Release
     - name: Dotnet devcerts
-      run: dotnet dev-certs https --trust
-      env:
-        SSL_CERT_DIR: ${{ env.HOME }}/.aspnet/dev-certs/trust
+      run: SSL_CERT_DIR=$HOME/.aspnet/dev-certs/trust dotnet dev-certs https --trust
   playwright:
     name: Playwright tests
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
