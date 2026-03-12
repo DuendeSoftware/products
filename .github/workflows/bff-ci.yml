@@ -53,7 +53,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100
+          10.0.200
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Verify Formatting
@@ -87,13 +87,13 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100
+          10.0.200
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
       run: dotnet build bff.slnf --no-restore -c Release
     - name: Dotnet devcerts
-      run: dotnet dev-certs https --trust
+      run: SSL_CERT_DIR=$HOME/.aspnet/dev-certs/trust dotnet dev-certs https --trust
     - name: Test - test/Bff.Tests
       run: dotnet test test/Bff.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Tests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-Bff-Tests
@@ -136,7 +136,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100
+          10.0.200
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
@@ -152,7 +152,7 @@ jobs:
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: pwsh test/Hosts.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts
-      run: dotnet dev-certs https --trust
+      run: SSL_CERT_DIR=$HOME/.aspnet/dev-certs/trust dotnet dev-certs https --trust
     - name: Test - test/Hosts.Tests
       run: dotnet test test/Hosts.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Hosts.Tests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-Hosts-Tests
@@ -223,7 +223,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100
+          10.0.200
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack bff.slnf

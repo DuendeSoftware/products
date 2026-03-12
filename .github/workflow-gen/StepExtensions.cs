@@ -18,7 +18,7 @@ public static class StepExtensions
 
         job.Step()
             .Name("Setup .NET")
-            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["8.0.x", "9.0.203", "10.0.100"]);
+            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["8.0.x", "9.0.203", "10.0.200"]);
         // v4.1.0
     }
 
@@ -38,7 +38,7 @@ public static class StepExtensions
     public static void StepDotNetDevCerts(this Job job)
         => job.Step()
             .Name("Dotnet devcerts")
-            .Run("dotnet dev-certs https --trust");
+            .Run("SSL_CERT_DIR=$HOME/.aspnet/dev-certs/trust dotnet dev-certs https --trust");
 
     public static void CachePlaywrightAssets(this Job job)
         => job.Step("playwright-cache")
