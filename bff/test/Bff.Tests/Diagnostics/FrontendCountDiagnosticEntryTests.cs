@@ -21,10 +21,7 @@ public class FrontendCountDiagnosticEntryTests(ITestOutputHelper testOutputHelpe
 
         AdvanceClock(TimeSpan.FromHours(1));
 
-        await Task.Delay(100);
-
-        var bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"));
-        bffLogMessages.ShouldContain(x => x.Contains("\"FrontendCount\":0"));
+        await WaitForLogMessage("\"FrontendCount\":0");
 
         AddOrUpdateFrontend(new BffFrontend
         {
@@ -37,9 +34,6 @@ public class FrontendCountDiagnosticEntryTests(ITestOutputHelper testOutputHelpe
 
         AdvanceClock(TimeSpan.FromHours(1));
 
-        await Task.Delay(100);
-
-        bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"));
-        bffLogMessages.ShouldContain(x => x.Contains("\"FrontendCount\":2"));
+        await WaitForLogMessage("\"FrontendCount\":2");
     }
 }

@@ -252,5 +252,28 @@ public abstract class BffTestBase : IAsyncDisposable
         };
 
     protected void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
+
+    protected async Task WaitForLogMessage(string expected, int maxRetries = 20, int delayMs = 100)
+    {
+        for (var i = 0; i < maxRetries; i++)
+        {
+            var bffLogMessages = Context.LogMessages.ToString()
+                .Split(Environment.NewLine)
+                .Where(x => x.StartsWith("bff"));
+
+            if (bffLogMessages.Any(x => x.Contains(expected)))
+            {
+                return;
+            }
+
+            await Task.Delay(delayMs);
+        }
+
+        // Final assertion to produce a clear failure message
+        var finalMessages = Context.LogMessages.ToString()
+            .Split(Environment.NewLine)
+            .Where(x => x.StartsWith("bff"));
+        finalMessages.ShouldContain(x => x.Contains(expected));
+    }
 }
 
