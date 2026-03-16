@@ -80,7 +80,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutService.SendLogoutNotifications");
 
         var backChannelRequests = await LogoutNotificationService.GetBackChannelLogoutNotificationsAsync(context, ct);
-        if (backChannelRequests.Any())
+        if (backChannelRequests.Count > 0)
         {
             await SendLogoutNotificationsAsync(backChannelRequests, ct);
         }

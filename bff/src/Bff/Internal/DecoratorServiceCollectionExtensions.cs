@@ -16,7 +16,7 @@ internal static class DecoratorServiceCollectionExtensions
         where TImplementation : class, TService
     {
         services.AddDecorator<TService>();
-        services.AddSingleton<TService, TImplementation>();
+        _ = services.AddSingleton<TService, TImplementation>();
     }
 
     internal static void AddTransientDecorator<TService, TImplementation>(this IServiceCollection services)
@@ -24,7 +24,7 @@ internal static class DecoratorServiceCollectionExtensions
         where TImplementation : class, TService
     {
         services.AddDecorator<TService>();
-        services.AddTransient<TService, TImplementation>();
+        _ = services.AddTransient<TService, TImplementation>();
     }
 
     internal static void AddDecorator<TService>(this IServiceCollection services)
@@ -40,7 +40,7 @@ internal static class DecoratorServiceCollectionExtensions
             throw new InvalidOperationException("Decorator already registered for type: " + typeof(TService).Name + ".");
         }
 
-        services.Remove(registration);
+        _ = services.Remove(registration);
 
         if (registration.ImplementationInstance != null)
         {

@@ -10,6 +10,6 @@ namespace Duende.IdentityServer.Internal.Saml;
 
 internal class NopSamlLogoutNotificationService : ISamlLogoutNotificationService
 {
-    public Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct) =>
-        Task.FromResult(Enumerable.Empty<ISamlFrontChannelLogout>());
+    public Task<IReadOnlyCollection<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct) =>
+        Task.FromResult<IReadOnlyCollection<ISamlFrontChannelLogout>>(Array.Empty<ISamlFrontChannelLogout>());
 }

@@ -8,7 +8,7 @@ using Spectre.Console;
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add ServiceDefaults from Aspire
-builder.AddServiceDefaults();
+_ = builder.AddServiceDefaults();
 
 // Display banner
 AnsiConsole.Write(new Rule("[bold green]Resource Indicators Demo[/]").Centered());
@@ -87,9 +87,9 @@ var completed = testsToRun.Count(t => t.Enabled && t.Status == TestStatus.Comple
 var failed = testsToRun.Count(t => t.Enabled && t.Status == TestStatus.Failed);
 var total = testsToRun.Count(t => t.Enabled);
 
-summary.AddRow("[green]Completed[/]", completed.ToString());
-summary.AddRow("[red]Failed[/]", failed.ToString());
-summary.AddRow("[cyan]Total[/]", total.ToString());
+_ = summary.AddRow("[green]Completed[/]", completed.ToString());
+_ = summary.AddRow("[red]Failed[/]", failed.ToString());
+_ = summary.AddRow("[cyan]Total[/]", total.ToString());
 
 AnsiConsole.Write(summary);
 
@@ -121,7 +121,7 @@ if (testsWithExpectedErrors.Any())
         {
             var reason = "Resource not configured for this test";
 
-            expectedErrorsTable.AddRow(
+            _ = expectedErrorsTable.AddRow(
                 test.Id,
                 error.Resource.Replace("urn:", ""),
                 $"[yellow]{error.Error ?? "unknown"}[/]",
@@ -168,7 +168,7 @@ if (mode == OutputMode.Table)
                 ? $"{test.Result.RefreshResults.Count(r => r.Success)}/{test.Result.RefreshResults.Count} successful"
                 : "-";
 
-            detailsTable.AddRow(
+            _ = detailsTable.AddRow(
                 test.Id,
                 accessToken,
                 refreshToken,
@@ -185,7 +185,7 @@ if (Environment.UserInteractive && !Console.IsInputRedirected)
 {
     AnsiConsole.WriteLine();
     AnsiConsole.Markup("[dim]Press Enter to exit...[/]");
-    Console.ReadLine();
+    _ = Console.ReadLine();
 }
 else
 {

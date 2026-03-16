@@ -31,7 +31,7 @@ public class PersistedGrantFilter
     /// <summary>
     /// Client ids the grant was issued to.
     /// </summary>
-    public IEnumerable<string>? ClientIds { get; set; }
+    public IReadOnlyCollection<string>? ClientIds { get; set; }
 
     /// <summary>
     /// The type of grant.
@@ -41,5 +41,5 @@ public class PersistedGrantFilter
     /// <summary>
     /// The types of grants.
     /// </summary>
-    public IEnumerable<string>? Types { get; set; }
+    public IReadOnlyCollection<string>? Types { get; set; }
 }

@@ -37,7 +37,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
         OnConfigureServices += services =>
         {
-            services.AddSingleton<IForwarderHttpClientFactory>(
+            _ = services.AddSingleton<IForwarderHttpClientFactory>(
                 new CallbackForwarderHttpClientFactory(context => new HttpMessageInvoker(Internet, false)));
 
             var builder = services.AddBff(options =>
@@ -58,7 +58,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
         {
             if (MapGetForRoot)
             {
-                app.MapGet("/", () => DefaultRootResponse);
+                _ = app.MapGet("/", () => DefaultRootResponse);
             }
         };
     }
@@ -81,19 +81,19 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
     protected override void ConfigureApp(IApplicationBuilder app)
     {
-        app.UseRouting();
-        app.Use(async (c, n) =>
+        _ = app.UseRouting();
+        _ = app.Use(async (c, n) =>
         {
             await n();
         });
-        app.UseAuthentication();
-        app.Use(async (c, n) =>
+        _ = app.UseAuthentication();
+        _ = app.Use(async (c, n) =>
         {
             await n();
         });
-        app.UseAuthorization();
+        _ = app.UseAuthorization();
 
-        app.UseBff();
+        _ = app.UseBff();
         base.ConfigureApp(app);
     }
 

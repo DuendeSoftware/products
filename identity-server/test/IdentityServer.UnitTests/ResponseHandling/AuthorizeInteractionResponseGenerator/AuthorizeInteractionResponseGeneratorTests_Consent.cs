@@ -7,7 +7,6 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.ResponseHandling.AuthorizeInteractionResponseGenerator;

@@ -40,7 +40,7 @@ public abstract class BffTestBase : IAsyncDisposable
         Api = new ApiHost(Context, IdentityServer);
         Bff = new BffTestHost(Context, IdentityServer);
         Cdn = new CdnHost(Context);
-        IdentityServer.AddClient(DefaultOidcClient.ClientId, Bff.Url());
+        _ = IdentityServer.AddClient(DefaultOidcClient.ClientId, Bff.Url());
         Some = Context.Some;
     }
 
@@ -77,11 +77,11 @@ public abstract class BffTestBase : IAsyncDisposable
         }
         else if (setup == BffSetupType.V4Bff)
         {
-            IdentityServer.AddClient(The.ClientId, Bff.Url());
+            _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
             Bff.OnConfigureBff += bff =>
             {
-                bff.ConfigureOpenIdConnect(openIdConfiguration);
-                bff.ConfigureCookies(options =>
+                _ = bff.ConfigureOpenIdConnect(openIdConfiguration);
+                _ = bff.ConfigureCookies(options =>
                 {
                     configureCookie?.Invoke(options);
                 });
@@ -90,11 +90,11 @@ public abstract class BffTestBase : IAsyncDisposable
         else if (setup == BffSetupType.ManuallyConfiguredBff)
         {
             // Old style setup. Explicitly configuring the authentication including cookie, and openid connect
-            IdentityServer.AddClient(The.ClientId, Bff.Url());
+            _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
 
             Bff.OnConfigureServices += services =>
             {
-                services.AddAuthentication(options =>
+                _ = services.AddAuthentication(options =>
                     {
                         options.DefaultScheme = "cookie";
                         options.DefaultChallengeScheme = "oidc";
@@ -191,7 +191,7 @@ public abstract class BffTestBase : IAsyncDisposable
         {
             baseUris.Add(ToUri(frontend.MatchingCriteria.MatchingHostHeader));
         }
-        IdentityServer.AddClientFor(frontend, baseUris);
+        _ = IdentityServer.AddClientFor(frontend, baseUris);
     }
 
     public Uri ToUri(HostHeaderValue value) => new UriBuilder
@@ -251,4 +251,3 @@ public abstract class BffTestBase : IAsyncDisposable
 
     protected void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
 }
-

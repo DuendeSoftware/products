@@ -108,7 +108,7 @@ public class Index(
         if (grantedConsent != null)
         {
             // communicate outcome of consent back to identityserver
-            await interaction.HandleRequestAsync(Input.UserCode, grantedConsent);
+            _ = await interaction.HandleRequestAsync(Input.UserCode, grantedConsent);
 
             // indicate that's it ok to redirect back to authorization endpoint
             return RedirectToPage("/Device/Success");

@@ -16,21 +16,21 @@ internal static class HostingExtensions
         var authority = builder.Configuration["is-host"];
         var simpleApi = builder.Configuration["simple-api"];
 
-        builder.Services.AddSingleton<IDiscoveryCache>(r =>
+        _ = builder.Services.AddSingleton<IDiscoveryCache>(r =>
         {
             var factory = r.GetRequiredService<IHttpClientFactory>();
             return new DiscoveryCache(authority, () => factory.CreateClient());
         });
 
-        builder.Services.AddSingleton<AssertionService>();
-        builder.Services.AddSingleton<RequestUriService>();
-        builder.Services.AddTransient<OidcEvents>();
+        _ = builder.Services.AddSingleton<AssertionService>();
+        _ = builder.Services.AddSingleton<RequestUriService>();
+        _ = builder.Services.AddTransient<OidcEvents>();
 
         // add MVC
-        builder.Services.AddControllersWithViews();
+        _ = builder.Services.AddControllersWithViews();
 
         // add cookie-based session management with OpenID Connect authentication
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = "cookie";
             options.DefaultChallengeScheme = "oidc";
@@ -86,11 +86,11 @@ internal static class HostingExtensions
             });
 
         // add automatic token management
-        builder.Services.AddOpenIdConnectAccessTokenManagement();
-        builder.Services.AddTransient<IClientAssertionService, ClientAssertionService>();
+        _ = builder.Services.AddOpenIdConnectAccessTokenManagement();
+        _ = builder.Services.AddTransient<IClientAssertionService, ClientAssertionService>();
 
         // add HTTP client to call protected API
-        builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
+        _ = builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
         {
             client.BaseAddress = new Uri(simpleApi);
         }).AddServiceDiscovery();
@@ -100,16 +100,16 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseDeveloperExceptionPage();
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseHttpsRedirection();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapDefaultControllerRoute()
+        _ = app.MapDefaultControllerRoute()
             .RequireAuthorization();
 
         return app;

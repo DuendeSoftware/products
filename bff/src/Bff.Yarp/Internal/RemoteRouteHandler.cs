@@ -103,7 +103,7 @@ internal class RemoteRouteHandler : IDisposable
 
                 var destinationPrefix = remoteApi.TargetUri.ToString();
 
-                await _httpForwarder.SendAsync(context, destinationPrefix, _invoker, requestConfig,
+                _ = await _httpForwarder.SendAsync(context, destinationPrefix, _invoker, requestConfig,
                     httpTransformer, ct);
 
                 return true;

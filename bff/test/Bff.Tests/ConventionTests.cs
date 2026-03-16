@@ -55,7 +55,7 @@ public class ConventionTests
         foreach (var type in stringValueTypes)
         {
             type.IsValueType.ShouldBeTrue($"{type.Name} should be a value type (struct).");
-            type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute));
+            _ = type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute));
         }
     }
 
@@ -81,7 +81,7 @@ public class ConventionTests
         {
             // Find the public constructor that takes a single string parameter
             var ctor = type.GetConstructor([]);
-            ctor.ShouldNotBeNull($"{type.Name} should have a public parameterless constructor.");
+            _ = ctor.ShouldNotBeNull($"{type.Name} should have a public parameterless constructor.");
 
             // Try to invoke the constructor with a value and expect an exception
             var ex = Should.Throw<TargetInvocationException>(() => ctor.Invoke([]));
@@ -108,7 +108,7 @@ public class ConventionTests
                 c.IsPublic &&
                 c.GetParameters().Length == 0);
 
-            publicParameterlessCtor.ShouldNotBeNull($"{type.Name} should have a public parameterless constructor.");
+            _ = publicParameterlessCtor.ShouldNotBeNull($"{type.Name} should have a public parameterless constructor.");
 
             // Find the private constructor with a single string parameter
             var privateStringCtor = ctors.FirstOrDefault(c =>
@@ -116,7 +116,7 @@ public class ConventionTests
                 c.GetParameters().Length == 1 &&
                 c.GetParameters()[0].ParameterType == typeof(string));
 
-            privateStringCtor.ShouldNotBeNull(
+            _ = privateStringCtor.ShouldNotBeNull(
                 $"{type.Name} should have a private constructor with a single string parameter.");
         }
     }

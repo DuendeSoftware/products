@@ -16,23 +16,23 @@ internal static class HostingExtensions
     {
         // Write most logs to the console but diagnostic data to a file.
         // See https://docs.duendesoftware.com/identityserver/diagnostics/data
-        builder.Services.AddSerilog(lc =>
+        _ = builder.Services.AddSerilog(lc =>
         {
-            lc.WriteTo.Logger(consoleLogger =>
+            _ = lc.WriteTo.Logger(consoleLogger =>
             {
-                consoleLogger.WriteTo.Console(
+                _ = consoleLogger.WriteTo.Console(
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
                     formatProvider: CultureInfo.InvariantCulture);
                 if (builder.Environment.IsDevelopment())
                 {
-                    consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
+                    _ = consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
                 }
             });
             if (builder.Environment.IsDevelopment())
             {
-                lc.WriteTo.Logger(fileLogger =>
+                _ = lc.WriteTo.Logger(fileLogger =>
                 {
-                    fileLogger
+                    _ = fileLogger
                         .WriteTo.File("./diagnostics/diagnostic.log", rollingInterval: RollingInterval.Day,
                             fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
                             rollOnFileSizeLimit: true,
@@ -48,16 +48,16 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        _ = builder.Services.AddRazorPages();
 
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        _ = builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        _ = builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-        builder.Services
+        _ = builder.Services
             .AddIdentityServer(options =>
             {
                 options.Events.RaiseErrorEvents = true;
@@ -77,7 +77,7 @@ internal static class HostingExtensions
             .AddAspNetIdentity<ApplicationUser>()
             .AddLicenseSummary();
 
-        builder.Services.AddAuthentication()
+        _ = builder.Services.AddAuthentication()
             .AddOpenIdConnect("oidc", "Sign-in with demo.duendesoftware.com", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -101,19 +101,19 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
+        _ = app.UseSerilogRequestLogging();
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            _ = app.UseDeveloperExceptionPage();
         }
 
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseIdentityServer();
-        app.UseAuthorization();
+        _ = app.UseStaticFiles();
+        _ = app.UseRouting();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
 
-        app.MapRazorPages()
+        _ = app.MapRazorPages()
             .RequireAuthorization();
 
         return app;

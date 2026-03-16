@@ -178,7 +178,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP proof token: {error}", ex.Message);
+            Logger.LogDebug("Error parsing DPoP proof token: {Error}", ex.Message);
             result.SetError("Malformed DPoP proof token.");
             return;
         }
@@ -199,7 +199,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP jwk value: {error}", ex.Message);
+            Logger.LogDebug("Error parsing DPoP jwk value: {Error}", ex.Message);
             result.SetError("Invalid 'jwk' value.");
             return;
         }
@@ -234,13 +234,13 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP proof token: {error}", ex.Message);
+            Logger.LogDebug("Error parsing DPoP proof token: {Error}", ex.Message);
             result.SetError("Invalid DPoP proof token.");
         }
 
         if (tokenValidationResult?.Exception != null)
         {
-            Logger.LogDebug("Error validating DPoP proof token: {error}", tokenValidationResult.Exception.Message);
+            Logger.LogDebug("Error validating DPoP proof token: {Error}", tokenValidationResult.Exception.Message);
             result.SetError("Invalid DPoP proof token.");
         }
 
@@ -337,7 +337,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
     }
 
-    private bool HtuValueIsValid(string requestedUri, string? htuValue)
+    private static bool HtuValueIsValid(string requestedUri, string? htuValue)
     {
         if (string.IsNullOrEmpty(requestedUri) || string.IsNullOrEmpty(htuValue))
         {

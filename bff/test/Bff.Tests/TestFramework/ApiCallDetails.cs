@@ -47,7 +47,7 @@ internal record ApiCallDetails(HttpMethod Method, string Path, string? Sub, stri
 
     public T BodyAs<T>()
     {
-        Body.ShouldNotBeNull();
+        _ = Body.ShouldNotBeNull();
         return JsonSerializer.Deserialize<T>(Body, TestSerializerOptions.Default) ?? throw new NullReferenceException($"result {Body} could not be deserialized to {typeof(T).Name}");
     }
 }

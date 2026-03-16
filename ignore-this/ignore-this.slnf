@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "..\\products.slnx",
+    "projects": [
+      "ignore-this\\src\\IgnoreThis\\IgnoreThis.csproj",
+      "ignore-this\\test\\IgnoreThis.Tests\\IgnoreThis.Tests.csproj"
+    ]
+  }
+}

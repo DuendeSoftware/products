@@ -30,7 +30,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         ILogger<BffClientAuthenticationStateProvider> logger)
     {
         _fetchUserService = fetchUserService;
-        persistentUserService.GetPersistedUser(out var user);
+        _ = persistentUserService.GetPersistedUser(out var user);
         _user = user;
         _timer = timeProvider.CreateTimer(TimerCallback,
             null,
@@ -48,7 +48,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         }
         finally
         {
-            _semaphore.Release();
+            _ = _semaphore.Release();
         }
     }
 
@@ -99,7 +99,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
             }
             finally
             {
-                _semaphore.Release();
+                _ = _semaphore.Release();
             }
         }
 

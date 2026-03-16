@@ -11,7 +11,7 @@ public class Startup
 
     public void Configure(IApplicationBuilder app)
     {
-        app.UseDefaultFiles();
+        _ = app.UseDefaultFiles();
 
         // enable to test w/ CSP
         //app.Use(async (ctx, next) =>
@@ -28,6 +28,6 @@ public class Startup
         //    await next();
         //});
 
-        app.UseStaticFiles();
+        _ = app.UseStaticFiles();
     }
 }

@@ -58,7 +58,7 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
         var llmsTxt = await httpClient.GetStringAsync(llmsUrl, stoppingToken);
         var llmsMd = Markdig.Markdown.Parse(llmsTxt);
 
-        await db.FTSDocsArticle.ExecuteDeleteAsync(stoppingToken);
+        _ = await db.FTSDocsArticle.ExecuteDeleteAsync(stoppingToken);
 
         foreach (var link in llmsMd.Descendants<LinkInline>())
         {
@@ -69,7 +69,7 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
             }
         }
 
-        await db.SaveChangesAsync(stoppingToken);
+        _ = await db.SaveChangesAsync(stoppingToken);
         logger.LogInformation("Saved {Count} docs articles", db.FTSDocsArticle.Count());
 
         await db.SetLastUpdateStateAsync("docs", DateTimeOffset.UtcNow);
@@ -102,7 +102,7 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
                 }
                 else if (articleContent != null)
                 {
-                    db.FTSDocsArticle.Add(new FTSDocsArticle
+                    _ = db.FTSDocsArticle.Add(new FTSDocsArticle
                     {
                         Id = Guid.NewGuid().ToString(),
                         Product = title,
@@ -111,16 +111,16 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
                     });
 
                     articleTitle = llmsTxt.Substring(h1.Span.Start, h1.Span.Length).TrimStart('#', ' ');
-                    articleContent.Clear();
+                    _ = articleContent.Clear();
                 }
             }
 
-            articleContent?.AppendLine(llmsTxt.Substring(block.Span.Start, block.Span.Length));
+            _ = articleContent?.AppendLine(llmsTxt.Substring(block.Span.Start, block.Span.Length));
         }
 
         if (articleTitle != null && articleContent != null)
         {
-            db.FTSDocsArticle.Add(new FTSDocsArticle
+            _ = db.FTSDocsArticle.Add(new FTSDocsArticle
             {
                 Id = Guid.NewGuid().ToString(),
                 Product = title,

@@ -3,7 +3,6 @@
   <PropertyGroup>
     <RootNamespace>IdentityServerHost</RootNamespace>
     <Nullable>enable</Nullable>
-    <AnalysisMode>all</AnalysisMode>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

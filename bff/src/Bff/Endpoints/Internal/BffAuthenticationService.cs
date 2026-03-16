@@ -78,8 +78,8 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
         {
             logger.ChallengeForBffApiEndpoint(LogLevel.Debug);
             context.Response.StatusCode = 401;
-            context.Response.Headers.Remove("Location");
-            context.Response.Headers.Remove("Set-Cookie");
+            _ = context.Response.Headers.Remove("Location");
+            _ = context.Response.Headers.Remove("Set-Cookie");
         }
     }
 
@@ -105,8 +105,8 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
         {
             logger.ForbidForBffApiEndpoint(LogLevel.Debug);
             context.Response.StatusCode = 403;
-            context.Response.Headers.Remove("Location");
-            context.Response.Headers.Remove("Set-Cookie");
+            _ = context.Response.Headers.Remove("Location");
+            _ = context.Response.Headers.Remove("Set-Cookie");
         }
     }
 }

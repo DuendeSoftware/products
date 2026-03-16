@@ -18,14 +18,14 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
 
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path)
@@ -42,14 +42,14 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
         };
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -67,7 +67,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -88,7 +88,7 @@ public class LocalEndpointTests : BffTestBase
 
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
 
@@ -108,7 +108,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
         };
@@ -130,7 +130,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
         await ConfigureBff(setup);
@@ -150,14 +150,14 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
         await ConfigureBff(setup);
 
 
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -178,7 +178,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization();
         };
         await ConfigureBff(setup);
@@ -204,7 +204,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -226,7 +226,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -234,7 +234,7 @@ public class LocalEndpointTests : BffTestBase
         await ConfigureBff(setup);
         LocalApiResponseStatus = HttpStatusCode.Forbidden;
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
         var response = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -248,7 +248,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet(The.Path, c => c.ChallengeAsync())
+            _ = app.MapGet(The.Path, c => c.ChallengeAsync())
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -257,7 +257,7 @@ public class LocalEndpointTests : BffTestBase
 
 
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var response = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -271,7 +271,7 @@ public class LocalEndpointTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet(The.Path, c => c.ChallengeAsync())
+            _ = app.MapGet(The.Path, c => c.ChallengeAsync())
                 .RequireAuthorization()
                 .AsBffApiEndpoint()
                 .SkipResponseHandling();
@@ -281,7 +281,7 @@ public class LocalEndpointTests : BffTestBase
 
 
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
         var response = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -296,7 +296,7 @@ public class LocalEndpointTests : BffTestBase
 
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.AddAuthorization(opts =>
+            _ = svcs.AddAuthorization(opts =>
             {
                 opts.FallbackPolicy =
                     new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -317,7 +317,7 @@ public class LocalEndpointTests : BffTestBase
     {
         var identityServer = new IdentityServerTestHost(Context);
         var bff = new BffTestHost(Context, identityServer);
-        identityServer.AddClient(The.ClientId, bff.Url());
+        _ = identityServer.AddClient(The.ClientId, bff.Url());
 
         bff.OnConfigureBffOptions += opt =>
         {
@@ -345,11 +345,11 @@ public class LocalEndpointTests : BffTestBase
 
         bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization(policy =>
                 {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("given_name", "Bob"); // Alice won't have this claim
+                    _ = policy.RequireAuthenticatedUser();
+                    _ = policy.RequireClaim("given_name", "Bob"); // Alice won't have this claim
                 })
                 .AsBffApiEndpoint();
         };
@@ -357,10 +357,10 @@ public class LocalEndpointTests : BffTestBase
         await identityServer.InitializeAsync();
         await bff.InitializeAsync();
 
-        await bff.BrowserClient.Login();
+        _ = await bff.BrowserClient.Login();
         bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
 
-        await bff.BrowserClient.CallBffHostApi(
+        _ = await bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Forbidden
         );

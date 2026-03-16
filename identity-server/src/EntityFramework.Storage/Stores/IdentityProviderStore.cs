@@ -40,7 +40,7 @@ public class IdentityProviderStore : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
+    public async Task<IReadOnlyCollection<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetAllSchemeNames");
 

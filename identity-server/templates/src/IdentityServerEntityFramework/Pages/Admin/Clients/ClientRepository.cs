@@ -138,9 +138,9 @@ public class ClientRepository
         // CA1849 Suppressed because AddAsync is only needed for value generators that
         // need async database access (e.g., HiLoValueGenerator), and we don't use those
         // generators
-        _context.Clients.Add(client.ToEntity());
+        _ = _context.Clients.Add(client.ToEntity());
 #pragma warning restore CA1849 // Call async methods when in an async method
-        await _context.SaveChangesAsync();
+        _ = await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(EditClientModel model)
@@ -171,7 +171,7 @@ public class ClientRepository
 
         if (scopesToRemove.Length != 0)
         {
-            client.AllowedScopes.RemoveAll(x => scopesToRemove.Contains(x.Scope));
+            _ = client.AllowedScopes.RemoveAll(x => scopesToRemove.Contains(x.Scope));
         }
         if (scopesToAdd.Length != 0)
         {
@@ -216,7 +216,7 @@ public class ClientRepository
             }
         }
 
-        await _context.SaveChangesAsync();
+        _ = await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string clientId)
@@ -228,8 +228,8 @@ public class ClientRepository
             throw new ArgumentException("Invalid Client Id");
         }
 
-        _context.Clients.Remove(client);
-        await _context.SaveChangesAsync();
+        _ = _context.Clients.Remove(client);
+        _ = await _context.SaveChangesAsync();
     }
 
 

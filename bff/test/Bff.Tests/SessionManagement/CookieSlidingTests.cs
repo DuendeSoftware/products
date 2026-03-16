@@ -22,7 +22,7 @@ public class CookieSlidingTests : BffTestBase
     {
         await ConfigureBff(setup, UseSlidingCookieExpiration);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
@@ -30,13 +30,13 @@ public class CookieSlidingTests : BffTestBase
         var session = sessions.Single();
 
         var firstTicket = await GetTicket(session.Key.ToString()!);
-        firstTicket.ShouldNotBeNull();
+        _ = firstTicket.ShouldNotBeNull();
 
         AdvanceClock(TimeSpan.FromMinutes(8));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync()).ShouldBeTrue();
 
         var secondTicket = await GetTicket(session.Key.ToString()!);
-        secondTicket.ShouldNotBeNull();
+        _ = secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
         (secondTicket.Properties.ExpiresUtc > firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
@@ -49,7 +49,7 @@ public class CookieSlidingTests : BffTestBase
     {
         await ConfigureBff(setup, UseSlidingCookieExpiration);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
@@ -57,13 +57,13 @@ public class CookieSlidingTests : BffTestBase
         var session = sessions.Single();
 
         var firstTicket = await GetTicket(session.Key.ToString()!);
-        firstTicket.ShouldNotBeNull();
+        _ = firstTicket.ShouldNotBeNull();
 
         AdvanceClock(TimeSpan.FromMinutes(8));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
         var secondTicket = await GetTicket(session.Key.ToString()!);
-        secondTicket.ShouldNotBeNull();
+        _ = secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
         (secondTicket.Properties.ExpiresUtc == firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
@@ -89,7 +89,7 @@ public class CookieSlidingTests : BffTestBase
         });
 
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
@@ -97,14 +97,14 @@ public class CookieSlidingTests : BffTestBase
         var session = sessions.Single();
 
         var firstTicket = await GetTicket(session.Key.ToString()!);
-        firstTicket.ShouldNotBeNull();
+        _ = firstTicket.ShouldNotBeNull();
 
         shouldRenew = true;
         AdvanceClock(TimeSpan.FromSeconds(1));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync()).ShouldBeTrue();
 
         var secondTicket = await GetTicket(session.Key.ToString()!);
-        secondTicket.ShouldNotBeNull();
+        _ = secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
         (secondTicket.Properties.ExpiresUtc > firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
@@ -130,7 +130,7 @@ public class CookieSlidingTests : BffTestBase
         });
 
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
@@ -138,14 +138,14 @@ public class CookieSlidingTests : BffTestBase
         var session = sessions.Single();
 
         var firstTicket = await GetTicket(session.Key.ToString()!);
-        firstTicket.ShouldNotBeNull();
+        _ = firstTicket.ShouldNotBeNull();
 
         shouldRenew = true;
         AdvanceClock(TimeSpan.FromSeconds(1));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
         var secondTicket = await GetTicket(session.Key.ToString()!);
-        secondTicket.ShouldNotBeNull();
+        _ = secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
         (secondTicket.Properties.ExpiresUtc == firstTicket.Properties.ExpiresUtc).ShouldBeTrue();

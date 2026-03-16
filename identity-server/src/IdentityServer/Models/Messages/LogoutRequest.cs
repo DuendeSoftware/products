@@ -90,7 +90,7 @@ public class LogoutMessage
     /// <summary>
     ///  Ids of clients known to have an authentication session for user at end session time
     /// </summary>
-    public IEnumerable<string>? ClientIds { get; set; }
+    public IReadOnlyCollection<string>? ClientIds { get; set; }
 
     /// <summary>
     /// Gets or sets the EntityId of the SAML Service Provider that initiated logout.
@@ -114,7 +114,7 @@ public class LogoutMessage
     /// SAML Service Provider sessions for the user at logout time.
     /// Contains full session data required for logout notifications.
     /// </summary>
-    public IEnumerable<SamlSpSessionData>? SamlSessions { get; set; }
+    public IReadOnlyCollection<SamlSpSessionData>? SamlSessions { get; set; }
 
     /// <summary>
     /// The UI locales.
@@ -130,9 +130,9 @@ public class LogoutMessage
     ///  Flag to indicate if the payload contains useful information or not to avoid serialization.
     /// </summary>
     internal bool ContainsPayload => ClientId.IsPresent()
-        || ClientIds?.Any() == true
+        || ClientIds?.Count > 0
         || SamlServiceProviderEntityId.IsPresent()
-        || SamlSessions?.Any() == true;
+        || SamlSessions?.Count > 0;
 }
 
 /// <summary>
@@ -194,7 +194,7 @@ public class LogoutRequest
     /// <summary>
     ///  Ids of clients known to have an authentication session for user at end session time
     /// </summary>
-    public IEnumerable<string>? ClientIds { get; set; }
+    public IReadOnlyCollection<string>? ClientIds { get; set; }
 
     /// <summary>
     /// Gets or sets the EntityId of the SAML Service Provider that initiated logout.
@@ -218,7 +218,7 @@ public class LogoutRequest
     /// SAML Service Provider sessions for the user at logout time.
     /// Contains full session data required for logout notifications.
     /// </summary>
-    public IEnumerable<SamlSpSessionData>? SamlSessions { get; set; }
+    public IReadOnlyCollection<SamlSpSessionData>? SamlSessions { get; set; }
 
     /// <summary>
     /// The UI locales.

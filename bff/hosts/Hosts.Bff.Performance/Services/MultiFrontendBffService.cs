@@ -16,7 +16,7 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
 
     public override void ConfigureBff(IBffServicesBuilder bff)
     {
-        bff.ConfigureOpenIdConnect(o => DefaultOpenIdConfiguration.Apply(o, Settings))
+        _ = bff.ConfigureOpenIdConnect(o => DefaultOpenIdConfiguration.Apply(o, Settings))
             .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
 
             // Note, in order for this to work, we'll need to inject this as config
@@ -26,7 +26,7 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
 
         for (var i = 0; i < 100; i++)
         {
-            bff.AddFrontends(
+            _ = bff.AddFrontends(
                 new BffFrontend(BffFrontendName.Parse("bff-with-path-" + i))
                     .MapToPath("/path" + i));
         }
@@ -35,4 +35,3 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
 
     public override void ConfigureApp(WebApplication app) => app.MapGet("/", (CurrentFrontendAccessor currentFrontendAccessor) => "multi - " + currentFrontendAccessor.Get().Name);
 }
-

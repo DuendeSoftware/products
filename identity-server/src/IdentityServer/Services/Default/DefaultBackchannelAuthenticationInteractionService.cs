@@ -88,7 +88,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct)
+    public async Task<IReadOnlyCollection<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetPendingLoginRequestsForCurrentUser");
 

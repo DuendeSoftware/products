@@ -39,11 +39,11 @@ public class LoopbackHttpListener : IDisposable
         _host.Start();
     }
 
-    public void Dispose() => Task.Run(async () =>
-                                  {
-                                      await Task.Delay(500);
-                                      _host.Dispose();
-                                  });
+    public void Dispose() => _ = Task.Run(async () =>
+    {
+        await Task.Delay(500);
+        _host.Dispose();
+    });
 
     private void Configure(IApplicationBuilder app) => app.Run(async ctx =>
                                                             {
@@ -58,7 +58,7 @@ public class LoopbackHttpListener : IDisposable
 
     private async Task SetResultAsync(string value, HttpContext ctx)
     {
-        _source.TrySetResult(value);
+        _ = _source.TrySetResult(value);
 
         try
         {
@@ -79,10 +79,10 @@ public class LoopbackHttpListener : IDisposable
 
     public Task<string> WaitForCallbackAsync(int timeoutInSeconds = DefaultTimeout)
     {
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             await Task.Delay(timeoutInSeconds * 1000);
-            _source.TrySetCanceled();
+            _ = _source.TrySetCanceled();
         });
 
         return _source.Task;

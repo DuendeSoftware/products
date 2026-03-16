@@ -67,7 +67,7 @@ void ConfigureIdentityServerHosts()
                 var aspnetMigration = builder.AddProject<Projects.AspNetIdentityDb>(name: "aspnetidentitydb-migrations")
                     .WithReference(identityServerDb, connectionName: "DefaultConnection")
                     .WaitFor(identityServerDb);
-                hostAspNetIdentity.WaitForCompletion(aspnetMigration);
+                _ = hostAspNetIdentity.WaitForCompletion(aspnetMigration);
             }
 
             projectRegistry.Add("is-host", hostAspNetIdentity);
@@ -84,7 +84,7 @@ void ConfigureIdentityServerHosts()
                 var idSrvMigration = builder.AddProject<Projects.IdentityServerDb>(name: "identityserverdb-migrations")
                     .WithReference(identityServerDb, connectionName: "DefaultConnection")
                     .WaitFor(identityServerDb);
-                hostEntityFramework.WaitForCompletion(idSrvMigration);
+                _ = hostEntityFramework.WaitForCompletion(idSrvMigration);
             }
 
             projectRegistry.Add("is-host", hostEntityFramework);
@@ -111,46 +111,46 @@ void ConfigureClients()
 
 void ConfigureWebClients()
 {
-    RegisterClientIfEnabled<Projects.MvcCode>("mvc-code");
-    RegisterClientIfEnabled<Projects.MvcDPoP>("mvc-dpop");
-    RegisterClientIfEnabled<Projects.JsOidc>("js-oidc");
-    RegisterClientIfEnabled<Projects.MvcAutomaticTokenManagement>("mvc-automatic-token-management");
-    RegisterClientIfEnabled<Projects.MvcHybridBackChannel>("mvc-hybrid-backchannel");
-    RegisterClientIfEnabled<Projects.MvcJarJwt>("mvc-jar-jwt");
-    RegisterClientIfEnabled<Projects.MvcJarUriJwt>("mvc-jar-uri-jwt");
-    RegisterClientIfEnabled<Projects.MvcSaml>("mvc-saml");
-    RegisterClientIfEnabled<Projects.Web>("web");
-    RegisterTemplateIfEnabled<Projects.IdentityServerTemplate>("template-is", 7001);
-    RegisterTemplateIfEnabled<Projects.IdentityServerEmpty>("template-is-empty", 7002);
-    RegisterTemplateIfEnabled<Projects.IdentityServerInMem>("template-is-inmem", 7003);
-    RegisterTemplateIfEnabled<Projects.IdentityServerAspNetIdentity>("template-is-aspid", 7004);
-    RegisterTemplateIfEnabled<Projects.IdentityServerEntityFramework>("template-is-ef", 7005);
+    _ = RegisterClientIfEnabled<Projects.MvcCode>("mvc-code");
+    _ = RegisterClientIfEnabled<Projects.MvcDPoP>("mvc-dpop");
+    _ = RegisterClientIfEnabled<Projects.JsOidc>("js-oidc");
+    _ = RegisterClientIfEnabled<Projects.MvcAutomaticTokenManagement>("mvc-automatic-token-management");
+    _ = RegisterClientIfEnabled<Projects.MvcHybridBackChannel>("mvc-hybrid-backchannel");
+    _ = RegisterClientIfEnabled<Projects.MvcJarJwt>("mvc-jar-jwt");
+    _ = RegisterClientIfEnabled<Projects.MvcJarUriJwt>("mvc-jar-uri-jwt");
+    _ = RegisterClientIfEnabled<Projects.MvcSaml>("mvc-saml");
+    _ = RegisterClientIfEnabled<Projects.Web>("web");
+    _ = RegisterTemplateIfEnabled<Projects.IdentityServerTemplate>("template-is", 7001);
+    _ = RegisterTemplateIfEnabled<Projects.IdentityServerEmpty>("template-is-empty", 7002);
+    _ = RegisterTemplateIfEnabled<Projects.IdentityServerInMem>("template-is-inmem", 7003);
+    _ = RegisterTemplateIfEnabled<Projects.IdentityServerAspNetIdentity>("template-is-aspid", 7004);
+    _ = RegisterTemplateIfEnabled<Projects.IdentityServerEntityFramework>("template-is-ef", 7005);
 }
 
 void ConfigureConsoleClients()
 {
-    RegisterClientIfEnabled<Projects.ConsoleCibaClient>("console-ciba-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleDeviceFlow>("console-device-flow", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlow>("console-client-credentials-flow", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi>("console-client-credentials-flow-callingidentityserverapi", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowPostBody>("console-client-credentials-flow-postbody", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowDPoP>("console-client-credentials-flow-dpop", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleDcrClient>("console-dcr-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleEphemeralMtlsClient>("console-ephemeral-mtls-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleExtensionGrant>("console-extension-grant", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleIntrospectionClient>("console-introspection-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleMTLSClient>("console-mtls-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleParameterizedScopeClient>("console-parameterized-scope-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsolePrivateKeyJwtClient>("console-private-key-jwt-client", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlow>("console-resource-owner-flow", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowPublic>("console-resource-owner-flow-public", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowReference>("console-resource-owner-flow-reference", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowRefreshToken>("console-resource-owner-flow-refresh-token", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowUserInfo>("console-resource-owner-flow-userinfo", explicitStart: true);
-    RegisterClientIfEnabled<Projects.WindowsConsoleSystemBrowser>("console-system-browser", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleScopesResources>("console-scopes-resources", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleCode>("console-code", explicitStart: true);
-    RegisterClientIfEnabled<Projects.ConsoleResourceIndicators>("console-resource-indicators", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleCibaClient>("console-ciba-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleDeviceFlow>("console-device-flow", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlow>("console-client-credentials-flow", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi>("console-client-credentials-flow-callingidentityserverapi", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowPostBody>("console-client-credentials-flow-postbody", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowDPoP>("console-client-credentials-flow-dpop", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleDcrClient>("console-dcr-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleEphemeralMtlsClient>("console-ephemeral-mtls-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleExtensionGrant>("console-extension-grant", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleIntrospectionClient>("console-introspection-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleMTLSClient>("console-mtls-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleParameterizedScopeClient>("console-parameterized-scope-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsolePrivateKeyJwtClient>("console-private-key-jwt-client", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlow>("console-resource-owner-flow", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowPublic>("console-resource-owner-flow-public", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowReference>("console-resource-owner-flow-reference", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowRefreshToken>("console-resource-owner-flow-refresh-token", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowUserInfo>("console-resource-owner-flow-userinfo", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.WindowsConsoleSystemBrowser>("console-system-browser", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleScopesResources>("console-scopes-resources", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleCode>("console-code", explicitStart: true);
+    _ = RegisterClientIfEnabled<Projects.ConsoleResourceIndicators>("console-resource-indicators", explicitStart: true);
 }
 
 bool ClientIsEnabled(string name)
@@ -196,10 +196,10 @@ IResourceBuilder<ProjectResource>? RegisterClientIfEnabled<T>(string name, bool 
         var resourceBuilder = useLaunchProfile ?
             builder.AddProject<T>(name) :
             builder.AddProject<T>(name, launchProfileName: null);
-        resourceBuilder.AddIdentityAndApiReferences(projectRegistry);
+        _ = resourceBuilder.AddIdentityAndApiReferences(projectRegistry);
         if (explicitStart)
         {
-            resourceBuilder.WithExplicitStart();
+            _ = resourceBuilder.WithExplicitStart();
         }
 
         return resourceBuilder;

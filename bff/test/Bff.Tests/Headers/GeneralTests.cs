@@ -17,7 +17,7 @@ public class GeneralTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c))
                 .RequireAuthorization();
         };
         await ConfigureBff(setup);
@@ -41,7 +41,7 @@ public class GeneralTests : BffTestBase
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
         };
         await ConfigureBff(setup);
@@ -65,7 +65,7 @@ public class GeneralTests : BffTestBase
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
         };
         await ConfigureBff(setup);
@@ -93,7 +93,7 @@ public class GeneralTests : BffTestBase
         Context.LogMessages.ToString().ShouldNotContain("Already mapped Login endpoint");
 
         // And we can log in, which means the login endpoint was registered
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
     }
 
     [Theory, MemberData(nameof(AllSetups))]
@@ -103,7 +103,7 @@ public class GeneralTests : BffTestBase
         await ConfigureBff(setup);
 
         // And we can log in, which means the login endpoint was registered
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         Context.LogMessages.ToString().ShouldContain("Management endpoints are automatically mapped");
     }

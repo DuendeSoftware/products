@@ -15,8 +15,8 @@ public class ServiceCollectionExtensionsTests
     public void When_base_address_option_is_set_AddBffBlazorClient_configures_HttpClient_base_address(string configuredRemoteAddress, string expectedBaseAddress)
     {
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.Configure<BffBlazorClientOptions>(opt =>
+        _ = sut.AddBffBlazorClient();
+        _ = sut.Configure<BffBlazorClientOptions>(opt =>
         {
             opt.StateProviderBaseAddress = configuredRemoteAddress;
         });
@@ -25,8 +25,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
         var httpClient = httpClientFactory?.CreateClient(BffClientAuthenticationStateProvider.HttpClientName);
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
     }
 
@@ -36,8 +36,8 @@ public class ServiceCollectionExtensionsTests
         var expectedBaseAddress = "https://example.com/";
 
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
         {
             BaseAddress = expectedBaseAddress
         });
@@ -45,8 +45,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
         var httpClient = httpClientFactory?.CreateClient(BffClientAuthenticationStateProvider.HttpClientName);
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
     }
 
@@ -56,10 +56,10 @@ public class ServiceCollectionExtensionsTests
     {
         var sut = new ServiceCollection();
 
-        sut.AddBffBlazorClient();
-        sut.AddLocalApiHttpClient("clientName");
-        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment());
-        sut.Configure<BffBlazorClientOptions>(opt =>
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddLocalApiHttpClient("clientName");
+        _ = sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment());
+        _ = sut.Configure<BffBlazorClientOptions>(opt =>
         {
             opt.RemoteApiBaseAddress = "Should_not_be_used";
             opt.RemoteApiPath = "should_not_be_used";
@@ -69,8 +69,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
         var httpClient = httpClientFactory?.CreateClient("clientName");
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(new FakeWebAssemblyHostEnvironment().BaseAddress);
     }
 
@@ -93,9 +93,9 @@ public class ServiceCollectionExtensionsTests
     public void AddRemoteApiHttpClient_configures_HttpClient_base_address(string? configuredRemoteAddress, string? configuredRemotePath, string expectedBaseAddress)
     {
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.AddRemoteApiHttpClient("clientName");
-        sut.Configure<BffBlazorClientOptions>(opt =>
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddRemoteApiHttpClient("clientName");
+        _ = sut.Configure<BffBlazorClientOptions>(opt =>
         {
             if (configuredRemoteAddress != null)
             {
@@ -111,8 +111,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
         var httpClient = httpClientFactory?.CreateClient("clientName");
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
     }
 
@@ -123,9 +123,9 @@ public class ServiceCollectionExtensionsTests
         var expectedBaseAddress = "https://example.com/remote-apis/";
 
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.AddRemoteApiHttpClient("clientName");
-        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddRemoteApiHttpClient("clientName");
+        _ = sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
         {
             BaseAddress = hostBaseAddress
         });
@@ -133,8 +133,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
         var httpClient = httpClientFactory?.CreateClient("clientName");
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
     }
 
@@ -145,9 +145,9 @@ public class ServiceCollectionExtensionsTests
         var expectedBaseAddress = "https://example.com/remote-apis/";
 
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.AddRemoteApiHttpClient("clientName", c => c.Timeout = TimeSpan.FromSeconds(321));
-        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddRemoteApiHttpClient("clientName", c => c.Timeout = TimeSpan.FromSeconds(321));
+        _ = sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
         {
             BaseAddress = hostBaseAddress
         });
@@ -155,8 +155,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
         var httpClient = httpClientFactory?.CreateClient("clientName");
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
         httpClient.Timeout.ShouldBe(TimeSpan.FromSeconds(321));
     }
@@ -168,10 +168,10 @@ public class ServiceCollectionExtensionsTests
         var expectedBaseAddress = "https://example.com/remote-apis/";
 
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.AddTransient<ResolvesTypedClients>();
-        sut.AddRemoteApiHttpClient<ResolvesTypedClients>();
-        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddTransient<ResolvesTypedClients>();
+        _ = sut.AddRemoteApiHttpClient<ResolvesTypedClients>();
+        _ = sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
         {
             BaseAddress = hostBaseAddress
         });
@@ -179,8 +179,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var wrapper = sp.GetService<ResolvesTypedClients>();
         var httpClient = wrapper?.Client;
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
     }
 
@@ -191,10 +191,10 @@ public class ServiceCollectionExtensionsTests
         var expectedBaseAddress = "https://example.com/remote-apis/";
 
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient();
-        sut.AddTransient<ResolvesTypedClients>();
-        sut.AddRemoteApiHttpClient<ResolvesTypedClients>(c => c.Timeout = TimeSpan.FromSeconds(321));
-        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        _ = sut.AddBffBlazorClient();
+        _ = sut.AddTransient<ResolvesTypedClients>();
+        _ = sut.AddRemoteApiHttpClient<ResolvesTypedClients>(c => c.Timeout = TimeSpan.FromSeconds(321));
+        _ = sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
         {
             BaseAddress = hostBaseAddress
         });
@@ -202,8 +202,8 @@ public class ServiceCollectionExtensionsTests
         var sp = sut.BuildServiceProvider();
         var wrapper = sp.GetService<ResolvesTypedClients>();
         var httpClient = wrapper?.Client;
-        httpClient.ShouldNotBeNull();
-        httpClient.BaseAddress.ShouldNotBeNull();
+        _ = httpClient.ShouldNotBeNull();
+        _ = httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
         httpClient.Timeout.ShouldBe(TimeSpan.FromSeconds(321));
     }
@@ -218,10 +218,10 @@ public class ServiceCollectionExtensionsTests
     {
         var expectedConfiguredValue = "some-path";
         var sut = new ServiceCollection();
-        sut.AddBffBlazorClient(opt => opt.RemoteApiPath = expectedConfiguredValue);
+        _ = sut.AddBffBlazorClient(opt => opt.RemoteApiPath = expectedConfiguredValue);
         var sp = sut.BuildServiceProvider();
         var opts = sp.GetService<IOptions<BffBlazorClientOptions>>();
-        opts.ShouldNotBeNull();
+        _ = opts.ShouldNotBeNull();
         opts.Value.RemoteApiPath.ShouldBe(expectedConfiguredValue);
     }
 }

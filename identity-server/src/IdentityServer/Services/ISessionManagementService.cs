@@ -48,7 +48,7 @@ public class RemoveSessionsContext
     /// The client ids for which to trigger logout notification, or revoke tokens or consent.
     /// If not set, then all clients will be removed.
     /// </summary>
-    public IEnumerable<string>? ClientIds { get; set; }
+    public IReadOnlyCollection<string>? ClientIds { get; set; }
 
     /// <summary>
     /// Removes the server side session for the user's session.

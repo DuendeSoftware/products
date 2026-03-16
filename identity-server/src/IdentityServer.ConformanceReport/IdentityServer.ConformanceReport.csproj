@@ -12,8 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Duende.ConformanceReport" /> 
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../IdentityServer/IdentityServer.csproj" />
-    <!-- TODO when conformance package ships, this should be a package reference instead -->
     <ProjectReference Include="../../../conformance-report/src/ConformanceReport/ConformanceReport.csproj" /> 
   </ItemGroup>
 

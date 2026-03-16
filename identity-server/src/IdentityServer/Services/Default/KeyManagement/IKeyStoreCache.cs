@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 
@@ -14,7 +15,7 @@ public interface ISigningKeyStoreCache
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct ct);
+    Task<IReadOnlyCollection<KeyContainer>?> GetKeysAsync(Ct ct);
 
     /// <summary>
     /// Caches keys for duration.
@@ -23,5 +24,5 @@ public interface ISigningKeyStoreCache
     /// <param name="duration"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct ct);
+    Task StoreKeysAsync(IReadOnlyCollection<KeyContainer> keys, TimeSpan duration, Ct ct);
 }

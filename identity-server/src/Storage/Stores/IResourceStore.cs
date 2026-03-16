@@ -18,28 +18,28 @@ public interface IResourceStore
     /// </summary>
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct);
+    Task<IReadOnlyCollection<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct);
 
     /// <summary>
     /// Gets API scopes by scope name.
     /// </summary>
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct);
+    Task<IReadOnlyCollection<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct);
 
     /// <summary>
     /// Gets API resources by scope name.
     /// </summary>
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct);
+    Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct);
 
     /// <summary>
     /// Gets API resources by API resource name.
     /// </summary>
     /// <param name="apiResourceNames">The API resource names.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct);
+    Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct);
 
     /// <summary>
     /// Gets all resources.

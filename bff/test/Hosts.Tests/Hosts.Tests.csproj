@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -7,36 +6,29 @@
     <Configurations>Debug;Release;Debug_ncrunch</Configurations>
     <RootNamespace>Hosts.Tests</RootNamespace>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
     <DefineConstants>$(DefineConstants);DEBUG_NCRUNCH</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
-    <PackageReference Include="Serilog" />
-    <PackageReference Include="Serilog.Extensions.Logging" />
-    <PackageReference Include="Serilog.Sinks.TextWriter" />
-    <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Microsoft.Playwright.Xunit.v3" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.TextWriter" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(Configuration)' != 'Debug_NCrunch'">
     <ProjectReference Include="..\..\hosts\Hosts.AppHost\Hosts.AppHost.csproj" />
     <Using Include="Aspire.Hosting.ApplicationModel" />
     <Using Include="Aspire.Hosting.Testing" />
   </ItemGroup>
-
-
   <ItemGroup>
     <Using Include="System.Net" />
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="Xunit" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
   </ItemGroup>
-
 </Project>

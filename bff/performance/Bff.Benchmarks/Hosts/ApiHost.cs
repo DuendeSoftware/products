@@ -12,7 +12,7 @@ public class ApiHost : Host
     {
         OnConfigureServices += services =>
         {
-            services.AddAuthentication("token")
+            _ = services.AddAuthentication("token")
                 .AddJwtBearer("token", options =>
                 {
                     options.Authority = identityServerUri.ToString();
@@ -23,17 +23,17 @@ public class ApiHost : Host
 
         OnConfigure += app =>
         {
-            app.Use(async (c, n) =>
+            _ = app.Use(async (c, n) =>
             {
                 await n();
             });
 
-            app.UseRouting();
+            _ = app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            _ = app.UseAuthentication();
+            _ = app.UseAuthorization();
 
-            app.MapGet("{**catch-all}", () => "ok");
+            _ = app.MapGet("{**catch-all}", () => "ok");
 
         };
 

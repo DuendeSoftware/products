@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 
 namespace Bff.Tests.Blazor;
@@ -59,7 +58,7 @@ public class ServerSideTokenStoreTests
                 HttpContext = new DefaultHttpContext()
             },
             logger: new NullLogger<ServerSideTicketStore>());
-        await sessionService.StoreAsync(new AuthenticationTicket(
+        _ = await sessionService.StoreAsync(new AuthenticationTicket(
             user,
             props,
             "test"
@@ -83,7 +82,7 @@ public class ServerSideTokenStoreTests
         var tokenForParameters = await sut.GetTokenAsync(user).GetToken();
         var actualToken = tokenForParameters.TokenForSpecifiedParameters;
 
-        actualToken.ShouldNotBeNull();
+        _ = actualToken.ShouldNotBeNull();
         actualToken.AccessToken.ShouldBe(expectedToken.AccessToken);
 
         await sut.ClearTokenAsync(user);

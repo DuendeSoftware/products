@@ -9,7 +9,6 @@ using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Hosting;

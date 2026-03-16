@@ -54,7 +54,7 @@ public class InMemoryResourcesStore : IResourceStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct)
+    public Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(apiResourceNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindApiResourcesByName");
@@ -63,11 +63,11 @@ public class InMemoryResourcesStore : IResourceStore
         var query = from a in _apiResources
                     where apiResourceNames.Contains(a.Name)
                     select a;
-        return Task.FromResult(query);
+        return Task.FromResult<IReadOnlyCollection<ApiResource>>(query.ToArray());
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
+    public Task<IReadOnlyCollection<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(scopeNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindIdentityResourcesByScopeName");
@@ -77,11 +77,11 @@ public class InMemoryResourcesStore : IResourceStore
                        where scopeNames.Contains(i.Name)
                        select i;
 
-        return Task.FromResult(identity);
+        return Task.FromResult<IReadOnlyCollection<IdentityResource>>(identity.ToArray());
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
+    public Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(scopeNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindApiResourcesByScopeName");
@@ -91,11 +91,11 @@ public class InMemoryResourcesStore : IResourceStore
                     where a.Scopes.Any(x => scopeNames.Contains(x))
                     select a;
 
-        return Task.FromResult(query);
+        return Task.FromResult<IReadOnlyCollection<ApiResource>>(query.ToArray());
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
+    public Task<IReadOnlyCollection<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(scopeNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindApiScopesByName");
@@ -106,6 +106,6 @@ public class InMemoryResourcesStore : IResourceStore
             where scopeNames.Contains(x.Name)
             select x;
 
-        return Task.FromResult(query);
+        return Task.FromResult<IReadOnlyCollection<ApiScope>>(query.ToArray());
     }
 }

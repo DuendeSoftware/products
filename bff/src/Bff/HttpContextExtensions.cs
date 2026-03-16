@@ -24,7 +24,7 @@ internal static class HttpContextExtensions
         };
         context.Response.StatusCode = problem.Status.Value;
         context.Response.ContentType = "application/problem+json";
-        context.Response.WriteAsJsonAsync(problem);
+        _ = context.Response.WriteAsJsonAsync(problem);
 
     }
 

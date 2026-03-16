@@ -22,7 +22,7 @@ internal class RoutingMessageHandler : HttpMessageHandler
     {
         var endpoint = new HostHandler(handler);
         var host = $"{hostHeaderValue.Host}:{hostHeaderValue.Port}";
-        _hosts.TryAdd(host, endpoint);
+        _ = _hosts.TryAdd(host, endpoint);
     }
 
     protected override Task<HttpResponseMessage> SendAsync(

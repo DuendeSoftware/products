@@ -12,7 +12,7 @@ using Serilog;
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add ServiceDefaults from Aspire
-builder.AddServiceDefaults();
+_ = builder.AddServiceDefaults();
 
 // Register a named HttpClient with service discovery support.
 // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
@@ -63,7 +63,7 @@ async Task SignIn()
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}")
         .CreateLogger();
 
-    options.LoggerFactory.AddSerilog(serilog);
+    _ = options.LoggerFactory.AddSerilog(serilog);
 
     _oidcClient = new OidcClient(options);
     var result = await _oidcClient.LoginAsync(new LoginRequest());

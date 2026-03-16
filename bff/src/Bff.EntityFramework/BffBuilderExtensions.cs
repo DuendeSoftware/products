@@ -46,7 +46,7 @@ public static class BffBuilderExtensions
         where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
-        bffBuilder.Services.AddDbContext<TContext>(action);
+        _ = bffBuilder.Services.AddDbContext<TContext>(action);
         return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext, T>();
     }
 
@@ -61,7 +61,7 @@ public static class BffBuilderExtensions
         where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
-        bffBuilder.Services.AddDbContext<TContext>(action);
+        _ = bffBuilder.Services.AddDbContext<TContext>(action);
         return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext, T>();
     }
 
@@ -76,9 +76,9 @@ public static class BffBuilderExtensions
         where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
-        bffBuilder.Services.AddTransient<IUserSessionStoreCleanup, UserSessionStore>();
-        bffBuilder.Services.AddTransient<ISessionDbContext>(svcs => svcs.GetRequiredService<TContext>());
-        bffBuilder.AddServerSideSessions<UserSessionStore>();
+        _ = bffBuilder.Services.AddTransient<IUserSessionStoreCleanup, UserSessionStore>();
+        _ = bffBuilder.Services.AddTransient<ISessionDbContext>(svcs => svcs.GetRequiredService<TContext>());
+        _ = bffBuilder.AddServerSideSessions<UserSessionStore>();
 
         return bffBuilder;
     }
@@ -90,7 +90,7 @@ public static class BffBuilderExtensions
         where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
-        bffBuilder.Services.Configure(action);
+        _ = bffBuilder.Services.Configure(action);
         return bffBuilder;
     }
 
@@ -98,8 +98,8 @@ public static class BffBuilderExtensions
         where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
-        bffBuilder.Services.AddSingleton<SessionCleanupHost>();
-        bffBuilder.Services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<SessionCleanupHost>());
+        _ = bffBuilder.Services.AddSingleton<SessionCleanupHost>();
+        _ = bffBuilder.Services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<SessionCleanupHost>());
         return bffBuilder;
     }
 

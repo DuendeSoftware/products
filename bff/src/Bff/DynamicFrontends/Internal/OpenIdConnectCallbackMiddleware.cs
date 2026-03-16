@@ -64,7 +64,7 @@ internal class OpenIdConnectCallbackMiddleware(
             var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
             if (await handlers.GetHandlerAsync(context, scheme) is IAuthenticationRequestHandler handler)
             {
-                await handler.HandleRequestAsync();
+                _ = await handler.HandleRequestAsync();
                 return;
             }
         }

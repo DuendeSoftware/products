@@ -16,5 +16,5 @@ public interface IValidationKeysStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct);
+    Task<IReadOnlyCollection<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct);
 }

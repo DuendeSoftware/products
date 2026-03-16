@@ -71,7 +71,7 @@ public static class BffEndpointRouteBuilderExtensions
             return;
         }
 
-        endpoints.Map(options.LoginPath.Value!, ProcessWith<ILoginEndpoint>)
+        _ = endpoints.Map(options.LoginPath.Value!, ProcessWith<ILoginEndpoint>)
             .WithMetadata(new BffUiEndpointAttribute())
             .AllowAnonymous();
     }
@@ -91,7 +91,7 @@ public static class BffEndpointRouteBuilderExtensions
 
         if (!endpoints.AlreadyMappedManagementEndpoint(options.SilentLoginPath))
         {
-            endpoints.MapGet(options.SilentLoginPath.Value!, ProcessWith<ISilentLoginEndpoint>)
+            _ = endpoints.MapGet(options.SilentLoginPath.Value!, ProcessWith<ISilentLoginEndpoint>)
                 .WithName("SilentLogin")
                 .WithMetadata(new BffUiEndpointAttribute())
                 .AllowAnonymous();
@@ -99,7 +99,7 @@ public static class BffEndpointRouteBuilderExtensions
 
         if (!endpoints.AlreadyMappedManagementEndpoint(options.SilentLoginCallbackPath))
         {
-            endpoints.MapGet(options.SilentLoginCallbackPath.Value!, ProcessWith<ISilentLoginCallbackEndpoint>)
+            _ = endpoints.MapGet(options.SilentLoginCallbackPath.Value!, ProcessWith<ISilentLoginCallbackEndpoint>)
                 .WithMetadata(new BffUiEndpointAttribute())
                 .AllowAnonymous();
         }
@@ -121,7 +121,7 @@ public static class BffEndpointRouteBuilderExtensions
             return;
         }
 
-        endpoints.MapGet(options.LogoutPath.Value!, ProcessWith<ILogoutEndpoint>)
+        _ = endpoints.MapGet(options.LogoutPath.Value!, ProcessWith<ILogoutEndpoint>)
             .WithName("Logout")
             .WithMetadata(new BffUiEndpointAttribute())
             .AllowAnonymous();
@@ -143,7 +143,7 @@ public static class BffEndpointRouteBuilderExtensions
             return;
         }
 
-        endpoints.MapGet(options.UserPath.Value!, ProcessWith<IUserEndpoint>)
+        _ = endpoints.MapGet(options.UserPath.Value!, ProcessWith<IUserEndpoint>)
             .AllowAnonymous()
             .AsBffApiEndpoint();
     }
@@ -164,7 +164,7 @@ public static class BffEndpointRouteBuilderExtensions
             return;
         }
 
-        endpoints.MapPost(options.BackChannelLogoutPath.Value!, ProcessWith<IBackchannelLogoutEndpoint>)
+        _ = endpoints.MapPost(options.BackChannelLogoutPath.Value!, ProcessWith<IBackchannelLogoutEndpoint>)
             .AllowAnonymous();
     }
 
@@ -184,7 +184,7 @@ public static class BffEndpointRouteBuilderExtensions
             return;
         }
 
-        endpoints.MapGet(options.DiagnosticsPath.Value!, ProcessWith<IDiagnosticsEndpoint>)
+        _ = endpoints.MapGet(options.DiagnosticsPath.Value!, ProcessWith<IDiagnosticsEndpoint>)
             .AllowAnonymous();
     }
 
@@ -201,6 +201,6 @@ public static class BffEndpointRouteBuilderExtensions
     internal static void CheckLicense(this IServiceProvider serviceProvider)
     {
         var license = serviceProvider.GetRequiredService<LicenseValidator>();
-        license.CheckLicense();
+        _ = license.CheckLicense();
     }
 }

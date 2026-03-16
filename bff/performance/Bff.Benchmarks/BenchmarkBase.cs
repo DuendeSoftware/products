@@ -116,10 +116,10 @@ public class BenchmarkConfig : ManualConfig
                 sizeUnit: SizeUnit.KB
             ));
 
-        AddJob(Job.LongRun);
-        AddColumnProvider(DefaultColumnProviders.Instance);
-        AddExporter(exporter);
-        AddLogger(new ConsoleLogger()); // Add a minimal logger back if you want basic running info
+        _ = AddJob(Job.LongRun);
+        _ = AddColumnProvider(DefaultColumnProviders.Instance);
+        _ = AddExporter(exporter);
+        _ = AddLogger(new ConsoleLogger()); // Add a minimal logger back if you want basic running info
 
     }
 }

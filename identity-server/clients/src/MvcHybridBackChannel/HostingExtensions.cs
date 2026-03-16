@@ -19,19 +19,19 @@ internal static class HostingExtensions
 
         var authority = builder.Configuration["is-host"];
 
-        builder.Services.AddControllersWithViews();
-        builder.Services.AddHttpClient();
+        _ = builder.Services.AddControllersWithViews();
+        _ = builder.Services.AddHttpClient();
 
-        builder.Services.AddSingleton<IDiscoveryCache>(r =>
+        _ = builder.Services.AddSingleton<IDiscoveryCache>(r =>
         {
             var factory = r.GetRequiredService<IHttpClientFactory>();
             return new DiscoveryCache(authority, () => factory.CreateClient());
         });
 
-        builder.Services.AddTransient<CookieEventHandler>();
-        builder.Services.AddSingleton<LogoutSessionManager>();
+        _ = builder.Services.AddTransient<CookieEventHandler>();
+        _ = builder.Services.AddSingleton<LogoutSessionManager>();
 
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = "oidc";
@@ -76,7 +76,7 @@ internal static class HostingExtensions
 
         // Register a named HttpClient with service discovery support.
         // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
-        builder.Services.AddHttpClient("SimpleApi", client =>
+        _ = builder.Services.AddHttpClient("SimpleApi", client =>
         {
             client.BaseAddress = new Uri("https://simple-api");
         })
@@ -87,13 +87,13 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseDeveloperExceptionPage();
-        app.UseStaticFiles();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapDefaultControllerRoute();
+        _ = app.UseRouting();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
+        _ = app.MapDefaultControllerRoute();
 
         return app;
     }

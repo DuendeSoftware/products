@@ -21,10 +21,10 @@ public static class ServiceCollectionExtensions
     {
         if (configureAction != null)
         {
-            services.Configure(configureAction);
+            _ = services.Configure(configureAction);
         }
 
-        services
+        _ = services
             .AddAuthorizationCore()
             // Most services for wasm are singletons, because DI scope doesn't exist in wasm
             .AddSingleton<PersistentUserService>()

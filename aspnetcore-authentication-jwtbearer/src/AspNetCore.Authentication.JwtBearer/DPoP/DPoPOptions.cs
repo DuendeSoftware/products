@@ -61,7 +61,7 @@ public sealed class DPoPOptions
     /// <item>Signatures are allowed from RSA, PSA, or ECDSA algorithms with key sizes of 256, 384, or 512 bits.</item>
     /// </list>
     /// </remarks>
-    public TokenValidationParameters ProofTokenValidationParameters = new()
+    public TokenValidationParameters ProofTokenValidationParameters { get; set; } = new()
     {
         ValidateAudience = false,
         ValidateIssuer = false,

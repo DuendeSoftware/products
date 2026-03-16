@@ -30,7 +30,7 @@ internal sealed class DelayedMessageBus(IMessageBus innerBus) : IMessageBus
     {
         foreach (var message in _messages)
         {
-            innerBus.QueueMessage(message);
+            _ = innerBus.QueueMessage(message);
         }
     }
 }

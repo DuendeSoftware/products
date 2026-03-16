@@ -101,6 +101,12 @@ public class SamlOptions
     public int MaxRelayStateLength { get; set; } = 80;
 
     /// <summary>
+    /// Gets or sets the name of the cookie used to store the SAML sign-in state identifier.
+    /// Defaults to "__IdsSvr_SamlSigninState".
+    /// </summary>
+    public string SigninStateCookieName { get; set; } = "__IdsSvr_SamlSigninState";
+
+    /// <summary>
     /// Gets or sets the user interaction options for SAML endpoints.
     /// </summary>
     public SamlUserInteractionOptions UserInteraction { get; set; } = new();

@@ -166,7 +166,7 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         var claims = await CallUserEndpointAsync();
 
         var sidClaim = claims.FirstOrDefault(c => c.Type == "sid")?.Value;
-        sidClaim.ShouldNotBeNull();
+        _ = sidClaim.ShouldNotBeNull();
         var sid = sidClaim.Value.ToString();
         return sid;
     }

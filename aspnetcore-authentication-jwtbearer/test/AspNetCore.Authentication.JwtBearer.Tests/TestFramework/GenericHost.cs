@@ -35,7 +35,7 @@ public class GenericHost
     public TestServer Server
     {
         get => _server ?? throw new InvalidOperationException(
-                $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call ${Initialize}?");
+                $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call {nameof(Initialize)}?");
         private set => _server = value;
     }
 
@@ -81,7 +81,7 @@ public class GenericHost
             EnvironmentName = IsDevelopment ? "Development" : "Production",
             ApplicationName = HostAssembly?.GetName()?.Name
         });
-        builder.WebHost
+        _ = builder.WebHost
             .UseTestServer();
 
         ConfigureServices(builder.Services);
@@ -101,15 +101,15 @@ public class GenericHost
     private void ConfigureServices(IServiceCollection services)
     {
         // This adds log messages to the output of our tests when they fail.
-        services.AddLogging(options =>
+        _ = services.AddLogging(options =>
         {
             // If you need different log output to understand a test failure, configure it here
-            options.SetMinimumLevel(LogLevel.Error);
-            options.AddFilter("Duende", LogLevel.Information);
-            options.AddFilter("Duende.IdentityServer.License", LogLevel.Error);
-            options.AddFilter("Duende.IdentityServer.Startup", LogLevel.Error);
+            _ = options.SetMinimumLevel(LogLevel.Error);
+            _ = options.AddFilter("Duende", LogLevel.Information);
+            _ = options.AddFilter("Duende.IdentityServer.License", LogLevel.Error);
+            _ = options.AddFilter("Duende.IdentityServer.Startup", LogLevel.Error);
 
-            options.AddXUnit(_testOutputHelper);
+            _ = options.AddXUnit(_testOutputHelper);
         });
 
         OnConfigureServices(services);

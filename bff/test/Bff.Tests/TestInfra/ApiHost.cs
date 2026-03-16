@@ -17,7 +17,7 @@ public class ApiHost : TestHost
     {
         OnConfigureServices += services =>
         {
-            services.AddAuthentication("token")
+            _ = services.AddAuthentication("token")
                 .AddJwtBearer("token", options =>
                 {
                     options.Authority = identityServerUri.Url().ToString();
@@ -29,7 +29,7 @@ public class ApiHost : TestHost
 
         OnConfigureApp += app =>
         {
-            app.Map("/{**catch-all}",
+            _ = app.Map("/{**catch-all}",
                 async context =>
                 {
                     await ReturnApiCallDetails(context, () => ApiStatusCodeToReturn ?? HttpStatusCode.OK);
@@ -39,11 +39,11 @@ public class ApiHost : TestHost
 
     protected override void ConfigureApp(IApplicationBuilder app)
     {
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
+        _ = app.UseAuthentication();
         // adds authorization for local and remote API endpoints
-        app.UseAuthorization();
+        _ = app.UseAuthorization();
         base.ConfigureApp(app);
     }
 

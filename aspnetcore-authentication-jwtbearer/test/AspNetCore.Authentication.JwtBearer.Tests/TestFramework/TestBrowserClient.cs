@@ -71,7 +71,7 @@ public class TestBrowserClient : HttpClient
     {
         LastResponse.StatusCode.ShouldBe((HttpStatusCode)302);
         var location = LastResponse.Headers.Location!.ToString();
-        await GetAsync(location);
+        _ = await GetAsync(location);
     }
 
     // TODO - Finish conversion from CSQuery to AngleSharp (CSQuery is unmaintained)

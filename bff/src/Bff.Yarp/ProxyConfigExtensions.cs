@@ -63,7 +63,7 @@ public static class ProxyConfigExtensions
             metadata = new();
         }
 
-        metadata.TryAdd(key, value);
+        _ = metadata.TryAdd(key, value);
 
         return config with { Metadata = metadata };
     }
@@ -89,7 +89,7 @@ public static class ProxyConfigExtensions
             metadata = new();
         }
 
-        metadata.TryAdd(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
+        _ = metadata.TryAdd(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
 
         return config with { Metadata = metadata };
     }

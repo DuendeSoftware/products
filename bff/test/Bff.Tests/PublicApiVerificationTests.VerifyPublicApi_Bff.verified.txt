@@ -15,44 +15,25 @@
     {
         protected AccessTokenResult() { }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class AccessTokenRetrievalContext : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenRetrievalContext>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public AccessTokenRetrievalContext() { }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public System.Uri ApiAddress { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Microsoft.AspNetCore.Http.HttpContext HttpContext { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.Configuration.BffRemoteApiEndpointMetadata Metadata { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.Configuration.BffUserAccessTokenParameters? UserTokenRequestParameters { get; init; }
+        public required System.Uri ApiAddress { get; init; }
+        public required Microsoft.AspNetCore.Http.HttpContext HttpContext { get; init; }
+        public required Duende.Bff.Configuration.BffRemoteApiEndpointMetadata Metadata { get; init; }
+        public required Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
+        public required Duende.Bff.Configuration.BffUserAccessTokenParameters? UserTokenRequestParameters { get; init; }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public class AccessTokenRetrievalError : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenRetrievalError>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public AccessTokenRetrievalError() { }
+        public required string Error { get; init; }
         public string? ErrorDescription { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public string Error { get; init; }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class BearerTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.BearerTokenResult>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public BearerTokenResult() { }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.AccessTokenManagement.AccessToken AccessToken { get; init; }
+        public required Duende.Bff.AccessTokenManagement.AccessToken AccessToken { get; init; }
     }
     [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.AccessTokenManagement.DPoPProofKey>))]
     [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.DPoPProofKey>))]
@@ -69,17 +50,11 @@
         public static Duende.AccessTokenManagement.DPoP.DPoPProofKey op_Implicit(Duende.Bff.AccessTokenManagement.DPoPProofKey value) { }
         public static string op_Implicit(Duende.Bff.AccessTokenManagement.DPoPProofKey value) { }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class DPoPTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.DPoPTokenResult>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public DPoPTokenResult() { }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.AccessTokenManagement.AccessToken AccessToken { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.AccessTokenManagement.DPoPProofKey DPoPJsonWebKey { get; init; }
+        public required Duende.Bff.AccessTokenManagement.AccessToken AccessToken { get; init; }
+        public required Duende.Bff.AccessTokenManagement.DPoPProofKey DPoPJsonWebKey { get; init; }
     }
     public interface IAccessTokenRetriever
     {
@@ -199,10 +174,10 @@ namespace Duende.Bff
         public ClaimRecord(string type, object value) { }
         [System.Text.Json.Serialization.JsonPropertyName("type")]
         public string Type { get; init; }
-        [System.Text.Json.Serialization.JsonPropertyName("valueType")]
-        public string? ValueType { get; init; }
         [System.Text.Json.Serialization.JsonPropertyName("value")]
         public object Value { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("valueType")]
+        public string? ValueType { get; init; }
     }
     public static class Constants
     {
@@ -371,23 +346,18 @@ namespace Duende.Bff.DynamicFrontends
         public static readonly Duende.Bff.AccessTokenManagement.Scheme BffCookie;
         public static readonly Duende.Bff.AccessTokenManagement.Scheme BffOpenIdConnect;
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class BffFrontend : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontend>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public BffFrontend() { }
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         public BffFrontend(Duende.Bff.DynamicFrontends.BffFrontendName name) { }
-        public Duende.Bff.AccessTokenManagement.Scheme CookieSchemeName { get; }
-        public Duende.Bff.AccessTokenManagement.Scheme OidcSchemeName { get; }
         public System.Uri? CdnIndexHtmlUrl { get; init; }
         public System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>? ConfigureCookieOptions { get; init; }
         public System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>? ConfigureOpenIdConnectOptions { get; init; }
+        public Duende.Bff.AccessTokenManagement.Scheme CookieSchemeName { get; }
         public Duende.Bff.DynamicFrontends.FrontendMatchingCriteria MatchingCriteria { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.DynamicFrontends.BffFrontendName Name { get; init; }
+        public required Duende.Bff.DynamicFrontends.BffFrontendName Name { get; init; }
+        public Duende.Bff.AccessTokenManagement.Scheme OidcSchemeName { get; }
         public System.Uri? StaticAssetsUrl { get; init; }
         public bool Equals(Duende.Bff.DynamicFrontends.BffFrontend? other) { }
         public override int GetHashCode() { }
@@ -427,22 +397,17 @@ namespace Duende.Bff.DynamicFrontends
         public bool Equals(Duende.Bff.DynamicFrontends.FrontendMatchingCriteria? other) { }
         public override int GetHashCode() { }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class HostHeaderValue : System.IEquatable<Duende.Bff.DynamicFrontends.HostHeaderValue>, System.IEquatable<Microsoft.AspNetCore.Http.HttpRequest>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public HostHeaderValue() { }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public string Host { get; init; }
+        public required string Host { get; init; }
         public int Port { get; init; }
         public bool Equals(Duende.Bff.DynamicFrontends.HostHeaderValue? other) { }
         public bool Equals(Microsoft.AspNetCore.Http.HttpRequest? request) { }
         public override int GetHashCode() { }
         public override string ToString() { }
-        public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(string hostHeaderValue) { }
         public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(System.Uri uri) { }
+        public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(string hostHeaderValue) { }
         public static Duende.Bff.DynamicFrontends.HostHeaderValue? ParseOrDefault(string? origin) { }
     }
     public interface IFrontendCollection : System.Collections.Generic.IEnumerable<Duende.Bff.DynamicFrontends.BffFrontend>, System.Collections.IEnumerable

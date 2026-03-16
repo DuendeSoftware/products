@@ -11,7 +11,7 @@ public class BffWithoutExplicitFrontendTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/secret", (HttpContext c, Ct ct) =>
+            _ = app.MapGet("/secret", (HttpContext c, Ct ct) =>
             {
                 if (!c.User.IsAuthenticated())
                 {
@@ -44,14 +44,14 @@ public class BffWithoutExplicitFrontendTests : BffTestBase
     {
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckHttpStatusCode();
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode();
 
         var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url("/somepath")).FirstOrDefault();
-        cookie.ShouldNotBeNull();
+        _ = cookie.ShouldNotBeNull();
         cookie.HttpOnly.ShouldBeTrue();
         cookie.Name.ShouldBe(Constants.Cookies.DefaultCookieName);
         cookie.Secure.ShouldBeTrue();

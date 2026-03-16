@@ -8,7 +8,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Time.Testing;
 
 namespace UnitTests.Services.Default;
 

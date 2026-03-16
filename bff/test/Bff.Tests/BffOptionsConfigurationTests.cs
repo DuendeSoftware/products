@@ -17,7 +17,7 @@ public class BffOptionsConfigurationTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => HttpStatusCode.OK))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => HttpStatusCode.OK))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -29,9 +29,9 @@ public class BffOptionsConfigurationTests : BffTestBase
         // when this happens, this call would fail with No HTTP Context available,
         // but also all subsequent requests, because IOptionsCache caches this.
         var opt = Bff.Resolve<IOptionsMonitor<OpenIdConnectOptions>>();
-        opt.Get(Some.BffFrontend().OidcSchemeName);
+        _ = opt.Get(Some.BffFrontend().OidcSchemeName);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path)
@@ -48,7 +48,7 @@ public class BffOptionsConfigurationTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => HttpStatusCode.OK))
+            _ = app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => HttpStatusCode.OK))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -60,9 +60,9 @@ public class BffOptionsConfigurationTests : BffTestBase
         // when this happens, this call would fail with No HTTP Context available,
         // but also all subsequent requests, because IOptionsCache caches this.
         var opt = Bff.Resolve<IOptionsMonitor<CookieAuthenticationOptions>>();
-        opt.Get(Some.BffFrontend().CookieSchemeName);
+        _ = opt.Get(Some.BffFrontend().CookieSchemeName);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path)

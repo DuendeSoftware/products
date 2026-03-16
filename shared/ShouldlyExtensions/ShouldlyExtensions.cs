@@ -57,7 +57,7 @@ public static class ShouldlyExtensions
     {
         var missingItems = expected.Where(item => !actual.Contains(item)).ToList();
 
-        if (missingItems.Any())
+        if (missingItems.Count > 0)
         {
             throw new ShouldAssertException(
                 $"Expected collection to contain all items, but these were missing: {string.Join(", ", missingItems)}.\n" +

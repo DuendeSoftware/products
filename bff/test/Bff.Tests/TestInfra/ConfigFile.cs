@@ -15,7 +15,7 @@ internal class ConfigFile : IDisposable
         var dir = Path.GetDirectoryName(_file)!;
         if (!Directory.Exists(dir))
         {
-            Directory.CreateDirectory(dir);
+            _ = Directory.CreateDirectory(dir);
         }
     }
 

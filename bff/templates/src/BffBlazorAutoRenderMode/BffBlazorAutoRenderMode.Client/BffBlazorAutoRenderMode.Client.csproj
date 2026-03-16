@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,16 +7,13 @@
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
     <RootNamespace>BffBlazorAutoRenderMode.Client</RootNamespace>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Framework)' == ''">
     <!-- If we do not have a value for framework from running dotnet new, default to one so things build in an IDE -->
     <Framework>$(TargetFramework)</Framework>
   </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="Duende.BFF.Blazor.Client" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-    <PackageReference Include="Duende.BFF.Blazor.Client" Version="3.0.0" />
   </ItemGroup>
-
 </Project>

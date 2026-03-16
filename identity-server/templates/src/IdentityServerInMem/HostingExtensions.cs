@@ -13,23 +13,23 @@ internal static class HostingExtensions
     {
         // Write most logs to the console but diagnostic data to a file.
         // See https://docs.duendesoftware.com/identityserver/diagnostics/data
-        builder.Services.AddSerilog(lc =>
+        _ = builder.Services.AddSerilog(lc =>
         {
-            lc.WriteTo.Logger(consoleLogger =>
+            _ = lc.WriteTo.Logger(consoleLogger =>
             {
-                consoleLogger.WriteTo.Console(
+                _ = consoleLogger.WriteTo.Console(
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
                     formatProvider: CultureInfo.InvariantCulture);
                 if (builder.Environment.IsDevelopment())
                 {
-                    consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
+                    _ = consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
                 }
             });
             if (builder.Environment.IsDevelopment())
             {
-                lc.WriteTo.Logger(fileLogger =>
+                _ = lc.WriteTo.Logger(fileLogger =>
                 {
-                    fileLogger
+                    _ = fileLogger
                         .WriteTo.File("./diagnostics/diagnostic.log", rollingInterval: RollingInterval.Day,
                             fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
                             rollOnFileSizeLimit: true,
@@ -45,7 +45,7 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        _ = builder.Services.AddRazorPages();
 
         var isBuilder = builder.Services.AddIdentityServer(options =>
             {
@@ -64,9 +64,9 @@ internal static class HostingExtensions
             .AddLicenseSummary();
 
         // in-memory, code config
-        isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
-        isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
-        isBuilder.AddInMemoryClients(Config.Clients);
+        _ = isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
+        _ = isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
+        _ = isBuilder.AddInMemoryClients(Config.Clients);
 
 
         // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
@@ -82,7 +82,7 @@ internal static class HostingExtensions
         //    options.Conventions.AuthorizeFolder("/ServerSideSessions", "admin"));
 
 
-        builder.Services.AddAuthentication()
+        _ = builder.Services.AddAuthentication()
             .AddOpenIdConnect("oidc", "Sign-in with demo.duendesoftware.com", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -106,19 +106,19 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
+        _ = app.UseSerilogRequestLogging();
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            _ = app.UseDeveloperExceptionPage();
         }
 
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseIdentityServer();
-        app.UseAuthorization();
+        _ = app.UseStaticFiles();
+        _ = app.UseRouting();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
 
-        app.MapRazorPages()
+        _ = app.MapRazorPages()
             .RequireAuthorization();
 
         return app;

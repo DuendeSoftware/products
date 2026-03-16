@@ -23,18 +23,18 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
             .ToArray();
 
         var builder = WebApplication.CreateBuilder();
-        builder.AddServiceDefaults();
+        _ = builder.AddServiceDefaults();
         // Configure Kestrel to listen on the specified Uri
-        builder.WebHost.UseUrls(urls);
+        _ = builder.WebHost.UseUrls(urls);
 
-        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        _ = builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.All;
             options.KnownProxies.Clear();
             options.KnownIPNetworks.Clear();
         });
 
-        builder.Services.AddAuthorization();
+        _ = builder.Services.AddAuthorization();
         ConfigureServices(builder.Services);
 
         var bffBuilder = builder.Services.AddBff()
@@ -44,35 +44,35 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
 
         // Build and run the web app
         var app = builder.Build();
-        app.UseForwardedHeaders();
+        _ = app.UseForwardedHeaders();
 
-        app.UseHttpsRedirection();
+        _ = app.UseHttpsRedirection();
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.UseBff();
+        _ = app.UseBff();
 
         ConfigureApp(app);
 
-        app.MapGet("/local_anon", () => DateTime.Now.ToString("s"))
+        _ = app.MapGet("/local_anon", () => DateTime.Now.ToString("s"))
             .AsBffApiEndpoint()
             .AllowAnonymous();
 
-        app.MapGet("/local", () => DateTime.Now.ToString("s"))
+        _ = app.MapGet("/local", () => DateTime.Now.ToString("s"))
             .RequireAuthorization()
             .AsBffApiEndpoint();
 
-        app.MapRemoteBffApiEndpoint("/remote_anon", Settings.ApiUrl)
+        _ = app.MapRemoteBffApiEndpoint("/remote_anon", Settings.ApiUrl)
             .WithAccessToken(RequiredTokenType.None);
 
 
-        app.MapRemoteBffApiEndpoint("/remote_user", Settings.ApiUrl)
+        _ = app.MapRemoteBffApiEndpoint("/remote_user", Settings.ApiUrl)
             .WithAccessToken();
 
-        app.MapRemoteBffApiEndpoint("/remote_client", Settings.ApiUrl)
+        _ = app.MapRemoteBffApiEndpoint("/remote_client", Settings.ApiUrl)
             .WithAccessToken(RequiredTokenType.Client);
 
         // Todo: Make sure this is mapped implicitly

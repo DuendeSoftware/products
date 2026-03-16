@@ -60,14 +60,14 @@ internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<Blog
         var filteredItems = items
             .Where(it => it.PublishDate >= ReferenceDate && it.Categories?.Contains("blog") == true).ToList();
 
-        await db.FTSBlogArticle.ExecuteDeleteAsync(stoppingToken);
+        _ = await db.FTSBlogArticle.ExecuteDeleteAsync(stoppingToken);
 
         foreach (var filteredItem in filteredItems)
         {
             await RunIndexerForDocumentAsync(filteredItem.Title ?? "", filteredItem.GetSummary(), filteredItem.Uri, db, httpClient, stoppingToken);
         }
 
-        await db.SaveChangesAsync(stoppingToken);
+        _ = await db.SaveChangesAsync(stoppingToken);
         logger.LogInformation("Saved {Count} blog articles", db.FTSBlogArticle.Count());
 
         await db.SetLastUpdateStateAsync("blog", DateTimeOffset.UtcNow);
@@ -102,7 +102,7 @@ internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<Blog
             GithubFlavored = true
         }).Convert(content!.InnerHtml); ;
 
-        db.FTSBlogArticle.Add(new FTSBlogArticle
+        _ = db.FTSBlogArticle.Add(new FTSBlogArticle
         {
             Id = Guid.NewGuid().ToString(),
             Title = title,

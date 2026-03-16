@@ -12,16 +12,16 @@ public class ApiHostedService(IOptions<ApiSettings> apiSettings) : BackgroundSer
     protected override Task ExecuteAsync(Ct stoppingToken)
     {
         var builder = WebApplication.CreateBuilder();
-        builder.AddServiceDefaults();
+        _ = builder.AddServiceDefaults();
 
         // Configure Kestrel to listen on the specified Uri
-        builder.WebHost.UseUrls(Settings.ApiUrl.ToString());
+        _ = builder.WebHost.UseUrls(Settings.ApiUrl.ToString());
         var app = builder.Build();
 
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.MapGet("/", () => "ok");
+        _ = app.MapGet("/", () => "ok");
         return app.RunAsync(stoppingToken);
 
     }

@@ -123,7 +123,7 @@ public class HostHeaderValueTests
     public void Will_catch_invalid_hostheader(string input, string reason)
     {
         var action = () => HostHeaderValue.Parse(input);
-        action.ShouldThrow<ArgumentException>();
+        _ = action.ShouldThrow<ArgumentException>();
     }
 
     [Fact]

@@ -2,7 +2,6 @@
   "solution": {
     "path": "..\\products.slnx",
     "projects": [
-      ".github\\workflow-gen\\workflow-gen.csproj",
       "aspnetcore-authentication-jwtbearer\\src\\AspNetCore.Authentication.JwtBearer\\AspNetCore.Authentication.JwtBearer.csproj",
       "aspnetcore-authentication-jwtbearer\\test\\AspNetCore.Authentication.JwtBearer.Tests\\AspNetCore.Authentication.JwtBearer.Tests.csproj"
     ]

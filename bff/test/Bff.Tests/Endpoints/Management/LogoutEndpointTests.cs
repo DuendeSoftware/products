@@ -16,7 +16,7 @@ public class LogoutEndpointTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.AddAuthorization(opts =>
+            _ = svcs.AddAuthorization(opts =>
             {
                 opts.FallbackPolicy =
                     new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -37,7 +37,7 @@ public class LogoutEndpointTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var response = await Bff.BrowserClient.Logout();
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -51,7 +51,7 @@ public class LogoutEndpointTests : BffTestBase
     public async Task logout_endpoint_for_authenticated_should_require_sid(BffSetupType setup)
     {
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var problem = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout"))
             .ShouldBeProblem();
@@ -67,7 +67,7 @@ public class LogoutEndpointTests : BffTestBase
         BffSetupType setup)
     {
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         Bff.BffOptions.RequireLogoutSessionId = false;
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
@@ -85,7 +85,7 @@ public class LogoutEndpointTests : BffTestBase
         // Workaround to place a session cookie in the BFF without a session id claim.
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/__signin", async ctx =>
+            _ = app.MapGet("/__signin", async ctx =>
             {
                 var props = new AuthenticationProperties();
                 await ctx.SignInAsync(
@@ -97,7 +97,7 @@ public class LogoutEndpointTests : BffTestBase
         };
 
         await ConfigureBff(setup);
-        await Bff.BrowserClient.GetAsync("__signin");
+        _ = await Bff.BrowserClient.GetAsync("__signin");
 
         // workaround for RevokeUserRefreshTokenAsync throwing when no RT in session
         Bff.BffOptions.RevokeRefreshTokenOnLogout = false;
@@ -129,10 +129,10 @@ public class LogoutEndpointTests : BffTestBase
     public async Task can_logout_twice(BffSetupType setup)
     {
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sid = await Bff.BrowserClient.GetSid();
-        await Bff.BrowserClient.Logout(sid)
+        _ = await Bff.BrowserClient.Logout(sid)
             .CheckHttpStatusCode();
 
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
@@ -154,7 +154,7 @@ public class LogoutEndpointTests : BffTestBase
         Bff.OnConfigureApp += app => app.MapGet("/foo", () => "foo'd you");
 
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var response = await Bff.BrowserClient.Logout(returnUrl: new Uri("/foo", UriKind.Relative))
             .CheckHttpStatusCode();
@@ -167,7 +167,7 @@ public class LogoutEndpointTests : BffTestBase
     public async Task logout_endpoint_should_reject_non_local_returnUrl(BffSetupType setup)
     {
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var problem = await Bff.BrowserClient.Logout(returnUrl: new Uri("https://foo"))
             .ShouldBeProblem();

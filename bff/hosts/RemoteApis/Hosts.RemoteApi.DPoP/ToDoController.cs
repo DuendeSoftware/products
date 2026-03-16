@@ -79,7 +79,7 @@ public class ToDoController : ControllerBase
             return NotFound();
         }
 
-        Data.Remove(item);
+        _ = Data.Remove(item);
         _logger.LogInformation("Delete {id}", id);
 
         return NoContent();

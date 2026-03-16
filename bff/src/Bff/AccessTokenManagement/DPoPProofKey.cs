@@ -50,7 +50,7 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
             message = string.Empty;
             try
             {
-                JsonWebKey.Create(value);
+                _ = JsonWebKey.Create(value);
                 return true;
             }
             catch (JsonException e)

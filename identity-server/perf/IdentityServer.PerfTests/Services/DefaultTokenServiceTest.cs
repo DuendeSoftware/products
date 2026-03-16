@@ -1,9 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Security.Claims;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;

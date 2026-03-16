@@ -26,9 +26,9 @@ public class SeedData
             Log.Debug("IdentityResources being populated");
             foreach (var resource in Config.IdentityResources.ToList())
             {
-                context.IdentityResources.Add(resource.ToEntity());
+                _ = context.IdentityResources.Add(resource.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {

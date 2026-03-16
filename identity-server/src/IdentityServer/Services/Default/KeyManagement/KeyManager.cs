@@ -60,7 +60,7 @@ public class KeyManager : IKeyManager
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<KeyContainer>> GetCurrentKeysAsync(Ct ct)
+    public async Task<IReadOnlyCollection<KeyContainer>> GetCurrentKeysAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("KeyManager.GetCurrentKeys");
 
@@ -83,7 +83,7 @@ public class KeyManager : IKeyManager
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<KeyContainer>> GetAllKeysAsync(Ct ct)
+    public async Task<IReadOnlyCollection<KeyContainer>> GetAllKeysAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("KeyManager.GetAllKeys");
 
@@ -95,18 +95,18 @@ public class KeyManager : IKeyManager
 
 
 
-    internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> signingKeys)> GetAllKeysInternalAsync(Ct ct)
+    internal async Task<(IReadOnlyCollection<KeyContainer> allKeys, IReadOnlyCollection<KeyContainer> signingKeys)> GetAllKeysInternalAsync(Ct ct)
     {
         var cached = true;
         var keys = await GetAllKeysFromCacheAsync(ct);
-        if (!keys.Any())
+        if (keys.Count == 0)
         {
             cached = false;
             keys = await GetAllKeysFromStoreAsync(ct);
         }
 
         // ensure we have all of our active signing keys
-        IEnumerable<KeyContainer> signingKeys;
+        IReadOnlyCollection<KeyContainer> signingKeys;
         var signingKeysSuccess = TryGetAllCurrentSigningKeys(keys, out signingKeys);
 
         // if we loaded from cache, see if DB has updated key
@@ -196,7 +196,7 @@ public class KeyManager : IKeyManager
             }
         }
 
-        if (!signingKeys.Any())
+        if (signingKeys.Count == 0)
         {
             _logger.LogError("Failed to create and then load new keys.");
             throw new Exception("Failed to create and then load new keys.");
@@ -205,9 +205,9 @@ public class KeyManager : IKeyManager
         return (keys, signingKeys);
     }
 
-    internal bool IsKeyRotationRequired(IEnumerable<KeyContainer> allKeys)
+    internal bool IsKeyRotationRequired(IReadOnlyCollection<KeyContainer> allKeys)
     {
-        if (allKeys == null || !allKeys.Any())
+        if (allKeys == null || allKeys.Count == 0)
         {
             return true;
         }
@@ -307,7 +307,7 @@ public class KeyManager : IKeyManager
         return container;
     }
 
-    internal async Task<IEnumerable<KeyContainer>> GetAllKeysFromCacheAsync(Ct ct)
+    internal async Task<IReadOnlyCollection<KeyContainer>> GetAllKeysFromCacheAsync(Ct ct)
     {
         var cachedKeys = await _cache.GetKeysAsync(ct);
         if (cachedKeys != null)
@@ -317,10 +317,10 @@ public class KeyManager : IKeyManager
         }
 
         _logger.LogTrace("Cache miss when loading all keys.");
-        return Enumerable.Empty<KeyContainer>();
+        return Array.Empty<KeyContainer>();
     }
 
-    internal bool AreAllKeysWithinInitializationDuration(IEnumerable<KeyContainer> keys)
+    internal bool AreAllKeysWithinInitializationDuration(IReadOnlyCollection<KeyContainer> keys)
     {
         if (_options.KeyManagement.InitializationDuration == TimeSpan.Zero)
         {
@@ -340,7 +340,7 @@ public class KeyManager : IKeyManager
         return result;
     }
 
-    internal async Task<IEnumerable<SerializedKey>> FilterAndDeleteRetiredKeysAsync(IEnumerable<SerializedKey> keys, Ct ct)
+    internal async Task<IReadOnlyCollection<SerializedKey>> FilterAndDeleteRetiredKeysAsync(IReadOnlyCollection<SerializedKey> keys, Ct ct)
     {
         var retired = keys
             .Where(x =>
@@ -373,9 +373,9 @@ public class KeyManager : IKeyManager
         return result;
     }
 
-    internal async Task DeleteKeysAsync(IEnumerable<string> keys, Ct ct)
+    internal async Task DeleteKeysAsync(IReadOnlyCollection<string> keys, Ct ct)
     {
-        if (keys == null || !keys.Any())
+        if (keys == null || keys.Count == 0)
         {
             return;
         }
@@ -386,7 +386,7 @@ public class KeyManager : IKeyManager
         }
     }
 
-    internal IEnumerable<KeyContainer> FilterExpiredKeys(IEnumerable<KeyContainer> keys)
+    internal IReadOnlyCollection<KeyContainer> FilterExpiredKeys(IReadOnlyCollection<KeyContainer> keys)
     {
         var result = keys
             .Where(x =>
@@ -394,14 +394,15 @@ public class KeyManager : IKeyManager
                 var age = _timeProvider.GetAge(x.Created);
                 var isExpired = _options.KeyManagement.IsExpired(age);
                 return !isExpired;
-            });
+            })
+            .ToArray();
 
         return result;
     }
 
-    internal async Task CacheKeysAsync(IEnumerable<KeyContainer> keys, Ct ct)
+    internal async Task CacheKeysAsync(IReadOnlyCollection<KeyContainer> keys, Ct ct)
     {
-        if (keys?.Any() == true)
+        if (keys?.Count > 0)
         {
             var duration = _options.KeyManagement.KeyCacheDuration;
 
@@ -428,17 +429,17 @@ public class KeyManager : IKeyManager
         }
     }
 
-    internal async Task<IEnumerable<KeyContainer>> GetAllKeysFromStoreAsync(Ct ct, bool cache = true)
+    internal async Task<IReadOnlyCollection<KeyContainer>> GetAllKeysFromStoreAsync(Ct ct, bool cache = true)
     {
         _logger.LogTrace("Loading keys from store.");
 
         var protectedKeys = await _store.LoadKeysAsync(ct);
-        if (protectedKeys != null && protectedKeys.Any())
+        if (protectedKeys != null && protectedKeys.Count > 0)
         {
             // retired keys are those that are beyond inclusion, thus we act as if they don't exist.
-            protectedKeys = await FilterAndDeleteRetiredKeysAsync(protectedKeys, ct);
+            var filteredKeys = await FilterAndDeleteRetiredKeysAsync(protectedKeys, ct);
 
-            var keys = protectedKeys.Select(x =>
+            var keys = filteredKeys.Select(x =>
                 {
                     try
                     {
@@ -460,55 +461,54 @@ public class KeyManager : IKeyManager
                     return null;
                 })
                 .Where(x => x != null)
-                .ToArray()
-                .AsEnumerable();
+                .ToArray();
 
-            if (_logger.IsEnabled(LogLevel.Trace) && keys.Any())
+            if (_logger.IsEnabled(LogLevel.Trace) && keys.Length > 0)
             {
                 var ids = keys.Select(x => x.Id).ToArray();
                 _logger.LogTrace("Loaded keys from store: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
 
-            if (_logger.IsEnabled(LogLevel.Trace) && keys.Any())
+            if (_logger.IsEnabled(LogLevel.Trace) && keys.Length > 0)
             {
                 var ids = keys.Select(x => x.Id).ToArray();
                 _logger.LogTrace("Remaining keys after filter: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
             // only use keys that are allowed
-            keys = keys.Where(x => _options.KeyManagement.AllowedSigningAlgorithmNames.Contains(x.Algorithm)).ToArray();
-            if (_logger.IsEnabled(LogLevel.Trace) && keys.Any())
+            var allowedKeys = keys.Where(x => _options.KeyManagement.AllowedSigningAlgorithmNames.Contains(x.Algorithm)).ToArray();
+            if (_logger.IsEnabled(LogLevel.Trace) && allowedKeys.Length > 0)
             {
-                var ids = keys.Select(x => x.Id).ToArray();
+                var ids = allowedKeys.Select(x => x.Id).ToArray();
                 _logger.LogTrace("Keys with allowed alg from store: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
-            if (keys.Any())
+            if (allowedKeys.Length > 0)
             {
                 _logger.LogTrace("Keys successfully returned from store.");
 
                 if (cache)
                 {
-                    await CacheKeysAsync(keys, ct);
+                    await CacheKeysAsync(allowedKeys, ct);
                 }
 
-                return keys;
+                return allowedKeys;
             }
         }
 
         _logger.LogTrace("No keys returned from store.");
 
-        return Enumerable.Empty<KeyContainer>();
+        return Array.Empty<KeyContainer>();
     }
 
 
 
 
-    internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> activeKeys)> CreateNewKeysAndAddToCacheAsync(Ct ct)
+    internal async Task<(IReadOnlyCollection<KeyContainer> allKeys, IReadOnlyCollection<KeyContainer> activeKeys)> CreateNewKeysAndAddToCacheAsync(Ct ct)
     {
         var keys = new List<KeyContainer>();
-        keys.AddRange(await _cache.GetKeysAsync(ct) ?? Enumerable.Empty<KeyContainer>());
+        keys.AddRange(await _cache.GetKeysAsync(ct) ?? Array.Empty<KeyContainer>());
 
         foreach (var alg in _options.KeyManagement.SigningAlgorithms)
         {
@@ -546,21 +546,21 @@ public class KeyManager : IKeyManager
         return (keys, activeKeys);
     }
 
-    internal bool TryGetAllCurrentSigningKeys(IEnumerable<KeyContainer> keys, out IEnumerable<KeyContainer> signingKeys)
+    internal bool TryGetAllCurrentSigningKeys(IReadOnlyCollection<KeyContainer> keys, out IReadOnlyCollection<KeyContainer> signingKeys)
     {
         signingKeys = GetAllCurrentSigningKeys(keys);
 
-        var success = signingKeys.Count() == _options.KeyManagement.AllowedSigningAlgorithmNames.Count() &&
+        var success = signingKeys.Count == _options.KeyManagement.AllowedSigningAlgorithmNames.Count() &&
                       signingKeys.All(x => _options.KeyManagement.AllowedSigningAlgorithmNames.Contains(x.Algorithm));
 
         return success;
     }
 
-    internal IEnumerable<KeyContainer> GetAllCurrentSigningKeys(IEnumerable<KeyContainer> allKeys)
+    internal IReadOnlyCollection<KeyContainer> GetAllCurrentSigningKeys(IReadOnlyCollection<KeyContainer> allKeys)
     {
-        if (allKeys == null || !allKeys.Any())
+        if (allKeys == null || allKeys.Count == 0)
         {
-            return Enumerable.Empty<KeyContainer>();
+            return Array.Empty<KeyContainer>();
         }
 
         _logger.LogTrace("Looking for active signing keys.");

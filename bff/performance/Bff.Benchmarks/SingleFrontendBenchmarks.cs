@@ -20,14 +20,14 @@ public class SingleFrontendBenchmarks : BenchmarkBase
         _fixture = new SingleFrontendFixture();
 
         _authenticatedBffClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-        await _authenticatedBffClient.GetAsync("/bff/login")
+        _ = await _authenticatedBffClient.GetAsync("/bff/login")
             .EnsureStatusCode();
 
         _anonBffClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
 
         _bffServerSideSessionsClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
 
-        await _bffServerSideSessionsClient.GetAsync("/bff/login")
+        _ = await _bffServerSideSessionsClient.GetAsync("/bff/login")
             .EnsureStatusCode();
 
     }
@@ -56,7 +56,7 @@ public class SingleFrontendBenchmarks : BenchmarkBase
     public async Task SingleFrontend_Login()
     {
         var client = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-        await client.GetAsync("/bff/login")
+        _ = await client.GetAsync("/bff/login")
             .EnsureStatusCode();
     }
 

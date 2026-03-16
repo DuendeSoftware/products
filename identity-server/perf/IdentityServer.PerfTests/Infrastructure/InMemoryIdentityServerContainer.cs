@@ -1,9 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System;
-using System.Collections.Generic;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
@@ -26,7 +23,7 @@ public class InMemoryIdentityServerContainer : IdentityServerContainer
     {
         OnConfigureServices += services =>
         {
-            services.AddIdentityServer(OnConfigureIdentityServerOptions)
+            _ = services.AddIdentityServer(OnConfigureIdentityServerOptions!)
                 .AddInMemoryClients(Clients)
                 .AddInMemoryIdentityResources(IdentityResources)
                 .AddInMemoryApiScopes(ApiScopes)
@@ -35,7 +32,7 @@ public class InMemoryIdentityServerContainer : IdentityServerContainer
 
         OnConfigure += app =>
         {
-            app.UseIdentityServer();
+            _ = app.UseIdentityServer();
         };
     }
 }

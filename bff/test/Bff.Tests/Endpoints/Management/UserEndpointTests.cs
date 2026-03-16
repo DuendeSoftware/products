@@ -20,7 +20,7 @@ public class UserEndpointTests : BffTestBase
         {
             // Setup a login endpoint that allows you to simulate signing in as a specific
             // user in the BFF. 
-            app.MapGet("/__signin", async ctx =>
+            _ = app.MapGet("/__signin", async ctx =>
             {
                 var props = new AuthenticationProperties();
                 await ctx.SignInAsync(UserToSignIn!, props);
@@ -59,14 +59,14 @@ public class UserEndpointTests : BffTestBase
         Bff.OnConfigureServices += services =>
         {
             // We're adding an AccessTokenManagement HTTP Client that can access the API Endpoint. 
-            services.AddUserAccessTokenHttpClient("c1",
+            _ = services.AddUserAccessTokenHttpClient("c1",
                 configureClient: client =>
                 {
                     client.BaseAddress = Api.Url();
                 }).ConfigurePrimaryHttpMessageHandler(() => Internet);
 
             // Then we're adding the claims enricher that will call the endpoint. 
-            services.AddSingleton<IUserEndpointClaimsEnricher, TestClaimsEnricher>();
+            _ = services.AddSingleton<IUserEndpointClaimsEnricher, TestClaimsEnricher>();
         };
 
         Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(opt =>
@@ -80,7 +80,7 @@ public class UserEndpointTests : BffTestBase
         await InitializeAsync();
 
         AddCustomUserClaims(new Claim("foo", "foo1"), new Claim("foo", "foo2"));
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var data = await Bff.BrowserClient.CallUserEndpointAsync();
 
@@ -99,7 +99,7 @@ public class UserEndpointTests : BffTestBase
         await ConfigureBff(setup);
 
         AddCustomUserClaims(new Claim("foo", "foo1"), new Claim("foo", "foo2"));
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var data = await Bff.BrowserClient.CallUserEndpointAsync();
 
@@ -124,7 +124,7 @@ public class UserEndpointTests : BffTestBase
             new Claim("sid", "123"),
         ], "test", "name", "role"));
 
-        await Bff.BrowserClient.GetAsync("/__signin");
+        _ = await Bff.BrowserClient.GetAsync("/__signin");
 
         var data = await Bff.BrowserClient.CallUserEndpointAsync();
 

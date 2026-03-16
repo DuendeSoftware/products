@@ -27,9 +27,9 @@ public class SeedData
             Log.Debug("Clients being populated");
             foreach (var client in Config.Clients.ToList())
             {
-                context.Clients.Add(client.ToEntity());
+                _ = context.Clients.Add(client.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -41,9 +41,9 @@ public class SeedData
             Log.Debug("IdentityResources being populated");
             foreach (var resource in Config.IdentityResources.ToList())
             {
-                context.IdentityResources.Add(resource.ToEntity());
+                _ = context.IdentityResources.Add(resource.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -55,9 +55,9 @@ public class SeedData
             Log.Debug("ApiScopes being populated");
             foreach (var resource in Config.ApiScopes.ToList())
             {
-                context.ApiScopes.Add(resource.ToEntity());
+                _ = context.ApiScopes.Add(resource.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -67,14 +67,14 @@ public class SeedData
         if (!context.IdentityProviders.Any())
         {
             Log.Debug("OIDC IdentityProviders being populated");
-            context.IdentityProviders.Add(new OidcProvider
+            _ = context.IdentityProviders.Add(new OidcProvider
             {
                 Scheme = "demoidsrv",
                 DisplayName = "IdentityServer",
                 Authority = "https://demo.duendesoftware.com",
                 ClientId = "login",
             }.ToEntity());
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {

@@ -68,7 +68,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
         await using var samplesRepositoryTempStream = await TemporaryFileStream.CreateFromAsync(samplesRepositoryBlobStream);
         await using var samplesRepositoryZipStream = new ZipArchive(samplesRepositoryTempStream, ZipArchiveMode.Read, leaveOpen: false);
 
-        await db.FTSSampleProject.ExecuteDeleteAsync(stoppingToken);
+        _ = await db.FTSSampleProject.ExecuteDeleteAsync(stoppingToken);
 
         // Extract sample titles and descriptions
         string? sampleTitle = null;
@@ -88,7 +88,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
                     var files = await GetFilesForRepositoryPathAsync(sampleContent.ToString(), samplesRepositoryZipStream, stoppingToken);
                     if (files.Count > 0)
                     {
-                        db.FTSSampleProject.Add(new FTSSampleProject
+                        _ = db.FTSSampleProject.Add(new FTSSampleProject
                         {
                             Id = Guid.NewGuid().ToString(),
                             Product = "IdentityServer",
@@ -99,7 +99,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
                     }
 
                     sampleTitle = llmsTxt.Substring(headingBlock.Span.Start, headingBlock.Span.Length).TrimStart('#', ' ');
-                    sampleContent.Clear();
+                    _ = sampleContent.Clear();
                 }
 
                 // HACK: Sprinkle some keywords
@@ -111,7 +111,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
 
             if (sampleTitle != null && sampleContent != null)
             {
-                sampleContent.AppendLine(llmsTxt.Substring(block.Span.Start, block.Span.Length));
+                _ = sampleContent.AppendLine(llmsTxt.Substring(block.Span.Start, block.Span.Length));
             }
         }
 
@@ -120,7 +120,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
             var files = await GetFilesForRepositoryPathAsync(sampleContent.ToString(), samplesRepositoryZipStream, stoppingToken);
             if (files.Count > 0)
             {
-                db.FTSSampleProject.Add(new FTSSampleProject
+                _ = db.FTSSampleProject.Add(new FTSSampleProject
                 {
                     Id = Guid.NewGuid().ToString(),
                     Product = "IdentityServer",
@@ -131,7 +131,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
             }
         }
 
-        await db.SaveChangesAsync(stoppingToken);
+        _ = await db.SaveChangesAsync(stoppingToken);
         logger.LogInformation("Saved {Count} samples", db.FTSSampleProject.Count());
 
         await db.SetLastUpdateStateAsync("samples", DateTimeOffset.UtcNow);

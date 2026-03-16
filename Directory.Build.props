@@ -1,0 +1,43 @@
+<Project>
+  <PropertyGroup>
+    <Company>Duende Software</Company>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AnalysisMode>All</AnalysisMode>
+    <Authors>$(Company)</Authors>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
+    <Copyright>$(Company)</Copyright>
+    <DebugType>embedded</DebugType>
+    <Deterministic>true</Deterministic>
+    <!-- <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> -->
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- <NoWarn>$(NoWarn);EnableGenerateDocumentationFile</NoWarn>--><!-- workaround for https://github.com/dotnet/roslyn/issues/41640 -->
+    <!-- <Nullable>enable</Nullable> -->
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA1034</NoWarn><!-- Nested types should not be visible -->
+    <NoWarn>$(NoWarn);CA1040</NoWarn><!-- Avoid empty interfaces -->
+    <NoWarn>$(NoWarn);CA2007</NoWarn><!-- Do not directly await a Task -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn><!-- Missing XML comment for publicly visible type or member -->
+    <NoWarn>$(NoWarn);NU1507</NoWarn><!-- There are 2 package sources defined in your configuration -->
+  </PropertyGroup>
+
+  <!--Release builds do more work and are stricter. This allows for faster
+      development: devs can be messy/experimental initially and verify their
+      code easily by running a build in Release mode, and we also enforce
+      stricter rules in CI with the Release configuration.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <!-- Workaround for https://github.com/dotnet/roslyn/issues/41640 -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)shared/Global.cs" Link="Global.cs" />
+  </ItemGroup>
+</Project>

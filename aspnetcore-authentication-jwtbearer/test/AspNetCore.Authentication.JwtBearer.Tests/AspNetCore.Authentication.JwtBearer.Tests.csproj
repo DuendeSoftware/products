@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -7,7 +6,6 @@
     <RootNameSpace>Duende.AspNetCore.Authentication.JwtBearer</RootNameSpace>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
@@ -16,13 +14,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
-    <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
-    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="RichardSzalay.MockHttp" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\src\AspNetCore.Authentication.JwtBearer\AspNetCore.Authentication.JwtBearer.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.Authentication.JwtBearer\AspNetCore.Authentication.JwtBearer.csproj" />
   </ItemGroup>
 </Project>

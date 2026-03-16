@@ -19,17 +19,17 @@ internal static class HostingExtensions
 
         JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
-        builder.Services.AddControllersWithViews();
+        _ = builder.Services.AddControllersWithViews();
 
-        builder.Services.AddHttpClient();
+        _ = builder.Services.AddHttpClient();
 
-        builder.Services.AddSingleton<IDiscoveryCache>(r =>
+        _ = builder.Services.AddSingleton<IDiscoveryCache>(r =>
         {
             var factory = r.GetRequiredService<IHttpClientFactory>();
             return new DiscoveryCache(authority, () => factory.CreateClient());
         });
 
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = "oidc";
@@ -77,7 +77,7 @@ internal static class HostingExtensions
 
         // Register a named HttpClient with service discovery support.
         // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
-        builder.Services.AddHttpClient("SimpleApi", client =>
+        _ = builder.Services.AddHttpClient("SimpleApi", client =>
         {
             client.BaseAddress = new Uri("https://simple-api");
         })
@@ -88,16 +88,16 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseDeveloperExceptionPage();
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseHttpsRedirection();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapDefaultControllerRoute()
+        _ = app.MapDefaultControllerRoute()
             .RequireAuthorization();
 
         return app;

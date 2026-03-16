@@ -18,7 +18,7 @@ public class BffFrontendMatchingTests : BffTestBase
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/show-front-end",
+            _ = app.MapGet("/show-front-end",
                 (CurrentFrontendAccessor currentFrontendAccessor) =>
                 {
                     if (currentFrontendAccessor.TryGet(out var frontend))
@@ -35,31 +35,31 @@ public class BffFrontendMatchingTests : BffTestBase
     public async Task When_no_frontend_but_openid_config_then_all_endpoints_are_present()
     {
         Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
         await InitializeAsync();
 
         // Remove the never-matching frontend so the default frontend is used
         Bff.Resolve<IFrontendCollection>().Remove(Some.NeverMatchingFrontEnd().Name);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         var user = await Bff.BrowserClient.CallUserEndpointAsync();
         user.ShouldNotBeEmpty();
-        await Bff.BrowserClient.Logout();
+        _ = await Bff.BrowserClient.Logout();
     }
 
     [Fact]
     public async Task Given_unmatched_frontend_then_default_frontend_is_disabled()
     {
         Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
-        IdentityServer.AddClient(The.ClientId, Bff.Url("not_matched/"));
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url("not_matched/"));
         await InitializeAsync();
         Bff.AddOrUpdateFrontend(Some.BffFrontend().MapToPath("/not_matched"));
 
         Bff.BrowserClient.DefaultRequestHeaders.Add("x-csrf", "1");
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
-        await Bff.BrowserClient.GetAsync("/bff/diagnostics").CheckHttpStatusCode(HttpStatusCode.NotFound);
-        await Bff.BrowserClient.GetAsync("/bff/logout").CheckHttpStatusCode(HttpStatusCode.NotFound);
-        await Bff.BrowserClient.GetAsync("/bff/user").CheckHttpStatusCode(HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.GetAsync("/bff/diagnostics").CheckHttpStatusCode(HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.GetAsync("/bff/logout").CheckHttpStatusCode(HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.GetAsync("/bff/user").CheckHttpStatusCode(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class BffFrontendMatchingTests : BffTestBase
     {
         Bff.OnConfigureServices += services =>
         {
-            services.Configure<ForwardedHeadersOptions>(options =>
+            _ = services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedHost;
             });

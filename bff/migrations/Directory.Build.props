@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
   <PropertyGroup>
+    <AnalysisMode>None</AnalysisMode>
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
-
-    <TargetFramework>net10.0</TargetFramework>
-
+    <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
   </PropertyGroup>
-  <Import Project="../../hosts_and_clients.props" />
 </Project>

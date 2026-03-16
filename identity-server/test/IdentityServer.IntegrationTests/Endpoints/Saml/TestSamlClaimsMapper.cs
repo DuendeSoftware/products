@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 /// </summary>
 public class TestSamlClaimsMapper : ISamlClaimsMapper
 {
-    public Task<IEnumerable<SamlAttribute>> MapClaimsAsync(SamlClaimsMappingContext mappingContext)
+    public Task<IReadOnlyCollection<SamlAttribute>> MapClaimsAsync(SamlClaimsMappingContext mappingContext)
     {
         var attributes = new List<SamlAttribute>
         {
@@ -23,6 +23,6 @@ public class TestSamlClaimsMapper : ISamlClaimsMapper
                 Values = new List<string> { "custom_value" }
             }
         };
-        return Task.FromResult<IEnumerable<SamlAttribute>>(attributes);
+        return Task.FromResult<IReadOnlyCollection<SamlAttribute>>(attributes);
     }
 }

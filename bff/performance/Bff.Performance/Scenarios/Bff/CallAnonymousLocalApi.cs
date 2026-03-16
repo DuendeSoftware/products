@@ -21,7 +21,7 @@ public class CallAuthorizedLocalApi(Uri baseUri) : BaseScenario(baseUri.ToString
     public override async Task Init(IScenarioInitContext c)
     {
         Client = TestClient.Create(baseUri);
-        await Client.TriggerLogin();
+        _ = await Client.TriggerLogin();
     }
 
     public override async Task<HttpResponseMessage> RunScenario(IScenarioContext context)

@@ -15,7 +15,7 @@ internal class TrialModeAuthenticatedSessionTracker
     {
         if (_authenticatedSessions.Count <= LicenseValidator.MaximumAllowedSessionsInTrialMode)
         {
-            _authenticatedSessions.TryAdd(subjectId, 0);
+            _ = _authenticatedSessions.TryAdd(subjectId, 0);
         }
     }
 }

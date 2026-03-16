@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add ServiceDefaults from Aspire
-builder.AddServiceDefaults();
+_ = builder.AddServiceDefaults();
 
 // Register named HttpClient with service discovery support.
 // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
@@ -66,7 +66,7 @@ async Task<DeviceAuthorizationResponse> RequestAuthorizationAsync()
     Console.WriteLine($"URL         : {response.VerificationUri}");
     Console.WriteLine($"Complete URL: {response.VerificationUriComplete}");
 
-    Process.Start(new ProcessStartInfo(response.VerificationUriComplete) { UseShellExecute = true });
+    _ = Process.Start(new ProcessStartInfo(response.VerificationUriComplete) { UseShellExecute = true });
     return response;
 }
 

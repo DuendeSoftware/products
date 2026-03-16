@@ -3,7 +3,6 @@
 
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client.Internals;
-using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
@@ -16,7 +15,7 @@ public class BffClientAuthenticationStateProviderTests
         var userService = Substitute.For<FetchUserService>();
         var persistentUserService = Substitute.For<PersistentUserService>();
         var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-        persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
+        _ = persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
             .Returns(x =>
             {
                 x[0] = anonymous;
@@ -34,7 +33,7 @@ public class BffClientAuthenticationStateProviderTests
         var authState = await sut.GetAuthenticationStateAsync();
         authState.User.Identity?.IsAuthenticated.ShouldBeFalse();
         time.Advance(TimeSpan.FromSeconds(100));
-        await userService.DidNotReceive().FetchUserAsync();
+        _ = await userService.DidNotReceive().FetchUserAsync();
     }
 
     [Fact]
@@ -54,13 +53,13 @@ public class BffClientAuthenticationStateProviderTests
             new Claim("name", expectedName),
             new Claim("source", "fetch")
         ], "pwd", "name", "role"));
-        persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
+        _ = persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
             .Returns(x =>
             {
                 x[0] = persistedUser;
                 return true;
             });
-        fetchUserService.FetchUserAsync().Returns(fetchedUser);
+        _ = fetchUserService.FetchUserAsync().Returns(fetchedUser);
 
         var sut = new BffClientAuthenticationStateProvider(
             fetchUserService,
@@ -77,29 +76,29 @@ public class BffClientAuthenticationStateProviderTests
         authState.User.Identity?.IsAuthenticated.ShouldBeTrue();
         authState.User.Identity?.Name.ShouldBe(expectedName);
         // Initially we get the persisted user and haven't yet polled
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await fetchUserService.DidNotReceive().FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await fetchUserService.DidNotReceive().FetchUserAsync();
 
         // Advance time within the polling delay, and note that we still haven't made additional calls
         time.Advance(TimeSpan.FromSeconds(1)); // t = 1
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await fetchUserService.DidNotReceive().FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await fetchUserService.DidNotReceive().FetchUserAsync();
 
         // Advance time past the polling delay, and note that we make an additional call to fetch the user
         time.Advance(TimeSpan.FromSeconds(2)); // t = 3
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await fetchUserService.Received(1).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await fetchUserService.Received(1).FetchUserAsync();
 
         // Advance time within the polling interval, but more than the polling delay
         // We don't expect additional calls yet
         time.Advance(TimeSpan.FromSeconds(3)); // t = 6
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await fetchUserService.Received(1).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await fetchUserService.Received(1).FetchUserAsync();
 
         // Advance time past the polling interval, and note that we make an additional call
         time.Advance(TimeSpan.FromSeconds(10)); // t = 16
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await fetchUserService.Received(2).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await fetchUserService.Received(2).FetchUserAsync();
     }
 
     [Fact]
@@ -114,13 +113,13 @@ public class BffClientAuthenticationStateProviderTests
             new Claim("name", expectedName),
             new Claim("source", "fetch")
         ], "pwd", "name", "role"));
-        persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
+        _ = persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
             .Returns(x =>
             {
                 x[0] = null;
                 return true;
             });
-        fetchUserService.FetchUserAsync().Returns(fetchedUser);
+        _ = fetchUserService.FetchUserAsync().Returns(fetchedUser);
 
         var sut = new BffClientAuthenticationStateProvider(
             fetchUserService,
@@ -137,16 +136,16 @@ public class BffClientAuthenticationStateProviderTests
         authState.User.Identity?.IsAuthenticated.ShouldBeTrue();
         authState.User.Identity?.Name.ShouldBe(expectedName);
         // We fail to get a persisted user and immediately start polling
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await fetchUserService.Received(1).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await fetchUserService.Received(1).FetchUserAsync();
 
         // Repeatedly advance time past the polling interval, and note that we make an additional call
         // each time.
         for (var i = 0; i < 10; i++)
         {
             time.Advance(TimeSpan.FromSeconds(10));
-            persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-            await fetchUserService.Received(i + 2).FetchUserAsync();
+            _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+            _ = await fetchUserService.Received(i + 2).FetchUserAsync();
         }
     }
 
@@ -170,7 +169,7 @@ public class BffClientAuthenticationStateProviderTests
             new Claim("source", "fetch")
         ], "pwd", "name", "role"));
 
-        persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
+        _ = persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
             .Returns(x =>
             {
                 x[0] = persistedUser;
@@ -178,7 +177,7 @@ public class BffClientAuthenticationStateProviderTests
             });
         // Simulate that the user got logged out by first returning a mocked logged in user,
         // and then returning an anonymous user
-        userService.FetchUserAsync().Returns(fetchedUser, anonymousUser);
+        _ = userService.FetchUserAsync().Returns(fetchedUser, anonymousUser);
 
         var sut = new BffClientAuthenticationStateProvider(
             userService,
@@ -187,17 +186,17 @@ public class BffClientAuthenticationStateProviderTests
             TestMocks.MockOptions(),
             Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
 
-        var _ = await sut.GetAuthenticationStateAsync();
+        _ = await sut.GetAuthenticationStateAsync();
         time.Advance(TimeSpan.FromSeconds(5));
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await userService.Received(1).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await userService.Received(1).FetchUserAsync();
 
         time.Advance(TimeSpan.FromSeconds(10));
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await userService.Received(2).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await userService.Received(2).FetchUserAsync();
 
         time.Advance(TimeSpan.FromSeconds(50));
-        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
-        await userService.Received(2).FetchUserAsync();
+        _ = persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        _ = await userService.Received(2).FetchUserAsync();
     }
 }

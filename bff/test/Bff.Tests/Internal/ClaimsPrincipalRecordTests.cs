@@ -41,7 +41,7 @@ public class ClaimsPrincipalRecordTests
     {
         var original = new ClaimsPrincipalRecord();
 
-        Should.NotThrow(() => original.ToClaimsPrincipal());
+        _ = Should.NotThrow(() => original.ToClaimsPrincipal());
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class ClaimsPrincipalRecordTests
             ]
         };
 
-        Should.NotThrow(() => original.ToClaimsPrincipal());
+        _ = Should.NotThrow(() => original.ToClaimsPrincipal());
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class ClaimsPrincipalRecordTests
         var serializedClaimsPrincipal = """{"Claims": null}""";
         var record = JsonSerializer.Deserialize<ClaimsPrincipalRecord>(serializedClaimsPrincipal);
 
-        Should.NotThrow(() => record!.ToClaimsPrincipal());
+        _ = Should.NotThrow(() => record!.ToClaimsPrincipal());
     }
 
     [Fact]

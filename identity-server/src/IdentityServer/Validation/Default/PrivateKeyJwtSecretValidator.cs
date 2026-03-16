@@ -130,8 +130,9 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
 
         if (enforceStrictAud)
         {
-            // New strict audience validation requires that the audience be the issuer identifier, disallows multiple
-            // audiences in an array, and even disallows wrapping even a single audience in an array
+            // Strict audience validation requires that the audience be the issuer identifier as the sole audience
+            // value, per draft-ietf-oauth-rfc7523bis. A single-element array is permitted, but multi-element arrays
+            // are rejected.
             tokenValidationParameters.AudienceValidator = (audiences, token, parameters) =>
             {
                 // There isn't a particularly nice way to distinguish between a claim that is a single string wrapped in
@@ -139,8 +140,12 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
                 // collection both convert that into a string valued claim. However, GetPayloadValue<object> does not do
                 // any type inferencing, so we can call that, and then check if the result is actually a string
                 var audValue = ((JsonWebToken)token).GetPayloadValue<object>("aud");
-                return audValue is string audString &&
-                       AudiencesMatch(audString, issuer);
+                return audValue switch
+                {
+                    string audString => AudiencesMatch(audString, issuer),
+                    List<string> { Count: 1 } audList => AudiencesMatch(audList[0], issuer),
+                    _ => false
+                };
             };
 
             // Strict audience validation requires that the token type be "client-authentication+jwt"

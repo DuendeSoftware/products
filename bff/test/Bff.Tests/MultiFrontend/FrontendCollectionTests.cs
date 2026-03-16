@@ -171,7 +171,7 @@ public class FrontendCollectionTests
 
         updateCount.ShouldBe(1);
         addedCount.ShouldBe(1);
-        eventArg.ShouldNotBeNull();
+        _ = eventArg.ShouldNotBeNull();
         eventArg.ShouldBe(updatedFrontend);
     }
 
@@ -209,7 +209,7 @@ public class FrontendCollectionTests
 
         updateCount.ShouldBe(0);
         addedCount.ShouldBe(1);
-        eventArg.ShouldNotBeNull();
+        _ = eventArg.ShouldNotBeNull();
         eventArg.ShouldBe(updatedFrontend);
     }
 
@@ -235,7 +235,7 @@ public class FrontendCollectionTests
         cache.Remove(bffFrontend.Name);
 
         eventCount.ShouldBe(1);
-        eventArg.ShouldNotBeNull();
+        _ = eventArg.ShouldNotBeNull();
         eventArg.ShouldBe(bffFrontend);
     }
 }

@@ -14,14 +14,14 @@ try
     Log.Information("{EnvironmentApplicationName} Starting up", builder.Environment.ApplicationName);
 
     builder.ConfigureSerilogDefaults();
-    builder.AddServiceDefaults();
+    _ = builder.AddServiceDefaults();
 
-    builder.Services.AddControllers();
-    builder.Services.AddCors();
-    builder.Services.AddDistributedMemoryCache();
+    _ = builder.Services.AddControllers();
+    _ = builder.Services.AddCors();
+    _ = builder.Services.AddDistributedMemoryCache();
 
     // this API will accept any access token from the authority
-    builder.Services.AddAuthentication("token")
+    _ = builder.Services.AddAuthentication("token")
         .AddJwtBearer("token", options =>
         {
             options.Authority = builder.Configuration["is-host"];
@@ -30,7 +30,7 @@ try
             options.TokenValidationParameters.ValidTypes = ["at+jwt"];
         });
 
-    builder.Services.ConfigureDPoPTokensForScheme("token", options =>
+    _ = builder.Services.ConfigureDPoPTokensForScheme("token", options =>
     {
         options.AllowBearerTokens = true;
         options.EnableReplayDetection = true;
@@ -38,21 +38,21 @@ try
 
     var app = builder.Build();
 
-    app.UseSerilogRequestLogging();
+    _ = app.UseSerilogRequestLogging();
 
-    app.UseCors(policy =>
+    _ = app.UseCors(policy =>
     {
-        policy.WithOrigins("https://localhost:44300");
-        policy.AllowAnyHeader();
-        policy.AllowAnyMethod();
-        policy.WithExposedHeaders("WWW-Authenticate");
+        _ = policy.WithOrigins("https://localhost:44300");
+        _ = policy.AllowAnyHeader();
+        _ = policy.AllowAnyMethod();
+        _ = policy.WithExposedHeaders("WWW-Authenticate");
     });
 
-    app.UseRouting();
-    app.UseAuthentication();
-    app.UseAuthorization();
+    _ = app.UseRouting();
+    _ = app.UseAuthentication();
+    _ = app.UseAuthorization();
 
-    app.MapControllers().RequireAuthorization();
+    _ = app.MapControllers().RequireAuthorization();
 
     app.Run();
 }

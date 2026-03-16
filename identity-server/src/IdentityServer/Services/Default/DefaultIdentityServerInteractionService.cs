@@ -83,7 +83,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         {
             var clientIds = await _userSession.GetClientListAsync(ct);
             var samlSessions = await _userSession.GetSamlSessionListAsync(ct);
-            if (clientIds.Any() || samlSessions.Any())
+            if (clientIds.Count > 0 || samlSessions.Count > 0)
             {
                 var sid = await _userSession.GetSessionIdAsync(ct);
                 var msg = new Message<LogoutMessage>(new LogoutMessage
@@ -178,7 +178,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Grant>> GetAllUserGrantsAsync(Ct ct)
+    public async Task<IReadOnlyCollection<Grant>> GetAllUserGrantsAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAllUserGrants");
 
@@ -189,7 +189,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
             return await _grants.GetAllGrantsAsync(subject, ct);
         }
 
-        return Enumerable.Empty<Grant>();
+        return Array.Empty<Grant>();
     }
 
     /// <inheritdoc/>

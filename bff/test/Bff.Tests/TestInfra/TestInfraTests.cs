@@ -13,7 +13,7 @@ public class TestInfraTests : BffTestBase
         await InitializeAsync();
         var client = Internet.BuildHttpClient(IdentityServer.Url());
 
-        await client.GetAsync("/account/login")
+        _ = await client.GetAsync("/account/login")
             .CheckHttpStatusCode();
     }
 
@@ -24,12 +24,12 @@ public class TestInfraTests : BffTestBase
 
         await InitializeAsync();
         var client = Internet.BuildHttpClient(Bff.Url());
-        await client.GetAsync("/bff/login")
+        _ = await client.GetAsync("/bff/login")
             .CheckHttpStatusCode();
     }
 
     private void AddManualOidcFlow(IServiceCollection services) =>
-        services.AddAuthentication(options =>
+        _ = services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
@@ -70,7 +70,7 @@ public class TestInfraTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/api/test", async context =>
+            _ = app.MapGet("/api/test", async context =>
             {
                 context.Response.StatusCode = 200;
                 await context.Response.WriteAsync("Hello World");
@@ -81,7 +81,7 @@ public class TestInfraTests : BffTestBase
 
         var client = Internet.BuildHttpClient(Bff.Url());
 
-        await client.GetAsync("/api/test")
+        _ = await client.GetAsync("/api/test")
             .CheckHttpStatusCode();
     }
 

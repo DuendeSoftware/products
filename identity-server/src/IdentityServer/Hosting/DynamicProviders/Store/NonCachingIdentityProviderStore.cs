@@ -38,7 +38,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct) => _inner.GetAllSchemeNamesAsync(ct);
+    public Task<IReadOnlyCollection<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct) => _inner.GetAllSchemeNamesAsync(ct);
 
     /// <inheritdoc/>
     public async Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)

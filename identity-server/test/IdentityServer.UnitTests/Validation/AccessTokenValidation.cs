@@ -7,7 +7,6 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 

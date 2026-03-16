@@ -16,7 +16,7 @@ public sealed class CurrentFrontendAccessor(IHttpContextAccessor contextAccessor
 
     public bool TryGet([NotNullWhen(true)] out BffFrontend? frontend)
     {
-        Context.Items.TryGetValue(HttpItemName, out var value);
+        _ = Context.Items.TryGetValue(HttpItemName, out var value);
         frontend = value as BffFrontend;
         return frontend != null;
     }

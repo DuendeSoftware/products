@@ -11,7 +11,6 @@ using Duende.IdentityServer.Internal.Saml.Infrastructure;
 using Duende.IdentityServer.Internal.Saml.SingleLogout;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Time.Testing;
 
 namespace UnitTests.Saml;
 

@@ -12,7 +12,7 @@ public record TestHostContext(ITestOutputHelper OutputHelper)
     public WriteTestOutput WriteOutput => s =>
     {
         OutputHelper.WriteLine(_watch.ElapsedMilliseconds.ToString() + "ms - " + s);
-        LogMessages.AppendLine(s);
+        _ = LogMessages.AppendLine(s);
     };
     public readonly TestData The = new TestData();
     public TestDataBuilder Some => new TestDataBuilder(The);

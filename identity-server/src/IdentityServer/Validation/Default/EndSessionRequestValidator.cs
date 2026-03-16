@@ -246,7 +246,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
 
         var endSessionId = parameters[Constants.UIConstants.DefaultRoutePathParams.EndSessionCallback];
         var endSessionMessage = await EndSessionMessageStore.ReadAsync(endSessionId, ct);
-        if (endSessionMessage?.Data?.ClientIds?.Any() == true || endSessionMessage?.Data?.SamlSessions?.Any() == true)
+        if (endSessionMessage?.Data?.ClientIds?.Count > 0 || endSessionMessage?.Data?.SamlSessions?.Count > 0)
         {
             result.IsError = false;
             result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data, ct);

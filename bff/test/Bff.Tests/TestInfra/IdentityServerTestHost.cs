@@ -25,7 +25,7 @@ public class IdentityServerTestHost : TestHost
                 ApiScopes.Add(new ApiScope(The.Scope));
             }
 
-            services.AddHttpClient(IdentityServerConstants.HttpClients.BackChannelLogoutHttpClient)
+            _ = services.AddHttpClient(IdentityServerConstants.HttpClients.BackChannelLogoutHttpClient)
                 .ConfigurePrimaryHttpMessageHandler(() => context.Internet);
 
             var idsrv = services.AddIdentityServer(options =>
@@ -37,23 +37,23 @@ public class IdentityServerTestHost : TestHost
                 .AddInMemoryIdentityResources(IdentityResources)
                 .AddInMemoryApiScopes(ApiScopes);
 
-            idsrv.AddBackChannelLogoutHttpClient();
+            _ = idsrv.AddBackChannelLogoutHttpClient();
         };
 
         OnConfigureApp += app =>
         {
-            app.MapGet("/account/create", context =>
+            _ = app.MapGet("/account/create", context =>
             {
                 return Task.CompletedTask;
             });
 
-            app.MapGet("/account/login", async ctx =>
+            _ = app.MapGet("/account/login", async ctx =>
             {
                 var props = PropsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignInAsync(UserToSignIn, props);
             });
 
-            app.MapGet("/account/logout", async ctx =>
+            _ = app.MapGet("/account/logout", async ctx =>
             {
                 // signout as if the user were prompted
                 await ctx.SignOutAsync(PropsToSignIn);
@@ -66,7 +66,7 @@ public class IdentityServerTestHost : TestHost
                 ctx.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
             });
 
-            app.MapGet("/__signin", async ctx =>
+            _ = app.MapGet("/__signin", async ctx =>
             {
                 var props = PropsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignInAsync(UserToSignIn, props);
@@ -74,7 +74,7 @@ public class IdentityServerTestHost : TestHost
                 ctx.Response.StatusCode = 204;
             });
 
-            app.MapGet("/__signout", async ctx =>
+            _ = app.MapGet("/__signout", async ctx =>
             {
                 var props = PropsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignOutAsync(props);
@@ -88,10 +88,10 @@ public class IdentityServerTestHost : TestHost
 
     protected override void ConfigureApp(IApplicationBuilder app)
     {
-        app.UseIdentityServer();
-        app.UseAuthorization();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
 
-        app.UseRouting();
+        _ = app.UseRouting();
         base.ConfigureApp(app);
     }
 
@@ -136,7 +136,7 @@ public class IdentityServerTestHost : TestHost
         var existing = Clients.FirstOrDefault(c => c.ClientId == clientId);
         if (existing != null)
         {
-            Clients.Remove(existing);
+            _ = Clients.Remove(existing);
         }
 
         var clientSecret = options.ClientSecret ?? The.ClientSecret;

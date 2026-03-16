@@ -25,19 +25,19 @@ internal sealed class BlogSearchTool(McpDb db)
             .ToListAsync();
 
         var responseBuilder = new StringBuilder();
-        responseBuilder.Append(CultureInfo.InvariantCulture, $"## Query\n\n{query}\n\n");
+        _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"## Query\n\n{query}\n\n");
 
         if (results.Count == 0)
         {
-            responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nNo results found for: \"{query}\"\n\nIf you'd like to retry the search, try changing the query to increase the likelihood of a match.");
+            _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nNo results found for: \"{query}\"\n\nIf you'd like to retry the search, try changing the query to increase the likelihood of a match.");
             return responseBuilder.ToString();
         }
 
-        responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nResults found for: \"{query}\". Listing a document id and document title:\n\n");
+        _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nResults found for: \"{query}\". Listing a document id and document title:\n\n");
 
         foreach (var result in results)
         {
-            responseBuilder.Append(CultureInfo.InvariantCulture, $"- [{result.Id}]({result.Title})\n");
+            _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"- [{result.Id}]({result.Title})\n");
         }
 
         return responseBuilder.ToString();

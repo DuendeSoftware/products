@@ -1,11 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -74,11 +69,11 @@ public class IdentityServerContainer : IDisposable
         var hostBuilder = new HostBuilder()
             .ConfigureWebHost(builder =>
             {
-                builder.UseTestServer();
-                builder.UseSetting("Environment", "Production");
+                _ = builder.UseTestServer();
+                _ = builder.UseSetting("Environment", "Production");
 
-                builder.ConfigureServices(ConfigureServices);
-                builder.Configure(ConfigureApp);
+                _ = builder.ConfigureServices(ConfigureServices);
+                _ = builder.Configure(ConfigureApp);
             });
 
         // Build and start the IHost
@@ -113,12 +108,12 @@ public class IdentityServerContainer : IDisposable
     {
         var logging = services.AddLogging(options =>
         {
-            options.SetMinimumLevel(DefaultLogLevel);
-            options.AddProvider(Logger);
+            _ = options.SetMinimumLevel(DefaultLogLevel);
+            _ = options.AddProvider(Logger);
 
             foreach (var item in LogFilters)
             {
-                options.AddFilter(item.Key, item.Value);
+                _ = options.AddFilter(item.Key, item.Value);
             }
         });
 

@@ -17,14 +17,14 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
 
     public IAccessTokenRetriever_Extensibility_tests() : base()
     {
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
         Bff.OnConfigureBff += bff => bff
             .ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration)
             .AddRemoteApis();
 
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton(_customAccessTokenReceiver);
+            _ = services.AddSingleton(_customAccessTokenReceiver);
         };
     }
 
@@ -33,15 +33,15 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint("/custom", Api.Url("/some/path"))
+            _ = app.MapRemoteBffApiEndpoint("/custom", Api.Url("/some/path"))
                 .WithAccessToken()
                 .WithAccessTokenRetriever<ContextCapturingAccessTokenRetriever>();
         };
 
         await InitializeAsync();
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.CallBffHostApi(Bff.Url("/custom"));
+        _ = await Bff.BrowserClient.CallBffHostApi(Bff.Url("/custom"));
 
         var usedContext = _customAccessTokenReceiver.UsedContext.ShouldNotBeNull();
 
@@ -58,13 +58,13 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
         Bff.OnConfigureApp += app =>
         {
 
-            app.Map("/subPath",
+            _ = app.Map("/subPath",
                 subPath =>
                 {
-                    subPath.UseRouting();
-                    subPath.UseEndpoints((endpoints) =>
+                    _ = subPath.UseRouting();
+                    _ = subPath.UseEndpoints((endpoints) =>
                     {
-                        endpoints.MapRemoteBffApiEndpoint("/custom_within_subpath", Api.Url("/some/path"))
+                        _ = endpoints.MapRemoteBffApiEndpoint("/custom_within_subpath", Api.Url("/some/path"))
                             .WithAccessToken()
                             .WithAccessTokenRetriever<ContextCapturingAccessTokenRetriever>();
                     });
@@ -72,8 +72,8 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
 
         };
         await InitializeAsync();
-        await Bff.BrowserClient.Login();
-        await Bff.BrowserClient.CallBffHostApi(Bff.Url("/subPath/custom_within_subpath"));
+        _ = await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.CallBffHostApi(Bff.Url("/subPath/custom_within_subpath"));
 
         var usedContext = _customAccessTokenReceiver.UsedContext.ShouldNotBeNull();
 

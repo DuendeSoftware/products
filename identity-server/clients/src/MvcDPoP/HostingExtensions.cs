@@ -19,10 +19,10 @@ internal static class HostingExtensions
         var authority = builder.Configuration["is-host"];
 
         // add MVC
-        builder.Services.AddControllersWithViews();
+        _ = builder.Services.AddControllersWithViews();
 
         // add cookie-based session management with OpenID Connect authentication
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = "cookie";
             options.DefaultChallengeScheme = "oidc";
@@ -73,7 +73,7 @@ internal static class HostingExtensions
             });
 
         // add automatic token management
-        builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
+        _ = builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
         {
             // add option to opt-in to jkt on authZ ep
             // create and configure a DPoP JWK
@@ -84,7 +84,7 @@ internal static class HostingExtensions
         });
 
         // add HTTP client to call protected API
-        builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
+        _ = builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
         {
             client.BaseAddress = new Uri("https://dpop-api");
             // somehow allow this HttpClient to override the scheme (because it might be a legacy API still using Bearer)
@@ -92,23 +92,23 @@ internal static class HostingExtensions
             .AddServiceDiscovery()
             .AddHttpMessageHandler<TestHandler>();
 
-        builder.Services.AddTransient<TestHandler>();
+        _ = builder.Services.AddTransient<TestHandler>();
 
         return builder.Build();
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseDeveloperExceptionPage();
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseHttpsRedirection();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapDefaultControllerRoute()
+        _ = app.MapDefaultControllerRoute()
             .RequireAuthorization();
 
         return app;

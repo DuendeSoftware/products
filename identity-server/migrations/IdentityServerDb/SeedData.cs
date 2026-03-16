@@ -36,9 +36,9 @@ public class SeedData
             Console.WriteLine("Clients being populated");
             foreach (var client in TestClients.Get())
             {
-                context.Clients.Add(client.ToEntity());
+                _ = context.Clients.Add(client.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -50,9 +50,9 @@ public class SeedData
             Console.WriteLine("IdentityResources being populated");
             foreach (var resource in TestResources.IdentityResources)
             {
-                context.IdentityResources.Add(resource.ToEntity());
+                _ = context.IdentityResources.Add(resource.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -64,9 +64,9 @@ public class SeedData
             Console.WriteLine("ApiResources being populated");
             foreach (var resource in TestResources.ApiResources)
             {
-                context.ApiResources.Add(resource.ToEntity());
+                _ = context.ApiResources.Add(resource.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -78,9 +78,9 @@ public class SeedData
             Console.WriteLine("Scopes being populated");
             foreach (var resource in TestResources.ApiScopes)
             {
-                context.ApiScopes.Add(resource.ToEntity());
+                _ = context.ApiScopes.Add(resource.ToEntity());
             }
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {
@@ -90,7 +90,7 @@ public class SeedData
         if (!context.IdentityProviders.Any())
         {
             Console.WriteLine("OidcIdentityProviders being populated");
-            context.IdentityProviders.Add(new OidcProvider
+            _ = context.IdentityProviders.Add(new OidcProvider
             {
                 Scheme = "demoidsrv",
                 DisplayName = "IdentityServer (Seeded)",
@@ -98,7 +98,7 @@ public class SeedData
                 ClientId = "login",
             }.ToEntity());
 
-            context.SaveChanges();
+            _ = context.SaveChanges();
         }
         else
         {

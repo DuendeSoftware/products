@@ -29,7 +29,7 @@ public class FetchUserServiceTests
 
         result.IsInRole("admin").ShouldBeTrue();
         result.IsInRole("garbage").ShouldBeFalse();
-        result.Identity.ShouldNotBeNull();
+        _ = result.Identity.ShouldNotBeNull();
         result.Identity.Name.ShouldBe("example-user");
         result.FindFirst("foo").ShouldNotBeNull()
             .Value.ShouldBe("bar");

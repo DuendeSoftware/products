@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -7,24 +6,20 @@
     <Nullable>enable</Nullable>
     <WarningsAsErrors>false</WarningsAsErrors>
   </PropertyGroup>
-
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer" />
-    <PackageReference Include="Duende.IdentityModel" />
     <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="Duende.IdentityServer" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bff.Yarp\Bff.Yarp.csproj" />
     <ProjectReference Include="..\..\src\Bff\Bff.csproj" />
   </ItemGroup>
-
 </Project>

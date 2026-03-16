@@ -14,7 +14,7 @@ public class BffBlazorWebAssemblyTests(BffHostTestFixture fixture)
 {
     public async Task<WebAssemblyPageModel> GoToHome()
     {
-        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorWebassembly).ToString(), Defaults.PageGotoOptions);
+        _ = await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorWebassembly).ToString(), Defaults.PageGotoOptions);
         return new WebAssemblyPageModel()
         {
             Page = Page
@@ -31,7 +31,7 @@ public class BffBlazorWebAssemblyTests(BffHostTestFixture fixture)
 
         await homePage.VerifyNotLoggedIn();
 
-        await homePage.Login();
+        _ = await homePage.Login();
 
         await homePage.VerifyLoggedIn();
 
@@ -39,7 +39,7 @@ public class BffBlazorWebAssemblyTests(BffHostTestFixture fixture)
 
         await weatherPage.VerifyWeatherListIsShown();
 
-        await homePage.LogOut();
+        _ = await homePage.LogOut();
     }
 
     private async Task Warmup()

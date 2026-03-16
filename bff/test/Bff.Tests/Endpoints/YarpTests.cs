@@ -16,16 +16,16 @@ public class YarpTests : BffTestBase
     public YarpTests() : base() =>
         Bff.OnConfigureApp += app =>
         {
-            app.MapReverseProxy(proxyApp =>
+            _ = app.MapReverseProxy(proxyApp =>
             {
-                proxyApp.UseAntiforgeryCheck();
+                _ = proxyApp.UseAntiforgeryCheck();
             });
         };
 
     private void ConfigureYarp(RouteConfig routeConfig) =>
         Bff.OnConfigureBff += bff =>
         {
-            bff.AddYarpConfig([routeConfig], [Some.ClusterConfig(Api)]);
+            _ = bff.AddYarpConfig([routeConfig], [Some.ClusterConfig(Api)]);
         };
 
     [Theory]
@@ -38,7 +38,7 @@ public class YarpTests : BffTestBase
         await ConfigureBff(setup);
 
 
-        await Bff.BrowserClient.CallBffHostApi(
+        _ = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.OK
         );
@@ -81,7 +81,7 @@ public class YarpTests : BffTestBase
 
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.CallBffHostApi(
+        _ = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.OK
         );
@@ -95,7 +95,7 @@ public class YarpTests : BffTestBase
 
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.CallBffHostApi(
+        _ = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
@@ -148,7 +148,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
 
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath
@@ -170,7 +170,7 @@ public class YarpTests : BffTestBase
 
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
@@ -190,7 +190,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
@@ -210,7 +210,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.UserOrNone));
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
@@ -230,7 +230,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.Client));
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath
@@ -249,7 +249,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.UserOrClient));
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath
@@ -281,7 +281,7 @@ public class YarpTests : BffTestBase
 
         AddOrUpdateFrontend(frontEnd);
 
-        await Bff.BrowserClient.Login("/somepath");
+        _ = await Bff.BrowserClient.Login("/somepath");
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: "/somepath" + The.PathAndSubPath
         );
@@ -300,9 +300,9 @@ public class YarpTests : BffTestBase
 
         await ConfigureBff(setup);
         Api.ApiStatusCodeToReturn = HttpStatusCode.Unauthorized;
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.CallBffHostApi(
+        _ = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
@@ -316,9 +316,9 @@ public class YarpTests : BffTestBase
 
         await ConfigureBff(setup);
         Api.ApiStatusCodeToReturn = HttpStatusCode.Forbidden;
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.CallBffHostApi(
+        _ = await Bff.BrowserClient.CallBffHostApi(
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Forbidden
         );

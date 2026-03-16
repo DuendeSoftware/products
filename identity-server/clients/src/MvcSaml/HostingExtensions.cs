@@ -24,11 +24,11 @@ internal static class HostingExtensions
         var idpBaseUrl = builder.Configuration["is-host"]
             ?? throw new InvalidOperationException("is-host configuration is required");
 
-        builder.Services.AddControllersWithViews();
+        _ = builder.Services.AddControllersWithViews();
 
         var spCert = LoadSpCertificate();
 
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = Saml2Defaults.Scheme;
@@ -70,23 +70,23 @@ internal static class HostingExtensions
                     });
             });
 
-        builder.Services.AddAuthorization();
+        _ = builder.Services.AddAuthorization();
 
         return builder.Build();
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseDeveloperExceptionPage();
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseHttpsRedirection();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapDefaultControllerRoute()
+        _ = app.MapDefaultControllerRoute()
             .RequireAuthorization();
 
         return app;

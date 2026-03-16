@@ -17,12 +17,12 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         var cn = Configuration.GetConnectionString("DefaultConnection");
-        services.AddDbContext<ApplicationDbContext>(options =>
+        _ = services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
+            _ = options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
         });
 
-        services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+        _ = services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
             {
                 opt.Password.RequireDigit = false;
                 opt.Password.RequireLowercase = false;

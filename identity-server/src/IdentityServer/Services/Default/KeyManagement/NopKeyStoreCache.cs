@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 
@@ -13,8 +14,8 @@ internal class NopKeyStoreCache : ISigningKeyStoreCache
     /// Returns null.
     /// </summary>
     /// <returns></returns>
-    public Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct _) => Task.FromResult<IEnumerable<KeyContainer>>(null);
+    public Task<IReadOnlyCollection<KeyContainer>?> GetKeysAsync(Ct _) => Task.FromResult<IReadOnlyCollection<KeyContainer>?>(null);
 
     /// <inheritdoc/>
-    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct _) => Task.CompletedTask;
+    public Task StoreKeysAsync(IReadOnlyCollection<KeyContainer> keys, TimeSpan duration, Ct _) => Task.CompletedTask;
 }

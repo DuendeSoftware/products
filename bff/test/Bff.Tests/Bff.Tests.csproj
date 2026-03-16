@@ -1,26 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Duende.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Duende.IdentityServer" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
-    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
-    <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="NSubstitute" />
     <PackageReference Include="PublicApiGenerator" />
-    <PackageReference Include="Verify.XunitV3" />
     <PackageReference Include="RichardSzalay.MockHttp" />
+    <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
     <ProjectReference Include="..\..\performance\Bff.Benchmarks\Bff.Benchmarks.csproj" />
@@ -29,5 +25,4 @@
     <ProjectReference Include="..\..\src\Bff\Bff.csproj" />
     <ProjectReference Include="..\..\src\Bff.Yarp\Bff.Yarp.csproj" />
   </ItemGroup>
-
 </Project>

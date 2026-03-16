@@ -33,18 +33,18 @@ public class DPoPRemoteEndpointTests : BffTestBase
     {
         Api.OnConfigureServices += services =>
         {
-            services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token");
         };
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.User);
         };
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckHttpStatusCode();
 
         ApiCallDetails callToApi = await Bff.BrowserClient.CallBffHostApi(
@@ -61,12 +61,12 @@ public class DPoPRemoteEndpointTests : BffTestBase
     {
         Api.OnConfigureServices += services =>
         {
-            services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token");
         };
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.Client);
         };
 
@@ -89,12 +89,12 @@ public class DPoPRemoteEndpointTests : BffTestBase
     {
         Api.OnConfigureServices += services =>
         {
-            services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token");
         };
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(mappedPath, Api.Url(targetPath))
+            _ = app.MapRemoteBffApiEndpoint(mappedPath, Api.Url(targetPath))
                 .WithAccessToken(RequiredTokenType.Client);
         };
 
@@ -122,12 +122,12 @@ public class DPoPRemoteEndpointTests : BffTestBase
         Api.OnConfigureServices += services =>
         {
 
-            services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token");
         };
 
         Api.OnConfigureApp += app =>
         {
-            app.Use(async (context, next) =>
+            _ = app.Use(async (context, next) =>
             {
                 capturedDPoPHeader = context.Request.Headers["DPoP"].FirstOrDefault();
                 capturedRequestPath = context.Request.Path.Value;
@@ -138,7 +138,7 @@ public class DPoPRemoteEndpointTests : BffTestBase
         Bff.OnConfigureApp += app =>
         {
             // Map BFF /api/foo to API https://localhost:port/api/foo
-            app.MapRemoteBffApiEndpoint("/api/foo", Api.Url("api/foo"))
+            _ = app.MapRemoteBffApiEndpoint("/api/foo", Api.Url("api/foo"))
                 .WithAccessToken(RequiredTokenType.Client);
         };
 

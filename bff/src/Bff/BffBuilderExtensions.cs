@@ -34,103 +34,103 @@ public static class BffBuilderExtensions
     public static T ConfigureOpenIdConnect<T>(this T builder, Action<OpenIdConnectOptions> oidc)
         where T : IBffBuilder
     {
-        builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureOpenIdConnectDefaults += oidc);
+        _ = builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureOpenIdConnectDefaults += oidc);
         return builder;
     }
 
     public static T ConfigureCookies<T>(this T builder, Action<CookieAuthenticationOptions> oidc)
         where T : IBffBuilder
     {
-        builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureCookieDefaults += oidc);
+        _ = builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureCookieDefaults += oidc);
         return builder;
     }
 
     internal static T AddBaseBffServices<T>(this T builder) where T : IBffServicesBuilder
     {
-        builder.Services.AddSingleton<GetLicenseKey>(sp =>
+        _ = builder.Services.AddSingleton<GetLicenseKey>(sp =>
             () => sp.GetRequiredService<IOptions<BffOptions>>().Value.LicenseKey);
-        builder.Services.AddSingleton<License>(sp =>
+        _ = builder.Services.AddSingleton<License>(sp =>
         {
             var accessor = sp.GetRequiredService<LicenseAccessor>();
             return accessor.Current;
         });
-        builder.Services.AddSingleton<LicenseAccessor>();
+        _ = builder.Services.AddSingleton<LicenseAccessor>();
         builder.Services.TryAddSingleton<LicenseValidator>();
-        builder.Services.AddDistributedMemoryCache();
+        _ = builder.Services.AddDistributedMemoryCache();
 
         // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
         // AddOpenIdConnectAccessTokenManagement because both configure the same options
         // The AddOpenIdConnectAccessTokenManagement adds OR wraps the BackchannelHttpHandler
         // to add DPoP support. However, our code can also add a backchannel handler.
-        builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, BffConfigureOpenIdConnectOptions>();
-        builder.Services.AddOpenIdConnectAccessTokenManagement();
+        _ = builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, BffConfigureOpenIdConnectOptions>();
+        _ = builder.Services.AddOpenIdConnectAccessTokenManagement();
 
-        builder.Services
+        _ = builder.Services
             .AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
 
-        builder.Services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
+        _ = builder.Services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
         builder.Services.TryAddSingleton<IAccessTokenRetriever, DefaultAccessTokenRetriever>();
 
         // management endpoints
-        builder.Services.AddTransient<ILoginEndpoint, DefaultLoginEndpoint>();
+        _ = builder.Services.AddTransient<ILoginEndpoint, DefaultLoginEndpoint>();
 #pragma warning disable CS0618 // Type or member is obsolete
-        builder.Services.AddTransient<ISilentLoginEndpoint, DefaultSilentLoginEndpoint>();
+        _ = builder.Services.AddTransient<ISilentLoginEndpoint, DefaultSilentLoginEndpoint>();
 #pragma warning restore CS0618 // Type or member is obsolete
-        builder.Services.AddTransient<ISilentLoginCallbackEndpoint, DefaultSilentLoginCallbackEndpoint>();
-        builder.Services.AddTransient<ILogoutEndpoint, DefaultLogoutEndpoint>();
-        builder.Services.AddTransient<IUserEndpoint, DefaultUserEndpoint>();
-        builder.Services.AddTransient<IBackchannelLogoutEndpoint, DefaultBackchannelLogoutEndpoint>();
-        builder.Services.AddTransient<IDiagnosticsEndpoint, DefaultDiagnosticsEndpoint>();
+        _ = builder.Services.AddTransient<ISilentLoginCallbackEndpoint, DefaultSilentLoginCallbackEndpoint>();
+        _ = builder.Services.AddTransient<ILogoutEndpoint, DefaultLogoutEndpoint>();
+        _ = builder.Services.AddTransient<IUserEndpoint, DefaultUserEndpoint>();
+        _ = builder.Services.AddTransient<IBackchannelLogoutEndpoint, DefaultBackchannelLogoutEndpoint>();
+        _ = builder.Services.AddTransient<IDiagnosticsEndpoint, DefaultDiagnosticsEndpoint>();
 
         // session management
         builder.Services.TryAddTransient<ISessionRevocationService, NopSessionRevocationService>();
 
         // cookie configuration
-        builder.Services
+        _ = builder.Services
             .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
-        builder.Services
+        _ = builder.Services
             .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
                 PostConfigureApplicationCookieRevokeRefreshToken>();
-        builder.Services.AddSingleton<ActiveCookieAuthenticationScheme>();
-        builder.Services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
+        _ = builder.Services.AddSingleton<ActiveCookieAuthenticationScheme>();
+        _ = builder.Services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
 
-        builder.Services
+        _ = builder.Services
             .AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
 
-        builder.Services.AddSingleton<TrialModeAuthenticatedSessionTracker>();
-        builder.Services
+        _ = builder.Services.AddSingleton<TrialModeAuthenticatedSessionTracker>();
+        _ = builder.Services
             .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
                 PostConfigureApplicationCookieTrialModeCheck>();
 
         AddBffMetrics(builder);
 
         // wrap ASP.NET Core
-        builder.Services.AddAuthentication();
+        _ = builder.Services.AddAuthentication();
         builder.Services.AddTransientDecorator<IAuthenticationService, BffAuthenticationService>();
 
         // Make sure the session partitioning is registered. There are a few codepaths that require this injected
         // even if you are not using session management.
-        builder.Services.AddSingleton<BuildUserSessionPartitionKey>(sp =>
+        _ = builder.Services.AddSingleton<BuildUserSessionPartitionKey>(sp =>
             sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
-        builder.Services.AddSingleton<UserSessionPartitionKeyBuilder>();
+        _ = builder.Services.AddSingleton<UserSessionPartitionKeyBuilder>();
 
         return builder;
     }
 
     internal static void AddBffMetrics<T>(T builder) where T : IBffBuilder =>
-        builder.Services.AddSingleton<BffMetrics>();
+        _ = builder.Services.AddSingleton<BffMetrics>();
 
     internal static T AddDiagnostics<T>(this T builder)
         where T : IBffServicesBuilder
     {
-        builder.Services.AddSingleton<IDiagnosticEntry, BasicServerInfoDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, FrontendCountDiagnosticEntry>();
-        builder.Services.AddSingleton<DiagnosticSummary>();
-        builder.Services.AddSingleton(serviceProvider => new DiagnosticDataService(
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, BasicServerInfoDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, FrontendCountDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<DiagnosticSummary>();
+        _ = builder.Services.AddSingleton(serviceProvider => new DiagnosticDataService(
             serviceProvider.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime,
             serviceProvider.GetServices<IDiagnosticEntry>()));
-        builder.Services.AddHostedService<DiagnosticHostedService>();
+        _ = builder.Services.AddHostedService<DiagnosticHostedService>();
 
         return builder;
     }
@@ -138,31 +138,31 @@ public static class BffBuilderExtensions
     internal static T AddDynamicFrontends<T>(this T builder)
         where T : IBffServicesBuilder
     {
-        builder.Services.AddHybridCache();
+        _ = builder.Services.AddHybridCache();
 
-        builder.Services.AddHostedService<BffCacheClearingHostedService>();
+        _ = builder.Services.AddHostedService<BffCacheClearingHostedService>();
 
-        builder.Services.AddTransient<IStartupFilter, ConfigureBffStartupFilter>();
+        _ = builder.Services.AddTransient<IStartupFilter, ConfigureBffStartupFilter>();
 
         // Register the frontend collection, which will be used to store and retrieve frontends
-        builder.Services.AddSingleton<FrontendCollection>();
+        _ = builder.Services.AddSingleton<FrontendCollection>();
         // Add a public accessible interface to the frontend collection, so our users can access it
-        builder.Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
+        _ = builder.Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
 
-        builder.Services.AddTransient<CurrentFrontendAccessor>();
-        builder.Services.AddSingleton<FrontendSelector>();
+        _ = builder.Services.AddTransient<CurrentFrontendAccessor>();
+        _ = builder.Services.AddSingleton<FrontendSelector>();
 
         // Add a scheme provider that will inject authentication schemes that are needed for the BFF
-        builder.Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
+        _ = builder.Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
 
         // Configure the AspNet Core Authentication settings if no
         // .AddAuthentication().AddCookie().AddOpenIdConnect() was added
-        builder.Services
+        _ = builder.Services
             .AddSingleton<IPostConfigureOptions<AuthenticationOptions>, BffConfigureAuthenticationOptions>();
 
-        builder.Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, BffConfigureCookieOptions>();
+        _ = builder.Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, BffConfigureCookieOptions>();
 
-        builder.Services.AddHttpContextAccessor();
+        _ = builder.Services.AddHttpContextAccessor();
 
         // Add 'default' configure methods that would have been added by
         // .AddAuthentication().AddCookie().AddOpenIdConnect()
@@ -186,7 +186,7 @@ public static class BffBuilderExtensions
     {
         var indexHtmlClientBuilder = services.AddHttpClient(Constants.HttpClientNames.StaticAssetsClientName);
 
-        services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
+        _ = services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
         {
             options.HttpMessageHandlerBuilderActions.Add(httpMessageHandlerBuilder =>
             {
@@ -215,16 +215,16 @@ public static class BffBuilderExtensions
 
     internal static void AddServerSideSessionsSupportingServices(this IServiceCollection services)
     {
-        services.AddSingleton<BuildUserSessionPartitionKey>(sp =>
+        _ = services.AddSingleton<BuildUserSessionPartitionKey>(sp =>
             sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
-        services.AddSingleton<UserSessionPartitionKeyBuilder>();
+        _ = services.AddSingleton<UserSessionPartitionKeyBuilder>();
 
-        services.AddSingleton<UserSessionPartitionKeyBuilder>();
-        services
+        _ = services.AddSingleton<UserSessionPartitionKeyBuilder>();
+        _ = services
             .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
                 PostConfigureApplicationCookieTicketStore>();
-        services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
-        services.AddTransient<ISessionRevocationService, SessionRevocationService>();
+        _ = services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
+        _ = services.AddTransient<ISessionRevocationService, SessionRevocationService>();
         // only add if not already in DI
     }
 
@@ -237,8 +237,8 @@ public static class BffBuilderExtensions
         where T : class, IUserSessionStore
     {
         ArgumentNullException.ThrowIfNull(builder);
-        builder.Services.AddTransient<IUserSessionStore, T>();
-        builder.AddServerSideSessions();
+        _ = builder.Services.AddTransient<IUserSessionStore, T>();
+        _ = builder.AddServerSideSessions();
         return builder;
     }
 

@@ -38,12 +38,12 @@ internal class BffCacheClearingHostedService(
             // When the frontend changes, we need to clear the cached options
             // This makes sure the (potentially) new OpenID Connect configuration
             // and cookie config is loaded
-            cookieOptionsMonitor.TryRemove(changedFrontend.CookieSchemeName);
-            oidcOptionsMonitor.TryRemove(changedFrontend.OidcSchemeName);
+            _ = cookieOptionsMonitor.TryRemove(changedFrontend.CookieSchemeName);
+            _ = oidcOptionsMonitor.TryRemove(changedFrontend.OidcSchemeName);
 
             // Duende.AccessTokenManagement also stores options. It's stored under the client name. 
             var clientCredentialsClientName = OpenIdConnectTokenManagementDefaults.ToClientName(changedFrontend.OidcSchemeName);
-            clientCredentialsCache.TryRemove(clientCredentialsClientName);
+            _ = clientCredentialsCache.TryRemove(clientCredentialsClientName);
 
             if (!Writer.TryWrite(changedFrontend))
             {

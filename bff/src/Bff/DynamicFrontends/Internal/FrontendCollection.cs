@@ -61,7 +61,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     .Where(frontend => oldFrontends.All(x => x.Name != frontend.Name))
                     .ToArray();
 
-                Interlocked.Exchange(ref _frontends, newFrontends);
+                _ = Interlocked.Exchange(ref _frontends, newFrontends);
 
             }
 
@@ -169,7 +169,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
             }
 
             // By replacing the array, we avoid locking the entire list for read operations.
-            Interlocked.Exchange(ref _frontends, _frontends
+            _ = Interlocked.Exchange(ref _frontends, _frontends
                 .Where(x => x.Name != frontend.Name)
                 .Append(frontend)
                 .ToArray());
@@ -199,7 +199,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
             }
 
             // By replacing the array, we avoid locking the entire list for read operations.
-            Interlocked.Exchange(ref _frontends, _frontends
+            _ = Interlocked.Exchange(ref _frontends, _frontends
                 .Where(x => x.Name != frontendName)
                 .ToArray());
         }

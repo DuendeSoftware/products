@@ -114,7 +114,7 @@ public static class IResourceStoreExtensions
     /// <param name="scopeNames">The scope names.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
+    public static async Task<IReadOnlyCollection<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
 
     /// <summary>
     /// Finds the enabled API resources by name.
@@ -122,5 +122,5 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="resourceNames">The resource names.</param>
     /// <param name="ct">The cancellation token.</param>
-    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, Ct ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
+    public static async Task<IReadOnlyCollection<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, Ct ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
 }

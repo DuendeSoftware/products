@@ -57,7 +57,7 @@ public static class HttpContextExtensions
         LogoutNotificationContext endSessionMsg = null;
 
         // if we have a logout message, then that take precedence over the current user
-        if (logoutMessage?.ClientIds?.Any() == true || logoutMessage?.SamlSessions?.Any() == true)
+        if (logoutMessage?.ClientIds?.Count > 0 || logoutMessage?.SamlSessions?.Count > 0)
         {
             var clientIds = logoutMessage.ClientIds ?? [];
             var samlSessions = logoutMessage.SamlSessions?.ToList() ?? [];
@@ -65,7 +65,7 @@ public static class HttpContextExtensions
             // check if current user is same, since we might have new clients (albeit unlikely)
             if (currentSubId == logoutMessage.SubjectId)
             {
-                clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted));
+                clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted)).ToArray();
                 var currentSamlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
                 samlSessions = samlSessions.Union(currentSamlSessions).ToList();
             }
@@ -89,8 +89,8 @@ public static class HttpContextExtensions
             var samlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
             var samlEntityIds = samlSessions.Select(s => s.EntityId);
 
-            if ((clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds)) ||
-                (samlEntityIds.Any() && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted)))
+            if ((clientIds.Count > 0 && await AnyClientHasFrontChannelLogout(clientIds)) ||
+                (samlSessions.Count > 0 && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted)))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {

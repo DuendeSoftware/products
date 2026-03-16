@@ -2,14 +2,16 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleSignin;
 
-internal class SamlSigninStateIdCookie(IHttpContextAccessor httpContextAccessor)
+internal sealed class SamlSigninStateIdCookie(IHttpContextAccessor httpContextAccessor, IOptions<SamlOptions> options)
 {
-    private const string CookieName = "__Host-idsrv.SamlSigninState";
+    private readonly string _cookieName = options.Value.SigninStateCookieName;
     private static readonly TimeSpan CookieLifetime = TimeSpan.FromMinutes(5);
 
     private HttpContext HttpContext => httpContextAccessor.HttpContext
@@ -27,14 +29,14 @@ internal class SamlSigninStateIdCookie(IHttpContextAccessor httpContextAccessor)
             Expires = DateTimeOffset.UtcNow.Add(CookieLifetime)
         };
 
-        HttpContext.Response.Cookies.Append(CookieName, stateId.Value.ToString(), cookieOptions);
+        HttpContext.Response.Cookies.Append(_cookieName, stateId.Value.ToString(), cookieOptions);
     }
 
     internal bool TryGetSamlSigninStateId([NotNullWhen(true)] out StateId? stateId)
     {
         stateId = null;
 
-        if (!HttpContext.Request.Cookies.TryGetValue(CookieName, out var rawStateId) || string.IsNullOrEmpty(rawStateId))
+        if (!HttpContext.Request.Cookies.TryGetValue(_cookieName, out var rawStateId) || string.IsNullOrEmpty(rawStateId))
         {
             return false;
         }
@@ -57,7 +59,7 @@ internal class SamlSigninStateIdCookie(IHttpContextAccessor httpContextAccessor)
         }
     }
 
-    internal void ClearAuthenticationState() => HttpContext.Response.Cookies.Delete(CookieName, new CookieOptions
+    internal void ClearAuthenticationState() => HttpContext.Response.Cookies.Delete(_cookieName, new CookieOptions
     {
         HttpOnly = true,
         Secure = true,

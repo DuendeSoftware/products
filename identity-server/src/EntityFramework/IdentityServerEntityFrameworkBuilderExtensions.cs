@@ -49,7 +49,6 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         builder.AddResourceStore<ResourceStore>();
         builder.AddCorsPolicyService<CorsPolicyService>();
         builder.AddIdentityProviderStore<IdentityProviderStore>();
-        builder.AddSamlServiceProviderStore<SamlServiceProviderStore>();
 
         return builder;
     }
@@ -69,7 +68,6 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         builder.AddResourceStoreCache<ResourceStore>();
         builder.AddCorsPolicyCache<CorsPolicyService>();
         builder.AddIdentityProviderStoreCache<IdentityProviderStore>();
-        builder.AddSamlServiceProviderStoreCache<SamlServiceProviderStore>();
 
         return builder;
     }

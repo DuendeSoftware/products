@@ -67,7 +67,7 @@ public class ApiSecretValidator : IApiSecretValidator
 
         // load API resource
         var apis = await _resources.FindApiResourcesByNameAsync(new[] { parsedSecret.Id }, ct);
-        if (apis == null || !apis.Any())
+        if (apis == null || apis.Count == 0)
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Unknown API resource", ct);
 
@@ -75,7 +75,7 @@ public class ApiSecretValidator : IApiSecretValidator
             return fail;
         }
 
-        if (apis.Count() > 1)
+        if (apis.Count > 1)
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Invalid API resource", ct);
 

@@ -20,7 +20,7 @@ internal static class Extensions
         var yarpBuilder = services.AddReverseProxy()
                .AddBffExtensions();
 
-        yarpBuilder.LoadFromMemory(
+        _ = yarpBuilder.LoadFromMemory(
             new[]
             {
                     new RouteConfig()
@@ -79,7 +79,7 @@ internal static class Extensions
             });
 
         // Add BFF services to DI - also add server-side session management
-        services.AddBff(options =>
+        _ = services.AddBff(options =>
             {
                 var rsaKey = new RsaSecurityKey(RSA.Create(2048));
                 var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
@@ -91,10 +91,10 @@ internal static class Extensions
             .AddServerSideSessions();
 
         // local APIs
-        services.AddControllers();
+        _ = services.AddControllers();
 
         // cookie options
-        services.AddAuthentication(options =>
+        _ = services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "cookie";
                 options.DefaultChallengeScheme = "oidc";
@@ -136,7 +136,7 @@ internal static class Extensions
                 options.Scope.Add("offline_access");
             });
 
-        services.AddUserAccessTokenHttpClient("api",
+        _ = services.AddUserAccessTokenHttpClient("api",
             configureClient: client =>
             {
                 client.BaseAddress = new Uri("https://localhost:5011/api");
@@ -147,23 +147,23 @@ internal static class Extensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseHttpLogging();
-        app.UseDeveloperExceptionPage();
+        _ = app.UseHttpLogging();
+        _ = app.UseDeveloperExceptionPage();
 
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
+        _ = app.UseDefaultFiles();
+        _ = app.UseStaticFiles();
 
-        app.UseAuthentication();
-        app.UseRouting();
+        _ = app.UseAuthentication();
+        _ = app.UseRouting();
 
         // adds antiforgery protection for local APIs
-        app.UseBff();
+        _ = app.UseBff();
 
         // adds authorization for local and remote API endpoints
-        app.UseAuthorization();
+        _ = app.UseAuthorization();
 
         // local APIs
-        app.MapControllers()
+        _ = app.MapControllers()
             .RequireAuthorization()
             .AsBffApiEndpoint();
 
@@ -171,9 +171,9 @@ internal static class Extensions
         app.MapBffManagementEndpoints();
 
         // proxy endpoints using yarp
-        app.MapReverseProxy(proxyApp =>
+        _ = app.MapReverseProxy(proxyApp =>
         {
-            proxyApp.UseAntiforgeryCheck();
+            _ = proxyApp.UseAntiforgeryCheck();
         });
 
         // proxy endpoints using BFF's simplified wrapper
@@ -184,22 +184,22 @@ internal static class Extensions
     private static void MapRemoteUrls(IEndpointRouteBuilder app)
     {
         // On this path, we use a client credentials token
-        app.MapRemoteBffApiEndpoint("/api/client-token", new Uri("https://localhost:5011"))
+        _ = app.MapRemoteBffApiEndpoint("/api/client-token", new Uri("https://localhost:5011"))
             .WithAccessToken(RequiredTokenType.Client);
 
         // On this path, we use a user token if logged in, and fall back to a client credentials token if not
-        app.MapRemoteBffApiEndpoint("/api/user-or-client-token", new Uri("https://localhost:5011"))
+        _ = app.MapRemoteBffApiEndpoint("/api/user-or-client-token", new Uri("https://localhost:5011"))
             .WithAccessToken(RequiredTokenType.UserOrClient);
 
         // On this path, we make anonymous requests
-        app.MapRemoteBffApiEndpoint("/api/anonymous", new Uri("https://localhost:5011"));
+        _ = app.MapRemoteBffApiEndpoint("/api/anonymous", new Uri("https://localhost:5011"));
 
         // On this path, we use the client token only if the user is logged in
-        app.MapRemoteBffApiEndpoint("/api/optional-user-token", new Uri("https://localhost:5011"))
+        _ = app.MapRemoteBffApiEndpoint("/api/optional-user-token", new Uri("https://localhost:5011"))
             .WithAccessToken(RequiredTokenType.UserOrNone);
 
         // On this path, we require the user token
-        app.MapRemoteBffApiEndpoint("/api/user-token", new Uri("https://localhost:5011"))
+        _ = app.MapRemoteBffApiEndpoint("/api/user-token", new Uri("https://localhost:5011"))
             .WithAccessToken();
     }
 }

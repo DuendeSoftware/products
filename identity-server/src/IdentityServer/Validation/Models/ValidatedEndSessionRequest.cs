@@ -46,11 +46,11 @@ public class ValidatedEndSessionRequest : ValidatedRequest
     /// <summary>
     ///  Ids of clients known to have an authentication session for user at end session time
     /// </summary>
-    public IEnumerable<string> ClientIds { get; set; }
+    public IReadOnlyCollection<string> ClientIds { get; set; }
 
     /// <summary>
     /// SAML Service Provider sessions for the user at end session time.
     /// Contains full session data including EntityIds, NameIds, and SessionIndexes required for logout notifications.
     /// </summary>
-    public IEnumerable<SamlSpSessionData> SamlSessions { get; set; } = [];
+    public IReadOnlyCollection<SamlSpSessionData> SamlSessions { get; set; } = [];
 }

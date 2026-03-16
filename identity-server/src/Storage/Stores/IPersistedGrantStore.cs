@@ -35,7 +35,7 @@ public interface IPersistedGrantStore
     /// <param name="filter">The filter.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct);
+    Task<IReadOnlyCollection<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct);
 
     /// <summary>
     /// Removes the grant by key.

@@ -12,9 +12,8 @@ namespace Duende.Bff.Tests;
 
 public class BffFrontendIndexTests : BffTestBase
 {
-    public BffFrontendIndexTests() : base() =>
-        // Disable the map to '/' for the test
-        Bff.MapGetForRoot = false;
+    // Disable the map to '/' for the test
+    public BffFrontendIndexTests() : base() => Bff.MapGetForRoot = false;
 
     [Fact]
     public async Task After_login_index_document_is_returned()
@@ -26,16 +25,16 @@ public class BffFrontendIndexTests : BffTestBase
             CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
                .CheckResponseContent(Cdn.IndexHtml);
 
         // A non-existing page should also return the index.html
-        await Bff.BrowserClient.GetAsync("/not-found")
+        _ = await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml);
 
         // The existing image.png should also return index html, because
         // we're not doing proxying of static assets here.
-        await Bff.BrowserClient.GetAsync("/image.png")
+        _ = await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.IndexHtml);
     }
 
@@ -44,7 +43,7 @@ public class BffFrontendIndexTests : BffTestBase
     {
         Bff.OnConfigureBff += opt =>
         {
-            opt.AddRemoteApis();
+            _ = opt.AddRemoteApis();
         };
 
         await InitializeAsync();
@@ -59,7 +58,7 @@ public class BffFrontendIndexTests : BffTestBase
             })
         );
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Cdn.IndexHtml);
 
         var result = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
@@ -69,7 +68,7 @@ public class BffFrontendIndexTests : BffTestBase
     {
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/local", () => "ok");
+            _ = app.MapGet("/local", () => "ok");
         };
 
         await InitializeAsync();
@@ -79,7 +78,7 @@ public class BffFrontendIndexTests : BffTestBase
             CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Cdn.IndexHtml);
 
         var result = await Bff.BrowserClient.GetAsync("/local")
@@ -97,7 +96,7 @@ public class BffFrontendIndexTests : BffTestBase
         });
 
         // get a random path. The index.html should be registered as fallback route
-        await Bff.BrowserClient.GetAsync("/random-path")
+        _ = await Bff.BrowserClient.GetAsync("/random-path")
             .CheckHttpStatusCode()
             .CheckResponseContent(Cdn.IndexHtml);
     }
@@ -107,7 +106,7 @@ public class BffFrontendIndexTests : BffTestBase
     {
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
+            _ = services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
         };
 
         await InitializeAsync();
@@ -137,8 +136,8 @@ public class BffFrontendIndexTests : BffTestBase
     {
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
-            services.AddSingleton<HybridCache, TestHybridCache>();
+            _ = services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
+            _ = services.AddSingleton<HybridCache, TestHybridCache>();
         };
 
         await InitializeAsync();
@@ -179,7 +178,7 @@ public class BffFrontendIndexTests : BffTestBase
     {
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
+            _ = services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
         };
         await InitializeAsync();
 
@@ -188,20 +187,20 @@ public class BffFrontendIndexTests : BffTestBase
             StaticAssetsUrl = Cdn.Url("/")
         });
 
-        await Bff.BrowserClient.GetAsync("/")
+        _ = await Bff.BrowserClient.GetAsync("/")
             .CheckResponseContent(Cdn.IndexHtml + " - transformed 1");
 
         // When you get an explicit HTML file, it's not the index.html file, so we're
         // not transforming it
-        await Bff.BrowserClient.GetAsync("/index2.html")
+        _ = await Bff.BrowserClient.GetAsync("/index2.html")
             .CheckResponseContent(Cdn.IndexHtml);
 
         // A non-existing page should also return the index.html and it should go through the transformer
-        await Bff.BrowserClient.GetAsync("/not-found")
+        _ = await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml + " - transformed 2");
 
         // The existing image.png should be proxied through the BFF. and should not be transformed
-        await Bff.BrowserClient.GetAsync("/image.png")
+        _ = await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
     }
 
@@ -216,18 +215,18 @@ public class BffFrontendIndexTests : BffTestBase
             StaticAssetsUrl = Cdn.Url("/")
         });
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Cdn.IndexHtml);
 
-        await Bff.BrowserClient.GetAsync("/test")
+        _ = await Bff.BrowserClient.GetAsync("/test")
             .CheckResponseContent("test");
 
         // A non-existing page should also return the index.html
-        await Bff.BrowserClient.GetAsync("/not-found")
+        _ = await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml);
 
         // The existing image.png should be proxied through the BFF.
-        await Bff.BrowserClient.GetAsync("/image.png")
+        _ = await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
     }
 
@@ -247,11 +246,11 @@ public class BffFrontendIndexTests : BffTestBase
         // Verifying that querystring parameters are passed correctly to the proxied endpoint
         // This is important, because vite dev server adds a querystring parameters to get
         // partial files
-        await Bff.BrowserClient.GetAsync("/withQuery?q=abc")
+        _ = await Bff.BrowserClient.GetAsync("/withQuery?q=abc")
             .CheckResponseContent("abc");
 
         // Just a quick check to verify encoding works as expected
-        await Bff.BrowserClient.GetAsync("/withQuery?q=" + UrlEncoder.Default.Encode("?@%^&*()"))
+        _ = await Bff.BrowserClient.GetAsync("/withQuery?q=" + UrlEncoder.Default.Encode("?@%^&*()"))
             .CheckResponseContent("?@%^&*()");
     }
 
@@ -274,25 +273,25 @@ public class BffFrontendIndexTests : BffTestBase
 
         // When getting the root of the path-mapped frontend, then we should get the static content
         // from the cdn
-        await Bff.BrowserClient.GetAsync(The.Path)
+        _ = await Bff.BrowserClient.GetAsync(The.Path)
             .CheckResponseContent(Cdn.IndexHtml);
 
         // It should also work for sub-paths and client side routing (The /test path doesn't exist on the cdn)
         // so the index.html should be returned
-        await Bff.BrowserClient.GetAsync(The.Path + "/test")
+        _ = await Bff.BrowserClient.GetAsync(The.Path + "/test")
             .CheckResponseContent(Cdn.IndexHtml);
 
         // It should also work for static assets that exist on the cdn, such as the image.
-        await Bff.BrowserClient.GetAsync(The.Path + "/image.png")
+        _ = await Bff.BrowserClient.GetAsync(The.Path + "/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
 
         // Now, if you go to the default frontend, it should return
         // the different static content that's only registered for the default frontend
-        await Bff.BrowserClient.GetAsync("/")
+        _ = await Bff.BrowserClient.GetAsync("/")
             .CheckResponseContent("default_frontend");
 
         // The image should not be registered (we only proxy the index.html for the default frontend)
-        await Bff.BrowserClient.GetAsync("/image.png")
+        _ = await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent("default_frontend");
     }
 
@@ -306,20 +305,20 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend().WithBffStaticAssets(Cdn.Url("/"), () => indexHtmlOnly));
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Cdn.IndexHtml);
 
         if (indexHtmlOnly)
         {
             // If we only proxy the index html, then any unmatched route (including the image.png)
             // should return the index.html content (for client side routing purposes)
-            await Bff.BrowserClient.GetAsync("/image.png")
+            _ = await Bff.BrowserClient.GetAsync("/image.png")
                 .CheckResponseContent(Cdn.IndexHtml);
         }
         else
         {
             // If we proxy all static assets for this frontend, then the image.png should be proxied
-            await Bff.BrowserClient.GetAsync("/image.png")
+            _ = await Bff.BrowserClient.GetAsync("/image.png")
                 .CheckResponseContent(Cdn.ImageBytes);
         }
     }

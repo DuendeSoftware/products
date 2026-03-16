@@ -12,5 +12,5 @@ public interface ISamlLogoutNotificationService
     /// </summary>
     /// <param name="context">The context for the logout notification.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct);
+    Task<IReadOnlyCollection<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct);
 }

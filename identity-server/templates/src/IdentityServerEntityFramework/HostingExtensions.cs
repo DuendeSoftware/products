@@ -18,23 +18,23 @@ internal static class HostingExtensions
     {
         // Write most logs to the console but diagnostic data to a file.
         // See https://docs.duendesoftware.com/identityserver/diagnostics/data
-        builder.Services.AddSerilog(lc =>
+        _ = builder.Services.AddSerilog(lc =>
         {
-            lc.WriteTo.Logger(consoleLogger =>
+            _ = lc.WriteTo.Logger(consoleLogger =>
             {
-                consoleLogger.WriteTo.Console(
+                _ = consoleLogger.WriteTo.Console(
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
                     formatProvider: CultureInfo.InvariantCulture);
                 if (builder.Environment.IsDevelopment())
                 {
-                    consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
+                    _ = consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
                 }
             });
             if (builder.Environment.IsDevelopment())
             {
-                lc.WriteTo.Logger(fileLogger =>
+                _ = lc.WriteTo.Logger(fileLogger =>
                 {
-                    fileLogger
+                    _ = fileLogger
                         .WriteTo.File("./diagnostics/diagnostic.log", rollingInterval: RollingInterval.Day,
                             fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
                             rollOnFileSizeLimit: true,
@@ -50,7 +50,7 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        _ = builder.Services.AddRazorPages();
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -86,7 +86,7 @@ internal static class HostingExtensions
             })
             .AddLicenseSummary();
 
-        builder.Services.AddAuthentication()
+        _ = builder.Services.AddAuthentication()
             .AddOpenIdConnect("oidc", "Sign-in with demo.duendesoftware.com", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -107,18 +107,18 @@ internal static class HostingExtensions
 
         // this adds the necessary config for the simple admin/config pages
         {
-            builder.Services.AddAuthorization(options =>
+            _ = builder.Services.AddAuthorization(options =>
                 options.AddPolicy("admin",
                     policy => policy.RequireClaim("sub", "1"))
             );
 
-            builder.Services.Configure<RazorPagesOptions>(options =>
+            _ = builder.Services.Configure<RazorPagesOptions>(options =>
                 options.Conventions.AuthorizeFolder("/Admin", "admin"));
 
-            builder.Services.AddTransient<IdentityServerHost.Pages.Portal.ClientRepository>();
-            builder.Services.AddTransient<ClientRepository>();
-            builder.Services.AddTransient<IdentityScopeRepository>();
-            builder.Services.AddTransient<ApiScopeRepository>();
+            _ = builder.Services.AddTransient<IdentityServerHost.Pages.Portal.ClientRepository>();
+            _ = builder.Services.AddTransient<ClientRepository>();
+            _ = builder.Services.AddTransient<IdentityScopeRepository>();
+            _ = builder.Services.AddTransient<ApiScopeRepository>();
         }
 
         // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
@@ -134,19 +134,19 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
+        _ = app.UseSerilogRequestLogging();
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            _ = app.UseDeveloperExceptionPage();
         }
 
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseIdentityServer();
-        app.UseAuthorization();
+        _ = app.UseStaticFiles();
+        _ = app.UseRouting();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
 
-        app.MapRazorPages()
+        _ = app.MapRazorPages()
             .RequireAuthorization();
 
         return app;

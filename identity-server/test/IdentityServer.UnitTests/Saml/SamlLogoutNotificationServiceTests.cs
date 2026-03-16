@@ -9,7 +9,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using SamlBinding = Duende.IdentityServer.Models.SamlBinding;

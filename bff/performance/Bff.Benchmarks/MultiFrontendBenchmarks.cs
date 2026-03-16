@@ -18,7 +18,7 @@ public class MultiFrontendBenchmarks : BenchmarkBase
         _authenticatedBffClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
 
         // Warm up the BFF Login
-        await _authenticatedBffClient.GetAsync("/bff/login")
+        _ = await _authenticatedBffClient.GetAsync("/bff/login")
             .EnsureStatusCode();
 
         _anonBffClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
@@ -28,7 +28,7 @@ public class MultiFrontendBenchmarks : BenchmarkBase
     public async Task MultiFrontend_login_to_default()
     {
         var client = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-        await client.GetAsync("/bff/login")
+        _ = await client.GetAsync("/bff/login")
             .EnsureStatusCode();
     }
 
@@ -36,7 +36,7 @@ public class MultiFrontendBenchmarks : BenchmarkBase
     public async Task MultiFrontend_login_to_frontend_3()
     {
         var client = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-        await client.GetAsync($"{GetPath(3)}/bff/login")
+        _ = await client.GetAsync($"{GetPath(3)}/bff/login")
             .EnsureStatusCode();
     }
 

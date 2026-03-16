@@ -25,7 +25,7 @@ internal class TestHybridCache : HybridCache
         RemoveAsync(string key, Ct ct = new Ct())
     {
         _waitUntilRemoveAsyncCalled.Set();
-        _cache.TryRemove(key, out _);
+        _ = _cache.TryRemove(key, out _);
         return ValueTask.CompletedTask;
     }
 
@@ -42,7 +42,7 @@ internal class TestHybridCache : HybridCache
 
     public void WaitUntilRemoveByTagAsyncCalled(TimeSpan until)
     {
-        _waitUntilRemoveByTagAsyncCalled.Wait(until);
+        _ = _waitUntilRemoveByTagAsyncCalled.Wait(until);
         if (!_waitUntilRemoveByTagAsyncCalled.IsSet)
         {
             throw new TimeoutException();
@@ -51,7 +51,7 @@ internal class TestHybridCache : HybridCache
 
     public void WaitUntilRemoveAsyncCalled(TimeSpan until)
     {
-        _waitUntilRemoveAsyncCalled.Wait(until);
+        _ = _waitUntilRemoveAsyncCalled.Wait(until);
         if (!_waitUntilRemoveAsyncCalled.IsSet)
         {
             throw new TimeoutException();

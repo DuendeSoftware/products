@@ -8,7 +8,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Validation.Setup;
 
 namespace UnitTests.Validation.Secrets;

@@ -21,7 +21,7 @@ internal sealed class McpDb(DbContextOptions<McpDb> options) : DbContext(options
         var stateEntity = await State.FirstOrDefaultAsync(it => it.Key == key);
         if (stateEntity == null)
         {
-            State.Add(new State
+            _ = State.Add(new State
             {
                 Id = Guid.NewGuid().ToString(),
                 Key = key,
@@ -33,7 +33,7 @@ internal sealed class McpDb(DbContextOptions<McpDb> options) : DbContext(options
             stateEntity.Value = JsonSerializer.Serialize(value);
         }
 
-        await SaveChangesAsync();
+        _ = await SaveChangesAsync();
     }
 
     public async Task<DateTimeOffset> GetLastUpdateStateAsync(string key)

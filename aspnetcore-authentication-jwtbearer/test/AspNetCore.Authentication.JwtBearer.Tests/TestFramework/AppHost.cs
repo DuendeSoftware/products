@@ -40,10 +40,10 @@ public class AppHost : GenericHost
 
     private void ConfigureServices(IServiceCollection services)
     {
-        services.AddRouting();
-        services.AddAuthorization();
+        _ = services.AddRouting();
+        _ = services.AddAuthorization();
 
-        services.AddAuthentication(options =>
+        _ = services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "cookie";
                 options.DefaultChallengeScheme = "oidc";
@@ -80,7 +80,7 @@ public class AppHost : GenericHost
                 if (IdentityServerHttpHandler != null)
                 {
                     // allow discovery document
-                    IdentityServerHttpHandler.When("/.well-known/*")
+                    _ = IdentityServerHttpHandler.When("/.well-known/*")
                         .Respond(identityServerHandler);
 
                     options.BackchannelHttpHandler = IdentityServerHttpHandler;
@@ -93,8 +93,8 @@ public class AppHost : GenericHost
                 options.ProtocolValidator.RequireNonce = false;
             });
 
-        services.AddDistributedMemoryCache();
-        services.AddOpenIdConnectAccessTokenManagement(opt =>
+        _ = services.AddDistributedMemoryCache();
+        _ = services.AddOpenIdConnectAccessTokenManagement(opt =>
         {
             _configureUserTokenManagementOptions?.Invoke(opt);
         });
@@ -103,13 +103,13 @@ public class AppHost : GenericHost
 
     private void Configure(IApplicationBuilder app)
     {
-        app.UseAuthentication();
-        app.UseRouting();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseRouting();
+        _ = app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
+        _ = app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGet("/login", async context =>
+            _ = endpoints.MapGet("/login", async context =>
             {
                 await context.ChallengeAsync(new AuthenticationProperties
                 {
@@ -117,18 +117,18 @@ public class AppHost : GenericHost
                 });
             });
 
-            endpoints.MapGet("/logout", async context =>
+            _ = endpoints.MapGet("/logout", async context =>
             {
                 await context.SignOutAsync();
             });
 
-            endpoints.MapGet("/user_token", async context =>
+            _ = endpoints.MapGet("/user_token", async context =>
             {
                 var tokenResult = await context.GetUserAccessTokenAsync();
                 await context.Response.WriteAsJsonAsync(tokenResult.Token);
             });
 
-            endpoints.MapGet("/user_token_with_resource/{resource}", async (string resource, HttpContext context) =>
+            _ = endpoints.MapGet("/user_token_with_resource/{resource}", async (string resource, HttpContext context) =>
             {
                 var token = await context.GetUserAccessTokenAsync(new UserTokenRequestParameters
                 {
@@ -137,7 +137,7 @@ public class AppHost : GenericHost
                 await context.Response.WriteAsJsonAsync(token);
             });
 
-            endpoints.MapGet("/client_token", async context =>
+            _ = endpoints.MapGet("/client_token", async context =>
             {
                 var token = await context.GetClientAccessTokenAsync();
                 await context.Response.WriteAsJsonAsync(token);

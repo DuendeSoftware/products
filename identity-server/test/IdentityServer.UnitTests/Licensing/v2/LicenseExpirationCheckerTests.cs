@@ -5,7 +5,6 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
-using Microsoft.Extensions.Time.Testing;
 
 namespace IdentityServer.UnitTests.Licensing.V2;
 

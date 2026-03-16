@@ -18,17 +18,17 @@ public class BffBlazorTests : BffTestBase
         Bff.MapGetForRoot = false;
         Bff.OnConfigureServices += services =>
         {
-            services.AddRazorComponents()
+            _ = services.AddRazorComponents()
                 .AddInteractiveServerComponents()
                 .AddInteractiveWebAssemblyComponents();
 
-            services.AddCascadingAuthenticationState();
-            services.AddAntiforgery();
+            _ = services.AddCascadingAuthenticationState();
+            _ = services.AddAntiforgery();
         };
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.AddBlazorServer();
+            _ = bff.AddBlazorServer();
 
             if (_addServerSideSessions)
             {
@@ -37,13 +37,13 @@ public class BffBlazorTests : BffTestBase
                     $"test-{Guid.NewGuid():N}.sqlite"
                 );
                 var connectionString = $"Data Source={dbFilePath}";
-                bff.AddEntityFrameworkServerSideSessions(options =>
+                _ = bff.AddEntityFrameworkServerSideSessions(options =>
                     options.UseSqlite(
                         connectionString,
                         dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName)
                     )
                 );
-                bff.AddSessionCleanupBackgroundProcess();
+                _ = bff.AddSessionCleanupBackgroundProcess();
             }
         };
 
@@ -57,8 +57,8 @@ public class BffBlazorTests : BffTestBase
                 scope.ServiceProvider.GetRequiredService<SessionDbContext>().Database.Migrate();
             }
 
-            app.UseAntiforgery();
-            app.MapRazorComponents<App>()
+            _ = app.UseAntiforgery();
+            _ = app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode()
                 .AddInteractiveWebAssemblyRenderMode();
         };
@@ -96,7 +96,7 @@ public class BffBlazorTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
         var response = await Bff.BrowserClient.GetAsync("/secure");
 

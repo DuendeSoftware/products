@@ -75,7 +75,7 @@ public class Callback : PageModel
             //
             // remove the user id claim so we don't include it as an extra claim if/when we provision the user
             var claims = externalUser.Claims.ToList();
-            claims.Remove(userIdClaim);
+            _ = claims.Remove(userIdClaim);
             user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
         }
 

@@ -107,7 +107,7 @@ internal class TestRunner(string authority, OutputMode outputMode)
                 ? string.Concat(test.Scope.AsSpan(0, 37), "...")
                 : test.Scope;
 
-            table.AddRow(
+            _ = table.AddRow(
                 test.Id,
                 status,
                 scopeDisplay,

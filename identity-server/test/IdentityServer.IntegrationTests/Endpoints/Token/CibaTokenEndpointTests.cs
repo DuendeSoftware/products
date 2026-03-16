@@ -12,7 +12,6 @@ using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Time.Testing;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 

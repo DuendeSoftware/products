@@ -26,11 +26,11 @@ public class ApiHost : GenericHost
 
     private void ConfigureServices(IServiceCollection services)
     {
-        services.AddHybridCache();
-        services.AddRouting();
-        services.AddAuthorization();
+        _ = services.AddHybridCache();
+        _ = services.AddRouting();
+        _ = services.AddAuthorization();
 
-        services.AddAuthentication(AuthenticationScheme)
+        _ = services.AddAuthentication(AuthenticationScheme)
             .AddJwtBearer(AuthenticationScheme, options =>
             {
                 options.Authority = _identityServerHost.Url();
@@ -42,7 +42,7 @@ public class ApiHost : GenericHost
 
     private void Configure(IApplicationBuilder app)
     {
-        app.Use(async (context, next) =>
+        _ = app.Use(async (context, next) =>
         {
             ApiInvoked.Invoke(context);
             if (ApiStatusCodeToReturn != null)
@@ -55,9 +55,9 @@ public class ApiHost : GenericHost
             await next();
         });
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
     }
 }

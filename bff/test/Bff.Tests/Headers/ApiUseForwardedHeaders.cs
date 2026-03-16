@@ -15,7 +15,7 @@ public class ApiUseForwardedHeaders : BffTestBase
 
         Api.OnConfigureApp += app =>
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            _ = app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor |
                                    ForwardedHeaders.XForwardedProto |
@@ -25,7 +25,7 @@ public class ApiUseForwardedHeaders : BffTestBase
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url());
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url());
         };
     }
 

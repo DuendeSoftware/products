@@ -14,7 +14,7 @@ public class BlazorPerComponentTests(BffHostTestFixture fixture)
 
     public async Task<PerComponentPageModel> GoToHome()
     {
-        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorPerComponent).ToString(), Defaults.PageGotoOptions);
+        _ = await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorPerComponent).ToString(), Defaults.PageGotoOptions);
         return new PerComponentPageModel()
         {
             Page = Page
@@ -27,7 +27,7 @@ public class BlazorPerComponentTests(BffHostTestFixture fixture)
         await Warmup();
 
         var homePage = await GoToHome();
-        await homePage.Login();
+        _ = await homePage.Login();
         var callApiPage = await homePage.GoToCallApiPage();
 
 

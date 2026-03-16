@@ -26,7 +26,7 @@ public interface IBackChannelAuthenticationRequestStore
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="clientId">The client identifier.</param>
-    Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string? clientId = null);
+    Task<IReadOnlyCollection<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string? clientId = null);
 
     /// <summary>
     /// Gets the request.

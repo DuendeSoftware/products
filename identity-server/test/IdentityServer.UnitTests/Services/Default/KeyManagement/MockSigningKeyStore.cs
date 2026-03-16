@@ -23,10 +23,10 @@ internal class MockSigningKeyStore : ISigningKeyStore
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct _)
+    public Task<IReadOnlyCollection<SerializedKey>> LoadKeysAsync(Ct _)
     {
         LoadKeysAsyncWasCalled = true;
-        return Task.FromResult<IEnumerable<SerializedKey>>(Keys);
+        return Task.FromResult<IReadOnlyCollection<SerializedKey>>(Keys);
     }
 
     public Task StoreKeyAsync(SerializedKey key, Ct _)

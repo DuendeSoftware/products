@@ -19,15 +19,15 @@ internal class ConfigureBffStartupFilter : IStartupFilter
 
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
-                app.UseForwardedHeaders();
-                app.UseBffPreProcessing();
+                _ = app.UseForwardedHeaders();
+                _ = app.UseBffPreProcessing();
             }
 
             next(app);
 
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
-                app.UseBffPostProcessing();
+                _ = app.UseBffPostProcessing();
 
             }
         };

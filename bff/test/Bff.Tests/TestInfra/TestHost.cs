@@ -98,11 +98,11 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
             ApplicationName = baseAddress.ToString(),
         });
 
-        hostBuilder.WebHost.UseTestServer();
+        _ = hostBuilder.WebHost.UseTestServer();
         ConfigureServices(hostBuilder.Services);
-        hostBuilder.Logging.ClearProviders();
-        hostBuilder.Logging.SetMinimumLevel(LogLevel.Debug);
-        hostBuilder.Logging.AddProvider(Logger);
+        _ = hostBuilder.Logging.ClearProviders();
+        _ = hostBuilder.Logging.SetMinimumLevel(LogLevel.Debug);
+        _ = hostBuilder.Logging.AddProvider(Logger);
 
         _webApplication = hostBuilder.Build();
         Server = (_webApplication.Services.GetRequiredService<IServer>() as TestServer)!;
@@ -118,11 +118,11 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     protected virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<TimeProvider>(The.Clock);
+        _ = services.AddSingleton<TimeProvider>(The.Clock);
 
-        services.AddAuthentication();
-        services.AddAuthorization();
-        services.AddRouting();
+        _ = services.AddAuthentication();
+        _ = services.AddAuthorization();
+        _ = services.AddRouting();
 
 
 
@@ -133,12 +133,12 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     {
         _appServices = app.ApplicationServices;
 
-        app.Use(async (c, n) =>
+        _ = app.Use(async (c, n) =>
         {
             await n();
         });
 
-        app.UseEndpoints(endpoints =>
+        _ = app.UseEndpoints(endpoints =>
         {
             OnConfigureApp(new BffWebApplication(app, endpoints));
         });

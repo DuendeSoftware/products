@@ -87,21 +87,19 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IEnumerable<Duende.IdentityServer.Models.PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
+    public virtual async Task<IReadOnlyCollection<Duende.IdentityServer.Models.PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.GetAll");
 
         filter.Validate();
 
         var persistedGrants = await Filter(Context.PersistedGrants.AsQueryable(), filter)
+            .Select(x => x.ToModel())
             .ToArrayAsync(ct);
-        persistedGrants = Filter(persistedGrants.AsQueryable(), filter).ToArray();
-
-        var model = persistedGrants.Select(x => x.ToModel());
 
         Logger.LogDebug("{persistedGrantCount} persisted grants found for {@filter}", persistedGrants.Length, filter);
 
-        return model;
+        return persistedGrants;
     }
 
     /// <inheritdoc/>

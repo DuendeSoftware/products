@@ -11,12 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddRazorComponents()
+_ = builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddBff();
+_ = builder.Services.AddBff();
 
-builder.Services.AddAuthentication(options =>
+_ = builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "cookie";
         options.DefaultChallengeScheme = "oidc";
@@ -48,10 +48,10 @@ builder.Services.AddAuthentication(options =>
         options.Scope.Add("api");
         options.Scope.Add("offline_access");
     });
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+_ = builder.Services.AddCascadingAuthenticationState();
+_ = builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
-builder.Services.AddAuthorization();
+_ = builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -62,24 +62,24 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    _ = app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    _ = app.UseHsts();
 }
 
-app.UseHttpLogging();
+_ = app.UseHttpLogging();
 
-app.UseHttpsRedirection();
+_ = app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+_ = app.UseStaticFiles();
 
-app.UseRouting();
-app.UseAuthentication();
-app.UseBff();
-app.UseAuthorization();
-app.UseAntiforgery();
+_ = app.UseRouting();
+_ = app.UseAuthentication();
+_ = app.UseBff();
+_ = app.UseAuthorization();
+_ = app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
+_ = app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Hosts.Bff.Blazor.WebAssembly.Client._Imports).Assembly);
 

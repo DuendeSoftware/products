@@ -11,13 +11,13 @@ public class BffScenarioTests : BffTestBase
     public async Task When_using_bff_as_host_and_client_credentials_token_manager_with_no_http_context_still_works()
     {
         var workerClientId = "worker.client.id";
-        IdentityServer.AddClient(workerClientId, Bff.Url());
+        _ = IdentityServer.AddClient(workerClientId, Bff.Url());
         var contentReceived = new TaskCompletionSource<string>();
         var workerStarted = new TaskCompletionSource();
 
         Bff.OnConfigureServices += services =>
         {
-            services.AddClientCredentialsTokenManagement()
+            _ = services.AddClientCredentialsTokenManagement()
                 .AddClient(ClientCredentialsClientName.Parse("worker.client"), client =>
                 {
                     client.TokenEndpoint = new Uri(IdentityServer.Url(), "/connect/token");
@@ -27,14 +27,14 @@ public class BffScenarioTests : BffTestBase
                     client.HttpClient = new HttpClient(Internet, disposeHandler: false);
                 });
 
-            services.AddClientCredentialsHttpClient("worker",
+            _ = services.AddClientCredentialsHttpClient("worker",
                     ClientCredentialsClientName.Parse("worker.client"),
                     client => { client.BaseAddress = Api.Url(); })
                 .ConfigurePrimaryHttpMessageHandler(() => Internet);
 
-            services.AddSingleton(contentReceived);
-            services.AddSingleton(workerStarted);
-            services.AddHostedService<BackgroundWorker>();
+            _ = services.AddSingleton(contentReceived);
+            _ = services.AddSingleton(workerStarted);
+            _ = services.AddHostedService<BackgroundWorker>();
         };
         await InitializeAsync();
         workerStarted.SetResult();
@@ -60,17 +60,17 @@ public class BffScenarioTests : BffTestBase
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync(stoppingToken);
-                    contentReceived.TrySetResult(content);
+                    _ = contentReceived.TrySetResult(content);
                 }
                 else
                 {
-                    contentReceived.TrySetException(
+                    _ = contentReceived.TrySetException(
                         new Exception($"Request failed with status code: {response.StatusCode}"));
                 }
             }
             catch (Exception ex)
             {
-                contentReceived.TrySetException(ex);
+                _ = contentReceived.TrySetException(ex);
             }
         }
     }

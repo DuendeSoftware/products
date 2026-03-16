@@ -25,7 +25,7 @@ public class MultiFrontendWarmedUpLoginBenchmarks : BenchmarkBase
         {
             var c = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
             var path = GetPath(i);
-            await c.GetAsync(path + "/bff/login")
+            _ = await c.GetAsync(path + "/bff/login")
                 .EnsureStatusCode();
         }
 
@@ -39,10 +39,10 @@ public class MultiFrontendWarmedUpLoginBenchmarks : BenchmarkBase
 
         var path = GetPath(_random.Next(0, PathsToTest - 1));
 
-        await client.GetAsync(path + "/bff/login")
+        _ = await client.GetAsync(path + "/bff/login")
             .EnsureStatusCode();
 
-        await client.GetWithCSRF(path + "/user_token")
+        _ = await client.GetWithCSRF(path + "/user_token")
             .EnsureStatusCode();
 
     }

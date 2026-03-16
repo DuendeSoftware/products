@@ -8,7 +8,6 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Tokens;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;

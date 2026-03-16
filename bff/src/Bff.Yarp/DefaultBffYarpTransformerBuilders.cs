@@ -18,8 +18,8 @@ public static class DefaultBffYarpTransformerBuilders
     public static readonly BffYarpTransformBuilder DirectProxyWithAccessToken =
         (pathMatch, context) =>
         {
-            context.AddRequestHeaderRemove("Cookie");
-            context.AddPathRemovePrefix(pathMatch);
-            context.AddBffAccessToken(pathMatch);
+            _ = context.AddRequestHeaderRemove("Cookie");
+            _ = context.AddPathRemovePrefix(pathMatch);
+            _ = context.AddBffAccessToken(pathMatch);
         };
 }

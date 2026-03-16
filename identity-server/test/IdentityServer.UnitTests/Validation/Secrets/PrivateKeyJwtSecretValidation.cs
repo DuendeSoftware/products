@@ -234,13 +234,13 @@ public class PrivateKeyJwtSecretValidation
     }
 
     [Theory]
-    [InlineData(Typ.ClientAuthentication, true, false)]
-    [InlineData(Typ.ClientAuthentication, false, false)]
+    [InlineData(Typ.ClientAuthentication, true, true)]
+    [InlineData(Typ.ClientAuthentication, false, true)]
     [InlineData(Typ.None, true, false)]
     [InlineData(Typ.None, false, true)]
     [InlineData(Typ.JWT, true, false)]
     [InlineData(Typ.JWT, false, true)]
-    public async Task Strict_audience_does_not_allow_single_valued_arrays(Typ typ, bool setStrictOption, bool expectedResult)
+    public async Task Strict_audience_allows_single_valued_arrays(Typ typ, bool setStrictOption, bool expectedResult)
     {
         _options.Preview.StrictClientAssertionAudienceValidation = setStrictOption;
 
@@ -248,7 +248,7 @@ public class PrivateKeyJwtSecretValidation
         var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var token = new JwtSecurityTokenHandler().WriteToken(CreateToken(
             clientId,
-            audiences: ["https://idsrv.com/connect/token"],
+            audiences: ["https://idsrv.com"],
             typ: typ));
 
         var secret = new ParsedSecret

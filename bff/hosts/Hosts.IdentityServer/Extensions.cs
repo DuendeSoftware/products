@@ -8,7 +8,7 @@ internal static class Extensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        _ = builder.Services.AddRazorPages();
 
         var isBuilder = builder.Services.AddIdentityServer(options =>
             {
@@ -22,25 +22,25 @@ internal static class Extensions
             .AddTestUsers(TestUsers.Users);
 
         // in-memory, code config
-        isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
-        isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
-        isBuilder.AddInMemoryClients(Config.Clients);
-        isBuilder.AddInMemoryApiResources(Config.ApiResources);
-        isBuilder.AddExtensionGrantValidator<TokenExchangeGrantValidator>();
+        _ = isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
+        _ = isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
+        _ = isBuilder.AddInMemoryClients(Config.Clients);
+        _ = isBuilder.AddInMemoryApiResources(Config.ApiResources);
+        _ = isBuilder.AddExtensionGrantValidator<TokenExchangeGrantValidator>();
 
         return builder.Build();
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseHttpLogging();
-        app.UseDeveloperExceptionPage();
-        app.UseStaticFiles();
+        _ = app.UseHttpLogging();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
-        app.UseIdentityServer();
-        app.UseAuthorization();
-        app.MapRazorPages()
+        _ = app.UseRouting();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
+        _ = app.MapRazorPages()
             .RequireAuthorization();
 
         return app;

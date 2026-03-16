@@ -39,10 +39,10 @@ public class IdentityServerHost : GenericHost
 
     private void ConfigureServices(IServiceCollection services)
     {
-        services.AddRouting();
-        services.AddAuthorization();
+        _ = services.AddRouting();
+        _ = services.AddAuthorization();
 
-        services.AddIdentityServer(options =>
+        _ = services.AddIdentityServer(options =>
             {
                 options.EmitStaticAudienceClaim = true;
 
@@ -58,19 +58,19 @@ public class IdentityServerHost : GenericHost
 
     private void Configure(IApplicationBuilder app)
     {
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseIdentityServer();
-        app.UseAuthorization();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
+        _ = app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGet("/account/login", context =>
+            _ = endpoints.MapGet("/account/login", context =>
             {
                 return Task.CompletedTask;
             });
 
-            endpoints.MapGet("/account/logout", async context =>
+            _ = endpoints.MapGet("/account/logout", async context =>
             {
                 // signout as if the user were prompted
                 await context.SignOutAsync();

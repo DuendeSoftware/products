@@ -6,17 +6,17 @@ internal static class HostingExtensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        _ = builder.Services.AddRazorPages();
 
-        builder.Services.AddControllers();
+        _ = builder.Services.AddControllers();
 
         // add BFF services and server-side session management
-        builder.Services.AddBff()
+        _ = builder.Services.AddBff()
             // if you wanted to enable a remote API (in addition or instead of the local API), then you could uncomment this line
             //.AddRemoteApis()
             .AddServerSideSessions();
 
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "cookie";
                 options.DefaultChallengeScheme = "oidc";
@@ -54,24 +54,24 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
+        _ = app.UseSerilogRequestLogging();
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            _ = app.UseDeveloperExceptionPage();
         }
 
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
-        app.UseAuthentication();
-        app.UseRouting();
+        _ = app.UseDefaultFiles();
+        _ = app.UseStaticFiles();
+        _ = app.UseAuthentication();
+        _ = app.UseRouting();
 
         // add CSRF protection and status code handling for API endpoints
-        app.UseBff();
-        app.UseAuthorization();
+        _ = app.UseBff();
+        _ = app.UseAuthorization();
 
         // local API endpoints
-        app.MapControllers()
+        _ = app.MapControllers()
             .RequireAuthorization()
             .AsBffApiEndpoint();
 

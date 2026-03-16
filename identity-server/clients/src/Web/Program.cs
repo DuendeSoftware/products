@@ -10,11 +10,11 @@ using Microsoft.IdentityModel.Tokens;
 using Web;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.AddServiceDefaults();
+_ = builder.AddServiceDefaults();
 var authority = builder.Configuration["is-host"];
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+_ = builder.Services.AddRazorPages();
 AddAuthentication();
 AddAccessTokenManagement();
 ConfigureBackChannelLogout();
@@ -24,27 +24,27 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    _ = app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    _ = app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+_ = app.UseHttpsRedirection();
 
-app.UseRouting();
+_ = app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+_ = app.UseAuthentication();
+_ = app.UseAuthorization();
 
-app.MapStaticAssets();
-app.MapRazorPages()
+_ = app.MapStaticAssets();
+_ = app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
 
 void AddAccessTokenManagement()
 {
-    builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
+    _ = builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
     {
         // add option to opt-in to jkt on authZ ep
         // create and configure a DPoP JWK
@@ -53,18 +53,18 @@ void AddAccessTokenManagement()
         jwk.Alg = "PS256";
         options.DPoPJsonWebKey = DPoPProofKey.Parse(JsonSerializer.Serialize(jwk));
     });
-    builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
+    _ = builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
     {
         client.BaseAddress = new Uri("https://dpop-api");
     }).AddServiceDiscovery();
 
-    builder.Services.AddTransient<IClientAssertionService, ClientAssertionService>();
-    builder.Services.AddSingleton<AssertionService>();
+    _ = builder.Services.AddTransient<IClientAssertionService, ClientAssertionService>();
+    _ = builder.Services.AddSingleton<AssertionService>();
 }
 
 void AddAuthentication()
 {
-    builder.Services.AddAuthentication(options =>
+    _ = builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "cookie";
         options.DefaultChallengeScheme = "oidc";
@@ -98,11 +98,11 @@ void AddAuthentication()
         };
         options.DisableTelemetry = true;
     });
-    builder.Services.ConfigureOptions<ConfigureAssertionsAndJar>();
+    _ = builder.Services.ConfigureOptions<ConfigureAssertionsAndJar>();
 }
 
 void ConfigureBackChannelLogout()
 {
-    builder.Services.AddTransient<LogoutEvents>();
-    builder.Services.AddSingleton<LogoutSessionManager>();
+    _ = builder.Services.AddTransient<LogoutEvents>();
+    _ = builder.Services.AddSingleton<LogoutSessionManager>();
 }

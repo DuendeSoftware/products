@@ -17,9 +17,9 @@ public static class
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.Services.AddActivatedSingleton<ServerSideSessionChecker>();
+        _ = builder.Services.AddActivatedSingleton<ServerSideSessionChecker>();
 
-        builder.Services
+        _ = builder.Services
             .AddOpenIdConnectAccessTokenManagement()
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()
             .AddSingleton<IClaimsTransformation, AddServerManagementClaimsTransform>()
@@ -28,7 +28,7 @@ public static class
 
         if (configureOptions != null)
         {
-            builder.Services.Configure(configureOptions);
+            _ = builder.Services.Configure(configureOptions);
         }
 
         return builder;

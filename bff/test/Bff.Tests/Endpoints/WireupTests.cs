@@ -16,7 +16,7 @@ public class WireupTests : BffTestBase
         };
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
     }
     [Fact]
     public async Task Can_call_map_management_endpoints_with_automapping_when_management_path_has_template()
@@ -37,7 +37,7 @@ public class WireupTests : BffTestBase
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login(basePath: "/some_value");
+        _ = await Bff.BrowserClient.Login(basePath: "/some_value");
     }
 
     [Fact]
@@ -57,6 +57,6 @@ public class WireupTests : BffTestBase
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login(basePath: "/some_base");
+        _ = await Bff.BrowserClient.Login(basePath: "/some_base");
     }
 }

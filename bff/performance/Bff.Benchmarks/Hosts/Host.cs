@@ -30,24 +30,24 @@ public abstract class Host : IAsyncDisposable
         Internet = simulatedInternet;
         _builder = WebApplication.CreateBuilder();
         // Logs interfere with the benchmarks, so we clear them
-        _builder.Logging.ClearProviders();
+        _ = _builder.Logging.ClearProviders();
         // Ensure dev certificate is used for SSL
         if (Internet.UseKestrel)
         {
-            _builder.WebHost.UseUrls("https://*:0");
+            _ = _builder.WebHost.UseUrls("https://*:0");
         }
         else
         {
-            _builder.Logging.AddConsole();
-            _builder.WebHost
+            _ = _builder.Logging.AddConsole();
+            _ = _builder.WebHost
                 .UseTestServer();
         }
 
 
 
-        _builder.Services.AddAuthentication();
-        _builder.Services.AddAuthorization();
-        _builder.Services.AddRouting();
+        _ = _builder.Services.AddAuthentication();
+        _ = _builder.Services.AddAuthorization();
+        _ = _builder.Services.AddRouting();
     }
 
     public T GetService<T>() where T : notnull => _app.Services.GetRequiredService<T>();

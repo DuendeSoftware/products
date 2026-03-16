@@ -11,9 +11,9 @@ public class MockSamlLogoutNotificationService : ISamlLogoutNotificationService
     public bool GetSamlFrontChannelLogoutsAsyncCalled { get; set; }
     public List<ISamlFrontChannelLogout> SamlFrontChannelLogouts { get; set; } = [];
 
-    public Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct _)
+    public Task<IReadOnlyCollection<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct _)
     {
         GetSamlFrontChannelLogoutsAsyncCalled = true;
-        return Task.FromResult(SamlFrontChannelLogouts.AsEnumerable());
+        return Task.FromResult<IReadOnlyCollection<ISamlFrontChannelLogout>>(SamlFrontChannelLogouts);
     }
 }

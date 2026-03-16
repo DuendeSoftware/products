@@ -19,7 +19,7 @@ public class BffFrontendSigninTests : BffTestBase
     public BffFrontendSigninTests() : base() =>
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet("/secret", (HttpContext c) =>
+            _ = app.MapGet("/secret", (HttpContext c) =>
             {
                 if (!c.User.IsAuthenticated())
                 {
@@ -39,7 +39,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend());
 
-        await Bff.BrowserClient.GetAsync("/")
+        _ = await Bff.BrowserClient.GetAsync("/")
             .CheckHttpStatusCode()
             .CheckResponseContent(Bff.DefaultRootResponse);
     }
@@ -60,12 +60,12 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet(pathString, (HttpContext c, Ct ct) => "ok");
+            _ = app.MapGet(pathString, (HttpContext c, Ct ct) => "ok");
         };
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.GetAsync(pathString)
+        _ = await Bff.BrowserClient.GetAsync(pathString)
             .CheckHttpStatusCode()
             .CheckResponseContent("ok");
     }
@@ -77,13 +77,13 @@ public class BffFrontendSigninTests : BffTestBase
         var logoutCalled = false;
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet(Bff.BffOptions.LoginPath, c =>
+            _ = app.MapGet(Bff.BffOptions.LoginPath, c =>
             {
                 loginCalled = true;
                 return c.RequestServices.GetRequiredService<ILoginEndpoint>().ProcessRequestAsync(c);
             });
 
-            app.MapGet(Bff.BffOptions.LogoutPath, c =>
+            _ = app.MapGet(Bff.BffOptions.LogoutPath, c =>
             {
                 logoutCalled = true;
                 return c.RequestServices.GetRequiredService<ILogoutEndpoint>().ProcessRequestAsync(c);
@@ -93,10 +93,10 @@ public class BffFrontendSigninTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend());
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
-        await Bff.BrowserClient.Logout();
+        _ = await Bff.BrowserClient.Logout();
         loginCalled.ShouldBeTrue();
         logoutCalled.ShouldBeTrue();
     }
@@ -108,22 +108,22 @@ public class BffFrontendSigninTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend());
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
     public async Task Can_add_frontends_using_AddFrontends_ExtensionMethod()
     {
-        IdentityServer.AddClientFor(Some.BffFrontend(), [Bff.Url()]);
+        _ = IdentityServer.AddClientFor(Some.BffFrontend(), [Bff.Url()]);
         Bff.OnConfigureBff += bff => bff.AddFrontends(Some.BffFrontend());
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode();
     }
 
@@ -141,13 +141,13 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
+        _ = IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
         for (var i = 0; i < 10; i++)
         {
             var client = Internet.BuildHttpClient(Bff.Url());
-            await client.GetAsync("/somepath/bff/login")
+            _ = await client.GetAsync("/somepath/bff/login")
                 .CheckResponseContent(Bff.DefaultRootResponse);
         }
     }
@@ -166,21 +166,21 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
+        _ = IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
 
-        await Bff.BrowserClient.Login("/somepath")
+        _ = await Bff.BrowserClient.Login("/somepath")
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url("/somepath")).FirstOrDefault();
-        cookie.ShouldNotBeNull();
+        _ = cookie.ShouldNotBeNull();
         cookie.HttpOnly.ShouldBeTrue();
         cookie.Name.ShouldBe(Constants.Cookies.SecurePrefix + "_" + "with_somepath");
         cookie.Secure.ShouldBeTrue();
         cookie.Path.ShouldBe("/somepath");
 
-        await Bff.BrowserClient.GetAsync("/somepath/secret")
+        _ = await Bff.BrowserClient.GetAsync("/somepath/secret")
             .CheckHttpStatusCode();
     }
 
@@ -198,11 +198,11 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
+        _ = IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
 
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -211,7 +211,7 @@ public class BffFrontendSigninTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff"; });
+            _ = svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff"; });
         };
         await InitializeAsync();
 
@@ -224,10 +224,10 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
+        _ = IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
 
 
         var response = await Bff.BrowserClient.Login("/somepath/custom");
@@ -248,11 +248,11 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
+        _ = IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
 
-        await Bff.BrowserClient.Login("/somepath")
+        _ = await Bff.BrowserClient.Login("/somepath")
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         var response = await Bff.BrowserClient.GetAsync("/somepath/bff/silent-login");
@@ -270,14 +270,14 @@ public class BffFrontendSigninTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend());
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode();
 
         var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url()).FirstOrDefault();
-        cookie.ShouldNotBeNull();
+        _ = cookie.ShouldNotBeNull();
         cookie.HttpOnly.ShouldBeTrue();
         cookie.Name.ShouldBe(Constants.Cookies.HostPrefix + "_" + The.FrontendName);
         cookie.Secure.ShouldBeTrue();
@@ -292,7 +292,7 @@ public class BffFrontendSigninTests : BffTestBase
         var bffFrontend = Some.BffFrontend();
         AddOrUpdateFrontend(bffFrontend);
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         // Bit weird, but the easiest way to see if the new settings are used is to update
@@ -306,7 +306,7 @@ public class BffFrontendSigninTests : BffTestBase
             }
         });
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .ShouldThrowAsync<InvalidOperationException>();
     }
 
@@ -315,16 +315,16 @@ public class BffFrontendSigninTests : BffTestBase
     {
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<HybridCache, TestHybridCache>();
+            _ = services.AddSingleton<HybridCache, TestHybridCache>();
         };
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-        IdentityServer.AddClient("differnet_client_id", Bff.Url());
+        _ = IdentityServer.AddClient("differnet_client_id", Bff.Url());
         await InitializeAsync();
 
         var bffFrontend = Some.BffFrontend().WithRemoteApis(new RemoteApi("/test", Api.Url()).WithAccessToken(RequiredTokenType.Client));
         AddOrUpdateFrontend(bffFrontend);
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         ApiCallDetails response = await Bff.BrowserClient.CallBffHostApi("/test");
@@ -344,7 +344,7 @@ public class BffFrontendSigninTests : BffTestBase
         // But it does so on a background thread, so we need to wait for it
         cache.WaitUntilRemoveByTagAsyncCalled(TimeSpan.FromSeconds(1));
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         ApiCallDetails response2 = await Bff.BrowserClient.CallBffHostApi("/test");
@@ -360,7 +360,7 @@ public class BffFrontendSigninTests : BffTestBase
         var bffFrontend = Some.BffFrontend();
         AddOrUpdateFrontend(bffFrontend);
 
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         Bff.BrowserClient.Cookies.Clear(Bff.Url());
@@ -372,7 +372,7 @@ public class BffFrontendSigninTests : BffTestBase
             ConfigureCookieOptions = opt => { opt.Cookie.Name = "my_custom_cookie_name"; }
         });
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         Bff.BrowserClient.Cookies.GetCookies(Bff.Url())
             .ShouldContain(c => c.Name == "my_custom_cookie_name" && c.HttpOnly && c.Secure && c.Path == "/");
@@ -385,7 +385,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.ConfigureOpenIdConnect(options =>
+            _ = bff.ConfigureOpenIdConnect(options =>
             {
                 options.Authority = IdentityServer.Url().ToString();
 
@@ -408,9 +408,9 @@ public class BffFrontendSigninTests : BffTestBase
             Name = BffFrontendName.Parse("some_frontend")
         });
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode();
     }
 
@@ -448,9 +448,9 @@ public class BffFrontendSigninTests : BffTestBase
             Name = BffFrontendName.Parse("some_frontend")
         });
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode();
 
         onTokenValidatedInvoked.ShouldBeTrue();
@@ -476,9 +476,9 @@ public class BffFrontendSigninTests : BffTestBase
             }
         });
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.GetAsync("/secret")
+        _ = await Bff.BrowserClient.GetAsync("/secret")
             .CheckHttpStatusCode();
 
         onTokenValidatedInvoked.ShouldBeTrue();
@@ -505,7 +505,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         onTokenValidatedInvoked.ShouldBeTrue();
         onTokenValidatedInvoked = false;
         AddOrUpdateFrontend(new BffFrontend()
@@ -524,11 +524,11 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.LoadConfiguration(configuration);
+            _ = bff.LoadConfiguration(configuration);
         };
         await InitializeAsync();
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
-        await Bff.BrowserClient.Login();
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = await Bff.BrowserClient.Login();
     }
 
     [Fact]
@@ -538,7 +538,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.LoadConfiguration(configuration);
+            _ = bff.LoadConfiguration(configuration);
         };
 
         await InitializeAsync();
@@ -549,8 +549,8 @@ public class BffFrontendSigninTests : BffTestBase
                 MatchingPath = "/not_matched"
             }
         });
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -560,7 +560,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.LoadConfiguration(configuration);
+            _ = bff.LoadConfiguration(configuration);
         };
 
         await InitializeAsync();
@@ -572,8 +572,8 @@ public class BffFrontendSigninTests : BffTestBase
                 MatchingPath = The.Path
             }
         });
-        IdentityServer.AddClient(The.ClientId, Bff.Url(The.Path + "/"));
-        await Bff.BrowserClient.Login(The.Path);
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url(The.Path + "/"));
+        _ = await Bff.BrowserClient.Login(The.Path);
     }
 
     private IConfiguration BuildValidBffOidcConfig()

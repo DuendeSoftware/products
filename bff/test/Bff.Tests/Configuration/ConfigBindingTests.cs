@@ -31,8 +31,8 @@ public class OptionsMonitorExplorationTests
 
         // Important: I'm binding two classes to the same IConfiguration instance
         // The different classes are mapped to the same data.
-        builder.Services.Configure<MyConfig>(builder.Configuration);
-        builder.Services.Configure<MyConfig2>(builder.Configuration);
+        _ = builder.Services.Configure<MyConfig>(builder.Configuration);
+        _ = builder.Services.Configure<MyConfig2>(builder.Configuration);
 
         using var host = builder.Build();
 
@@ -43,7 +43,7 @@ public class OptionsMonitorExplorationTests
         // Count for each data what the number of items is when the first monitor changes.
         var countMyConfig1 = 0;
         var countMyConfig2 = 0;
-        monitor1.OnChange(c =>
+        _ = monitor1.OnChange(c =>
         {
             countMyConfig1 = c.Items.Count;
             countMyConfig2 = monitor2.CurrentValue.Items.Count;
@@ -52,7 +52,7 @@ public class OptionsMonitorExplorationTests
         // Now we load a single data item and trigger a (single) reload.
         provider.LoadDataWithOneItem();
         provider.Reload();
-        Task.Delay(200);
+        _ = Task.Delay(200);
 
         // After first reload both monitors have 1 item.
         countMyConfig1.ShouldBe(1);
@@ -61,7 +61,7 @@ public class OptionsMonitorExplorationTests
         // Now reload the configuration, but with two items
         provider.LoadDataWithSecondItem();
         provider.Reload();
-        Task.Delay(200);
+        _ = Task.Delay(200);
 
         // The first config is updated (as expected)
         countMyConfig1.ShouldBe(2);
@@ -75,7 +75,7 @@ public class OptionsMonitorExplorationTests
         // A second reload now causes both providers to be reloaded.
         customConfigurationSource.Provider.Reload();
 
-        Task.Delay(200);
+        _ = Task.Delay(200);
 
         // and now the options monitors for BOTH are updated.
         countMyConfig1.ShouldBe(2);
@@ -158,7 +158,7 @@ public class ConfigBindingTests : BffTestBase
     public async Task Can_load_remote_apis_at_runtime_from_multiple_config_sources()
     {
         var folder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(folder);
+        _ = Directory.CreateDirectory(folder);
 
 
 
@@ -214,9 +214,9 @@ public class ConfigBindingTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.LoadConfiguration(config);
+            _ = bff.LoadConfiguration(config);
 
-            bff.AddRemoteApis();
+            _ = bff.AddRemoteApis();
 
         };
 

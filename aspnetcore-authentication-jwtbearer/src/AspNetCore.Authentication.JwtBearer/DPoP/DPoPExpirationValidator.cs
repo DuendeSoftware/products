@@ -30,7 +30,7 @@ internal class DPoPExpirationValidator
         if (start < time)
         {
             var diff = time - now;
-            Logger.LogDebug("Expiration check failed. Creation time was too far in the future. The time being checked was {iat}, and clock is now {now}. The time difference is {diff}.", time, now, diff);
+            Logger.LogDebug("Expiration check failed. Creation time was too far in the future. The time being checked was {Iat}, and clock is now {Now}. The time difference is {Diff}.", time, now, diff);
             return true;
         }
 
@@ -39,7 +39,7 @@ internal class DPoPExpirationValidator
         if (expiration < end)
         {
             var diff = now - expiration;
-            Logger.LogDebug("Expiration check failed. Expiration has already happened. The expiration was at {exp}, and clock is now {now}. The time difference is {diff}.", expiration, now, diff);
+            Logger.LogDebug("Expiration check failed. Expiration has already happened. The expiration was at {Exp}, and clock is now {Now}. The time difference is {Diff}.", expiration, now, diff);
             return true;
         }
 

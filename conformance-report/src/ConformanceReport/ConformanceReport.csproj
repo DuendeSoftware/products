@@ -6,6 +6,8 @@
     <Description>Conformance assessment for FAPI 2.0 and OAuth 2.1 profiles</Description>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
+    <!-- Keep CompilerGeneratedFilesOutputPath set to prevent MSB5029 from the SDK -->
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     <OutputType>Library</OutputType>
     <NoWarn>$(NoWarn);NETSDK1086</NoWarn>
   </PropertyGroup>

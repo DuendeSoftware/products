@@ -62,7 +62,7 @@ public interface IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<string>> GetClientListAsync(Ct ct);
+    Task<IReadOnlyCollection<string>> GetClientListAsync(Ct ct);
 
     /// <summary>
     /// Adds a SAML SP session to the user's session.
@@ -80,7 +80,7 @@ public interface IUserSession
     /// Gets the list of SAML SP sessions for the user's session.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync(Ct ct);
+    Task<IReadOnlyCollection<SamlSpSessionData>> GetSamlSessionListAsync(Ct ct);
 
     /// <summary>
     /// Removes a SAML SP session by EntityId.

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 
@@ -14,7 +15,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     private object _lock = new object();
 
     private DateTime _expires = DateTime.MinValue;
-    private IEnumerable<KeyContainer> _cache;
+    private IReadOnlyCollection<KeyContainer>? _cache;
 
     /// <summary>
     /// Constructor for InMemoryKeyStoreCache.
@@ -26,10 +27,10 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// Returns cached keys.
     /// </summary>
     /// <returns></returns>
-    public Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct ct)
+    public Task<IReadOnlyCollection<KeyContainer>?> GetKeysAsync(Ct ct)
     {
         DateTime expires;
-        IEnumerable<KeyContainer> keys;
+        IReadOnlyCollection<KeyContainer>? keys;
 
         lock (_lock)
         {
@@ -39,10 +40,10 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
 
         if (keys != null && expires >= _timeProvider.GetUtcNow().UtcDateTime)
         {
-            return Task.FromResult(keys);
+            return Task.FromResult<IReadOnlyCollection<KeyContainer>?>(keys);
         }
 
-        return Task.FromResult<IEnumerable<KeyContainer>>(null);
+        return Task.FromResult<IReadOnlyCollection<KeyContainer>?>(null);
     }
 
     /// <summary>
@@ -52,7 +53,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// <param name="duration"></param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct ct)
+    public Task StoreKeysAsync(IReadOnlyCollection<KeyContainer> keys, TimeSpan duration, Ct ct)
     {
         lock (_lock)
         {

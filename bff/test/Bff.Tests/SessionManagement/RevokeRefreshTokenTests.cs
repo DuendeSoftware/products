@@ -16,7 +16,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             options.Scope.Add("offline_access");
         });
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         {
             var store = IdentityServer.Resolve<IPersistedGrantStore>();
@@ -25,10 +25,10 @@ public class RevokeRefreshTokenTests : BffTestBase
                 SubjectId = The.Sub
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
-            rt.ShouldNotBeNull();
+            _ = rt.ShouldNotBeNull();
         }
 
-        await Bff.BrowserClient.Logout();
+        _ = await Bff.BrowserClient.Logout();
 
         {
             var store = IdentityServer.Resolve<IPersistedGrantStore>();
@@ -51,7 +51,7 @@ public class RevokeRefreshTokenTests : BffTestBase
 
         Bff.BffOptions.RevokeRefreshTokenOnLogout = false;
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         {
             var store = IdentityServer.Resolve<IPersistedGrantStore>();
@@ -60,10 +60,10 @@ public class RevokeRefreshTokenTests : BffTestBase
                 SubjectId = The.Sub
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
-            rt.ShouldNotBeNull();
+            _ = rt.ShouldNotBeNull();
         }
 
-        await Bff.BrowserClient.Logout();
+        _ = await Bff.BrowserClient.Logout();
 
         {
             var store = IdentityServer.Resolve<IPersistedGrantStore>();
@@ -72,7 +72,7 @@ public class RevokeRefreshTokenTests : BffTestBase
                 SubjectId = The.Sub
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
-            rt.ShouldNotBeNull();
+            _ = rt.ShouldNotBeNull();
         }
     }
 
@@ -93,7 +93,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             client.BackChannelLogoutSessionRequired = true;
         }
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         {
             var store = IdentityServer.Resolve<IPersistedGrantStore>();
@@ -102,7 +102,7 @@ public class RevokeRefreshTokenTests : BffTestBase
                 SubjectId = The.Sub
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
-            rt.ShouldNotBeNull();
+            _ = rt.ShouldNotBeNull();
         }
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
@@ -138,7 +138,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             client.BackChannelLogoutSessionRequired = true;
         }
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         {
             var store = IdentityServer.Resolve<IPersistedGrantStore>();
@@ -147,7 +147,7 @@ public class RevokeRefreshTokenTests : BffTestBase
                 SubjectId = The.Sub
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
-            rt.ShouldNotBeNull();
+            _ = rt.ShouldNotBeNull();
         }
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
@@ -159,7 +159,7 @@ public class RevokeRefreshTokenTests : BffTestBase
                 SubjectId = The.Sub
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
-            rt.ShouldNotBeNull();
+            _ = rt.ShouldNotBeNull();
         }
     }
 }

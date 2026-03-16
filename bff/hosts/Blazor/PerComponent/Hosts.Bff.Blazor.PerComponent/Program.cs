@@ -15,26 +15,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // BFF setup for blazor
-builder.Services.AddBff()
+_ = builder.Services.AddBff()
     .AddServerSideSessions()
     .AddBlazorServer()
     .AddRemoteApis();
 
-builder.Services.AddUserAccessTokenHttpClient("callApi",
+_ = builder.Services.AddUserAccessTokenHttpClient("callApi",
     configureClient: client => client.BaseAddress = new Uri("https://localhost:5010/"));
 
 
 
 // General blazor services
-builder.Services.AddRazorComponents()
+_ = builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
-builder.Services.AddCascadingAuthenticationState();
+_ = builder.Services.AddCascadingAuthenticationState();
 
 // Service used by the sample to describe where code is running
-builder.Services.AddScoped<IRenderModeContext, ServerRenderModeContext>();
+_ = builder.Services.AddScoped<IRenderModeContext, ServerRenderModeContext>();
 
-builder.Services.AddAuthentication(options =>
+_ = builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "cookie";
         options.DefaultChallengeScheme = "oidc";
@@ -72,7 +72,7 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-app.UseHttpLogging();
+_ = app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -81,25 +81,25 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    _ = app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    _ = app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+_ = app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+_ = app.UseStaticFiles();
 
-app.UseRouting();
-app.UseAuthentication();
-app.UseBff();
-app.UseAuthorization();
-app.UseAntiforgery();
+_ = app.UseRouting();
+_ = app.UseAuthentication();
+_ = app.UseBff();
+_ = app.UseAuthorization();
+_ = app.UseAntiforgery();
 
-app.MapRemoteBffApiEndpoint("/remote-apis/user-token", new Uri("https://localhost:5010"))
+_ = app.MapRemoteBffApiEndpoint("/remote-apis/user-token", new Uri("https://localhost:5010"))
     .WithAccessToken(RequiredTokenType.User);
 
-app.MapRazorComponents<App>()
+_ = app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Hosts.Bff.Blazor.PerComponent.Client._Imports).Assembly);

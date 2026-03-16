@@ -576,7 +576,7 @@ public class DefaultPersistedGrantServiceTests
 
         public CorruptingPersistedGrantStore(IPersistedGrantStore inner) => _inner = inner;
 
-        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
+        public async Task<IReadOnlyCollection<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
         {
             var items = await _inner.GetAllAsync(filter, ct);
             if (ClientIdToCorrupt != null)

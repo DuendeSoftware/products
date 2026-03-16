@@ -19,5 +19,5 @@ public interface ISamlClaimsMapper
     /// </summary>
     /// <param name="claimsMappingContext">Context with information about the authentication request for which claims need to be mapped</param>
     /// <returns>The mapped SAML attributes</returns>
-    Task<IEnumerable<SamlAttribute>> MapClaimsAsync(SamlClaimsMappingContext claimsMappingContext);
+    Task<IReadOnlyCollection<SamlAttribute>> MapClaimsAsync(SamlClaimsMappingContext claimsMappingContext);
 }

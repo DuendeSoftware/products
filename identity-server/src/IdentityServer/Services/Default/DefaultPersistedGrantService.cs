@@ -34,7 +34,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId, Ct ct)
+    public async Task<IReadOnlyCollection<Grant>> GetAllGrantsAsync(string subjectId, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultPersistedGrantService.GetAllGrants");
 
@@ -128,7 +128,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
             _logger.LogError(ex, "Failed processing results from grant store.");
         }
 
-        return Enumerable.Empty<Grant>();
+        return Array.Empty<Grant>();
     }
 
     private static List<Grant> Join(IEnumerable<Grant> first, IEnumerable<Grant> second)

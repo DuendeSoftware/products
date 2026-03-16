@@ -10,7 +10,6 @@ using Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Testing;
-using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 

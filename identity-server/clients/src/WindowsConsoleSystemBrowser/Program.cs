@@ -56,12 +56,12 @@ internal class Program
         Console.WriteLine("+-----------------------+");
         Console.WriteLine("");
         Console.WriteLine("Press any key to sign in...");
-        Console.ReadKey();
+        _ = Console.ReadKey();
 
         var p = new Program();
         await p.SignIn();
 
-        Console.ReadKey();
+        _ = Console.ReadKey();
     }
 
     private async Task SignIn()
@@ -84,7 +84,7 @@ internal class Program
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}")
             .CreateLogger();
 
-        options.LoggerFactory.AddSerilog(serilog);
+        _ = options.LoggerFactory.AddSerilog(serilog);
 
         var client = new OidcClient(options);
         var state = await client.PrepareLoginAsync();
@@ -99,7 +99,7 @@ internal class Program
             FileName = state.StartUrl,
             UseShellExecute = true
         };
-        Process.Start(psi);
+        _ = Process.Start(psi);
 
         Console.WriteLine("Running callback manager");
         var response = await callbackManager.RunServer();
@@ -153,7 +153,7 @@ internal class Program
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-    public void BringConsoleToFront() => SetForegroundWindow(GetConsoleWindow());
+    public void BringConsoleToFront() => _ = SetForegroundWindow(GetConsoleWindow());
 
     public static string GetRequestPostData(HttpListenerRequest request)
     {

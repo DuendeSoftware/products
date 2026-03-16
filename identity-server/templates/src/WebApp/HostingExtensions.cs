@@ -14,7 +14,7 @@ internal static class HostingExtensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        _ = builder.Services.AddRazorPages();
 
         // In production, these values should be stored securely in Azure Key Vault or AWS Secrets Manager.
         var identityProviderConfig = builder.Configuration
@@ -28,7 +28,7 @@ internal static class HostingExtensions
         // The __Host- prefix ensures the cookie is host-only, requires Secure and Path=/ attributes
         var hostCookiePrefix = "__Host-";
 
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
@@ -87,7 +87,7 @@ internal static class HostingExtensions
 
         // In production, use a secure location for storing keys, such as Azure Key Vault or AWS Secrets Manager.
         // Make sure to secure the keys at rest.
-        builder.Services.AddDataProtection()
+        _ = builder.Services.AddDataProtection()
             .SetApplicationName("TemplateWebApp")
             .PersistKeysToFileSystem(new DirectoryInfo("./keys"));
 
@@ -98,18 +98,18 @@ internal static class HostingExtensions
     {
         if (!app.Environment.IsDevelopment())
         {
-            app.UseExceptionHandler("/Error");
-            app.UseHsts();
+            _ = app.UseExceptionHandler("/Error");
+            _ = app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
-        app.UseRouting();
+        _ = app.UseHttpsRedirection();
+        _ = app.UseRouting();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapStaticAssets();
-        app.MapRazorPages()
+        _ = app.MapStaticAssets();
+        _ = app.MapRazorPages()
            .WithStaticAssets();
 
         return app;

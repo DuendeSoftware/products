@@ -18,7 +18,7 @@ public static class ReverseProxyBuilderExtensions
     /// <returns></returns>
     public static IReverseProxyBuilder AddBffExtensions(this IReverseProxyBuilder builder)
     {
-        builder.AddTransforms<AccessTokenTransformProvider>();
+        _ = builder.AddTransforms<AccessTokenTransformProvider>();
 
         return builder;
     }

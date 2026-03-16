@@ -67,11 +67,11 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string clientId = null)
+    public async Task<IReadOnlyCollection<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string clientId = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetLoginsForUser");
 
-        return GetAllAsync(new PersistedGrantFilter
+        return await GetAllAsync(new PersistedGrantFilter
         {
             SubjectId = subjectId,
             ClientId = clientId,

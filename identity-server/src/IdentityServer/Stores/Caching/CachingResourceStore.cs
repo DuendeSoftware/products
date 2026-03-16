@@ -95,7 +95,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
+    public async Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindApiResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -166,7 +166,7 @@ public class CachingResourceStore<T> : IResourceStore
 
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct)
+    public async Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindApiResourcesByName");
         activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
@@ -177,7 +177,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
+    public async Task<IReadOnlyCollection<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindIdentityResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -188,7 +188,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
+    public async Task<IReadOnlyCollection<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.FindApiScopesByName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -199,7 +199,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
 
-    private async Task<IEnumerable<TItem>> FindItemsAsync<TItem>(
+    private async Task<IReadOnlyCollection<TItem>> FindItemsAsync<TItem>(
         IEnumerable<string> names,
         ICache<TItem> cache,
         Func<IEnumerable<string>, Ct, Task<Resources>> getResourcesFunc,

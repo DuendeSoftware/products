@@ -22,7 +22,7 @@ public class TestOptionsMonitor<T>(T value) : IOptionsMonitor<T>
         _actions.Add(listener);
         return new DelegateDisposable(() =>
         {
-            _actions.Remove(listener);
+            _ = _actions.Remove(listener);
         });
     }
 

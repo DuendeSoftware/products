@@ -28,17 +28,17 @@ public class IdentityServerHost : Host
                 .AddInMemoryIdentityResources(IdentityResources)
                 .AddInMemoryApiScopes(ApiScopes);
 
-            identityServer.AddBackChannelLogoutHttpClient();
+            _ = identityServer.AddBackChannelLogoutHttpClient();
         };
 
         OnConfigure += app =>
         {
-            app.UseRouting();
+            _ = app.UseRouting();
 
-            app.UseIdentityServer();
-            app.UseAuthorization();
+            _ = app.UseIdentityServer();
+            _ = app.UseAuthorization();
 
-            app.MapGet("/account/login", async ctx =>
+            _ = app.MapGet("/account/login", async ctx =>
             {
                 await ctx.SignInAsync(UserToSignIn);
             });

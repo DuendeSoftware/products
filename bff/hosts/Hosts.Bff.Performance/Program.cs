@@ -16,21 +16,21 @@ var builder = Host.CreateApplicationBuilder();
 
 if (startupConfiguration.IsServiceEnabled("api"))
 {
-    builder.Services.Configure<ApiSettings>(builder.Configuration);
-    builder.Services.AddHostedService<ApiHostedService>();
+    _ = builder.Services.Configure<ApiSettings>(builder.Configuration);
+    _ = builder.Services.AddHostedService<ApiHostedService>();
 }
 
 if (startupConfiguration.IsServiceEnabled("idsrv"))
 {
-    builder.Services.Configure<IdentityServerSettings>(builder.Configuration);
-    builder.Services.AddHostedService<IdentityServerService>();
+    _ = builder.Services.Configure<IdentityServerSettings>(builder.Configuration);
+    _ = builder.Services.AddHostedService<IdentityServerService>();
 }
 
 if (startupConfiguration.IsServiceEnabled("bff"))
 {
-    builder.Services.Configure<BffSettings>(builder.Configuration);
-    builder.Services.AddHostedService<SingleFrontendBffService>();
-    builder.Services.AddHostedService<MultiFrontendBffService>();
+    _ = builder.Services.Configure<BffSettings>(builder.Configuration);
+    _ = builder.Services.AddHostedService<SingleFrontendBffService>();
+    _ = builder.Services.AddHostedService<MultiFrontendBffService>();
 
 }
 // Add services to the container.

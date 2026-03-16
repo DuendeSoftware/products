@@ -14,7 +14,7 @@ public class BffBlazorTemplateTests(BffHostTestFixture fixture)
 {
     public async Task<WebAssemblyPageModel> GoToHome()
     {
-        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.TemplateBffBlazor).ToString(), Defaults.PageGotoOptions);
+        _ = await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.TemplateBffBlazor).ToString(), Defaults.PageGotoOptions);
         return new WebAssemblyPageModel()
         {
             Page = Page
@@ -28,7 +28,7 @@ public class BffBlazorTemplateTests(BffHostTestFixture fixture)
 
         var homePage = await GoToHome();
 
-        await homePage.Login();
+        _ = await homePage.Login();
 
         var weatherPage = await homePage.GoToWeather();
 

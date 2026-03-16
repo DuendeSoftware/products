@@ -14,12 +14,12 @@ public interface IKeyManager
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetCurrentKeysAsync(Ct ct);
+    Task<IReadOnlyCollection<KeyContainer>> GetCurrentKeysAsync(Ct ct);
 
     /// <summary>
     /// Returns all the validation keys.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<KeyContainer>> GetAllKeysAsync(Ct ct);
+    Task<IReadOnlyCollection<KeyContainer>> GetAllKeysAsync(Ct ct);
 }

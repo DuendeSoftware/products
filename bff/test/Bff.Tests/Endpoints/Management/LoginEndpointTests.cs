@@ -22,7 +22,7 @@ public class LoginEndpointTests : BffTestBase
 
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.AddAuthorization(opts =>
+            _ = svcs.AddAuthorization(opts =>
             {
                 opts.FallbackPolicy =
                     new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -56,7 +56,7 @@ public class LoginEndpointTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/silent-login?redirectUri=/"))
             .CheckHttpStatusCode();
@@ -76,7 +76,7 @@ public class LoginEndpointTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
             .CheckHttpStatusCode();
@@ -138,12 +138,12 @@ public class LoginEndpointTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff"; });
+            _ = svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff"; });
         };
         await ConfigureBff(setup);
 
 
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
 
         var response = await Bff.BrowserClient.Login("/custom");
         response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/"));
@@ -156,13 +156,13 @@ public class LoginEndpointTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff/"; });
+            _ = svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff/"; });
         };
 
         await ConfigureBff(setup);
 
 
-        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        _ = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
 
         var response = await Bff.BrowserClient.Login("/custom");
         response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/"));
@@ -174,7 +174,7 @@ public class LoginEndpointTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/"; });
+            _ = svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/"; });
         };
 
         await ConfigureBff(setup);
@@ -191,7 +191,7 @@ public class LoginEndpointTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         // Disable auto redirects, to see if we get a challenge
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
@@ -235,7 +235,7 @@ public class LoginEndpointTests : BffTestBase
         await ConfigureBff(setup);
         Bff.BffOptions.AllowedSilentLoginReferers.Add("https://allowed.com");
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         Bff.BrowserClient.DefaultRequestHeaders.Add("Referer", "https://ALLOWED.com");
 
@@ -260,9 +260,9 @@ public class LoginEndpointTests : BffTestBase
         await ConfigureBff(setup);
         Bff.BffOptions.AllowedSilentLoginReferers.Add("https://allowed.com");
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
-        await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
+        _ = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
             .CheckHttpStatusCode(HttpStatusCode.BadRequest);
     }
 
@@ -275,10 +275,10 @@ public class LoginEndpointTests : BffTestBase
         await ConfigureBff(setup);
         Bff.BffOptions.AllowedSilentLoginReferers.Add("https://allowed.com");
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         Bff.BrowserClient.DefaultRequestHeaders.Add("Referer", "https://not_allowed.com");
-        await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
+        _ = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
             .CheckHttpStatusCode(HttpStatusCode.BadRequest);
     }
 }

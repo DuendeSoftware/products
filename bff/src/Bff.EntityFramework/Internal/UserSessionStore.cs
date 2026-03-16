@@ -34,11 +34,11 @@ internal sealed class UserSessionStore(
 
         var item = new UserSessionEntity();
         session.CopyTo(item);
-        sessionDbContext.UserSessions.Add(item);
+        _ = sessionDbContext.UserSessions.Add(item);
 
         try
         {
-            await sessionDbContext.SaveChangesAsync(ct);
+            _ = await sessionDbContext.SaveChangesAsync(ct);
         }
         catch (DbUpdateException ex)
         {
@@ -84,10 +84,10 @@ internal sealed class UserSessionStore(
 
         logger.DeletingUserSession(LogLevel.Debug, item.SubjectId, item.SessionId);
 
-        sessionDbContext.UserSessions.Remove(item);
+        _ = sessionDbContext.UserSessions.Remove(item);
         try
         {
-            await sessionDbContext.SaveChangesAsync(ct);
+            _ = await sessionDbContext.SaveChangesAsync(ct);
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -135,7 +135,7 @@ internal sealed class UserSessionStore(
 
         try
         {
-            await sessionDbContext.SaveChangesAsync(ct);
+            _ = await sessionDbContext.SaveChangesAsync(ct);
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -231,7 +231,7 @@ internal sealed class UserSessionStore(
         logger.UpdatingUserSession(LogLevel.Debug, item.SubjectId, item.SessionId);
 
         session.CopyTo(item);
-        await sessionDbContext.SaveChangesAsync(ct);
+        _ = await sessionDbContext.SaveChangesAsync(ct);
     }
 
     /// <inheritdoc/>
@@ -263,7 +263,7 @@ internal sealed class UserSessionStore(
             removed += found;
             try
             {
-                await sessionDbContext.SaveChangesAsync(ct);
+                _ = await sessionDbContext.SaveChangesAsync(ct);
             }
             catch (DbUpdateConcurrencyException ex)
             {

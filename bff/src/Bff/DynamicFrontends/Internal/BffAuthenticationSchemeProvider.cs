@@ -45,7 +45,7 @@ internal class BffAuthenticationSchemeProvider(
         BffFrontend? frontend = null;
         if (httpContextAccessor.HttpContext != null)
         {
-            currentFrontendAccessor.TryGet(out frontend);
+            _ = currentFrontendAccessor.TryGet(out frontend);
         }
 
         if (name == frontend?.CookieSchemeName || name == BffAuthenticationSchemes.BffCookie)

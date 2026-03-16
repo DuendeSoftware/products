@@ -68,7 +68,7 @@ public class SystemBrowser : IBrowser
     {
         try
         {
-            Process.Start(url);
+            _ = Process.Start(url);
         }
         catch
         {
@@ -76,15 +76,15 @@ public class SystemBrowser : IBrowser
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                _ = Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Process.Start("xdg-open", url);
+                _ = Process.Start("xdg-open", url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start("open", url);
+                _ = Process.Start("open", url);
             }
             else
             {

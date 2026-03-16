@@ -70,7 +70,7 @@ public interface IIdentityServerInteractionService
     /// Returns a collection representing all of the user's consents and grants.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<Grant>> GetAllUserGrantsAsync(Ct ct);
+    Task<IReadOnlyCollection<Grant>> GetAllUserGrantsAsync(Ct ct);
 
     /// <summary>
     /// Revokes all a user's consents and grants for a given client, or for all clients if clientId is null.

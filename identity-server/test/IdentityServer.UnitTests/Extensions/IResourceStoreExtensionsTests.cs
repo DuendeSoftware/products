@@ -148,15 +148,15 @@ public class IResourceStoreExtensionsTests
         public List<ApiResource> ApiResources { get; set; } = new List<ApiResource>();
         public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct _)
+        public Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names, Ct _)
         {
             var apis = from a in ApiResources
                        where names.Contains(a.Name)
                        select a;
-            return Task.FromResult(apis);
+            return Task.FromResult<IReadOnlyCollection<ApiResource>>(apis.ToArray());
         }
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
+        public Task<IReadOnlyCollection<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
         {
             ArgumentNullException.ThrowIfNull(names);
 
@@ -164,10 +164,10 @@ public class IResourceStoreExtensionsTests
                       where a.Scopes.Any(x => names.Contains(x))
                       select a;
 
-            return Task.FromResult(api);
+            return Task.FromResult<IReadOnlyCollection<ApiResource>>(api.ToArray());
         }
 
-        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
+        public Task<IReadOnlyCollection<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> names, Ct _)
         {
             ArgumentNullException.ThrowIfNull(names);
 
@@ -175,15 +175,15 @@ public class IResourceStoreExtensionsTests
                            where names.Contains(i.Name)
                            select i;
 
-            return Task.FromResult(identity);
+            return Task.FromResult<IReadOnlyCollection<IdentityResource>>(identity.ToArray());
         }
 
-        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct _)
+        public Task<IReadOnlyCollection<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, Ct _)
         {
             var q = from x in ApiScopes
                     where scopeNames.Contains(x.Name)
                     select x;
-            return Task.FromResult(q);
+            return Task.FromResult<IReadOnlyCollection<ApiScope>>(q.ToArray());
         }
 
         public Task<Resources> GetAllResourcesAsync(Ct _)

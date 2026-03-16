@@ -74,7 +74,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct)
+    public async Task<IReadOnlyCollection<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetAllSigningCredentials");
 
@@ -99,14 +99,14 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct)
+    public async Task<IReadOnlyCollection<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetValidationKeys");
 
         var keys = new List<SecurityKeyInfo>();
 
         var automaticSigningKeys = await _keyManagerKeyStore.GetValidationKeysAsync(ct);
-        if (automaticSigningKeys?.Any() == true)
+        if (automaticSigningKeys?.Count > 0)
         {
             keys.AddRange(automaticSigningKeys);
         }

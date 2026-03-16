@@ -17,13 +17,13 @@ public class Startup
     {
         var cn = Configuration.GetConnectionString("DefaultConnection");
 
-        services.AddOperationalDbContext(options =>
+        _ = services.AddOperationalDbContext(options =>
         {
             options.ConfigureDbContext = b =>
                 b.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
         });
 
-        services.AddConfigurationDbContext(options =>
+        _ = services.AddConfigurationDbContext(options =>
         {
             options.ConfigureDbContext = b =>
                 b.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));

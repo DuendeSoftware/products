@@ -23,5 +23,5 @@ public interface IDiscoveryResponseGenerator
     /// Creates the JWK document.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<JsonWebKey>> CreateJwkDocumentAsync(Ct ct);
+    Task<IReadOnlyCollection<JsonWebKey>> CreateJwkDocumentAsync(Ct ct);
 }

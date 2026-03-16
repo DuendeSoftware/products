@@ -55,7 +55,7 @@ internal class BffIndex
 
         if (!_registeredCriteria.TryAdd(frontendMatchingCriteria, frontend.Name))
         {
-            _registeredCriteria.TryGetValue(frontendMatchingCriteria, out var collidesWith);
+            _ = _registeredCriteria.TryGetValue(frontendMatchingCriteria, out var collidesWith);
             _logger.FrontendWithSimilarMatchingCriteriaAlreadyRegistered(LogLevel.Warning,
                 frontend.Name,
                 collidesWith

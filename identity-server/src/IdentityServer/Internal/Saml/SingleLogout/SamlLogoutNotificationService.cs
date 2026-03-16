@@ -15,13 +15,13 @@ internal class SamlLogoutNotificationService(
     SamlFrontChannelLogoutRequestBuilder frontChannelLogoutRequestBuilder,
     ILogger<SamlLogoutNotificationService> logger) : ISamlLogoutNotificationService
 {
-    public async Task<IEnumerable<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct)
+    public async Task<IReadOnlyCollection<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetSamlFrontChannelLogoutUrls");
 
         var logoutUrls = new List<ISamlFrontChannelLogout>();
 
-        if (!context.SamlSessions.Any())
+        if (context.SamlSessions.Count == 0)
         {
             logger.NoSamlServiceProvidersToNotifyForLogout(LogLevel.Debug);
             return logoutUrls;

@@ -12,7 +12,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 {
     public BackchannelLogoutEndpointTests() : base() => Bff.OnConfigureBff += bff =>
     {
-        bff.AddServerSideSessions();
+        _ = bff.AddServerSideSessions();
     };
 
     public override async ValueTask InitializeAsync()
@@ -32,7 +32,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.AddAuthorization(opts =>
+            _ = svcs.AddAuthorization(opts =>
             {
                 opts.FallbackPolicy =
                     new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -43,7 +43,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
         await ConfigureBff(setup);
 
         // if you call the endpoint without a token, it should return 400
-        await Bff.BrowserClient.PostAsync(Bff.Url("/bff/backchannel"), null)
+        _ = await Bff.BrowserClient.PostAsync(Bff.Url("/bff/backchannel"), null)
             .CheckHttpStatusCode(HttpStatusCode.BadRequest);
     }
 
@@ -53,7 +53,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
 
@@ -68,7 +68,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, The.Sid);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, "different_sub", The.Sid);
 
@@ -83,7 +83,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
     {
         await ConfigureBff(setup);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, "different_sid");
 
@@ -103,14 +103,14 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, The.Sid);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         // Set a Set-Cookie header to clear the "__Host-bff-auth" cookie
         Bff.BrowserClient.Cookies.Clear(Bff.Url());
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, "different");
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         (await GetUserSessions()).Count.ShouldBe(2);
 
@@ -153,14 +153,14 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, The.Sid);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         // Set a Set-Cookie header to clear the "__Host-bff-auth" cookie
         Bff.BrowserClient.Cookies.Clear(Bff.Url());
 
         await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, "different");
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         (await GetUserSessions()).Count.ShouldBe(2);
 

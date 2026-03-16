@@ -25,19 +25,19 @@ internal sealed class DocsSearchTool(McpDb db)
             .ToListAsync();
 
         var responseBuilder = new StringBuilder();
-        responseBuilder.Append(CultureInfo.InvariantCulture, $"## Query\n\n{query}\n\n");
+        _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"## Query\n\n{query}\n\n");
 
         if (results.Count == 0)
         {
-            responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nNo results found for: \"{query}\"\n\nIf you'd like to retry the search, try changing the query to increase the likelihood of a match.");
+            _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nNo results found for: \"{query}\"\n\nIf you'd like to retry the search, try changing the query to increase the likelihood of a match.");
             return responseBuilder.ToString();
         }
 
-        responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nResults found for: \"{query}\". Listing a document id and document title, followed by related product:\n\n");
+        _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nResults found for: \"{query}\". Listing a document id and document title, followed by related product:\n\n");
 
         foreach (var result in results)
         {
-            responseBuilder.Append(CultureInfo.InvariantCulture, $"- [{result.Id}]({result.Title}) ({result.Product})\n");
+            _ = responseBuilder.Append(CultureInfo.InvariantCulture, $"- [{result.Id}]({result.Title}) ({result.Product})\n");
         }
 
         return responseBuilder.ToString();

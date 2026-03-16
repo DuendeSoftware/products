@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 using Duende.IdentityServer.Services.KeyManagement;
 
@@ -8,19 +9,19 @@ namespace UnitTests.Services.Default.KeyManagement;
 
 internal class MockSigningKeyStoreCache : ISigningKeyStoreCache
 {
-    public List<KeyContainer> Cache { get; set; } = new List<KeyContainer>();
+    public List<KeyContainer>? Cache { get; set; } = new List<KeyContainer>();
 
     public bool GetKeysAsyncWasCalled { get; set; }
     public bool StoreKeysAsyncWasCalled { get; set; }
     public TimeSpan StoreKeysAsyncDuration { get; set; }
 
-    public Task<IEnumerable<KeyContainer>> GetKeysAsync(Ct _)
+    public Task<IReadOnlyCollection<KeyContainer>?> GetKeysAsync(Ct _)
     {
         GetKeysAsyncWasCalled = true;
-        return Task.FromResult(Cache.AsEnumerable());
+        return Task.FromResult<IReadOnlyCollection<KeyContainer>?>(Cache);
     }
 
-    public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, Ct _)
+    public Task StoreKeysAsync(IReadOnlyCollection<KeyContainer> keys, TimeSpan duration, Ct _)
     {
         StoreKeysAsyncWasCalled = true;
         StoreKeysAsyncDuration = duration;

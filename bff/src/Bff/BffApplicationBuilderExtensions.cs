@@ -49,9 +49,9 @@ public static class BffApplicationBuilderExtensions
     public static IApplicationBuilder UseBffPreProcessing(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);
-        app.UseBffFrontendSelection();
-        app.UseBffPathMapping();
-        app.UseBffOpenIdCallbacks();
+        _ = app.UseBffFrontendSelection();
+        _ = app.UseBffPathMapping();
+        _ = app.UseBffOpenIdCallbacks();
         return app;
     }
 
@@ -72,7 +72,7 @@ public static class BffApplicationBuilderExtensions
         {
             loader(app);
         }
-        app.UseEndpoints(endpoints =>
+        _ = app.UseEndpoints(endpoints =>
         {
             // Mapping the management endpoints. 
             endpoints.MapBffManagementLoginEndpoint();
@@ -84,7 +84,7 @@ public static class BffApplicationBuilderExtensions
             endpoints.MapBffManagementBackchannelEndpoint();
             endpoints.MapBffDiagnosticsEndpoint();
         });
-        app.UseBffStaticFileProxying();
+        _ = app.UseBffStaticFileProxying();
         return app;
 
     }

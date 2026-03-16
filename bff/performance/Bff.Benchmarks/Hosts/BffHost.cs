@@ -53,27 +53,27 @@ public class BffHost : Host
                 .AddRemoteApis();
             if (!Internet.UseKestrel)
             {
-                services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));
+                _ = services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));
             }
             OnConfigureBff(bff);
         };
         OnConfigure += app =>
         {
-            app.UseRouting();
+            _ = app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            _ = app.UseAuthentication();
+            _ = app.UseAuthorization();
 
-            app.UseBff();
-            app.MapGet("/", () => "bff");
-            app.MapGet("/anon", () => "bff")
+            _ = app.UseBff();
+            _ = app.MapGet("/", () => "bff");
+            _ = app.MapGet("/anon", () => "bff")
                 .AllowAnonymous();
 
-            app.MapRemoteBffApiEndpoint("/allow_anon", apiUri);
-            app.MapRemoteBffApiEndpoint("/client_token", apiUri)
+            _ = app.MapRemoteBffApiEndpoint("/allow_anon", apiUri);
+            _ = app.MapRemoteBffApiEndpoint("/client_token", apiUri)
                 .WithAccessToken(RequiredTokenType.Client);
 
-            app.MapRemoteBffApiEndpoint("/user_token", apiUri)
+            _ = app.MapRemoteBffApiEndpoint("/user_token", apiUri)
                 .WithAccessToken(RequiredTokenType.User);
         };
     }

@@ -19,7 +19,7 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct);
+    Task<IReadOnlyCollection<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct);
 }
 
 /// <summary>
@@ -31,10 +31,10 @@ internal class NopAutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     public Task<SigningCredentials> GetSigningCredentialsAsync(Ct _) => Task.FromResult<SigningCredentials>(null);
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct _) => Task.FromResult(Enumerable.Empty<SigningCredentials>());
+    public Task<IReadOnlyCollection<SigningCredentials>> GetAllSigningCredentialsAsync(Ct _) => Task.FromResult<IReadOnlyCollection<SigningCredentials>>(Array.Empty<SigningCredentials>());
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct _) => Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
+    public Task<IReadOnlyCollection<SecurityKeyInfo>> GetValidationKeysAsync(Ct _) => Task.FromResult<IReadOnlyCollection<SecurityKeyInfo>>(Array.Empty<SecurityKeyInfo>());
 }
 
 /// <summary>
@@ -71,24 +71,24 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct)
+    public async Task<IReadOnlyCollection<SigningCredentials>> GetAllSigningCredentialsAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
-            return Enumerable.Empty<SigningCredentials>();
+            return Array.Empty<SigningCredentials>();
         }
 
         var keyContainers = await _keyManager.GetCurrentKeysAsync(ct);
         var credentials = keyContainers.Select(x => new SigningCredentials(x.ToSecurityKey(), x.Algorithm));
-        return credentials;
+        return credentials.ToArray();
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct)
+    public async Task<IReadOnlyCollection<SecurityKeyInfo>> GetValidationKeysAsync(Ct ct)
     {
         if (!_options.Enabled)
         {
-            return Enumerable.Empty<SecurityKeyInfo>();
+            return Array.Empty<SecurityKeyInfo>();
         }
 
         var containers = await _keyManager.GetAllKeysAsync(ct);

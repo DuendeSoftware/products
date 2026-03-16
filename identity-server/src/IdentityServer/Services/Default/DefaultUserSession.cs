@@ -327,7 +327,7 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<string>> GetClientListAsync(Ct ct)
+    public virtual async Task<IReadOnlyCollection<string>> GetClientListAsync(Ct ct)
     {
         await AuthenticateAsync();
 
@@ -335,7 +335,7 @@ public class DefaultUserSession : IUserSession
         {
             try
             {
-                return Properties.GetClientList();
+                return Properties.GetClientList().ToArray();
             }
             catch (Exception ex)
             {
@@ -346,7 +346,7 @@ public class DefaultUserSession : IUserSession
             }
         }
 
-        return Enumerable.Empty<string>();
+        return Array.Empty<string>();
     }
 
     // client list helpers
@@ -377,7 +377,7 @@ public class DefaultUserSession : IUserSession
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync(Ct ct)
+    public virtual async Task<IReadOnlyCollection<SamlSpSessionData>> GetSamlSessionListAsync(Ct ct)
     {
         await AuthenticateAsync();
 
@@ -385,7 +385,7 @@ public class DefaultUserSession : IUserSession
         {
             try
             {
-                return Properties.GetSamlSessionList();
+                return Properties.GetSamlSessionList().ToArray();
             }
             catch (Exception ex)
             {

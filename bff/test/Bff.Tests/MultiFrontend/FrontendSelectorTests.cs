@@ -29,7 +29,7 @@ public class FrontendSelectorTests
         var testLoggerProvider = new TestLoggerProvider((s) =>
         {
             _output.WriteLine(s);
-            _logMessages.AppendLine(s);
+            _ = _logMessages.AppendLine(s);
         }, "", forceToWriteOutput: true);
         var loggerFactory = new LoggerFactory([testLoggerProvider]);
 
@@ -72,7 +72,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe("test-frontend1");
     }
 
@@ -90,7 +90,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
     [Fact]
@@ -107,7 +107,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
     [Fact]
@@ -124,7 +124,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
 
@@ -142,7 +142,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
 
         //_logMessages.ToString().ShouldContain("has different case");
@@ -163,7 +163,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
     [Fact]
@@ -182,7 +182,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
 
@@ -201,7 +201,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
 
@@ -225,7 +225,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe("specific-frontend");
     }
 
@@ -248,7 +248,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe("specific-frontend");
     }
 
@@ -290,16 +290,16 @@ public class FrontendSelectorTests
 
 
         // Act
-        _selector.TrySelectFrontend(CreateHttpRequest("https://different.com/path"), out var selectedFrontend);
+        _ = _selector.TrySelectFrontend(CreateHttpRequest("https://different.com/path"), out var selectedFrontend);
         selectedFrontend!.Name.ToString().ShouldBe("path");
 
-        _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/otherpath"), out selectedFrontend);
+        _ = _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/otherpath"), out selectedFrontend);
         selectedFrontend!.Name.ToString().ShouldBe("Host");
 
-        _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/path/otherSubPath"), out selectedFrontend);
+        _ = _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/path/otherSubPath"), out selectedFrontend);
         selectedFrontend!.Name.ToString().ShouldBe("path_and_Host");
 
-        _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/path/subpath"), out selectedFrontend);
+        _ = _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/path/subpath"), out selectedFrontend);
         selectedFrontend!.Name.ToString().ShouldBe("path_subpath_and_Host");
     }
 
@@ -321,7 +321,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe("default-frontend");
     }
 
@@ -343,7 +343,7 @@ public class FrontendSelectorTests
 
         // Assert
         result.ShouldBeTrue();
-        selectedFrontend.ShouldNotBeNull();
+        _ = selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe("default-frontend");
     }
 

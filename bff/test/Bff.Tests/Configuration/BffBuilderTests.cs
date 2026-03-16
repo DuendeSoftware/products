@@ -27,7 +27,7 @@ public class BffBuilderTests
         {
             Name = BffFrontendName.Parse("different")
         };
-        services.AddBff()
+        _ = services.AddBff()
             .AddFrontends(frontend1, frontend2);
 
         var provider = services.BuildServiceProvider();
@@ -46,7 +46,7 @@ public class BffBuilderTests
         {
             Name = BffFrontendName.Parse("different")
         };
-        services.AddBff()
+        _ = services.AddBff()
             .AddFrontends(frontend1)
             .AddFrontends(frontend2);
 
@@ -71,7 +71,7 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddBff()
+        _ = services.AddBff()
             .LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>();
@@ -120,7 +120,7 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddBff()
+        _ = services.AddBff()
             .AddRemoteApis()
             .LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
@@ -150,7 +150,7 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configuration);
+        _ = services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
@@ -191,9 +191,9 @@ public class BffBuilderTests
 
         // Wire up the BFF
         var services = new ServiceCollection();
-        services
+        _ = services
             .AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
-        services.AddBff().LoadConfiguration(configuration);
+        _ = services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
@@ -240,9 +240,9 @@ public class BffBuilderTests
 
         // Wire up the BFF
         var services = new ServiceCollection();
-        services
+        _ = services
             .AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
-        services.AddBff().LoadConfiguration(configuration);
+        _ = services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
@@ -315,7 +315,7 @@ public class BffBuilderTests
                 .Build();
 
         var services = new ServiceCollection();
-        services.AddBff()
+        _ = services.AddBff()
             .LoadConfiguration(configuration)
             .AddRemoteApis();
         var provider = services.BuildServiceProvider();
@@ -362,7 +362,7 @@ public class BffBuilderTests
         });
 
         var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configFile.Configuration);
+        _ = services.AddBff().LoadConfiguration(configFile.Configuration);
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
@@ -408,12 +408,12 @@ public class BffBuilderTests
         });
 
         var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configFile.Configuration);
+        _ = services.AddBff().LoadConfiguration(configFile.Configuration);
         var provider = services.BuildServiceProvider();
         var optionsCache = provider.GetRequiredService<IOptionsMonitorCache<OpenIdConnectOptions>>();
 
-        optionsCache.TryAdd("to_be_removed", new OpenIdConnectOptions());
-        optionsCache.TryAdd("to_be_updated", new OpenIdConnectOptions());
+        _ = optionsCache.TryAdd("to_be_removed", new OpenIdConnectOptions());
+        _ = optionsCache.TryAdd("to_be_updated", new OpenIdConnectOptions());
 
         var frontends = provider.GetRequiredService<FrontendCollection>();
 
@@ -451,8 +451,8 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>();
-        services.AddBff().LoadConfiguration(configuration);
+        _ = services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>();
+        _ = services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
 
         var factory = provider.GetRequiredService<IOptionsFactory<OpenIdConnectOptions>>();
@@ -473,8 +473,8 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>();
-        services.AddBff().LoadConfiguration(configuration);
+        _ = services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>();
+        _ = services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
 
         var factory = provider.GetRequiredService<IOptionsFactory<CookieAuthenticationOptions>>();
@@ -516,10 +516,10 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configuration);
+        _ = services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
 
-        Should.Throw<OptionsValidationException>(() => provider.GetRequiredService<IOptions<BffConfiguration>>().Value);
+        _ = Should.Throw<OptionsValidationException>(() => provider.GetRequiredService<IOptions<BffConfiguration>>().Value);
     }
 
     [Fact]
@@ -527,7 +527,7 @@ public class BffBuilderTests
     {
         var services = new ServiceCollection();
 
-        Should.Throw<InvalidOperationException>(() => services.AddBff()
+        _ = Should.Throw<InvalidOperationException>(() => services.AddBff()
                 .AddFrontends(Some.BffFrontend(), Some.BffFrontend()))
             ;
     }

@@ -1,43 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <DebugType>full</DebugType>
-    <IsPackable>false</IsPackable>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile><!-- workaround for https://github.com/dotnet/roslyn/issues/41640 -->
+
     <IsTestProject>true</IsTestProject>
-    <ImplicitUsings>true</ImplicitUsings>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- <Nullable>enable</Nullable> -->
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <NoWarn>$(NoWarn);CS1591;NU1507</NoWarn>
     <OutputType>exe</OutputType>
     <!-- Enable Microsoft Testing Platform command line experience for code coverage support -->
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-  </PropertyGroup>
-
-  <!--Release builds do more work and are stricter. This allows for faster
-      development: devs can be messy/experimental initially and verify their
-      code easily by running a build in Release mode, and we also enforce
-      stricter rules in CI with the Release configuration. We can also move
-      any slow actions to the Release configuration to speed up test runs, etc.
-  -->
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Suppress analyzer rules inappropriate for test projects -->
+    <!-- CA1000: No static members on generic types — generic test fixtures commonly use static helpers -->
+    <!-- CA1001: Types owning disposable fields should be disposable — test classes rely on xunit lifecycle -->
+    <!-- CA1002: Use Collection<T> instead of List<T> — test fixtures use List<T> for convenience -->
+    <!-- CA1003: Use generic EventHandler — test infrastructure uses Action delegates -->
+    <!-- CA1012: Abstract types should not have public constructors — test base classes need public ctors for xunit -->
+    <!-- CA1024: Use properties where appropriate — test helpers use Get methods for clarity -->
+    <!-- CA1031: Catch more specific exception — test infrastructure intentionally catches all exceptions -->
+    <!-- CA1033: Explicit interface implementation — test mocks use explicit interface impls without sealing -->
+    <!-- CA1041: Provide ObsoleteAttribute message — test methods use [Obsolete] to skip without message -->
+    <!-- CA1051: Do not declare visible instance fields — test base classes expose fields for subclasses -->
+    <!-- CA1052: Static holder types should be static — test classes with only static [Fact] methods are common -->
+    <!-- CA1054/CA1055/CA1056: URI parameters/return/properties should not be strings — test helpers use strings -->
+    <!-- CA1062: Validate public method parameters — test code relies on xunit for argument validation -->
+    <!-- CA1063: Implement IDisposable correctly — test infrastructure uses simplified disposal patterns -->
+    <!-- CA1304/CA1305/CA1307/CA1308/CA1309/CA1310/CA1311: Locale/culture/ordinal rules — not critical in test code -->
+    <!-- CA1508: Avoid dead conditional code — tests intentionally verify always-true/false conditions -->
+    <!-- CA1515: Make class internal — test classes must be public for xunit discovery -->
+    <!-- CA1707: Identifiers should not contain underscores — snake_case test method names are conventional -->
+    <!-- CA1708: Namespace names differ only by case — test namespaces mirror SUT folder structure (V2 vs v2) -->
+    <!-- CA1711: Identifiers should not have incorrect suffix — xunit [CollectionDefinition] requires 'Collection' suffix -->
+    <!-- CA1716: Reserved language keyword in namespace — test namespaces use 'Default' to mirror SUT structure -->
+    <!-- CA1724: Type names should not match namespaces — test types like TestHost commonly shadow framework namespaces -->
+    <!-- CA1725: Parameter names should match base — test overrides use abbreviated names (ct) -->
+    <!-- CA1805: Do not initialize unnecessarily — clarity preferred in test code -->
+    <!-- CA1806: Return value not used / object instantiated but not used — tests verify ctor exceptions -->
+    <!-- CA1810: Initialize static fields when declared — test classes use static ctors for complex initialization -->
+    <!-- CA1812: Internal class never instantiated — test classes instantiated via DI/reflection -->
+    <!-- CA1816: Call GC.SuppressFinalize — test infrastructure uses simplified disposal patterns -->
+    <!-- CA1820: Test for empty strings using Length — test code uses == "" for readability -->
+    <!-- CA1822: Mark members as static — test helper methods may be non-static by convention -->
+    <!-- CA1823: Unused fields — test fixture fields may be assigned but not directly referenced -->
+    <!-- CA1825: Avoid zero-length array allocations — test code uses new T[0] for clarity -->
+    <!-- CA1829: Use Count property — test code prioritizes readability over perf -->
+    <!-- CA1835: Use Memory-based overloads — test code uses simpler byte[] overloads -->
+    <!-- CA1848: Use LoggerMessage delegates — test infrastructure uses simple logging -->
+    <!-- CA1849: Call async methods in async context — test infrastructure may use sync APIs intentionally -->
+    <!-- CA1850: Prefer static hash methods — test code uses instance SHA256 for readability -->
+    <!-- CA1851: Possible multiple enumerations — test assertions may enumerate multiple times intentionally -->
+    <!-- CA1852: Type can be sealed — test infrastructure classes are not sealed for flexibility -->
+    <!-- CA1859: Change return type for perf — test code prioritizes interface-based design over perf -->
+    <!-- CA1860: Use Count > 0 instead of Any() — test code prioritizes readability -->
+    <!-- CA1861: Prefer static readonly arrays — test code prioritizes inline readability -->
+    <!-- CA1863: Cache CompositeFormat — test code uses string.Format with inline format strings -->
+    <!-- CA1864: Use TryAdd — test code uses ContainsKey+Add for clarity -->
+    <!-- CA1866: Use char overload — not critical in test code -->
+    <!-- CA1869: Cache JsonSerializerOptions — test code creates options inline for clarity -->
+    <!-- CA1872: Prefer Convert.ToHexString — test code uses BitConverter.ToString for readability -->
+    <!-- CA2000: Dispose objects before losing scope — test code manages disposal differently -->
+    <!-- CA2016: Forward CancellationToken — test infrastructure may intentionally not propagate -->
+    <!-- CA2201: Do not raise reserved exception types — test infrastructure may throw Exception -->
+    <!-- CA2211: Non-constant visible fields — test base classes expose mutable static fields -->
+    <!-- CA2213: Dispose IDisposable fields — test classes rely on xunit lifecycle for cleanup -->
+    <!-- CA2227: Collection properties should be read only — test DTOs need setters -->
+    <!-- CA2234: Pass Uri instead of string — test code uses string URLs for readability -->
+    <!-- CA2254: Logging template should not vary — test infrastructure builds templates dynamically -->
+    <!-- CA5350: Weak cryptographic algorithm — test code uses TripleDES to validate SAML interop scenarios -->
+    <NoWarn>$(NoWarn);CA1000;CA1001;CA1002;CA1003;CA1012;CA1024;CA1031;CA1033;CA1041;CA1051;CA1052;CA1054;CA1055;CA1056;CA1062;CA1063;CA1304;CA1305;CA1307;CA1308;CA1309;CA1310;CA1311;CA1508;CA1515;CA1707;CA1708;CA1711;CA1716;CA1724;CA1725;CA1805;CA1806;CA1810;CA1812;CA1816;CA1820;CA1822;CA1823;CA1825;CA1829;CA1835;CA1848;CA1849;CA1850;CA1851;CA1852;CA1859;CA1860;CA1861;CA1863;CA1864;CA1866;CA1869;CA1872;CA2000;CA2016;CA2201;CA2211;CA2213;CA2227;CA2234;CA2254;CA5350</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)shared/Global.cs" Link="Global.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="xunit.v3.core.mtp-v2" />
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="Microsoft.Extensions.Time.Testing" />
     <Using Include="Shouldly"/>
     <Using Include="Xunit"/>
   </ItemGroup>

@@ -22,7 +22,7 @@ public class PublicApiVerificationTests
         };
         var publicApi = typeof(BffBuilder).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
-        await Verify(publicApi, settings);
+        _ = await Verify(publicApi, settings);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class PublicApiVerificationTests
         };
         var publicApi = typeof(AccessTokenRequestTransform).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
-        await Verify(publicApi, settings);
+        _ = await Verify(publicApi, settings);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class PublicApiVerificationTests
         };
         var publicApi = typeof(ISessionDbContext).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
-        await Verify(publicApi, settings);
+        _ = await Verify(publicApi, settings);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class PublicApiVerificationTests
         };
         var publicApi = typeof(BffBlazorServerOptions).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
-        await Verify(publicApi, settings);
+        _ = await Verify(publicApi, settings);
     }
 
 
@@ -71,7 +71,7 @@ public class PublicApiVerificationTests
         };
         var publicApi = typeof(AntiForgeryHandler).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
-        await Verify(publicApi, settings);
+        _ = await Verify(publicApi, settings);
     }
 
 }

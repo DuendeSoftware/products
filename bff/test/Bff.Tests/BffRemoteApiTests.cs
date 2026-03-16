@@ -19,7 +19,7 @@ public class BffRemoteApiTests : BffTestBase
     public BffRemoteApiTests() : base() =>
         Bff.OnConfigureBff += bff =>
         {
-            bff.AddRemoteApis();
+            _ = bff.AddRemoteApis();
         };
 
     [Theory]
@@ -40,7 +40,7 @@ public class BffRemoteApiTests : BffTestBase
                     })
         );
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         ApiCallDetails result = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
         result.Sub.ShouldBe(The.Sub);
@@ -98,12 +98,12 @@ public class BffRemoteApiTests : BffTestBase
         Bff.OnConfigureBff += bff =>
         {
             // The remote api registers the testtokenretriever
-            bff.Services.AddSingleton<TestTokenRetriever>();
+            _ = bff.Services.AddSingleton<TestTokenRetriever>();
         };
 
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var (response, apiResult) = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path)
@@ -133,7 +133,7 @@ public class BffRemoteApiTests : BffTestBase
                 })
         );
 
-        await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath,
+        _ = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized);
     }
 
@@ -160,7 +160,7 @@ public class BffRemoteApiTests : BffTestBase
         // Register a fake usermanager, that tracks if it was called
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<IUserTokenManager, FakeUserManager>();
+            _ = services.AddSingleton<IUserTokenManager, FakeUserManager>();
         };
 
         await InitializeAsync();
@@ -176,7 +176,7 @@ public class BffRemoteApiTests : BffTestBase
         );
 
 
-        await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
+        _ = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
 
         // A user reported an issue that, if an anonymous request is made,
         // that errors were being logged. This assertion ensures that no such errors are no longer logged.
@@ -191,7 +191,7 @@ public class BffRemoteApiTests : BffTestBase
         // Register a fake usermanager, that tracks if it was called
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<IUserTokenManager, FakeUserManager>();
+            _ = services.AddSingleton<IUserTokenManager, FakeUserManager>();
         };
         await InitializeAsync();
 
@@ -205,7 +205,7 @@ public class BffRemoteApiTests : BffTestBase
                 })
         );
 
-        await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
+        _ = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
 
         // A user reported an issue that, if an anonymous request is made,
         // that errors were being logged. This assertion ensures that no such errors are no longer logged.

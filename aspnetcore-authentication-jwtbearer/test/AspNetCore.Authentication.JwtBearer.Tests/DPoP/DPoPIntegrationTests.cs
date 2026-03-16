@@ -174,18 +174,18 @@ public class DPoPIntegrationTests
         // Verify that a nonce was issued in the response
         result.Headers.TryGetValues("DPoP-Nonce", out var nonceValues).ShouldBeTrue();
         var serverNonce = nonceValues?.FirstOrDefault();
-        serverNonce.ShouldNotBeNull();
+        _ = serverNonce.ShouldNotBeNull();
         serverNonce.ShouldNotBeEmpty();
 
         // Verify the WWW-Authenticate header contains the use_dpop_nonce error
         var wwwAuthValues = result.Headers.GetValues(HeaderNames.WWWAuthenticate).FirstOrDefault();
-        wwwAuthValues.ShouldNotBeNull();
+        _ = wwwAuthValues.ShouldNotBeNull();
         wwwAuthValues.ShouldContain("use_dpop_nonce");
 
         // Make a new request with the server issued nonce
         var proofWithNonce = await CreateProofToken(token, Jwk, HttpMethod.Get, new Uri("http://localhost/"),
             nonce: DPoPNonce.Parse(serverNonce));
-        Api.HttpClient.DefaultRequestHeaders.Remove(OidcConstants.HttpHeaders.DPoP);
+        _ = Api.HttpClient.DefaultRequestHeaders.Remove(OidcConstants.HttpHeaders.DPoP);
         Api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proofWithNonce);
         var secondResult = await Api.HttpClient.GetAsync("/");
         secondResult.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -202,7 +202,7 @@ public class DPoPIntegrationTests
         };
         Api.OnConfigureServices += services =>
         {
-            services.AddSingleton<IDPoPNonceValidator>(customValidator);
+            _ = services.AddSingleton<IDPoPNonceValidator>(customValidator);
         };
         await Initialize();
 
@@ -220,13 +220,13 @@ public class DPoPIntegrationTests
         // Verify that a custom nonce was issued in the response
         result.Headers.TryGetValues("DPoP-Nonce", out var nonceValues).ShouldBeTrue();
         var serverNonce = nonceValues?.FirstOrDefault();
-        serverNonce.ShouldNotBeNull();
+        _ = serverNonce.ShouldNotBeNull();
         serverNonce.ShouldStartWith("custom-nonce-");
 
         // Make a new request with the custom server issued nonce
         var proofWithNonce = await CreateProofToken(token, Jwk, HttpMethod.Get, new Uri("http://localhost/"),
             nonce: DPoPNonce.Parse(serverNonce));
-        Api.HttpClient.DefaultRequestHeaders.Remove(OidcConstants.HttpHeaders.DPoP);
+        _ = Api.HttpClient.DefaultRequestHeaders.Remove(OidcConstants.HttpHeaders.DPoP);
         Api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proofWithNonce);
         var secondResult = await Api.HttpClient.GetAsync("/");
         secondResult.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -238,7 +238,7 @@ public class DPoPIntegrationTests
         var cache = new TestHybridCache();
         Api.OnConfigureServices += services =>
         {
-            services.AddKeyedSingleton<HybridCache>(ServiceProviderKeys.ProofTokenReplayHybridCache, cache);
+            _ = services.AddKeyedSingleton<HybridCache>(ServiceProviderKeys.ProofTokenReplayHybridCache, cache);
         };
         await Initialize();
 
@@ -270,12 +270,12 @@ public class DPoPIntegrationTests
     /// </summary>
     private async Task<UserToken> LoginAndGetToken()
     {
-        await App.LoginAsync("sub");
+        _ = await App.LoginAsync("sub");
         var response = await App.BrowserClient.GetAsync(App.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
-        token.ShouldNotBeNull();
-        token.AccessToken.ToString().ShouldNotBeNull();
-        token.DPoPJsonWebKey.ShouldNotBeNull();
+        _ = token.ShouldNotBeNull();
+        _ = token.AccessToken.ToString().ShouldNotBeNull();
+        _ = token.DPoPJsonWebKey.ShouldNotBeNull();
         return token;
     }
 
@@ -301,7 +301,7 @@ public class DPoPIntegrationTests
         };
 
         var proof = await dpopService.CreateProofTokenAsync(proofRequest);
-        proof.ShouldNotBeNull();
+        _ = proof.ShouldNotBeNull();
         return proof.Value;
     }
 
@@ -329,10 +329,10 @@ public class DPoPIntegrationTests
         var api = new ApiHost(IdentityServer, baseAddress);
         api.OnConfigureServices += services =>
         {
-            services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
+            _ = services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
                 opt => ApiOptions?.Invoke(opt));
 
-            services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
+            _ = services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
 
         };
         api.OnConfigure += app =>

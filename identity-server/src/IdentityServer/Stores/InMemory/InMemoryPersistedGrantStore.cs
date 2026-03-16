@@ -39,7 +39,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
+    public Task<IReadOnlyCollection<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.GetAll");
 
@@ -47,7 +47,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
 
         var items = Filter(filter);
 
-        return Task.FromResult(items);
+        return Task.FromResult<IReadOnlyCollection<PersistedGrant>>(items);
     }
 
     /// <inheritdoc/>
@@ -77,7 +77,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
         return Task.CompletedTask;
     }
 
-    private IEnumerable<PersistedGrant> Filter(PersistedGrantFilter filter)
+    private PersistedGrant[] Filter(PersistedGrantFilter filter)
     {
         var query =
             from item in _repository
@@ -120,7 +120,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
             query = query.Where(x => x.Type == filter.Type);
         }
 
-        var items = query.ToArray().AsEnumerable();
+        var items = query.ToArray();
         return items;
     }
 }

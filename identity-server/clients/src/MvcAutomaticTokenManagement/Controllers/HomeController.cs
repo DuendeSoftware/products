@@ -21,7 +21,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Renew()
     {
-        await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { ForceTokenRenewal = true });
+        _ = await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { ForceTokenRenewal = true });
 
         return RedirectToAction(nameof(Secure));
     }

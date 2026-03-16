@@ -130,6 +130,7 @@ DocProject/Help/html
 
 # Click-Once directory
 publish/
+!**/Commands/Publish/
 
 # Publish Web Output
 *.[Pp]ublish.xml
@@ -169,6 +170,13 @@ bower_components/
 
 # RIA/Silverlight projects
 Generated_Code/
+
+# source generated files
+Logging.g.cs
+LoggerMessage.g.cs
+PublicTopLevelProgram.Generated.g.cs
+RegexGenerator.g.cs
+**/Generated/
 
 # Backup & report files from converting an old project file
 # to a newer Visual Studio version. Backup files are not needed,
@@ -232,4 +240,5 @@ reports
 *.db
 *.db-shm
 *.db-wal
+nul
 .weave

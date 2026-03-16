@@ -17,7 +17,7 @@ try
     var builder = WebApplication
         .CreateBuilder(args);
 
-    builder
+    _ = builder
         .AddServiceDefaults();
 
     builder

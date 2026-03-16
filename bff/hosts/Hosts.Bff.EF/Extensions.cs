@@ -17,12 +17,12 @@ internal static class Extensions
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
-        services.AddDataProtection()
+        _ = services.AddDataProtection()
             .SetApplicationName("JS-EF-Sample");
 
         // Add BFF services to DI - also add server-side session management
         var cn = configuration.GetConnectionString("db");
-        services.AddBff(options =>
+        _ = services.AddBff(options =>
             {
                 options.BackchannelLogoutAllUserSessions = true;
             })
@@ -30,15 +30,15 @@ internal static class Extensions
             .AddEntityFrameworkServerSideSessions(options =>
             {
                 //options.UseSqlServer(cn);
-                options.UseSqlite(cn, opt => opt.MigrationsAssembly(typeof(UserSessions).Assembly.FullName));
+                _ = options.UseSqlite(cn, opt => opt.MigrationsAssembly(typeof(UserSessions).Assembly.FullName));
             })
             .AddSessionCleanupBackgroundProcess();
 
         // local APIs
-        services.AddControllers();
+        _ = services.AddControllers();
 
         // cookie options
-        services.AddAuthentication(options =>
+        _ = services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "cookie";
                 options.DefaultChallengeScheme = "oidc";
@@ -79,24 +79,24 @@ internal static class Extensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseHttpLogging();
-        app.UseDeveloperExceptionPage();
+        _ = app.UseHttpLogging();
+        _ = app.UseDeveloperExceptionPage();
 
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
+        _ = app.UseDefaultFiles();
+        _ = app.UseStaticFiles();
 
-        app.UseAuthentication();
-        app.UseRouting();
+        _ = app.UseAuthentication();
+        _ = app.UseRouting();
 
         // adds antiforgery protection for local APIs
-        app.UseBff();
+        _ = app.UseBff();
 
         // adds authorization for local and remote API endpoints
-        app.UseAuthorization();
+        _ = app.UseAuthorization();
 
         // local APIs
 
-        app.MapControllers()
+        _ = app.MapControllers()
             .RequireAuthorization()
             .AsBffApiEndpoint();
 
@@ -104,7 +104,7 @@ internal static class Extensions
         // all calls to /api/* will be forwarded to the remote API
         // user or client access token will be attached in API call
         // user access token will be managed automatically using the refresh token
-        app.MapRemoteBffApiEndpoint("/api", new Uri("https://localhost:5010"))
+        _ = app.MapRemoteBffApiEndpoint("/api", new Uri("https://localhost:5010"))
             .WithAccessToken(RequiredTokenType.UserOrClient);
 
         return app;

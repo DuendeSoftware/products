@@ -107,7 +107,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         // jwks
         if (Options.Discovery.ShowKeySet)
         {
-            if ((await Keys.GetValidationKeysAsync(ct)).Any())
+            if ((await Keys.GetValidationKeysAsync(ct)).Count > 0)
             {
                 entries.Add(OidcConstants.Discovery.JwksUri, baseUrl + ProtocolRoutePaths.DiscoveryWebKeys);
             }
@@ -344,7 +344,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync(ct);
-        if (signingCredentials.Any())
+        if (signingCredentials.Count > 0)
         {
             var signingAlgorithms = signingCredentials.Select(c => c.Algorithm).Distinct();
             entries.Add(OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, signingAlgorithms);
@@ -460,7 +460,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// Creates the JWK document.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    public virtual async Task<IEnumerable<Models.JsonWebKey>> CreateJwkDocumentAsync(Ct ct)
+    public virtual async Task<IReadOnlyCollection<Models.JsonWebKey>> CreateJwkDocumentAsync(Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DiscoveryResponseGenerator.CreateJwkDocument");
 

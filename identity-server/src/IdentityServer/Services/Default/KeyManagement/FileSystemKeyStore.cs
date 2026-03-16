@@ -46,7 +46,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct ct)
+    public async Task<IReadOnlyCollection<SerializedKey>> LoadKeysAsync(Ct ct)
     {
         var list = new List<SerializedKey>();
 

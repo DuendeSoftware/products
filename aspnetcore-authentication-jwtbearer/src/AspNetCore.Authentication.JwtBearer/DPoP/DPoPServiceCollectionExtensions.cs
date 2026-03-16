@@ -20,18 +20,18 @@ public static class DPoPServiceCollectionExtensions
         /// </summary>
         public IServiceCollection ConfigureDPoPTokensForScheme(string scheme)
         {
-            services.AddOptions<DPoPOptions>();
+            _ = services.AddOptions<DPoPOptions>();
 
-            services.AddSingleton<DPoPJwtBearerEvents>();
+            _ = services.AddSingleton<DPoPJwtBearerEvents>();
             services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
             services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
-            services.AddTransient<DPoPExpirationValidator>();
+            _ = services.AddTransient<DPoPExpirationValidator>();
             services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
 
             services.TryAddTransient<DPoPHybridCacheProvider>();
             services.TryAddTransient<IReplayCache, ReplayCache>();
 
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>
+            _ = services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>
             {
                 var events = sp.GetRequiredService<DPoPJwtBearerEvents>();
                 return new ConfigureJwtBearerOptions(events)
@@ -48,7 +48,7 @@ public static class DPoPServiceCollectionExtensions
         /// </summary>
         public IServiceCollection ConfigureDPoPTokensForScheme(string scheme, Action<DPoPOptions> configure)
         {
-            services.Configure(scheme, configure);
+            _ = services.Configure(scheme, configure);
             return services.ConfigureDPoPTokensForScheme(scheme);
         }
     }

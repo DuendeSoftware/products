@@ -115,7 +115,7 @@ internal class AuthNRequestParser : SamlProtocolMessageParser
         }
 
         // Parse Comparison attribute (defaults to "exact" per spec)
-        var comparisonAttr = requestedAuthnContextElement.Attribute(RequestedAuthnContext.AttributeNames.Comparison)?.Value;
+        var comparisonAttr = requestedAuthnContextElement.Attribute(RequestedAuthnContext.AttributeNames.Comparison!)?.Value;
         var comparison = AuthnContextComparisonExtensions.Parse(comparisonAttr);
 
         var assertionNs = XNamespace.Get(SamlConstants.Namespaces.Assertion);

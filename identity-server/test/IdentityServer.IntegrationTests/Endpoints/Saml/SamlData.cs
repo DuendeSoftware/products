@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using Microsoft.Extensions.Time.Testing;
-
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
 internal class SamlData

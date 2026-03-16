@@ -17,7 +17,7 @@ public interface IIdentityProviderStore
     /// Gets all identity providers name.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct);
+    Task<IReadOnlyCollection<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct);
 
     /// <summary>
     /// Gets the identity provider by scheme name.

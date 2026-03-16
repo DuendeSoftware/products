@@ -30,12 +30,8 @@ namespace Duende.Bff.Yarp
         public static Duende.Bff.Yarp.RemoteApi[] GetRemoteApis(this Duende.Bff.DynamicFrontends.BffFrontend frontend) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithRemoteApis(this Duende.Bff.DynamicFrontends.BffFrontend frontend, params Duende.Bff.Yarp.RemoteApi[] config) { }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class RemoteApi : System.IEquatable<Duende.Bff.Yarp.RemoteApi>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public RemoteApi() { }
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         public RemoteApi(Microsoft.AspNetCore.Http.PathString pathMatch, System.Uri targetUri) { }
@@ -43,12 +39,9 @@ namespace Duende.Bff.Yarp
         public System.TimeSpan? ActivityTimeout { get; init; }
         public bool? AllowResponseBuffering { get; init; }
         public Duende.Bff.Configuration.BffUserAccessTokenParameters? Parameters { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public System.Uri TargetUri { get; init; }
+        public required Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
+        public required Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
+        public required System.Uri TargetUri { get; init; }
         public bool Equals(Duende.Bff.Yarp.RemoteApi? other) { }
         public override int GetHashCode() { }
         public Duende.Bff.Yarp.RemoteApi WithAccessToken(Duende.Bff.AccessTokenManagement.RequiredTokenType type) { }

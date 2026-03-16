@@ -171,7 +171,7 @@ internal class AccessTokenRequestTransform(
         });
         if (proofToken != null)
         {
-            context.ProxyRequest.Headers.Remove(OidcConstants.HttpHeaders.DPoP);
+            _ = context.ProxyRequest.Headers.Remove(OidcConstants.HttpHeaders.DPoP);
             context.ProxyRequest.Headers.Add(OidcConstants.HttpHeaders.DPoP, proofToken.Value);
             context.ProxyRequest.Headers.Authorization =
                 new AuthenticationHeaderValue(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, token.AccessToken);

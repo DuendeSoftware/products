@@ -77,7 +77,7 @@ void CopyDir(DirectoryInfo source, DirectoryInfo target)
 void CopyFile(DirectoryInfo directoryInfo, FileInfo fileInfo)
 {
     var destFileName = Path.Combine(directoryInfo.FullName, fileInfo.Name);
-    fileInfo.CopyTo(destFileName, true);
+    _ = fileInfo.CopyTo(destFileName, true);
 }
 
 bool TryFindFile(string fileName, [NotNullWhen(true)] out FileInfo? found)

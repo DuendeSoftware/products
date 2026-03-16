@@ -21,7 +21,7 @@ public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
 
         Bff.OnConfigureServices += services =>
         {
-            services.AddAuthentication(opt =>
+            _ = services.AddAuthentication(opt =>
                 {
                     opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     opt.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
@@ -38,7 +38,7 @@ public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.Client)
                 ;
         };
@@ -48,9 +48,9 @@ public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
     }
 
     [Fact]
+    //// Can login with dpop doesn't work
     public async Task When_logging_in_then_dpop_is_sent() =>
-        //// Can login with dpop doesn't work
-        await Bff.BrowserClient.Login()
+        _ = await Bff.BrowserClient.Login()
             .CheckHttpStatusCode();
 
     [Fact]

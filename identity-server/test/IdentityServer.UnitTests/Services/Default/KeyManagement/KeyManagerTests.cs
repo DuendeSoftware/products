@@ -9,7 +9,6 @@ using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Validation.Setup;
 
 namespace UnitTests.Services.Default.KeyManagement;

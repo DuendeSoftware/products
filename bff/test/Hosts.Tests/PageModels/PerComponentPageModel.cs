@@ -37,7 +37,7 @@ public class CallApiPageModel : PerComponentPageModel
         var parentDiv = heading.Locator("xpath=ancestor::div[@class='col']").First;
 
         // Assert that the parent div is found
-        parentDiv.ShouldNotBeNull();
+        _ = parentDiv.ShouldNotBeNull();
 
         var button = parentDiv.GetByRole(AriaRole.Button, new() { Name = "Call Api" });
         await button.ClickAsync();

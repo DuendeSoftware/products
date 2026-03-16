@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Globalization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -38,7 +39,7 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
     public string CreateNonce(DPoPProofValidationContext context)
     {
         var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
-        return DataProtector.Protect(now.ToString());
+        return DataProtector.Protect(now.ToString(CultureInfo.InvariantCulture));
     }
 
     public NonceValidationResult ValidateNonce(DPoPProofValidationContext context, string? nonce)
@@ -75,7 +76,7 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
+            Logger.LogDebug("Error parsing DPoP 'nonce' value: {Error}", ex.ToString());
         }
 
         time = 0;

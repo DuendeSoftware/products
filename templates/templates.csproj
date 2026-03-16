@@ -1,17 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <PackageType>Template</PackageType>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <language>en-US</language>
+
+    <IsTestProject>false</IsTestProject>
+    <IsPackable>true</IsPackable>
+
     <PackageId>Duende.Templates</PackageId>
     <Description>Templates for Duende Identity Server and Duende BFF </Description>
     <PackageTags>dotnet-new;templates;duende;bff;</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!--NU5128 doesn't apply to template packages.
+    https://learn.microsoft.com/en-us/dotnet/core/tutorials/cli-templates-create-template-package#description-of-the-project-xml-->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+
+    <!--Minver-->
+    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
+    <MinVerBuildMetadata>build.$(BUILD_NUMBER)</MinVerBuildMetadata>
+    <MinVerAutoIncrement>patch</MinVerAutoIncrement>
     <MinVerTagPrefix>templates-</MinVerTagPrefix>
+
+    <!--NuGet-->
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
   </PropertyGroup>
 
-  <Import Project="../templates.props" />
-
-  <PropertyGroup>
-    <PackageReadmePath>README.md</PackageReadmePath>
+  <!--Release builds do more work and are stricter. This allows for faster
+      development: devs can be messy/experimental initially and verify their
+      code easily by running a build in Release mode, and we also enforce
+      stricter rules in CI with the Release configuration. We can also move
+      any slow actions to the Release configuration to speed up test runs, etc.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,5 +48,17 @@
     <Compile Remove="**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
 </Project>

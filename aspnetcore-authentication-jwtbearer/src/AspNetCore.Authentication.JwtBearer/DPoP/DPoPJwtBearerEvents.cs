@@ -100,7 +100,7 @@ internal class DPoPJwtBearerEvents
 
             if (result.IsError)
             {
-                context.Fail(result.ErrorDescription ?? result.Error ?? throw new Exception("No ErrorDescription or Error set."));
+                context.Fail(result.ErrorDescription ?? result.Error ?? throw new InvalidOperationException("No ErrorDescription or Error set."));
 
                 // we need to stash these values away, so they are available later when the Challenge method is called
                 if (!string.IsNullOrWhiteSpace(result.Error))
@@ -202,19 +202,19 @@ internal class DPoPJwtBearerEvents
         // For example:
         // WWW-Authenticate: DPoP error="invalid_dpop_proof", error_description="Invalid 'iat' value."
         var sb = new StringBuilder();
-        sb.Append(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP);
+        _ = sb.Append(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP);
 
         if (context.HttpContext.Items.TryGetValue("DPoP-Error", out var dpopErrorObj) && dpopErrorObj is string error)
         {
-            sb.Append(" error=\"");
-            sb.Append(error);
-            sb.Append('\"');
+            _ = sb.Append(" error=\"");
+            _ = sb.Append(error);
+            _ = sb.Append('\"');
 
             if (context.HttpContext.Items.TryGetValue("DPoP-ErrorDescription", out var dpopErrorDescObj) && dpopErrorDescObj is string description)
             {
-                sb.Append(", error_description=\"");
-                sb.Append(description);
-                sb.Append('\"');
+                _ = sb.Append(", error_description=\"");
+                _ = sb.Append(description);
+                _ = sb.Append('\"');
             }
         }
 

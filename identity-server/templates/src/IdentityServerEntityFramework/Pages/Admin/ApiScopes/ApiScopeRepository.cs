@@ -83,9 +83,9 @@ public class ApiScopeRepository
         // CA1849 Suppressed because AddAsync is only needed for value generators that
         // need async database access (e.g., HiLoValueGenerator), and we don't use those
         // generators
-        _context.ApiScopes.Add(scope.ToEntity());
+        _ = _context.ApiScopes.Add(scope.ToEntity());
 #pragma warning restore CA1849 // Call async methods when in an async method
-        await _context.SaveChangesAsync();
+        _ = await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(ApiScopeModel model)
@@ -113,7 +113,7 @@ public class ApiScopeRepository
 
         if (claimsToRemove.Length != 0)
         {
-            scope.UserClaims.RemoveAll(x => claimsToRemove.Contains(x.Type));
+            _ = scope.UserClaims.RemoveAll(x => claimsToRemove.Contains(x.Type));
         }
         if (claimsToAdd.Length != 0)
         {
@@ -123,7 +123,7 @@ public class ApiScopeRepository
             }));
         }
 
-        await _context.SaveChangesAsync();
+        _ = await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string id)
@@ -135,8 +135,8 @@ public class ApiScopeRepository
             throw new ArgumentException("Invalid Api Scope");
         }
 
-        _context.ApiScopes.Remove(scope);
-        await _context.SaveChangesAsync();
+        _ = _context.ApiScopes.Remove(scope);
+        _ = await _context.SaveChangesAsync();
     }
 
 

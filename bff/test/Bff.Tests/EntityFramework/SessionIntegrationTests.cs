@@ -27,7 +27,7 @@ public class HostBuilder_SessionTests : BffTestBase
         Bff.OnConfigureBff += bff =>
         {
             // Enable server-side sessions with in-memory storage
-            bff.AddServerSideSessions();
+            _ = bff.AddServerSideSessions();
         };
         await InitializeAsync();
 
@@ -36,7 +36,7 @@ public class HostBuilder_SessionTests : BffTestBase
         // you get the InMemoryUserSessionStore.
         var userSessionStore = Bff.Server.Services.GetRequiredService<IUserSessionStore>();
         var userSessionStore2 = Bff.Server.Services.GetRequiredService<IUserSessionStore>();
-        userSessionStore.ShouldBeOfType<InMemoryUserSessionStore>();
+        _ = userSessionStore.ShouldBeOfType<InMemoryUserSessionStore>();
 
         userSessionStore2.ShouldBe(userSessionStore, "should be singleton");
     }
@@ -48,14 +48,14 @@ public class HostBuilder_SessionTests : BffTestBase
         Bff.OnConfigureBff += bff =>
         {
             // Enable server-side sessions with in-memory storage
-            bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
+            _ = bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
 
         };
         await InitializeAsync();
 
         // The bff should use the UserSessionStore, which is registered by the WithEntityFramework
         var userSessionStore = Bff.Server.Services.GetRequiredService<IUserSessionStore>();
-        userSessionStore.ShouldBeOfType<UserSessionStore>();
+        _ = userSessionStore.ShouldBeOfType<UserSessionStore>();
     }
 
     [Fact]
@@ -64,14 +64,14 @@ public class HostBuilder_SessionTests : BffTestBase
         Bff.OnConfigureBff += bff =>
         {
             // Enable server-side sessions with in-memory storage
-            bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
-            bff.AddSessionCleanupBackgroundProcess();
-            bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
+            _ = bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
+            _ = bff.AddSessionCleanupBackgroundProcess();
+            _ = bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
         };
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
         await InitializeAsync();
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sessionStore = Bff.Server.Services.GetRequiredService<IUserSessionStore>();
         // Get the partition key from the first host, which is where the session was created
@@ -109,21 +109,21 @@ public class HostBuilder_SessionTests : BffTestBase
         host2.OnConfigureBff += bff =>
         {
             // Enable server-side sessions with in-memory storage
-            bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
-            bff.AddSessionCleanupBackgroundProcess();
+            _ = bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
+            _ = bff.AddSessionCleanupBackgroundProcess();
         };
 
         Bff.OnConfigureBff += bff =>
         {
             // Enable server-side sessions with in-memory storage
-            bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
-            bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
+            _ = bff.AddEntityFrameworkServerSideSessions(opt => opt.UseInMemoryDatabase(_databaseName));
+            _ = bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
         };
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
         await InitializeAsync();
         await host2.InitializeAsync();
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         var sessionStore = Bff.Server.Services.GetRequiredService<IUserSessionStore>();
         // Get the partition key from the first host, which is where the session was created
@@ -160,10 +160,10 @@ public class HostBuilder_SessionTests : BffTestBase
         Bff.OnConfigureBff += bff =>
         {
             // Enable server-side sessions with in-memory storage
-            bff.AddSessionCleanupBackgroundProcess();
-            bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
+            _ = bff.AddSessionCleanupBackgroundProcess();
+            _ = bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
         };
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        _ = IdentityServer.AddClient(The.ClientId, Bff.Url());
 
         var exception = await Should.ThrowAsync<InvalidOperationException>(() => InitializeAsync().AsTask());
         exception.Message.ShouldBe("No IUserSessionStoreCleanup is registered. Did you add session storage, such as EntityFramework?");

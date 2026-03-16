@@ -46,23 +46,22 @@ public class SigningKeyStore : ISigningKeyStore
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(Ct ct)
+    public async Task<IReadOnlyCollection<SerializedKey>> LoadKeysAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.LoadKeys");
 
-        var entities = await Context.Keys.Where(x => x.Use == Use)
+        return await Context.Keys.Where(x => x.Use == Use)
             .AsNoTracking()
-            .ToArrayAsync(ct);
-        return entities.Select(key => new SerializedKey
-        {
-            Id = key.Id,
-            Created = key.Created,
-            Version = key.Version,
-            Algorithm = key.Algorithm,
-            Data = key.Data,
-            DataProtected = key.DataProtected,
-            IsX509Certificate = key.IsX509Certificate
-        });
+            .Select(key => new SerializedKey
+            {
+                Id = key.Id,
+                Created = key.Created,
+                Version = key.Version,
+                Algorithm = key.Algorithm,
+                Data = key.Data,
+                DataProtected = key.DataProtected,
+                IsX509Certificate = key.IsX509Certificate
+            }).ToArrayAsync(ct);
     }
 
     /// <summary>

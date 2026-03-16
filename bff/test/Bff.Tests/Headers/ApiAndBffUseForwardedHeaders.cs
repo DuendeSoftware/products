@@ -13,7 +13,7 @@ public class ApiAndBffUseForwardedHeaders : BffTestBase, IAsyncLifetime
     {
         Bff.OnConfigureApp += app =>
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            _ = app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor |
                                    ForwardedHeaders.XForwardedProto |
@@ -25,7 +25,7 @@ public class ApiAndBffUseForwardedHeaders : BffTestBase, IAsyncLifetime
 
         Api.OnConfigureApp += app =>
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            _ = app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor |
                                    ForwardedHeaders.XForwardedProto |
@@ -35,7 +35,7 @@ public class ApiAndBffUseForwardedHeaders : BffTestBase, IAsyncLifetime
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url());
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url());
         };
 
     }

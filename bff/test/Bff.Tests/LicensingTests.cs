@@ -44,7 +44,7 @@ public class LicensingTests : BffTestBase
         {
             var subjectId = Guid.NewGuid().ToString();
             await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, subjectId);
-            await Bff.BrowserClient.Login();
+            _ = await Bff.BrowserClient.Login();
         }
 
         var bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"))
@@ -70,7 +70,7 @@ public class LicensingTests : BffTestBase
         {
             var subjectId = Guid.NewGuid().ToString();
             await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, subjectId);
-            await Bff.BrowserClient.Login();
+            _ = await Bff.BrowserClient.Login();
         }
 
         var bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"))
@@ -91,7 +91,7 @@ public class LicensingTests : BffTestBase
         {
             var subjectId = Guid.NewGuid().ToString();
             await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, subjectId);
-            await Bff.BrowserClient.Login();
+            _ = await Bff.BrowserClient.Login();
         }
 
         var bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"))

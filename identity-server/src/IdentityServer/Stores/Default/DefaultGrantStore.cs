@@ -149,7 +149,7 @@ public class DefaultGrantStore<T>
     /// </summary>
     /// <param name="filter">The filter.</param>
     /// <param name="ct">The cancellation token.</param>
-    protected virtual async Task<IEnumerable<T>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
+    protected virtual async Task<IReadOnlyCollection<T>> GetAllAsync(PersistedGrantFilter filter, Ct ct)
     {
         filter.Type = GrantType;
         var items = await Store.GetAllAsync(filter, ct);

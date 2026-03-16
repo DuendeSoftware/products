@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "NuGetKeyVaultSignTool": {
+      "version": "3.2.3",
+      "commands": [
+        "NuGetKeyVaultSignTool"
+      ]
+    }
+  }
+}

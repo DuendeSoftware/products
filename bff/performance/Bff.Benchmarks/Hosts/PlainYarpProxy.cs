@@ -14,8 +14,8 @@ public class PlainYarpProxy : Host
     {
         OnConfigureServices += services =>
         {
-            services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));
-            services.AddReverseProxy()
+            _ = services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));
+            _ = services.AddReverseProxy()
                 .LoadFromMemory(
                     [
                         new RouteConfig()
@@ -42,8 +42,8 @@ public class PlainYarpProxy : Host
         };
         OnConfigure += app =>
         {
-            app.UseRouting();
-            app.MapReverseProxy();
+            _ = app.UseRouting();
+            _ = app.MapReverseProxy();
         };
     }
 }

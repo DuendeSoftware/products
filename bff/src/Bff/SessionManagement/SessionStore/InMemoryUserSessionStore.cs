@@ -50,7 +50,7 @@ internal class InMemoryUserSessionStore(
     public Task<UserSession?> GetUserSessionAsync(UserSessionKey key, Ct ct = default)
     {
         var partition = GetPartition(key.PartitionKey);
-        partition.TryGetValue(key.UserKey, out var item);
+        _ = partition.TryGetValue(key.UserKey, out var item);
 
         return Task.FromResult(item?.Clone());
     }
@@ -73,7 +73,7 @@ internal class InMemoryUserSessionStore(
     public Task DeleteUserSessionAsync(UserSessionKey key, Ct ct = default)
     {
         var partition = GetPartition(key.PartitionKey);
-        partition.TryRemove(key.UserKey, out _);
+        _ = partition.TryRemove(key.UserKey, out _);
         return Task.CompletedTask;
     }
 
@@ -117,7 +117,7 @@ internal class InMemoryUserSessionStore(
             .ToArray();
         foreach (var key in keys)
         {
-            partition.TryRemove(key, out _);
+            _ = partition.TryRemove(key, out _);
         }
 
         return Task.CompletedTask;

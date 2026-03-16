@@ -3,7 +3,6 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
-using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;

@@ -20,7 +20,7 @@ public class ManagementBasePathTests : BffTestBase
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.Configure<BffOptions>(options =>
+            _ = svcs.Configure<BffOptions>(options =>
             {
                 options.ManagementBasePath = new PathString("/{path:regex(^[a-zA-Z\\d-]+$)}/bff");
             });

@@ -32,14 +32,14 @@ public class UserSessionStoreTests : IAsyncLifetime
         _dbFilePath = Path.Combine(Path.GetTempPath(), $"test-{Guid.NewGuid():N}.sqlite");
         var connectionString = $"Data Source={_dbFilePath}";
 
-        services
+        _ = services
             .AddSingleton<CurrentFrontendAccessor>()
             .AddSingleton<IHttpContextAccessor>(_fakeHttpContextAccessor)
             .AddLogging(l => l.AddProvider(new TestLoggerProvider(output.WriteLine, "db")))
             .AddBff()
             .AddEntityFrameworkServerSideSessions(options => options.UseSqlite(connectionString, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName)));
 
-        services.AddDataProtection(s => s.ApplicationDiscriminator = "bob");
+        _ = services.AddDataProtection(s => s.ApplicationDiscriminator = "bob");
 
         _provider = services.BuildServiceProvider();
 
@@ -139,7 +139,7 @@ public class UserSessionStoreTests : IAsyncLifetime
             });
 
             var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
-            item.ShouldNotBeNull();
+            _ = item.ShouldNotBeNull();
             item.Key.ShouldBe(The.UserKey);
             item.SubjectId.ShouldBe("sub");
             item.SessionId.ShouldBe("sid");
@@ -160,7 +160,7 @@ public class UserSessionStoreTests : IAsyncLifetime
             });
 
             var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
-            item.ShouldNotBeNull();
+            _ = item.ShouldNotBeNull();
             item.Key.ShouldBe(The.UserKey);
             item.SubjectId.ShouldBe("sub2");
             item.SessionId.ShouldBe("sid2");
@@ -503,7 +503,7 @@ public class UserSessionStoreTests : IAsyncLifetime
         Func<Task> f = () => _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter()
         {
         });
-        await f.ShouldThrowAsync<Exception>();
+        _ = await f.ShouldThrowAsync<Exception>();
     }
 
 
@@ -772,7 +772,7 @@ public class UserSessionStoreTests : IAsyncLifetime
         Func<Task> f = () => _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter()
         {
         });
-        await f.ShouldThrowAsync<Exception>();
+        _ = await f.ShouldThrowAsync<Exception>();
     }
 
     [Fact]
@@ -780,14 +780,14 @@ public class UserSessionStoreTests : IAsyncLifetime
     {
         var dbName = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        services.AddBff()
+        _ = services.AddBff()
             .AddEntityFrameworkServerSideSessions(options => options.UseInMemoryDatabase(dbName));
         var provider = services.BuildServiceProvider();
 
         using var scope0 = provider.CreateScope();
         var ctx0 = scope0.ServiceProvider.GetRequiredService<SessionDbContext>();
         var key = UserKey.Parse(Guid.NewGuid().ToString());
-        ctx0.UserSessions.Add(new UserSessionEntity
+        _ = ctx0.UserSessions.Add(new UserSessionEntity
         {
             PartitionKey = The.PartitionKey,
             Key = key,
@@ -795,26 +795,26 @@ public class UserSessionStoreTests : IAsyncLifetime
             SubjectId = "sub",
             SessionId = "sid",
         });
-        await ctx0.SaveChangesAsync();
+        _ = await ctx0.SaveChangesAsync();
 
         using var scope1 = provider.CreateScope();
         var ctx1 = scope1.ServiceProvider.GetRequiredService<SessionDbContext>();
         var item1 = ctx1.UserSessions.Single(x => x.Key == key);
-        ctx1.UserSessions.Remove(item1);
+        _ = ctx1.UserSessions.Remove(item1);
 
         using var scope2 = provider.CreateScope();
         var ctx2 = scope2.ServiceProvider.GetRequiredService<SessionDbContext>();
         var item2 = ctx2.UserSessions.Single(x => x.Key == key);
-        ctx2.UserSessions.Remove(item2);
+        _ = ctx2.UserSessions.Remove(item2);
 
-        await ctx1.SaveChangesAsync();
+        _ = await ctx1.SaveChangesAsync();
 
         Func<Task> f1 = async () => await ctx2.SaveChangesAsync();
-        await f1.ShouldThrowAsync<DbUpdateConcurrencyException>();
+        _ = await f1.ShouldThrowAsync<DbUpdateConcurrencyException>();
 
         try
         {
-            await ctx2.SaveChangesAsync();
+            _ = await ctx2.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -826,7 +826,7 @@ public class UserSessionStoreTests : IAsyncLifetime
         }
 
         // calling again to not throw
-        await ctx2.SaveChangesAsync();
+        _ = await ctx2.SaveChangesAsync();
     }
 
     public IDisposable UseFrontend(BffFrontend frontent)
@@ -839,9 +839,8 @@ public class UserSessionStoreTests : IAsyncLifetime
         });
     }
 
-    public async ValueTask InitializeAsync() =>
-        // Ensure the database is created and migrations are applied
-        await _database.Database.MigrateAsync();
+    // Ensure the database is created and migrations are applied
+    public async ValueTask InitializeAsync() => await _database.Database.MigrateAsync();
 
 
     public async ValueTask DisposeAsync()

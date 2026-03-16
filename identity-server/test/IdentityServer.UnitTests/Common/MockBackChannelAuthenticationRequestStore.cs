@@ -28,12 +28,12 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
         return Task.FromResult(item.Value);
     }
 
-    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string clientId = null)
+    public Task<IReadOnlyCollection<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, Ct ct, string clientId = null)
     {
         var items = Items.Where(x => x.Value.Subject.GetSubjectId() == subjectId
                                      && (clientId == null || x.Value.ClientId == clientId)
         );
-        return Task.FromResult(items.Select(x => x.Value).AsEnumerable());
+        return Task.FromResult<IReadOnlyCollection<BackChannelAuthenticationRequest>>(items.Select(x => x.Value).ToArray());
     }
 
     public Task RemoveByInternalIdAsync(string id, Ct _)

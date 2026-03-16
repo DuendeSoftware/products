@@ -20,19 +20,19 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
     protected override Task ExecuteAsync(Ct stoppingToken)
     {
         var builder = WebApplication.CreateBuilder();
-        builder.AddServiceDefaults();
+        _ = builder.AddServiceDefaults();
         // Configure Kestrel to listen on the specified Uri
-        builder.WebHost.UseUrls(Settings.IdentityServerUrl);
+        _ = builder.WebHost.UseUrls(Settings.IdentityServerUrl);
 
-        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        _ = builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.All;
             options.KnownProxies.Clear();
             options.KnownIPNetworks.Clear();
         });
 
-        builder.Services.AddAuthorization();
-        builder.Services.AddHttpLogging();
+        _ = builder.Services.AddAuthorization();
+        _ = builder.Services.AddHttpLogging();
 
         var isBuilder = builder.Services.AddIdentityServer(options =>
                 {
@@ -61,8 +61,8 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
             ;
 
         // in-memory, code config
-        isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
-        isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
+        _ = isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
+        _ = isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
 
         var bffUrls = config.AsEnumerable()
             .Where(x => x.Key.StartsWith("BFFURL"))
@@ -77,7 +77,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
             bffUrls.Add(bffUrl2 + "/path" + i);
         }
 
-        isBuilder.AddInMemoryClients([new Client
+        _ = isBuilder.AddInMemoryClients([new Client
         {
             ClientId = "bff.perf",
             ClientSecrets = [new Secret("secret".Sha256())],
@@ -96,22 +96,22 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
             AccessTokenLifetime = 15 // Force refresh
 
         }]);
-        isBuilder.AddInMemoryApiResources(Config.ApiResources);
+        _ = isBuilder.AddInMemoryApiResources(Config.ApiResources);
 
         var app = builder.Build();
-        app.UseForwardedHeaders();
+        _ = app.UseForwardedHeaders();
 
-        app.UseHttpLogging();
-        app.UseDeveloperExceptionPage();
-        app.UseStaticFiles();
+        _ = app.UseHttpLogging();
+        _ = app.UseDeveloperExceptionPage();
+        _ = app.UseStaticFiles();
 
-        app.UseRouting();
-        app.UseIdentityServer();
-        app.UseAuthorization();
+        _ = app.UseRouting();
+        _ = app.UseIdentityServer();
+        _ = app.UseAuthorization();
 
-        app.MapGet("/", () => "identity server");
+        _ = app.MapGet("/", () => "identity server");
 
-        app.MapGet("/account/login", async ctx =>
+        _ = app.MapGet("/account/login", async ctx =>
         {
             var props = new AuthenticationProperties();
             await ctx.SignInAsync(new ClaimsPrincipal(new ClaimsIdentity(
@@ -122,7 +122,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
                 "login", "name", "role")), props);
         });
 
-        app.MapGet("/account/logout", async ctx =>
+        _ = app.MapGet("/account/logout", async ctx =>
         {
             // signout as if the user were prompted
             await ctx.SignOutAsync();

@@ -171,7 +171,7 @@ public class ClientRepository(ConfigurationDbContext context)
         client.ClientSecrets.Clear();
         client.ClientSecrets.Add(new ClientSecret { Value = secret.Sha256(), Description = description });
 
-        await context.SaveChangesAsync();
+        _ = await context.SaveChangesAsync();
     }
 
     public async Task ClearClientSecret(string clientId)
@@ -183,7 +183,7 @@ public class ClientRepository(ConfigurationDbContext context)
             .SingleOrDefaultAsync(x => x.ClientId == clientId) ?? throw new ArgumentException("Invalid Client Id");
 
         client.ClientSecrets.Clear();
-        await context.SaveChangesAsync();
+        _ = await context.SaveChangesAsync();
     }
 
     public async Task CreateAsync(CreateClientModel model)
@@ -233,8 +233,8 @@ public class ClientRepository(ConfigurationDbContext context)
             frontChannelLogoutPath: "signout-oidc"
         );
 
-        context.Clients.Add(client.ToEntity());
-        await context.SaveChangesAsync();
+        _ = context.Clients.Add(client.ToEntity());
+        _ = await context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(EditClientModel model)
@@ -266,7 +266,7 @@ public class ClientRepository(ConfigurationDbContext context)
 
         if (toRemove.Count != 0)
         {
-            client.AllowedScopes.RemoveAll(x => toRemove.Contains(x.Scope));
+            _ = client.AllowedScopes.RemoveAll(x => toRemove.Contains(x.Scope));
         }
 
         if (toAdd.Count != 0)
@@ -313,7 +313,7 @@ public class ClientRepository(ConfigurationDbContext context)
             client.BackChannelLogoutUri = model.BackChannelLogoutUri?.Trim();
         }
 
-        await context.SaveChangesAsync();
+        _ = await context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string clientId)
@@ -321,8 +321,8 @@ public class ClientRepository(ConfigurationDbContext context)
         var client = await context.Clients.SingleOrDefaultAsync(x => x.ClientId == clientId)
             ?? throw new ArgumentException("Invalid Client Id");
 
-        context.Clients.Remove(client);
-        await context.SaveChangesAsync();
+        _ = context.Clients.Remove(client);
+        _ = await context.SaveChangesAsync();
     }
 
 }

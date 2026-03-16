@@ -17,7 +17,7 @@ public interface IBackchannelAuthenticationInteractionService
     /// <summary>
     /// Returns the pending login requests for the current user.
     /// </summary>
-    Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct);
+    Task<IReadOnlyCollection<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct);
 
     /// <summary>
     /// Returns the login request for the id.

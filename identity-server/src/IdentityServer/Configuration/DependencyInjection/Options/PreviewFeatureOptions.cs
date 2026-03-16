@@ -14,7 +14,7 @@ public class PreviewFeatureOptions
     public bool EnableDiscoveryDocumentCache { get; set; }
 
     /// <summary>
-    /// When clients authenticate with private_key_jwt assertions, validate the audience of the assertion strictly: the audience must be this IdentityServer's issuer identifier as a single string.
+    /// When clients authenticate with private_key_jwt assertions, validate the audience of the assertion strictly: the audience must be this IdentityServer's issuer identifier as the sole audience value (either a plain string or a single-element array).
     /// </summary>
     public bool StrictClientAssertionAudienceValidation { get; set; }
 

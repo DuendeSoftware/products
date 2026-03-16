@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
         if (configureAction != null)
         {
-            builder.Services.Configure(configureAction);
+            _ = builder.Services.Configure(configureAction);
         }
 
         return builder
@@ -79,7 +79,7 @@ internal class BffBuilder : IBffServicesBuilder
 
         _loadedConfiguration = section;
 
-        Services.Configure<BffConfiguration>(section);
+        _ = Services.Configure<BffConfiguration>(section);
 
         // Trigger all configuration loaders from plugins
         foreach (var configLoader in _pluginConfigurationLoaders)

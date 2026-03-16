@@ -21,7 +21,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
 {
     private readonly IIdentityProviderStore _inner;
     private readonly ICache<IdentityProvider> _cache;
-    private readonly ICache<IEnumerable<IdentityProviderName>> _allCache;
+    private readonly ICache<IReadOnlyCollection<IdentityProviderName>> _allCache;
     private readonly IdentityServerOptions _options;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<CachingIdentityProviderStore<T>> _logger;
@@ -37,7 +37,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
     /// <param name="logger"></param>
     public CachingIdentityProviderStore(T inner,
         ICache<IdentityProvider> cache,
-        ICache<IEnumerable<IdentityProviderName>> allCache,
+        ICache<IReadOnlyCollection<IdentityProviderName>> allCache,
         IdentityServerOptions options,
         IHttpContextAccessor httpContextAccessor,
         ILogger<CachingIdentityProviderStore<T>> logger)
@@ -51,7 +51,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
+    public async Task<IReadOnlyCollection<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingIdentityProviderStore.GetAllSchemeNames");
 

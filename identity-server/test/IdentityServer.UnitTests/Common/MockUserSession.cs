@@ -47,7 +47,7 @@ public class MockUserSession : IUserSession
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<string>> GetClientListAsync(Ct _) => Task.FromResult<IEnumerable<string>>(Clients);
+    public Task<IReadOnlyCollection<string>> GetClientListAsync(Ct _) => Task.FromResult<IReadOnlyCollection<string>>(Clients);
 
     public Task AddClientIdAsync(string clientId, Ct _)
     {
@@ -62,7 +62,7 @@ public class MockUserSession : IUserSession
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync(Ct _) => Task.FromResult<IEnumerable<SamlSpSessionData>>(SamlSessions);
+    public Task<IReadOnlyCollection<SamlSpSessionData>> GetSamlSessionListAsync(Ct _) => Task.FromResult<IReadOnlyCollection<SamlSpSessionData>>(SamlSessions);
 
     public Task RemoveSamlSessionAsync(string entityId, Ct _)
     {

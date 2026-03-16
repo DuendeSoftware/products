@@ -4,7 +4,7 @@ using System.Text.Json;
 /// <summary>
 /// this is an example of a class that would access the data via a web service. This is typically
 /// what you'd do in webassembly. 
-/// Note that it implements the same interface as the <see cref="ServerWeatherClient"/>
+/// Note that it implements the same interface as the ServerWeatherClient
 /// when it's rendering on the server. 
 /// </summary>
 /// <param name="client"></param>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
   <Import Project="../../src.props" />
 
   <PropertyGroup>
@@ -9,6 +10,11 @@
     <MinVerTagPrefix>aaj-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.2</MinVerMinimumMajorMinor>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
+    <!-- CA1848/CA1873: LoggerMessage refactor is a separate effort -->
+    <!-- CA1031: Intentional catch-all for malformed token parsing -->
+    <!-- CA5404: DPoP proofs intentionally skip audience/issuer/lifetime validation -->
+    <!-- CA1056: ExpectedUrl is used as string throughout the DPoP flow -->
+    <NoWarn>$(NoWarn);CA1848;CA1873;CA1031;CA5404;CA1056</NoWarn>
   </PropertyGroup>
 
 </Project>

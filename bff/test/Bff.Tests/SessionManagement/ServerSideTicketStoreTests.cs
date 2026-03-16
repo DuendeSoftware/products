@@ -12,7 +12,7 @@ public class ServerSideTicketStoreTests : BffTestBase
     public ServerSideTicketStoreTests() : base() =>
         Bff.OnConfigureBff += bff =>
         {
-            bff.AddServerSideSessions();
+            _ = bff.AddServerSideSessions();
         };
 
     [Theory, MemberData(nameof(AllSetups))]
@@ -20,12 +20,12 @@ public class ServerSideTicketStoreTests : BffTestBase
     {
         Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
         await ConfigureBff(setup);
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         Bff.BrowserClient.Cookies.Clear(Bff.Url());
         (await GetUserSessions()).Count.ShouldBe(1);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
 
         (await GetUserSessions()).Count.ShouldBe(1);
     }
@@ -41,11 +41,11 @@ public class ServerSideTicketStoreTests : BffTestBase
             .MapToHost(HostHeaderValue.Parse(The.DomainName));
         AddOrUpdateFrontend(frontendWithOrigin);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         (await GetUserSessions()).Count.ShouldBe(1);
 
         var bffClientForOtherOrigin = Bff.BuildBrowserClient(The.DomainName, Bff.BrowserClient.Cookies);
-        await bffClientForOtherOrigin.Login();
+        _ = await bffClientForOtherOrigin.Login();
 
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
         (await bffClientForOtherOrigin.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
@@ -71,16 +71,16 @@ public class ServerSideTicketStoreTests : BffTestBase
             .MapToHost(HostHeaderValue.Parse(The.DomainName));
         AddOrUpdateFrontend(frontendWithOrigin);
 
-        await Bff.BrowserClient.Login();
+        _ = await Bff.BrowserClient.Login();
         (await GetUserSessions()).Count.ShouldBe(1);
 
         var bffClientForOtherOrigin = Bff.BuildBrowserClient(The.DomainName, Bff.BrowserClient.Cookies);
-        await bffClientForOtherOrigin.Login();
+        _ = await bffClientForOtherOrigin.Login();
 
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
         (await bffClientForOtherOrigin.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
-        await Bff.BrowserClient.Logout();
+        _ = await Bff.BrowserClient.Logout();
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeFalse();
 
         (await bffClientForOtherOrigin.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();

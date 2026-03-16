@@ -30,24 +30,24 @@ public static class ModelBuilderExtensions
         ArgumentNullException.ThrowIfNull(storeOptions);
         if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
         {
-            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+            _ = modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
         }
 
-        modelBuilder.Entity<UserSessionEntity>(entity =>
+        _ = modelBuilder.Entity<UserSessionEntity>(entity =>
         {
-            entity.ToTable(storeOptions.UserSessions);
+            _ = entity.ToTable(storeOptions.UserSessions);
 
-            entity.HasKey(x => x.Id);
+            _ = entity.HasKey(x => x.Id);
 
-            entity.Property(x => x.PartitionKey).HasConversion<PartitionKeyConverter>().HasMaxLength(200);
-            entity.Property(x => x.Key).HasConversion<UserKeyConverter>().IsRequired().HasMaxLength(200);
-            entity.Property(x => x.SubjectId).IsRequired().HasMaxLength(200);
-            entity.Property(x => x.Ticket).IsRequired();
+            _ = entity.Property(x => x.PartitionKey).HasConversion<PartitionKeyConverter>().HasMaxLength(200);
+            _ = entity.Property(x => x.Key).HasConversion<UserKeyConverter>().IsRequired().HasMaxLength(200);
+            _ = entity.Property(x => x.SubjectId).IsRequired().HasMaxLength(200);
+            _ = entity.Property(x => x.Ticket).IsRequired();
 
-            entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.Key }).IsUnique();
-            entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.SubjectId, x.SessionId }).IsUnique();
-            entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.SessionId }).IsUnique();
-            entity.HasIndex(x => x.Expires);
+            _ = entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.Key }).IsUnique();
+            _ = entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.SubjectId, x.SessionId }).IsUnique();
+            _ = entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.SessionId }).IsUnique();
+            _ = entity.HasIndex(x => x.Expires);
         });
     }
 

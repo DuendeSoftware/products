@@ -16,10 +16,10 @@ public class Startup
     {
         var cn = Configuration.GetConnectionString("db");
 
-        services.AddDbContext<SessionDbContext>(options =>
+        _ = services.AddDbContext<SessionDbContext>(options =>
         {
             //options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
-            options.UseSqlite(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
+            _ = options.UseSqlite(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
         });
     }
 

@@ -19,14 +19,14 @@ public static class TestMocks
             BaseAddress = new Uri("https://example.com")
         };
         var factory = Substitute.For<IHttpClientFactory>();
-        factory.CreateClient(BffClientAuthenticationStateProvider.HttpClientName).Returns(httpClient);
+        _ = factory.CreateClient(BffClientAuthenticationStateProvider.HttpClientName).Returns(httpClient);
         return factory;
     }
 
     public static IOptions<BffBlazorClientOptions> MockOptions(BffBlazorClientOptions? opt = null)
     {
         var result = Substitute.For<IOptions<BffBlazorClientOptions>>();
-        result.Value.Returns(opt ?? new BffBlazorClientOptions());
+        _ = result.Value.Returns(opt ?? new BffBlazorClientOptions());
         return result;
     }
 }

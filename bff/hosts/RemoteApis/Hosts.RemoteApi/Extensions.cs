@@ -12,9 +12,9 @@ internal static class Extensions
     {
         var services = builder.Services;
 
-        services.AddControllers();
+        _ = services.AddControllers();
 
-        services.AddAuthentication("token")
+        _ = services.AddAuthentication("token")
             .AddJwtBearer("token", options =>
             {
                 options.Authority = "https://localhost:5001";
@@ -30,16 +30,16 @@ internal static class Extensions
                 };
             });
 
-        services.AddAuthorization(options =>
+        _ = services.AddAuthorization(options =>
         {
             options.AddPolicy("ApiCaller", policy =>
             {
-                policy.RequireClaim("scope", "api");
+                _ = policy.RequireClaim("scope", "api");
             });
 
             options.AddPolicy("RequireInteractiveUser", policy =>
             {
-                policy.RequireClaim("sub");
+                _ = policy.RequireClaim("sub");
             });
         });
 
@@ -48,33 +48,32 @@ internal static class Extensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        _ = app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
             ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost,
         });
 
-        app.UseHttpLogging();
+        _ = app.UseHttpLogging();
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            _ = app.UseDeveloperExceptionPage();
         }
 
 
-        app.Map("/static", inner =>
+        _ = app.Map("/static", inner =>
         {
-            inner.UseDefaultFiles();
-            inner.UseStaticFiles();
+            _ = inner.UseDefaultFiles();
+            _ = inner.UseStaticFiles();
         });
 
 
-        app.UseRouting();
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseRouting();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapControllers()
+        _ = app.MapControllers()
             .RequireAuthorization("ApiCaller");
         return app;
     }
 }
-

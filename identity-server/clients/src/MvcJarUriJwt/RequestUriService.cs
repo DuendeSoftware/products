@@ -12,7 +12,7 @@ public class RequestUriService
     public string Set(string value)
     {
         var id = Guid.NewGuid().ToString();
-        _requestObjects.TryAdd(id, value);
+        _ = _requestObjects.TryAdd(id, value);
 
         return id;
     }

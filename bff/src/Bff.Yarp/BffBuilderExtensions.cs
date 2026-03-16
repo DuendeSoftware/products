@@ -38,21 +38,21 @@ public static class BffBuilderExtensions
 
             // As a workaround, we're registering the config as a singleton
             // then loading the singleton when the config reloads. 
-            services.AddKeyedSingleton(ServiceProviderKeys.ProxyConfigurationKey, config);
+            _ = services.AddKeyedSingleton(ServiceProviderKeys.ProxyConfigurationKey, config);
 
         });
 
-        builder.Services.Configure<BffOptions>(opt =>
+        _ = builder.Services.Configure<BffOptions>(opt =>
         {
             opt.MiddlewareLoaders.Add(app =>
             {
-                app.UseBffRemoteRoutes();
+                _ = app.UseBffRemoteRoutes();
             });
         });
-        builder.Services.AddHttpForwarder();
-        builder.Services.AddSingleton<RemoteRouteHandler>();
+        _ = builder.Services.AddHttpForwarder();
+        _ = builder.Services.AddSingleton<RemoteRouteHandler>();
 
-        builder.Services.AddSingleton<IBffPluginLoader, ProxyBffPluginLoader>();
+        _ = builder.Services.AddSingleton<IBffPluginLoader, ProxyBffPluginLoader>();
 
         return builder;
     }
@@ -65,7 +65,7 @@ public static class BffBuilderExtensions
         var yarpBuilder = builder.Services.AddReverseProxy()
             .AddBffExtensions();
 
-        yarpBuilder.LoadFromMemory(routes, clusters);
+        _ = yarpBuilder.LoadFromMemory(routes, clusters);
 
         return yarpBuilder;
     }
@@ -77,7 +77,7 @@ public static class BffBuilderExtensions
         var yarpBuilder = builder.Services.AddReverseProxy()
             .AddBffExtensions();
 
-        yarpBuilder.LoadFromConfig(config);
+        _ = yarpBuilder.LoadFromConfig(config);
 
         return yarpBuilder;
     }

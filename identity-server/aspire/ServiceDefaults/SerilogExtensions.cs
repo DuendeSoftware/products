@@ -13,7 +13,7 @@ public static class SerilogExtensions
     public static void ConfigureSerilogDefaults(this WebApplicationBuilder builder) =>
         builder.Services.AddSerilog((services, configuration) =>
         {
-            configuration
+            _ = configuration
                 .ReadFrom.Configuration(builder.Configuration)
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext()
@@ -24,7 +24,7 @@ public static class SerilogExtensions
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
                 .WriteTo.Logger(fileLogger =>
                 {
-                    fileLogger.WriteTo.File("./diagnostics/diagnostic.log",
+                    _ = fileLogger.WriteTo.File("./diagnostics/diagnostic.log",
                         rollingInterval: RollingInterval.Day,
                         fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
                         rollOnFileSizeLimit: true,
@@ -34,7 +34,7 @@ public static class SerilogExtensions
                 })
                 .WriteTo.Logger(consoleLogger =>
                 {
-                    consoleLogger.WriteTo
+                    _ = consoleLogger.WriteTo
                         .Console(
                             outputTemplate:
                             "[{Timestamp:HH:mm:ss} {Level} {EventId}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
