@@ -3,7 +3,10 @@
 
 using Microsoft.AspNetCore.Mvc;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace SampleApi.Controllers;
+#pragma warning restore IDE0130
 
 [Route("identity")]
 public class IdentityController : ControllerBase

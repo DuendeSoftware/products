@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);IDE0130</NoWarn><!-- Namespace does not match folder structure -->
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Duende.IdentityModel" />
   </ItemGroup>

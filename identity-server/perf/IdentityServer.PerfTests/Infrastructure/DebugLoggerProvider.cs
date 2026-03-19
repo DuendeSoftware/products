@@ -3,7 +3,10 @@
 
 using Microsoft.Extensions.Logging;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IdentityServer.PerfTest.Infrastructure;
+#pragma warning restore IDE0130
 
 public class DebugLoggerProvider : List<string>, ILoggerProvider
 {

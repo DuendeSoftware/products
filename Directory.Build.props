@@ -9,11 +9,10 @@
     <Copyright>$(Company)</Copyright>
     <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
-    <!-- <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild> -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <!-- <NoWarn>$(NoWarn);EnableGenerateDocumentationFile</NoWarn>--><!-- workaround for https://github.com/dotnet/roslyn/issues/41640 -->
     <!-- <Nullable>enable</Nullable> -->
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
@@ -24,6 +23,10 @@
     <NoWarn>$(NoWarn);CA2007</NoWarn><!-- Do not directly await a Task -->
     <NoWarn>$(NoWarn);CS1591</NoWarn><!-- Missing XML comment for publicly visible type or member -->
     <NoWarn>$(NoWarn);NU1507</NoWarn><!-- There are 2 package sources defined in your configuration -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <NoWarn>$(NoWarn);EnableGenerateDocumentationFile</NoWarn><!-- workaround for https://github.com/dotnet/roslyn/issues/41640 -->
   </PropertyGroup>
 
   <!--Release builds do more work and are stricter. This allows for faster

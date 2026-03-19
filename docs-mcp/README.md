@@ -27,22 +27,6 @@ Alternatively, you can add a `.vscode/mcp.json` file to your workspace:
     "duende-mcp": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["Duende.Documentation.Mcp", "--yes"],
-      "env": {}
-    }
-  }
-}
-```
-
-You can also add the `--database` parameter with a path to the database file to use.
-The database file will be created by the MCP server at the specified path:
-
-```json
-{
-  "servers": {
-    "duende-mcp": {
-      "type": "stdio",
-      "command": "dnx",
       "args": ["Duende.Documentation.Mcp", "--yes", "--", "--database", "/path/to/database.db"],
       "env": {}
     }
@@ -50,26 +34,14 @@ The database file will be created by the MCP server at the specified path:
 }
 ```
 
-Open GitHub Copilot and select Agent Mode to work with the MCP server.
+The Duende Documentation MCP Server will create its database index at the path defined in the `--database` parameter.
+
+Next, open GitHub Copilot and select Agent Mode to work with the MCP server.
 
 ### JetBrains Rider
 
 In JetBrains Rider settings, navigate to **Tools \| AI Assistant \| Model Context Protocol (MCP)**.
 Next, add a new MCP server. In the dialog that opens, select **As JSON** and enter the following configuration:
-
-```json
-{
-  "mcpServers": {
-    "duende-mcp": {
-      "command": "dnx",
-      "args": ["Duende.Documentation.Mcp", "--yes"]
-    }
-  }
-}
-```
-
-Alternatively, you can add the `--database` parameter with a path to the database file to use.
-The database file will be created by the MCP server at the specified path:
 
 ```json
 {
@@ -82,20 +54,17 @@ The database file will be created by the MCP server at the specified path:
 }
 ```
 
+The Duende Documentation MCP Server will create its database index at the path defined in the `--database` parameter.
+
 ### Claude Code
 
 Execute the following command:
 
 ```shell
-claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --yes
+claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --yes -- --database /path/to/database.db
 ```
 
-Set the working directory to a path on your machine where the Duende Documentation MCP Server can store its database
-index. Not setting the working directory will result in the MCP server failing to start because it cannot create the
-database file.
-
-Alternatively, you can add the `--database` parameter with a path to a database file that the MCP server has write access to.
-The file will be created and mnaaged by the MCP server.
+The Duende Documentation MCP Server will create its database index at the path defined in the `--database` parameter.
 
 ## Tools and Example Prompts
 

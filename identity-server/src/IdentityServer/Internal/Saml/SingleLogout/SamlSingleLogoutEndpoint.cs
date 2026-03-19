@@ -26,10 +26,23 @@ internal class SamlSingleLogoutEndpoint(
             return new StatusCodeResult(System.Net.HttpStatusCode.MethodNotAllowed);
         }
 
-        // Extract the SAML logout request from query string (GET/Redirect) or form (POST)
-        var logoutRequest = await extractor.ExtractAsync(context);
+        SamlLogoutRequest logoutRequest;
+        try
+        {
+            logoutRequest = await extractor.ExtractAsync(context);
+        }
+        catch (SamlParseException ex)
+        {
+            return HandleParseError(ex);
+        }
 
         return await ProcessLogoutRequest(logoutRequest, context.RequestAborted);
+    }
+
+    private ValidationProblemResult HandleParseError(SamlParseException ex)
+    {
+        logger.SamlLogoutParseError(ex, ex.Message, ex.Issuer);
+        return new ValidationProblemResult("The SAML request could not be processed");
     }
 
     internal async Task<IEndpointResult> ProcessLogoutRequest(SamlLogoutRequest logoutRequest, Ct ct = default)

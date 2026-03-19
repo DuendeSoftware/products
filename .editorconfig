@@ -41,6 +41,7 @@ dotnet_diagnostic.IDE0055.severity = warning # Formatting rule
 dotnet_diagnostic.IDE0058.severity = warning # Remove unnecessary expression value
 dotnet_diagnostic.IDE0066.severity = warning # Use switch expressions
 dotnet_diagnostic.IDE0073.severity = warning # Require file header
+dotnet_diagnostic.IDE0130.severity = warning # Namespace does not match folder structure
 dotnet_diagnostic.IDE0161.severity = warning # Use file-scoped namespace
 dotnet_sort_system_directives_first = true
 dotnet_style_predefined_type_for_locals_parameters_members = true

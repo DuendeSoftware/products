@@ -5,7 +5,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Api;
+#pragma warning restore IDE0130
 
 [AllowAnonymous]
 public class EchoController : ControllerBase

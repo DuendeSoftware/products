@@ -4,7 +4,10 @@
 using System.Security.Cryptography.X509Certificates;
 using BenchmarkDotNet.Attributes;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IdentityServer.PerfTest.Infrastructure;
+#pragma warning restore IDE0130
 
 // TODO: Update to newer X509Certificate2 implementation
 #pragma warning disable SYSLIB0057 // X509Certificate2 constructor used here is deprecated from net10.0 onwards.

@@ -142,26 +142,64 @@ internal abstract class SamlRequestExtractor<TRequest, TResult>
             relayState);
     }
 
-    private (TRequest parsedRequest, XDocument xmlDocument) LoadRequestFromStream(LimitedReadStream limitedStream)
+    private static string? TryExtractIssuer(XDocument doc)
     {
         try
         {
-            var xmlDocument = SecureXmlParser.LoadXDocument(limitedStream);
-            var parsedRequest = ParseRequest(xmlDocument);
+            var assertionNs = XNamespace.Get("urn:oasis:names:tc:SAML:2.0:assertion");
+            var issuerElement = doc.Root?.Element(assertionNs + "Issuer");
+            var value = issuerElement?.Value?.Trim();
+            return string.IsNullOrEmpty(value) ? null : value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
+    private (TRequest parsedRequest, XDocument xmlDocument) LoadRequestFromStream(LimitedReadStream limitedStream)
+    {
+        XDocument xmlDocument;
+        try
+        {
+            xmlDocument = SecureXmlParser.LoadXDocument(limitedStream);
+        }
+        catch (XmlException ex)
+        {
+            throw new SamlParseException(
+                $"Failed to parse SAMLRequest XML in {TRequest.MessageName}", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new SamlParseException(
+                $"Failed to load SAMLRequest in {TRequest.MessageName}", ex);
+        }
+
+        try
+        {
+            var parsedRequest = ParseRequest(xmlDocument);
             return (parsedRequest, xmlDocument);
         }
         catch (FormatException ex)
         {
-            throw new BadHttpRequestException($"Invalid SAMLRequest format in {TRequest.MessageName}", ex);
+            throw new SamlParseException(
+                $"Invalid SAMLRequest format in {TRequest.MessageName}: {ex.Message}",
+                ex,
+                TryExtractIssuer(xmlDocument));
         }
         catch (InvalidOperationException ex)
         {
-            throw new BadHttpRequestException($"Invalid SAMLRequest format in {TRequest.MessageName}", ex);
+            throw new SamlParseException(
+                $"Invalid SAMLRequest format in {TRequest.MessageName}: {ex.Message}",
+                ex,
+                TryExtractIssuer(xmlDocument));
         }
-        catch (XmlException ex)
+        catch (Exception ex)
         {
-            throw new BadHttpRequestException($"Failed to parse SAMLRequest XML in {TRequest.MessageName}", ex);
+            throw new SamlParseException(
+                $"Unexpected error parsing SAMLRequest in {TRequest.MessageName}: {ex.Message}",
+                ex,
+                TryExtractIssuer(xmlDocument));
         }
     }
 }

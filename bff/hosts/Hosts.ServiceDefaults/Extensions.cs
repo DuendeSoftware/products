@@ -14,7 +14,9 @@ using OpenTelemetry.Trace;
 
 // By default, aspire adds this into the Microsoft.Extensions.Hosting namespace, so that it is automatically picked up
 // ReSharper disable once CheckNamespace
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.Extensions.Hosting;
+#pragma warning restore IDE0130
 
 // Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // This project should be referenced by each service project in your solution.

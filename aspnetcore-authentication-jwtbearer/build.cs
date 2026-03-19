@@ -15,6 +15,7 @@ Target(SharedTargets.Default, [
     SharedTargets.CheckSolutions,
     SharedTargets.CheckUnusedPackages,
     SharedTargets.CheckSortedRefs,
+    SharedTargets.CheckSortedSlnf,
     SharedTargets.VerifyFormatting,
     SharedTargets.Clean,
     SharedTargets.VerifyNoChanges,

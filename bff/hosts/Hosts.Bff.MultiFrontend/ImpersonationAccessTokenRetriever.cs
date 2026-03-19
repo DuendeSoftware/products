@@ -5,7 +5,10 @@ using Duende.Bff.AccessTokenManagement;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Bff;
+#pragma warning restore IDE0130
 
 public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IAccessTokenRetriever
 {

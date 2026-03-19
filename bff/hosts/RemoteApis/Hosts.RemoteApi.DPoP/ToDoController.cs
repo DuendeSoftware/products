@@ -4,7 +4,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Api.DPoP;
+#pragma warning restore IDE0130
 
 [Authorize("RequireInteractiveUser")]
 public class ToDoController : ControllerBase

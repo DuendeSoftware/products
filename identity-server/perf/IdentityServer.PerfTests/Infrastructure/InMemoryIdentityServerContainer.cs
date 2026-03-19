@@ -6,7 +6,10 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IdentityServer.PerfTest.Infrastructure;
+#pragma warning restore IDE0130
 
 public class InMemoryIdentityServerContainer : IdentityServerContainer
 {

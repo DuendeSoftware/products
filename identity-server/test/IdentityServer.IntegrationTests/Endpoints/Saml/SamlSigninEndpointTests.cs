@@ -1057,8 +1057,7 @@ public class SamlSigninEndpointTests
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
         problemDetails.ShouldNotBeNull();
-        //TODO: do we want more specific errors returned?
-        problemDetails.Detail.ShouldBe("Invalid SAMLRequest format in SAML signin request");
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -1077,8 +1076,7 @@ public class SamlSigninEndpointTests
         var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
         problemDetails.ShouldNotBeNull();
         problemDetails.Detail.ShouldNotBeNull();
-        //TODO: do we want more specific errors returned?
-        problemDetails.Detail.ShouldBe("Invalid SAMLRequest format in SAML signin request");
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -1096,8 +1094,7 @@ public class SamlSigninEndpointTests
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
         problemDetails.ShouldNotBeNull();
-        //TODO: do we want more specific errors returned?
-        problemDetails.Detail.ShouldBe("Invalid SAMLRequest format in SAML signin request");
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -1120,8 +1117,7 @@ public class SamlSigninEndpointTests
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
         problemDetails.ShouldNotBeNull();
-        //TODO: do we want more specific errors returned?
-        problemDetails.Detail.ShouldBe("Invalid SAMLRequest format in SAML signin request");
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]

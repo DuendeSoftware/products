@@ -11,7 +11,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace ConsoleResourceIndicators;
+#pragma warning restore IDE0130
 
 // TODO: Upgrade this client to remove dependancy on IWebHost & WebHostBuilder
 #pragma warning disable ASPDEPR008 // IWebHost is deprecated in net10.0

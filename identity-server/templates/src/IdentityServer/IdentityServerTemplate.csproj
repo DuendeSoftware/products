@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);IDE0130</NoWarn><!-- Namespace does not match folder structure --><!-- TODO: remove? -->
     <Nullable>enable</Nullable>
     <RootNamespace>IdentityServerTemplate</RootNamespace>
   </PropertyGroup>

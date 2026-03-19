@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
+
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleLogout;
@@ -264,5 +266,11 @@ internal static partial class Log
         EventName = nameof(SuccessfullyProcessedLogoutCallback),
         Message = "Successfully processed SAML logout callback")]
     internal static partial void SuccessfullyProcessedLogoutCallback(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(SamlLogoutParseError),
+        Level = LogLevel.Warning,
+        Message = $"Failed to parse SAML logout request: {{{SingleLogoutLogParameters.Message}}}. Issuer: {{{SingleLogoutLogParameters.Issuer}}}")]
+    internal static partial void SamlLogoutParseError(this ILogger logger, Exception exception, string message, string? issuer);
 }
 

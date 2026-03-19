@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>ConformanceReport.Tests</AssemblyName>
+    <NoWarn>$(NoWarn);IDE0130</NoWarn><!-- Namespace does not match folder structure --><!-- TODO: remove? -->
   </PropertyGroup>
 
   <ItemGroup>

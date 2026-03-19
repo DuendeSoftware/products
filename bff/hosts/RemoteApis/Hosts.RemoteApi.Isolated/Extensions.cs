@@ -4,7 +4,10 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Api.Isolated;
+#pragma warning restore IDE0130
 
 internal static class Extensions
 {

@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
+
 using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
@@ -19,6 +21,7 @@ internal static class SamlLogParameters
     internal const string ClaimCount = "claimCount";
     internal const string AttributeCount = "attributeCount";
     internal const string MessageType = "messageType";
+    internal const string Issuer = "issuer";
 }
 
 internal static partial class Log
@@ -195,4 +198,10 @@ internal static partial class Log
         Level = LogLevel.Warning,
         Message = $"SAML request contained invalid XML: {{{SamlLogParameters.ErrorMessage}}}")]
     internal static partial void SamlRequestContainedInvalidXml(this ILogger logger, Exception exception, string errorMessage);
+
+    [LoggerMessage(
+        EventName = nameof(SamlSigninParseError),
+        Level = LogLevel.Warning,
+        Message = $"Failed to parse SAML signin request: {{{SamlLogParameters.ErrorMessage}}}. Issuer: {{{SamlLogParameters.Issuer}}}")]
+    internal static partial void SamlSigninParseError(this ILogger logger, Exception exception, string errorMessage, string? issuer);
 }

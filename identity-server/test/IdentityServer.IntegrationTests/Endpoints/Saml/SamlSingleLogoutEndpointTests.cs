@@ -499,6 +499,142 @@ public class SamlSingleLogoutEndpointTests
         finalProtectedResourceResult.RequestMessage?.RequestUri?.AbsoluteUri.ShouldStartWith($"{Fixture.Url()}{Fixture.LoginUrl.ToString()}");
     }
 
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task logout_endpoint_when_redirect_binding_with_invalid_base64_should_return_bad_request()
+    {
+        // Arrange
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        var invalidBase64 = "not-valid-base64!!!";
+
+        // Act
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={invalidBase64}", _ct);
+
+        // Assert
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
+        problemDetails.ShouldNotBeNull();
+        problemDetails.Detail.ShouldBe("Invalid base64 encoding in SAML logout request");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task logout_endpoint_when_form_post_with_invalid_base64_should_return_bad_request()
+    {
+        // Arrange
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        var invalidBase64 = "not-valid-base64!!!";
+        var formData = new Dictionary<string, string>
+        {
+            { "SAMLRequest", invalidBase64 }
+        };
+        var content = new FormUrlEncodedContent(formData);
+
+        // Act
+        var result = await Fixture.Client.PostAsync("/saml/logout", content, _ct);
+
+        // Assert
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
+        problemDetails.ShouldNotBeNull();
+        problemDetails.Detail.ShouldBe("Invalid base64 encoding in SAML logout request");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task logout_endpoint_when_request_has_no_id_attribute_should_return_bad_request()
+    {
+        // Arrange
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        var logoutRequestXml = Build.LogoutRequestXml();
+        var xmlWithoutId = logoutRequestXml.Replace($"ID=\"{Data.RequestId}\"", "");
+
+        var urlEncoded = await EncodeRequest(xmlWithoutId, _ct);
+
+        // Act
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", _ct);
+
+        // Assert
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
+        problemDetails.ShouldNotBeNull();
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task logout_endpoint_when_request_has_empty_id_should_return_bad_request()
+    {
+        // Arrange
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        var logoutRequestXml = Build.LogoutRequestXml(requestId: "");
+        var urlEncoded = await EncodeRequest(logoutRequestXml, _ct);
+
+        // Act
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", _ct);
+
+        // Assert
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
+        problemDetails.ShouldNotBeNull();
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task logout_endpoint_when_request_issuer_is_empty_should_return_bad_request()
+    {
+        // Arrange
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        var logoutRequestXml = Build.LogoutRequestXml(issuer: "");
+        var urlEncoded = await EncodeRequest(logoutRequestXml, _ct);
+
+        // Act
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", _ct);
+
+        // Assert
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
+        problemDetails.ShouldNotBeNull();
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task logout_endpoint_when_request_issuer_is_missing_should_return_bad_request()
+    {
+        // Arrange
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        var logoutRequestXml = Build.LogoutRequestXml();
+        var xmlWithoutIssuer = logoutRequestXml.Replace(
+            $"<saml:Issuer>{Data.EntityId}</saml:Issuer>",
+            ""
+        );
+
+        var urlEncoded = await EncodeRequest(xmlWithoutIssuer, _ct);
+
+        // Act
+        var result = await Fixture.Client.GetAsync($"/saml/logout?SAMLRequest={urlEncoded}", _ct);
+
+        // Assert
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
+        problemDetails.ShouldNotBeNull();
+        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+    }
+
     private static async Task<string> EncodeAndSignRequest(
         string xml,
         SamlServiceProvider sp,

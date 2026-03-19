@@ -19,7 +19,7 @@ internal sealed class BlogSearchTool(McpDb db)
         [Description("The search query. Keep it concise and specific to increase the likelihood of a match.")] string query)
     {
         var results = await db.FTSBlogArticle
-            .FromSqlRaw("SELECT * FROM FTSBlogArticle WHERE Title MATCH {0} OR Content MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query))
+            .FromSqlRaw("SELECT * FROM FTSBlogArticle WHERE Title MATCH {0} OR Content MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query, "OR"))
             .AsNoTracking()
             .Take(6)
             .ToListAsync();

@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.2">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -24,8 +24,6 @@
     <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
     <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly\Hosts.Bff.Blazor.WebAssembly.csproj" />
     <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
-
-
     <ProjectReference Include="..\..\templates\src\BffLocalApi\BffLocalApi.csproj" />
     <ProjectReference Include="..\..\templates\src\BffRemoteApi\BffRemoteApi.csproj" />
     <ProjectReference Include="..\..\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" />

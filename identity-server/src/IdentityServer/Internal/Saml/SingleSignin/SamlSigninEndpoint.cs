@@ -26,10 +26,23 @@ internal class SamlSigninEndpoint(
             return new StatusCodeResult(System.Net.HttpStatusCode.MethodNotAllowed);
         }
 
-        // Extract the SAML request from query string (GET/Redirect) or form (POST)
-        var signinRequest = await extractor.ExtractAsync(context);
+        SamlSigninRequest signinRequest;
+        try
+        {
+            signinRequest = await extractor.ExtractAsync(context);
+        }
+        catch (SamlParseException ex)
+        {
+            return HandleParseError(ex);
+        }
 
         return await ProcessSpInitiatedSignin(signinRequest, context.RequestAborted);
+    }
+
+    private ValidationProblemResult HandleParseError(SamlParseException ex)
+    {
+        logger.SamlSigninParseError(ex, ex.Message, ex.Issuer);
+        return new ValidationProblemResult("The SAML request could not be processed");
     }
 
     internal async Task<IEndpointResult> ProcessSpInitiatedSignin(

@@ -17,6 +17,34 @@ public record TestHostContext(ITestOutputHelper OutputHelper)
     public readonly TestData The = new TestData();
     public TestDataBuilder Some => new TestDataBuilder(The);
 
-    public readonly StringBuilder LogMessages = new StringBuilder();
+    public readonly ThreadSafeStringBuilder LogMessages = new();
 
+}
+
+/// <summary>
+/// A thread-safe wrapper around <see cref="StringBuilder"/> that synchronizes
+/// access to <see cref="AppendLine"/> and <see cref="ToString"/> to prevent
+/// race conditions during concurrent logging from test host threads.
+/// </summary>
+public class ThreadSafeStringBuilder
+{
+    private readonly StringBuilder _sb = new();
+    private readonly object _lock = new();
+
+    public ThreadSafeStringBuilder AppendLine(string value)
+    {
+        lock (_lock)
+        {
+            _ = _sb.AppendLine(value);
+        }
+        return this;
+    }
+
+    public override string ToString()
+    {
+        lock (_lock)
+        {
+            return _sb.ToString();
+        }
+    }
 }

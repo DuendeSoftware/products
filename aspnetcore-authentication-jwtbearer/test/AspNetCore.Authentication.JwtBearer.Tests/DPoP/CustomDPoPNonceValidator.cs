@@ -3,7 +3,10 @@
 
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
+// TODO: remove pragma?
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Duende.AspNetCore.Authentication.JwtBearer;
+#pragma warning restore IDE0130
 
 /// <summary>
 /// An example of a custom nonce validator for testing that uses a simple counter-based nonce

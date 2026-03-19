@@ -7,13 +7,16 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
+// TODO: remove suppressions?
 // ReSharper disable CheckNamespace
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Duende.Bff;
+#pragma warning restore IDE0130
 
 /// <summary>
-/// this shim class is needed since ITicketStore is not configured in DI, rather it's a property 
+/// this shim class is needed since ITicketStore is not configured in DI, rather it's a property
 /// of the cookie options and coordinated with PostConfigureApplicationCookie. #lame
-/// https://github.com/aspnet/AspNetCore/issues/6946 
+/// https://github.com/aspnet/AspNetCore/issues/6946
 /// </summary>
 internal sealed class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
 {
