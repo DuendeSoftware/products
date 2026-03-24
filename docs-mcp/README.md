@@ -98,6 +98,22 @@ MCP Server:
 If you experience an issue with the Duende Documentation MCP or have any other feedback, please open an issue in our
 [Duende community](https://duende.link/community).
 
+## Disclaimer
+
+Duende's AI developer tools (including the Duende Documentation MCP Server and Duende Agent Skills) are designed
+to provide Large Language Models (LLMs) with verified, structured context from Duende's documentation and product knowledge.
+These tools improve the quality and relevance of AI-assisted development with Duende products, including IdentityServer,
+BFF and our Open Source offerings, but they do not guarantee the correctness, security, or completeness
+of AI-generated output. All code, configuration, and architectural decisions produced with the assistance of these tools
+must be reviewed and validated by qualified developers before deployment to any environment.
+Duende Software is not responsible for AI-generated output that results from the use of these tools.
+
+The Duende Documentation MCP Server provides LLM agents with access to Duende's official product documentation, website,
+and sample code. While this improves the accuracy of AI-assisted responses about Duende products, the LLM may still
+produce responses that are incomplete, outdated, or incorrect. The MCP Server serves context; it does not validate,
+execute, or enforce the correctness of the LLM's output. Always verify AI-generated guidance against the official
+documentation and samples at [docs.duendesoftware.com](https://docs.duendesoftware.com/).
+
 ## Technical details
 
 ### Development
