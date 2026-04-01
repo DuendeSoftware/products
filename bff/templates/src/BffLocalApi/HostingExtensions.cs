@@ -50,7 +50,7 @@ internal static class HostingExtensions
                 options.TokenValidationParameters.RoleClaimType = "role";
             });
 
-        // Add `.PersistKeysTo…()` and `.ProtectKeysWith…()`calls
+        // Add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
         // See more at https://docs.duendesoftware.com/general/data-protection
         _ = builder.Services.AddDataProtection()
             .SetApplicationName("BFF");
