@@ -1,5 +1,6 @@
 using BffRemoteApi;
 using Duende.Bff.Yarp;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +40,17 @@ builder.Services.AddAuthentication(options =>
             options.Scope.Add(scope);
         }
 
-        options.TokenValidationParameters = new()
+            options.TokenValidationParameters = new()
         {
             NameClaimType = "name",
             RoleClaimType = "role"
         };
     });
+
+// Add `.PersistKeysTo…()` and `.ProtectKeysWith…()`calls
+// See more at https://docs.duendesoftware.com/general/data-protection
+_ = builder.Services.AddDataProtection()
+    .SetApplicationName("BFF");
 
 
 var app = builder.Build();
