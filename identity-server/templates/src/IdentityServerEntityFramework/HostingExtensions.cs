@@ -4,6 +4,7 @@ using IdentityServerHost.Pages;
 using IdentityServerHost.Pages.Admin.ApiScopes;
 using IdentityServerHost.Pages.Admin.Clients;
 using IdentityServerHost.Pages.Admin.IdentityScopes;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -120,6 +121,11 @@ internal static class HostingExtensions
             _ = builder.Services.AddTransient<IdentityScopeRepository>();
             _ = builder.Services.AddTransient<ApiScopeRepository>();
         }
+
+        // Add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // See more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+            .SetApplicationName("IdentityServer");
 
         // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
         // then enable it
