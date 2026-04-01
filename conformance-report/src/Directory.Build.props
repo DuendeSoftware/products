@@ -2,7 +2,6 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
   <Import Project="../../src.props" />
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <AssemblyName>Duende.ConformanceReport.$(MSBuildProjectName)</AssemblyName>
     <PackageId>Duende.ConformanceReport.$(MSBuildProjectName)</PackageId>
     <RootNamespace>Duende.ConformanceReport</RootNamespace>

@@ -43,7 +43,7 @@ public class DPoPProofValidatorTests
         }
     }
 
-    private DPoPProofValidatonContext _context = new DPoPProofValidatonContext
+    private DPoPProofValidationContext _context = new DPoPProofValidationContext
     {
         ClientClockSkew = TimeSpan.Zero,
         Url = "https://identityserver/connect/token",

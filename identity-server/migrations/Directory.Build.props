@@ -4,5 +4,6 @@
     <AnalysisMode>None</AnalysisMode>
     <IsIdSrvProject>true</IsIdSrvProject>
     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
   </PropertyGroup>
 </Project>

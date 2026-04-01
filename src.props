@@ -1,33 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <IsTestProject>false</IsTestProject>
-    <IsPackable>true</IsPackable>
-    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-
-    <!--NuGet-->
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <!-- TODO - Verify that license is included in nuget packages -->
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-
-    <!--Minver-->
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath><!-- TODO: move to Directory.Build.props -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles><!-- TODO: move to Directory.Build.props -->
+    <IsPackable>true</IsPackable>
     <MinVerBuildMetadata>build.$(BUILD_NUMBER)</MinVerBuildMetadata>
-    <MinVerAutoIncrement>patch</MinVerAutoIncrement>
-
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile><!-- TODO: verify license is included in packages -->
+    <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReadmePath>../../README.md</PackageReadmePath>
+    <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
+  <!-- TODO: check which of these properties are actually required -->
+  <PropertyGroup Label="SourceLink">
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+  </PropertyGroup>
 
   <PropertyGroup>
     <NoWarn>$(NoWarn);RS0016</NoWarn><!-- Add public types and members to the declared API -->
@@ -41,8 +34,7 @@
 
   <ItemGroup>
     <None Include="../../../icon.png" Pack="true" Visible="false" PackagePath="" />
-    <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
     <None Include="../../../LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
   </ItemGroup>
-
 </Project>

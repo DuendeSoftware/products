@@ -5,5 +5,39 @@
   <Import Project="../identity-server.props" />
   <PropertyGroup>
     <IsIdSrvProject>true</IsIdSrvProject>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
+    <!-- TODO: Fix these in identity-server test code and remove suppressions -->
+    <NoWarn>$(NoWarn);CA1001</NoWarn><!-- Types that own disposable fields should be disposable -->
+    <NoWarn>$(NoWarn);CA1041</NoWarn><!-- Provide ObsoleteAttribute message -->
+    <NoWarn>$(NoWarn);CA1051</NoWarn><!-- Do not declare visible instance fields -->
+    <NoWarn>$(NoWarn);CA1304</NoWarn><!-- Specify CultureInfo -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1309</NoWarn><!-- Use ordinal StringComparison -->
+    <NoWarn>$(NoWarn);CA1310</NoWarn><!-- Specify StringComparison for correctness -->
+    <NoWarn>$(NoWarn);CA1311</NoWarn><!-- Specify a culture or use an invariant version -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn><!-- Identifiers should not contain underscores -->
+    <NoWarn>$(NoWarn);CA1708</NoWarn><!-- Identifiers should differ by more than case -->
+    <NoWarn>$(NoWarn);CA1711</NoWarn><!-- Identifiers should not have incorrect suffix -->
+    <NoWarn>$(NoWarn);CA1716</NoWarn><!-- Identifiers should not match keywords -->
+    <NoWarn>$(NoWarn);CA1725</NoWarn><!-- Parameter names should match base declaration -->
+    <NoWarn>$(NoWarn);CA1805</NoWarn><!-- Do not initialize unnecessarily -->
+    <NoWarn>$(NoWarn);CA1806</NoWarn><!-- Do not ignore method results -->
+    <NoWarn>$(NoWarn);CA1816</NoWarn><!-- Call GC.SuppressFinalize correctly -->
+    <NoWarn>$(NoWarn);CA1822</NoWarn><!-- Mark members as static -->
+    <NoWarn>$(NoWarn);CA1825</NoWarn><!-- Avoid zero-length array allocations -->
+    <NoWarn>$(NoWarn);CA1829</NoWarn><!-- Use Length/Count property instead of Count() -->
+    <NoWarn>$(NoWarn);CA1835</NoWarn><!-- Prefer Memory-based overloads for ReadAsync/WriteAsync -->
+    <NoWarn>$(NoWarn);CA1850</NoWarn><!-- Prefer static HashData method over ComputeHash -->
+    <NoWarn>$(NoWarn);CA1852</NoWarn><!-- Seal internal types -->
+    <NoWarn>$(NoWarn);CA1859</NoWarn><!-- Use concrete types when possible for improved performance -->
+    <NoWarn>$(NoWarn);CA1860</NoWarn><!-- Avoid using Enumerable.Any() extension method -->
+    <NoWarn>$(NoWarn);CA1861</NoWarn><!-- Avoid constant arrays as arguments -->
+    <NoWarn>$(NoWarn);CA1863</NoWarn><!-- Cache and reuse CompositeFormat instances -->
+    <NoWarn>$(NoWarn);CA1864</NoWarn><!-- Prefer IDictionary.TryAdd(TKey, TValue) -->
+    <NoWarn>$(NoWarn);CA1869</NoWarn><!-- Cache and reuse JsonSerializerOptions instances -->
+    <NoWarn>$(NoWarn);CA1872</NoWarn><!-- Prefer Convert.ToHexString and Convert.ToHexStringLower -->
+    <NoWarn>$(NoWarn);CA2201</NoWarn><!-- Do not raise reserved exception types -->
+    <NoWarn>$(NoWarn);CA2211</NoWarn><!-- Non-constant fields should not be visible -->
+    <NoWarn>$(NoWarn);CA5350</NoWarn><!-- Do not use weak cryptographic algorithms -->
   </PropertyGroup>
 </Project>

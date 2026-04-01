@@ -87,7 +87,7 @@ internal class PushedAuthorizationRequestValidator(
 
             // validate proof token
             var parUrl = context.ClientCertificate == null ? serverUrls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.PushedAuthorization : mtlsEndpointGenerator.GetMtlsEndpointPath(ProtocolRoutePaths.PushedAuthorization);
-            var dpopContext = new DPoPProofValidatonContext
+            var dpopContext = new DPoPProofValidationContext
             {
                 ProofToken = context.DPoPProofToken,
                 ExpirationValidationMode = context.Client.DPoPValidationMode,

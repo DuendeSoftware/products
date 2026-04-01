@@ -5,11 +5,33 @@
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
 
-        <!-- RS0026: Do not add multiple overloads with optional parameters -->
-    <NoWarn>$(NoWarn);RS0026</NoWarn>
-
-    <!-- RS0027: API with optional parameter(s) should have the most parameters amongst its public overloads -->
-    <NoWarn>$(NoWarn);RS0027</NoWarn>
+    <!-- TODO: Fix these in bff test code and remove suppressions -->
+    <NoWarn>$(NoWarn);RS0026</NoWarn><!-- Do not add multiple overloads with optional parameters -->
+    <NoWarn>$(NoWarn);RS0027</NoWarn><!-- API with optional parameter(s) should have the most parameters amongst its public overloads -->
+    <NoWarn>$(NoWarn);CA1000</NoWarn><!-- Do not declare static members on generic types -->
+    <NoWarn>$(NoWarn);CA1001</NoWarn><!-- Types that own disposable fields should be disposable -->
+    <NoWarn>$(NoWarn);CA1051</NoWarn><!-- Do not declare visible instance fields -->
+    <NoWarn>$(NoWarn);CA1304</NoWarn><!-- Specify CultureInfo -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1310</NoWarn><!-- Specify StringComparison for correctness -->
+    <NoWarn>$(NoWarn);CA1311</NoWarn><!-- Specify a culture or use an invariant version -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn><!-- Identifiers should not contain underscores -->
+    <NoWarn>$(NoWarn);CA1711</NoWarn><!-- Identifiers should not have incorrect suffix -->
+    <NoWarn>$(NoWarn);CA1725</NoWarn><!-- Parameter names should match base declaration -->
+    <NoWarn>$(NoWarn);CA1805</NoWarn><!-- Do not initialize unnecessarily -->
+    <NoWarn>$(NoWarn);CA1816</NoWarn><!-- Call GC.SuppressFinalize correctly -->
+    <NoWarn>$(NoWarn);CA1822</NoWarn><!-- Mark members as static -->
+    <NoWarn>$(NoWarn);CA1829</NoWarn><!-- Use Length/Count property instead of Count() -->
+    <NoWarn>$(NoWarn);CA1848</NoWarn><!-- Use the LoggerMessage delegates -->
+    <NoWarn>$(NoWarn);CA1852</NoWarn><!-- Seal internal types -->
+    <NoWarn>$(NoWarn);CA1859</NoWarn><!-- Use concrete types when possible for improved performance -->
+    <NoWarn>$(NoWarn);CA1860</NoWarn><!-- Avoid using Enumerable.Any() extension method -->
+    <NoWarn>$(NoWarn);CA1861</NoWarn><!-- Avoid constant arrays as arguments -->
+    <NoWarn>$(NoWarn);CA1866</NoWarn><!-- Use char overload -->
+    <NoWarn>$(NoWarn);CA1869</NoWarn><!-- Cache and reuse JsonSerializerOptions instances -->
+    <NoWarn>$(NoWarn);CA2016</NoWarn><!-- Forward CancellationToken to methods that accept it -->
+    <NoWarn>$(NoWarn);CA2201</NoWarn><!-- Do not raise reserved exception types -->
+    <NoWarn>$(NoWarn);CA2254</NoWarn><!-- Template should be a static expression -->
   </PropertyGroup>
   <Import Project="../../test.props" />
 </Project>

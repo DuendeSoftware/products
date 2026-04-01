@@ -5,7 +5,6 @@
   <Import Project="../../src.props" />
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <Product>Duende IgnoreThis</Product>
     <MinVerTagPrefix>it-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>

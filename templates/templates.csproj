@@ -8,6 +8,7 @@
 
     <IsTestProject>false</IsTestProject>
     <IsPackable>true</IsPackable>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
 
     <PackageId>Duende.Templates</PackageId>
     <Description>Templates for Duende Identity Server and Duende BFF </Description>

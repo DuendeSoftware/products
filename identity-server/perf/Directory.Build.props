@@ -2,5 +2,6 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
   <PropertyGroup>
     <AnalysisMode>None</AnalysisMode>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
   </PropertyGroup>
 </Project>

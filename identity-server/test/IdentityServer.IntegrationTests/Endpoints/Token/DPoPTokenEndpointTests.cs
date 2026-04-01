@@ -444,7 +444,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
 
         public string ServerIssuedNonce { get; set; }
 
-        protected override async Task ValidateFreshnessAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+        protected override async Task ValidateFreshnessAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
         {
             if (ServerIssuedNonce.IsPresent())
             {

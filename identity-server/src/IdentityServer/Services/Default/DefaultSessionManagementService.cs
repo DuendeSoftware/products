@@ -61,10 +61,7 @@ public class DefaultSessionManagementService : ISessionManagementService
                 SessionId = context.SessionId,
             };
 
-            if (context.ClientIds != null)
-            {
-                grantFilter.ClientIds = context.ClientIds;
-            }
+            grantFilter.ClientIds = context.ClientIds ?? [];
 
             if (!context.RevokeTokens || !context.RevokeConsents)
             {

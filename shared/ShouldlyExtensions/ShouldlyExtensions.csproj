@@ -3,7 +3,6 @@
   <PropertyGroup>
     <AnalysisMode>None</AnalysisMode>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <Nullable>enable</Nullable>
     <IsTestProject>false</IsTestProject>
     <RootNamespace>Shouldly</RootNamespace>
   </PropertyGroup>

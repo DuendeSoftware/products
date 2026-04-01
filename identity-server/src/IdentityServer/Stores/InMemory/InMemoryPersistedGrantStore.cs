@@ -83,7 +83,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
             from item in _repository
             select item.Value;
 
-        if (filter.ClientIds != null)
+        if (filter.ClientIds.Count > 0)
         {
             var ids = filter.ClientIds.ToList();
             if (!string.IsNullOrWhiteSpace(filter.ClientId))
@@ -106,7 +106,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
 
-        if (filter.Types != null)
+        if (filter.Types.Count > 0)
         {
             var types = filter.Types.ToList();
             if (!string.IsNullOrWhiteSpace(filter.Type))

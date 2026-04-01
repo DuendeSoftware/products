@@ -4,7 +4,6 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <RootNamespace>IdentityServerHost</RootNamespace>
     <UserSecretsId>e60c119c-8b86-4016-9d44-80e25948dbba</UserSecretsId>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

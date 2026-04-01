@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Validation;
 /// <summary>
 /// Models the result of DPoP proof validation.
 /// </summary>
-public class DPoPProofValidatonResult : ValidationResult
+public class DPoPProofValidationResult : ValidationResult
 {
     /// <summary>
     /// The serialized JWK from the validated DPoP proof token.

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CA1303</NoWarn>
   </PropertyGroup>
 

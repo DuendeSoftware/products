@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;Debug_ncrunch</Configurations>
     <RootNamespace>Hosts.Tests</RootNamespace>

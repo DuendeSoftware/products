@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
     <RootNamespace>Bff.EF</RootNamespace>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />

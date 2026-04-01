@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <RootNamespace>IdentityServerHost</RootNamespace>
-    <Nullable>enable</Nullable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

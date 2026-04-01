@@ -2,4 +2,16 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
   <Import Project="../../test.props" />
+  <PropertyGroup>
+    <!-- TODO: Fix these in test code and remove suppressions -->
+    <NoWarn>$(NoWarn);CA1051</NoWarn><!-- Do not declare visible instance fields -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1310</NoWarn><!-- Specify StringComparison for correctness -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn><!-- Identifiers should not contain underscores -->
+    <NoWarn>$(NoWarn);CA1805</NoWarn><!-- Do not initialize unnecessarily -->
+    <NoWarn>$(NoWarn);CA1822</NoWarn><!-- Mark members as static -->
+    <NoWarn>$(NoWarn);CA1852</NoWarn><!-- Seal internal types -->
+    <NoWarn>$(NoWarn);CA1866</NoWarn><!-- Use char overload -->
+    <NoWarn>$(NoWarn);CA2201</NoWarn><!-- Do not raise reserved exception types -->
+  </PropertyGroup>
 </Project>

@@ -159,7 +159,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
 
     private static IQueryable<PersistedGrant> Filter(IQueryable<PersistedGrant> query, PersistedGrantFilter filter)
     {
-        if (filter.ClientIds != null)
+        if (filter.ClientIds.Count > 0)
         {
             var ids = filter.ClientIds.ToList();
             if (!string.IsNullOrWhiteSpace(filter.ClientId))
@@ -182,7 +182,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
 
-        if (filter.Types != null)
+        if (filter.Types.Count > 0)
         {
             var types = filter.Types.ToList();
             if (!string.IsNullOrWhiteSpace(filter.Type))

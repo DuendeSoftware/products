@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Validation;
 /// <summary>
 /// Models the context for validaing DPoP proof tokens.
 /// </summary>
-public class DPoPProofValidatonContext
+public class DPoPProofValidationContext
 {
     /// <summary>
     /// Enum setting to control validation for the DPoP proof token expiration.

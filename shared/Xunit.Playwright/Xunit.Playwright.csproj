@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AnalysisMode>None</AnalysisMode>
-    <Nullable>enable</Nullable>
     <AssemblyName>Duende.Xunit.Playwright</AssemblyName>
     <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
     <IsTestProject>false</IsTestProject>

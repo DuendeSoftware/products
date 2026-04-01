@@ -5,5 +5,6 @@
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
   </PropertyGroup>
 </Project>

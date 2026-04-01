@@ -3,7 +3,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <WarningsAsErrors>false</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>

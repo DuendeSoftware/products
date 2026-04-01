@@ -16,5 +16,5 @@ public interface IDPoPProofValidator
     /// </summary>
     /// <param name="context">The validation context.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task<DPoPProofValidatonResult> ValidateAsync(DPoPProofValidatonContext context, Ct ct);
+    Task<DPoPProofValidationResult> ValidateAsync(DPoPProofValidationContext context, Ct ct);
 }

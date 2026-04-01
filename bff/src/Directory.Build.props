@@ -5,7 +5,6 @@
   <Import Project="../../src.props" />
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <PackageTags>OAuth 2.0;OpenID Connect;Security;BFF;IdentityServer;ASP.NET Core;SPA;Blazor</PackageTags>
     <Product>Duende BFF</Product>
     <MinVerTagPrefix>bff-</MinVerTagPrefix>

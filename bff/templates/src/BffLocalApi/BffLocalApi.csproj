@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable><!-- TODO: enable nullable -->
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Duende.BFF.Yarp" Version="3.0.0" />

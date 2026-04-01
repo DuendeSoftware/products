@@ -253,7 +253,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             }
 
             var tokenUrl = context.ClientCertificate == null ? _serverUrls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.Token : _mtlsEndpointGenerator.GetMtlsEndpointPath(ProtocolRoutePaths.Token);
-            var dpopContext = new DPoPProofValidatonContext
+            var dpopContext = new DPoPProofValidationContext
             {
                 ExpirationValidationMode = _validatedRequest.Client.DPoPValidationMode,
                 ClientClockSkew = _validatedRequest.Client.DPoPClockSkew,

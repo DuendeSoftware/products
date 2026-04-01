@@ -24,6 +24,7 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+[Tt]emp/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -176,7 +177,7 @@ Logging.g.cs
 LoggerMessage.g.cs
 PublicTopLevelProgram.Generated.g.cs
 RegexGenerator.g.cs
-**/Generated/
+**/Generated/Microsoft.CodeAnalysis.Razor.Compiler/
 
 # Backup & report files from converting an old project file
 # to a newer Visual Studio version. Backup files are not needed,

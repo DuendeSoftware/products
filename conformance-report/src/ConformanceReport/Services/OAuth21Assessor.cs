@@ -122,8 +122,6 @@ internal class OAuth21Assessor(ConformanceReportServerOptions options)
         return findings;
     }
 
-    #region Server-Level Assessments
-
     private Finding AssessParAvailability()
     {
         var parEnabled = options.PushedAuthorizationEndpointEnabled;
@@ -239,10 +237,6 @@ internal class OAuth21Assessor(ConformanceReportServerOptions options)
                 : "HTTP 302 (Found) redirects are used. HTTP 303 is recommended to prevent POST data resubmission.",
             Recommendation = options.UseHttp303Redirects ? null : "Set UseHttp303Redirects = true in IdentityServerOptions."
         };
-
-    #endregion
-
-    #region Client-Level Assessments
 
     private static Finding AssessAllowedGrantTypes(ConformanceReportClient client)
     {
@@ -654,5 +648,4 @@ internal class OAuth21Assessor(ConformanceReportServerOptions options)
         };
     }
 
-    #endregion
 }

@@ -69,9 +69,9 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     }
 
     /// <inheritdoc/>
-    public async Task<DPoPProofValidatonResult> ValidateAsync(DPoPProofValidatonContext context, Ct ct)
+    public async Task<DPoPProofValidationResult> ValidateAsync(DPoPProofValidationContext context, Ct ct)
     {
-        var result = new DPoPProofValidatonResult() { IsError = false };
+        var result = new DPoPProofValidationResult() { IsError = false };
 
         try
         {
@@ -120,7 +120,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the header.
     /// </summary>
-    protected virtual Task ValidateHeaderAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual Task ValidateHeaderAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         JsonWebToken token;
         var handler = new JsonWebTokenHandler();
@@ -242,7 +242,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the signature.
     /// </summary>
-    protected virtual async Task ValidateSignatureAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual async Task ValidateSignatureAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         Microsoft.IdentityModel.Tokens.TokenValidationResult tokenValidationResult;
 
@@ -284,7 +284,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the payload.
     /// </summary>
-    protected virtual async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, Ct ct)
+    protected virtual async Task ValidatePayloadAsync(DPoPProofValidationContext context, DPoPProofValidationResult result, Ct ct)
     {
         if (context.ValidateAccessToken)
         {
@@ -379,9 +379,9 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     }
 
     /// <summary>
-    /// Validates is the token has been replayed.
+    /// Validates if the token has been replayed.
     /// </summary>
-    protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result, Ct ct)
+    protected virtual async Task ValidateReplayAsync(DPoPProofValidationContext context, DPoPProofValidationResult result, Ct ct)
     {
         if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId, ct))
         {
@@ -416,7 +416,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the freshness.
     /// </summary>
-    protected virtual async Task ValidateFreshnessAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual async Task ValidateFreshnessAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         var validateIat = (context.ExpirationValidationMode & DPoPTokenExpirationValidationMode.Iat) == DPoPTokenExpirationValidationMode.Iat;
         if (validateIat)
@@ -442,7 +442,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the freshness of the iat value.
     /// </summary>
-    protected virtual Task ValidateIatAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual Task ValidateIatAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         if (IsExpired(context, result, context.ClientClockSkew, result.IssuedAt.Value))
         {
@@ -457,7 +457,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the freshness of the nonce value.
     /// </summary>
-    protected virtual async Task ValidateNonceAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual async Task ValidateNonceAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         if (result.Nonce.IsMissing())
         {
@@ -496,7 +496,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// Creates a nonce value to return to the client.
     /// </summary>
     /// <returns></returns>
-    protected virtual string CreateNonce(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
         return DataProtector.Protect(now.ToString(CultureInfo.InvariantCulture));
@@ -506,7 +506,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// Reads the time the nonce was created.
     /// </summary>
     /// <returns></returns>
-    protected virtual ValueTask<long> GetUnixTimeFromNonceAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected virtual ValueTask<long> GetUnixTimeFromNonceAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         try
         {
@@ -528,7 +528,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    protected virtual bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
+    protected virtual bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, TimeSpan clockSkew, long issuedAtTime)
     {
         var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
         var start = now + (int)clockSkew.TotalSeconds;

@@ -226,7 +226,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
 
         try
         {
-            var tvp = context.Options.ProofTokenValidationParameters;
+            var tvp = context.Options.ProofTokenValidationParameters.Clone();
             tvp.IssuerSigningKey = new JsonWebKey(result.JsonWebKey);
 
             var handler = new JsonWebTokenHandler();

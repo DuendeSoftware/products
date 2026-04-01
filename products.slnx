@@ -11,12 +11,6 @@
   <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
-  <Folder Name="/conformance-report/src/">
-    <Project Path="conformance-report/src/ConformanceReport/ConformanceReport.csproj" />
-  </Folder>
-  <Folder Name="/conformance-report/test/">
-    <Project Path="conformance-report/test/ConformanceReport.Tests/ConformanceReport.Tests.csproj" />
-  </Folder>
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
@@ -43,16 +37,16 @@
   <Folder Name="/bff/migrations/">
     <Project Path="bff/migrations/UserSessionDb/UserSessionDb.csproj" />
   </Folder>
+  <Folder Name="/bff/performance/">
+    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
+    <Project Path="bff/performance/Bff.Performance/Bff.Performance.csproj" />
+  </Folder>
   <Folder Name="/bff/src/">
     <Project Path="bff/src/Bff.Blazor.Client/Bff.Blazor.Client.csproj" />
     <Project Path="bff/src/Bff.Blazor/Bff.Blazor.csproj" />
     <Project Path="bff/src/Bff.EntityFramework/Bff.EntityFramework.csproj" />
     <Project Path="bff/src/Bff.Yarp/Bff.Yarp.csproj" />
     <Project Path="bff/src/Bff/Bff.csproj" />
-  </Folder>
-  <Folder Name="/bff/performance/">
-    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
-    <Project Path="bff/performance/Bff.Performance/Bff.Performance.csproj" />
   </Folder>
   <Folder Name="/bff/templates/src/">
     <Project Path="bff/templates/src/BffLocalApi/BffLocalApi.csproj" />
@@ -66,9 +60,15 @@
     <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
+  <Folder Name="/conformance-report/src/">
+    <Project Path="conformance-report/src/ConformanceReport/ConformanceReport.csproj" />
+  </Folder>
+  <Folder Name="/conformance-report/test/">
+    <Project Path="conformance-report/test/ConformanceReport.Tests/ConformanceReport.Tests.csproj" />
+  </Folder>
   <Folder Name="/docs-mcp/">
-    <File Path="docs-mcp/README.md" />
     <Project Path="docs-mcp/src/Documentation.Mcp/Documentation.Mcp.csproj" />
+    <File Path="docs-mcp/README.md" />
   </Folder>
   <Folder Name="/docs-mcp/.config/">
     <File Path="docs-mcp/.config/dotnet-tools.json" />

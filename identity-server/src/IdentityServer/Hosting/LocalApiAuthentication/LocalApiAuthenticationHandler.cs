@@ -119,7 +119,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             }
 
             var proofToken = Context.Request.Headers[OidcConstants.HttpHeaders.DPoP].FirstOrDefault();
-            var validationContext = new DPoPProofValidatonContext
+            var validationContext = new DPoPProofValidationContext
             {
                 ProofToken = proofToken,
                 Method = Context.Request.Method,
