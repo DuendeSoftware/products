@@ -1,6 +1,7 @@
 using BffBlazorAutoRenderMode;
 using BffBlazorAutoRenderMode.Components;
 using Duende.Bff.Blazor;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -61,6 +62,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddAuthorization();
+
+// Add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+// See more at https://docs.duendesoftware.com/general/data-protection
+_ = builder.Services.AddDataProtection()
+    .SetApplicationName("BFF");
 
 var app = builder.Build();
 

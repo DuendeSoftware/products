@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Serilog;
 
 namespace BffLocalApi;
@@ -48,6 +49,11 @@ internal static class HostingExtensions
                 options.TokenValidationParameters.NameClaimType = "name";
                 options.TokenValidationParameters.RoleClaimType = "role";
             });
+
+        // Add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // See more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+            .SetApplicationName("BFF");
 
         return builder.Build();
     }

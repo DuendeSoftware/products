@@ -4,6 +4,7 @@ using Duende.IdentityServer;
 using IdentityServerTemplate.Pages.Admin.ApiScopes;
 using IdentityServerTemplate.Pages.Admin.Clients;
 using IdentityServerTemplate.Pages.Admin.IdentityScopes;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -136,6 +137,11 @@ internal static class HostingExtensions
             _ = builder.Services.AddTransient<IdentityScopeRepository>();
             _ = builder.Services.AddTransient<ApiScopeRepository>();
         }
+
+        // Add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // See more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+            .SetApplicationName("IdentityServer");
 
         // this adds the necessary config for the portal page
         _ = builder.Services.AddTransient<Pages.Portal.ClientRepository>();
