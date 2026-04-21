@@ -1,0 +1,93 @@
+name: github/auto-close-external
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Log what would be closed without actually closing'
+        type: boolean
+        default: true
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  close-external:
+    # Only run on the public 'products' repo, not 'products-private'
+    if: github.repository == 'DuendeSoftware/products'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const isIssue = context.eventName === 'issues';
+            const isPR = context.eventName === 'pull_request_target';
+            const isManual = context.eventName === 'workflow_dispatch';
+            const dryRun = isManual && context.payload.inputs['dry-run'] === 'true';
+
+            const { owner, repo } = context.repo;
+            const exempt = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+
+            function buildComment(itemType) {
+              return [
+                `Thank you for your interest in Duende Software!`,
+                ``,
+                `This repository contains proprietary licensed software and does not accept unsolicited issues or pull requests. This ${itemType} has been automatically closed.`,
+                ``,
+                `- Please review our [contributor guidelines](https://github.com/DuendeSoftware/products/blob/main/.github/CONTRIBUTING.md) for more details.`,
+                `- For questions, bug reports, or suggestions, please use [GitHub Discussions](https://github.com/orgs/DuendeSoftware/discussions).`,
+                ``,
+                `We appreciate your understanding!`,
+              ].join('\n');
+            }
+
+            async function closeItem(number, association, itemType) {
+              if (exempt.includes(association)) {
+                console.log(`Skipping #${number} - author_association is ${association}`);
+                return;
+              }
+
+              if (dryRun) {
+                console.log(`[DRY RUN] Would close ${itemType} #${number} (author_association: ${association})`);
+                return;
+              }
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: number, body: buildComment(itemType),
+              });
+
+              if (itemType === 'issue') {
+                await github.rest.issues.update({
+                  owner, repo, issue_number: number, state: 'closed', state_reason: 'not_planned',
+                });
+              } else {
+                await github.rest.pulls.update({
+                  owner, repo, pull_number: number, state: 'closed',
+                });
+              }
+
+              console.log(`Closed ${itemType} #${number} (author_association: ${association})`);
+            }
+
+            if (isManual) {
+              // Process all open issues
+              for await (const response of github.paginate.iterator(
+                github.rest.issues.listForRepo, { owner, repo, state: 'open', per_page: 100 }
+              )) {
+                for (const item of response.data) {
+                  const itemType = item.pull_request ? 'pull request' : 'issue';
+                  await closeItem(item.number, item.author_association, itemType);
+                }
+              }
+            } else if (isIssue) {
+              const item = context.payload.issue;
+              await closeItem(item.number, item.author_association, 'issue');
+            } else if (isPR) {
+              const item = context.payload.pull_request;
+              await closeItem(item.number, item.author_association, 'pull request');
+            }
