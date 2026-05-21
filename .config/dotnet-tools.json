@@ -7,6 +7,12 @@
       "commands": [
         "NuGetKeyVaultSignTool"
       ]
+    },
+    "damianh.playwright.installtool": {
+      "version": "0.2.0",
+      "commands": [
+        "playwright"
+      ]
     }
   }
 }

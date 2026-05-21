@@ -43,4 +43,5 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)shared/Global.cs" Link="Global.cs" />
   </ItemGroup>
+
 </Project>

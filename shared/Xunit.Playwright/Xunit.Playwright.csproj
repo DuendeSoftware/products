@@ -9,6 +9,9 @@
     <DefineConstants>$(DefineConstants);DEBUG_NCRUNCH</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AppHost.Abstractions\AppHost.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Microsoft.Playwright.Xunit.v3" />

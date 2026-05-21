@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
@@ -16,6 +16,10 @@
     <NoWarn>$(NoWarn);CA1873</NoWarn>
     <!-- Avoid uninstantiated internal classes (code analysis) - https://github.com/dotnet/roslyn-analyzers/issues/6561 -->
     <NoWarn>$(NoWarn);CA1812</NoWarn>
+    <!-- Do not pass literals as localized parameters -->
+    <NoWarn>$(NoWarn);CA1303</NoWarn>
+    <!-- C# 14 extension blocks generate nested public types that trigger this rule - compiler limitation -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,5 +35,6 @@
     <PackageReference Include="ModelContextProtocol.AspNetCore"/>
     <PackageReference Include="ReverseMarkdown"/>
     <PackageReference Include="SimpleFeedReader"/>
+    <PackageReference Include="System.Security.Cryptography.Xml"/>
   </ItemGroup>
 </Project>

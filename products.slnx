@@ -1,16 +1,33 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/.github/">
+    <Project Path=".github/BuildHelpers/BuildHelpers.csproj" />
+    <Project Path=".github/RepoTool/RepoTool.csproj" />
+  </Folder>
+  <Folder Name="/aspnetcore-authentication-jwtbearer/" />
   <Folder Name="/aspnetcore-authentication-jwtbearer/src/">
     <Project Path="aspnetcore-authentication-jwtbearer/src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj" />
   </Folder>
   <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
+  <Folder Name="/aspnetcore-authentication-jwtbearer/tools/">
+    <Project Path="aspnetcore-authentication-jwtbearer/tools/PublicApi/PublicApi.csproj" />
+  </Folder>
+  <Folder Name="/cli/" />
+  <Folder Name="/cli/src/">
+    <Project Path="cli/src/Cli/Cli.csproj" />
+    <Project Path="cli/src/Cli.PluginAbstractions/Cli.PluginAbstractions.csproj" />
+  </Folder>
+  <Folder Name="/cli/test/">
+    <Project Path="cli/test/Cli.IntegrationTests/Cli.IntegrationTests.csproj" />
+    <Project Path="cli/test/Cli.Tests/Cli.Tests.csproj" />
+  </Folder>
+  <Folder Name="/bff/" />
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
@@ -21,6 +38,7 @@
     <Project Path="bff/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="bff/hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/bff/hosts/Blazor/" />
   <Folder Name="/bff/hosts/Blazor/PerComponent/">
     <Project Path="bff/hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent.Client/Hosts.Bff.Blazor.PerComponent.Client.csproj" />
     <Project Path="bff/hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent/Hosts.Bff.Blazor.PerComponent.csproj" />
@@ -48,6 +66,7 @@
     <Project Path="bff/src/Bff.Yarp/Bff.Yarp.csproj" />
     <Project Path="bff/src/Bff/Bff.csproj" />
   </Folder>
+  <Folder Name="/bff/templates/" />
   <Folder Name="/bff/templates/src/">
     <Project Path="bff/templates/src/BffLocalApi/BffLocalApi.csproj" />
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
@@ -60,24 +79,36 @@
     <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
+  <Folder Name="/bff/tools/">
+    <Project Path="bff/tools/PublicApi/PublicApi.csproj" />
+  </Folder>
+  <Folder Name="/conformance-report/" />
   <Folder Name="/conformance-report/src/">
     <Project Path="conformance-report/src/ConformanceReport/ConformanceReport.csproj" />
   </Folder>
   <Folder Name="/conformance-report/test/">
     <Project Path="conformance-report/test/ConformanceReport.Tests/ConformanceReport.Tests.csproj" />
   </Folder>
+  <Folder Name="/conformance-report/tools/">
+    <Project Path="conformance-report/tools/PublicApi/PublicApi.csproj" />
+  </Folder>
   <Folder Name="/docs-mcp/">
-    <Project Path="docs-mcp/src/Documentation.Mcp/Documentation.Mcp.csproj" />
     <File Path="docs-mcp/README.md" />
+    <Project Path="docs-mcp/src/Documentation.Mcp/Documentation.Mcp.csproj" />
+  </Folder>
+  <Folder Name="/docs-mcp/tools/">
+    <Project Path="docs-mcp/tools/PublicApi/PublicApi.csproj" />
   </Folder>
   <Folder Name="/docs-mcp/.config/">
     <File Path="docs-mcp/.config/dotnet-tools.json" />
   </Folder>
+  <Folder Name="/identity-server/" />
   <Folder Name="/identity-server/aspire/">
     <Project Path="identity-server/aspire/AppHosts/All/All.csproj" />
     <Project Path="identity-server/aspire/AppHosts/Dev/Dev.csproj" />
     <Project Path="identity-server/aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/identity-server/clients/" />
   <Folder Name="/identity-server/clients/src/">
     <Project Path="identity-server/clients/src/ConsoleCibaClient/ConsoleCibaClient.csproj" />
     <Project Path="identity-server/clients/src/ConsoleClientCredentialsFlow/ConsoleClientCredentialsFlow.csproj" />
@@ -145,7 +176,9 @@
     <Project Path="identity-server/src/IdentityServer.ConformanceReport/IdentityServer.ConformanceReport.csproj" />
     <Project Path="identity-server/src/IdentityServer/IdentityServer.csproj" />
     <Project Path="identity-server/src/Storage/IdentityServer.Storage.csproj" />
+    <Project Path="identity-server/src/UserManagement/IdentityServer.UserManagement.csproj" />
   </Folder>
+  <Folder Name="/identity-server/templates/" />
   <Folder Name="/identity-server/templates/src/">
     <Project Path="identity-server/templates/src/IdentityServer/IdentityServerTemplate.csproj" />
     <Project Path="identity-server/templates/src/IdentityServerAspNetIdentity/IdentityServerAspNetIdentity.csproj" />
@@ -158,18 +191,112 @@
     <Project Path="identity-server/test/IdentityServer.EndToEndTests/IdentityServer.EndToEndTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
+    <Project Path="identity-server/test/IdentityServer.UserManagement.UnitTests/IdentityServer.UserManagement.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/identity-server/tools/">
+    <Project Path="identity-server/tools/PublicApi/PublicApi.csproj" />
+  </Folder>
+  <Folder Name="/ignore-this/" />
   <Folder Name="/ignore-this/src/">
     <Project Path="ignore-this/src/IgnoreThis/IgnoreThis.csproj" />
   </Folder>
   <Folder Name="/ignore-this/test/">
     <Project Path="ignore-this/test/IgnoreThis.Tests/IgnoreThis.Tests.csproj" />
   </Folder>
+
+  <Folder Name="/user-management/samples/">
+    <Project Path="user-management/samples/AspNetIdentityApp/AspNetIdentityApp.csproj" />
+    <Project Path="user-management/samples/ExternalAuthentication/ExternalAuthentication.csproj" />
+    <Project Path="user-management/samples/MfaStepUp/MfaStepUp.csproj" />
+    <Project Path="user-management/samples/OtpAuthentication/OtpAuthentication.csproj" />
+    <Project Path="user-management/samples/OtpIdentityServer/OtpIdentityServer.csproj" />
+    <Project Path="user-management/samples/PasskeyAuthentication.Sdk/PasskeyAuthentication.Sdk.csproj" />
+    <Project Path="user-management/samples/PasskeyAuthentication/PasskeyAuthentication.csproj" />
+    <Project Path="user-management/samples/PasskeyAuthenticationAs2FA/PasskeyAuthenticationAs2FA.csproj" />
+    <Project Path="user-management/samples/PasswordValidation/PasswordValidation.csproj" />
+    <Project Path="user-management/samples/PlatformUserManagementApp/PlatformUserManagementApp.csproj" />
+    <Project Path="user-management/samples/SimpleWebApp/SimpleWebApp.csproj" />
+    <Project Path="user-management/samples/TotpAuthentication/TotpAuthentication.csproj" />
+    <Project Path="user-management/samples/UserManagementSamples/UserManagementSamples.csproj" />
+    <Project Path="user-management/samples/UserSearch/UserSearch.csproj" />
+    <Project Path="user-management/samples/WebComponent/AuthenticationFlowWithWebComponent/AuthenticationFlowWithWebComponent.csproj" />
+  </Folder>
+
+  <Folder Name="/user-management/" />
+  <Folder Name="/user-management/src/">
+    <Project Path="user-management/src/UserManagement/UserManagement.csproj" />
+  </Folder>
+  <Folder Name="/user-management/test/">
+    <Project Path="user-management/test/UserManagement.Tests.Internal/UserManagement.Tests.Internal.csproj" />
+    <Project Path="user-management/test/UserManagement.Tests.Public/UserManagement.Tests.Public.csproj" />
+  </Folder>
+  <Folder Name="/user-management/testing/">
+    <Project Path="user-management/testing/UserManagement.TestInfrastructure/UserManagement.TestInfrastructure.csproj" />
+  </Folder>
+  <Folder Name="/user-management/tools/">
+    <Project Path="user-management/tools/PublicApi/PublicApi.csproj" />
+  </Folder>
+
+  <Folder Name="/storage/" />
+  <Folder Name="/storage/src/">
+    <Project Path="storage/src/Storage.CliPlugin/Storage.CliPlugin.csproj" />
+    <Project Path="storage/src/Storage.MsSql/Storage.MsSql.csproj" />
+    <Project Path="storage/src/Storage.PostgreSql/Storage.PostgreSql.csproj" />
+    <Project Path="storage/src/Storage.Sqlite/Storage.Sqlite.csproj" />
+    <Project Path="storage/src/Storage/Storage.csproj" />
+  </Folder>
+  <Folder Name="/storage/samples/">
+    <Project Path="storage/samples/GettingStarted/GettingStarted.csproj" />
+    <Project Path="storage/samples/EntityLinking/EntityLinking.csproj" />
+    <Project Path="storage/samples/EavSchema/EavSchema.csproj" />
+  </Folder>
+  <Folder Name="/storage/test/">
+    <Project Path="storage/test/Storage.MsSql.Tests/Storage.MsSql.Tests.csproj" />
+    <Project Path="storage/test/Storage.PostgreSql.Tests/Storage.PostgreSql.Tests.csproj" />
+    <Project Path="storage/test/Storage.Sqlite.Tests/Storage.Sqlite.Tests.csproj" />
+    <Project Path="storage/test/Storage.Tests/Storage.Tests.csproj" />
+  </Folder>
+  <Folder Name="/storage/testing/">
+    <Project Path="storage/testing/TestAppHost/TestAppHost.csproj" />
+  </Folder>
+  <Folder Name="/storage/benchmarks/">
+    <Project Path="storage/benchmarks/Duende.Storage.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/storage/tools/">
+    <Project Path="storage/tools/PublicApi/PublicApi.csproj" />
+  </Folder>
   <Folder Name="/shared/">
+    <Project Path="shared/AppHost.Abstractions/AppHost.Abstractions.csproj" />
     <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
+    <Project Path="shared/ValueObjectsGenerator/ValueObjectsGenerator.csproj" />
     <Project Path="shared/Xunit.Playwright/Xunit.Playwright.csproj" />
   </Folder>
   <Folder Name="/templates/">
     <Project Path="templates/build/build.csproj" />
+  </Folder>
+  <Folder Name="/labs/" />
+  <Folder Name="/labs/FineGrainedAuthorization/" />
+  <Folder Name="/labs/FineGrainedAuthorization/src/">
+    <Project Path="labs/FineGrainedAuthorization/src/FGA.AspNetCore/FGA.AspNetCore.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/src/FGA.Storage.PostgreSQL/FGA.Storage.PostgreSQL.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/src/FGA.Storage.Sqlite/FGA.Storage.Sqlite.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/src/FGA.Storage.SqlServer/FGA.Storage.SqlServer.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/src/FGA.Testing/FGA.Testing.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/src/FGA/FGA.csproj" />
+  </Folder>
+  <Folder Name="/labs/FineGrainedAuthorization/test/">
+    <Project Path="labs/FineGrainedAuthorization/test/FGA.Tests/FGA.Tests.csproj" />
+  </Folder>
+  <Folder Name="/labs/FineGrainedAuthorization/samples/">
+    <Project Path="labs/FineGrainedAuthorization/samples/AdvancedDemo/AdvancedDemo.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/samples/DemoApp/DemoApp.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/samples/PostgreSqlDemo/PostgreSqlDemo.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/samples/SqliteDemo/SqliteDemo.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/samples/SqlServerDemo/SqlServerDemo.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/samples/WebApiDemo/WebApiDemo.csproj" />
+  </Folder>
+  <Folder Name="/labs/FineGrainedAuthorization/aspire/">
+    <Project Path="labs/FineGrainedAuthorization/aspire/AppHost/AppHost.csproj" />
+    <Project Path="labs/FineGrainedAuthorization/aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
 </Solution>

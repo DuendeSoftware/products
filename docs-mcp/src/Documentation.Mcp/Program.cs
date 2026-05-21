@@ -6,25 +6,24 @@ using Documentation.Mcp.Sources.Blog;
 using Documentation.Mcp.Sources.Docs;
 using Documentation.Mcp.Sources.Samples;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
 
-// Build server
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure all logs to go to stderr in case the MCP is used as a stdio server
-builder.Logging.AddConsole(consoleLogOptions =>
-{
-    consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
-});
-
-// Determine database path
+// Parse command-line arguments
 var databasePath = "mcp.db";
+var enableHttp = false;
+var httpPort = 5800;
+var dbParameterIndex = -1;
+var httpParameterIndex = -1;
+var httpPortIsNextArg = false;
+
 if (args.Length > 0)
 {
-    var dbParameterIndex = args.IndexOf("--database");
+    dbParameterIndex = args.IndexOf("--database");
     if (dbParameterIndex >= 0 && args.Length > dbParameterIndex + 1)
     {
         var dbPathParameter = args[dbParameterIndex + 1].Replace("\"", "", StringComparison.OrdinalIgnoreCase);
@@ -33,7 +32,68 @@ if (args.Length > 0)
             databasePath = dbPathParameter;
         }
     }
+
+    httpParameterIndex = Array.FindIndex(args, arg =>
+        string.Equals(arg, "--with-http", StringComparison.OrdinalIgnoreCase) ||
+        arg.StartsWith("--with-http=", StringComparison.OrdinalIgnoreCase));
+    enableHttp = httpParameterIndex >= 0;
+    if (httpParameterIndex >= 0)
+    {
+        string? httpPortValue = null;
+        var httpArgument = args[httpParameterIndex];
+        if (httpArgument.StartsWith("--with-http=", StringComparison.OrdinalIgnoreCase))
+        {
+            httpPortValue = httpArgument["--with-http=".Length..];
+        }
+        else if (args.Length > httpParameterIndex + 1 && !args[httpParameterIndex + 1].StartsWith("--", StringComparison.Ordinal))
+        {
+            httpPortValue = args[httpParameterIndex + 1];
+            httpPortIsNextArg = true;
+        }
+        if (!string.IsNullOrEmpty(httpPortValue))
+        {
+            if (!int.TryParse(httpPortValue, out var parsedPort) ||
+                parsedPort is < 1 or > 65535)
+            {
+                await Console.Error.WriteLineAsync("Invalid HTTP port. Specify a value between 1 and 65535.");
+                return 1;
+            }
+            httpPort = parsedPort;
+        }
+    }
 }
+
+// Filter out custom CLI flags before passing args to the host builder to avoid
+// unintended configuration state from the default command-line config parser.
+var excludedArgIndices = new HashSet<int>();
+if (dbParameterIndex >= 0)
+{
+    _ = excludedArgIndices.Add(dbParameterIndex);
+    if (args.Length > dbParameterIndex + 1)
+    {
+        _ = excludedArgIndices.Add(dbParameterIndex + 1);
+    }
+}
+if (httpParameterIndex >= 0)
+{
+    _ = excludedArgIndices.Add(httpParameterIndex);
+    if (httpPortIsNextArg)
+    {
+        _ = excludedArgIndices.Add(httpParameterIndex + 1);
+    }
+}
+var hostArgs = args.Where((_, i) => !excludedArgIndices.Contains(i)).ToArray();
+
+// Build server
+IHostApplicationBuilder builder = enableHttp
+    ? WebApplication.CreateBuilder(hostArgs)
+    : Host.CreateApplicationBuilder(hostArgs);
+
+// Configure all logs to go to stderr in case the MCP is used as a stdio server
+builder.Logging.AddConsole(consoleLogOptions =>
+{
+    consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
+});
 
 // Setup services
 builder.Services.AddHttpClient();
@@ -43,7 +103,7 @@ builder.Services.AddHostedService<DocsArticleIndexer>();
 builder.Services.AddHostedService<BlogArticleIndexer>();
 builder.Services.AddHostedService<SamplesIndexer>();
 
-builder.Services
+var mcpServerBuilder = builder.Services
     .AddMcpServer(options =>
     {
         options.ServerInfo = new Implementation
@@ -70,17 +130,41 @@ builder.Services
     .WithTools<DocsSearchTool>()
     .WithTools<BlogSearchTool>()
     .WithTools<SamplesSearchTool>()
-    .WithStdioServerTransport()
-    .WithHttpTransport();
+    .WithStdioServerTransport();
+
+if (enableHttp)
+{
+    _ = mcpServerBuilder.WithHttpTransport();
+
+    if (builder is WebApplicationBuilder webApplicationBuilder)
+    {
+        _ = webApplicationBuilder.WebHost.ConfigureKestrel(options => options.ListenLocalhost(httpPort));
+    }
+}
 
 // Setup application
-var app = builder.Build();
+IHost app;
+if (enableHttp)
+{
+    var webApp = (builder as WebApplicationBuilder)!.Build();
+    webApp.Logger.LogInformation("Transport enabled: HTTP on port {Port}", httpPort);
+    _ = webApp.MapMcp();
 
-app.MapMcp();
+    app = webApp;
+}
+else
+{
+    var consoleApp = (builder as HostApplicationBuilder)!.Build();
+
+    app = consoleApp;
+}
+
+app.Logger.LogInformation("Transport enabled: stdio");
 
 await EnsureDb(app.Services, app.Logger);
 
 await app.RunAsync();
+return 0;
 
 async Task EnsureDb(IServiceProvider services, ILogger logger)
 {
@@ -93,5 +177,13 @@ async Task EnsureDb(IServiceProvider services, ILogger logger)
         logger.LogInformation("Updating database...");
         await db.Database.MigrateAsync();
         logger.LogInformation("Updated database");
+    }
+}
+
+internal static class HostExtensions
+{
+    extension(IHost host)
+    {
+        internal ILogger Logger => host.Services.GetRequiredService<ILogger<Program>>();
     }
 }

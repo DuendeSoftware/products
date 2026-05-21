@@ -36,6 +36,13 @@ Alternatively, you can add a `.vscode/mcp.json` file to your workspace:
 
 The Duende Documentation MCP Server will create its database index at the path defined in the `--database` parameter.
 
+### Command-line Options
+
+| Flag                 | Description                                                   | Default                                  |
+|----------------------|---------------------------------------------------------------|------------------------------------------|
+| `--database <path>`  | Fully qualified path to the SQLite database file              | `mcp.db` (relative to working directory) |
+| `--with-http [port]` | Enable the HTTP transport (Streamable HTTP) on the given port | Disabled; port defaults to `5800`        |
+
 Next, open GitHub Copilot and select Agent Mode to work with the MCP server.
 
 ### JetBrains Rider
@@ -118,7 +125,7 @@ documentation and samples at [docs.duendesoftware.com](https://docs.duendesoftwa
 
 ### Development
 
-* Run the project. This will host a server on port 3000 (http), and with stdio bindings.
+* Run the project with `--with-http 3000` to enable the HTTP transport (e.g., on port 3000).
 * In VS Code, add a `.vscode/mcp.json` to your workspace:
   ```json
   {

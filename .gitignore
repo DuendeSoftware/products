@@ -4,6 +4,9 @@
 # Rider
 .idea
 
+# NCrunch
+*.ncrunchproject
+
 # User-specific files
 *.suo
 *.user
@@ -209,9 +212,6 @@ FakesAssemblies/
 *.opt
 docs/_build/
 
-# Local .NET CLI tools
-tools/
-
 # Visual Studio Code workspace options
 **/.vscode/settings.json
 
@@ -243,3 +243,11 @@ reports
 *.db-wal
 nul
 .weave
+progress.txt
+
+# AdminStudio runtime data (secrets, user stores)
+faro-connections.json
+adminstudio-data/
+
+# VS Code C# Dev Kit language service cache
+*.lscache
