@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+  <Import Project="../../test.props" />
+
+  <PropertyGroup>
+    <!--Naming rule violation: Missing suffix: 'Async' (we don't append async on test method names) -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn>
+  </PropertyGroup>
+</Project>

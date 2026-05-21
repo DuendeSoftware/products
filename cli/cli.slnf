@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "..\\products.slnx",
+    "projects": [
+      "cli\\src\\Cli.PluginAbstractions\\Cli.PluginAbstractions.csproj",
+      "cli\\src\\Cli\\Cli.csproj",
+      "cli\\testing\\Cli.TestPlugin\\Cli.TestPlugin.csproj",
+      "cli\\test\\Cli.IntegrationTests\\Cli.IntegrationTests.csproj",
+      "cli\\test\\Cli.Tests\\Cli.Tests.csproj"
+    ]
+  }
+}

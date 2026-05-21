@@ -27,6 +27,9 @@
     <Project Path="cli/test/Cli.IntegrationTests/Cli.IntegrationTests.csproj" />
     <Project Path="cli/test/Cli.Tests/Cli.Tests.csproj" />
   </Folder>
+  <Folder Name="/cli/testing/">
+    <Project Path="cli/testing/Cli.TestPlugin/Cli.TestPlugin.csproj" />
+  </Folder>
   <Folder Name="/bff/" />
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />

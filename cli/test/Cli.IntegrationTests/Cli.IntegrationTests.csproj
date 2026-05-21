@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cli\Cli.csproj" />
+    <ProjectReference Include="..\..\testing\Cli.TestPlugin\Cli.TestPlugin.csproj" />
+  </ItemGroup>
+
+</Project>

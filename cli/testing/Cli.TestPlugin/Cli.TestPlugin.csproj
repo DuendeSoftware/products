@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cli.PluginAbstractions\Cli.PluginAbstractions.csproj" />
+  </ItemGroup>
+
+</Project>
