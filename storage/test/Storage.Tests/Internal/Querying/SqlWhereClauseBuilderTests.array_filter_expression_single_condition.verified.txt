@@ -1,0 +1,14 @@
+﻿SQL:
+EXISTS (
+    SELECT 1 FROM main.search_values sv0_0
+    WHERE sv0_0.entity_type_id = v.entity_type_id
+      AND sv0_0.pool_id = v.pool_id
+      AND sv0_0.entity_id = v.entity_id
+      AND sv0_0.item_index IS NOT NULL
+      AND sv0_0.field_path = @array_field_0_0
+      AND sv0_0.guid_value = @array_value_0_0
+)
+
+Parameters:
+@array_field_0_0 = 60489294-2cba-2d42-60fd-0617941bf915
+@array_value_0_0 = fbf1209f-d44b-8163-44d4-f642b3159812

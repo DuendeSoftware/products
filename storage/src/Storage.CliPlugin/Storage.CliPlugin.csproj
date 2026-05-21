@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Override AssemblyName and namespace — this project is Duende.Storage.CliPlugin -->
+    <AssemblyName>Duende.Storage.CliPlugin</AssemblyName>
+    <RootNamespace>Duende.Storage.CliPlugin</RootNamespace>
+    <PackageId>Duende.Storage.CliPlugin</PackageId>
+
+    <!--
+      Fat-package: copy all transitive dependencies to the output directory so they
+      can be included in the NuGet package. The CLI host loads plugins via an isolated
+      AssemblyLoadContext and does not run NuGet restore, so the plugin package must
+      be self-contained (minus host-shared assemblies).
+    -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Cli.PluginAbstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Storage.MsSql\Storage.MsSql.csproj" />
+    <ProjectReference Include="..\Storage.PostgreSql\Storage.PostgreSql.csproj" />
+    <ProjectReference Include="..\Storage.Sqlite\Storage.Sqlite.csproj" />
+  </ItemGroup>
+
+  <!--
+    Fat-package target: after build, collect all non-shared dependency DLLs from the
+    output directory and mark them for inclusion in the NuGet package alongside the
+    plugin assembly. Host-shared assemblies (PluginAbstractions, System.CommandLine,
+    Microsoft.Extensions.Logging.Abstractions) are excluded because the CLI host
+    already loads them in the default AssemblyLoadContext.
+  -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CollectPluginDependencies</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="CollectPluginDependencies">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)*.dll"
+                            Exclude="$(OutputPath)$(AssemblyName).dll;$(OutputPath)Duende.Cli.PluginAbstractions.dll;$(OutputPath)System.CommandLine.dll;$(OutputPath)Microsoft.Extensions.Logging.Abstractions.dll" />
+      <!-- AssemblyDependencyResolver needs the deps.json to resolve transitive assemblies -->
+      <BuildOutputInPackage Include="$(OutputPath)$(AssemblyName).deps.json" />
+    </ItemGroup>
+  </Target>
+
+</Project>

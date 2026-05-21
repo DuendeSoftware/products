@@ -1,0 +1,17 @@
+{
+  "solution": {
+    "path": "..\\products.slnx",
+    "projects": [
+      "storage\\src\\Storage.CliPlugin\\Storage.CliPlugin.csproj",
+      "storage\\src\\Storage.MsSql\\Storage.MsSql.csproj",
+      "storage\\src\\Storage.PostgreSql\\Storage.PostgreSql.csproj",
+      "storage\\src\\Storage.Sqlite\\Storage.Sqlite.csproj",
+      "storage\\src\\Storage\\Storage.csproj",
+      "storage\\testing\\TestAppHost\\TestAppHost.csproj",
+      "storage\\test\\Storage.MsSql.Tests\\Storage.MsSql.Tests.csproj",
+      "storage\\test\\Storage.PostgreSql.Tests\\Storage.PostgreSql.Tests.csproj",
+      "storage\\test\\Storage.Sqlite.Tests\\Storage.Sqlite.Tests.csproj",
+      "storage\\test\\Storage.Tests\\Storage.Tests.csproj"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+﻿SQL:
+EXISTS (
+    SELECT 1 FROM main.search_values sv0_0
+    INNER JOIN main.search_values sv0_1
+      ON sv0_0.entity_type_id = sv0_1.entity_type_id
+      AND sv0_0.pool_id = sv0_1.pool_id
+      AND sv0_0.entity_id = sv0_1.entity_id
+      AND sv0_0.item_index = sv0_1.item_index
+    WHERE sv0_0.entity_type_id = v.entity_type_id
+      AND sv0_0.pool_id = v.pool_id
+      AND sv0_0.entity_id = v.entity_id
+      AND sv0_0.item_index IS NOT NULL
+      AND sv0_0.field_path = @array_field_0_0
+      AND sv0_0.guid_value = @array_value_0_0
+      AND sv0_1.field_path = @array_field_0_1
+      AND sv0_1.string_value LIKE @array_value_0_1 ESCAPE '\'
+)
+
+Parameters:
+@array_field_0_0 = 60489294-2cba-2d42-60fd-0617941bf915
+@array_value_0_0 = fbf1209f-d44b-8163-44d4-f642b3159812
+@array_field_0_1 = 45aa6524-c732-d63a-ada3-56ad96a7fab6
+@array_value_0_1 = %@EXAMPLE.COM%

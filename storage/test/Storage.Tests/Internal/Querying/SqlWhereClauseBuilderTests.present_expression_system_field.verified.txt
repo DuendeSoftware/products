@@ -1,0 +1,4 @@
+﻿SQL:
+1=1
+
+Parameters:

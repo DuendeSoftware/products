@@ -1,0 +1,24 @@
+﻿SQL:
+(EXISTS (
+    SELECT 1 FROM main.search_values sv0
+    WHERE sv0.entity_type_id = v.entity_type_id
+      AND sv0.pool_id = v.pool_id
+      AND sv0.entity_id = v.entity_id
+      AND sv0.field_path = @field_path_0
+      AND sv0.item_index = -1
+      AND sv0.guid_value = @value_0
+)) AND (EXISTS (
+    SELECT 1 FROM main.search_values sv1
+    WHERE sv1.entity_type_id = v.entity_type_id
+      AND sv1.pool_id = v.pool_id
+      AND sv1.entity_id = v.entity_id
+      AND sv1.field_path = @field_path_1
+      AND sv1.item_index = -1
+      AND sv1.number_value > @value_1
+))
+
+Parameters:
+@field_path_0 = 327b0827-ee9d-e8ad-28ed-d652d45461b2
+@value_0 = 3018b8b6-434a-919f-fc90-b3fe8dd35be8
+@field_path_1 = 463e2156-a7ab-74fd-11eb-0b25ecf7bce8
+@value_1 = 18

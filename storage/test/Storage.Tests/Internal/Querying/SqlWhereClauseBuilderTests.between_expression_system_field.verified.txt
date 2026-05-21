@@ -1,0 +1,6 @@
+﻿SQL:
+v.created_at BETWEEN @min_0 AND @max_0
+
+Parameters:
+@min_0 = 2024-01-01T00:00:00.0000000Z
+@max_0 = 2024-12-31T00:00:00.0000000Z

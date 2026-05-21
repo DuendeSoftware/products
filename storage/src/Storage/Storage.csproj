@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Duende.Storage</RootNamespace>
+    <AssemblyName>Duende.Storage</AssemblyName>
+    <PackageId>Duende.Labs.Storage</PackageId>
+    <ValueObjectsGeneratorNamespace>Duende.Storage</ValueObjectsGeneratorNamespace>
+    <NoWarn>$(NoWarn);CA1062</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.Storage.MsSql" />
+    <InternalsVisibleTo Include="Duende.Storage.PostgreSql" />
+    <InternalsVisibleTo Include="Duende.Storage.Sqlite" />
+    <InternalsVisibleTo Include="Duende.Storage.Tests" />
+    <InternalsVisibleTo Include="Duende.Storage.Sqlite.Tests" />
+    <InternalsVisibleTo Include="Duende.Storage.MsSql.Tests" />
+    <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
+    <InternalsVisibleTo Include="Duende.Storage.Benchmarks" />
+    <InternalsVisibleTo Include="Duende.UserManagement" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Internal\ValueObjects\CharsetExtensions.g.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.g', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="Internal\ValueObjects\IValueOf.g.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.g', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="Internal\ValueObjects\ValueOfTypeConverter.g.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.g', '.cs'))</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

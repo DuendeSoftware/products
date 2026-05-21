@@ -1,0 +1,14 @@
+﻿SQL:
+NOT (EXISTS (
+    SELECT 1 FROM main.search_values sv0
+    WHERE sv0.entity_type_id = v.entity_type_id
+      AND sv0.pool_id = v.pool_id
+      AND sv0.entity_id = v.entity_id
+      AND sv0.field_path = @field_path_0
+      AND sv0.item_index = -1
+      AND sv0.guid_value = @value_0
+))
+
+Parameters:
+@field_path_0 = 8c1c245f-988f-3c5b-51e0-5d39cf030f4c
+@value_0 = 4333276b-54c4-c5f9-3dcf-c9c4ccf171d2

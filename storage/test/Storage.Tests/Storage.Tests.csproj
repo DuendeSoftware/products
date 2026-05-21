@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Duende.Storage</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Storage\Storage.csproj" />
+    <ProjectReference Include="..\..\src\Storage.MsSql\Storage.MsSql.csproj" />
+    <ProjectReference Include="..\..\src\Storage.PostgreSql\Storage.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\src\Storage.Sqlite\Storage.Sqlite.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Verify.XunitV3" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+  <Import Project="../../test.props" />
+
+  <PropertyGroup>
+    <!--Naming rule violation: Missing suffix: 'Async' (we don't append async on test method names) -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn>
+    <!-- CA1859: FixtureFactory is typed as interface intentionally so shared linked partials can use it polymorphically -->
+    <NoWarn>$(NoWarn);CA1859</NoWarn>
+    <!-- IDE0130: Shared linked files intentionally use a common namespace that differs from folder path -->
+    <NoWarn>$(NoWarn);IDE0130</NoWarn>
+  </PropertyGroup>
+</Project>

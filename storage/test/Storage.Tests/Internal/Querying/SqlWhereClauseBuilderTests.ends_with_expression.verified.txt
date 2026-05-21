@@ -1,0 +1,14 @@
+﻿SQL:
+EXISTS (
+    SELECT 1 FROM main.search_values sv0
+    WHERE sv0.entity_type_id = v.entity_type_id
+      AND sv0.pool_id = v.pool_id
+      AND sv0.entity_id = v.entity_id
+      AND sv0.field_path = @field_path_0
+      AND sv0.item_index = -1
+      AND sv0.string_value LIKE @value_0 ESCAPE '\'
+)
+
+Parameters:
+@field_path_0 = a349a661-283f-e569-e35f-bb7aff3a80d9
+@value_0 = %@EXAMPLE.COM

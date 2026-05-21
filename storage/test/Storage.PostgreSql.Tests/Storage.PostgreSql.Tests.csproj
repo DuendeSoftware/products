@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Duende.Storage.PostgreSql</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <ProjectReference Include="..\..\src\Storage.PostgreSql\Storage.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\testing\TestAppHost\TestAppHost.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SharedIntegrationTests\**\*.cs" Link="SharedIntegrationTests\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

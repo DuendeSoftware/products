@@ -1,0 +1,6 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)..\'))" />
+  <Import Project="../../src.targets" />
+  <Import Project="../../shared/ValueObjectsGenerator/ValueObjectsGenerator.targets"
+          Condition="'$(NCrunch)' != '1'"/>
+</Project>

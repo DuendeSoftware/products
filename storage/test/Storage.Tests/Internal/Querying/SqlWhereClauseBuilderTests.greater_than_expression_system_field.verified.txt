@@ -1,0 +1,5 @@
+﻿SQL:
+v.last_updated_at > @value_0
+
+Parameters:
+@value_0 = 2024-01-01T00:00:00.0000000Z
