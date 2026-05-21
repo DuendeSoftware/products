@@ -31,6 +31,7 @@
       "bff\\templates\\src\\BffRemoteApi\\BffRemoteApi.csproj",
       "bff\\test\\Bff.Tests\\Bff.Tests.csproj",
       "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj",
+      "shared\\AppHost.Abstractions\\AppHost.Abstractions.csproj",
       "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj",
       "shared\\Xunit.Playwright\\Xunit.Playwright.csproj"
     ]

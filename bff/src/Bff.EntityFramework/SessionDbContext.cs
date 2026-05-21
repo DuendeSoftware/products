@@ -36,9 +36,12 @@ public class SessionDbContext<TContext> : DbContext, ISessionDbContext
     /// Initializes a new instance of the <see cref="SessionDbContext"/> class.
     /// </summary>
     /// <param name="options"></param>
+    // TODO: address CS8618
+#pragma warning disable CS8618 // Non-nullable variable must contain a non-null value when exiting constructor. Consider adding the 'required' modifier declaring it as nullable.
     public SessionDbContext(DbContextOptions<TContext> options) : base(options)
     {
     }
+#pragma warning restore CS8618
 
     /// <summary>
     /// DbSet for user sessions

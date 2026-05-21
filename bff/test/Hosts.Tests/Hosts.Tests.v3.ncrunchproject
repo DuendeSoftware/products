@@ -1,7 +1,0 @@
-﻿<ProjectConfiguration>
-  <Settings>
-    <ConsiderInconclusiveTestsAsPassing>True</ConsiderInconclusiveTestsAsPassing>
-    <EnableRDI>False</EnableRDI>
-    <UseBuildConfiguration>Debug_NCrunch</UseBuildConfiguration>
-  </Settings>
-</ProjectConfiguration>

@@ -41,7 +41,7 @@ public class Index : PageModel
     [BindProperty]
     public InputModel Input { get; set; }
 
-    public async Task<IActionResult> OnGet(string userCode)
+    public async Task<IActionResult> OnGetAsync(string userCode)
     {
         if (string.IsNullOrWhiteSpace(userCode))
         {
@@ -67,7 +67,7 @@ public class Index : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         var request = await _interaction.GetAuthorizationContextAsync(Input.UserCode);
         if (request == null)
@@ -102,7 +102,7 @@ public class Index : PageModel
 
                 grantedConsent = new ConsentResponse
                 {
-                    RememberConsent = Input.RememberConsent,
+                    RememberConsent = false,
                     ScopesValuesConsented = scopes.ToArray(),
                     Description = Input.Description
                 };
@@ -152,8 +152,7 @@ public class Index : PageModel
         {
             ClientName = request.Client.ClientName ?? request.Client.ClientId,
             ClientUrl = request.Client.ClientUri,
-            ClientLogoUrl = request.Client.LogoUri,
-            AllowRememberConsent = request.Client.AllowRememberConsent
+            ClientLogoUrl = request.Client.LogoUri
         };
 
         vm.IdentityScopes = request.ValidatedResources.Resources.IdentityResources.Select(x => CreateScopeViewModel(x, model == null || model.ScopesConsented?.Contains(x.Name) == true)).ToArray();

@@ -1,5 +1,6 @@
 using BffRemoteApi;
 using Duende.Bff.Yarp;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,10 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+// Add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+// See more at https://docs.duendesoftware.com/general/data-protection
+builder.Services.AddDataProtection()
+       .SetApplicationName("BFF");
 
 var app = builder.Build();
 

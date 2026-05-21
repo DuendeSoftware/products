@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Duende.Bff.Blazor.Client.Internals;
 
@@ -34,9 +35,7 @@ internal class FetchUserService : IDisposable
     internal FetchUserService()
     {
         _client = new HttpClient();
-#pragma warning disable CA2000 // This is a test-only ctor, so we don't want to dispose the client here.
-        _logger = new Logger<FetchUserService>(new LoggerFactory());
-#pragma warning restore CA2000
+        _logger = NullLogger<FetchUserService>.Instance;
     }
 
     public virtual async ValueTask<ClaimsPrincipal> FetchUserAsync()
