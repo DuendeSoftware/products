@@ -15,55 +15,45 @@ public static class AttributeDefinitions
     [InlineData(ScalarDataType.Decimal)]
     [InlineData(ScalarDataType.Integer)]
     [InlineData(ScalarDataType.String)]
-    public static void existing_scalar_constructor_still_works(ScalarDataType dataType)
+    public static void object_initializer_with_scalar_type_works(ScalarDataType dataType)
     {
-        var definition = new AttributeDefinition(TestName, dataType, TestDescription);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(dataType),
+            Description = TestDescription
+        };
 
         _ = definition.AttributeType.ShouldBeOfType<ScalarAttributeType>();
         ((ScalarAttributeType)definition.AttributeType).DataType.ShouldBe(dataType);
     }
 
     [Fact]
-    public static void new_constructor_with_complex_type_works()
+    public static void object_initializer_with_complex_type_works()
     {
         var complexType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
         {
             [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         });
-        var definition = new AttributeDefinition(TestName, complexType, TestDescription);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = complexType,
+            Description = TestDescription
+        };
 
         definition.AttributeType.ShouldBe(complexType);
     }
 
     [Fact]
-    public static void is_unique_true_with_complex_type_throws()
-    {
-        var complexType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
-        {
-            [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
-        });
-
-        var ex = Record.Exception(() =>
-            _ = new AttributeDefinition(TestName, complexType, TestDescription, IsUnique: true, Tags: null));
-
-        _ = ex.ShouldBeOfType<ArgumentException>();
-    }
-
-    [Fact]
-    public static void is_unique_true_with_list_type_throws()
-    {
-        var listType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String));
-
-        var ex = Record.Exception(() =>
-            _ = new AttributeDefinition(TestName, listType, TestDescription, IsUnique: true, Tags: null));
-
-        _ = ex.ShouldBeOfType<ArgumentException>();
-    }
-
-    [Fact]
     public static void tags_default_to_empty_collection()
     {
-        var definition = new AttributeDefinition(TestName, ScalarDataType.String, TestDescription);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription
+        };
 
         definition.Tags.ShouldBeEmpty();
     }
@@ -72,7 +62,14 @@ public static class AttributeDefinitions
     public static void scalar_attribute_can_have_group_name()
     {
         var groupName = AttributeGroupCode.Create("personal_info");
-        var definition = new AttributeDefinition(TestName, ScalarDataType.String, TestDescription, false, null, groupName, 0);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription,
+            GroupCode = groupName,
+            Order = 0
+        };
 
         definition.GroupCode.ShouldBe(groupName);
     }
@@ -86,7 +83,14 @@ public static class AttributeDefinitions
         });
         var groupName = AttributeGroupCode.Create("personal_info");
 
-        var definition = new AttributeDefinition(TestName, complexType, TestDescription, false, null, groupName, 0);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = complexType,
+            Description = TestDescription,
+            GroupCode = groupName,
+            Order = 0
+        };
 
         definition.GroupCode.ShouldBe(groupName);
     }
@@ -97,7 +101,14 @@ public static class AttributeDefinitions
         var listType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String));
         var groupName = AttributeGroupCode.Create("personal_info");
 
-        var definition = new AttributeDefinition(TestName, listType, TestDescription, false, null, groupName, 0);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = listType,
+            Description = TestDescription,
+            GroupCode = groupName,
+            Order = 0
+        };
 
         definition.GroupCode.ShouldBe(groupName);
     }
@@ -105,7 +116,12 @@ public static class AttributeDefinitions
     [Fact]
     public static void group_name_defaults_to_null()
     {
-        var definition = new AttributeDefinition(TestName, ScalarDataType.String, TestDescription);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription
+        };
 
         definition.GroupCode.ShouldBeNull();
     }
@@ -113,7 +129,12 @@ public static class AttributeDefinitions
     [Fact]
     public static void order_defaults_to_zero()
     {
-        var definition = new AttributeDefinition(TestName, ScalarDataType.String, TestDescription);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription
+        };
 
         definition.Order.ShouldBe(0);
     }
@@ -121,8 +142,41 @@ public static class AttributeDefinitions
     [Fact]
     public static void order_is_preserved()
     {
-        var definition = new AttributeDefinition(TestName, ScalarDataType.String, TestDescription, false, null, null, 42);
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription,
+            Order = 42
+        };
 
         definition.Order.ShouldBe(42);
+    }
+
+    [Fact]
+    public static void indexed_defaults_to_true()
+    {
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription
+        };
+
+        definition.IsQueryable.ShouldBeTrue();
+    }
+
+    [Fact]
+    public static void indexed_can_be_set_to_false()
+    {
+        var definition = new AttributeDefinition
+        {
+            Code = TestName,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = TestDescription,
+            IsQueryable = false
+        };
+
+        definition.IsQueryable.ShouldBeFalse();
     }
 }

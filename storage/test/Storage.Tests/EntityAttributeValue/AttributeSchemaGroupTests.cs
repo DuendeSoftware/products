@@ -12,7 +12,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void add_group_stores_code_and_display_name()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var group = new AttributeGroup(
             AttributeGroupCode.Create("personal_info"),
             AttributeDisplayName.Create("Personal Information"),
@@ -28,7 +28,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void add_group_stores_description()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var group = new AttributeGroup(
             AttributeGroupCode.Create("personal_info"),
             AttributeDisplayName.Create("Personal Information"),
@@ -43,7 +43,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void add_group_stores_order()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var group = new AttributeGroup(
             AttributeGroupCode.Create("personal_info"),
             null,
@@ -58,7 +58,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void add_group_with_null_display_name_and_description()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var group = new AttributeGroup(
             AttributeGroupCode.Create("personal_info"),
             null,
@@ -74,7 +74,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void cannot_add_duplicate_group()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var group = new AttributeGroup(
             AttributeGroupCode.Create("personal_info"),
             AttributeDisplayName.Create("Personal Information"),
@@ -88,7 +88,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void remove_group_returns_true_when_exists()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var code = AttributeGroupCode.Create("personal_info");
         var group = new AttributeGroup(code, null, null, 0);
         _ = schema.AddGroup(group);
@@ -101,7 +101,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void remove_group_returns_false_when_not_found()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
 
         schema.RemoveGroup(AttributeGroupCode.Create("nonexistent")).ShouldBeFalse();
     }
@@ -109,19 +109,20 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void remove_group_ungroups_member_attributes()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var groupCode = AttributeGroupCode.Create("personal_info");
         var group = new AttributeGroup(groupCode, AttributeDisplayName.Create("Personal"), null, 0);
         _ = schema.AddGroup(group);
 
-        var definition = new AttributeDefinition(
-            AttributeCode.Create("first_name"),
-            ScalarDataType.String,
-            Desc,
-            false,
-            null,
-            groupCode,
-            0);
+        var definition = new AttributeDefinition
+        {
+            Code = AttributeCode.Create("first_name"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = Desc,
+            IsUnique = false,
+            GroupCode = groupCode,
+            Order = 0
+        };
         _ = schema.AddAttributeDefinition(definition);
 
         schema.RemoveGroup(groupCode).ShouldBeTrue();
@@ -132,23 +133,26 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void remove_group_preserves_ungrouped_attributes()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var groupCode = AttributeGroupCode.Create("personal_info");
         var group = new AttributeGroup(groupCode, null, null, 0);
         _ = schema.AddGroup(group);
 
-        var grouped = new AttributeDefinition(
-            AttributeCode.Create("first_name"),
-            ScalarDataType.String,
-            Desc,
-            false,
-            null,
-            groupCode,
-            0);
-        var ungrouped = new AttributeDefinition(
-            AttributeCode.Create("email"),
-            ScalarDataType.String,
-            Desc);
+        var grouped = new AttributeDefinition
+        {
+            Code = AttributeCode.Create("first_name"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = Desc,
+            IsUnique = false,
+            GroupCode = groupCode,
+            Order = 0
+        };
+        var ungrouped = new AttributeDefinition
+        {
+            Code = AttributeCode.Create("email"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = Desc
+        };
         _ = schema.AddAttributeDefinition(grouped);
         _ = schema.AddAttributeDefinition(ungrouped);
 
@@ -161,7 +165,7 @@ public sealed class AttributeSchemaGroupTests
     [Fact]
     public void group_dso_round_trip_preserves_display_name_and_description()
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         var group = new AttributeGroup(
             AttributeGroupCode.Create("contact"),
             AttributeDisplayName.Create("Contact Info"),
@@ -169,14 +173,15 @@ public sealed class AttributeSchemaGroupTests
             5);
         _ = schema.AddGroup(group);
 
-        var definition = new AttributeDefinition(
-            AttributeCode.Create("phone"),
-            ScalarDataType.String,
-            Desc,
-            false,
-            null,
-            group.Code,
-            1);
+        var definition = new AttributeDefinition
+        {
+            Code = AttributeCode.Create("phone"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = Desc,
+            IsUnique = false,
+            GroupCode = group.Code,
+            Order = 1
+        };
         _ = schema.AddAttributeDefinition(definition);
 
         // Verify the in-memory state is correct

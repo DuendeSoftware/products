@@ -245,6 +245,11 @@ public interface IStore
     /// <param name="dataRange">The pagination strategy (page, offset, or continuation token).</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A query result containing projected field values and pagination metadata.</returns>
+    /// <remarks>
+    /// Only fields that are stored as search fields (EAV indexed values) can be projected.
+    /// Non-indexed attribute values are not written to the search index and will not appear
+    /// in projected results, even if the field path is included in <paramref name="fields"/>.
+    /// </remarks>
     Task<QueryResult<ProjectedResult>> QueryFieldsAsync(
         EntityType entityType,
         IReadOnlyCollection<Field> fields,

@@ -24,7 +24,10 @@
     <InternalsVisibleTo Include="Duende.Storage.MsSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.Benchmarks" />
+    <InternalsVisibleTo Include="Duende.Storage.Samples.EavSchema" />
     <InternalsVisibleTo Include="Duende.UserManagement" />
+    <InternalsVisibleTo Include="Duende.UserManagement.Tests.Internal" />
+    <InternalsVisibleTo Include="Duende.UserManagement.Tests.Public" />
   </ItemGroup>
 
   <ItemGroup>

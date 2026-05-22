@@ -13,5 +13,7 @@ public static class AttributeDefinitionDso
         IReadOnlyList<string> Tags,
         string? GroupCode,
         int Order,
-        string? DisplayName);
+        string? DisplayName,
+        bool IsQueryable,
+        bool IsRequired);
 }

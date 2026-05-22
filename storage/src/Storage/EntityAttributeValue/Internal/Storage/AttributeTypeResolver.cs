@@ -57,6 +57,12 @@ public sealed class AttributeTypeResolver : IScimAttributeTypeResolver
             throw new NotSupportedException($"Unknown user attribute: {attributePath}");
         }
 
+        if (!definition.IsQueryable)
+        {
+            throw new NotSupportedException(
+                $"Attribute '{attributePath}' is not queryable and cannot be used in filter or sort expressions.");
+        }
+
         // Walk the remaining segments through the type tree
         var isArray = false;
         var currentType = definition.AttributeType;

@@ -11,7 +11,7 @@ public sealed class AttributeSchemaValidationErrorTests
 
     private static AttributeSchema SchemaWith(AttributeDefinition definition)
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         _ = schema.AddAttributeDefinition(definition);
         return schema;
     }
@@ -21,10 +21,15 @@ public sealed class AttributeSchemaValidationErrorTests
     [Fact]
     public void undefined_attribute_code_returns_not_defined_error()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("active"), new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("active"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), true, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), true, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -35,9 +40,10 @@ public sealed class AttributeSchemaValidationErrorTests
     public void type_mismatch_returns_defined_as_error()
     {
         var name = AttributeCode.Create("active");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = Desc });
 
-        var result = schema.TryCreateAttribute(name, "true", out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, "true", out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -48,9 +54,10 @@ public sealed class AttributeSchemaValidationErrorTests
     public void success_returns_null_errors()
     {
         var name = AttributeCode.Create("active");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = Desc });
 
-        var result = schema.TryCreateAttribute(name, true, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, true, out var errors);
 
         result.ShouldBeTrue();
         errors.ShouldBeNull();
@@ -66,10 +73,11 @@ public sealed class AttributeSchemaValidationErrorTests
         {
             [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         var value = new Dictionary<string, object> { ["city"] = "Seattle", ["country"] = "US" };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyDictionary<string, object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -84,10 +92,11 @@ public sealed class AttributeSchemaValidationErrorTests
         {
             [AttributeCode.Create("zip")] = ComplexAttributeProperty.Of(ScalarDataType.Integer)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         var value = new Dictionary<string, object> { ["zip"] = "not-an-int" };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyDictionary<string, object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -102,11 +111,12 @@ public sealed class AttributeSchemaValidationErrorTests
         {
             [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         // Two unknown properties → two errors
         var value = new Dictionary<string, object> { ["country"] = "US", ["region"] = "WA" };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyDictionary<string, object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -117,10 +127,11 @@ public sealed class AttributeSchemaValidationErrorTests
     public void not_a_complex_type_returns_error()
     {
         var name = AttributeCode.Create("active");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = Desc });
 
         var value = new Dictionary<string, object> { ["key"] = "value" };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyDictionary<string, object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -133,11 +144,16 @@ public sealed class AttributeSchemaValidationErrorTests
     public void element_type_mismatch_returns_index_error()
     {
         var name = AttributeCode.Create("tags");
-        var schema = SchemaWith(new AttributeDefinition(
-            name, new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = name,
+            AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
+            Description = Desc
+        });
 
         var value = new List<object> { "valid", 42 };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyList<object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyList<object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -148,12 +164,17 @@ public sealed class AttributeSchemaValidationErrorTests
     public void multiple_list_errors_accumulated()
     {
         var name = AttributeCode.Create("tags");
-        var schema = SchemaWith(new AttributeDefinition(
-            name, new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = name,
+            AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
+            Description = Desc
+        });
 
         // Two wrong-type elements → two errors
         var value = new List<object> { 1, 2 };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyList<object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyList<object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -164,10 +185,11 @@ public sealed class AttributeSchemaValidationErrorTests
     public void not_a_list_type_returns_error()
     {
         var name = AttributeCode.Create("active");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = Desc });
 
         var value = new List<object> { "a", "b" };
-        var result = schema.TryCreateAttribute(name, (IReadOnlyList<object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyList<object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -184,7 +206,7 @@ public sealed class AttributeSchemaValidationErrorTests
             [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
         }));
-        return SchemaWith(new AttributeDefinition(AttributeCode.Create("emails"), emailsType, Desc));
+        return SchemaWith(new AttributeDefinition { Code = AttributeCode.Create("emails"), AttributeType = emailsType, Description = Desc });
     }
 
     [Fact]
@@ -197,7 +219,8 @@ public sealed class AttributeSchemaValidationErrorTests
         {
             new Dictionary<string, object> { ["value"] = "a@b.com", ["type"] = "work", ["primary"] = "yes" }
         };
-        var result = schema.TryCreateAttribute(AttributeCode.Create("emails"), (IReadOnlyList<object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("emails"), (IReadOnlyList<object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();
@@ -214,7 +237,8 @@ public sealed class AttributeSchemaValidationErrorTests
         {
             new Dictionary<string, object> { ["value"] = "a@b.com", ["display"] = "Work Email" }
         };
-        var result = schema.TryCreateAttribute(AttributeCode.Create("emails"), (IReadOnlyList<object>)value, out _, out var errors);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("emails"), (IReadOnlyList<object>)value, out var errors);
 
         result.ShouldBeFalse();
         _ = errors.ShouldNotBeNull();

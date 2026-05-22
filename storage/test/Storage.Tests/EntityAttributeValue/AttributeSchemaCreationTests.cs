@@ -12,7 +12,7 @@ public sealed class AttributeSchemaCreationTests
 
     private static AttributeSchema SchemaWith(AttributeDefinition definition)
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         _ = schema.AddAttributeDefinition(definition);
         return schema;
     }
@@ -26,12 +26,13 @@ public sealed class AttributeSchemaCreationTests
             [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("zip")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         var value = new Dictionary<string, object> { ["city"] = "Seattle", ["zip"] = "98101" };
-        var attr = schema.CreateAttribute(name, value);
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, (IReadOnlyDictionary<string, object>)value);
 
-        _ = attr.UntypedValue.ShouldBeOfType<ReadOnlyDictionary<string, object>>();
+        _ = collection[name].UntypedValue.ShouldBeOfType<ReadOnlyDictionary<string, object>>();
     }
 
     [Fact]
@@ -44,10 +45,11 @@ public sealed class AttributeSchemaCreationTests
             [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("zip")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         var value = new Dictionary<string, object> { ["city"] = "Seattle" }; // zip omitted
-        var result = schema.TryCreateAttribute(name, value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out _);
 
         result.ShouldBeTrue();
     }
@@ -60,10 +62,11 @@ public sealed class AttributeSchemaCreationTests
         {
             [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         var value = new Dictionary<string, object> { ["city"] = "Seattle", ["country"] = "US" };
-        var result = schema.TryCreateAttribute(name, value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out _);
 
         result.ShouldBeFalse();
     }
@@ -76,10 +79,11 @@ public sealed class AttributeSchemaCreationTests
         {
             [AttributeCode.Create("zip")] = ComplexAttributeProperty.Of(ScalarDataType.Integer)
         });
-        var schema = SchemaWith(new AttributeDefinition(name, complexType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = complexType, Description = Desc });
 
         var value = new Dictionary<string, object> { ["zip"] = "not-an-int" }; // string instead of int
-        var result = schema.TryCreateAttribute(name, value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyDictionary<string, object>)value, out _);
 
         result.ShouldBeFalse();
     }
@@ -89,12 +93,13 @@ public sealed class AttributeSchemaCreationTests
     {
         var name = AttributeCode.Create("tags");
         var listType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String));
-        var schema = SchemaWith(new AttributeDefinition(name, listType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = listType, Description = Desc });
 
         var value = new List<object> { "admin", "power" };
-        var attr = schema.CreateAttribute(name, value);
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, (IReadOnlyList<object>)value);
 
-        _ = attr.UntypedValue.ShouldBeOfType<ReadOnlyCollection<object>>();
+        _ = collection[name].UntypedValue.ShouldBeOfType<ReadOnlyCollection<object>>();
     }
 
     [Fact]
@@ -106,15 +111,17 @@ public sealed class AttributeSchemaCreationTests
             [AttributeCode.Create("number")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String)
         }));
-        var schema = SchemaWith(new AttributeDefinition(name, listType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = listType, Description = Desc });
 
         var value = new List<object>
         {
             new Dictionary<string, object> { ["number"] = "555-1234", ["type"] = "mobile" },
             new Dictionary<string, object> { ["number"] = "555-9999", ["type"] = "home"},
         };
-        var attr = schema.CreateAttribute(name, value);
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, (IReadOnlyList<object>)value);
 
+        var attr = (AttributeValue<IReadOnlyList<object>>)collection[name];
         _ = attr.UntypedValue.ShouldBeOfType<ReadOnlyCollection<object>>();
 
         attr.TypedValue.Count.ShouldBe(2);
@@ -127,10 +134,11 @@ public sealed class AttributeSchemaCreationTests
     {
         var name = AttributeCode.Create("tags");
         var listType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String));
-        var schema = SchemaWith(new AttributeDefinition(name, listType, Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = listType, Description = Desc });
 
         var value = new List<object>();
-        var result = schema.TryCreateAttribute(name, value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyList<object>)value, out _);
 
         result.ShouldBeTrue();
     }
@@ -140,10 +148,15 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_bool()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("active"), new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("active"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), true, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), true, out _);
 
         result.ShouldBeFalse();
     }
@@ -151,10 +164,15 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_string()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("color"), new ScalarAttributeType(ScalarDataType.String), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("color"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), "value", out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), "value", out _);
 
         result.ShouldBeFalse();
     }
@@ -162,10 +180,15 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_int()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("age"), new ScalarAttributeType(ScalarDataType.Integer), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("age"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Integer),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), 42, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), 42, out _);
 
         result.ShouldBeFalse();
     }
@@ -173,10 +196,15 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_decimal()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("balance"), new ScalarAttributeType(ScalarDataType.Decimal), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("balance"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Decimal),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), 3.14m, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), 3.14m, out _);
 
         result.ShouldBeFalse();
     }
@@ -184,10 +212,15 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_date()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("birthdate"), new ScalarAttributeType(ScalarDataType.Date), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("birthdate"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Date),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), new DateOnly(2000, 1, 1), out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), new DateOnly(2000, 1, 1), out _);
 
         result.ShouldBeFalse();
     }
@@ -195,10 +228,15 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_date_time()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("recordedat"), new ScalarAttributeType(ScalarDataType.DateTime), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("recordedat"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.DateTime),
+            Description = Desc
+        });
 
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), DateTimeOffset.UtcNow, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), DateTimeOffset.UtcNow, out _);
 
         result.ShouldBeFalse();
     }
@@ -206,16 +244,19 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_complex()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("address"),
-            new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("address"),
+            AttributeType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
             {
                 [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
             }),
-            Desc));
+            Description = Desc
+        });
 
         var value = new Dictionary<string, object> { ["city"] = "Seattle" };
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), (IReadOnlyDictionary<string, object>)value, out _);
 
         result.ShouldBeFalse();
     }
@@ -223,13 +264,16 @@ public sealed class AttributeSchemaCreationTests
     [Fact]
     public void unknown_attribute_name_fails_for_list()
     {
-        var schema = SchemaWith(new AttributeDefinition(
-            AttributeCode.Create("tags"),
-            new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
-            Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("tags"),
+            AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
+            Description = Desc
+        });
 
         var value = new List<object> { "a", "b" };
-        var result = schema.TryCreateAttribute(AttributeCode.Create("missing"), value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(AttributeCode.Create("missing"), (IReadOnlyList<object>)value, out _);
 
         result.ShouldBeFalse();
     }
@@ -238,10 +282,10 @@ public sealed class AttributeSchemaCreationTests
     public void wrong_type_string_instead_of_bool_fails()
     {
         var name = AttributeCode.Create("active");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = Desc });
 
-        // Attempt to create a string attribute for a boolean definition
-        var result = schema.TryCreateAttribute(name, "true", out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, "true", out _);
 
         result.ShouldBeFalse();
     }
@@ -250,10 +294,10 @@ public sealed class AttributeSchemaCreationTests
     public void wrong_type_bool_instead_of_string_fails()
     {
         var name = AttributeCode.Create("color");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.String), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = Desc });
 
-        // Attempt to create a bool attribute for a string definition
-        var result = schema.TryCreateAttribute(name, true, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, true, out _);
 
         result.ShouldBeFalse();
     }
@@ -262,10 +306,10 @@ public sealed class AttributeSchemaCreationTests
     public void wrong_type_int_instead_of_decimal_fails()
     {
         var name = AttributeCode.Create("balance");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Decimal), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Decimal), Description = Desc });
 
-        // Attempt to create an int attribute for a decimal definition
-        var result = schema.TryCreateAttribute(name, 42, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, 42, out _);
 
         result.ShouldBeFalse();
     }
@@ -274,11 +318,15 @@ public sealed class AttributeSchemaCreationTests
     public void wrong_type_scalar_instead_of_list_fails()
     {
         var name = AttributeCode.Create("tags");
-        var schema = SchemaWith(new AttributeDefinition(
-            name, new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = name,
+            AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
+            Description = Desc
+        });
 
-        // Attempt to create a string attribute for a list definition
-        var result = schema.TryCreateAttribute(name, "single", out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, "single", out _);
 
         result.ShouldBeFalse();
     }
@@ -287,16 +335,18 @@ public sealed class AttributeSchemaCreationTests
     public void wrong_type_scalar_instead_of_complex_fails()
     {
         var name = AttributeCode.Create("address");
-        var schema = SchemaWith(new AttributeDefinition(
-            name,
-            new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = name,
+            AttributeType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
             {
                 [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
             }),
-            Desc));
+            Description = Desc
+        });
 
-        // Attempt to create a string attribute for a complex definition
-        var result = schema.TryCreateAttribute(name, "not-a-complex", out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, "not-a-complex", out _);
 
         result.ShouldBeFalse();
     }
@@ -305,24 +355,30 @@ public sealed class AttributeSchemaCreationTests
     public void list_with_wrong_element_type_fails()
     {
         var name = AttributeCode.Create("tags");
-        var schema = SchemaWith(new AttributeDefinition(
-            name, new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)), Desc));
+        var schema = SchemaWith(new AttributeDefinition
+        {
+            Code = name,
+            AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
+            Description = Desc
+        });
 
         // Provide ints instead of strings as list elements
         var value = new List<object> { 1, 2, 3 };
-        var result = schema.TryCreateAttribute(name, value, out _);
+        var collection = new AttributeValueCollection(schema);
+        var result = collection.TrySet(name, (IReadOnlyList<object>)value, out _);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void create_attribute_throws_for_invalid_value()
+    public void set_throws_for_invalid_value()
     {
         var name = AttributeCode.Create("active");
-        var schema = SchemaWith(new AttributeDefinition(name, new ScalarAttributeType(ScalarDataType.Boolean), Desc));
+        var schema = SchemaWith(new AttributeDefinition { Code = name, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = Desc });
 
-        // CreateAttribute (non-Try) should throw for wrong type
-        var ex = Record.Exception(() => schema.CreateAttribute(name, "not-a-bool"));
+        var collection = new AttributeValueCollection(schema);
+        // Set (non-Try) should throw for wrong type
+        var ex = Record.Exception(() => collection.Set(name, "not-a-bool"));
 
         _ = ex.ShouldBeOfType<ArgumentException>();
     }

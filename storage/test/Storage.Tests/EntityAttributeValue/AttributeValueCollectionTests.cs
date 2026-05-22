@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#pragma warning disable CS0618 // Type or member is obsolete
 using Duende.Storage.EntityAttributeValue.Internal;
 
 namespace Duende.Storage.EntityAttributeValue;
@@ -11,7 +12,7 @@ public static class AttributeValueCollectionTests
 
     private static AttributeSchema SchemaWith(params AttributeDefinition[] definitions)
     {
-        var schema = new AttributeSchema();
+        var schema = AttributeSchema.Load([], []);
         foreach (var def in definitions)
         {
             _ = schema.AddAttributeDefinition(def);
@@ -20,7 +21,7 @@ public static class AttributeValueCollectionTests
     }
 
     private static AttributeDefinition StringDef(string name) =>
-        new(AttributeCode.Create(name), new ScalarAttributeType(ScalarDataType.String), Desc);
+        new() { Code = AttributeCode.Create(name), AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = Desc };
 
     // --- Set ---
 
@@ -28,10 +29,9 @@ public static class AttributeValueCollectionTests
     public static void set_adds_new_attribute()
     {
         var schema = SchemaWith(StringDef("color"));
-        var attr = schema.CreateAttribute(AttributeCode.Create("color"), "red");
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(schema);
 
-        collection.Set(attr);
+        collection.Set(AttributeCode.Create("color"), "red");
 
         collection.Count.ShouldBe(1);
     }
@@ -41,10 +41,10 @@ public static class AttributeValueCollectionTests
     {
         var schema = SchemaWith(StringDef("color"));
         var name = AttributeCode.Create("color");
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(schema);
 
-        collection.Set(schema.CreateAttribute(name, "red"));
-        collection.Set(schema.CreateAttribute(name, "blue"));
+        collection.Set(name, "red");
+        collection.Set(name, "blue");
 
         collection.Count.ShouldBe(1);
         collection[name].UntypedValue.ShouldBe("blue");
@@ -53,7 +53,7 @@ public static class AttributeValueCollectionTests
     [Fact]
     public static void set_throws_for_null()
     {
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(SchemaWith());
 
         var ex = Record.Exception(() => collection.Set(null!));
 
@@ -67,8 +67,8 @@ public static class AttributeValueCollectionTests
     {
         var schema = SchemaWith(StringDef("color"));
         var name = AttributeCode.Create("color");
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(name, "red"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, "red");
 
         var result = collection.Remove(name);
 
@@ -79,7 +79,7 @@ public static class AttributeValueCollectionTests
     [Fact]
     public static void remove_returns_false_when_absent()
     {
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(SchemaWith());
 
         var result = collection.Remove(AttributeCode.Create("missing"));
 
@@ -93,8 +93,8 @@ public static class AttributeValueCollectionTests
     {
         var schema = SchemaWith(StringDef("color"));
         var name = AttributeCode.Create("color");
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(name, "red"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, "red");
 
         collection.Contains(name).ShouldBeTrue();
     }
@@ -102,7 +102,7 @@ public static class AttributeValueCollectionTests
     [Fact]
     public static void contains_returns_false_when_absent()
     {
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(SchemaWith());
 
         collection.Contains(AttributeCode.Create("missing")).ShouldBeFalse();
     }
@@ -114,8 +114,8 @@ public static class AttributeValueCollectionTests
     {
         var schema = SchemaWith(StringDef("color"));
         var name = AttributeCode.Create("color");
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(name, "red"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, "red");
 
         var found = collection.TryGet(name, out var attribute);
 
@@ -127,7 +127,7 @@ public static class AttributeValueCollectionTests
     [Fact]
     public static void try_get_returns_false_when_absent()
     {
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(SchemaWith());
 
         var found = collection.TryGet(AttributeCode.Create("missing"), out var attribute);
 
@@ -142,8 +142,8 @@ public static class AttributeValueCollectionTests
     {
         var schema = SchemaWith(StringDef("color"));
         var name = AttributeCode.Create("color");
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(name, "red"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(name, "red");
 
         var attribute = collection[name];
 
@@ -153,7 +153,7 @@ public static class AttributeValueCollectionTests
     [Fact]
     public static void indexer_throws_when_absent()
     {
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(SchemaWith());
 
         var ex = Record.Exception(() => _ = collection[AttributeCode.Create("missing")]);
 
@@ -165,7 +165,7 @@ public static class AttributeValueCollectionTests
     [Fact]
     public static void empty_collection_has_zero_count()
     {
-        var collection = new AttributeValueCollection();
+        var collection = new AttributeValueCollection(SchemaWith());
 
         collection.Count.ShouldBe(0);
     }
@@ -176,9 +176,9 @@ public static class AttributeValueCollectionTests
     public static void enumerator_yields_all_attributes()
     {
         var schema = SchemaWith(StringDef("color"), StringDef("size"));
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("color"), "red"));
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("size"), "large"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(AttributeCode.Create("color"), "red");
+        collection.Set(AttributeCode.Create("size"), "large");
 
         var items = collection.ToList();
 
@@ -192,10 +192,10 @@ public static class AttributeValueCollectionTests
     {
         var schema = SchemaWith(StringDef("color"));
         var name = AttributeCode.Create("color");
-        var attr1 = schema.CreateAttribute(name, "red");
-        var attr2 = schema.CreateAttribute(name, "blue");
+        var attr1 = new AttributeValue<string>(name, "red");
+        var attr2 = new AttributeValue<string>(name, "blue");
 
-        var ex = Record.Exception(() => schema.CreateAttributes([attr1, attr2]));
+        var ex = Record.Exception(() => new AttributeValueCollection(schema, [attr1, attr2]));
 
         _ = ex.ShouldBeOfType<ArgumentException>();
         ex.Message.ShouldContain("color");
@@ -205,10 +205,10 @@ public static class AttributeValueCollectionTests
     public static void constructor_rejects_duplicate_names_different_casing()
     {
         var schema = SchemaWith(StringDef("color"));
-        var attr1 = schema.CreateAttribute(AttributeCode.Create("color"), "red");
-        var attr2 = schema.CreateAttribute(AttributeCode.Create("Color"), "blue");
+        var attr1 = new AttributeValue<string>(AttributeCode.Create("color"), "red");
+        var attr2 = new AttributeValue<string>(AttributeCode.Create("Color"), "blue");
 
-        var ex = Record.Exception(() => schema.CreateAttributes([attr1, attr2]));
+        var ex = Record.Exception(() => new AttributeValueCollection(schema, [attr1, attr2]));
 
         _ = ex.ShouldBeOfType<ArgumentException>();
     }
@@ -219,8 +219,8 @@ public static class AttributeValueCollectionTests
     public static void try_get_finds_attribute_with_different_casing()
     {
         var schema = SchemaWith(StringDef("givenName"));
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("givenName"), "Alice"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(AttributeCode.Create("givenName"), "Alice");
 
         collection.TryGet(AttributeCode.Create("givenname"), out var attr).ShouldBeTrue();
         _ = attr.ShouldNotBeNull();
@@ -231,8 +231,8 @@ public static class AttributeValueCollectionTests
     public static void contains_matches_case_insensitively()
     {
         var schema = SchemaWith(StringDef("givenName"));
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("givenName"), "Alice"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(AttributeCode.Create("givenName"), "Alice");
 
         collection.Contains(AttributeCode.Create("GIVENNAME")).ShouldBeTrue();
         collection.Contains(AttributeCode.Create("givenname")).ShouldBeTrue();
@@ -243,9 +243,9 @@ public static class AttributeValueCollectionTests
     public static void set_replaces_attribute_with_different_casing()
     {
         var schema = SchemaWith(StringDef("givenName"));
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("givenName"), "Alice"));
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("GIVENNAME"), "Bob"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(AttributeCode.Create("givenName"), "Alice");
+        collection.Set(AttributeCode.Create("GIVENNAME"), "Bob");
 
         collection.Count.ShouldBe(1);
         collection.TryGet(AttributeCode.Create("givenName"), out var attr).ShouldBeTrue();
@@ -256,8 +256,8 @@ public static class AttributeValueCollectionTests
     public static void remove_works_with_different_casing()
     {
         var schema = SchemaWith(StringDef("givenName"));
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("givenName"), "Alice"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(AttributeCode.Create("givenName"), "Alice");
 
         collection.Remove(AttributeCode.Create("GIVENNAME")).ShouldBeTrue();
         collection.Count.ShouldBe(0);
@@ -267,8 +267,8 @@ public static class AttributeValueCollectionTests
     public static void stored_attribute_preserves_original_casing()
     {
         var schema = SchemaWith(StringDef("givenName"));
-        var collection = new AttributeValueCollection();
-        collection.Set(schema.CreateAttribute(AttributeCode.Create("givenName"), "Alice"));
+        var collection = new AttributeValueCollection(schema);
+        collection.Set(AttributeCode.Create("givenName"), "Alice");
 
         var attr = collection[AttributeCode.Create("givenname")];
 

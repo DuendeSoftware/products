@@ -5,139 +5,41 @@ namespace Duende.Storage.EntityAttributeValue;
 
 public sealed record AttributeDefinition
 {
-    /// <summary>
-    ///     Creates a definition with a scalar data type.
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        ScalarDataType DataType,
-        AttributeDescription? Description,
-        bool IsUnique,
-        IReadOnlyCollection<string>? Tags)
-        : this(Code, new ScalarAttributeType(DataType), Description, IsUnique, Tags, null, 0)
+    public AttributeDefinition()
     {
-    }
-
-    /// <summary>
-    ///     Creates a definition with a scalar data type and IsUnique flag.
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        ScalarDataType DataType,
-        AttributeDescription? Description,
-        bool IsUnique)
-        : this(Code, new ScalarAttributeType(DataType), Description, IsUnique, null, null, 0)
-    {
-    }
-
-    /// <summary>
-    ///     Creates a definition with a scalar data type (convenience overload without IsUnique/Tags).
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        ScalarDataType DataType,
-        AttributeDescription? Description)
-        : this(Code, new ScalarAttributeType(DataType), Description, false, null, null, 0)
-    {
-    }
-
-    /// <summary>
-    ///     Creates a definition with any <see cref="AttributeType" />.
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        AttributeType AttributeType,
-        AttributeDescription? Description,
-        bool IsUnique,
-        IReadOnlyCollection<string>? Tags)
-        : this(Code, AttributeType, Description, IsUnique, Tags, null, 0)
-    {
-    }
-
-    /// <summary>
-    ///     Creates a definition with any <see cref="AttributeType" /> (convenience overload without IsUnique/Tags).
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        AttributeType AttributeType,
-        AttributeDescription? Description)
-        : this(Code, AttributeType, Description, false, null, null, 0)
-    {
-    }
-
-    /// <summary>
-    ///     Creates a definition with a scalar data type, group, and order.
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        ScalarDataType DataType,
-        AttributeDescription? Description,
-        bool IsUnique,
-        IReadOnlyCollection<string>? Tags,
-        AttributeGroupCode? GroupCode,
-        int Order)
-        : this(Code, new ScalarAttributeType(DataType), Description, IsUnique, Tags, GroupCode, Order)
-    {
-    }
-
-    /// <summary>
-    ///     Creates a definition with any <see cref="AttributeType" />, group, and order.
-    /// </summary>
-    public AttributeDefinition(
-        AttributeCode Code,
-        AttributeType AttributeType,
-        AttributeDescription? Description,
-        bool IsUnique,
-        IReadOnlyCollection<string>? Tags,
-        AttributeGroupCode? GroupCode,
-        int Order)
-    {
-        if (IsUnique && AttributeType is ComplexAttributeType or ListAttributeType)
-        {
-            throw new ArgumentException(
-                "IsUnique is not supported for complex or list attribute types.",
-                nameof(IsUnique));
-        }
-
-        this.Code = Code;
-        this.AttributeType = AttributeType;
-        this.Description = Description;
-        this.IsUnique = IsUnique;
-        this.Tags = Tags ?? [];
-        this.GroupCode = GroupCode;
-        this.Order = Order;
     }
 
     public static AttributeDefinition Load(
         AttributeCode code,
         AttributeType attributeType,
         AttributeDescription? description,
+        AttributeDisplayName? displayName,
         bool isUnique,
+        bool isQueryable,
+        bool isRequired,
         IReadOnlyCollection<string> tags,
         AttributeGroupCode? groupCode,
         int order) =>
-        Load(code, attributeType, description, isUnique, tags, groupCode, order, null);
-
-    public static AttributeDefinition Load(
-        AttributeCode code,
-        AttributeType attributeType,
-        AttributeDescription? description,
-        bool isUnique,
-        IReadOnlyCollection<string> tags,
-        AttributeGroupCode? groupCode,
-        int order,
-        AttributeDisplayName? displayName) =>
-        new(code, attributeType, description, isUnique, tags, groupCode, order)
+        new()
         {
-            DisplayName = displayName
+            Code = code,
+            AttributeType = attributeType,
+            Description = description,
+            DisplayName = displayName,
+            IsUnique = isUnique,
+            IsQueryable = isQueryable,
+            IsRequired = isRequired,
+            Tags = tags,
+            GroupCode = groupCode,
+            Order = order
         };
 
-    public AttributeCode Code { get; }
+    public required AttributeCode Code { get; init; }
 
     /// <summary>
     ///     The full type descriptor for this attribute.
     /// </summary>
-    public AttributeType AttributeType { get; }
+    public required AttributeType AttributeType { get; init; }
 
     /// <summary>
     ///     Convenience accessor for scalar attribute types.
@@ -149,21 +51,35 @@ public sealed record AttributeDefinition
             : throw new InvalidOperationException(
                 $"Attribute '{Code}' has type '{AttributeType.GetType().Name}', not a scalar type. Use AttributeType instead.");
 
-    public AttributeDescription? Description { get; }
+    public AttributeDescription? Description { get; init; }
     public AttributeDisplayName? DisplayName { get; init; }
-    public bool IsUnique { get; }
-    public IReadOnlyCollection<string> Tags { get; }
+
+    /// <summary>
+    ///     Controls whether the attribute's values can be used in queries (filtering, sorting, projection).
+    /// </summary>
+    /// <remarks>
+    ///     Only queryable attributes can be filtered, sorted, or projected via store queries
+    ///     (e.g., <c>QueryFieldsAsync</c> or <c>QueryAsync</c> with a filter expression).
+    ///     Non-queryable attributes are still stored in the entity's JSON payload and can be
+    ///     read when loading the full entity, but their values will not appear in projected
+    ///     query results and cannot be used in filter or sort expressions.
+    /// </remarks>
+    public bool IsQueryable { get; init; } = true;
+
+    public bool IsRequired { get; init; }
+    public bool IsUnique { get; init; }
+    public IReadOnlyCollection<string> Tags { get; init; } = [];
 
     /// <summary>
     ///     The group this attribute belongs to, or <c>null</c> if ungrouped.
     /// </summary>
-    public AttributeGroupCode? GroupCode { get; }
+    public AttributeGroupCode? GroupCode { get; init; }
 
     /// <summary>
     ///     Sort weight controlling display order within the group (or among ungrouped attributes).
     ///     Not required to be unique; ties are resolved by a stable secondary sort (e.g. name).
     /// </summary>
-    public int Order { get; }
+    public int Order { get; init; }
 
 #pragma warning disable CA2225 // Operator overloads have named alternates
     public static implicit operator AttributeCode(AttributeDefinition definition)
@@ -181,7 +97,7 @@ public sealed record AttributeDefinition
     {
         _ = builder.Append(
             System.FormattableString.Invariant(
-                $"Code = {Code}, AttributeType = {AttributeType}, Description = {Description?.Value ?? "(none)"}, DisplayName = {DisplayName?.Value ?? "(none)"}, IsUnique = {IsUnique}, Tags = [{string.Join(", ", Tags)}], GroupCode = {GroupCode?.Value ?? "(none)"}, Order = {Order}"));
+                $"Code = {Code}, AttributeType = {AttributeType}, Description = {Description?.Value ?? "(none)"}, DisplayName = {DisplayName?.Value ?? "(none)"}, IsUnique = {IsUnique}, IsQueryable = {IsQueryable}, IsRequired = {IsRequired}, Tags = [{string.Join(", ", Tags)}], GroupCode = {GroupCode?.Value ?? "(none)"}, Order = {Order}"));
         return true;
     }
 }

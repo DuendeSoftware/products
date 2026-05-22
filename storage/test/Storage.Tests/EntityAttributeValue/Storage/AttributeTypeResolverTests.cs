@@ -22,10 +22,12 @@ public static class AttributeTypeResolverTests
     public static void scalar_string_resolves_to_string_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("displayname"),
-                new ScalarAttributeType(ScalarDataType.String),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("displayname"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.String),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("displayname");
 
@@ -37,10 +39,12 @@ public static class AttributeTypeResolverTests
     public static void scalar_boolean_resolves_to_boolean_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("active"),
-                new ScalarAttributeType(ScalarDataType.Boolean),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("active"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("active");
 
@@ -51,10 +55,12 @@ public static class AttributeTypeResolverTests
     public static void scalar_date_resolves_to_date_time_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("birthdate"),
-                new ScalarAttributeType(ScalarDataType.Date),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("birthdate"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.Date),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("birthdate");
 
@@ -65,10 +71,12 @@ public static class AttributeTypeResolverTests
     public static void scalar_date_time_resolves_to_date_time_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("recordedat"),
-                new ScalarAttributeType(ScalarDataType.DateTime),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("recordedat"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.DateTime),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("recordedat");
 
@@ -79,10 +87,12 @@ public static class AttributeTypeResolverTests
     public static void scalar_decimal_resolves_to_number_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("balance"),
-                new ScalarAttributeType(ScalarDataType.Decimal),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("balance"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.Decimal),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("balance");
 
@@ -93,10 +103,12 @@ public static class AttributeTypeResolverTests
     public static void scalar_integer_resolves_to_number_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("age"),
-                new ScalarAttributeType(ScalarDataType.Integer),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("age"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.Integer),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("age");
 
@@ -133,10 +145,12 @@ public static class AttributeTypeResolverTests
     public static void mixed_case_attribute_is_normalized()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("displayname"),
-                new ScalarAttributeType(ScalarDataType.String),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("displayname"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.String),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("DisplayName");
 
@@ -150,14 +164,16 @@ public static class AttributeTypeResolverTests
     public static void complex_sub_property_resolves_to_correct_field_type()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("address"),
-                new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("address"),
+                AttributeType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
                 {
                     [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String),
                     [AttributeCode.Create("zip")] = ComplexAttributeProperty.Of(ScalarDataType.Integer)
                 }),
-                Desc));
+                Description = Desc
+            });
 
         var cityField = resolver.ResolveField("address.city");
         var zipField = resolver.ResolveField("address.zip");
@@ -172,10 +188,12 @@ public static class AttributeTypeResolverTests
     public static void list_of_scalar_resolves_to_multi_valued_string_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("tags"),
-                new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("tags"),
+                AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("tags");
 
@@ -187,10 +205,12 @@ public static class AttributeTypeResolverTests
     public static void list_of_boolean_resolves_to_multi_valued_boolean_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("flags"),
-                new ListAttributeType(new ScalarAttributeType(ScalarDataType.Boolean)),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("flags"),
+                AttributeType = new ListAttributeType(new ScalarAttributeType(ScalarDataType.Boolean)),
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("flags");
 
@@ -204,14 +224,16 @@ public static class AttributeTypeResolverTests
     public static void list_of_complex_sub_property_resolves_to_multi_valued_string_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("phones"),
-                new ListAttributeType(new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("phones"),
+                AttributeType = new ListAttributeType(new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
                 {
                     [AttributeCode.Create("number")] = ComplexAttributeProperty.Of(ScalarDataType.String),
                     [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String)
                 })),
-                Desc));
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("phones.number");
 
@@ -224,13 +246,15 @@ public static class AttributeTypeResolverTests
     public static void list_of_complex_integer_sub_property_resolves_to_multi_valued_number_field()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("entries"),
-                new ListAttributeType(new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("entries"),
+                AttributeType = new ListAttributeType(new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
                 {
                     [AttributeCode.Create("rank")] = ComplexAttributeProperty.Of(ScalarDataType.Integer)
                 })),
-                Desc));
+                Description = Desc
+            });
 
         var field = resolver.ResolveField("entries.rank");
 
@@ -256,13 +280,15 @@ public static class AttributeTypeResolverTests
     public static void unknown_sub_property_throws_not_supported()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("address"),
-                new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("address"),
+                AttributeType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
                 {
                     [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
                 }),
-                Desc));
+                Description = Desc
+            });
 
         var ex = Record.Exception(() => resolver.ResolveField("address.country"));
 
@@ -274,13 +300,15 @@ public static class AttributeTypeResolverTests
     public static void direct_complex_query_throws_not_supported()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("address"),
-                new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("address"),
+                AttributeType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
                 {
                     [AttributeCode.Create("city")] = ComplexAttributeProperty.Of(ScalarDataType.String)
                 }),
-                Desc));
+                Description = Desc
+            });
 
         var ex = Record.Exception(() => resolver.ResolveField("address"));
 
@@ -292,10 +320,12 @@ public static class AttributeTypeResolverTests
     public static void navigating_into_scalar_throws_not_supported()
     {
         var resolver = ResolverWith(
-            new AttributeDefinition(
-                AttributeCode.Create("displayname"),
-                new ScalarAttributeType(ScalarDataType.String),
-                Desc));
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("displayname"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.String),
+                Description = Desc
+            });
 
         var ex = Record.Exception(() => resolver.ResolveField("displayname.sub"));
 
@@ -312,5 +342,40 @@ public static class AttributeTypeResolverTests
         var ex = Record.Exception(() => resolver.ResolveField("INVALID_NAME"));
 
         _ = ex.ShouldBeOfType<NotSupportedException>();
+    }
+
+    [Fact]
+    public static void non_indexed_attribute_throws_not_supported()
+    {
+        var resolver = ResolverWith(
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("secret"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.String),
+                Description = Desc,
+                IsQueryable = false
+            });
+
+        var ex = Record.Exception(() => resolver.ResolveField("secret"));
+
+        _ = ex.ShouldBeOfType<NotSupportedException>();
+        ex.Message.ShouldContain("secret");
+    }
+
+    [Fact]
+    public static void indexed_attribute_resolves_successfully()
+    {
+        var resolver = ResolverWith(
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create("displayname"),
+                AttributeType = new ScalarAttributeType(ScalarDataType.String),
+                Description = Desc,
+                IsQueryable = true
+            });
+
+        var field = resolver.ResolveField("displayname");
+
+        _ = field.ShouldBeOfType<StringField>();
     }
 }
