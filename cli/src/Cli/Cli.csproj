@@ -10,13 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Duende.Cli.PluginAbstractions" />
     <PackageReference Include="NuGet.Packaging" />
     <PackageReference Include="NuGet.Protocol" />
     <PackageReference Include="System.CommandLine" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../Cli.PluginAbstractions/Cli.PluginAbstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
