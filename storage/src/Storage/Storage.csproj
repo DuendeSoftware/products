@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>Duende.Storage</RootNamespace>
     <AssemblyName>Duende.Storage</AssemblyName>
-    <PackageId>Duende.Labs.Storage</PackageId>
+    <PackageId>Duende.Storage</PackageId>
     <ValueObjectsGeneratorNamespace>Duende.Storage</ValueObjectsGeneratorNamespace>
     <NoWarn>$(NoWarn);CA1062</NoWarn>
   </PropertyGroup>
