@@ -28,6 +28,6 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
   </ItemGroup>
 </Project>

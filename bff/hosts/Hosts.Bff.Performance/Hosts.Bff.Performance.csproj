@@ -8,7 +8,7 @@
     <PackageReference Include="Duende.IdentityServer" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\bff\hosts\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\Bff.Yarp\Bff.Yarp.csproj" />
   </ItemGroup>
 </Project>

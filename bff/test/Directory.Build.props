@@ -33,5 +33,5 @@
     <NoWarn>$(NoWarn);CA2201</NoWarn><!-- Do not raise reserved exception types -->
     <NoWarn>$(NoWarn);CA2254</NoWarn><!-- Template should be a static expression -->
   </PropertyGroup>
-  <Import Project="../../test.props" />
+  <Import Project="../../../test.props" />
 </Project>

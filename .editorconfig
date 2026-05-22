@@ -88,3 +88,5 @@ dotnet_naming_rule.async_methods_must_end_with_async.severity = none
 
 [platform/src/AdminStudio.Web/Services/*GrpcService.cs]
 dotnet_naming_rule.async_methods_must_end_with_async.severity = none
+
+

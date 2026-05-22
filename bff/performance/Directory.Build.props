@@ -2,7 +2,7 @@
 <Project>
 
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
-  <Import Project="../../src.props" />
+  <Import Project="../../../src.props" />
 
   <PropertyGroup>
     <AnalysisMode>None</AnalysisMode>
@@ -12,6 +12,9 @@
 
     <!-- RS0027: API with optional parameter(s) should have the most parameters amongst its public overloads -->
     <NoWarn>$(NoWarn);RS0027</NoWarn>
+
+    <!-- IDE1006: Naming rule violation (async suffix) - benchmark methods -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn>
   </PropertyGroup>
   
 </Project>

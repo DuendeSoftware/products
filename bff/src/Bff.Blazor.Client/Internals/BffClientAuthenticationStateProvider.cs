@@ -32,19 +32,19 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         _fetchUserService = fetchUserService;
         _ = persistentUserService.GetPersistedUser(out var user);
         _user = user;
-        _timer = timeProvider.CreateTimer(TimerCallback,
+        _timer = timeProvider.CreateTimer(TimerCallbackAsync,
             null,
             TimeSpan.FromMilliseconds(options.Value.WebAssemblyStateProviderPollingDelay),
             TimeSpan.FromMilliseconds(options.Value.WebAssemblyStateProviderPollingInterval));
         _logger = logger;
     }
 
-    private async void TimerCallback(object? _)
+    private async void TimerCallbackAsync(object? _)
     {
         await _semaphore.WaitAsync();
         try
         {
-            _user = await RefreshUser();
+            _user = await RefreshUserAsync();
         }
         finally
         {
@@ -52,7 +52,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         }
     }
 
-    private async Task<ClaimsPrincipal> RefreshUser()
+    private async Task<ClaimsPrincipal> RefreshUserAsync()
     {
         // We don't want to do any polling if we already know that the user is anonymous.
         // There's no way for us to become authenticated without the server issuing a cookie
@@ -94,7 +94,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
                 if (_user == null)
 #pragma warning restore CA1508
                 {
-                    _user = await RefreshUser();
+                    _user = await RefreshUserAsync();
                 }
             }
             finally

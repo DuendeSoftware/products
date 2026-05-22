@@ -35,7 +35,7 @@ internal class ServerSideTokenStore(
         Ct ct = default)
     {
         logger.RetrievingTokenForUser(LogLevel.Debug, user.Identity?.Name);
-        var session = await GetSession(user);
+        var session = await GetSessionAsync(user);
         if (session == null)
         {
             var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
@@ -50,7 +50,7 @@ internal class ServerSideTokenStore(
         return tokensInAuthProperties.GetUserToken(ticket.Properties, parameters);
     }
 
-    private async Task<UserSession?> GetSession(ClaimsPrincipal user)
+    private async Task<UserSession?> GetSessionAsync(ClaimsPrincipal user)
     {
         if (user.Identity?.IsAuthenticated == false)
         {
@@ -86,7 +86,7 @@ internal class ServerSideTokenStore(
         UserTokenRequestParameters? parameters = null, Ct ct = default)
     {
         logger.StoringTokenForUser(LogLevel.Debug, user.Identity?.Name);
-        await UpdateTicket(user,
+        await UpdateTicketAsync(user,
             async ticket => { await tokensInAuthProperties.SetUserTokenAsync(token, ticket.Properties, parameters, ct); });
     }
 
@@ -94,16 +94,16 @@ internal class ServerSideTokenStore(
     public async Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null, Ct ct = default)
     {
         logger.RemovingTokenForUser(LogLevel.Debug, user.Identity?.Name);
-        await UpdateTicket(user, ticket =>
+        await UpdateTicketAsync(user, ticket =>
         {
             tokensInAuthProperties.RemoveUserToken(ticket.Properties, parameters);
             return Task.CompletedTask;
         });
     }
 
-    protected async Task UpdateTicket(ClaimsPrincipal user, Func<AuthenticationTicket, Task> updateAction)
+    protected async Task UpdateTicketAsync(ClaimsPrincipal user, Func<AuthenticationTicket, Task> updateAction)
     {
-        var session = await GetSession(user);
+        var session = await GetSessionAsync(user);
         if (session == null)
         {
             logger.FailedToFindSessionToUpdate(LogLevel.Debug);
