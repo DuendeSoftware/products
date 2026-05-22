@@ -16,10 +16,13 @@ public sealed class DataRange
     {
     }
 
+    /// <summary>The continuation-token-based pagination value, if set.</summary>
     public ContinuationTokenDataRange? TokenValue { get; private init; }
 
+    /// <summary>The offset-based pagination value, if set.</summary>
     public OffsetDataRange? OffsetValue { get; private init; }
 
+    /// <summary>The page-number-based pagination value, if set.</summary>
     public PagedDataRange? PageValue { get; private init; }
 
     /// <summary>
@@ -72,11 +75,20 @@ public sealed class DataRange
         PageValue = page
     };
 
+    /// <summary>
+    /// Creates a <see cref="DataRange"/> from offset-based pagination.
+    /// </summary>
+    /// <param name="skip">The number of items to skip.</param>
     public static DataRange FromOffset(OffsetSkip? skip) => new()
     {
         OffsetValue = new OffsetDataRange(skip, null)
     };
 
+    /// <summary>
+    /// Creates a <see cref="DataRange"/> from offset-based pagination.
+    /// </summary>
+    /// <param name="skip">The number of items to skip.</param>
+    /// <param name="size">The number of items to take.</param>
     public static DataRange FromOffset(OffsetSkip? skip, DataRangeSize? size) => new()
     {
         OffsetValue = new OffsetDataRange(skip, size)

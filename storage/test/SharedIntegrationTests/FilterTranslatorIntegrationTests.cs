@@ -22,7 +22,7 @@ public partial class FilterTranslatorIntegrationTests
 
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
-    private sealed class TestEntityAttributeResolver : IScimAttributeTypeResolver
+    private sealed class TestEntityAttributeResolver : IQueryAttributeTypeResolver
     {
         public Field ResolveField(string attributePath) => attributePath.ToLowerInvariant() switch
         {

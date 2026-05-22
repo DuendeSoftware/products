@@ -14,6 +14,7 @@ public sealed class FilterBy
     {
     }
 
+    /// <summary>The search expression value, if set.</summary>
     public SearchExpression? SearchExpressionValue { get; init; }
 
     /// <summary>
@@ -49,6 +50,7 @@ public sealed class FilterBy<T>
 
     internal SearchExpression? SearchExpressionValue { get; init; }
 
+    /// <summary>The typed filter value, if set.</summary>
     public T? FilterValue { get; init; }
 
     /// <summary>

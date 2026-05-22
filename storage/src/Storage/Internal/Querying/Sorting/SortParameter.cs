@@ -10,6 +10,9 @@ namespace Duende.Storage.Internal.Querying.Sorting;
 /// <summary>
 /// Specifies a field and direction for sorting query results.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record SortParameter
 {
     /// <summary>

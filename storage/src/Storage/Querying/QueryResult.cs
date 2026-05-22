@@ -55,6 +55,12 @@ public sealed record QueryResult<TItem> : IReadOnlyList<TItem>
     /// <inheritdoc />
     public TItem this[int index] => Items[index];
 
+    /// <summary>
+    /// Converts the items in this result to a different type using the specified conversion function.
+    /// </summary>
+    /// <typeparam name="TConverted">The target item type.</typeparam>
+    /// <param name="convert">The function to convert each item.</param>
+    /// <returns>A new <see cref="QueryResult{TConverted}"/> with converted items and the same pagination metadata.</returns>
     public QueryResult<TConverted> ConvertTo<TConverted>(Func<TItem, TConverted> convert) =>
         new()
         {

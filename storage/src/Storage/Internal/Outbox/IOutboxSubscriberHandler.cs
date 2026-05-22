@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Outbox;
 /// Defines the handler contract for processing outbox events for a specific subscriber.
 /// Implementations are registered in DI using keyed services, keyed by subscriber name.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public interface IOutboxSubscriberHandler
 {
     /// <summary>Handles a single outbox event delivered to this subscriber.</summary>

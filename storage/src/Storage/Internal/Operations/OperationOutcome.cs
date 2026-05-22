@@ -6,6 +6,9 @@ namespace Duende.Storage.Internal.Operations;
 /// <summary>
 /// Represents the outcome of an individual operation within a batch.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public enum OperationOutcome
 {
     /// <summary>

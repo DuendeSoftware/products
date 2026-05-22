@@ -8,6 +8,8 @@ namespace Duende.Storage.Internal.Querying.SearchFields;
 /// This is a pure data structure for Entity-Attribute-Value (EAV) storage pattern.
 /// </summary>
 /// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+///
 /// For string fields, both StringValue and GuidValue are set — StringValue holds the raw (uppercased)
 /// string for LIKE queries, and GuidValue holds a deterministic hash for fast exact-match queries.
 /// For GuidField and ExactMatchField, only GuidValue is set.

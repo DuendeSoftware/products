@@ -8,12 +8,18 @@ namespace Duende.Storage.Internal.Telemetry;
 /// <summary>
 /// Records storage metrics using System.Diagnostics.Metrics.
 /// </summary>
-public sealed class StorageMetrics : IDisposable
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal sealed class StorageMetrics : IDisposable
 {
     private readonly Meter _meter;
     private readonly Counter<long> _operationCounter;
     private readonly Histogram<double> _operationDuration;
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="StorageMetrics"/>.
+    /// </summary>
     public StorageMetrics()
     {
         _meter = new Meter(StorageTelemetryConstants.MeterName, StorageTracing.ServiceVersion);
@@ -26,6 +32,12 @@ public sealed class StorageMetrics : IDisposable
             description: "Duration of storage operations in seconds.");
     }
 
+    /// <summary>
+    /// Records a successful operation.
+    /// </summary>
+    /// <param name="operation">The operation name.</param>
+    /// <param name="dbSystem">The database system.</param>
+    /// <param name="entityType">The entity type name, or null.</param>
     public void RecordSuccess(string operation, string dbSystem, string? entityType)
     {
         if (entityType != null)
@@ -45,6 +57,13 @@ public sealed class StorageMetrics : IDisposable
         }
     }
 
+    /// <summary>
+    /// Records a failed operation.
+    /// </summary>
+    /// <param name="operation">The operation name.</param>
+    /// <param name="dbSystem">The database system.</param>
+    /// <param name="ex">The exception that occurred.</param>
+    /// <param name="entityType">The entity type name, or null.</param>
     public void RecordError(string operation, string dbSystem, Exception ex, string? entityType)
     {
         if (entityType != null)
@@ -66,6 +85,14 @@ public sealed class StorageMetrics : IDisposable
         }
     }
 
+    /// <summary>
+    /// Records operation duration.
+    /// </summary>
+    /// <param name="operation">The operation name.</param>
+    /// <param name="durationSeconds">The duration in seconds.</param>
+    /// <param name="dbSystem">The database system.</param>
+    /// <param name="result">The result tag value (success or error).</param>
+    /// <param name="entityType">The entity type name, or null.</param>
     public void RecordDuration(string operation, double durationSeconds, string dbSystem, string result, string? entityType)
     {
         if (entityType != null)
@@ -85,5 +112,6 @@ public sealed class StorageMetrics : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose() => _meter.Dispose();
 }

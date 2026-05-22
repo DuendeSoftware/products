@@ -9,6 +9,9 @@ namespace Duende.Storage.Internal.Querying;
 /// Constants for system field paths that map to entity-level columns
 /// rather than EAV search values.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public static class SystemFields
 {
     /// <summary>

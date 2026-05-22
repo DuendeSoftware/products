@@ -8,7 +8,10 @@ namespace Duende.Storage.Internal.Querying;
 /// <summary>
 /// Defines SQL dialect-specific behavior for query building.
 /// </summary>
-public interface ISqlDialect
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal interface ISqlDialect
 {
     /// <summary>
     /// The LIKE operator for case-insensitive matching.

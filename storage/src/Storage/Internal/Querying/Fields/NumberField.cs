@@ -8,8 +8,16 @@ namespace Duende.Storage.Internal.Querying.Fields;
 /// <summary>
 /// Represents a number-valued field with numeric comparison operations.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record NumberField : Field
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="NumberField"/>.
+    /// </summary>
+    /// <param name="path">The field path.</param>
+    /// <param name="isMultiValued">Whether the field is multi-valued.</param>
     public NumberField(string path, bool isMultiValued = false) : base(path, FieldType.Number, isMultiValued)
     {
     }

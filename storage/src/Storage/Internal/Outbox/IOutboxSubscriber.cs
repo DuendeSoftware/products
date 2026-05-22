@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Outbox;
 /// Declares a subscriber that wants to receive outbox events via the fanout mechanism.
 /// Subscribers are registered in DI and matched against outbox events by event name and entity type.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public interface IOutboxSubscriber
 {
     /// <summary>The unique name identifying this subscriber.</summary>

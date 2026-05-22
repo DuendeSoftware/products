@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Outbox;
 /// Represents the outcome of a handler processing an outbox event.
 /// Handlers return one of: <see cref="Success"/>, <see cref="Retry"/>, or <see cref="Drop"/>.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public abstract record HandleOutcomeResult
 {
     private HandleOutcomeResult() { }

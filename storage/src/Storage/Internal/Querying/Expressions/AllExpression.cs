@@ -6,6 +6,9 @@ namespace Duende.Storage.Internal.Querying.Expressions;
 /// <summary>
 /// Singleton expression representing 'match all records' - no filter applied.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record AllExpression : IQueryFilterExpression
 {
     /// <summary>

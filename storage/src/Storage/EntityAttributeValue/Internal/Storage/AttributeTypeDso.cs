@@ -4,11 +4,14 @@
 namespace Duende.Storage.EntityAttributeValue.Internal.Storage;
 
 /// <summary>
-///     Persisted representation of an <see cref="AttributeType"/>.
-///     <c>EnumValues</c> and <c>ConstrainedValues</c> are reserved for future enum/constrained-string
-///     attribute types and are currently always <c>null</c>.
+/// Persisted representation of an <see cref="AttributeType"/>.
+/// <c>EnumValues</c> and <c>ConstrainedValues</c> are reserved for future enum/constrained-string
+/// attribute types and are currently always <c>null</c>.
 /// </summary>
-public sealed record AttributeTypeDso(
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal sealed record AttributeTypeDso(
     string Kind,
     string? ScalarDataType,
     IReadOnlyList<EnumValueDso>? EnumValues,
@@ -17,9 +20,12 @@ public sealed record AttributeTypeDso(
     AttributeTypeDso? ElementType);
 
 /// <summary>
-///     Persisted representation of a sub-property within a complex attribute type.
+/// Persisted representation of a sub-property within a complex attribute type.
 /// </summary>
-public sealed record ComplexPropertyDso(
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal sealed record ComplexPropertyDso(
     AttributeTypeDso Type,
     string? DisplayName,
     string? Description);

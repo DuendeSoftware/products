@@ -5,7 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage;
 
+/// <summary>
+/// A builder interface for configuring storage services.
+/// </summary>
 public interface IStorageBuilder
 {
+    /// <summary>
+    /// Gets the service collection used to register storage services.
+    /// </summary>
     public IServiceCollection Services { get; }
 }

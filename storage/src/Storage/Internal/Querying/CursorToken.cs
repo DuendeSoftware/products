@@ -9,7 +9,10 @@ namespace Duende.Storage.Internal.Querying;
 /// <summary>
 /// Represents a decoded cursor token containing the last-seen position for seek-based pagination.
 /// </summary>
-public sealed record CursorToken
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal sealed record CursorToken
 {
     /// <summary>
     /// The ID of the last entity on the previous page.

@@ -6,6 +6,9 @@ namespace Duende.Storage.Internal.Operations;
 /// <summary>
 /// Represents the result of a batch operation.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 /// <param name="Success">True if all operations succeeded; false if any failed (and all were rolled back).</param>
 /// <param name="Results">The outcome of each operation, in order.</param>
 public sealed record BatchResult(bool Success, IReadOnlyList<OperationResult> Results)

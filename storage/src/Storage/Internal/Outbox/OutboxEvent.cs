@@ -8,6 +8,9 @@ namespace Duende.Storage.Internal.Outbox;
 /// The store implementation stamps <c>PoolId</c> from the ambient pool context, and the
 /// database automatically assigns the <c>SequenceNumber</c> on insert.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record OutboxEvent
 {
     /// <summary>The unique identifier for this outbox event.</summary>

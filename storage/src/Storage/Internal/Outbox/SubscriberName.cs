@@ -8,6 +8,9 @@ namespace Duende.Storage.Internal.Outbox;
 /// <summary>
 /// The unique name identifying an outbox subscriber. Only alphanumeric characters, underscores, and hyphens are allowed.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 [StringValue]
 public partial record SubscriberName
 {

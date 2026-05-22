@@ -12,5 +12,6 @@ namespace Duende.Storage.Pagination;
 [StringValue]
 public partial record ContinuationToken
 {
+    /// <summary>The token value representing the beginning of the dataset.</summary>
     public const string Beginning = "Beginning";
 }

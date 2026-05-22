@@ -5,6 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.Internal;
 
+/// <summary>
+/// Extension methods for configuring storage services.
+/// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public static class StorageBuilderExtensions
 {
     extension(IServiceCollection services)

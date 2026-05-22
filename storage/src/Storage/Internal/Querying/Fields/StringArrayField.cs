@@ -9,8 +9,15 @@ namespace Duende.Storage.Internal.Querying.Fields;
 /// Represents a string array field (multi-valued string).
 /// This is a convenience subclass of <see cref="Field"/> with <see cref="Field.IsMultiValued"/> set to true.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record StringArrayField : Field
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="StringArrayField"/>.
+    /// </summary>
+    /// <param name="path">The field path.</param>
     public StringArrayField(string path) : base(path, FieldType.String, isMultiValued: true)
     {
     }

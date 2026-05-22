@@ -8,6 +8,10 @@ namespace Duende.Storage.EntityAttributeValue;
 /// </summary>
 public sealed record ScalarAttributeType : AttributeType
 {
+    /// <summary>
+    ///     Creates a scalar attribute type with the specified data type.
+    /// </summary>
+    /// <param name="DataType">The scalar data type.</param>
     public ScalarAttributeType(ScalarDataType DataType)
     {
         if (!Enum.IsDefined(DataType))
@@ -18,5 +22,8 @@ public sealed record ScalarAttributeType : AttributeType
         this.DataType = DataType;
     }
 
+    /// <summary>
+    ///     Gets the scalar data type for this attribute.
+    /// </summary>
     public ScalarDataType DataType { get; init; }
 }

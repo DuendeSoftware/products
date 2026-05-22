@@ -8,13 +8,28 @@ using Duende.Storage.Internal.Querying.Fields;
 
 namespace Duende.Storage.Internal.Filtering;
 
+/// <summary>
+/// Translates parsed filter expression trees into query filter expressions.
+/// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed class FilterTranslator
 {
-    private readonly IScimAttributeTypeResolver _resolver;
+    private readonly IQueryAttributeTypeResolver _resolver;
 
-    public FilterTranslator(IScimAttributeTypeResolver resolver) =>
+    /// <summary>
+    /// Initializes a new instance of <see cref="FilterTranslator"/>.
+    /// </summary>
+    /// <param name="resolver">The attribute type resolver for mapping attribute paths to fields.</param>
+    public FilterTranslator(IQueryAttributeTypeResolver resolver) =>
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
 
+    /// <summary>
+    /// Translates a filter string into a query filter expression.
+    /// </summary>
+    /// <param name="filter">The filter string to translate, or null for no filter.</param>
+    /// <returns>The query filter expression, or null if the filter is empty.</returns>
     public IQueryFilterExpression? Translate(string? filter)
     {
         if (string.IsNullOrWhiteSpace(filter))
@@ -26,6 +41,11 @@ public sealed class FilterTranslator
         return Translate(expression);
     }
 
+    /// <summary>
+    /// Translates a parsed filter expression into a query filter expression.
+    /// </summary>
+    /// <param name="expression">The filter expression to translate.</param>
+    /// <returns>The query filter expression.</returns>
     public IQueryFilterExpression Translate(FilterExpression expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
@@ -148,7 +168,7 @@ public sealed class FilterTranslator
     /// Inside an array filter, fields are per-element and the SQL builder
     /// re-adds the array prefix when building the query.
     /// </summary>
-    private sealed class ArrayElementResolver(IScimAttributeTypeResolver inner, string arrayPrefix) : IScimAttributeTypeResolver
+    private sealed class ArrayElementResolver(IQueryAttributeTypeResolver inner, string arrayPrefix) : IQueryAttributeTypeResolver
     {
         public Field ResolveField(string attributePath)
         {

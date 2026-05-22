@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Outbox;
 /// Represents an outbox event as read from the database, including the
 /// database-assigned sequence number and the store-stamped space identifier.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record PersistedOutboxEvent
 {
     /// <summary>The store-generated unique identifier for this persisted message (one per subscriber fanout row).</summary>

@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Querying.SearchFields;
 /// Builder for constructing <see cref="SearchFieldCollection"/> collections.
 /// Provides helper methods for adding scalar values, nested values, and array item values.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed class SearchFieldsBuilder
 {
     private readonly List<SearchFieldValue> _values = new();

@@ -10,6 +10,9 @@ namespace Duende.Storage.Internal.Querying.Expressions;
 /// Example: emails[type eq "work" and value co "@example.com"]
 /// This ensures both conditions match the same email in the emails array.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record ArrayFilterExpression : IQueryFilterExpression
 {
     /// <summary>
@@ -23,6 +26,11 @@ public sealed record ArrayFilterExpression : IQueryFilterExpression
     /// </summary>
     public IQueryFilterExpression Filter { get; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="ArrayFilterExpression"/>.
+    /// </summary>
+    /// <param name="arrayFieldPath">The array field path.</param>
+    /// <param name="filter">The filter expression to apply within each array element.</param>
     public ArrayFilterExpression(string arrayFieldPath, IQueryFilterExpression filter)
     {
         if (string.IsNullOrWhiteSpace(arrayFieldPath))

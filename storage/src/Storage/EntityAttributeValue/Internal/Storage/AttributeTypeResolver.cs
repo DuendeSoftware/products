@@ -8,12 +8,15 @@ using Duende.Storage.Internal.Querying.Fields;
 namespace Duende.Storage.EntityAttributeValue.Internal.Storage;
 
 /// <summary>
-/// Resolves SCIM attribute paths to Faro Field types based on the dynamic user schema.
-/// Unlike other <see cref="IScimAttributeTypeResolver"/> implementations which map fixed SCIM User schema attributes,
+/// Resolves query attribute paths to Faro Field types based on the dynamic user schema.
+/// Unlike other <see cref="IQueryAttributeTypeResolver"/> implementations which map fixed schema attributes,
 /// this resolver dynamically maps user-defined schema attributes to their Faro field types.
 /// Supports dotted paths (e.g., <c>address.city</c>, <c>phones.type</c>) for complex and list types.
 /// </summary>
-public sealed class AttributeTypeResolver : IScimAttributeTypeResolver
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal sealed class AttributeTypeResolver : IQueryAttributeTypeResolver
 {
     private readonly IReadOnlyDictionary<AttributeCode, AttributeDefinition> _attributeDefinitions;
 

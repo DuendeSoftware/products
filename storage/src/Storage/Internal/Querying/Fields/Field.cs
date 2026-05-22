@@ -8,6 +8,9 @@ namespace Duende.Storage.Internal.Querying.Fields;
 /// <summary>
 /// Base class for all field types, representing a queryable field path.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public abstract record Field
 {
     /// <summary>
@@ -28,6 +31,12 @@ public abstract record Field
     /// </summary>
     public bool IsMultiValued { get; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="Field"/>.
+    /// </summary>
+    /// <param name="path">The field path.</param>
+    /// <param name="type">The field type.</param>
+    /// <param name="isMultiValued">Whether the field is multi-valued.</param>
     protected Field(string path, FieldType type, bool isMultiValued = false)
     {
         if (string.IsNullOrWhiteSpace(path))

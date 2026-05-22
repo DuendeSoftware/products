@@ -9,6 +9,9 @@ namespace Duende.Storage.Internal.Querying;
 /// Static entry point for building query expressions.
 /// Provides a fluent API for constructing query filter expressions.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public static class Query
 {
     /// <summary>

@@ -8,6 +8,9 @@ namespace Duende.Storage.Internal;
 /// When used, the query returns <see cref="EntityAttributeValue.AttributeValueCollection"/>
 /// instead of a fully-typed DTO.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record Projection
 {
     /// <summary>The attribute names to include.</summary>

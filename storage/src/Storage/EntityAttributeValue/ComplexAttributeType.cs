@@ -10,6 +10,10 @@ namespace Duende.Storage.EntityAttributeValue;
 /// </summary>
 public sealed record ComplexAttributeType : AttributeType
 {
+    /// <summary>
+    ///     Creates a complex attribute type with the specified named properties.
+    /// </summary>
+    /// <param name="Properties">The property definitions keyed by attribute code.</param>
     public ComplexAttributeType(IReadOnlyDictionary<AttributeCode, ComplexAttributeProperty> Properties)
     {
         ArgumentNullException.ThrowIfNull(Properties, nameof(Properties));
@@ -72,6 +76,11 @@ public sealed record ComplexAttributeType : AttributeType
         return false;
     }
 
+    /// <summary>
+    ///     Determines whether this complex type is equal to another.
+    /// </summary>
+    /// <param name="other">The other complex attribute type.</param>
+    /// <returns><c>true</c> if the types are equal; otherwise, <c>false</c>.</returns>
     public bool Equals(ComplexAttributeType? other)
     {
         if (other is null)
@@ -95,6 +104,10 @@ public sealed record ComplexAttributeType : AttributeType
         return true;
     }
 
+    /// <summary>
+    ///     Returns the hash code for this complex attribute type.
+    /// </summary>
+    /// <returns>The hash code.</returns>
     public override int GetHashCode()
     {
         var hash = new HashCode();

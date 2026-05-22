@@ -9,6 +9,9 @@ namespace Duende.Storage.Internal.Querying;
 /// Visitor interface for processing query expression trees.
 /// Implementations can translate expressions to different formats (e.g., SQL, in-memory evaluation).
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 /// <typeparam name="TResult">The type returned by visiting an expression.</typeparam>
 public interface IQueryExpressionVisitor<TResult>
 {

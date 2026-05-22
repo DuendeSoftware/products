@@ -4,8 +4,7 @@
 namespace Duende.Storage.Pagination;
 
 /// <summary>
-/// A starting position for pagination. Represents a 0-based row offset or a 1-based page number,
-/// depending on context.
+/// A validated 0-based row offset for offset-based pagination.
 /// </summary>
 [ValueOf<long>]
 public partial record OffsetSkip

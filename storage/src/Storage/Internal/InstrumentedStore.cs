@@ -17,10 +17,17 @@ namespace Duende.Storage.Internal;
 /// <summary>
 /// Decorates an <see cref="IStore"/> with tracing and metrics instrumentation.
 /// </summary>
-public sealed class InstrumentedStore(IStore inner, StorageMetrics metrics, string dbSystem) : IStore
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
+internal sealed class InstrumentedStore(IStore inner, StorageMetrics metrics, string dbSystem) : IStore
 {
+    /// <summary>
+    /// Gets the inner store being decorated.
+    /// </summary>
     public IStore Inner => inner;
 
+    /// <inheritdoc />
     public void SetPoolId(PoolId poolId) => inner.SetPoolId(poolId);
 
     public async Task<CreateResult> CreateAsync<TDso>(

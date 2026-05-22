@@ -9,6 +9,9 @@ namespace Duende.Storage.Internal;
 /// <see cref="InRelative"/> for a duration from now,
 /// or <see cref="NoExpiration"/> to explicitly indicate no expiration.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public abstract record Expiration
 {
     // Prevent external subclassing.

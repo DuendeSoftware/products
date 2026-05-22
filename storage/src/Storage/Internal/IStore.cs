@@ -13,6 +13,12 @@ using OutboxEventId = Duende.Storage.Internal.Outbox.OutboxEventId;
 
 namespace Duende.Storage.Internal;
 
+/// <summary>
+/// Defines the core data store operations for entities, links, and outbox events.
+/// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public interface IStore
 {
     internal void SetPoolId(PoolId poolId);

@@ -6,6 +6,9 @@ namespace Duende.Storage.Internal.Operations;
 /// <summary>
 /// Marker interface for batch operations.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public interface IStoreOperation
 {
     /// <summary>

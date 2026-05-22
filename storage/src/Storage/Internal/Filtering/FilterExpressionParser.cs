@@ -6,8 +6,21 @@ using Duende.Storage.Querying;
 
 namespace Duende.Storage.Internal.Filtering;
 
+/// <summary>
+/// Parses SCIM-style filter strings into a filter expression tree.
+/// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public static class FilterExpressionParser
 {
+    /// <summary>
+    /// Parses a filter string into a <see cref="FilterExpression"/>.
+    /// </summary>
+    /// <param name="filter">The SCIM filter string to parse.</param>
+    /// <returns>The parsed filter expression tree.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="filter"/> is null or whitespace.</exception>
+    /// <exception cref="FilterParseException">Thrown when the filter string has invalid syntax.</exception>
     public static FilterExpression Parse(string filter)
     {
         if (string.IsNullOrWhiteSpace(filter))
@@ -36,6 +49,12 @@ public static class FilterExpressionParser
         }
     }
 
+    /// <summary>
+    /// Attempts to parse a filter string, returning a value indicating success.
+    /// </summary>
+    /// <param name="filter">The SCIM filter string to parse.</param>
+    /// <param name="expression">When successful, the parsed filter expression; otherwise, null.</param>
+    /// <returns><c>true</c> if parsing succeeded; otherwise, <c>false</c>.</returns>
     public static bool TryParse(string filter, out FilterExpression? expression)
     {
         try

@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal;
 /// Specifies the type of a field, corresponding to the typed columns in the search_values table.
 /// This ensures QueryFields reads from the correct column instead of checking the first non-null value.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public enum FieldType
 {
     /// <summary>

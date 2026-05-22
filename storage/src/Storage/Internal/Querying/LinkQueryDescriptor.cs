@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Querying;
 /// Describes a link traversal query — built by <c>LinkQueryBuilder</c> and
 /// consumed by <c>IQueryStore.QueryLinks</c>.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record LinkQueryDescriptor(
     EntityType SourceEntityType,
     IReadOnlyList<LinkQueryJoin> Joins,
@@ -17,6 +20,9 @@ public sealed record LinkQueryDescriptor(
 /// A single hop in a link query chain, pairing a <see cref="LinkDefinition"/>
 /// with the direction it is traversed.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record LinkQueryJoin(
     LinkDefinition Definition,
     LinkJoinDirection Direction);
@@ -24,6 +30,9 @@ public sealed record LinkQueryJoin(
 /// <summary>
 /// Direction of a link traversal join.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public enum LinkJoinDirection
 {
     /// <summary>Traverse from the left entity to the right entity.</summary>

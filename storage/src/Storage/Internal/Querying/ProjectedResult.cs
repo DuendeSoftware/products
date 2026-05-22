@@ -6,6 +6,9 @@ namespace Duende.Storage.Internal.Querying;
 /// <summary>
 /// Represents a query result with only selected field values rather than the full entity.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record ProjectedResult
 {
     /// <summary>

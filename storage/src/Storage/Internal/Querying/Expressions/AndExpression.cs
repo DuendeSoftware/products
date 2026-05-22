@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Querying.Expressions;
 /// Expression that combines multiple filter expressions with AND logic.
 /// All conditions must be true for the expression to match.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record AndExpression : IQueryFilterExpression
 {
     /// <summary>
@@ -14,6 +17,10 @@ public sealed record AndExpression : IQueryFilterExpression
     /// </summary>
     public IReadOnlyList<IQueryFilterExpression> Parts { get; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="AndExpression"/> with the specified parts.
+    /// </summary>
+    /// <param name="parts">The filter expressions to combine with AND logic.</param>
     public AndExpression(IReadOnlyList<IQueryFilterExpression> parts)
     {
         ArgumentNullException.ThrowIfNull(parts);
@@ -26,6 +33,10 @@ public sealed record AndExpression : IQueryFilterExpression
         Parts = parts;
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="AndExpression"/> with the specified parts.
+    /// </summary>
+    /// <param name="parts">The filter expressions to combine with AND logic.</param>
     public AndExpression(params IQueryFilterExpression[] parts)
         : this((IReadOnlyList<IQueryFilterExpression>)parts)
     {

@@ -11,8 +11,15 @@ namespace Duende.Storage.Internal.Querying.Fields;
 /// Queries use the guid_value column with hashed values for fast lookups.
 /// No string_value is stored — only the deterministic hash in guid_value.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record ExactMatchField : Field
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="ExactMatchField"/>.
+    /// </summary>
+    /// <param name="path">The field path.</param>
     public ExactMatchField(string path) : base(path, FieldType.Guid)
     {
     }

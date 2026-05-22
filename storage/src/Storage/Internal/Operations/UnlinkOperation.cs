@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Operations;
 /// Represents an unlink operation for batch processing.
 /// Removes a link between two entities as part of an atomic batch.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed class UnlinkOperation : IStoreOperation
 {
     private UnlinkOperation(LinkDefinition definition, UuidV7 leftEntityId, UuidV7 rightEntityId)

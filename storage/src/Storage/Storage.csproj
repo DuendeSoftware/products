@@ -6,6 +6,8 @@
     <PackageId>Duende.Storage</PackageId>
     <ValueObjectsGeneratorNamespace>Duende.Storage</ValueObjectsGeneratorNamespace>
     <NoWarn>$(NoWarn);CA1062</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors Condition="'$(Configuration)' == 'Release'">$(WarningsAsErrors);CS1591</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +26,9 @@
     <InternalsVisibleTo Include="Duende.Storage.MsSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.Benchmarks" />
+    <InternalsVisibleTo Include="Duende.Platform" />
+    <InternalsVisibleTo Include="Storage" />
+    <InternalsVisibleTo Include="Authentication.Tests.Internal" />
     <InternalsVisibleTo Include="Duende.Storage.Samples.EavSchema" />
     <InternalsVisibleTo Include="Duende.UserManagement" />
     <InternalsVisibleTo Include="Duende.UserManagement.Tests.Internal" />

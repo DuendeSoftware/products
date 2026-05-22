@@ -7,6 +7,9 @@ namespace Duende.Storage.Internal.Querying.Expressions;
 /// Expression that combines multiple filter expressions with OR logic.
 /// At least one condition must be true for the expression to match.
 /// </summary>
+/// <remarks>
+/// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
+/// </remarks>
 public sealed record OrExpression : IQueryFilterExpression
 {
     /// <summary>
@@ -14,6 +17,10 @@ public sealed record OrExpression : IQueryFilterExpression
     /// </summary>
     public IReadOnlyList<IQueryFilterExpression> Parts { get; }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="OrExpression"/> with the specified parts.
+    /// </summary>
+    /// <param name="parts">The filter expressions to combine with OR logic.</param>
     public OrExpression(IReadOnlyList<IQueryFilterExpression> parts)
     {
         ArgumentNullException.ThrowIfNull(parts);
@@ -26,6 +33,10 @@ public sealed record OrExpression : IQueryFilterExpression
         Parts = parts;
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="OrExpression"/> with the specified parts.
+    /// </summary>
+    /// <param name="parts">The filter expressions to combine with OR logic.</param>
     public OrExpression(params IQueryFilterExpression[] parts)
         : this((IReadOnlyList<IQueryFilterExpression>)parts)
     {
