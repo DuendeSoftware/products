@@ -37,8 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../icon.png" Pack="true" Visible="false" PackagePath="" />
-    <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" />
     <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
