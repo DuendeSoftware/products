@@ -1,0 +1,10 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+  <Import Project="../../test.props" />
+  <PropertyGroup>
+    <!-- TODO: Fix these in platform test code and remove suppressions -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1829</NoWarn><!-- Use Length/Count property instead of Count() -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn><!-- Naming rule violation -->
+  </PropertyGroup>
+</Project>

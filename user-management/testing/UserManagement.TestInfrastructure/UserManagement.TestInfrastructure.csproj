@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Duende.UserManagement</RootNamespace>
+    <AssemblyName>Duende.UserManagement.TestInfrastructure</AssemblyName>
+    <NoWarn>$(NoWarn);IDE0130</NoWarn><!-- Namespace does not match folder structure --><!-- TODO: remove? -->
+    <PackageId>Duende.UserManagement.TestInfrastructure</PackageId>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!--Because an application's API isn't typically referenced from outside the assembly, types can be made internal -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.UserManagement.Tests.Internal" />
+  </ItemGroup>
+  
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\UserManagement\UserManagement.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="Duende.Storage.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Time.Testing" />
+    <Using Include="Shouldly" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

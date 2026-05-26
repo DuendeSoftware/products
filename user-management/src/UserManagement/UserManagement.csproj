@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.UserManagement</AssemblyName>
+    <RootNamespace>Duende.UserManagement</RootNamespace>
+    <ValueObjectsGeneratorNamespace>Duende.UserManagement</ValueObjectsGeneratorNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Authentication\Passkeys\passkeys.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Authentication\Passkeys\passkeys.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.IdentityModel" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Storage" />
+  </ItemGroup>
+
+</Project>

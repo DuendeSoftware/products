@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Duende.Platform.UserManagement</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Namespace does not match folder structure --> <!--todo: remove-->
+    <NoWarn>$(NoWarn);IDE0130</NoWarn>
+
+    <!-- async suffix for test methods -->
+    <NoWarn>$(NoWarn);IDE0106</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\UserManagement\UserManagement.csproj" />
+    <ProjectReference Include="..\..\testing\UserManagement.TestInfrastructure\UserManagement.TestInfrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" />
+    <PackageReference Include="Verify.XunitV3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Time.Testing" />
+    <Using Include="Shouldly" />
+  </ItemGroup>
+</Project>

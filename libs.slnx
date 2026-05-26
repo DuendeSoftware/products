@@ -8,16 +8,6 @@
     <Project Path=".github/BuildHelpers/BuildHelpers.csproj" />
     <Project Path=".github/RepoTool/RepoTool.csproj" />
   </Folder>
-  <Folder Name="/aspnetcore-authentication-jwtbearer/" />
-  <Folder Name="/aspnetcore-authentication-jwtbearer/src/">
-    <Project Path="aspnetcore-authentication-jwtbearer/src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj" />
-  </Folder>
-  <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
-    <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
-  </Folder>
-  <Folder Name="/aspnetcore-authentication-jwtbearer/tools/">
-    <Project Path="aspnetcore-authentication-jwtbearer/tools/PublicApi/PublicApi.csproj" />
-  </Folder>
   <Folder Name="/cli/" />
   <Folder Name="/cli/src/">
     <Project Path="cli/src/Cli/Cli.csproj" />
@@ -219,32 +209,5 @@
     <Project Path="shared/ValueObjectsGenerator/ValueObjectsGenerator.csproj" />
     <Project Path="shared/Xunit.Playwright/Xunit.Playwright.csproj" />
   </Folder>
-  <Folder Name="/templates/">
-    <Project Path="templates/build/build.csproj" />
-  </Folder>
-  <Folder Name="/labs/" />
-  <Folder Name="/labs/FineGrainedAuthorization/" />
-  <Folder Name="/labs/FineGrainedAuthorization/src/">
-    <Project Path="labs/FineGrainedAuthorization/src/FGA.AspNetCore/FGA.AspNetCore.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/src/FGA.Storage.PostgreSQL/FGA.Storage.PostgreSQL.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/src/FGA.Storage.Sqlite/FGA.Storage.Sqlite.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/src/FGA.Storage.SqlServer/FGA.Storage.SqlServer.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/src/FGA.Testing/FGA.Testing.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/src/FGA/FGA.csproj" />
-  </Folder>
-  <Folder Name="/labs/FineGrainedAuthorization/test/">
-    <Project Path="labs/FineGrainedAuthorization/test/FGA.Tests/FGA.Tests.csproj" />
-  </Folder>
-  <Folder Name="/labs/FineGrainedAuthorization/samples/">
-    <Project Path="labs/FineGrainedAuthorization/samples/AdvancedDemo/AdvancedDemo.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/samples/DemoApp/DemoApp.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/samples/PostgreSqlDemo/PostgreSqlDemo.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/samples/SqliteDemo/SqliteDemo.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/samples/SqlServerDemo/SqlServerDemo.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/samples/WebApiDemo/WebApiDemo.csproj" />
-  </Folder>
-  <Folder Name="/labs/FineGrainedAuthorization/aspire/">
-    <Project Path="labs/FineGrainedAuthorization/aspire/AppHost/AppHost.csproj" />
-    <Project Path="labs/FineGrainedAuthorization/aspire/ServiceDefaults/ServiceDefaults.csproj" />
-  </Folder>
+
 </Solution>
