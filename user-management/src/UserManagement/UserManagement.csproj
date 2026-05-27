@@ -3,7 +3,6 @@
   <PropertyGroup>
     <AssemblyName>Duende.UserManagement</AssemblyName>
     <RootNamespace>Duende.UserManagement</RootNamespace>
-    <ValueObjectsGeneratorNamespace>Duende.UserManagement</ValueObjectsGeneratorNamespace>
   </PropertyGroup>
 
   <ItemGroup>

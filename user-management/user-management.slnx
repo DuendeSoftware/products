@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UserManagement/UserManagement.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/UserManagement.Tests.Internal/UserManagement.Tests.Internal.csproj" />
+    <Project Path="test/UserManagement.Tests.Public/UserManagement.Tests.Public.csproj" />
+  </Folder>
+  <Folder Name="/testing/">
+    <Project Path="testing/UserManagement.TestInfrastructure/UserManagement.TestInfrastructure.csproj" />
+  </Folder>
+</Solution>

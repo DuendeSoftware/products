@@ -1,6 +1,6 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
-  <Import Project="../../test.props" />
+  <Import Project="../test.props" />
   <PropertyGroup>
     <!-- TODO: Fix these in platform test code and remove suppressions -->
     <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
