@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>Duende.Storage.MsSql.Tests</AssemblyName>
     <RootNamespace>Duende.Storage.MsSql</RootNamespace>
   </PropertyGroup>
 

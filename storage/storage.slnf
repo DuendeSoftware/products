@@ -1,7 +1,11 @@
 {
   "solution": {
-    "path": "..\\products.slnx",
+    "path": "..\\libs.slnx",
     "projects": [
+      "storage\\benchmarks\\Duende.Storage.Benchmarks.csproj",
+      "storage\\samples\\EavSchema\\EavSchema.csproj",
+      "storage\\samples\\EntityLinking\\EntityLinking.csproj",
+      "storage\\samples\\GettingStarted\\GettingStarted.csproj",
       "storage\\src\\Storage.CliPlugin\\Storage.CliPlugin.csproj",
       "storage\\src\\Storage.MsSql\\Storage.MsSql.csproj",
       "storage\\src\\Storage.PostgreSql\\Storage.PostgreSql.csproj",
@@ -11,7 +15,8 @@
       "storage\\test\\Storage.MsSql.Tests\\Storage.MsSql.Tests.csproj",
       "storage\\test\\Storage.PostgreSql.Tests\\Storage.PostgreSql.Tests.csproj",
       "storage\\test\\Storage.Sqlite.Tests\\Storage.Sqlite.Tests.csproj",
-      "storage\\test\\Storage.Tests\\Storage.Tests.csproj"
+      "storage\\test\\Storage.Tests\\Storage.Tests.csproj",
+      "storage\\tools\\PublicApi\\PublicApi.csproj"
     ]
   }
 }

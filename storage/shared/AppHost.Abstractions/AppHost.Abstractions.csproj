@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AnalysisMode>None</AnalysisMode>
+    <AssemblyName>Duende.AppHost.Abstractions</AssemblyName>
+    <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+</Project>
