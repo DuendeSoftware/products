@@ -1,10 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>Duende.Storage</RootNamespace>
     <AssemblyName>Duende.Storage</AssemblyName>
     <PackageId>Duende.Storage</PackageId>
-    <ValueObjectsGeneratorNamespace>Duende.Storage</ValueObjectsGeneratorNamespace>
     <NoWarn>$(NoWarn);CA1062</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarningsAsErrors Condition="'$(Configuration)' == 'Release'">$(WarningsAsErrors);CS1591</WarningsAsErrors>
