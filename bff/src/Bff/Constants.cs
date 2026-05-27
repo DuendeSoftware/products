@@ -33,9 +33,9 @@ public static class Constants
     public static class Cookies
 #pragma warning restore CA1724
     {
-        public const string HostPrefix = "__Host";
-        public const string SecurePrefix = "__Secure";
-        public const string DefaultCookieName = HostPrefix + "-bff-auth";
+        public const string HostPrefix = "__Host-";
+        public const string SecurePrefix = "__Secure-";
+        public const string DefaultCookieName = HostPrefix + "bff-auth";
     }
 
     /// <summary>

@@ -33,7 +33,7 @@ public class DPoPRemoteEndpointTests : BffTestBase
     {
         Api.OnConfigureServices += services =>
         {
-            _ = services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token", o => o.EnableReplayDetection = false);
         };
 
         Bff.OnConfigureApp += app =>
@@ -61,7 +61,7 @@ public class DPoPRemoteEndpointTests : BffTestBase
     {
         Api.OnConfigureServices += services =>
         {
-            _ = services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token", o => o.EnableReplayDetection = false);
         };
 
         Bff.OnConfigureApp += app =>
@@ -89,7 +89,7 @@ public class DPoPRemoteEndpointTests : BffTestBase
     {
         Api.OnConfigureServices += services =>
         {
-            _ = services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token", o => o.EnableReplayDetection = false);
         };
 
         Bff.OnConfigureApp += app =>
@@ -122,7 +122,7 @@ public class DPoPRemoteEndpointTests : BffTestBase
         Api.OnConfigureServices += services =>
         {
 
-            _ = services.ConfigureDPoPTokensForScheme("token");
+            _ = services.ConfigureDPoPTokensForScheme("token", o => o.EnableReplayDetection = false);
         };
 
         Api.OnConfigureApp += app =>

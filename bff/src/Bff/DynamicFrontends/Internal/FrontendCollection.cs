@@ -83,9 +83,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         });
     }
 
-
-
-
     private static bool IsUpdated(BffFrontend left, BffFrontend right)
     {
         if (!left.Equals(right))

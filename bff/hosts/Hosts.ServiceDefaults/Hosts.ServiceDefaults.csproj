@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\shared\AppHost.Abstractions\AppHost.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\shared\AppHost.Abstractions\AppHost.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Bff\Bff.csproj" />
   </ItemGroup>
 

@@ -32,12 +32,12 @@ internal class BffConfigureCookieOptions(
         {
             if (frontEnd.MatchingCriteria.MatchingPath != null)
             {
-                options.Cookie.Name = Constants.Cookies.SecurePrefix + "_" + frontEnd.Name;
+                options.Cookie.Name = Constants.Cookies.SecurePrefix + frontEnd.Name;
                 options.Cookie.Path = frontEnd.MatchingCriteria.MatchingPath;
             }
             else
             {
-                options.Cookie.Name = Constants.Cookies.HostPrefix + "_" + frontEnd.Name;
+                options.Cookie.Name = Constants.Cookies.HostPrefix + frontEnd.Name;
             }
 
             ConfigureDefaults(options);

@@ -87,6 +87,8 @@ public static class BffBuilderExtensions
 
         // cookie configuration
         _ = builder.Services
+            .AddSingleton<IValidateOptions<CookieAuthenticationOptions>, ValidateCookiePrefixOptions>();
+        _ = builder.Services
             .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
         _ = builder.Services
             .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,

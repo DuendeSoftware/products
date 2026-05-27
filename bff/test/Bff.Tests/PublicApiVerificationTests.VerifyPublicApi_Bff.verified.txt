@@ -194,8 +194,8 @@ namespace Duende.Bff
         public static class Cookies
         {
             public const string DefaultCookieName = "__Host-bff-auth";
-            public const string HostPrefix = "__Host";
-            public const string SecurePrefix = "__Secure";
+            public const string HostPrefix = "__Host-";
+            public const string SecurePrefix = "__Secure-";
         }
         public static class HttpClientNames
         {

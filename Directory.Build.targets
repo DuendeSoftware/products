@@ -1,1 +1,7 @@
-<Project />
+<Project>
+  <ItemGroup>
+    <Compile Update="**\*.g.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.g', '.cs'))</DependentUpon>
+    </Compile>
+  </ItemGroup>
+</Project>

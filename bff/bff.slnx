@@ -54,8 +54,8 @@
     <Project Path="tools/PublicApi/PublicApi.csproj" />
   </Folder>
   <Folder Name="/shared/">
-    <Project Path="../shared/AppHost.Abstractions/AppHost.Abstractions.csproj" />
-    <Project Path="../shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
-    <Project Path="../shared/Xunit.Playwright/Xunit.Playwright.csproj" />
+    <Project Path="shared/AppHost.Abstractions/AppHost.Abstractions.csproj" />
+    <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
+    <Project Path="shared/Xunit.Playwright/Xunit.Playwright.csproj" />
   </Folder>
 </Solution>

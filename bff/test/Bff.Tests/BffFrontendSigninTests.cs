@@ -176,7 +176,7 @@ public class BffFrontendSigninTests : BffTestBase
         var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url("/somepath")).FirstOrDefault();
         _ = cookie.ShouldNotBeNull();
         cookie.HttpOnly.ShouldBeTrue();
-        cookie.Name.ShouldBe(Constants.Cookies.SecurePrefix + "_" + "with_somepath");
+        cookie.Name.ShouldBe(Constants.Cookies.SecurePrefix + "with_somepath");
         cookie.Secure.ShouldBeTrue();
         cookie.Path.ShouldBe("/somepath");
 
@@ -279,7 +279,7 @@ public class BffFrontendSigninTests : BffTestBase
         var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url()).FirstOrDefault();
         _ = cookie.ShouldNotBeNull();
         cookie.HttpOnly.ShouldBeTrue();
-        cookie.Name.ShouldBe(Constants.Cookies.HostPrefix + "_" + The.FrontendName);
+        cookie.Name.ShouldBe(Constants.Cookies.HostPrefix + The.FrontendName);
         cookie.Secure.ShouldBeTrue();
         cookie.Path.ShouldBe("/");
     }
