@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "..\\products.slnx",
+    "path": "..\\libs.slnx",
     "projects": [
       "storage\\src\\Storage.CliPlugin\\Storage.CliPlugin.csproj",
       "storage\\src\\Storage.MsSql\\Storage.MsSql.csproj",

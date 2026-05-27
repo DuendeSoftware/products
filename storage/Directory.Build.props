@@ -1,9 +1,3 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
-  <PropertyGroup>
-    <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Duende.$(MSBuildProjectName)</RootNamespace>
-    <PackageId>Duende.$(MSBuildProjectName)</PackageId>
-  </PropertyGroup>
-
 </Project>
