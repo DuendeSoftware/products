@@ -7,13 +7,17 @@ using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Otp;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.UserManagement.Authentication.Internal;
 
 #pragma warning disable CS1573 // Parameter 'parameter' has no matching param tag in the XML comment for 'parameter' (but other parameters do)
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserAuthenticatorsAdmin(UserAuthenticatorsRepository repo, ILogger<UserAuthenticatorsAdmin> logger) : IUserAuthenticatorsAdmin
+internal sealed class UserAuthenticatorsAdmin(
+    UserAuthenticatorsRepository repo,
+    ILogger<UserAuthenticatorsAdmin> logger,
+    UserManagementLicenseValidator licenseValidator) : IUserAuthenticatorsAdmin
 {
     public async Task<Authentication.UserAuthenticators?> TryAddAsync(
         UserSubjectId subjectId,
@@ -21,15 +25,32 @@ internal sealed class UserAuthenticatorsAdmin(UserAuthenticatorsRepository repo,
         IEnumerable<ExternalAuthenticator> externalAuthenticators,
         Ct ct)
     {
+        var materializedExternalAuthenticators =
+            externalAuthenticators as ExternalAuthenticator[] ?? externalAuthenticators.ToArray();
+        if (materializedExternalAuthenticators.Length != 0)
+        {
+            licenseValidator.ValidateExternalIdpLinking();
+        }
+
+        var materializedOtpAddresses = otpAddresses as OtpAddress[] ?? otpAddresses.ToArray();
+        if (materializedOtpAddresses.Length != 0)
+        {
+            licenseValidator.ValidateOtp();
+        }
+
         using var scope = logger.BeginSubjectScope(subjectId);
-        var user = new UserAuthenticators(subjectId, otpAddresses, externalAuthenticators);
-        return await repo.CreateAsync(user, ct) is CreateResult.Success ? new Authentication.UserAuthenticators(user) : null;
+        var user = new UserAuthenticators(subjectId, materializedOtpAddresses, materializedExternalAuthenticators);
+        return await repo.CreateAsync(user, ct) is CreateResult.Success
+            ? new Authentication.UserAuthenticators(user)
+            : null;
     }
 
     public async Task<Authentication.UserAuthenticators?> TryGetAsync(UserSubjectId subjectId, Ct ct)
     {
         using var scope = logger.BeginSubjectScope(subjectId);
-        return await repo.TryReadAsync(subjectId, ct) is ({ } user, _) ? new Authentication.UserAuthenticators(user) : null;
+        return await repo.TryReadAsync(subjectId, ct) is ({ } user, _)
+            ? new Authentication.UserAuthenticators(user)
+            : null;
     }
 
     public async Task<Authentication.UserAuthenticators?> TryGetAsync(UserName userName, Ct ct) =>
@@ -38,6 +59,7 @@ internal sealed class UserAuthenticatorsAdmin(UserAuthenticatorsRepository repo,
     public async Task<bool> TryAddOtpAddressesAsync(
         UserSubjectId subjectId, IEnumerable<OtpAddress> addresses, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
@@ -57,6 +79,7 @@ internal sealed class UserAuthenticatorsAdmin(UserAuthenticatorsRepository repo,
     public async Task<bool> TryRemoveOtpAddressesAsync(
         UserSubjectId subjectId, IEnumerable<OtpAddress> addresses, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
@@ -76,6 +99,7 @@ internal sealed class UserAuthenticatorsAdmin(UserAuthenticatorsRepository repo,
     public async Task<bool> TryAddExternalAuthenticatorsAsync(
         UserSubjectId subjectId, IEnumerable<ExternalAuthenticator> authenticators, Ct ct)
     {
+        licenseValidator.ValidateExternalIdpLinking();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
@@ -95,6 +119,7 @@ internal sealed class UserAuthenticatorsAdmin(UserAuthenticatorsRepository repo,
     public async Task<bool> TryRemoveExternalAuthenticatorsAsync(
         UserSubjectId subjectId, IEnumerable<ExternalAuthenticator> authenticators, Ct ct)
     {
+        licenseValidator.ValidateExternalIdpLinking();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {

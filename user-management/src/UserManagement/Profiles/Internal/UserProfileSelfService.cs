@@ -5,13 +5,14 @@ using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.UserManagement.Profiles.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserProfileSelfService(UserProfileRepository repo, AttributeSchemaRepository schemaRepo, ILogger<UserProfileSelfService> logger)
+internal sealed class UserProfileSelfService(UserProfileRepository repo, AttributeSchemaRepository schemaRepo, ILogger<UserProfileSelfService> logger, UserManagementLicenseValidator licenseValidator)
     : IUserProfileSelfService
 {
     public async Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) =>
@@ -19,6 +20,7 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, Attribu
 
     public async Task<Profiles.UserProfile?> TryRegisterAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
         if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
         {
@@ -51,6 +53,7 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, Attribu
 
     public async Task<Profiles.UserProfile?> TryUpdateAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
         if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
         {

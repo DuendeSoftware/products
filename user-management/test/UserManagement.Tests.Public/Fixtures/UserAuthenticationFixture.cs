@@ -78,7 +78,7 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
                 var dbId = Guid.NewGuid();
                 _ = services.AddUserManagementInternal(users =>
                 {
-                    _ = users.EnableAuthentication(ConfigureBuilder);
+                    _ = users.Authentication(ConfigureBuilder);
                     _ = users.AddSqliteStore(opt =>
                         opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
                 });

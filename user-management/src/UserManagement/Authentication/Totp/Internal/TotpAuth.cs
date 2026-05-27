@@ -5,6 +5,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -16,10 +17,12 @@ internal sealed class TotpAuth(
     IAuthenticationAttemptPolicy attemptPolicy,
     ILogger<TotpAuth> logger,
     IOptions<UserAuthenticationOptions> options,
-    TimeProvider timeProvider) : ITotpAuth
+    TimeProvider timeProvider,
+    UserManagementLicenseValidator licenseValidator) : ITotpAuth
 {
     public async Task<bool> TryAuthenticateAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, PlainTextTotp totp, Ct ct)
     {
+        licenseValidator.ValidateTotp();
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.TotpAuthenticationStarted(LogLevel.Debug, subjectId, authenticatorName);
 

@@ -4,16 +4,18 @@
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 using Duende.UserManagement.Admin;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Membership.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.UserManagement.Membership.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin> logger) : IRoleAdmin
+internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin> logger, UserManagementLicenseValidator licenseValidator) : IRoleAdmin
 {
     public async Task<SaveResult<RoleId>> CreateAsync(Membership.Role dto, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         // Check if a role with this name already exists
         var existing = await roleRepository.TryReadAsync(dto.Name, ct);
         if (existing.HasValue)
@@ -63,6 +65,7 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
 
     public async Task<SaveResult<RoleId>> UpdateAsync(RoleId id, Membership.Role dto, Admin.DataVersion expectedVersion, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         // Load existing role
         var existing = await roleRepository.TryReadAsync(id, ct);
         if (!existing.HasValue)
@@ -102,6 +105,7 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
 
     public async Task<SaveResult<RoleId>> DeleteAsync(RoleId id, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         // Check existence
         var existing = await roleRepository.TryReadAsync(id, ct);
         if (!existing.HasValue)

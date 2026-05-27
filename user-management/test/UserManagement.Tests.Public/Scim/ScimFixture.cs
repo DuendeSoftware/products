@@ -55,11 +55,10 @@ public sealed class ScimFixture : IAsyncDisposable
                 _ = services.AddAuthentication();
                 var builder = services.AddUserManagementInternal(users =>
                 {
-                    _ = users.EnableProfiles();
-                    _ = users.EnableMembership();
+                    // modules registered unconditionally by AddUserManagementInternal
 
 #pragma warning disable duende_experimental
-                    _ = users.EnableScim(x => ConfigureScimCapabilities(x), x => ConfigureScimOptions(x));
+                    _ = users.Scim(x => ConfigureScimCapabilities(x), x => ConfigureScimOptions(x));
 #pragma warning restore duende_experimental
 
                     ConfigurePlatform(users);

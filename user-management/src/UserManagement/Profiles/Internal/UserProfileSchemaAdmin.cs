@@ -4,12 +4,13 @@
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Operations;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.UserManagement.Profiles.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILogger<UserProfileSchemaAdmin> logger) : IUserProfileSchemaAdmin
+internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILogger<UserProfileSchemaAdmin> logger, UserManagementLicenseValidator licenseValidator) : IUserProfileSchemaAdmin
 {
     public async Task<IReadOnlyDictionary<AttributeCode, AttributeDefinition>> GetAllAttributeDefinitionsAsync(Ct ct) =>
         (await repo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema.AttributeDefinitions ?? new Dictionary<AttributeCode, AttributeDefinition>();
@@ -19,6 +20,7 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryAddAttributeDefinitionAsync(AttributeDefinition definition, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         bool result;
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
@@ -44,6 +46,7 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryRemoveAttributeDefinitionAsync(AttributeCode code, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             return true;
@@ -66,6 +69,7 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryAddGroupAsync(AttributeGroup group, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         bool result;
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
@@ -91,6 +95,7 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryRemoveGroupAsync(AttributeGroupCode name, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             return true;
@@ -113,6 +118,7 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> ReorderAttributesAsync(AttributeGroupCode? group, IReadOnlyList<AttributeCode> orderedCodes, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             logger.SchemaAttributesReorderFailedSchemaNotFound(LogLevel.Debug);
@@ -166,6 +172,7 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> ReorderGroupsAsync(IReadOnlyList<AttributeGroupCode> orderedGroups, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             logger.SchemaGroupsReorderFailedSchemaNotFound(LogLevel.Debug);

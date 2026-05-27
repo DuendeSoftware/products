@@ -12,6 +12,7 @@ using Duende.UserManagement.Authentication.Passwords.Internal;
 using Duende.UserManagement.Authentication.RecoveryCodes;
 using Duende.UserManagement.Authentication.Totp;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -25,11 +26,13 @@ internal sealed class UserAuthenticatorsSelfService(
     IOptions<UserAuthenticationOptions> options,
     TimeProvider timeProvider,
     PasswordHashAlgorithms passwordHashAlgorithms,
-    PlainTextPasswordFactory passwordFactory)
+    PlainTextPasswordFactory passwordFactory,
+    UserManagementLicenseValidator licenseValidator)
     : IUserAuthenticatorsSelfService
 {
     public async Task<PlainTextPassword> CreatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
     {
+        licenseValidator.ValidatePassword();
         var result = await passwordFactory.CreateAsync(userId, passwordString, ct);
         return result switch
         {
@@ -40,11 +43,15 @@ internal sealed class UserAuthenticatorsSelfService(
         };
     }
 
-    public Task<PasswordCreationResult> TryCreatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct) =>
-        passwordFactory.CreateAsync(userId, passwordString, ct);
+    public Task<PasswordCreationResult> TryCreatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
+    {
+        licenseValidator.ValidatePassword();
+        return passwordFactory.CreateAsync(userId, passwordString, ct);
+    }
 
     public async Task<Authentication.UserAuthenticators?> TryRegisterAsync(UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct)
     {
+        licenseValidator.ValidateExternalIdpLinking();
         using var scope = logger.BeginSubjectScope(subjectId);
         var user = new UserAuthenticators(subjectId, [], [authenticator]);
         return await repo.CreateAsync(user, ct) is CreateResult.Success ? new Authentication.UserAuthenticators(user) : null;
@@ -58,6 +65,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryAddOtpAddressAsync(UserSubjectId subjectId, OtpAddress address, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -78,6 +86,7 @@ internal sealed class UserAuthenticatorsSelfService(
     public async Task<bool> TryReplaceOtpAddressAsync(
         UserSubjectId subjectId, OtpAddress oldAddress, OtpAddress newAddress, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -102,6 +111,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryRemoveOtpAddressAsync(UserSubjectId subjectId, OtpAddress address, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -122,6 +132,7 @@ internal sealed class UserAuthenticatorsSelfService(
     public async Task<bool> TryAddExternalAuthenticatorAsync(
         UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct)
     {
+        licenseValidator.ValidateExternalIdpLinking();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -142,6 +153,7 @@ internal sealed class UserAuthenticatorsSelfService(
     public async Task<bool> TryRemoveExternalAuthenticatorAsync(
         UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct)
     {
+        licenseValidator.ValidateExternalIdpLinking();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -161,6 +173,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryAddTotpAuthenticatorAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, PlainBytesTotpKey key, PlainTextTotp totp, Ct ct)
     {
+        licenseValidator.ValidateTotp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -180,6 +193,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryRemoveTotpAuthenticatorAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, Ct ct)
     {
+        licenseValidator.ValidateTotp();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -194,6 +208,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryAddPasskeyAsync(UserSubjectId subjectId, PasskeyCredentialData credential, Ct ct)
     {
+        licenseValidator.ValidatePasskey();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -224,6 +239,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryRemovePasskeyAsync(UserSubjectId subjectId, PasskeyCredentialId credentialId, Ct ct)
     {
+        licenseValidator.ValidatePasskey();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -243,6 +259,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<IReadOnlyCollection<PlainTextRecoveryCode>?> TryCreateRecoveryCodesAsync(UserSubjectId subjectId, Ct ct)
     {
+        licenseValidator.ValidateRecoveryCode();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (!options.Value.RecoveryCodes.Enabled)
         {
@@ -272,6 +289,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TrySetPasswordAsync(UserSubjectId subjectId, PlainTextPassword password, Ct ct)
     {
+        licenseValidator.ValidatePassword();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -296,6 +314,7 @@ internal sealed class UserAuthenticatorsSelfService(
     public async Task<bool> TryChangePasswordAsync(
         UserSubjectId subjectId, NonValidatedPassword oldPassword, PlainTextPassword newPassword, Ct ct)
     {
+        licenseValidator.ValidatePassword();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -370,6 +389,7 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryResetPasswordAsync(UserSubjectId subjectId, PlainTextPassword password, Ct ct)
     {
+        licenseValidator.ValidatePassword();
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {

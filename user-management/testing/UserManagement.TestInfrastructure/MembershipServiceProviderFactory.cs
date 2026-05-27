@@ -19,7 +19,7 @@ public sealed class MembershipServiceProviderFactory
         _ = services.AddUserManagementInternal(users =>
         {
             _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
-            _ = users.EnableMembership();
+            // modules registered unconditionally by AddUserManagementInternal
         });
 
         var sp = services.BuildServiceProvider();

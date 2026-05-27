@@ -5,6 +5,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -16,10 +17,12 @@ internal sealed class RecoveryCodeAuth(
     IAuthenticationAttemptPolicy attemptPolicy,
     ILogger<RecoveryCodeAuth> logger,
     IOptions<UserAuthenticationOptions> options,
-    TimeProvider timeProvider) : IRecoveryCodeAuth
+    TimeProvider timeProvider,
+    UserManagementLicenseValidator licenseValidator) : IRecoveryCodeAuth
 {
     public async Task<bool> TryAuthenticateAsync(UserSubjectId subjectId, PlainTextRecoveryCode recoveryCode, Ct ct)
     {
+        licenseValidator.ValidateRecoveryCode();
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.RecoveryCodeAuthenticationStarted(LogLevel.Debug, subjectId);
 

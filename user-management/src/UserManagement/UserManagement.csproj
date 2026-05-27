@@ -25,4 +25,8 @@
     <PackageReference Include="Duende.Storage" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\Licensing\Licensing.csproj" />
+  </ItemGroup>
+
 </Project>

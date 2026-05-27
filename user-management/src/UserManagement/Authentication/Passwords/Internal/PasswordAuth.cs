@@ -5,6 +5,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -17,10 +18,12 @@ internal sealed class PasswordAuth(
     ILogger<PasswordAuth> logger,
     IOptions<UserAuthenticationOptions> options,
     TimeProvider timeProvider,
-    PasswordHashAlgorithms algorithms) : IPasswordAuth
+    PasswordHashAlgorithms algorithms,
+    UserManagementLicenseValidator licenseValidator) : IPasswordAuth
 {
     public async Task<PasswordAuthenticationResult> TryAuthenticateAsync(UserName userName, NonValidatedPassword password, Ct ct)
     {
+        licenseValidator.ValidatePassword();
         using var userNameScope = logger.BeginUserNameScope(userName);
         logger.PasswordAuthenticationStarted(LogLevel.Debug, userName);
 

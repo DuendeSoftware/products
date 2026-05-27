@@ -3,6 +3,7 @@
 
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal.Storage;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ internal sealed class UserSelfService(
     IStoreFactory storeFactory,
     UserRepository userRepository,
     ILogger<UserSelfService> logger,
+    UserManagementLicenseValidator licenseValidator,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     UserProfileRepository? profileRepo = null) : IUserSelfService
 {
@@ -22,6 +24,7 @@ internal sealed class UserSelfService(
 
     public async Task<bool> TrySetUserNameAsync(UserSubjectId subjectId, UserName userName, Ct ct)
     {
+        licenseValidator.ValidateSelfService();
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserNameSetStarting(LogLevel.Debug, subjectId);
         var result = await _batchBuilder.TrySetUserNameAsync(subjectId, userName, ct);
@@ -39,6 +42,7 @@ internal sealed class UserSelfService(
 
     public async Task<bool> TryRemoveUserNameAsync(UserSubjectId subjectId, Ct ct)
     {
+        licenseValidator.ValidateSelfService();
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserNameRemoveStarting(LogLevel.Debug, subjectId);
         var result = await _batchBuilder.TryRemoveUserNameAsync(subjectId, ct);
@@ -56,6 +60,7 @@ internal sealed class UserSelfService(
 
     public async Task<bool> TryDeregisterAsync(UserSubjectId subjectId, Ct ct)
     {
+        licenseValidator.ValidateSelfService();
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserDeregisterStarting(LogLevel.Debug, subjectId);
         List<IStoreOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];

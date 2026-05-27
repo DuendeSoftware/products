@@ -4,6 +4,7 @@
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Otp.Internal.Storage;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 using InternalUserAuthenticators = Duende.UserManagement.Authentication.Internal.UserAuthenticators;
 
@@ -15,10 +16,12 @@ internal sealed class OtpAuthenticator(
     UserAuthenticatorsRepository authenticatorsRepository,
     IEnumerable<IOtpSender> otpSenders,
     ILogger<OtpAuthenticator> logger,
-    TimeProvider timeProvider) : IOtpAuthenticator
+    TimeProvider timeProvider,
+    UserManagementLicenseValidator licenseValidator) : IOtpAuthenticator
 {
     public async Task<SendOtpResult?> TrySendOtpAsync(OtpAddress address, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         logger.OtpSendStarted(LogLevel.Debug, address);
 
         var record = await workflowRepository.TryReadAsync(address, ct);
@@ -72,6 +75,7 @@ internal sealed class OtpAuthenticator(
 
     public async Task<OtpAuthenticationResult> TryAuthenticateAsync(PlainTextOtp otp, OtpToken token, Ct ct)
     {
+        licenseValidator.ValidateOtp();
         logger.OtpAuthenticationStarted(LogLevel.Debug);
 
         var workflowRecord = await workflowRepository.TryReadAsync(token, ct);

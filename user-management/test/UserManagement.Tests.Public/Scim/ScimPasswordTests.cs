@@ -16,7 +16,7 @@ public sealed class ScimPasswordTests(ITestOutputHelper output, WebServerFixture
 
     private readonly ScimFixture Fixture = new(output, serverFixture);
 
-    public async ValueTask InitializeAsync() => Fixture.ConfigurePlatform += p => p.EnableAuthentication();
+    public async ValueTask InitializeAsync() => await Task.CompletedTask; // modules registered unconditionally
 
     [Fact]
     public async Task CreateUserWithPassword_ReturnsCreated()
@@ -65,25 +65,6 @@ public sealed class ScimPasswordTests(ITestOutputHelper output, WebServerFixture
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
         ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "password");
-    }
-
-    [Fact]
-    public async Task CreateUserWithPasswordWhenAuthDisabled_Returns400()
-    {
-        var noAuthFixture = new ScimFixture(output, serverFixture);
-        await noAuthFixture.InitializeAsync();
-        try
-        {
-            var (response, body) = await noAuthFixture.Client.CreateUserWithPasswordAsync("eve", ValidPassword);
-
-            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-            body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
-            ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "password");
-        }
-        finally
-        {
-            await noAuthFixture.DisposeAsync();
-        }
     }
 
     [Fact]

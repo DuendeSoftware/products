@@ -6,6 +6,7 @@ using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Duende.UserManagement.Admin;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Membership.Internal.Storage;
 using Microsoft.Extensions.Logging;
@@ -18,13 +19,15 @@ internal sealed class MembershipAdmin(
     MembershipRepository membershipRepo,
     RoleRepository roleRepo,
     GroupRepository groupRepo,
-    ILogger<MembershipAdmin> logger)
+    ILogger<MembershipAdmin> logger,
+    UserManagementLicenseValidator licenseValidator)
     : IMembershipAdmin
 {
     private static readonly DataRange DefaultRange = DataRange.FromPage(1, 200);
 
     public async Task<SaveResult<RoleId>> AssignRoleAsync(UserSubjectId subjectId, RoleId roleId, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         using var scope = logger.BeginSubjectScope(subjectId);
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
@@ -43,6 +46,7 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> RemoveRoleAsync(UserSubjectId subjectId, RoleId roleId, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         using var scope = logger.BeginSubjectScope(subjectId);
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
@@ -67,6 +71,7 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> AssignRoleToGroupAsync(RoleId roleId, GroupId groupId, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
         {
@@ -90,6 +95,7 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> RemoveRoleFromGroupAsync(RoleId roleId, GroupId groupId, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
         {
@@ -113,6 +119,7 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<GroupId>> AssignGroupAsync(UserSubjectId subjectId, GroupId groupId, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         using var scope = logger.BeginSubjectScope(subjectId);
         var groupResult = await groupRepo.TryReadAsync(groupId, ct);
         if (!groupResult.HasValue)
@@ -131,6 +138,7 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<GroupId>> RemoveGroupAsync(UserSubjectId subjectId, GroupId groupId, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         using var scope = logger.BeginSubjectScope(subjectId);
         var groupResult = await groupRepo.TryReadAsync(groupId, ct);
         if (!groupResult.HasValue)

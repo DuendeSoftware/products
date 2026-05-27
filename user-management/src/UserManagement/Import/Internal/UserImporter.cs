@@ -10,6 +10,7 @@ using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Membership.Internal;
 using Duende.UserManagement.Membership.Internal.Storage;
@@ -26,30 +27,25 @@ internal sealed class UserImporter(
     TimeProvider timeProvider,
     IStoreFactory storeFactory,
     ILogger<UserImporter> logger,
-    UserProfileRepository? profileRepo = null,
-    UserAuthenticatorsRepository? authenticatorsRepo = null,
-    AttributeSchemaRepository? schemaRepo = null,
-    GroupRepository? groupRepo = null,
-    RoleRepository? roleRepo = null,
-    MembershipRepository? membershipRepo = null,
-    PasswordHashAlgorithms? passwordHashAlgorithms = null) : IUserImporter
+    UserManagementLicenseValidator licenseValidator,
+    UserProfileRepository profileRepo,
+    UserAuthenticatorsRepository authenticatorsRepo,
+    AttributeSchemaRepository schemaRepo,
+    GroupRepository groupRepo,
+    RoleRepository roleRepo,
+    MembershipRepository membershipRepo) : IUserImporter
 {
     private const int MaxAttempts = 3;
 
     public async Task<UserImportBatchResult> ImportAsync(IReadOnlyList<UserImportRecord> records, Ct ct)
     {
+        licenseValidator.ValidateRegistration();
         logger.BatchImportStarted(LogLevel.Debug, records.Count);
 
         // Load schema once for the entire batch (only needed if any record has profile attributes)
         AttributeSchema? schema = null;
         if (records.Any(r => r.ProfileAttributes is not null))
         {
-            if (profileRepo is null || schemaRepo is null)
-            {
-                throw new InvalidOperationException(
-                    "Cannot import profile attributes: user profiles are not registered. Call AddUserProfiles() on the platform builder.");
-            }
-
             schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema
                 ?? AttributeSchema.Empty;
 
@@ -95,12 +91,6 @@ internal sealed class UserImporter(
         // 1. Validate profile attributes against schema (if provided)
         if (record.ProfileAttributes is not null)
         {
-            if (profileRepo is null || schemaRepo is null)
-            {
-                throw new InvalidOperationException(
-                    "Cannot import profile attributes: user profiles are not registered. Call AddUserProfiles() on the platform builder.");
-            }
-
             var currentSchema = schema ?? AttributeSchema.Empty;
             if (!SchemaFreshnessCheck.IsValid(record.ProfileAttributes, currentSchema, logger))
             {
@@ -108,20 +98,6 @@ internal sealed class UserImporter(
             }
         }
 
-        if (record.Authenticators is not null && (authenticatorsRepo is null || passwordHashAlgorithms is null))
-        {
-            throw new InvalidOperationException(
-                "Cannot import authenticators: user authentication is not registered. Call AddUserAuthentication() on the platform builder.");
-        }
-
-        if (record.Memberships is not null)
-        {
-            if (membershipRepo is null || groupRepo is null || roleRepo is null)
-            {
-                throw new InvalidOperationException(
-                    "Cannot import memberships: membership services are not registered. Call AddUserMembership() on the platform builder.");
-            }
-        }
 
         // 2. Validate membership references exist before attempting batch
         if (record.Memberships is not null)
@@ -206,7 +182,7 @@ internal sealed class UserImporter(
                 profile.SetUserName(record.UserName.Value);
             }
 
-            var (aspectOp, aspectRef) = await profileRepo!.CreateAspectBatchOperationAsync(profile, ct);
+            var (aspectOp, aspectRef) = await profileRepo.CreateAspectBatchOperationAsync(profile, ct);
             profileOp = aspectOp;
             aspectRefs.Add(aspectRef);
         }
@@ -214,7 +190,7 @@ internal sealed class UserImporter(
         if (record.Authenticators is not null)
         {
             var authenticators = BuildAuthenticators(record.SubjectId, record.Authenticators, record.UserName);
-            authOp = authenticatorsRepo!.CreateAspectBatchOperation(authenticators);
+            authOp = authenticatorsRepo.CreateAspectBatchOperation(authenticators);
             aspectRefs.Add(UserAuthenticatorsRepository.GetAspectRef(authenticators));
         }
 
@@ -242,7 +218,7 @@ internal sealed class UserImporter(
             {
                 foreach (var groupId in record.Memberships.Groups.Distinct())
                 {
-                    var (resolvedGroup, _) = await groupRepo!.TryReadAsync(groupId, ct)
+                    var (resolvedGroup, _) = await groupRepo.TryReadAsync(groupId, ct)
                         ?? throw new InvalidOperationException($"Group '{groupId}' not found during import.");
                     operations.Add(LinkOperation.For(MembershipLinkDefinitions.MembershipGroup, userDsoId, resolvedGroup.StoreId));
                 }
@@ -252,7 +228,7 @@ internal sealed class UserImporter(
             {
                 foreach (var roleId in record.Memberships.DirectRoles.Distinct())
                 {
-                    var (resolvedRole, _) = await roleRepo!.TryReadAsync(roleId, ct)
+                    var (resolvedRole, _) = await roleRepo.TryReadAsync(roleId, ct)
                         ?? throw new InvalidOperationException($"Role '{roleId}' not found during import.");
                     operations.Add(LinkOperation.For(MembershipLinkDefinitions.MembershipRole, userDsoId, resolvedRole.StoreId));
                 }
@@ -382,7 +358,7 @@ internal sealed class UserImporter(
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
-            var existing = await profileRepo!.TryReadAsync(subjectId, ct);
+            var existing = await profileRepo.TryReadAsync(subjectId, ct);
             if (existing is not ({ } profile, var version))
             {
                 return "Profile not found for merge.";
@@ -434,7 +410,7 @@ internal sealed class UserImporter(
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
-            var existing = await authenticatorsRepo!.TryReadAsync(subjectId, ct);
+            var existing = await authenticatorsRepo.TryReadAsync(subjectId, ct);
             if (existing is not ({ } authenticators, var version))
             {
                 var created = BuildAuthenticators(subjectId, import, userName);
@@ -579,7 +555,7 @@ internal sealed class UserImporter(
         {
             foreach (var groupId in import.Groups)
             {
-                if (!(await groupRepo!.TryReadAsync(groupId, ct)).HasValue)
+                if (!(await groupRepo.TryReadAsync(groupId, ct)).HasValue)
                 {
                     return $"Group '{groupId}' does not exist.";
                 }
@@ -590,7 +566,7 @@ internal sealed class UserImporter(
         {
             foreach (var roleId in import.DirectRoles)
             {
-                if (!(await roleRepo!.TryReadAsync(roleId, ct)).HasValue)
+                if (!(await roleRepo.TryReadAsync(roleId, ct)).HasValue)
                 {
                     return $"Role '{roleId}' does not exist.";
                 }
@@ -602,14 +578,14 @@ internal sealed class UserImporter(
 
     private async Task<string?> MergeMembershipsAsync(UserSubjectId subjectId, MembershipImport import, Ct ct)
     {
-        var userUuid = await membershipRepo!.GetOrCreateUserUuidAsync(subjectId, ct);
+        var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
         var store = storeFactory.GetStore();
 
         if (import.Groups is not null)
         {
             foreach (var groupId in import.Groups)
             {
-                var (resolvedGroup, _) = await groupRepo!.TryReadAsync(groupId, ct)
+                var (resolvedGroup, _) = await groupRepo.TryReadAsync(groupId, ct)
                     ?? throw new InvalidOperationException($"Group '{groupId}' not found during import.");
                 _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, resolvedGroup.StoreId, [], ct);
             }
@@ -619,7 +595,7 @@ internal sealed class UserImporter(
         {
             foreach (var roleId in import.DirectRoles)
             {
-                var (resolvedRole, _) = await roleRepo!.TryReadAsync(roleId, ct)
+                var (resolvedRole, _) = await roleRepo.TryReadAsync(roleId, ct)
                     ?? throw new InvalidOperationException($"Role '{roleId}' not found during import.");
                 _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, resolvedRole.StoreId, [], ct);
             }

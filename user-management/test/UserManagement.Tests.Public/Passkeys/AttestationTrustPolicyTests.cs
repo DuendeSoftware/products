@@ -28,7 +28,7 @@ public sealed class AttestationTrustPolicyTests
     {
         await using var serviceProvider = await UsersServiceProviderFactory.CreateAsync(builder =>
         {
-            _ = builder.EnableAuthentication(auth => { _ = auth.AddAttestationTrustPolicy<AcceptAllPolicy>(); });
+            _ = builder.Authentication(auth => { _ = auth.AddAttestationTrustPolicy<AcceptAllPolicy>(); });
         });
 
         var result = await RegisterPasskeyAsync(serviceProvider);
@@ -41,7 +41,7 @@ public sealed class AttestationTrustPolicyTests
     {
         await using var serviceProvider = await UsersServiceProviderFactory.CreateAsync(builder =>
         {
-            _ = builder.EnableAuthentication(auth => { _ = auth.AddAttestationTrustPolicy<RejectAllPolicy>(); });
+            _ = builder.Authentication(auth => { _ = auth.AddAttestationTrustPolicy<RejectAllPolicy>(); });
         });
 
         var result = await RegisterPasskeyAsync(serviceProvider);
@@ -56,7 +56,7 @@ public sealed class AttestationTrustPolicyTests
     {
         await using var serviceProvider = await UsersServiceProviderFactory.CreateAsync(builder =>
         {
-            _ = builder.EnableAuthentication(auth =>
+            _ = builder.Authentication(auth =>
             {
                 _ = auth.AddAttestationTrustPolicy<AcceptAllPolicy>();
                 _ = auth.AddAttestationTrustPolicy<AlsoAcceptAllPolicy>();
@@ -75,7 +75,7 @@ public sealed class AttestationTrustPolicyTests
 
         await using var serviceProvider = await UsersServiceProviderFactory.CreateAsync(builder =>
         {
-            _ = builder.EnableAuthentication(auth =>
+            _ = builder.Authentication(auth =>
             {
                 _ = auth.AddAttestationTrustPolicy<RejectAllPolicy>();
                 _ = auth.AddAttestationTrustPolicy<TrackingAcceptPolicy>();
@@ -98,7 +98,7 @@ public sealed class AttestationTrustPolicyTests
 
         await using var serviceProvider = await UsersServiceProviderFactory.CreateAsync(builder =>
         {
-            _ = builder.EnableAuthentication(auth =>
+            _ = builder.Authentication(auth =>
             {
                 _ = auth.AddAttestationTrustPolicy<CapturingPolicy>();
                 _ = auth.Services.AddSingleton(capturedContext);
@@ -149,7 +149,7 @@ public sealed class AttestationTrustPolicyTests
 
         await using var serviceProvider = await UsersServiceProviderFactory.CreateAsync(builder =>
         {
-            _ = builder.EnableAuthentication(auth =>
+            _ = builder.Authentication(auth =>
             {
                 _ = auth.AddAttestationTrustPolicy<CapturingPolicy>();
                 _ = auth.Services.AddSingleton(capturedContext);

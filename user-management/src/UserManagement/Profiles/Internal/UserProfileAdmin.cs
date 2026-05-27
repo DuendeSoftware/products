@@ -6,6 +6,7 @@ using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -13,13 +14,14 @@ namespace Duende.UserManagement.Profiles.Internal;
 
 #pragma warning disable CS1573 // Parameter 'parameter' has no matching param tag in the XML comment for 'parameter' (but other parameters do)
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSchemaRepository schemaRepo, ILogger<UserProfileAdmin> logger) : IUserProfileAdmin
+internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSchemaRepository schemaRepo, ILogger<UserProfileAdmin> logger, UserManagementLicenseValidator licenseValidator) : IUserProfileAdmin
 {
     public async Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) =>
         await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } record ? record.AttributeSchema : AttributeSchema.Empty;
 
     public async Task<Profiles.UserProfile?> TryAddAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
+        licenseValidator.ValidateProfiles();
         var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
         if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
         {

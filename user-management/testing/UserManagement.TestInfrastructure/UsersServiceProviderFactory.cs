@@ -60,7 +60,7 @@ public sealed class UsersServiceProviderFactory
             _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
             configureBuilder?.Invoke(users);
 
-            _ = users.EnableMembership().EnableProfiles().EnableAuthentication();
+            // modules registered unconditionally by AddUserManagementInternal
         });
 
         _ = services.Configure<UserAuthenticationOptions>(options =>

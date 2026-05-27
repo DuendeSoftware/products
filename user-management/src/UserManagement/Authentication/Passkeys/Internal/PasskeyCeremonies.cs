@@ -8,6 +8,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Passkeys.Internal.Storage;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -22,7 +23,8 @@ internal sealed class PasskeyCeremonies(
     WebAuthnRegistrationCeremony webAuthnRegistrationCeremony,
     IOptions<UserAuthenticationOptions> options,
     TimeProvider timeProvider,
-    ILogger<PasskeyCeremonies> logger) : IPasskeyCeremonies
+    ILogger<PasskeyCeremonies> logger,
+    UserManagementLicenseValidator licenseValidator) : IPasskeyCeremonies
 {
     private readonly PasskeyOptions _passkeyOptions = options.Value.Passkeys;
 
@@ -37,6 +39,7 @@ internal sealed class PasskeyCeremonies(
         string userDisplayName,
         Ct ct)
     {
+        licenseValidator.ValidatePasskey();
         using var scope = logger.BeginSubjectScope(userSubjectId);
         ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         ArgumentException.ThrowIfNullOrWhiteSpace(userDisplayName);
@@ -149,6 +152,7 @@ internal sealed class PasskeyCeremonies(
 
     public async Task<PasskeyAuthenticationBeginResult> BeginAuthenticationAsync(Ct ct)
     {
+        licenseValidator.ValidatePasskey();
         var challenge = WebAuthnCrypto.GenerateChallenge(_passkeyOptions.ChallengeSize);
 
         var passkeyAuthenticationChallenge = PasskeyAuthenticationChallenge.CreateDiscoverable(
@@ -174,6 +178,7 @@ internal sealed class PasskeyCeremonies(
         UserSubjectId userSubjectId,
         Ct ct)
     {
+        licenseValidator.ValidatePasskey();
         using var scope = logger.BeginSubjectScope(userSubjectId);
         var challenge = WebAuthnCrypto.GenerateChallenge(_passkeyOptions.ChallengeSize);
 
@@ -220,6 +225,7 @@ internal sealed class PasskeyCeremonies(
         PasskeyCompleteAuthenticationRequest request,
         Ct ct)
     {
+        licenseValidator.ValidatePasskey();
         ArgumentNullException.ThrowIfNull(request);
 
         var challengeId = PasskeyAuthenticationChallengeId.From(request.ChallengeId);

@@ -4,16 +4,18 @@
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 using Duende.UserManagement.Admin;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Membership.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.UserManagement.Membership.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupAdmin> logger) : IGroupAdmin
+internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupAdmin> logger, UserManagementLicenseValidator licenseValidator) : IGroupAdmin
 {
     public async Task<SaveResult<GroupId>> CreateAsync(Membership.Group dto, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         // Check if a group with this name already exists
         var existing = await groupRepository.TryReadAsync(dto.Name, ct);
         if (existing.HasValue)
@@ -63,6 +65,7 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
 
     public async Task<SaveResult<GroupId>> UpdateAsync(GroupId id, Membership.Group dto, Admin.DataVersion expectedVersion, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         // Load existing group
         var existing = await groupRepository.TryReadAsync(id, ct);
         if (!existing.HasValue)
@@ -102,6 +105,7 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
 
     public async Task<SaveResult<GroupId>> DeleteAsync(GroupId id, Ct ct)
     {
+        licenseValidator.ValidateRolesAndGroups();
         // Check existence
         var existing = await groupRepository.TryReadAsync(id, ct);
         if (!existing.HasValue)

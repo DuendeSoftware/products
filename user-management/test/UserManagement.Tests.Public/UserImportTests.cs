@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Internal;
-using Duende.Storage.Sqlite;
 using Duende.UserManagement;
-using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Otp;
 using Duende.UserManagement.Authentication.Passwords;
@@ -616,56 +613,6 @@ public sealed class UserImportTests : IAsyncLifetime
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         }
     }
-    [Fact]
-    public async Task import_profile_without_profiles_registered_throws()
-    {
-        await using var sp = await CreateProviderWithoutProfiles();
-        var import = sp.GetRequiredService<IUserImporter>();
-
-        var act = () => import.ImportAsync(
-            [new UserImportRecord { SubjectId = UserSubjectId.New(), ProfileAttributes = ValidatedAttributeValueCollection.Empty }],
-            _ct);
-
-        var ex = await Should.ThrowAsync<InvalidOperationException>(act);
-        ShouldlyExtensions.ShouldContain(ex.Message, "profile");
-    }
-
-    [Fact]
-    public async Task import_authenticators_without_authentication_registered_throws()
-    {
-        await using var sp = await CreateProviderWithoutAuthentication();
-        var import = sp.GetRequiredService<IUserImporter>();
-
-        var act = () => import.ImportAsync(
-            [new UserImportRecord
-            {
-                SubjectId = UserSubjectId.New(),
-                UserName = UserName.Create("test"),
-                Authenticators = new AuthenticatorImport()
-            }],
-            _ct);
-
-        var ex = await Should.ThrowAsync<InvalidOperationException>(act);
-        ShouldlyExtensions.ShouldContain(ex.Message, "authenticat");
-    }
-
-    [Fact]
-    public async Task import_memberships_without_profiles_registered_throws()
-    {
-        await using var sp = await CreateProviderWithoutProfiles();
-        var import = sp.GetRequiredService<IUserImporter>();
-
-        var act = () => import.ImportAsync(
-            [new UserImportRecord
-            {
-                SubjectId = UserSubjectId.New(),
-                Memberships = new MembershipImport { Groups = [] }
-            }],
-            _ct);
-
-        var ex = await Should.ThrowAsync<InvalidOperationException>(act);
-        ShouldlyExtensions.ShouldContain(ex.Message, "membership");
-    }
     private static async Task<ServiceProvider> CreateProviderWithResolver(IUserImportConflictResolver resolver) =>
         await UsersServiceProviderFactory.CreateAsync(builder =>
         {
@@ -711,49 +658,4 @@ public sealed class UserImportTests : IAsyncLifetime
         public Task<UserImportConflictResolution> ResolveAsync(UserImportConflict conflict, Ct ct) => resolve(conflict);
     }
 
-    private static async Task<ServiceProvider> CreateProviderWithoutProfiles()
-    {
-        var dbId = Guid.NewGuid();
-        var services = new ServiceCollection();
-        _ = services
-            .AddLogging()
-            .AddSingleton(TimeProvider.System)
-            .AddUserManagementInternal(x =>
-            {
-                _ = x.EnableAuthentication();
-                _ = x.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
-            });
-
-        _ = services.DisableDataProtection();
-        _ = services.Configure<UserAuthenticationOptions>(options =>
-        {
-            options.Passkeys.ServerDomain = "example.com";
-            options.Passkeys.AllowedOrigins = ["https://example.com"];
-        });
-
-        var sp = services.BuildServiceProvider();
-        await sp.GetRequiredService<IPooledStore>().MigrateAsync(CancellationToken.None);
-        return sp;
-    }
-
-    private static async Task<ServiceProvider> CreateProviderWithoutAuthentication()
-    {
-        var dbId = Guid.NewGuid();
-
-        var services = new ServiceCollection();
-        _ = services
-            .AddLogging()
-            .AddSingleton(TimeProvider.System)
-            .AddUserManagementInternal(x =>
-            {
-                _ = x.EnableProfiles();
-                _ = x.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
-            });
-
-        _ = services.DisableDataProtection();
-
-        var sp = services.BuildServiceProvider();
-        await sp.GetRequiredService<IPooledStore>().MigrateAsync(CancellationToken.None);
-        return sp;
-    }
 }
