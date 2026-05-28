@@ -39,7 +39,7 @@ public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
             else
             {
                 throw new InvalidOperationException(
-                    "Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
+                    "Attempt to assign an AccessTokenRetriever type that cannot be assigned to IAccessTokenRetriever");
             }
         }
     }

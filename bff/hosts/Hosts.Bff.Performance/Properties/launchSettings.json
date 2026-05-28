@@ -10,7 +10,7 @@
         "IDENTITYSERVERURL": "https://localhost:6001",
         "BFFURL1": "https://localhost:6002",
         "BFFURL2": "https://localhost:6003",
-        "BFFURL3": "https://app1.localhost:6004"
+        "BFFURL3": "https://app1.dev.localhost:6004"
       }
     }
   }

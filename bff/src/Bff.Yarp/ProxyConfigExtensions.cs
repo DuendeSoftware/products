@@ -24,7 +24,7 @@ public static class ProxyConfigExtensions
     }
 
     /// <summary>
-    /// Adds BFF access token metadata to a route configuration, indicating that 
+    /// Adds BFF access token metadata to a route configuration, indicating that
     /// the route should use the user access token if the user is authenticated,
     /// but fall back to an anonymous request if not.
     /// </summary>
@@ -46,6 +46,19 @@ public static class ProxyConfigExtensions
     {
         ArgumentNullException.ThrowIfNull(config);
         return config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
+    }
+
+    /// <summary>
+    /// Adds access token retrieval metadata to a route configuration
+    /// </summary>
+    /// <param name="config"></param>
+    /// <typeparam name="TRetriever"></typeparam>
+    /// <returns></returns>
+    public static RouteConfig WithAccessTokenRetriever<TRetriever>(this RouteConfig config)
+        where TRetriever : IAccessTokenRetriever
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return config.WithMetadata(Constants.Yarp.AccessTokenRetrieverMetadata, typeof(TRetriever).AssemblyQualifiedName!);
     }
 
     private static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
@@ -78,18 +91,29 @@ public static class ProxyConfigExtensions
     public static ClusterConfig WithAccessToken(this ClusterConfig config, RequiredTokenType requiredTokenType)
     {
         ArgumentNullException.ThrowIfNull(config);
-        Dictionary<string, string> metadata;
+        return config.WithClusterMetadata(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
+    }
 
-        if (config.Metadata != null)
-        {
-            metadata = new Dictionary<string, string>(config.Metadata);
-        }
-        else
-        {
-            metadata = new();
-        }
+    /// <summary>
+    /// Adds access token retrieval metadata to a cluster configuration
+    /// </summary>
+    /// <param name="config"></param>
+    /// <typeparam name="TRetriever">The type implementing <see cref="IAccessTokenRetriever"/> to use for token retrieval.</typeparam>
+    /// <returns></returns>
+    public static ClusterConfig WithAccessTokenRetriever<TRetriever>(this ClusterConfig config)
+        where TRetriever : IAccessTokenRetriever
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return config.WithClusterMetadata(Constants.Yarp.AccessTokenRetrieverMetadata, typeof(TRetriever).AssemblyQualifiedName!);
+    }
 
-        _ = metadata.TryAdd(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
+    private static ClusterConfig WithClusterMetadata(this ClusterConfig config, string key, string value)
+    {
+        var metadata = config.Metadata != null
+            ? new Dictionary<string, string>(config.Metadata)
+            : new Dictionary<string, string>();
+
+        _ = metadata.TryAdd(key, value);
 
         return config with { Metadata = metadata };
     }

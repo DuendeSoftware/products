@@ -22,10 +22,10 @@ public class YarpTests : BffTestBase
             });
         };
 
-    private void ConfigureYarp(RouteConfig routeConfig) =>
+    private void ConfigureYarp(RouteConfig routeConfig, ClusterConfig? clusterConfig = null) =>
         Bff.OnConfigureBff += bff =>
         {
-            _ = bff.AddYarpConfig([routeConfig], [Some.ClusterConfig(Api)]);
+            _ = bff.AddYarpConfig([routeConfig], [clusterConfig ?? Some.ClusterConfig(Api)]);
         };
 
     [Theory]
@@ -322,5 +322,44 @@ public class YarpTests : BffTestBase
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Forbidden
         );
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task anonymous_call_with_user_token_requirement_on_cluster_should_fail(BffSetupType setup)
+    {
+        // Token type set on cluster only, NOT on the route
+        ConfigureYarp(
+            Some.RouteConfig(),
+            Some.ClusterConfig(Api).WithAccessToken(RequiredTokenType.User)
+        );
+
+        await ConfigureBff(setup);
+
+        _ = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath,
+            expectedStatusCode: HttpStatusCode.Unauthorized
+        );
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_call_with_user_token_requirement_on_cluster_should_succeed(BffSetupType setup)
+    {
+        // Token type set on cluster only, NOT on the route
+        ConfigureYarp(
+            Some.RouteConfig(),
+            Some.ClusterConfig(Api).WithAccessToken(RequiredTokenType.User)
+        );
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath
+        );
+
+        apiResult.Sub.ShouldBe(The.Sub);
+        apiResult.ClientId.ShouldBe(The.ClientId);
     }
 }

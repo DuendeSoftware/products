@@ -34,7 +34,7 @@ async function onLoad() {
         } else if (resp.status === 401) {
             log("user not logged in");
 
-            // if we've detected that the user is no already logged in, we can attempt a silent login
+            // if we've detected that the user is not already logged in, we can attempt a silent login
             // this will trigger a normal OIDC request in an iframe using prompt=none.
             // if the user is already logged into IdentityServer, then the result will establish a session in the BFF.
             // this whole process avoids redirecting the top window without knowing if the user is logged in or not.
@@ -136,6 +136,18 @@ async function callYarpUserOrClientTokenApi() {
     await callYarpApi("/user-or-client-token");
 }
 
+async function callYarpImpersonationRouteApi() {
+    await callYarpApi("/impersonation-route-level");
+}
+
+async function callYarpImpersonationClusterApi() {
+    await callYarpApi("/impersonation-cluster-level");
+}
+
+async function callYarpImpersonationOverrideApi() {
+    await callYarpApi("/impersonation-route-overrides-cluster");
+}
+
 
 // User Management
 document.querySelector(".login").addEventListener("click", login, false);
@@ -157,6 +169,9 @@ document.querySelector(".call_yarp_anonymous").addEventListener("click", callYar
 document.querySelector(".call_yarp_user").addEventListener("click", callYarpUserTokenApi, false);
 document.querySelector(".call_yarp_client").addEventListener("click", callYarpClientTokenApi, false);
 document.querySelector(".call_yarp_user_or_client").addEventListener("click", callYarpUserOrClientTokenApi, false);
+document.querySelector(".call_yarp_impersonation_route").addEventListener("click", callYarpImpersonationRouteApi, false);
+document.querySelector(".call_yarp_impersonation_cluster").addEventListener("click", callYarpImpersonationClusterApi, false);
+document.querySelector(".call_yarp_impersonation_override").addEventListener("click", callYarpImpersonationOverrideApi, false);
 
 function showApi() {
     document.getElementById('api-result').innerText = '';
@@ -225,7 +240,7 @@ function silentLogin(iframeSelector) {
             // we can either just treat this like a "not logged in"
             resolve(false);
             // or we can trigger an error, so someone can look into the reason why
-            // reject(new Error("timed_out")); 
+            // reject(new Error("timed_out"));
         }, timeout);
 
         // send the iframe to the silent login endpoint to kick off the workflow

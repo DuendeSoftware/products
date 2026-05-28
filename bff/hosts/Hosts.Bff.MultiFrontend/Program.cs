@@ -24,6 +24,8 @@ var bffConfig = new ConfigurationBuilder()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTransient<IIndexHtmlTransformer, FrontendAwareIndexHtmlTransformer>();
+builder.Services.AddTransient<ImpersonationAccessTokenRetriever>();
+builder.Services.AddTransient<NoOpAccessTokenRetriever>();
 
 builder.Services.AddUserAccessTokenHttpClient("api",
     configureClient: client =>
@@ -81,7 +83,7 @@ bffBuilder
     .AddRemoteApis()
     .AddFrontends(
         new BffFrontend(BffFrontendName.Parse("default-frontend"))
-            .WithBffStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction),
+            .WithBffStaticAssets(new Uri("https://localhost:5005/static"), useCdnWhen: runningInProduction),
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>
             {
@@ -98,7 +100,7 @@ bffBuilder
                     opt.ClientSecret = "secret";
                 })
                 .WithCdnIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-                .MapToHost(HostHeaderValue.Parse("https://app1.localhost:5005"))
+                .MapToHost(HostHeaderValue.Parse("https://app1.dev.localhost:5005"))
                 .WithRemoteApis(
                     new RemoteApi("/api/user-token", new Uri("https://localhost:5010")),
                     new RemoteApi("/api/client-token", new Uri("https://localhost:5010"))
@@ -113,8 +115,20 @@ bffBuilder
                         .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>(),
                     new RemoteApi("/api/audience-constrained", new Uri("https://localhost:5010"))
                         .WithUserAccessTokenParameters(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") }))
-        )
-    .AddYarpConfig(BuildYarpRoutes(), [
+        );
+
+// YARP configuration can be loaded from code (in-memory) or from JSON (appsettings.json).
+// Toggle "UseJsonYarpConfig" in appsettings.json to switch between the two approaches.
+if (builder.Configuration.GetValue<bool>("UseJsonYarpConfig"))
+{
+    // Load YARP routes and clusters from the "ReverseProxy" section in appsettings.json.
+    // Metadata keys like "Duende.Bff.Yarp.AccessTokenRetriever" use assembly-qualified type names.
+    bffBuilder.AddYarpConfig(builder.Configuration.GetSection("ReverseProxy"));
+}
+else
+{
+    // Load YARP routes and clusters from code using the fluent configuration API.
+    bffBuilder.AddYarpConfig(BuildYarpRoutes(), [
         new ClusterConfig()
         {
 
@@ -124,8 +138,18 @@ bffBuilder
             {
                 { "destination1", new() { Address = "https://localhost:5010" } },
             }
-        }
+        },
+        new ClusterConfig()
+        {
+            ClusterId = "cluster-with-impersonation",
+
+            Destinations = new Dictionary<string, DestinationConfig>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "destination1", new() { Address = "https://localhost:5010" } },
+            }
+        }.WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>()
     ]);
+}
 
 
 
@@ -139,7 +163,7 @@ app.UseRouting();
 
 
 app.UseBff();
-
+app.MapBffReverseProxy();
 
 app.Map("/static", staticApp =>
 {
@@ -228,6 +252,52 @@ RouteConfig[] BuildYarpRoutes()
                     Path = "/yarp/anonymous/{**catch-all}"
                 }
             }
+            .WithAntiforgeryCheck(),
+
+        // Custom access token retriever set on the route
+        new RouteConfig()
+            {
+                RouteId = "impersonation-route-level",
+                ClusterId = "cluster1",
+
+                Match = new()
+                {
+                    Path = "/yarp/impersonation-route-level/{**catch-all}"
+                }
+            }
+            .WithAccessToken(RequiredTokenType.User)
+            .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>()
+            .WithAntiforgeryCheck(),
+
+        // Custom access token retriever inherited from the cluster
+        new RouteConfig()
+            {
+                RouteId = "impersonation-cluster-level",
+                ClusterId = "cluster-with-impersonation",
+
+                Match = new()
+                {
+                    Path = "/yarp/impersonation-cluster-level/{**catch-all}"
+                }
+            }
+            .WithAccessToken(RequiredTokenType.User)
+            .WithAntiforgeryCheck(),
+
+        // Route-level retriever takes precedence over cluster-level:
+        // this route uses NoOpAccessTokenRetriever (via route metadata)
+        // even though the cluster has ImpersonationAccessTokenRetriever
+        new RouteConfig()
+            {
+                RouteId = "impersonation-route-overrides-cluster",
+                ClusterId = "cluster-with-impersonation",
+
+                Match = new()
+                {
+                    Path = "/yarp/impersonation-route-overrides-cluster/{**catch-all}"
+                }
+            }
+            .WithAccessToken(RequiredTokenType.User)
+            .WithAccessTokenRetriever<NoOpAccessTokenRetriever>()
             .WithAntiforgeryCheck()
     ];
 }
@@ -242,4 +312,14 @@ public class FrontendAwareIndexHtmlTransformer : IIndexHtmlTransformer
 
         return Task.FromResult<string?>(indexHtml);
     }
+}
+
+/// <summary>
+/// A no-op access token retriever that simply delegates to the default retriever.
+/// Used to demonstrate that a route-level retriever takes precedence over a cluster-level one.
+/// </summary>
+public class NoOpAccessTokenRetriever(IAccessTokenRetriever inner) : IAccessTokenRetriever
+{
+    public Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, Ct ct = default) =>
+        inner.GetAccessTokenAsync(context, ct);
 }

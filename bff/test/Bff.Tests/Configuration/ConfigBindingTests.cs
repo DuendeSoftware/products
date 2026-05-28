@@ -312,7 +312,7 @@ public class MergedJsonConfigurationProvider : ConfigurationProvider, IDisposabl
                 }
                 catch (Exception ex)
                 {
-                    _testOutputHelper.WriteLine($"[Warning] Could not read or parse config file '{Path.GetFileName(file)}'. Skipping. Error: {ex.Message}");
+                    TryWriteLine($"[Warning] Could not read or parse config file '{Path.GetFileName(file)}'. Skipping. Error: {ex.Message}");
                 }
             }
 
@@ -322,13 +322,26 @@ public class MergedJsonConfigurationProvider : ConfigurationProvider, IDisposabl
         }
         catch (Exception ex)
         {
-            _testOutputHelper.WriteLine($"[Error] Could not load merged configuration. Error: {ex.Message}");
+            TryWriteLine($"[Error] Could not load merged configuration. Error: {ex.Message}");
             Data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         }
 
         if (reload)
         {
             OnReload();
+        }
+    }
+
+    private void TryWriteLine(string message)
+    {
+        try
+        {
+            _testOutputHelper.WriteLine(message);
+        }
+        catch (InvalidOperationException)
+        {
+            // FileSystemWatcher callbacks can fire after the test has completed,
+            // at which point xUnit's TestOutputHelper throws because there is no active test.
         }
     }
 

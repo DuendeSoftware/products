@@ -76,7 +76,7 @@ internal class AccessTokenRequestTransform(
                     ApplyBearerToken(context, bearerToken);
                     break;
                 case DPoPTokenResult dpopToken:
-                    await ApplyDPoPToken(context, dpopToken);
+                    await ApplyDPoPTokenAsync(context, dpopToken);
                     break;
                 case AccessTokenRetrievalError tokenError:
 
@@ -129,17 +129,42 @@ internal class AccessTokenRequestTransform(
             return null;
         }
 
+        var routeMetadata = yarp.Config.Metadata;
+        var clusterMetadata = yarp.Cluster?.Model.Config.Metadata;
+
         RequiredTokenType? requiredTokenType = null;
-        if (Enum.TryParse<RequiredTokenType>(yarp.Config.Metadata?.GetValueOrDefault(Constants.Yarp.TokenTypeMetadata), true, out var type))
+        if (Enum.TryParse<RequiredTokenType>(
+                GetMetadataValue(routeMetadata, clusterMetadata, Constants.Yarp.TokenTypeMetadata), true, out var type))
         {
             requiredTokenType = type;
         }
 
-        return new BffRemoteApiEndpointMetadata()
+        var accessTokenRetrieverTypeName = GetMetadataValue(routeMetadata, clusterMetadata, Constants.Yarp.AccessTokenRetrieverMetadata);
+        Type? accessTokenRetrieverType = null;
+        if (!string.IsNullOrEmpty(accessTokenRetrieverTypeName))
+        {
+            accessTokenRetrieverType = Type.GetType(accessTokenRetrieverTypeName)
+                ?? throw new InvalidOperationException($"Type '{accessTokenRetrieverTypeName}' not found.");
+        }
+
+        var metadata = new BffRemoteApiEndpointMetadata
         {
             TokenType = requiredTokenType
         };
+
+        if (accessTokenRetrieverType != null)
+        {
+            metadata.AccessTokenRetriever = accessTokenRetrieverType;
+        }
+
+        return metadata;
     }
+
+    private static string? GetMetadataValue(
+        IReadOnlyDictionary<string, string>? routeMetadata,
+        IReadOnlyDictionary<string, string>? clusterMetadata,
+        string key) =>
+        routeMetadata?.GetValueOrDefault(key) ?? clusterMetadata?.GetValueOrDefault(key);
 
     private void ApplyError(RequestTransformContext context, AccessTokenRetrievalError tokenError, RequiredTokenType? tokenType)
     {
@@ -155,7 +180,7 @@ internal class AccessTokenRequestTransform(
     private static void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token) => context.ProxyRequest.Headers.Authorization =
             new AuthenticationHeaderValue(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer, token.AccessToken.ToString());
 
-    private async Task ApplyDPoPToken(RequestTransformContext context, DPoPTokenResult token)
+    private async Task ApplyDPoPTokenAsync(RequestTransformContext context, DPoPTokenResult token)
     {
         var url = RequestUtilities.MakeDestinationAddress(
             context.DestinationPrefix,

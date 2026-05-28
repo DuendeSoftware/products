@@ -220,6 +220,7 @@ namespace Duende.Bff
         }
         public static class Yarp
         {
+            public const string AccessTokenRetrieverMetadata = "Duende.Bff.Yarp.AccessTokenRetriever";
             public const string AntiforgeryCheckMetadata = "Duende.Bff.Yarp.AntiforgeryCheck";
             public const string TokenTypeMetadata = "Duende.Bff.Yarp.TokenType";
         }

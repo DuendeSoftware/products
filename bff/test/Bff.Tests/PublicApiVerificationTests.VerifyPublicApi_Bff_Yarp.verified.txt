@@ -21,6 +21,10 @@ namespace Duende.Bff.Yarp
     {
         public static Yarp.ReverseProxy.Configuration.ClusterConfig WithAccessToken(this Yarp.ReverseProxy.Configuration.ClusterConfig config, Duende.Bff.AccessTokenManagement.RequiredTokenType requiredTokenType) { }
         public static Yarp.ReverseProxy.Configuration.RouteConfig WithAccessToken(this Yarp.ReverseProxy.Configuration.RouteConfig config, Duende.Bff.AccessTokenManagement.RequiredTokenType requiredTokenType) { }
+        public static Yarp.ReverseProxy.Configuration.ClusterConfig WithAccessTokenRetriever<TRetriever>(this Yarp.ReverseProxy.Configuration.ClusterConfig config)
+            where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
+        public static Yarp.ReverseProxy.Configuration.RouteConfig WithAccessTokenRetriever<TRetriever>(this Yarp.ReverseProxy.Configuration.RouteConfig config)
+            where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
         public static Yarp.ReverseProxy.Configuration.RouteConfig WithAntiforgeryCheck(this Yarp.ReverseProxy.Configuration.RouteConfig config) { }
         [System.Obsolete("Use TokenRequirement.OptionalUserOrNone")]
         public static Yarp.ReverseProxy.Configuration.RouteConfig WithOptionalUserAccessToken(this Yarp.ReverseProxy.Configuration.RouteConfig config) { }

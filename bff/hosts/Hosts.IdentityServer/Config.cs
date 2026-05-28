@@ -42,7 +42,7 @@ public static class Config
         BuildClient("bff.perf",
             ServiceDiscovery.ResolveService(AppHostServices.BffPerf, "single"),
             ServiceDiscovery.ResolveService(AppHostServices.BffPerf, "multi"),
-            new Uri("https://app1.localhost:6002")
+            new Uri("https://app1.dev.localhost:6002")
         ),
 
         BuildClient("bff", client =>
@@ -68,7 +68,7 @@ public static class Config
         BuildClient("bff.multi-frontend.with-domain", client =>
         {
             client.AllowedScopes.Add("scope-for-isolated-api");
-        }, new Uri("https://app1.localhost:5005")),
+        }, new Uri("https://app1.dev.localhost:5005")),
 
         BuildClient("bff.dpop", client =>
         {

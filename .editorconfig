@@ -75,6 +75,9 @@ dotnet_naming_rule.async_methods_must_end_with_async.severity = none
 [platform/test/**/*.cs]
 dotnet_naming_rule.async_methods_must_end_with_async.severity = none
 
+[libs/bff/test/**/*.cs]
+dotnet_naming_rule.async_methods_must_end_with_async.severity = none
+
 # Sample test projects also use xUnit test naming conventions
 [platform/samples/**/test/**/*.cs]
 dotnet_naming_rule.async_methods_must_end_with_async.severity = none

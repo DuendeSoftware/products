@@ -1,5 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Folder Name="/hosts/">
+    <Project Path="hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent.Client/Hosts.Bff.Blazor.PerComponent.Client.csproj" />
+    <Project Path="hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent/Hosts.Bff.Blazor.PerComponent.csproj" />
+    <Project Path="hosts/Blazor/WebAssembly/Hosts.Bff.Blazor.WebAssembly.Client/Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
+    <Project Path="hosts/Blazor/WebAssembly/Hosts.Bff.Blazor.WebAssembly/Hosts.Bff.Blazor.WebAssembly.csproj" />
     <Project Path="hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
     <Project Path="hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
     <Project Path="hosts/Hosts.Bff.EF/Hosts.Bff.EF.csproj" />
@@ -8,17 +13,6 @@
     <Project Path="hosts/Hosts.Bff.Performance/Hosts.Bff.Performance.csproj" />
     <Project Path="hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
-  </Folder>
-  <Folder Name="/hosts/Blazor/" />
-  <Folder Name="/hosts/Blazor/PerComponent/">
-    <Project Path="hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent.Client/Hosts.Bff.Blazor.PerComponent.Client.csproj" />
-    <Project Path="hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent/Hosts.Bff.Blazor.PerComponent.csproj" />
-  </Folder>
-  <Folder Name="/hosts/Blazor/WebAssembly/">
-    <Project Path="hosts/Blazor/WebAssembly/Hosts.Bff.Blazor.WebAssembly.Client/Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
-    <Project Path="hosts/Blazor/WebAssembly/Hosts.Bff.Blazor.WebAssembly/Hosts.Bff.Blazor.WebAssembly.csproj" />
-  </Folder>
-  <Folder Name="/hosts/RemoteApis/">
     <Project Path="hosts/RemoteApis/Hosts.RemoteApi.DPoP/Hosts.RemoteApi.DPoP.csproj" />
     <Project Path="hosts/RemoteApis/Hosts.RemoteApi.Isolated/Hosts.RemoteApi.Isolated.csproj" />
     <Project Path="hosts/RemoteApis/Hosts.RemoteApi/Hosts.RemoteApi.csproj" />
@@ -37,25 +31,14 @@
     <Project Path="src/Bff.Yarp/Bff.Yarp.csproj" />
     <Project Path="src/Bff/Bff.csproj" />
   </Folder>
-  <Folder Name="/templates/" />
-  <Folder Name="/templates/src/">
-    <Project Path="templates/src/BffLocalApi/BffLocalApi.csproj" />
-    <Project Path="templates/src/BffRemoteApi/BffRemoteApi.csproj" />
-  </Folder>
-  <Folder Name="/templates/src/BffBlazorAutoRenderMode/">
+  <Folder Name="/templates/">
     <Project Path="templates/src/BffBlazorAutoRenderMode/BffBlazorAutoRenderMode.Client/BffBlazorAutoRenderMode.Client.csproj" />
     <Project Path="templates/src/BffBlazorAutoRenderMode/BffBlazorAutoRenderMode/BffBlazorAutoRenderMode.csproj" />
+    <Project Path="templates/src/BffLocalApi/BffLocalApi.csproj" />
+    <Project Path="templates/src/BffRemoteApi/BffRemoteApi.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="test/Hosts.Tests/Hosts.Tests.csproj" />
-  </Folder>
-  <Folder Name="/tools/">
-    <Project Path="tools/PublicApi/PublicApi.csproj" />
-  </Folder>
-  <Folder Name="/shared/">
-    <Project Path="shared/AppHost.Abstractions/AppHost.Abstractions.csproj" />
-    <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
-    <Project Path="shared/Xunit.Playwright/Xunit.Playwright.csproj" />
   </Folder>
 </Solution>
