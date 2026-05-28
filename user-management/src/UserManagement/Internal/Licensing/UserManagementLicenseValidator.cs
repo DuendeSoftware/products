@@ -11,42 +11,44 @@ namespace Duende.UserManagement.Internal.Licensing;
 /// </summary>
 internal sealed class UserManagementLicenseValidator(LicenseValidator validator)
 {
-    internal void ValidateProfiles() => validator.ValidateFeature(SkuIds.UM_002, "User Profiles");
+    internal void ValidateProfiles() => validator.ValidateFeature(SkuIds.UM_002);
 
-    internal void ValidateRolesAndGroups() => validator.ValidateFeature(SkuIds.UM_003, "Roles & Groups");
+    internal void ValidateRolesAndGroups() => validator.ValidateFeature(SkuIds.UM_003);
 
-    internal void ValidateOtp() => validator.ValidateFeature(SkuIds.UM_004, "OTP Authentication");
+    internal void ValidateOtp() => validator.ValidateFeature(SkuIds.UM_004);
 
-    internal void ValidateTotp() => validator.ValidateFeature(SkuIds.UM_005, "TOTP Authentication");
+    internal void ValidateTotp() => validator.ValidateFeature(SkuIds.UM_005);
 
-    internal void ValidatePasskey() => validator.ValidateFeature(SkuIds.UM_006, "Passkey Authentication");
+    internal void ValidatePasskey() => validator.ValidateFeature(SkuIds.UM_006);
 
-    internal void ValidateRecoveryCode() => validator.ValidateFeature(SkuIds.UM_007, "Recovery Code Authentication");
+    internal void ValidateRecoveryCode() => validator.ValidateFeature(SkuIds.UM_007);
 
-    internal void ValidatePassword() => validator.ValidateFeature(SkuIds.UM_008, "Password Authentication");
+    internal void ValidatePassword() => validator.ValidateFeature(SkuIds.UM_008);
 
     // TODO: UM-009 (Account Lockout) - deferred. Injection point is DefaultAuthenticationAttemptPolicy.EvaluateAsync
     //       but the relationship with UM-016 (Per-space Policies) needs clarification.
-    internal void ValidateAccountLockout() => validator.ValidateFeature(SkuIds.UM_009, "Account Lockout");
+    internal void ValidateAccountLockout() => validator.ValidateFeature(SkuIds.UM_009);
 
-    internal void ValidateExternalIdpLinking() => validator.ValidateFeature(SkuIds.UM_010, "External IdP Account Linking");
+    internal void ValidateExternalIdpLinking() => validator.ValidateFeature(SkuIds.UM_010);
 
-    internal void ValidateSelfService() => validator.ValidateFeature(SkuIds.UM_011, "Self-Service");
+    internal void ValidateSelfService() => validator.ValidateFeature(SkuIds.UM_011);
 
-    internal void ValidateAdministration() => validator.ValidateFeature(SkuIds.UM_012, "Account Administration");
+    internal void ValidateAdministration() => validator.ValidateFeature(SkuIds.UM_012);
 
-    internal void ValidateRegistration() => validator.ValidateFeature(SkuIds.UM_013, "Registration Modes");
+    internal void ValidateRegistration() => validator.ValidateFeature(SkuIds.UM_013);
+
+    internal void ValidateInboundScim() => validator.ValidateFeature(SkuIds.PLT_013);
 
     // TODO: UM-014 (User Events) - deferred. We need to establish when this needs to be included.
-    internal void ValidateUserEvents() => validator.ValidateFeature(SkuIds.UM_014, "User Events");
+    internal void ValidateUserEvents() => validator.ValidateFeature(SkuIds.UM_014);
 
     // TODO: UM-015 (Advanced Password Policies) - deferred. Find the appropriate place to call this.
-    internal void ValidateAdvancedPasswordPolicies() => validator.ValidateFeature(SkuIds.UM_015, "Advanced Password Policies");
+    internal void ValidateAdvancedPasswordPolicies() => validator.ValidateFeature(SkuIds.UM_015);
 
     // TODO: UM-016 (Per-space Policies) - deferred. Same injection point as UM-009
     //       (DefaultAuthenticationAttemptPolicy.EvaluateAsync). Needs design clarification.
-    internal void ValidatePerSpacePolicies() => validator.ValidateFeature(SkuIds.UM_016, "Per-space Authentication Policies");
+    internal void ValidatePerSpacePolicies() => validator.ValidateFeature(SkuIds.UM_016);
 
     // TODO: We need to design and discuss a mechanism for how we want to retrieve the actual user count.
-    internal void ValidateUserCount(int actual) => validator.ValidateQuantized(SkuIds.UM_001, "User count", actual);
+    internal void ValidateUserCount(int actual) => validator.ValidateQuantized(SkuIds.UM_001, actual);
 }

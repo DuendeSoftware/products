@@ -3,6 +3,7 @@
 
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Profiles.Internal.Storage;
@@ -19,6 +20,7 @@ internal sealed class ScimListUsersEndpoint(
     UserProfileReader profileReader,
     IServerUrls serverUrls,
     IOptions<ScimEndpointOptions> scimOptions,
+    UserManagementLicenseValidator licenseValidator,
     ILogger<ScimListUsersEndpoint> logger)
 {
     internal async Task<IResult> HandleAsync(
@@ -32,6 +34,8 @@ internal sealed class ScimListUsersEndpoint(
         [FromQuery] string? excludedAttributes,
         Ct ct)
     {
+        licenseValidator.ValidateInboundScim();
+
         var resolvedStartIndex = Math.Max(1, startIndex ?? 1);
         var resolvedCount = count ?? 20;
         var sortDirection = ScimEndpointHelpers.ParseSortDirection(sortOrder);

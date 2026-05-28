@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Membership;
 using Duende.UserManagement.Scim.Internal.Endpoints.Users;
@@ -18,6 +19,7 @@ internal sealed class ScimGetGroupEndpoint(
     IServerUrls serverUrls,
     IOptions<ScimEndpointOptions> scimOptions,
     IOptions<ScimOptions> options,
+    UserManagementLicenseValidator licenseValidator,
     ILogger<ScimGetGroupEndpoint> logger)
 {
     internal async Task<IResult> HandleAsync(
@@ -27,6 +29,8 @@ internal sealed class ScimGetGroupEndpoint(
         [FromQuery] string? excludedAttributes,
         Ct ct)
     {
+        licenseValidator.ValidateInboundScim();
+
         if (!GroupId.TryCreate(id, out var parsedGroupId))
         {
             return ScimResults.Error(404, detail: "Group not found.");

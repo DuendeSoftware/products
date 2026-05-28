@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/IdentityServer8/IdentityServer8.csproj" />
     <Project Path="src/UserManagement/UserManagement.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/IdentityServer8.UnitTests/IdentityServer8.UnitTests.csproj" />
     <Project Path="test/UserManagement.Tests.Internal/UserManagement.Tests.Internal.csproj" />
     <Project Path="test/UserManagement.Tests.Public/UserManagement.Tests.Public.csproj" />
   </Folder>

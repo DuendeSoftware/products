@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Text.Json;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Scim.Internal.Endpoints.Groups;
 using Duende.UserManagement.Scim.Internal.Endpoints.Users;
 using Duende.UserManagement.Scim.Internal.Models;
@@ -15,6 +16,7 @@ namespace Duende.UserManagement.Scim.Internal.Endpoints.Bulk;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class ScimBulkEndpoint(
+    UserManagementLicenseValidator licenseValidator,
     IServiceProvider serviceProvider,
     IOptions<ScimOptions> scimOptions,
     ILogger<ScimBulkEndpoint> logger)
@@ -26,6 +28,8 @@ internal sealed class ScimBulkEndpoint(
         HttpContext context,
         CancellationToken ct)
     {
+        licenseValidator.ValidateInboundScim();
+
         if (body is null)
         {
             return ScimResults.Error(400, ScimConstants.ErrorTypes.InvalidSyntax, "Request body is required.");
