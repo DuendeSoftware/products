@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Description>Duende UserManagement Integration for Duende IdentityServer</Description>
     <AssemblyName>Duende.UserManagement.IdentityServer8</AssemblyName>
-    <RootNamespace>Duende.IdentityServer.UserManagement</RootNamespace>
+    <RootNamespace>Duende.IdentityServer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

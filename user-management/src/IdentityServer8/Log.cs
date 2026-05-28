@@ -5,7 +5,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Duende.IdentityServer.UserManagement;
+namespace Duende.IdentityServer;
 
 internal static partial class Log
 {

@@ -1,11 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.UserManagement;
 using Duende.UserManagement;
 using Duende.UserManagement.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Duende.IdentityServer.UserManagement;
+namespace Duende.IdentityServer;
 
 /// <summary>
 /// Extension methods to add Duende UserManagement support to IdentityServer.
