@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Licensing.Enforcement;
 using Duende.Private.Licencing.V2;
 
 namespace Duende.UserManagement.Internal.Licensing;

@@ -6,27 +6,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Authentication\Passkeys\passkeys.js" />
+    <None Remove="Authentication\Passkeys\passkeys.js"/>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Authentication\Passkeys\passkeys.js" />
+    <EmbeddedResource Include="Authentication\Passkeys\passkeys.js"/>
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityModel" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Duende.Storage" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\shared\Licensing\Licensing.csproj" />
+    <PackageReference Include="Duende.IdentityModel"/>
+    <PackageReference Include="Duende.Private.Licensing"/>
+    <PackageReference Include="Duende.Storage"/>
   </ItemGroup>
 
 </Project>

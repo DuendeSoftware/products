@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
-  <Folder Name="/shared/">
-    <Project Path="shared/Licensing/Licensing.csproj" />
-  </Folder>
   <Folder Name="/src/">
     <Project Path="src/UserManagement/UserManagement.csproj" />
   </Folder>
