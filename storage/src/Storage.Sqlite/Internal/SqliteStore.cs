@@ -2046,17 +2046,16 @@ internal sealed class SqliteStore(
             return (OperationOutcome.Success, false);
         }
 
+        deleteCmd.CommandText += " RETURNING entity_id";
+
         Log.ExecutingSql(logger, deleteCmd.CommandText);
 
-        // Resolve entity_id for link cleanup BEFORE deleting the entity
-        var entityId = op.Id?.Value ?? (op.Key is not null
-            ? await ResolveKeyToEntityIdAsync(cnn, tx, op.EntityType, op.Key, PoolId, ct)
-            : null);
-
-        var rowsAffected = await deleteCmd.ExecuteNonQueryAsync(ct);
+        // Use RETURNING to get the deleted entity_id in a single round-trip
+        var result = await deleteCmd.ExecuteScalarAsync(ct);
+        var deletedEntityId = result is string s ? Guid.Parse(s) : (Guid?)null;
 
         // Delete entity links (no FK to entities, must be done manually)
-        if (entityId.HasValue)
+        if (deletedEntityId.HasValue)
         {
             await using var linkDeleteCmd = cnn.CreateCommand();
             linkDeleteCmd.Transaction = tx;
@@ -2066,40 +2065,15 @@ internal sealed class SqliteStore(
                   AND (left_entity_id = @entity_id OR right_entity_id = @entity_id)
                 """;
             _ = linkDeleteCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-            _ = linkDeleteCmd.Parameters.AddWithValue("@entity_id", entityId.Value.ToString());
+            _ = linkDeleteCmd.Parameters.AddWithValue("@entity_id", deletedEntityId.Value.ToString());
             Log.ExecutingSql(logger, linkDeleteCmd.CommandText);
             _ = await linkDeleteCmd.ExecuteNonQueryAsync(ct);
         }
 
-        return (OperationOutcome.Success, rowsAffected > 0);
+        return (OperationOutcome.Success, deletedEntityId.HasValue);
     }
 
-    private static async Task<Guid?> ResolveKeyToEntityIdAsync(
-        SqliteConnection cnn,
-        SqliteTransaction tx,
-        EntityType entityType,
-        DataStorageKey key,
-        PoolId poolId,
-        Ct ct)
-    {
-        await using var cmd = cnn.CreateCommand();
-        cmd.Transaction = tx;
-        cmd.CommandText = """
-            SELECT entity_id FROM main.entity_keys
-            WHERE entity_type_id = @entity_type_id
-              AND key_type_id = @key_type_id
-              AND key_type_version = @key_type_version
-              AND key_value = @key_value
-              AND pool_id = @pool_id
-            """;
-        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
-        _ = cmd.Parameters.AddWithValue("@key_type_id", (int)key.DskVersion.KeyType.Id);
-        _ = cmd.Parameters.AddWithValue("@key_type_version", (int)key.DskVersion.SchemaVersion);
-        _ = cmd.Parameters.AddWithValue("@key_value", key.Value.ToString());
-        _ = cmd.Parameters.AddWithValue("@pool_id", poolId.Value);
-        var result = await cmd.ExecuteScalarAsync(ct);
-        return result is string s ? Guid.Parse(s) : null;
-    }
+
 
     /// <inheritdoc/>
     async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryLinksAsync<TDso>(

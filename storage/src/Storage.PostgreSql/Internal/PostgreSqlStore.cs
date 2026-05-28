@@ -617,33 +617,58 @@ internal sealed class PostgreSqlStore(
         NpgsqlCommand cmd,
         IReadOnlyCollection<DataStorageKey> keys)
     {
-        var idNumber = 0;
-
-        foreach (var key in keys)
+        if (keys.Count == 0)
         {
-            var keyTypeIdParam = $"@key_type_id{idNumber}";
-            var keyTypeNameParam = $"@key_type_name{idNumber}";
-            var keyTypeVersionParam = $"@key_type_version{idNumber}";
-            var keyValueParam = $"@key{idNumber}";
-            var keyStringParam = $"@key_json{idNumber}";
-
-            _ = builder.AppendLine(
-                CultureInfo.InvariantCulture,
-                $"""
-                 INSERT INTO {_schemaName}.entity_keys (entity_type_id, key_type_id, key_type_name, key_value, key_json, key_type_version, entity_id, pool_id)
-                 VALUES (@entity_type_id, {keyTypeIdParam}, {keyTypeNameParam}, {keyValueParam}, {keyStringParam}, {keyTypeVersionParam}, @entity_id, @pool_id);
-                 """);
-
-            _ = cmd.Parameters.AddWithValue(keyTypeIdParam, (int)key.DskVersion.KeyType.Id);
-            _ = cmd.Parameters.AddWithValue(keyTypeNameParam, key.DskVersion.KeyType.Name);
-            _ = cmd.Parameters.AddWithValue(keyValueParam, key.Value);
-            _ = cmd.Parameters.AddWithValue(keyStringParam, NpgsqlDbType.Jsonb, (object?)key.KeyJsonValue ?? DBNull.Value);
-            _ = cmd.Parameters.AddWithValue(keyTypeVersionParam, (int)key.DskVersion.SchemaVersion);
-
-            ++idNumber;
+            return 0;
         }
 
-        return idNumber;
+        var keyTypeIds = new int[keys.Count];
+        var keyTypeNames = new string[keys.Count];
+        var keyValues = new Guid[keys.Count];
+        var keyJsons = new string?[keys.Count];
+        var keyTypeVersions = new int[keys.Count];
+
+        var i = 0;
+        foreach (var key in keys)
+        {
+            keyTypeIds[i] = (int)key.DskVersion.KeyType.Id;
+            keyTypeNames[i] = key.DskVersion.KeyType.Name;
+            keyValues[i] = key.Value;
+            keyJsons[i] = key.KeyJsonValue;
+            keyTypeVersions[i] = (int)key.DskVersion.SchemaVersion;
+            ++i;
+        }
+
+        _ = builder.AppendLine(
+            CultureInfo.InvariantCulture,
+            $"""
+             INSERT INTO {_schemaName}.entity_keys (entity_type_id, key_type_id, key_type_name, key_value, key_json, key_type_version, entity_id, pool_id)
+             SELECT @entity_type_id, key_type_id, key_type_name, key_value, key_json, key_type_version, @entity_id, @pool_id
+             FROM UNNEST(@key_type_ids, @key_type_names, @key_values, @key_jsons, @key_type_versions)
+               AS t(key_type_id, key_type_name, key_value, key_json, key_type_version);
+             """);
+
+        var keyTypeIdsParam = new NpgsqlParameter("@key_type_ids", NpgsqlDbType.Array | NpgsqlDbType.Integer);
+        keyTypeIdsParam.Value = keyTypeIds;
+        _ = cmd.Parameters.Add(keyTypeIdsParam);
+
+        var keyTypeNamesParam = new NpgsqlParameter("@key_type_names", NpgsqlDbType.Array | NpgsqlDbType.Text);
+        keyTypeNamesParam.Value = keyTypeNames;
+        _ = cmd.Parameters.Add(keyTypeNamesParam);
+
+        var keyValuesParam = new NpgsqlParameter("@key_values", NpgsqlDbType.Array | NpgsqlDbType.Uuid);
+        keyValuesParam.Value = keyValues;
+        _ = cmd.Parameters.Add(keyValuesParam);
+
+        var keyJsonsParam = new NpgsqlParameter("@key_jsons", NpgsqlDbType.Array | NpgsqlDbType.Jsonb);
+        keyJsonsParam.Value = keyJsons;
+        _ = cmd.Parameters.Add(keyJsonsParam);
+
+        var keyTypeVersionsParam = new NpgsqlParameter("@key_type_versions", NpgsqlDbType.Array | NpgsqlDbType.Integer);
+        keyTypeVersionsParam.Value = keyTypeVersions;
+        _ = cmd.Parameters.Add(keyTypeVersionsParam);
+
+        return keys.Count;
     }
 
     private int AddSearchFieldInserts(
@@ -656,53 +681,72 @@ internal sealed class PostgreSqlStore(
             return 0;
         }
 
-        var fieldNumber = 0;
+        var fieldPaths = new Guid[searchFields.Count];
+        var fieldPathTexts = new string[searchFields.Count];
+        var itemIndexes = new int[searchFields.Count];
+        var stringValues = new string?[searchFields.Count];
+        var numberValues = new decimal?[searchFields.Count];
+        var datetimeValues = new DateTime?[searchFields.Count];
+        var booleanValues = new bool?[searchFields.Count];
+        var guidValues = new Guid?[searchFields.Count];
+
+        var i = 0;
         foreach (var field in searchFields)
         {
-            var fieldPathParam = $"@field_path{fieldNumber}";
-            var fieldPathTextParam = $"@field_path_text{fieldNumber}";
-            var itemIndexParam = $"@item_index{fieldNumber}";
-            var stringValueParam = $"@string_value{fieldNumber}";
-            var numberValueParam = $"@number_value{fieldNumber}";
-            var datetimeValueParam = $"@datetime_value{fieldNumber}";
-            var booleanValueParam = $"@boolean_value{fieldNumber}";
-            var guidValueParam = $"@guid_value{fieldNumber}";
-
-            _ = builder.AppendLine(
-                CultureInfo.InvariantCulture,
-                $"""
-                 INSERT INTO {_schemaName}.search_values (entity_type_id, entity_id, field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value, pool_id)
-                 VALUES (@entity_type_id, @entity_id, {fieldPathParam}, {fieldPathTextParam}, {itemIndexParam}, {stringValueParam}, {numberValueParam}, {datetimeValueParam}, {booleanValueParam}, {guidValueParam}, @pool_id);
-                 """);
-
-            _ = cmd.Parameters.AddWithValue(fieldPathParam, field.FieldPathId);
-            _ = cmd.Parameters.AddWithValue(fieldPathTextParam, field.FieldPath);
-            _ = cmd.Parameters.AddWithValue(itemIndexParam, field.ItemIndex ?? -1);
-            _ = cmd.Parameters.AddWithValue(stringValueParam, (object?)field.StringValue ?? DBNull.Value);
-            _ = cmd.Parameters.AddWithValue(numberValueParam,
-                field.NumberValue.HasValue ? field.NumberValue.Value : DBNull.Value);
-
+            fieldPaths[i] = field.FieldPathId;
+            fieldPathTexts[i] = field.FieldPath;
+            itemIndexes[i] = field.ItemIndex ?? -1;
+            stringValues[i] = field.StringValue;
+            numberValues[i] = field.NumberValue;
             // Convert DateTimeOffset to UTC timestamp for PostgreSQL
-            if (field.DateTimeValue.HasValue)
-            {
-                _ = cmd.Parameters.AddWithValue(datetimeValueParam, NpgsqlDbType.TimestampTz,
-                    field.DateTimeValue.Value.UtcDateTime);
-            }
-            else
-            {
-                _ = cmd.Parameters.AddWithValue(datetimeValueParam, DBNull.Value);
-            }
-
-            _ = cmd.Parameters.AddWithValue(booleanValueParam,
-                field.BooleanValue.HasValue ? field.BooleanValue.Value : DBNull.Value);
-
-            _ = cmd.Parameters.AddWithValue(guidValueParam,
-                field.GuidValue.HasValue ? field.GuidValue.Value : DBNull.Value);
-
-            ++fieldNumber;
+            datetimeValues[i] = field.DateTimeValue?.UtcDateTime;
+            booleanValues[i] = field.BooleanValue;
+            guidValues[i] = field.GuidValue;
+            ++i;
         }
 
-        return fieldNumber;
+        _ = builder.AppendLine(
+            CultureInfo.InvariantCulture,
+            $"""
+             INSERT INTO {_schemaName}.search_values (entity_type_id, entity_id, field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value, pool_id)
+             SELECT @entity_type_id, @entity_id, field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value, @pool_id
+             FROM UNNEST(@sf_field_paths, @sf_field_path_texts, @sf_item_indexes, @sf_string_values, @sf_number_values, @sf_datetime_values, @sf_boolean_values, @sf_guid_values)
+               AS t(field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value);
+             """);
+
+        var sfFieldPathsParam = new NpgsqlParameter("@sf_field_paths", NpgsqlDbType.Array | NpgsqlDbType.Uuid);
+        sfFieldPathsParam.Value = fieldPaths;
+        _ = cmd.Parameters.Add(sfFieldPathsParam);
+
+        var sfFieldPathTextsParam = new NpgsqlParameter("@sf_field_path_texts", NpgsqlDbType.Array | NpgsqlDbType.Text);
+        sfFieldPathTextsParam.Value = fieldPathTexts;
+        _ = cmd.Parameters.Add(sfFieldPathTextsParam);
+
+        var sfItemIndexesParam = new NpgsqlParameter("@sf_item_indexes", NpgsqlDbType.Array | NpgsqlDbType.Integer);
+        sfItemIndexesParam.Value = itemIndexes;
+        _ = cmd.Parameters.Add(sfItemIndexesParam);
+
+        var sfStringValuesParam = new NpgsqlParameter("@sf_string_values", NpgsqlDbType.Array | NpgsqlDbType.Text);
+        sfStringValuesParam.Value = stringValues;
+        _ = cmd.Parameters.Add(sfStringValuesParam);
+
+        var sfNumberValuesParam = new NpgsqlParameter("@sf_number_values", NpgsqlDbType.Array | NpgsqlDbType.Numeric);
+        sfNumberValuesParam.Value = numberValues;
+        _ = cmd.Parameters.Add(sfNumberValuesParam);
+
+        var sfDatetimeValuesParam = new NpgsqlParameter("@sf_datetime_values", NpgsqlDbType.Array | NpgsqlDbType.TimestampTz);
+        sfDatetimeValuesParam.Value = datetimeValues;
+        _ = cmd.Parameters.Add(sfDatetimeValuesParam);
+
+        var sfBooleanValuesParam = new NpgsqlParameter("@sf_boolean_values", NpgsqlDbType.Array | NpgsqlDbType.Boolean);
+        sfBooleanValuesParam.Value = booleanValues;
+        _ = cmd.Parameters.Add(sfBooleanValuesParam);
+
+        var sfGuidValuesParam = new NpgsqlParameter("@sf_guid_values", NpgsqlDbType.Array | NpgsqlDbType.Uuid);
+        sfGuidValuesParam.Value = guidValues;
+        _ = cmd.Parameters.Add(sfGuidValuesParam);
+
+        return searchFields.Count;
     }
 
     /// <summary>
@@ -2114,18 +2158,16 @@ internal sealed class PostgreSqlStore(
             return (OperationOutcome.Success, false);
         }
 
+        deleteCmd.CommandText += " RETURNING entity_id";
+
         Log.ExecutingSql(logger, deleteCmd.CommandText);
 
-        // Resolve entity_id for link cleanup BEFORE deleting the entity,
-        // because entity_keys has ON DELETE CASCADE and will be gone after delete.
-        var entityId = op.Id?.Value ?? (op.Key is not null
-            ? await ResolveKeyToEntityIdAsync(cnn, tx, op.EntityType, op.Key, ct)
-            : null);
-
-        var rowsAffected = await deleteCmd.ExecuteNonQueryAsync(ct);
+        // Use RETURNING to get the deleted entity_id in a single round-trip
+        var result = await deleteCmd.ExecuteScalarAsync(ct);
+        var deletedEntityId = result is Guid guid ? guid : (Guid?)null;
 
         // Delete entity links (no FK to entities, must be done manually)
-        if (entityId.HasValue)
+        if (deletedEntityId.HasValue)
         {
             await using var linkDeleteCmd = cnn.CreateCommand();
             linkDeleteCmd.Transaction = tx;
@@ -2135,39 +2177,15 @@ internal sealed class PostgreSqlStore(
                   AND (left_entity_id = @entity_id OR right_entity_id = @entity_id)
                 """;
             _ = linkDeleteCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-            _ = linkDeleteCmd.Parameters.AddWithValue("@entity_id", entityId.Value);
+            _ = linkDeleteCmd.Parameters.AddWithValue("@entity_id", deletedEntityId.Value);
             Log.ExecutingSql(logger, linkDeleteCmd.CommandText);
             _ = await linkDeleteCmd.ExecuteNonQueryAsync(ct);
         }
 
-        return (OperationOutcome.Success, rowsAffected > 0);
+        return (OperationOutcome.Success, deletedEntityId.HasValue);
     }
 
-    private async Task<Guid?> ResolveKeyToEntityIdAsync(
-        NpgsqlConnection cnn,
-        NpgsqlTransaction tx,
-        EntityType entityType,
-        DataStorageKey key,
-        Ct ct)
-    {
-        await using var cmd = cnn.CreateCommand();
-        cmd.Transaction = tx;
-        cmd.CommandText = $"""
-            SELECT entity_id FROM {_schemaName}.entity_keys
-            WHERE entity_type_id = @entity_type_id
-              AND key_type_id = @key_type_id
-              AND key_type_version = @key_type_version
-              AND key_value = @key_value
-              AND pool_id = @pool_id
-            """;
-        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
-        _ = cmd.Parameters.AddWithValue("@key_type_id", (int)key.DskVersion.KeyType.Id);
-        _ = cmd.Parameters.AddWithValue("@key_type_version", (int)key.DskVersion.SchemaVersion);
-        _ = cmd.Parameters.AddWithValue("@key_value", key.Value);
-        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-        var result = await cmd.ExecuteScalarAsync(ct);
-        return result is Guid guid ? guid : null;
-    }
+
 
     private async Task<bool> AlreadyExistsInTransactionAsync(
         NpgsqlConnection cnn,

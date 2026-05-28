@@ -2080,6 +2080,7 @@ internal sealed class MsSqlStore(
 
             deleteCmd.CommandText = $"""
                 DELETE FROM [{_schemaName}].[entities]
+                OUTPUT deleted.entity_id
                 WHERE entity_type_id = @entityTypeId AND entity_id = @entityId AND pool_id = @poolId
                 """;
 
@@ -2091,6 +2092,7 @@ internal sealed class MsSqlStore(
 
             deleteCmd.CommandText = $"""
                 DELETE FROM [{_schemaName}].[entities]
+                OUTPUT deleted.entity_id
                 WHERE entity_type_id = @entityTypeId
                   AND pool_id = @poolId
                   AND entity_id = (
@@ -2115,22 +2117,12 @@ internal sealed class MsSqlStore(
 
         Log.ExecutingSql(logger, deleteCmd.CommandText);
 
-        // Resolve entity_id for link cleanup BEFORE deleting the entity,
-        // because entity_keys has ON DELETE CASCADE and will be gone after delete.
-        Guid? entityIdForLinks = null;
-        if (op.Id is not null)
-        {
-            entityIdForLinks = SqlServerGuidConverter.ToSqlServer(op.Id.Value);
-        }
-        else if (op.Key is not null)
-        {
-            entityIdForLinks = await ResolveKeyToEntityIdAsync(connection, transaction, op.EntityType, op.Key, ct);
-        }
-
-        var rowsAffected = await deleteCmd.ExecuteNonQueryAsync(ct);
+        // Use OUTPUT to get the deleted entity_id in a single round-trip
+        var result = await deleteCmd.ExecuteScalarAsync(ct);
+        var deletedEntityId = result is Guid guid ? guid : (Guid?)null;
 
         // Delete entity links (no FK to entities, must be done manually)
-        if (entityIdForLinks.HasValue)
+        if (deletedEntityId.HasValue)
         {
             await using var linkDeleteCmd = connection.CreateCommand();
             linkDeleteCmd.Transaction = transaction;
@@ -2141,40 +2133,15 @@ internal sealed class MsSqlStore(
                   AND (left_entity_id = @entityId OR right_entity_id = @entityId)
                 """;
             _ = linkDeleteCmd.Parameters.AddWithValue("@poolId", PoolId.Value);
-            _ = linkDeleteCmd.Parameters.AddWithValue("@entityId", entityIdForLinks.Value);
+            _ = linkDeleteCmd.Parameters.AddWithValue("@entityId", deletedEntityId.Value);
             Log.ExecutingSql(logger, linkDeleteCmd.CommandText);
             _ = await linkDeleteCmd.ExecuteNonQueryAsync(ct);
         }
 
-        return (OperationOutcome.Success, rowsAffected > 0);
+        return (OperationOutcome.Success, deletedEntityId.HasValue);
     }
 
-    private async Task<Guid?> ResolveKeyToEntityIdAsync(
-        SqlConnection connection,
-        SqlTransaction transaction,
-        EntityType entityType,
-        DataStorageKey key,
-        Ct ct)
-    {
-        await using var cmd = connection.CreateCommand();
-        cmd.Transaction = transaction;
-        cmd.CommandType = CommandType.Text;
-        cmd.CommandText = $"""
-            SELECT entity_id FROM [{_schemaName}].[entity_keys]
-            WHERE entity_type_id = @entityTypeId
-              AND key_type_id = @keyTypeId
-              AND key_type_version = @keyTypeVersion
-              AND key_value = @keyValue
-              AND pool_id = @poolId
-            """;
-        _ = cmd.Parameters.AddWithValue("@entityTypeId", (int)entityType.Id);
-        _ = cmd.Parameters.AddWithValue("@keyTypeId", (int)key.DskVersion.KeyType.Id);
-        _ = cmd.Parameters.AddWithValue("@keyTypeVersion", (int)key.DskVersion.SchemaVersion);
-        _ = cmd.Parameters.AddWithValue("@keyValue", key.Value);
-        _ = cmd.Parameters.AddWithValue("@poolId", PoolId.Value);
-        var result = await cmd.ExecuteScalarAsync(ct);
-        return result is Guid guid ? guid : null;
-    }
+
 
     /// <summary>
     /// Builds the WHERE clause, JOIN clause, ORDER BY clause, and calculates the offset for a query.
