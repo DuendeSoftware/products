@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
@@ -6,8 +6,6 @@
     <AssemblyName>Duende.IdentityServer.ConformanceReport</AssemblyName>
     <RootNamespace>Duende.IdentityServer.ConformanceReport</RootNamespace>
     <Description>IdentityServer adapter for Duende ConformanceReport assessment</Description>
-    <MinVerTagPrefix>cr-</MinVerTagPrefix>
-    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     <PackageReadmePath>README.md</PackageReadmePath>
   </PropertyGroup>
 
@@ -17,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../IdentityServer/IdentityServer.csproj" />
-    <ProjectReference Include="../../../conformance-report/src/ConformanceReport/ConformanceReport.csproj" /> 
   </ItemGroup>
 
 </Project>
