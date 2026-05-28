@@ -1,10 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
@@ -41,7 +43,9 @@ public class DefaultIdentityServerInteractionServiceTests
         _mockMockHttpContextAccessor = new MockHttpContextAccessor(_options, _mockUserSession, _mockEndSessionStore,
             _mockServerUrls, configureServices: services => services.AddSingleton<IClientStore>(_mockClientStore));
 
-        _subject = new DefaultIdentityServerInteractionService(new FakeTimeProvider(),
+        _subject = new DefaultIdentityServerInteractionService(
+            _options,
+            new FakeTimeProvider(),
             _mockMockHttpContextAccessor,
             _mockLogoutMessageStore,
             _mockErrorMessageStore,
@@ -155,7 +159,7 @@ public class DefaultIdentityServerInteractionServiceTests
             Client = new Client { ClientId = "client" },
             ValidatedResources = _resourceValidationResult
         };
-        await _subject.GrantConsentAsync(req, new ConsentResponse { Error = AuthorizationError.AccessDenied }, _ct, null);
+        await _subject.GrantConsentAsync(req, new ConsentResponse { Error = InteractionError.AccessDenied }, _ct, null);
     }
 
     [Fact]
@@ -249,5 +253,253 @@ public class DefaultIdentityServerInteractionServiceTests
         message.Data.ClientIds?.ShouldContain("client1");
 
         message.Data.SamlSessions.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task GetAuthenticationContextAsync_returns_oidc_context_when_return_url_parses()
+    {
+        var client = new Client { ClientId = "oidc-client", ClientName = "OIDC Client" };
+        var authzRequest = new AuthorizationRequest { Client = client, IdP = "google" };
+        _mockReturnUrlParser.AuthorizationRequestResult = authzRequest;
+
+        var result = await _subject.GetAuthenticationContextAsync("/connect/authorize/callback?authzId=123", _ct);
+
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<AuthorizationRequest>();
+        result.Application.ShouldBeSameAs(client);
+        result.IdP.ShouldBe("google");
+    }
+
+    [Fact]
+    public async Task GetAuthenticationContextAsync_returns_saml_context_when_oidc_returns_null()
+    {
+        var sp = new SamlServiceProvider { EntityId = "https://sp.example.com", DisplayName = "Test SP" };
+        var samlRequest = new SamlAuthenticationContext { ServiceProvider = sp };
+        _mockReturnUrlParser.ParseResult = samlRequest;
+
+        // The mock returns whatever ParseResult is set to, regardless of URL
+        var result = await _subject.GetAuthenticationContextAsync("/any-url", _ct);
+
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<SamlAuthenticationContext>();
+        result.Application.ShouldBeSameAs(sp);
+        result.Application.Identifier.ShouldBe("https://sp.example.com");
+    }
+
+    [Fact]
+    public async Task GetAuthenticationContextAsync_returns_null_when_no_context_found()
+    {
+        _mockReturnUrlParser.ParseResult = null;
+
+        var result = await _subject.GetAuthenticationContextAsync(null, _ct);
+
+        result.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetAuthenticationContextAsync_prefers_oidc_over_saml()
+    {
+        // The unified parser returns the first match — OIDC parser is registered first.
+        // This test verifies that an OIDC result is returned as AuthorizationRequest.
+        var client = new Client { ClientId = "oidc-client" };
+        var authzRequest = new AuthorizationRequest { Client = client };
+        _mockReturnUrlParser.ParseResult = authzRequest;
+
+        var result = await _subject.GetAuthenticationContextAsync("/connect/authorize/callback", _ct);
+
+        result.ShouldBeOfType<AuthorizationRequest>();
+        result!.Application.Identifier.ShouldBe("oidc-client");
+    }
+
+    [Fact]
+    public async Task GetAuthenticationContextAsync_pattern_matches_to_protocol_specific_type()
+    {
+        var client = new Client { ClientId = "oidc-client" };
+        var authzRequest = new AuthorizationRequest { Client = client, LoginHint = "alice" };
+        _mockReturnUrlParser.AuthorizationRequestResult = authzRequest;
+
+        var result = await _subject.GetAuthenticationContextAsync("/authorize", _ct);
+
+        // Demonstrates the intended consumption pattern.
+        var identifier = result switch
+        {
+            AuthorizationRequest oidc => oidc.Client.ClientId,
+            SamlAuthenticationContext saml => saml.ServiceProvider.EntityId,
+            _ => "unknown"
+        };
+
+        identifier.ShouldBe("oidc-client");
+    }
+
+    [Fact]
+    public async Task GetLogoutContextAsync_saml_logout_should_append_logoutId_to_PostLogoutRedirectUri()
+    {
+        _mockLogoutMessageStore.Messages.Add("saml-logout-id", new Message<LogoutMessage>(new LogoutMessage
+        {
+            SessionId = "session",
+            SamlServiceProviderEntityId = "https://sp.example.com",
+            PostLogoutRedirectUri = "https://idp.example.com/saml/slo/callback"
+        }));
+        _mockUserSession.SessionId = "session";
+
+        var context = await _subject.GetLogoutContextAsync("saml-logout-id", _ct);
+
+        context.PostLogoutRedirectUri.ShouldNotBeNull();
+        context.PostLogoutRedirectUri.ShouldContain("logoutId=saml-logout-id");
+    }
+
+    [Fact]
+    public async Task GetLogoutContextAsync_saml_logout_uses_configured_logoutId_parameter_name()
+    {
+        _options.UserInteraction.LogoutIdParameter = "custom_logout_id";
+        _mockLogoutMessageStore.Messages.Add("saml-logout-id", new Message<LogoutMessage>(new LogoutMessage
+        {
+            SessionId = "session",
+            SamlServiceProviderEntityId = "https://sp.example.com",
+            PostLogoutRedirectUri = "https://idp.example.com/saml/slo/callback"
+        }));
+        _mockUserSession.SessionId = "session";
+
+        var context = await _subject.GetLogoutContextAsync("saml-logout-id", _ct);
+
+        context.PostLogoutRedirectUri.ShouldNotBeNull();
+        context.PostLogoutRedirectUri.ShouldContain("custom_logout_id=saml-logout-id");
+        context.PostLogoutRedirectUri.ShouldNotContain("logoutId=");
+    }
+
+    [Fact]
+    public async Task GetLogoutContextAsync_non_saml_logout_should_not_modify_PostLogoutRedirectUri()
+    {
+        _mockLogoutMessageStore.Messages.Add("oidc-logout-id", new Message<LogoutMessage>(new LogoutMessage
+        {
+            SessionId = "session",
+            PostLogoutRedirectUri = "https://client.example.com/signout-callback"
+        }));
+        _mockUserSession.SessionId = "session";
+
+        var context = await _subject.GetLogoutContextAsync("oidc-logout-id", _ct);
+
+        context.PostLogoutRedirectUri.ShouldBe("https://client.example.com/signout-callback");
+    }
+
+    [Fact]
+    public async Task GetLogoutContextAsync_saml_logout_without_PostLogoutRedirectUri_should_not_throw()
+    {
+        _mockLogoutMessageStore.Messages.Add("saml-logout-id", new Message<LogoutMessage>(new LogoutMessage
+        {
+            SessionId = "session",
+            SamlServiceProviderEntityId = "https://sp.example.com",
+            PostLogoutRedirectUri = null
+        }));
+        _mockUserSession.SessionId = "session";
+
+        var context = await _subject.GetLogoutContextAsync("saml-logout-id", _ct);
+
+        context.PostLogoutRedirectUri.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task DenyAuthenticationAsync_WithAuthorizationRequest_WritesConsentDenial()
+    {
+        var request = new AuthorizationRequest
+        {
+            Client = new Client { ClientId = "client1" },
+            ValidatedResources = _resourceValidationResult
+        };
+
+        await _subject.DenyAuthenticationAsync(request, InteractionError.AccessDenied, _ct, "user cancelled");
+
+        var stored = _mockConsentStore.Messages.Values.Single();
+        stored.Data.Error.ShouldBe(InteractionError.AccessDenied);
+        stored.Data.ErrorDescription.ShouldBe("user cancelled");
+    }
+
+    [Fact]
+    public async Task DenyAuthenticationAsync_WithSamlContext_NoStoreRegistered_Throws()
+    {
+        var context = new SamlAuthenticationContext();
+
+        await Should.ThrowAsync<InvalidOperationException>(
+            () => _subject.DenyAuthenticationAsync(context, InteractionError.AccessDenied, _ct));
+    }
+
+    [Fact]
+    public async Task DenyAuthenticationAsync_WithSamlContext_WritesDenialToStateStore()
+    {
+        var state = new SamlAuthenticationState
+        {
+            ServiceProviderEntityId = "https://sp.example.com",
+            AssertionConsumerService = new IndexedEndpoint { Location = "https://sp.example.com/acs" }
+        };
+        var spyStore = new SpySamlSigninStateStore(retrieveReturns: state);
+
+        var subject = new DefaultIdentityServerInteractionService(
+            _options,
+            new FakeTimeProvider(),
+            _mockMockHttpContextAccessor,
+            _mockLogoutMessageStore,
+            _mockErrorMessageStore,
+            _mockConsentStore,
+            _mockPersistedGrantService,
+            _mockUserSession,
+            _mockReturnUrlParser,
+            TestLogger.Create<DefaultIdentityServerInteractionService>(),
+            spyStore
+        );
+
+        var stateId = Guid.NewGuid();
+        var context = new SamlAuthenticationContext { StateId = stateId };
+
+        await subject.DenyAuthenticationAsync(context, InteractionError.AccessDenied, _ct, "user refused");
+
+        spyStore.UpdateCallCount.ShouldBe(1);
+        spyStore.LastUpdatedStateId.ShouldBe(stateId);
+        spyStore.LastUpdatedState!.DenialError.ShouldBe(InteractionError.AccessDenied);
+        spyStore.LastUpdatedState.DenialErrorDescription.ShouldBe("user refused");
+    }
+
+    [Fact]
+    public async Task DenyAuthorizationAsync_DelegatesToDenyAuthenticationAsync()
+    {
+        var request = new AuthorizationRequest
+        {
+            Client = new Client { ClientId = "client1" },
+            ValidatedResources = _resourceValidationResult
+        };
+
+        await _subject.DenyAuthorizationAsync(request, InteractionError.ConsentRequired, _ct, "consent denied");
+
+        var stored = _mockConsentStore.Messages.Values.Single();
+        stored.Data.Error.ShouldBe(InteractionError.ConsentRequired);
+        stored.Data.ErrorDescription.ShouldBe("consent denied");
+    }
+
+    [Fact]
+    public async Task DenyAuthenticationAsync_WithSamlContext_ExpiredState_IsNoOp()
+    {
+        // retrieveReturns: null simulates expired/missing state
+        var spyStore = new SpySamlSigninStateStore(retrieveReturns: null);
+
+        var subject = new DefaultIdentityServerInteractionService(
+            _options,
+            new FakeTimeProvider(),
+            _mockMockHttpContextAccessor,
+            _mockLogoutMessageStore,
+            _mockErrorMessageStore,
+            _mockConsentStore,
+            _mockPersistedGrantService,
+            _mockUserSession,
+            _mockReturnUrlParser,
+            TestLogger.Create<DefaultIdentityServerInteractionService>(),
+            spyStore
+        );
+
+        var stateId = Guid.NewGuid();
+        var context = new SamlAuthenticationContext { StateId = stateId };
+
+        // Should not throw — graceful no-op
+        await subject.DenyAuthenticationAsync(context, InteractionError.AccessDenied, _ct);
+
+        spyStore.UpdateCallCount.ShouldBe(0);
     }
 }

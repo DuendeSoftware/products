@@ -289,7 +289,7 @@ internal class TokenValidator : ITokenValidator
         }
         else
         {
-#pragma warning disable CA5404 // This is intentional
+#pragma warning disable CA5404 // No audience is specified — issuer, signature, and lifetime are still validated; token type is checked as a compensating control
             parameters.ValidateAudience = false;
 #pragma warning restore CA5404
 

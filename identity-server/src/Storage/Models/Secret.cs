@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Models;
 public class Secret
 {
     /// <summary>
-    /// Gets or sets the description.
+    /// Gets or sets a human-readable description for this secret. Used for display and auditing purposes.
     /// </summary>
     /// <value>
     /// The description.
@@ -20,7 +20,8 @@ public class Secret
     public string? Description { get; set; }
 
     /// <summary>
-    /// Gets or sets the value.
+    /// Gets or sets the secret value. For shared secrets, this should be the hashed value of the secret
+    /// (e.g. using <c>secret.Sha256()</c> or <c>secret.Sha512()</c>).
     /// </summary>
     /// <value>
     /// The value.
@@ -28,7 +29,8 @@ public class Secret
     public string Value { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the expiration.
+    /// Gets or sets the optional expiration date and time for this secret. After this point the secret is no longer valid.
+    /// Defaults to <c>null</c> (no expiration).
     /// </summary>
     /// <value>
     /// The expiration.
@@ -36,7 +38,9 @@ public class Secret
     public DateTime? Expiration { get; set; }
 
     /// <summary>
-    /// Gets or sets the type of the client secret.
+    /// Gets or sets the type of the secret, which determines how the secret value is validated.
+    /// Defaults to <c>SharedSecret</c>. Other types (e.g. X.509 certificate thumbprints) can be registered
+    /// by implementing <c>ISecretValidator</c>.
     /// </summary>
     /// <value>
     /// The type of the client secret.

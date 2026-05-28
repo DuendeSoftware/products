@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Models;
 public class PersistedGrant
 {
     /// <summary>
-    /// Gets or sets the key.
+    /// Gets or sets the unique key that identifies this grant in the store.
     /// </summary>
     /// <value>
     /// The key.
@@ -20,7 +20,7 @@ public class PersistedGrant
     public string Key { get; set; } = default!;
 
     /// <summary>
-    /// Gets the type.
+    /// Gets or sets the grant type (e.g. <c>authorization_code</c>, <c>refresh_token</c>, <c>reference_token</c>).
     /// </summary>
     /// <value>
     /// The type.
@@ -28,7 +28,7 @@ public class PersistedGrant
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// Gets the subject identifier.
+    /// Gets or sets the subject identifier of the user associated with this grant.
     /// </summary>
     /// <value>
     /// The subject identifier.
@@ -36,7 +36,7 @@ public class PersistedGrant
     public string SubjectId { get; set; } = default!;
 
     /// <summary>
-    /// Gets the session identifier.
+    /// Gets or sets the session identifier associated with this grant, if any.
     /// </summary>
     /// <value>
     /// The session identifier.
@@ -44,7 +44,7 @@ public class PersistedGrant
     public string? SessionId { get; set; }
 
     /// <summary>
-    /// Gets the client identifier.
+    /// Gets or sets the client identifier that requested this grant.
     /// </summary>
     /// <value>
     /// The client identifier.
@@ -52,7 +52,7 @@ public class PersistedGrant
     public string ClientId { get; set; } = default!;
 
     /// <summary>
-    /// Gets the description the user assigned to the device being authorized.
+    /// Gets or sets the description the user assigned to the device being authorized.
     /// </summary>
     /// <value>
     /// The description.
@@ -60,7 +60,7 @@ public class PersistedGrant
     public string? Description { get; set; }
 
     /// <summary>
-    /// Gets or sets the creation time.
+    /// Gets or sets the UTC time when this grant was created.
     /// </summary>
     /// <value>
     /// The creation time.
@@ -68,7 +68,7 @@ public class PersistedGrant
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the expiration.
+    /// Gets or sets the UTC time when this grant expires. <c>null</c> means the grant does not expire.
     /// </summary>
     /// <value>
     /// The expiration.
@@ -76,7 +76,8 @@ public class PersistedGrant
     public DateTime? Expiration { get; set; }
 
     /// <summary>
-    /// Gets or sets the consumed time.
+    /// Gets or sets the UTC time when this grant was consumed (e.g. a one-time-use authorization code was redeemed).
+    /// <c>null</c> means the grant has not been consumed.
     /// </summary>
     /// <value>
     /// The consumed time.
@@ -84,7 +85,7 @@ public class PersistedGrant
     public DateTime? ConsumedTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the data.
+    /// Gets or sets the serialized payload of the grant (e.g. the JSON-serialized token or code data).
     /// </summary>
     /// <value>
     /// The data.

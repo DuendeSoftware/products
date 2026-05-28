@@ -1,6 +1,7 @@
 using System.Globalization;
 using Duende.IdentityServer;
 using IdentityServerHost.Pages;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Filters;
@@ -12,7 +13,7 @@ internal static class HostingExtensions
     public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
     {
         // Write most logs to the console but diagnostic data to a file.
-        // See https://docs.duendesoftware.com/identityserver/diagnostics/data
+        // See https://duende.link/diagnostics
         _ = builder.Services.AddSerilog(lc =>
         {
             _ = lc.WriteTo.Logger(consoleLogger =>
@@ -69,7 +70,7 @@ internal static class HostingExtensions
         _ = isBuilder.AddInMemoryClients(Config.Clients);
 
 
-        // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
+        // if you want to use server-side sessions: https://duende.link/p/session-management
         // then enable it
         //isBuilder.AddServerSideSessions();
         //
@@ -100,6 +101,11 @@ internal static class HostingExtensions
                     RoleClaimType = "role"
                 };
             });
+
+        // add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // see more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+                   .SetApplicationName("IdentityServer");
 
         return builder.Build();
     }

@@ -3,8 +3,11 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Internal.Saml;
+using System.Xml;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Bindings;
+using Duende.IdentityServer.Saml.Common;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
@@ -15,22 +18,48 @@ internal class SamlDataBuilder(SamlData data)
         bool requireSignedAuthnRequests = false,
         System.Security.Cryptography.X509Certificates.X509Certificate2[]? encryptionCertificates = null,
         bool encryptAssertions = false,
-        string? entityId = null) => new SamlServiceProvider
+        string? entityId = null,
+        SamlBinding acsBinding = SamlBinding.HttpPost) => new SamlServiceProvider
         {
             EntityId = entityId ?? data.EntityId,
             DisplayName = "Example SP",
             Description = "Example SP",
             Enabled = true,
+            AllowedScopes = new HashSet<string> { "openid", "profile", "email", "custom" },
             RequireSignedAuthnRequests = requireSignedAuthnRequests || signingCertificate != null,
-            SigningCertificates = signingCertificate != null ? [signingCertificate] : null,
-            EncryptionCertificates = encryptionCertificates,
-            EncryptAssertions = encryptAssertions,
-            AssertionConsumerServiceUrls = [data.AcsUrl],
-            AssertionConsumerServiceBinding = SamlBinding.HttpPost,
-            SingleLogoutServiceUrl = new SamlEndpointType { Location = data.SingleLogoutServiceUrl, Binding = SamlBinding.HttpRedirect },
+            Certificates = BuildCertificates(signingCertificate, encryptionCertificates),
+            AssertionConsumerServiceUrls = [new IndexedEndpoint { Location = data.AcsUrl.OriginalString, Binding = acsBinding }],
+            SingleLogoutServiceUrls = [new SamlEndpointType { Location = data.SingleLogoutServiceUrl.OriginalString, Binding = SamlBinding.HttpRedirect }],
             RequestMaxAge = TimeSpan.FromMinutes(5),
+            AssertionLifetime = TimeSpan.FromMinutes(5),
             ClockSkew = TimeSpan.FromMinutes(5)
         };
+
+    private static List<ServiceProviderCertificate>? BuildCertificates(
+        System.Security.Cryptography.X509Certificates.X509Certificate2? signingCertificate,
+        System.Security.Cryptography.X509Certificates.X509Certificate2[]? encryptionCertificates)
+    {
+        if (signingCertificate == null && encryptionCertificates == null)
+        {
+            return null;
+        }
+
+        var certs = new List<ServiceProviderCertificate>();
+        if (signingCertificate != null)
+        {
+            certs.Add(new ServiceProviderCertificate { Certificate = signingCertificate, Use = KeyUse.Signing });
+        }
+
+        if (encryptionCertificates != null)
+        {
+            foreach (var cert in encryptionCertificates)
+            {
+                certs.Add(new ServiceProviderCertificate { Certificate = cert, Use = KeyUse.Encryption });
+            }
+        }
+
+        return certs;
+    }
 
 
     public string AuthNRequestXml(
@@ -45,7 +74,8 @@ internal class SamlDataBuilder(SamlData data)
         string? issuer = null,
         string? requestedAuthnContext = null,
         string? nameIdFormat = null,
-        string? spNameQualifier = null
+        string? spNameQualifier = null,
+        SamlBinding samlBinding = SamlBinding.HttpPost
         )
     {
         var id = requestId ?? data.RequestId;
@@ -83,11 +113,11 @@ internal class SamlDataBuilder(SamlData data)
                                                        ID="{id}"
                                                        Version="{version ?? "2.0"}"
                                                        Destination="{destination}"
-                                                       IssueInstant="{(issueInstant ?? data.Now):yyyy-MM-ddTHH:mm:ssZ}"
-                                                       ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                                                       IssueInstant="{new DateTimeUtc((issueInstant ?? data.Now).Ticks)}"
+                                                       ProtocolBinding="{samlBinding.ToUrn()}"
                                                        {acsAttributes}
-                                                       ForceAuthn="{forceAuthn}"
-                                                       IsPassive="{isPassive}"
+                                                       ForceAuthn="{XmlConvert.ToString(forceAuthn)}"
+                                                       IsPassive="{XmlConvert.ToString(isPassive)}"
                                                        xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
                                                        xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
                                                        <saml:Issuer>{issuerValue}</saml:Issuer>
@@ -118,7 +148,7 @@ internal class SamlDataBuilder(SamlData data)
             : "";
 
         var notOnOrAfterAttr = notOnOrAfter.HasValue
-            ? $"NotOnOrAfter=\"{notOnOrAfter.Value:yyyy-MM-ddTHH:mm:ssZ}\""
+            ? $"NotOnOrAfter=\"{new DateTimeUtc(notOnOrAfter.Value.Ticks)}\""
             : "";
 
         return $"""
@@ -127,14 +157,50 @@ internal class SamlDataBuilder(SamlData data)
                                                        ID="{id}"
                                                        Version="{version ?? "2.0"}"
                                                        Destination="{destination}"
-                                                       IssueInstant="{(issueInstant ?? data.Now):yyyy-MM-ddTHH:mm:ssZ}"
+                                                       IssueInstant="{new DateTimeUtc((issueInstant ?? data.Now).Ticks)}"
                                                        {notOnOrAfterAttr}
                                                        xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
                                                        xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
                                                        <saml:Issuer>{issuerValue}</saml:Issuer>
                                                        <saml:NameID Format="{nameIdFormatValue}">{nameIdValue}</saml:NameID>
-                                                       {sessionIndexElement}
-                                                   </samlp:LogoutRequest>
-                                               """.Trim();
+                                                   {sessionIndexElement}
+                                                    </samlp:LogoutRequest>
+                                                """.Trim();
+    }
+
+    public string LogoutResponseXml(
+        string inResponseTo,
+        string statusCode = "urn:oasis:names:tc:SAML:2.0:status:Success",
+        string? subStatusCode = null,
+        DateTimeOffset? issueInstant = null,
+        Uri? destination = null,
+        string? responseId = null,
+        string? issuer = null)
+    {
+        var id = responseId ?? $"_response-{Guid.NewGuid():N}";
+        var issuerValue = issuer ?? data.EntityId;
+
+        var subStatusElement = subStatusCode != null
+            ? $"""<samlp:StatusCode Value="{subStatusCode}" />"""
+            : "";
+
+        return $"""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <samlp:LogoutResponse
+                    ID="{id}"
+                    Version="2.0"
+                    IssueInstant="{new DateTimeUtc((issueInstant ?? data.Now).Ticks)}"
+                    Destination="{destination}"
+                    InResponseTo="{inResponseTo}"
+                    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+                    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+                    <saml:Issuer>{issuerValue}</saml:Issuer>
+                    <samlp:Status>
+                        <samlp:StatusCode Value="{statusCode}">
+                            {subStatusElement}
+                        </samlp:StatusCode>
+                    </samlp:Status>
+                </samlp:LogoutResponse>
+                """.Trim();
     }
 }

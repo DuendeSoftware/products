@@ -89,13 +89,6 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         deviceAuth.Description = consent.Description;
         deviceAuth.AuthorizedScopes = consent.ScopesValuesConsented;
 
-        // TODO: Device Flow - Record consent template
-        if (consent.RememberConsent)
-        {
-            //var consentRequest = new ConsentRequest(request, subject);
-            //await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _clock.UtcNow.UtcDateTime));
-        }
-
         await _devices.UpdateByUserCodeAsync(userCode, deviceAuth, ct);
 
         return new DeviceFlowInteractionResult();

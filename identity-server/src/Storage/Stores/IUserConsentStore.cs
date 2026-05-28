@@ -9,33 +9,43 @@ using Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Stores;
 
 /// <summary>
-/// Interface for user consent storage
+/// Persists and retrieves user consent decisions. When a user grants a client permission
+/// to access specific scopes, IdentityServer can remember that decision so the user is
+/// not prompted again on subsequent authorization requests. Consent records are stored
+/// per subject/client pair and optionally expire based on the client's
+/// <c>ConsentLifetime</c> setting. The default implementation is backed by
+/// <see cref="IPersistedGrantStore"/>.
 /// </summary>
 public interface IUserConsentStore
 {
     /// <summary>
-    /// Stores the user consent.
+    /// Persists a user consent decision, recording which scopes the user has granted to
+    /// the client. If a consent record already exists for the same subject and client,
+    /// it is replaced.
     /// </summary>
-    /// <param name="consent">The consent.</param>
+    /// <param name="consent">The consent record to store.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     Task StoreUserConsentAsync(Consent consent, Ct ct);
 
     /// <summary>
-    /// Gets the user consent.
+    /// Retrieves the stored consent decision for the specified subject and client.
     /// </summary>
-    /// <param name="subjectId">The subject identifier.</param>
-    /// <param name="clientId">The client identifier.</param>
+    /// <param name="subjectId">The subject identifier of the user.</param>
+    /// <param name="clientId">The client identifier for which consent was granted.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>
+    /// The <see cref="Consent"/> record for the specified subject and client, or
+    /// <see langword="null"/> if no consent has been stored or the stored consent has
+    /// expired.
+    /// </returns>
     Task<Consent?> GetUserConsentAsync(string subjectId, string clientId, Ct ct);
 
     /// <summary>
-    /// Removes the user consent.
+    /// Removes the stored consent decision for the specified subject and client,
+    /// effectively revoking the user's previously granted consent.
     /// </summary>
-    /// <param name="subjectId">The subject identifier.</param>
-    /// <param name="clientId">The client identifier.</param>
+    /// <param name="subjectId">The subject identifier of the user.</param>
+    /// <param name="clientId">The client identifier whose consent should be revoked.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     Task RemoveUserConsentAsync(string subjectId, string clientId, Ct ct);
 }

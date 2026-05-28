@@ -4,6 +4,8 @@
 
 #nullable enable
 
+using System.Text.Json.Serialization;
+
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -12,29 +14,30 @@ namespace Duende.IdentityServer.Models;
 public class IdentityProviderName
 {
     /// <summary>
-    /// Scheme name for the provider.
+    /// Gets or sets the scheme name for the provider.
     /// </summary>
     public string Scheme { get; set; } = default!;
 
     /// <summary>
-    /// Display name for the provider.
+    /// Gets or sets the display name for the provider.
     /// </summary>
     public string? DisplayName { get; set; }
 
     /// <summary>
-    /// Flag that indicates if the provider should be used.
+    /// Gets or sets a value indicating whether this provider is enabled and can be used for authentication. Defaults to <c>true</c>.
     /// </summary>
-    public bool Enabled { get; set; } = default!;
+    public bool Enabled { get; set; } = true;
 }
 
 /// <summary>
 /// Models general storage for an external authentication provider/handler scheme
 /// </summary>
-public class IdentityProvider
+public record IdentityProvider
 {
     /// <summary>
     /// Ctor
     /// </summary>
+    [JsonConstructor]
     public IdentityProvider(string type)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(type);
@@ -61,27 +64,28 @@ public class IdentityProvider
     }
 
     /// <summary>
-    /// Scheme name for the provider.
+    /// Gets or sets the scheme name for the provider.
     /// </summary>
     public string Scheme { get; set; } = default!;
 
     /// <summary>
-    /// Display name for the provider.
+    /// Gets or sets the display name for the provider.
     /// </summary>
     public string? DisplayName { get; set; }
 
     /// <summary>
-    /// Flag that indicates if the provider should be used.
+    /// Gets or sets a value indicating whether this provider is enabled and can be used for authentication. Defaults to <c>true</c>.
     /// </summary>
     public bool Enabled { get; set; } = true;
 
     /// <summary>
-    /// Protocol type of the provider.
+    /// Gets or sets the protocol type of the provider (e.g. <c>oidc</c> for OpenID Connect). Used to distinguish provider implementations.
     /// </summary>
     public string Type { get; set; }
 
     /// <summary>
-    /// Protocol specific properties for the provider.
+    /// Gets or sets the protocol-specific properties for the provider, stored as a key-value dictionary.
+    /// Derived classes (e.g. <see cref="OidcProvider"/>) expose typed properties backed by this dictionary.
     /// </summary>
     public Dictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
 
@@ -98,5 +102,76 @@ public class IdentityProvider
             return result;
         }
         set => Properties[name] = value!;
+    }
+
+    /// <summary>
+    /// Provides value-based equality that includes the <see cref="Properties"/> dictionary contents.
+    /// The compiler-generated record equality uses reference equality for the dictionary,
+    /// so we override to compare entries by value.
+    /// </summary>
+    public virtual bool Equals(IdentityProvider? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        if (EqualityContract != other.EqualityContract)
+        {
+            return false;
+        }
+
+        return Scheme == other.Scheme
+            && DisplayName == other.DisplayName
+            && Enabled == other.Enabled
+            && Type == other.Type
+            && DictionariesEqual(Properties, other.Properties);
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(EqualityContract);
+        hash.Add(Scheme);
+        hash.Add(DisplayName);
+        hash.Add(Enabled);
+        hash.Add(Type);
+
+        foreach (var kvp in Properties.OrderBy(x => x.Key, StringComparer.Ordinal))
+        {
+            hash.Add(kvp.Key, StringComparer.Ordinal);
+            hash.Add(kvp.Value, StringComparer.Ordinal);
+        }
+
+        return hash.ToHashCode();
+    }
+
+    private static bool DictionariesEqual(Dictionary<string, string> a, Dictionary<string, string> b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        if (a.Count != b.Count)
+        {
+            return false;
+        }
+
+        foreach (var kvp in a)
+        {
+            if (!b.TryGetValue(kvp.Key, out var value) || value != kvp.Value)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

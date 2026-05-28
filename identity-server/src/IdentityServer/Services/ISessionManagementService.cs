@@ -10,21 +10,38 @@ using Duende.IdentityServer.Stores;
 namespace Duende.IdentityServer.Services;
 
 /// <summary>
-/// Session management service
+/// Provides administrative features for querying and terminating server-side sessions.
+/// When server-side sessions are enabled, this service can be used to enumerate active sessions
+/// and to terminate them — including revoking associated tokens and consents, and triggering
+/// back-channel logout notifications to participating clients.
 /// </summary>
 public interface ISessionManagementService
 {
     /// <summary>
-    /// Queries all the session related data for a user.
+    /// Queries server-side session data for users, returning paged results based on the optional filter.
+    /// Use this to build administrative UIs that list active sessions.
     /// </summary>
-    /// <param name="filter">The session query filter.</param>
+    /// <param name="filter">
+    /// An optional <see cref="SessionQuery"/> to filter results by subject ID, session ID, or other criteria.
+    /// Pass <c>null</c> to return all sessions.
+    /// </param>
     /// <param name="ct">The cancellation token.</param>
+    /// <returns>
+    /// A <see cref="QueryResult{UserSession}"/> containing the matching <see cref="UserSession"/> records
+    /// and pagination metadata.
+    /// </returns>
     Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery? filter, Ct ct);
 
     /// <summary>
-    /// Removes all the session related data for a user.
+    /// Removes server-side session data for the user(s) identified by the given context,
+    /// and optionally revokes tokens, revokes consents, and sends back-channel logout notifications
+    /// to the clients that participated in the session.
     /// </summary>
-    /// <param name="context">The context describing what to remove.</param>
+    /// <param name="context">
+    /// A <see cref="RemoveSessionsContext"/> specifying the subject ID and/or session ID to target,
+    /// the client IDs to act on, and flags controlling which actions to perform
+    /// (remove session, revoke tokens, revoke consents, send back-channel logout).
+    /// </param>
     /// <param name="ct">The cancellation token.</param>
     Task RemoveSessionsAsync(RemoveSessionsContext context, Ct ct);
 }

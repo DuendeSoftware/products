@@ -15,11 +15,13 @@ public class DiagnosticDataService
 {
     private readonly DateTime _serverStartTime;
     private readonly IEnumerable<IDiagnosticEntry> _entries;
+    private readonly TimeProvider _timeProvider;
 
-    internal DiagnosticDataService(DateTime serverStartTime, IEnumerable<IDiagnosticEntry> entries)
+    internal DiagnosticDataService(DateTime serverStartTime, IEnumerable<IDiagnosticEntry> entries, TimeProvider timeProvider)
     {
         _serverStartTime = serverStartTime;
         _entries = entries;
+        _timeProvider = timeProvider;
     }
 
     public async Task<ReadOnlyMemory<byte>> GetJsonBytesAsync(Ct ct)
@@ -29,7 +31,7 @@ public class DiagnosticDataService
 
         writer.WriteStartObject();
 
-        var diagnosticContext = new DiagnosticContext(_serverStartTime, DateTime.UtcNow);
+        var diagnosticContext = new DiagnosticContext(_serverStartTime, _timeProvider.GetUtcNow().UtcDateTime);
         foreach (var diagnosticEntry in _entries)
         {
             await diagnosticEntry.WriteAsync(diagnosticContext, writer);

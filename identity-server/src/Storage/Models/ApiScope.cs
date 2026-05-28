@@ -80,12 +80,12 @@ public class ApiScope : Resource
     }
 
     /// <summary>
-    /// Specifies whether the user can de-select the scope on the consent screen. Defaults to false.
+    /// Gets or sets a value indicating whether the user can de-select the scope on the consent screen. Defaults to false.
     /// </summary>
     public bool Required { get; set; }
 
     /// <summary>
-    /// Specifies whether the consent screen will emphasize this scope. Use this setting for sensitive or important scopes. Defaults to false.
+    /// Gets or sets a value indicating whether the consent screen will emphasize this scope. Use this setting for sensitive or important scopes. Defaults to false.
     /// </summary>
     public bool Emphasize { get; set; }
 }

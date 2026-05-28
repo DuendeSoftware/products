@@ -36,7 +36,6 @@ internal class KestrelTestHost : IAsyncDisposable
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
         builder.Logging.ClearProviders();
         builder.WebHost.UseUrls("https://127.0.0.1:0");
-        builder.Logging.AddXUnit(output);
         configureServices(builder.Services);
         var app = builder.Build();
         configureApp(app);

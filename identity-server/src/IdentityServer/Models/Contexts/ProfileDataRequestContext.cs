@@ -5,6 +5,7 @@
 #nullable enable
 
 using System.Security.Claims;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Models;
@@ -30,18 +31,32 @@ public class ProfileDataRequestContext
     public ProfileDataRequestContext(ClaimsPrincipal subject, Client client, string caller, IEnumerable<string> requestedClaimTypes)
     {
         Subject = subject ?? throw new ArgumentNullException(nameof(subject));
-        Client = client ?? throw new ArgumentNullException(nameof(client));
+        Application = client ?? throw new ArgumentNullException(nameof(client));
         Caller = caller ?? throw new ArgumentNullException(nameof(caller));
         RequestedClaimTypes = requestedClaimTypes ?? throw new ArgumentNullException(nameof(requestedClaimTypes));
     }
 
     /// <summary>
-    /// Gets or sets the validatedRequest.
+    /// Initializes a new instance of the <see cref="ProfileDataRequestContext" /> class.
     /// </summary>
-    /// <value>
-    /// The validatedRequest.
-    /// </value>
-    public ValidatedRequest ValidatedRequest { get; set; } = default!;
+    /// <param name="subject">The subject.</param>
+    /// <param name="application">The connected application.</param>
+    /// <param name="caller">The caller.</param>
+    /// <param name="requestedClaimTypes">The requested claim types.</param>
+    public ProfileDataRequestContext(ClaimsPrincipal subject, IConnectedApplication application, string caller, IEnumerable<string> requestedClaimTypes)
+    {
+        Subject = subject ?? throw new ArgumentNullException(nameof(subject));
+        Application = application ?? throw new ArgumentNullException(nameof(application));
+        Caller = caller ?? throw new ArgumentNullException(nameof(caller));
+        RequestedClaimTypes = requestedClaimTypes ?? throw new ArgumentNullException(nameof(requestedClaimTypes));
+    }
+
+    /// <summary>
+    /// Gets or sets the protocol-agnostic validated request context.
+    /// For protocol-specific details, use pattern matching to downcast to the concrete type
+    /// (e.g., <see cref="ValidatedRequest"/> for OIDC).
+    /// </summary>
+    public IValidatedRequest? ProtocolRequest { get; set; }
 
     /// <summary>
     /// Gets or sets the subject.
@@ -60,12 +75,12 @@ public class ProfileDataRequestContext
     public IEnumerable<string> RequestedClaimTypes { get; set; } = Enumerable.Empty<string>();
 
     /// <summary>
-    /// Gets or sets the client id.
+    /// Gets or sets the connected application (OIDC client or SAML service provider).
     /// </summary>
     /// <value>
-    /// The client id.
+    /// The connected application.
     /// </value>
-    public Client Client { get; set; } = default!;
+    public IConnectedApplication? Application { get; set; }
 
     /// <summary>
     /// Gets or sets the caller.
@@ -90,4 +105,10 @@ public class ProfileDataRequestContext
     /// The issued claims.
     /// </value>
     public List<Claim> IssuedClaims { get; set; } = new List<Claim>();
+
+    /// <summary>
+    /// Gets the SAML attributes to include directly in the assertion, bypassing claim-to-attribute mapping.
+    /// Populated by <see cref="Services.IProfileService"/> implementations for SAML-specific attribute control.
+    /// </summary>
+    public List<SamlAttribute> SamlAttributes { get; } = new List<SamlAttribute>();
 }

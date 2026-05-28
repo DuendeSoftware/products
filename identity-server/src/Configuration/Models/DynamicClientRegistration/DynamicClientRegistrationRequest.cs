@@ -4,6 +4,7 @@
 
 using System.Text.Json.Serialization;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration.Validation.DynamicClientRegistration;
 
 namespace Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 
@@ -13,6 +14,19 @@ namespace Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 /// (https://www.iana.org/assignments/oauth-parameters/oauth-parameters.xhtml#client-metadata),
 /// and custom properties needed by IdentityServer.
 /// </summary>
+/// <remarks>
+/// Standard IANA parameters map directly to their OAuth/OIDC counterparts. IdentityServer
+/// also supports a set of extension properties (e.g., <see cref="AccessTokenLifetime"/>,
+/// <see cref="RefreshTokenExpiration"/>, <see cref="RequireConsent"/>) that allow fine-grained
+/// control over the registered client's behavior. Unknown properties are captured in the
+/// <see cref="Extensions"/> dictionary and round-tripped in the response.
+/// <para>
+/// Some properties (e.g., <see cref="SoftwareStatement"/>, <see cref="SoftwareId"/>,
+/// <see cref="JwksUri"/>) are included in the model to facilitate extensions but are not
+/// processed by the default validator. To act on these properties, derive from
+/// <see cref="DynamicClientRegistrationValidator"/> and override the appropriate validation step.
+/// </para>
+/// </remarks>
 public class DynamicClientRegistrationRequest
 {
     /// <summary>
@@ -58,15 +72,15 @@ public class DynamicClientRegistrationRequest
     /// URL to a JWK Set document which contains the client's public keys.
     /// </summary>
     /// <remarks>
-    /// <remark>
+    /// <para>
     /// The default configuration endpoints do not use the jwks uri.
     /// It is included in this model to facilitate extensions to the
     /// configuration system.
-    /// </remark>
-    /// <remark>
+    /// </para>
+    /// <para>
     /// The <see cref="JwksUri"/> and <see cref="Jwks"/> parameters MUST NOT both be present in
     /// the same request or response.
-    /// </remark>
+    /// </para>
     /// </remarks>
     [JsonPropertyName(OidcConstants.ClientMetadata.JwksUri)]
     public Uri? JwksUri { get; set; }
@@ -74,10 +88,10 @@ public class DynamicClientRegistrationRequest
     /// <summary>
     /// JWK Set document which contains the client's public keys.
     /// </summary>
-    /// <remark>
+    /// <remarks>
     /// The <see cref="JwksUri"/> and <see cref="Jwks"/> parameters MUST NOT both be present in
     /// the same request or response.
-    /// </remark>
+    /// </remarks>
     [JsonPropertyName(OidcConstants.ClientMetadata.Jwks)]
     public KeySet? Jwks { get; set; }
 
@@ -136,11 +150,11 @@ public class DynamicClientRegistrationRequest
     /// software as claims.  This is a string value containing the entire signed
     /// JWT.
     /// </summary>
-    /// <remark>
+    /// <remarks>
     /// The default configuration endpoints do not use the software statement.
     /// It is included in this model to facilitate extensions to the
     /// configuration system.
-    /// </remark>
+    /// </remarks>
     [JsonPropertyName(OidcConstants.ClientMetadata.SoftwareStatement)]
     public string? SoftwareStatement { get; set; }
 
@@ -156,11 +170,11 @@ public class DynamicClientRegistrationRequest
     /// to be human readable and is usually opaque to the client and
     /// authorization server.
     /// </summary>
-    /// <remark>
+    /// <remarks>
     /// The default configuration endpoints do not use the software id.
     /// It is included in this model to facilitate extensions to the
     /// configuration system.
-    /// </remark>
+    /// </remarks>
     [JsonPropertyName(OidcConstants.ClientMetadata.SoftwareId)]
     public string? SoftwareId { get; set; }
 
@@ -177,9 +191,11 @@ public class DynamicClientRegistrationRequest
     /// change to this value is specific to the software itself and is outside
     /// the scope of this specification.
     /// </summary>
-    /// <remark> The default configuration endpoints do not use the software
+    /// <remarks>
+    /// The default configuration endpoints do not use the software
     /// version. It is included in this model to facilitate extensions to the
-    /// configuration system. </remark>
+    /// configuration system.
+    /// </remarks>
     [JsonPropertyName(OidcConstants.ClientMetadata.SoftwareVersion)]
     public string? SoftwareVersion { get; set; }
 

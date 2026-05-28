@@ -358,6 +358,21 @@ public class LocalApiAuthenticationTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task multiple_dpop_headers_should_be_rejected()
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, "https://server/api");
+        var at = await GetAccessTokenAsync(true);
+        req.Headers.Authorization = new AuthenticationHeaderValue("DPoP", at);
+        req.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at));
+        req.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at));
+
+        var response = await _pipeline.BackChannelClient.SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task dpop_nonce_required_should_require_nonce()
     {
         var req = new HttpRequestMessage(HttpMethod.Get, "https://server/api");

@@ -27,11 +27,16 @@ namespace Microsoft.AspNetCore.Builder;
 public static class IdentityServerApplicationBuilderExtensions
 {
     /// <summary>
-    /// Adds IdentityServer to the pipeline.
+    /// Adds IdentityServer to the ASP.NET Core request pipeline. This registers the middleware components
+    /// required to handle all IdentityServer protocol endpoints (authorize, token, discovery, userinfo, etc.),
+    /// validates the IdentityServer configuration and license at startup, and sets up CORS, mutual TLS,
+    /// and dynamic external provider authentication.
     /// </summary>
-    /// <param name="app">The application.</param>
-    /// <param name="options">The options.</param>
-    /// <returns></returns>
+    /// <param name="app">The <see cref="IApplicationBuilder"/> to add IdentityServer middleware to.</param>
+    /// <param name="options">Optional <see cref="IdentityServerMiddlewareOptions"/> to customize how the
+    /// ASP.NET Core authentication middleware is inserted into the pipeline. If not provided, the default
+    /// behavior calls <c>UseAuthentication()</c> automatically.</param>
+    /// <returns>The <see cref="IApplicationBuilder"/> so that additional middleware can be chained.</returns>
     public static IApplicationBuilder UseIdentityServer(this IApplicationBuilder app, IdentityServerMiddlewareOptions? options = null)
     {
         app.Validate();

@@ -9,28 +9,34 @@ using Microsoft.IdentityModel.Tokens;
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// Options for DPoP
+/// Settings for Demonstration of Proof-of-Possession (DPoP), which enables sender-constrained
+/// access tokens that are cryptographically bound to a client's key pair.
 /// </summary>
 public class DPoPOptions
 {
     /// <summary>
-    /// Duration that DPoP proof tokens are considered valid. Defaults to 1 minute.
+    /// Gets or sets how long a DPoP proof token is considered valid after it is issued.
     /// </summary>
+    /// <remarks>
+    /// Defaults to 1 minute. DPoP proof tokens are short-lived by design to prevent replay
+    /// attacks. This window must be wide enough to account for clock differences between the
+    /// client and server; see also <see cref="ServerClockSkew"/>.
+    /// </remarks>
     public TimeSpan ProofTokenValidityDuration { get; set; } = TimeSpan.FromMinutes(1);
 
     /// <summary>
-    /// Clock skew used in validating DPoP proof token expiration using a server-generated nonce value. Defaults to zero.
+    /// Gets or sets the clock skew tolerance applied when validating the expiration of DPoP proof tokens that
+    /// use a server-generated nonce.
     /// </summary>
+    /// <remarks>
+    /// Defaults to zero. Increase this value if clients and the server have measurable clock
+    /// drift and server-generated nonces are in use.
+    /// </remarks>
     public TimeSpan ServerClockSkew { get; set; } = TimeSpan.FromMinutes(0);
 
     /// <summary>
-    /// The allowed signing algorithms used in validating DPoP proof tokens. Defaults to:
-    /// RSA256, RSA384, RSA512, PS256, PS384, PS512, ES256, ES384, ES512.
-    /// </summary>
-    ///
-    /// <summary>
     /// <para>
-    /// Specifies the allowed signature algorithms for DPoP proof tokens. The "alg" headers of proofs
+    /// Gets or sets the allowed signature algorithms for DPoP proof tokens. The "alg" headers of proofs
     /// are validated against this collection, and the dpop_signing_alg_values_supported discovery property is populated
     /// with these values.
     /// </para>
@@ -39,8 +45,9 @@ public class DPoPOptions
     /// RSA, or ECDSA signing algorithms with 256, 384, or 512-bit SHA hashing.
     /// </para>
     /// <para>
-    /// If set to an empty collection, all algorithms (including symmetric algorithms) are allowed, and the
-    /// dpop_signing_alg_values_supported will not be set. Explicitly listing the expected values is recommended.
+    /// If set to an empty collection, no algorithms will be accepted and all DPoP proofs will be rejected.
+    /// The dpop_signing_alg_values_supported discovery property will not be set. Explicitly listing the
+    /// expected values is recommended.
     ///</para>
     /// </summary>
     public ICollection<string> SupportedDPoPSigningAlgorithms { get; set; } =

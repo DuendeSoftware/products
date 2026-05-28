@@ -1,0 +1,69 @@
+[*.cs]
+# Suppress all analyzer diagnostics for imported Sustainsys SP code.
+# This code was imported as-is from Sustainsys.Saml2 and is not subject to
+# the same coding standards as the rest of IdentityServer.
+
+# IDE style rules
+dotnet_diagnostic.IDE0007.severity = none
+dotnet_diagnostic.IDE0011.severity = none
+dotnet_diagnostic.IDE0021.severity = none
+dotnet_diagnostic.IDE0022.severity = none
+dotnet_diagnostic.IDE0025.severity = none
+dotnet_diagnostic.IDE0027.severity = none
+dotnet_diagnostic.IDE0066.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+
+# CA correctness / design rules
+dotnet_diagnostic.CA1001.severity = none
+dotnet_diagnostic.CA1032.severity = none
+dotnet_diagnostic.CA1063.severity = none
+dotnet_diagnostic.CA1064.severity = none
+dotnet_diagnostic.CA1065.severity = none
+dotnet_diagnostic.CA1066.severity = none
+dotnet_diagnostic.CA1069.severity = none
+dotnet_diagnostic.CA1305.severity = none
+dotnet_diagnostic.CA1307.severity = none
+dotnet_diagnostic.CA1309.severity = none
+dotnet_diagnostic.CA1310.severity = none
+dotnet_diagnostic.CA1508.severity = none
+dotnet_diagnostic.CA1510.severity = none
+dotnet_diagnostic.CA1513.severity = none
+dotnet_diagnostic.CA1805.severity = none
+dotnet_diagnostic.CA1815.severity = none
+dotnet_diagnostic.CA1816.severity = none
+dotnet_diagnostic.CA1820.severity = none
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA1827.severity = none
+dotnet_diagnostic.CA1835.severity = none
+dotnet_diagnostic.CA1859.severity = none
+dotnet_diagnostic.CA1860.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1863.severity = none
+dotnet_diagnostic.CA1865.severity = none
+dotnet_diagnostic.CA1866.severity = none
+dotnet_diagnostic.CA1867.severity = none
+dotnet_diagnostic.CA1870.severity = none
+dotnet_diagnostic.CA2000.severity = none
+dotnet_diagnostic.CA2008.severity = none
+dotnet_diagnostic.CA2231.severity = none
+dotnet_diagnostic.CA2254.severity = none
+
+# CA security rules (older patterns in imported code)
+dotnet_diagnostic.CA5350.severity = none
+dotnet_diagnostic.CA5351.severity = none
+dotnet_diagnostic.CA5384.severity = none
+dotnet_diagnostic.CA5404.severity = none
+
+# SYSLIB obsolete API suppressions (pre-.NET 10 patterns)
+dotnet_diagnostic.SYSLIB0014.severity = none
+dotnet_diagnostic.SYSLIB0021.severity = none
+dotnet_diagnostic.SYSLIB0022.severity = none
+dotnet_diagnostic.SYSLIB0027.severity = none
+dotnet_diagnostic.SYSLIB0028.severity = none
+dotnet_diagnostic.SYSLIB0050.severity = none
+dotnet_diagnostic.SYSLIB0051.severity = none
+dotnet_diagnostic.SYSLIB0053.severity = none
+dotnet_diagnostic.SYSLIB0057.severity = none
+
+# ASP.NET Core analyzer suppressions
+dotnet_diagnostic.ASP0019.severity = none

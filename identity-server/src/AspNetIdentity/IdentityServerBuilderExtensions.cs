@@ -8,6 +8,8 @@ using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.AspNetIdentity;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -21,14 +23,16 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class IdentityServerBuilderExtensions
 {
     /// <summary>
-    /// Configures IdentityServer to use the ASP.NET Identity implementations
-    /// of IUserClaimsPrincipalFactory, IResourceOwnerPasswordValidator, and IProfileService.
-    /// Also configures some of ASP.NET Identity's options for use with IdentityServer (such as claim types to use
-    /// and authentication cookie settings).
+    /// Configures IdentityServer to use ASP.NET Core Identity as the backing store for user management.
+    /// Registers ASP.NET Identity implementations of <see cref="IResourceOwnerPasswordValidator"/> and
+    /// <see cref="IProfileService"/>, and decorates <see cref="IUserClaimsPrincipalFactory{TUser}"/> to
+    /// emit standard OpenID Connect claim types (sub, name, role, email).
+    /// Also adjusts ASP.NET Identity's cookie settings for compatibility with IdentityServer's
+    /// iframe-based session management (sets <c>SameSite=None</c> and <c>IsEssential=true</c>).
     /// </summary>
-    /// <typeparam name="TUser">The type of the user.</typeparam>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <typeparam name="TUser">The ASP.NET Core Identity user type (must be a reference type).</typeparam>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to configure ASP.NET Identity integration on.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddAspNetIdentity<TUser>(this IIdentityServerBuilder builder)
         where TUser : class
     {

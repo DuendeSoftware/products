@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Duende.IdentityServer.Extensions;
 
-public static class IEnumerableExtensions
+internal static class IEnumerableExtensions
 {
     [DebuggerStepThrough]
     public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> list)

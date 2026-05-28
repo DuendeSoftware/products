@@ -50,6 +50,11 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     protected readonly IServerSideTicketStore ServerSideTicketStore;
 
     /// <summary>
+    /// The time provider.
+    /// </summary>
+    protected readonly TimeProvider TimeProvider;
+
+    /// <summary>
     /// Ctor.
     /// </summary>
     public DefaultSessionCoordinationService(
@@ -58,6 +63,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         IClientStore clientStore,
         IBackChannelLogoutService backChannelLogoutService,
         ILogger<DefaultSessionCoordinationService> logger,
+        TimeProvider timeProvider,
         IServerSideSessionStore serverSideSessionStore = null,
         IServerSideTicketStore serverSideTicketStore = null)
     {
@@ -66,6 +72,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         ClientStore = clientStore;
         BackChannelLogoutService = backChannelLogoutService;
         Logger = logger;
+        TimeProvider = timeProvider;
         ServerSideSessionStore = serverSideSessionStore;
         ServerSideTicketStore = serverSideTicketStore;
     }
@@ -211,7 +218,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 }, ct);
 
                 var valid = sessions.Count > 0 &&
-                    sessions.Any(x => x.Expires == null || DateTime.UtcNow < x.Expires.Value);
+                    sessions.Any(x => x.Expires == null || TimeProvider.GetUtcNow().UtcDateTime < x.Expires.Value);
 
                 if (!valid)
                 {
@@ -229,7 +236,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                         // since we know that when loading from the DB that column will overwrite the 
                         // expires in the AuthenticationTicket.
                         var diff = session.Expires.Value.Subtract(session.Renewed);
-                        session.Renewed = DateTime.UtcNow;
+                        session.Renewed = TimeProvider.GetUtcNow().UtcDateTime;
                         session.Expires = session.Renewed.Add(diff);
 
                         //In rare cases, there are setups where we push forward the expiration of a session

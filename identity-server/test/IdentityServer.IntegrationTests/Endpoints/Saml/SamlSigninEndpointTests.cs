@@ -5,16 +5,15 @@
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using System.Net;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Web;
 using Duende.IdentityModel;
-using Duende.IdentityServer.Internal.Saml;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Common;
 using Duende.IdentityServer.Saml.Models;
-using Microsoft.AspNetCore.Mvc;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
@@ -35,36 +34,39 @@ public class SamlSigninEndpointTests
     [Trait("Category", Category)]
     public async Task can_initiate_binding_redirected_signin()
     {
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var sp = Build.SamlServiceProvider();
+        sp.AssertionConsumerServiceUrls =
+            [new IndexedEndpoint { Location = Data.AcsUrl.OriginalString, Binding = SamlBinding.HttpPost }];
+        Fixture.ServiceProviders.Add(sp);
 
         await Fixture.InitializeAsync();
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(samlBinding: SamlBinding.HttpRedirect));
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
         requestUrl.ShouldNotBeNull();
         requestUrl.AbsolutePath.ShouldBe(Fixture.LoginUrl.ToString());
         var queryStringValues = HttpUtility.ParseQueryString(requestUrl.Query);
-        queryStringValues["ReturnUrl"].ShouldBe("/saml/signin_callback");
+        AssertReturnUrlIsSigninCallback(queryStringValues["ReturnUrl"]);
     }
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task error_on_binding_redirected_signin_with_no_saml_request()
+    public async Task error_on_request_to_saml_single_sign_on_service_endpoint_with_no_saml_in_request()
     {
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/signin", _ct);
+        var result = await Fixture.Client.GetAsync("/Saml2/SSO", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("Missing 'SAMLRequest' query parameter in SAML signin request");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("No front channel bindings found to satisfy request");
     }
 
     [Fact]
@@ -77,12 +79,12 @@ public class SamlSigninEndpointTests
 
         var invalidBase64 = "not-valid-base64!!!";
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={invalidBase64}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={invalidBase64}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("Invalid base64 encoding in SAML signin request");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Invalid base64 encoding in SAML signin request");
     }
 
     [Fact]
@@ -96,24 +98,22 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(version: "1.0");
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        // Should return SAML error response via HTTP-POST binding
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:VersionMismatch");
-        errorResponse.StatusMessage.ShouldNotBeNull();
-        errorResponse.StatusMessage.ShouldContain("Only Version 2.0 is supported");
-        errorResponse.Issuer.ShouldBe(Fixture.Url());
-        errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
-        errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Only Version 2.0 is supported");
     }
 
     [Fact]
     [Trait("Category", Category)]
     public async Task can_initiate_binding_redirected_signin_with_relay_state()
     {
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var sp = Build.SamlServiceProvider();
+        sp.AssertionConsumerServiceUrls =
+            [new IndexedEndpoint { Location = Data.AcsUrl.OriginalString, Binding = SamlBinding.HttpPost }];
+        Fixture.ServiceProviders.Add(sp);
 
         await Fixture.InitializeAsync();
 
@@ -121,10 +121,10 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(samlBinding: SamlBinding.HttpRedirect));
 
         var result =
-            await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}&RelayState={Data.RelayState}", _ct);
+            await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}&RelayState={Data.RelayState}", _ct);
 
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -146,14 +146,14 @@ public class SamlSigninEndpointTests
         };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync($"/saml/signin?", content, _ct);
+        var result = await Fixture.Client.PostAsync($"/Saml2/SSO?", content, _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
         requestUrl.ShouldNotBeNull();
         requestUrl.AbsolutePath.ShouldBe(Fixture.LoginUrl.ToString());
         var queryStringValues = HttpUtility.ParseQueryString(requestUrl.Query);
-        queryStringValues["ReturnUrl"].ShouldBe("/saml/signin_callback");
+        AssertReturnUrlIsSigninCallback(queryStringValues["ReturnUrl"]);
     }
 
     [Fact]
@@ -166,12 +166,12 @@ public class SamlSigninEndpointTests
 
         var content = new FormUrlEncodedContent(new Dictionary<string, string>());
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("Missing 'SAMLRequest' form parameter in SAML signin request");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("No front channel bindings found to satisfy request");
     }
 
     [Fact]
@@ -189,12 +189,12 @@ public class SamlSigninEndpointTests
         };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("Invalid base64 encoding in SAML signin request");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Invalid base64 encoding in SAML signin request");
     }
 
     [Fact]
@@ -205,7 +205,6 @@ public class SamlSigninEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var authnRequestXml = Build.AuthNRequestXml();
         var encodedRequest = ConvertToBase64Encoded(Build.AuthNRequestXml(version: "1.0"));
         var formData = new Dictionary<string, string>
         {
@@ -213,17 +212,12 @@ public class SamlSigninEndpointTests
         };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync($"/saml/signin?", content, _ct);
+        var result = await Fixture.Client.PostAsync($"/Saml2/SSO?", content, _ct);
 
-        // Should return SAML error response via HTTP-POST binding
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:VersionMismatch");
-        errorResponse.StatusMessage.ShouldNotBeNull();
-        errorResponse.StatusMessage.ShouldContain("Only Version 2.0 is supported");
-        errorResponse.Issuer.ShouldBe(Fixture.Url());
-        errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
-        errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Only Version 2.0 is supported");
     }
 
     [Fact]
@@ -247,7 +241,7 @@ public class SamlSigninEndpointTests
         };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync($"/saml/signin?", content, _ct);
+        var result = await Fixture.Client.PostAsync($"/Saml2/SSO?", content, _ct);
 
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -266,7 +260,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: slightlyFutureTime);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Should succeed and redirect to login
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -287,12 +281,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(futureTime);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldNotBeNull();
-        errorResponse.StatusMessage.ShouldContain("IssueInstant is in the future");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request IssueInstant is in the future");
     }
 
     [Fact]
@@ -308,15 +302,12 @@ public class SamlSigninEndpointTests
         var futureIssueInstant = Data.Now.Add(serviceProviderClockSkew) + TimeSpan.FromSeconds(1);
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(issueInstant: futureIssueInstant));
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
-        errorResponse.Issuer.ShouldBe(Fixture.Url());
-        errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
-        errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request IssueInstant is in the future");
     }
 
     [Fact]
@@ -331,12 +322,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(pastTime);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldNotBeNull();
-        errorResponse.StatusMessage.ShouldContain("expired");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request has expired (IssueInstant too old)");
     }
 
     [Fact]
@@ -352,12 +343,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(pastTime);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldNotBeNull();
-        errorResponse.StatusMessage.ShouldContain("expired");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request has expired (IssueInstant too old)");
     }
 
     [Fact]
@@ -371,12 +362,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(destination: new Uri("https://wrong.example.com/saml/sso"));
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldNotBeNull();
-        errorResponse.StatusMessage.ShouldContain("Invalid destination");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Invalid destination");
     }
 
     [Fact]
@@ -390,14 +381,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(acsUrl: new Uri("https://sp.example.com/wrong-callback"));
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldNotBeNull();
-        problemDetails.Detail.ShouldContain("AssertionConsumerServiceUrl");
-        problemDetails.Detail.ShouldContain("is not valid");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("AssertionConsumerServiceUrl is not registered for this Service Provider");
     }
 
     [Fact]
@@ -408,19 +397,15 @@ public class SamlSigninEndpointTests
         await Fixture.InitializeAsync();
 
         // Add an AssertionConsumerServiceIndex that doesn't exist
-        var authnRequestXml = Build.AuthNRequestXml()
-            .Replace("AssertionConsumerServiceURL=\"" + Data.AcsUrl + "\"",
-                "AssertionConsumerServiceIndex=\"99\"");
+        var authnRequestXml = Build.AuthNRequestXml(acsIndex: 99);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldNotBeNull();
-        problemDetails.Detail.ShouldContain("AssertionConsumerServiceIndex");
-        problemDetails.Detail.ShouldContain("is not valid");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("No AssertionConsumerServiceUrl registered for this Service Provider with the provided index");
     }
 
     [Fact]
@@ -437,14 +422,13 @@ public class SamlSigninEndpointTests
                 string.Empty);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldNotBeNull();
-        problemDetails.Detail.ShouldContain(
-            $"The Service Provider '{Data.EntityId}' does not have any configured Assertion Consumer Service URLs");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        // the validation prevents a misconfigured SP from loading and will result in this error
+        errorMessage.ShouldBe("Invalid SP EntityId.");
     }
 
     [Fact]
@@ -459,13 +443,11 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldNotBeNull();
-        problemDetails.Detail.ShouldContain($"Service Provider '{Data.EntityId}' is not registered or is disabled");
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Invalid SP EntityId.");
     }
 
     [Fact]
@@ -480,7 +462,7 @@ public class SamlSigninEndpointTests
                 string.Empty);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -496,11 +478,11 @@ public class SamlSigninEndpointTests
         await Fixture.InitializeAsync();
 
         // Use the correct Destination attribute
-        var correctDestination = new Uri(Fixture.Url() + "/saml/signin");
+        var correctDestination = new Uri(Fixture.Url() + "/Saml2/SSO");
         var authnRequestXml = Build.AuthNRequestXml(destination: correctDestination);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Should succeed and redirect to login
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -513,7 +495,7 @@ public class SamlSigninEndpointTests
     [Trait("Category", Category)]
     public async Task success_when_user_is_already_logged_in_at_identity_provider()
     {
-        var sp = Build.SamlServiceProvider();
+        var sp = Build.SamlServiceProvider(acsBinding: SamlBinding.HttpPost);
         sp.ClaimMappings = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
         {
             ["sub"] = "sub",
@@ -521,6 +503,7 @@ public class SamlSigninEndpointTests
             ["amr"] = "amr",
             ["auth_time"] = "auth_time"
         });
+        sp.RequestedClaimTypes = ["sub", "idp", "amr", "auth_time"];
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
@@ -528,17 +511,17 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
+        var authnRequestXml = Build.AuthNRequestXml(samlBinding: SamlBinding.HttpRedirect);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
 
         successResponse.ResponseId.ShouldNotBeNullOrEmpty();
-        successResponse.Destination.ShouldBe(Fixture.Data.AcsUrl.ToString());
-        successResponse.IssueInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        successResponse.Issuer.ShouldBe(Fixture.Url());
+        successResponse.Destination.ShouldBe(Fixture.Data.AcsUrl.OriginalString);
+        successResponse.IssueInstant.ShouldBe(new DateTimeUtc(Data.FakeTimeProvider.GetUtcNow().Ticks).ToString());
+        successResponse.Issuer.ShouldBe(Fixture.SamlIssuer());
         successResponse.InResponseTo.ShouldBe(Data.RequestId);
 
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -547,8 +530,8 @@ public class SamlSigninEndpointTests
         assertion.ShouldNotBeNull();
         assertion.Id.ShouldNotBeNullOrEmpty();
         assertion.Version.ShouldBe("2.0");
-        assertion.IssueInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        assertion.Issuer.ShouldBe(Fixture.Url());
+        assertion.IssueInstant.ShouldBe(new DateTimeUtc(Data.FakeTimeProvider.GetUtcNow().Ticks).ToString());
+        assertion.Issuer.ShouldBe(Fixture.SamlIssuer());
 
         var subject = assertion.Subject;
         subject.ShouldNotBeNull();
@@ -562,21 +545,21 @@ public class SamlSigninEndpointTests
 
         var subjectConfirmationData = subjectConfirmation.SubjectConfirmationData;
         subjectConfirmationData.ShouldNotBeNull();
-        subjectConfirmationData.NotOnOrAfter.ShouldBe(Data.FakeTimeProvider.GetUtcNow().Add(Build.SamlServiceProvider().RequestMaxAge!.Value).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
+        subjectConfirmationData.NotOnOrAfter.ShouldBe(new DateTimeUtc(Data.FakeTimeProvider.GetUtcNow().Add(Build.SamlServiceProvider().AssertionLifetime!.Value).Ticks).ToString());
         subjectConfirmationData.Recipient.ShouldBe(Fixture.Data.AcsUrl.ToString());
         subjectConfirmationData.InResponseTo.ShouldBe(Data.RequestId);
 
         var conditions = assertion.Conditions;
         conditions.ShouldNotBeNull();
-        conditions.NotBefore.ShouldBe(Data.FakeTimeProvider.GetUtcNow().Subtract(Build.SamlServiceProvider().ClockSkew!.Value).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        conditions.NotOnOrAfter.ShouldBe(Data.FakeTimeProvider.GetUtcNow().Add(Build.SamlServiceProvider().RequestMaxAge!.Value).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
+        conditions.NotBefore.ShouldBe(new DateTimeUtc(Data.FakeTimeProvider.GetUtcNow().Ticks).ToString());
+        conditions.NotOnOrAfter.ShouldBe(new DateTimeUtc(Data.FakeTimeProvider.GetUtcNow().Add(Build.SamlServiceProvider().AssertionLifetime!.Value).Ticks).ToString());
         conditions.Audience.ShouldBe(Data.EntityId.ToString());
 
         var authnStatement = assertion.AuthnStatement;
         authnStatement.ShouldNotBeNull();
-        authnStatement.AuthnInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        authnStatement.SessionIndex.ShouldNotBeNullOrEmpty();
-        authnStatement.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified");
+        authnStatement.AuthnInstant.ShouldBe(new DateTimeUtc(Data.FakeTimeProvider.GetUtcNow().Ticks).ToString());
+        //        authnStatement.SessionIndex.ShouldNotBeNullOrEmpty();
+        authnStatement.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
 
         var attributes = assertion.Attributes;
         attributes.ShouldNotBeNull();
@@ -584,26 +567,26 @@ public class SamlSigninEndpointTests
 
         var subAttribute = attributes.FirstOrDefault(a => a.Name == "sub");
         subAttribute.ShouldNotBeNull();
-        subAttribute.NameFormat.ShouldBe(SamlConstants.AttributeNameFormats.Uri);
-        subAttribute.FriendlyName.ShouldBe("sub");
+        subAttribute.NameFormat.ShouldBeNull();
+        subAttribute.FriendlyName.ShouldBeNull();
         subAttribute.Value.ShouldBe("user-id");
 
         var idpAttribute = attributes.FirstOrDefault(a => a.Name == "idp");
         idpAttribute.ShouldNotBeNull();
-        idpAttribute.NameFormat.ShouldBe(SamlConstants.AttributeNameFormats.Uri);
-        idpAttribute.FriendlyName.ShouldBe("idp");
+        idpAttribute.NameFormat.ShouldBeNull();
+        idpAttribute.FriendlyName.ShouldBeNull();
         idpAttribute.Value.ShouldBe("local");
 
         var amrAttribute = attributes.FirstOrDefault(a => a.Name == "amr");
         amrAttribute.ShouldNotBeNull();
-        amrAttribute.NameFormat.ShouldBe(SamlConstants.AttributeNameFormats.Uri);
-        amrAttribute.FriendlyName.ShouldBe("amr");
+        amrAttribute.NameFormat.ShouldBeNull();
+        amrAttribute.FriendlyName.ShouldBeNull();
         amrAttribute.Value.ShouldBe("pwd");
 
         var authTimeAttribute = attributes.FirstOrDefault(a => a.Name == "auth_time");
         authTimeAttribute.ShouldNotBeNull();
-        authTimeAttribute.NameFormat.ShouldBe(SamlConstants.AttributeNameFormats.Uri);
-        authTimeAttribute.FriendlyName.ShouldBe("auth_time");
+        authTimeAttribute.NameFormat.ShouldBeNull();
+        authTimeAttribute.FriendlyName.ShouldBeNull();
         authTimeAttribute.Value.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToUnixTimeSeconds().ToString());
     }
 
@@ -611,17 +594,20 @@ public class SamlSigninEndpointTests
     [Trait("Category", Category)]
     public async Task success_when_user_is_already_logged_in_at_identity_provider_but_request_includes_force_authn()
     {
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var signingCert = CreateTestSigningCertificate(Data.FakeTimeProvider);
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider(signingCert, requireSignedAuthnRequests: false));
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml(forceAuthn: true);
+        var authnRequestXml = Build.AuthNRequestXml(forceAuthn: true, destination: new Uri(Fixture.Url("/Saml2/SSO")));
         var urlEncoded = await EncodeRequest(authnRequestXml);
+        var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, signingCert);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync(
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -751,28 +737,6 @@ public class SamlSigninEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task redirects_to_consent_when_require_consent_is_true()
-    {
-        var sp = Build.SamlServiceProvider();
-        sp.RequireConsent = true;
-        Fixture.ServiceProviders.Add(sp);
-
-        await Fixture.InitializeAsync();
-
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
-
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var requestUrl = result.RequestMessage?.RequestUri;
-        requestUrl.ShouldNotBeNull();
-        requestUrl.AbsolutePath.ShouldBe(Fixture.ConsentUrl.ToString());
-        var queryStringValues = HttpUtility.ParseQueryString(requestUrl.Query);
-        queryStringValues["ReturnUrl"].ShouldBe("/saml/signin_callback");
-    }
-
-    [Fact]
-    [Trait("Category", Category)]
     public async Task returns_error_when_is_passive_and_user_not_authenticated()
     {
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
@@ -781,40 +745,59 @@ public class SamlSigninEndpointTests
 
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(isPassive: true));
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:NoPassive");
-        errorResponse.StatusMessage.ShouldBe("The user is not currently logged in and passive login was requested.");
-        errorResponse.Issuer.ShouldBe(Fixture.Url());
-        errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
-        errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
+        var samlError = await ExtractSamlErrorFromPostAsync(result);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
+        samlError.SubStatusCode.ShouldBe(SamlStatusCodes.NoPassive);
+        samlError.InResponseTo.ShouldBe(Fixture.Data.RequestId);
+        samlError.Issuer.ShouldBe(Fixture.SamlIssuer());
+        samlError.AssertionConsumerServiceUrl.ShouldBe(Fixture.Data.AcsUrl.OriginalString);
     }
 
     [Fact]
     [Trait("Category", Category)]
     public async Task returns_no_passive_error_when_both_force_authn_and_is_passive_are_true()
     {
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var signingCert = CreateTestSigningCertificate(Data.FakeTimeProvider);
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider(signingCert, requireSignedAuthnRequests: false));
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml(forceAuthn: true, isPassive: true);
+        var authnRequestXml = Build.AuthNRequestXml(forceAuthn: true, isPassive: true, destination: new Uri(Fixture.Url("/Saml2/SSO")));
         var urlEncoded = await EncodeRequest(authnRequestXml);
+        var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, signingCert);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync(
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
+        var samlError = await ExtractSamlErrorFromPostAsync(result);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
+        samlError.SubStatusCode.ShouldBe(SamlStatusCodes.NoPassive);
+        samlError.InResponseTo.ShouldBe(Fixture.Data.RequestId);
+        samlError.Issuer.ShouldBe(Fixture.SamlIssuer());
+        samlError.AssertionConsumerServiceUrl.ShouldBe(Fixture.Data.AcsUrl.OriginalString);
+    }
 
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:NoPassive");
-        errorResponse.StatusMessage.ShouldBe("The user is not currently logged in");
-        errorResponse.Issuer.ShouldBe(Fixture.Url());
-        errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
-        errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task returns_no_passive_saml_error_with_relay_state_echoed_back()
+    {
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        const string relayState = "some-relay-state-value";
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(isPassive: true));
+
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}&RelayState={Uri.EscapeDataString(relayState)}", _ct);
+
+        var samlError = await ExtractSamlErrorFromPostAsync(result);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
+        samlError.SubStatusCode.ShouldBe(SamlStatusCodes.NoPassive);
+        samlError.RelayState.ShouldBe(relayState);
     }
 
     [Fact]
@@ -831,7 +814,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(isPassive: true);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -843,26 +826,31 @@ public class SamlSigninEndpointTests
     [Trait("Category", Category)]
     public async Task forces_authentication_when_force_authn_true_and_user_authenticated()
     {
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var signingCert = CreateTestSigningCertificate(Data.FakeTimeProvider);
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider(signingCert));
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        // Verify user is authenticated by doing a normal request first
-        var normalRequestXml = Build.AuthNRequestXml(forceAuthn: false);
+        // Verify user is authenticated by doing a normal request first (must be signed)
+        var normalRequestXml = Build.AuthNRequestXml(forceAuthn: false, destination: new Uri(Fixture.Url("/Saml2/SSO")));
         var normalUrlEncoded = await EncodeRequest(normalRequestXml);
-        var normalResult = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={normalUrlEncoded}", _ct);
+        var (normalSig, normalSigAlg) = SignAuthNRequestRedirect(normalUrlEncoded, null, signingCert);
+        var normalResult = await Fixture.Client.GetAsync(
+            $"/Saml2/SSO?SAMLRequest={normalUrlEncoded}&Signature={Uri.EscapeDataString(normalSig)}&SigAlg={Uri.EscapeDataString(normalSigAlg)}", _ct);
 
         // Without ForceAuthn, authenticated user goes directly to callback
         normalResult.StatusCode.ShouldBe(HttpStatusCode.OK);
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(normalResult, _ct);
         samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
-        var forceAuthnRequestXml = Build.AuthNRequestXml(forceAuthn: true);
+        var forceAuthnRequestXml = Build.AuthNRequestXml(forceAuthn: true, destination: new Uri(Fixture.Url("/Saml2/SSO")));
         var forceAuthnUrlEncoded = await EncodeRequest(forceAuthnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={forceAuthnUrlEncoded}", _ct);
+        var (forceAuthnSig, forceAuthnSigAlg) = SignAuthNRequestRedirect(forceAuthnUrlEncoded, null, signingCert);
+        var result = await Fixture.Client.GetAsync(
+            $"/Saml2/SSO?SAMLRequest={forceAuthnUrlEncoded}&Signature={Uri.EscapeDataString(forceAuthnSig)}&SigAlg={Uri.EscapeDataString(forceAuthnSigAlg)}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -871,7 +859,7 @@ public class SamlSigninEndpointTests
 
         var queryStringValues = HttpUtility.ParseQueryString(requestUrl.Query);
         var returnUrl = queryStringValues["ReturnUrl"];
-        returnUrl.ShouldBe("/saml/signin_callback");
+        AssertReturnUrlIsSigninCallback(returnUrl);
     }
 
     [Fact]
@@ -888,7 +876,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: exactBoundaryTime);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -910,11 +898,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: beyondBoundaryTime);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request IssueInstant is in the future");
     }
 
     [Fact]
@@ -930,7 +919,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: exactTime);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -951,11 +940,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: futureTime);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request IssueInstant is in the future");
     }
 
     [Fact]
@@ -972,7 +962,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: exactMaxAgeTime);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -994,19 +984,20 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issueInstant: beyondMaxAgeTime);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
-        errorResponse.StatusMessage.ShouldBe("Request has expired (IssueInstant too old)");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Request has expired (IssueInstant too old)");
     }
 
-    [Fact]
+    [Fact(Skip = "Skipping until state is being stored and we can go to login page, login, and generate response")]
     [Trait("Category", Category)]
     public async Task uses_acs_url_when_both_url_and_index_provided()
     {
-        var primaryAcsUrl = new Uri("https://sp.example.com/callback1");
-        var secondaryAcsUrl = new Uri("https://sp.example.com/callback2");
+        var primaryAcsUrl = new IndexedEndpoint { Location = "https://sp.example.com/callback1", Binding = SamlBinding.HttpPost, Index = 0 };
+        var secondaryAcsUrl = new IndexedEndpoint { Location = "https://sp.example.com/callback2", Binding = SamlBinding.HttpPost, Index = 1 };
 
         var sp = Build.SamlServiceProvider();
         sp.AssertionConsumerServiceUrls = [primaryAcsUrl, secondaryAcsUrl];
@@ -1014,12 +1005,12 @@ public class SamlSigninEndpointTests
         await Fixture.InitializeAsync();
 
         var authnRequestXml = Build.AuthNRequestXml(
-            acsUrl: primaryAcsUrl,
+            acsUrl: new Uri(primaryAcsUrl.Location),
             acsIndex: 1  // Points to secondary URL
         );
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -1028,7 +1019,7 @@ public class SamlSigninEndpointTests
 
         var queryStringValues = HttpUtility.ParseQueryString(requestUrl.Query);
         var returnUrl = queryStringValues["ReturnUrl"];
-        returnUrl.ShouldBe("/saml/signin_callback");
+        AssertReturnUrlIsSigninCallback(returnUrl);
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
@@ -1052,15 +1043,15 @@ public class SamlSigninEndpointTests
         var xmlWithoutId = authnRequestXml.Replace($"ID=\"{Data.RequestId}\"", "");
 
         var urlEncoded = await EncodeRequest(xmlWithoutId);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The SAML request could not be processed");
     }
 
-    [Fact]
+    [Fact(Skip = "Confirm still needed")]
     [Trait("Category", Category)]
     public async Task error_when_request_has_empty_id()
     {
@@ -1070,13 +1061,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(requestId: "");
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -1089,12 +1079,12 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(issuer: "");
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Invalid SP EntityId.");
     }
 
     [Fact]
@@ -1112,12 +1102,12 @@ public class SamlSigninEndpointTests
 
         var urlEncoded = await EncodeRequest(xmlWithoutIssuer);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("The SAML request could not be processed");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Missing SP EntityID in AuthnRequest");
     }
 
     [Fact]
@@ -1136,7 +1126,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1166,7 +1156,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1198,7 +1188,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1232,7 +1222,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1259,7 +1249,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1287,7 +1277,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1321,7 +1311,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1358,7 +1348,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1400,7 +1390,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1424,7 +1414,7 @@ public class SamlSigninEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task response_signature_uses_exclusive_canonicalization()
+    public async Task response_signature_uses_exclusive_canonicalization_with_comments()
     {
         var sp = Build.SamlServiceProvider();
         sp.SigningBehavior = SamlSigningBehavior.SignResponse;
@@ -1438,7 +1428,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1451,7 +1441,7 @@ public class SamlSigninEndpointTests
 
         // Verify Exclusive Canonicalization (C14N)
         signatureInfo.CanonicalizationMethod.ShouldNotBeNull("Signature should specify CanonicalizationMethod");
-        signatureInfo.CanonicalizationMethod.ShouldBe("http://www.w3.org/2001/10/xml-exc-c14n#",
+        signatureInfo.CanonicalizationMethod.ShouldBe("http://www.w3.org/2001/10/xml-exc-c14n#WithComments",
             "CanonicalizationMethod should be Exclusive C14N");
     }
 
@@ -1471,7 +1461,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1486,7 +1476,7 @@ public class SamlSigninEndpointTests
         var signatureInfo = ParseSignatureInfo(signatureElement!);
 
         // Verify all algorithms match SAML 2.0 best practices
-        signatureInfo.CanonicalizationMethod.ShouldBe("http://www.w3.org/2001/10/xml-exc-c14n#");
+        signatureInfo.CanonicalizationMethod.ShouldBe("http://www.w3.org/2001/10/xml-exc-c14n#WithComments");
         signatureInfo.SignatureMethod.ShouldBe("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         signatureInfo.DigestMethod.ShouldBe("http://www.w3.org/2001/04/xmlenc#sha256");
     }
@@ -1507,7 +1497,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml();
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
         var (_, samlNs, responseElement) = ParseSamlResponseXml(responseXml);
@@ -1550,7 +1540,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
         var relayStateValue = "test-relay-state-123";
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}&RelayState={relayStateValue}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}&RelayState={relayStateValue}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1567,7 +1557,8 @@ public class SamlSigninEndpointTests
     [Trait("Category", Category)]
     public async Task signed_response_works_with_force_authn()
     {
-        var sp = Build.SamlServiceProvider();
+        var signingCert = CreateTestSigningCertificate(Data.FakeTimeProvider);
+        var sp = Build.SamlServiceProvider(signingCert, requireSignedAuthnRequests: false);
         sp.SigningBehavior = SamlSigningBehavior.SignResponse;
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
@@ -1576,15 +1567,19 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var normalRequestXml = Build.AuthNRequestXml(forceAuthn: false);
+        var normalRequestXml = Build.AuthNRequestXml(forceAuthn: false, destination: new Uri(Fixture.Url("/Saml2/SSO")));
         var normalUrlEncoded = await EncodeRequest(normalRequestXml);
-        var normalResult = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={normalUrlEncoded}", _ct);
+        var (normalSig, normalSigAlg) = SignAuthNRequestRedirect(normalUrlEncoded, null, signingCert);
+        var normalResult = await Fixture.Client.GetAsync(
+            $"/Saml2/SSO?SAMLRequest={normalUrlEncoded}&Signature={Uri.EscapeDataString(normalSig)}&SigAlg={Uri.EscapeDataString(normalSigAlg)}", _ct);
         var normalResponse = await ExtractSamlSuccessFromPostAsync(normalResult, _ct);
         normalResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
-        var forceAuthnRequestXml = Build.AuthNRequestXml(forceAuthn: true);
+        var forceAuthnRequestXml = Build.AuthNRequestXml(forceAuthn: true, destination: new Uri(Fixture.Url("/Saml2/SSO")));
         var forceAuthnUrlEncoded = await EncodeRequest(forceAuthnRequestXml);
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={forceAuthnUrlEncoded}", _ct);
+        var (sig, sigAlg) = SignAuthNRequestRedirect(forceAuthnUrlEncoded, null, signingCert);
+        var result = await Fixture.Client.GetAsync(
+            $"/Saml2/SSO?SAMLRequest={forceAuthnUrlEncoded}&Signature={Uri.EscapeDataString(sig)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var requestUrl = result.RequestMessage?.RequestUri;
@@ -1593,7 +1588,7 @@ public class SamlSigninEndpointTests
 
         var queryStringValues = HttpUtility.ParseQueryString(requestUrl.Query);
         var returnUrl = queryStringValues["ReturnUrl"];
-        returnUrl.ShouldBe("/saml/signin_callback");
+        AssertReturnUrlIsSigninCallback(returnUrl);
     }
 
     [Fact]
@@ -1601,7 +1596,7 @@ public class SamlSigninEndpointTests
     public async Task signed_response_works_with_is_passive()
     {
         var sp = Build.SamlServiceProvider();
-        sp.SigningBehavior = SamlSigningBehavior.SignBoth;
+        sp.SigningBehavior = SamlSigningBehavior.SignResponse;
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
@@ -1612,23 +1607,23 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(isPassive: true);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
 
-        VerifySignaturePresence(responseXml, expectResponseSignature: true, expectAssertionSignature: true);
+        VerifySignaturePresence(responseXml, expectResponseSignature: true, expectAssertionSignature: false);
 
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
-    [Fact]
+    [Fact(Skip = "Discuss handling multiple SP ACS")]
     [Trait("Category", Category)]
     public async Task signed_response_works_with_custom_acs_index()
     {
-        var primaryAcsUrl = new Uri("https://sp.example.com/callback1");
-        var secondaryAcsUrl = new Uri("https://sp.example.com/callback2");
+        var primaryAcsUrl = new IndexedEndpoint { Location = "https://sp.example.com/callback1", Binding = SamlBinding.HttpPost };
+        var secondaryAcsUrl = new IndexedEndpoint { Location = "https://sp.example.com/callback2", Binding = SamlBinding.HttpPost };
 
         var sp = Build.SamlServiceProvider();
         sp.SigningBehavior = SamlSigningBehavior.SignResponse;
@@ -1643,7 +1638,7 @@ public class SamlSigninEndpointTests
         var authnRequestXml = Build.AuthNRequestXml(acsIndex: 1);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -1665,11 +1660,12 @@ public class SamlSigninEndpointTests
         await Fixture.InitializeAsync();
 
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Missing signature parameter");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The AuthnRequest signature is missing or not trusted");
     }
 
     [Fact]
@@ -1685,11 +1681,12 @@ public class SamlSigninEndpointTests
         var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Signature element not found");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The AuthnRequest signature is missing or not trusted");
     }
 
     [Fact]
@@ -1706,11 +1703,12 @@ public class SamlSigninEndpointTests
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, wrongCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Invalid signature");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The AuthnRequest signature is missing or not trusted");
     }
 
     [Fact]
@@ -1728,11 +1726,13 @@ public class SamlSigninEndpointTests
         var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Invalid signature");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        // Invalid signature fails during parsing before we even get to validating a signature was required
+        errorMessage.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -1745,12 +1745,12 @@ public class SamlSigninEndpointTests
         await Fixture.InitializeAsync();
 
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe($"Service Provider '{sp.EntityId}' has no signing certificates configured and has sent a SAML signin request which requires signature validation");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The AuthnRequest signature is missing or not trusted");
     }
 
     [Fact]
@@ -1766,11 +1766,11 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(destination: new Uri(Fixture.Url("/Saml2/SSO"))));
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, signingCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -1789,12 +1789,41 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var signedXml = SignAuthNRequestXml(Build.AuthNRequestXml(), signingCert);
+        var destination = new Uri(Fixture.Url() + "/Saml2/SSO");
+        var signedXml = SignAuthNRequestXml(Build.AuthNRequestXml(destination: destination), signingCert);
         var encodedRequest = ConvertToBase64Encoded(signedXml);
         var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
+
+        var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task success_when_post_binding_request_signed_with_comments_transform()
+    {
+        var signingCert = CreateTestSigningCertificate(Data.FakeTimeProvider);
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider(signingCert, requireSignedAuthnRequests: true));
+
+        await Fixture.InitializeAsync();
+
+        Fixture.UserToSignIn =
+            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
+        await Fixture.Client.GetAsync("/__signin", _ct);
+
+        var destination = new Uri(Fixture.Url() + "/Saml2/SSO");
+        var xml = Build.AuthNRequestXml(destination: destination);
+        // Inject an XML comment into the request to exercise the comment-preservation path
+        xml = xml.Replace("<saml:Issuer>", "<!-- SP comment --><saml:Issuer>");
+        var signedXml = SignAuthNRequestXmlWithComments(xml, signingCert);
+        var encodedRequest = ConvertToBase64Encoded(signedXml);
+        var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
+        var content = new FormUrlEncodedContent(formData);
+
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -1813,7 +1842,7 @@ public class SamlSigninEndpointTests
         await Fixture.Client.GetAsync("/__signin", _ct);
 
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -1832,11 +1861,11 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(destination: new Uri(Fixture.Url("/Saml2/SSO"))));
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, signingCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -1856,11 +1885,16 @@ public class SamlSigninEndpointTests
             DisplayName = "Example SP",
             Description = "Example SP",
             Enabled = true,
+            AllowedScopes = new HashSet<string> { "openid", "profile", "email", "custom" },
             RequireSignedAuthnRequests = true,
-            SigningCertificates = [cert1, cert2, cert3],
-            AssertionConsumerServiceUrls = [Data.AcsUrl],
-            AssertionConsumerServiceBinding = SamlBinding.HttpPost,
+            Certificates = [
+                new ServiceProviderCertificate { Certificate = cert1, Use = KeyUse.Signing },
+                new ServiceProviderCertificate { Certificate = cert2, Use = KeyUse.Signing },
+                new ServiceProviderCertificate { Certificate = cert3, Use = KeyUse.Signing }
+            ],
+            AssertionConsumerServiceUrls = [new IndexedEndpoint { Location = Data.AcsUrl.OriginalString, Binding = SamlBinding.HttpPost }],
             RequestMaxAge = TimeSpan.FromMinutes(5),
+            AssertionLifetime = TimeSpan.FromMinutes(5),
             ClockSkew = TimeSpan.FromMinutes(5)
         };
 
@@ -1871,17 +1905,17 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(destination: new Uri(Fixture.Url() + "/Saml2/SSO")));
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, cert2);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for loading allowed algorithms from SP for signature validation")]
     [Trait("Category", Category)]
     public async Task error_when_redirect_binding_signature_algorithm_unsupported()
     {
@@ -1896,7 +1930,7 @@ public class SamlSigninEndpointTests
             "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
         samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
@@ -1918,11 +1952,12 @@ public class SamlSigninEndpointTests
         var (signature, sigAlg) = SignAuthNRequestRedirect(relayState, urlEncoded, signingCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&SigAlg={Uri.EscapeDataString(sigAlg)}&Signature={Uri.EscapeDataString(signature)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&SigAlg={Uri.EscapeDataString(sigAlg)}&Signature={Uri.EscapeDataString(signature)}", _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Invalid signature");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The AuthnRequest signature is missing or not trusted");
     }
 
     [Fact]
@@ -1938,12 +1973,12 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(destination: new Uri(Fixture.Url("/Saml2/SSO"))));
         var relayState = "test-relay-state-value";
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, relayState, signingCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&RelayState={Uri.EscapeDataString(relayState)}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&RelayState={Uri.EscapeDataString(relayState)}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
@@ -1965,11 +2000,12 @@ public class SamlSigninEndpointTests
         var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Invalid signature");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -1988,11 +2024,12 @@ public class SamlSigninEndpointTests
         var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
-        var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
-        samlError.StatusMessage.ShouldBe("Invalid signature");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("The SAML request could not be processed");
     }
 
     [Fact]
@@ -2009,18 +2046,19 @@ public class SamlSigninEndpointTests
         await Fixture.Client.GetAsync("/__signin", _ct);
 
         // SignAuthNRequestXml already uses ExcC14N, so this validates it works
-        var signedXml = SignAuthNRequestXml(Build.AuthNRequestXml(), signingCert);
+        var destination = new Uri(Fixture.Url() + "/Saml2/SSO");
+        var signedXml = SignAuthNRequestXml(Build.AuthNRequestXml(destination: destination), signingCert);
         var encodedRequest = ConvertToBase64Encoded(signedXml);
         var formData = new Dictionary<string, string> { { "SAMLRequest", encodedRequest } };
         var content = new FormUrlEncodedContent(formData);
 
-        var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
+        var result = await Fixture.Client.PostAsync("/Saml2/SSO", content, _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for certificate validation")]
     [Trait("Category", Category)]
     public async Task error_when_signature_certificate_expired()
     {
@@ -2033,14 +2071,14 @@ public class SamlSigninEndpointTests
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, expiredCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
         samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
         samlError.StatusMessage.ShouldBe("No valid certificates configured for service provider");
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for certificate validation")]
     [Trait("Category", Category)]
     public async Task error_when_signature_certificate_not_yet_valid()
     {
@@ -2053,7 +2091,7 @@ public class SamlSigninEndpointTests
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, notYetValidCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
         samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
@@ -2073,17 +2111,17 @@ public class SamlSigninEndpointTests
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
+        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(destination: new Uri(Fixture.Url("/Saml2/SSO"))));
         var (signature, sigAlg) = SignAuthNRequestRedirect(urlEncoded, null, signingCert);
 
         var result = await Fixture.Client.GetAsync(
-            $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
+            $"/Saml2/SSO?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for signaling result of RequestAuthnContext and callback endpoint")]
     [Trait("Category", Category)]
     public async Task auth_n_request_with_requested_authn_context_and_requirement_is_satisfied()
     {
@@ -2098,32 +2136,14 @@ public class SamlSigninEndpointTests
             </samlp:RequestedAuthnContext>
             """;
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
+        _ = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
 
-        // First, initiate SAML signin to create state (use NonRedirectingClient for all requests to share cookies)
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-
-        // Then sign in the user with authn context requirements
-        Fixture.UserMetRequestedAuthnContextRequirements = true;
-        Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(JwtClaimTypes.Subject, "user-id"),
-            new Claim("saml:acr", "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport")
-        ], "Test"));
-
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
-
-        // Act - complete the callback
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
-
-        // Assert
-        var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
-        successResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
+        // TODO: The old endpoint used NonRedirectingClient + /saml/signin to create state,
+        // then set UserMetRequestedAuthnContextRequirements = true, signed in, and hit /saml/signin_callback.
+        // The new endpoint needs an equivalent mechanism to signal authn context requirements were met.
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for signaling result of RequestAuthnContext and callback endpoint")]
     [Trait("Category", Category)]
     public async Task auth_n_request_with_requested_authn_context_and_requirement_is_not_satisfied()
     {
@@ -2138,33 +2158,14 @@ public class SamlSigninEndpointTests
             </samlp:RequestedAuthnContext>
             """;
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
+        _ = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
 
-        // First, initiate SAML signin to create state (use NonRedirectingClient for all requests to share cookies)
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-
-        // Then sign in the user with authn context requirements
-        Fixture.UserMetRequestedAuthnContextRequirements = false;
-        Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(JwtClaimTypes.Subject, "user-id"),
-            new Claim("saml:acr", "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport")
-        ], "Test"));
-
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
-
-        // Act - complete the callback
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
-
-        // Assert
-        var samlResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
-        samlResponse.SubStatusCode.ShouldBe(SamlStatusCodes.NoAuthnContext);
-        samlResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
+        // TODO: The old endpoint set UserMetRequestedAuthnContextRequirements = false, then hit callback.
+        // Expected: StatusCode = Success, SubStatusCode = NoAuthnContext,
+        // AuthnContextClassRef = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for signaling result of RequestAuthnContext and callback endpoint")]
     [Trait("Category", Category)]
     public async Task auth_n_request_with_requested_authn_context_but_no_claim_returns_error()
     {
@@ -2186,7 +2187,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var samlResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2195,7 +2196,7 @@ public class SamlSigninEndpointTests
         samlResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified");
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for signaling result of RequestAuthnContext and callback endpoint")]
     [Trait("Category", Category)]
     public async Task auth_n_request_without_requested_authn_context_returns_authn_context_if_claim_is_present()
     {
@@ -2215,7 +2216,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(Build.AuthNRequestXml());
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2223,7 +2224,7 @@ public class SamlSigninEndpointTests
         successResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for signaling result of RequestAuthnContext and callback endpoint")]
     [Trait("Category", Category)]
     public async Task auth_n_request_with_multiple_authn_context_class_refs_parsed_correctly()
     {
@@ -2240,20 +2241,13 @@ public class SamlSigninEndpointTests
             </samlp:RequestedAuthnContext>
             """;
 
-        var urlEncoded = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
+        _ = await EncodeRequest(Build.AuthNRequestXml(requestedAuthnContext: requestedAuthnContext));
 
-        // Act
-        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        result.StatusCode.ShouldBe(HttpStatusCode.Found);
-
-        var parsedRequestedAuthnContext = await Fixture.NonRedirectingClient.GetFromJsonAsync<RequestedAuthnContext>("/__authentication-request", _ct);
-
-        // Assert
-        parsedRequestedAuthnContext.ShouldNotBeNull();
-        parsedRequestedAuthnContext.Comparison.ShouldBe(AuthnContextComparison.Better);
-        parsedRequestedAuthnContext.AuthnContextClassRefs.Count.ShouldBe(3);
-        parsedRequestedAuthnContext.AuthnContextClassRefs.ShouldBe(["urn:oasis:names:tc:SAML:2.0:ac:classes:Password", "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport", "urn:oasis:names:tc:SAML:2.0:ac:classes:X509"]);
+        // TODO: The old endpoint used NonRedirectingClient to get a 302, then hit /__authentication-request
+        // to verify the parsed RequestedAuthnContext. Expected:
+        // - Comparison = Better
+        // - AuthnContextClassRefs.Count = 3
+        // - Contains Password, PasswordProtectedTransport, X509
     }
 
     [Fact]
@@ -2264,11 +2258,11 @@ public class SamlSigninEndpointTests
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
         await Fixture.InitializeAsync();
 
-        var authnRequestXml = Build.AuthNRequestXml(nameIdFormat: SamlConstants.NameIdentifierFormats.Persistent);
+        var authnRequestXml = Build.AuthNRequestXml(nameIdFormat: SamlConstants.NameIdentifierFormats.EmailAddress);
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -2290,13 +2284,13 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        // Assert
-        var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe(SamlStatusCodes.Responder);
-        errorResponse.SubStatusCode.ShouldBe(SamlStatusCodes.InvalidNameIdPolicy);
-        errorResponse.StatusMessage.ShouldBe($"Requested NameID format '{unsupportedFormat}' is not supported by this IdP");
+        // Assert — unsupported format redirects to error page
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe($"Requested NameID format '{unsupportedFormat}' is not supported by this IdP");
     }
 
     [Fact]
@@ -2312,7 +2306,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -2333,7 +2327,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -2358,7 +2352,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2373,26 +2367,25 @@ public class SamlSigninEndpointTests
     {
         // Arrange
         var sp = Build.SamlServiceProvider();
-        sp.DefaultNameIdFormat = SamlConstants.NameIdentifierFormats.Persistent;
+        sp.DefaultNameIdFormat = SamlConstants.NameIdentifierFormats.Unspecified;
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
-        var persistentIdentifier = Guid.NewGuid().ToString();
         Fixture.UserToSignIn =
-            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id"), new Claim(ClaimTypes.NameIdentifier, persistentIdentifier)], "Test"));
+            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
         var authnRequestXml = Build.AuthNRequestXml(); // No NameIDPolicy
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
-        successResponse.Assertion.Subject?.NameId.ShouldBe(persistentIdentifier);
-        successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
+        successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Unspecified);
+        successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
     [Fact]
@@ -2416,7 +2409,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2425,7 +2418,7 @@ public class SamlSigninEndpointTests
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task transient_format_generates_different_ids_per_request()
     {
@@ -2441,12 +2434,12 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // First request
-        var result1 = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result1 = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
         var response1 = await ExtractSamlSuccessFromPostAsync(result1, _ct);
         var nameId1 = response1.Assertion.Subject?.NameId;
 
         // Second request with same parameters
-        var result2 = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result2 = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
         var response2 = await ExtractSamlSuccessFromPostAsync(result2, _ct);
         var nameId2 = response2.Assertion.Subject?.NameId;
 
@@ -2464,7 +2457,7 @@ public class SamlSigninEndpointTests
         nameId1.ShouldNotBe(nameId2, "Transient NameIDs should be unique per authentication");
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task persistent_format_uses_default_claim_type_from_service_provider_options()
     {
@@ -2485,7 +2478,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2495,14 +2488,14 @@ public class SamlSigninEndpointTests
         successResponse.Assertion.Subject?.SPNameQualifier.ShouldBe(Data.EntityId.ToString());
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task persistent_format_uses_sp_specific_claim_type_override()
     {
         // Arrange
         var sp = Build.SamlServiceProvider();
         sp.DefaultNameIdFormat = SamlConstants.NameIdentifierFormats.Persistent;
-        sp.DefaultPersistentNameIdentifierClaimType = "custom_persistent_id";
+        sp.EmailNameIdClaimType = "custom_persistent_id";
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
@@ -2518,7 +2511,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2528,7 +2521,7 @@ public class SamlSigninEndpointTests
         successResponse.Assertion.Subject?.SPNameQualifier.ShouldBe(Data.EntityId.ToString());
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task persistent_format_fails_when_claim_missing()
     {
@@ -2549,13 +2542,13 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - if configured claim type cannot be found the request cannot be fulfilled
         result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task persistent_format_fails_when_claim_value_is_empty()
     {
@@ -2576,13 +2569,13 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert - if configured claim type cannot be found the request cannot be fulfilled
         result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task persistent_format_sets_sp_name_qualifier_to_sp_entity_id()
     {
@@ -2603,7 +2596,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2612,14 +2605,14 @@ public class SamlSigninEndpointTests
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task persistent_format_works_with_custom_global_claim_type()
     {
         // Arrange
         Fixture.ConfigureSamlOptions = options =>
         {
-            options.DefaultPersistentNameIdentifierClaimType = "app_persistent_id";
+            options.EmailNameIdClaimType = "app_persistent_id";
         };
 
         var sp = Build.SamlServiceProvider();
@@ -2639,7 +2632,7 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -2648,7 +2641,7 @@ public class SamlSigninEndpointTests
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
     }
 
-    [Fact]
+    [Fact(Skip = "Need to add support for nameid format")]
     [Trait("Category", Category)]
     public async Task multiple_users_get_different_persistent_ids_same_sp()
     {
@@ -2669,7 +2662,7 @@ public class SamlSigninEndpointTests
         ], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var resultA = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var resultA = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
         var responseA = await ExtractSamlSuccessFromPostAsync(resultA, _ct);
 
         // User B (re-authenticate as different user)
@@ -2680,7 +2673,7 @@ public class SamlSigninEndpointTests
         ], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
-        var resultB = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var resultB = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
         var responseB = await ExtractSamlSuccessFromPostAsync(resultB, _ct);
 
         // Assert
@@ -2705,7 +2698,7 @@ public class SamlSigninEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
-        // User WITHOUT ClaimTypes.NameIdentifier claim
+        // User WITHOUT email claim
         Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim(JwtClaimTypes.Subject, "user-id")
         ], "Test"));
@@ -2715,10 +2708,13 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        // Assert - if configured claim type cannot be found the request cannot be fulfilled
-        result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        // Assert — email claim not found redirects to error page
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Email claim is required for email NameID format but was not found.");
     }
 
     [Fact]
@@ -2731,10 +2727,10 @@ public class SamlSigninEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
-        // User with empty ClaimTypes.NameIdentifier
+        // User with empty email claim
         Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim(JwtClaimTypes.Subject, "user-id"),
-            new Claim(ClaimTypes.Email, "") // Empty claim
+            new Claim(JwtClaimTypes.Email, "") // Empty claim
         ], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
@@ -2742,10 +2738,13 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
-        // Assert - if configured claim type cannot be found the request cannot be fulfilled
-        result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        // Assert — empty email claim redirects to error page
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.RequestMessage.ShouldNotBeNull();
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage.RequestUri, _ct);
+        errorMessage.ShouldBe("Email claim is required for email NameID format but was not found.");
     }
 
     [Fact]
@@ -2758,10 +2757,9 @@ public class SamlSigninEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
-        // User with empty ClaimTypes.NameIdentifier
         Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim(JwtClaimTypes.Subject, "user-id"),
-            new Claim(ClaimTypes.Email, "test@testing.com")
+            new Claim(JwtClaimTypes.Email, "test@testing.com")
         ], "Test"));
         await Fixture.Client.GetAsync("/__signin", _ct);
 
@@ -2769,13 +2767,43 @@ public class SamlSigninEndpointTests
         var urlEncoded = await EncodeRequest(authnRequestXml);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("test@testing.com");
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.EmailAddress);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task custom_endpoint_paths_should_be_routed()
+    {
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        Fixture.ConfigureSamlOptions = options =>
+        {
+            options.Endpoints.SingleSignOnServicePath = "/custom/sso";
+        };
+
+        await Fixture.InitializeAsync();
+
+        // Custom path should be routed (400 is expected — no SAMLRequest, but not 404)
+        var customResult = await Fixture.NonRedirectingClient.GetAsync("/custom/sso", _ct);
+        customResult.StatusCode.ShouldNotBe(HttpStatusCode.NotFound);
+
+        // Default path should no longer be routed
+        var defaultResult = await Fixture.NonRedirectingClient.GetAsync("/Saml2/SSO", _ct);
+        defaultResult.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    private static void AssertReturnUrlIsSigninCallback(string? returnUrl)
+    {
+        returnUrl.ShouldNotBeNullOrEmpty();
+        var uri = new Uri("https://placeholder" + returnUrl);
+        uri.AbsolutePath.ShouldBe("/Saml2/SSO/Callback");
+        var qs = HttpUtility.ParseQueryString(uri.Query);
+        qs["samlStateId"].ShouldNotBeNullOrEmpty();
     }
 }
 

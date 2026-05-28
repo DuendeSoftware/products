@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 namespace Duende.IdentityServer.Endpoints.Results;
 
 /// <summary>
-/// Models the result of backchannel authentication 
+/// Models the result of backchannel authentication
 /// </summary>
 public class BackchannelAuthenticationResult : EndpointResult<BackchannelAuthenticationResult>
 {
@@ -66,21 +66,21 @@ internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<Backcha
 
     internal class SuccessResultDto
     {
-#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming rule violation
         public string auth_req_id { get; set; }
         public int expires_in { get; set; }
         public int interval { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Custom { get; set; }
-#pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore IDE1006
     }
 
     internal class ErrorResultDto
     {
-#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming rule violation
         public string error { get; set; }
         public string error_description { get; set; }
-#pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore IDE1006
     }
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+#nullable enable
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Services;
@@ -25,7 +25,7 @@ public class ReturnUrlParser
     /// <param name="returnUrl">The return URL.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<AuthorizationRequest> ParseAsync(string returnUrl, Ct ct)
+    public virtual async Task<IAuthenticationContext?> ParseAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ReturnUrlParser.Parse");
 

@@ -20,19 +20,22 @@ internal class RequestObjectValidator : IRequestObjectValidator
     private readonly IPushedAuthorizationService _pushedAuthorizationService;
     private readonly IdentityServerOptions _options;
     private readonly ILogger<RequestObjectValidator> _logger;
+    private readonly TimeProvider _timeProvider;
 
     public RequestObjectValidator(
         IJwtRequestValidator jwtRequestValidator,
         IJwtRequestUriHttpClient jwtRequestUriHttpClient,
         IPushedAuthorizationService pushedAuthorizationService,
         IdentityServerOptions options,
-        ILogger<RequestObjectValidator> logger)
+        ILogger<RequestObjectValidator> logger,
+        TimeProvider timeProvider)
     {
         _jwtRequestValidator = jwtRequestValidator;
         _jwtRequestUriHttpClient = jwtRequestUriHttpClient;
         _pushedAuthorizationService = pushedAuthorizationService;
         _options = options;
         _logger = logger;
+        _timeProvider = timeProvider;
     }
 
 
@@ -181,9 +184,9 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    public static AuthorizeRequestValidationResult? ValidatePushedAuthorizationExpiration(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
+    public AuthorizeRequestValidationResult? ValidatePushedAuthorizationExpiration(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
     {
-        if (DateTime.UtcNow > pushedAuthorizationRequest.ExpiresAtUtc)
+        if (_timeProvider.GetUtcNow().UtcDateTime > pushedAuthorizationRequest.ExpiresAtUtc)
         {
             {
                 return Invalid(authorizeRequest, error: OidcConstants.AuthorizeErrors.InvalidRequestUri,

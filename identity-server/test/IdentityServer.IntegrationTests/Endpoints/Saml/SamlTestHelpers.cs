@@ -10,6 +10,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Web;
 using System.Xml;
+using Duende.IdentityServer.Models;
 using Microsoft.Net.Http.Headers;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
@@ -44,6 +45,48 @@ internal static class SamlTestHelpers
         var baseData = ParseCommonResponseElements(responseElement, samlNs, samlpNs, relayState, acsUrl);
 
         return new SamlErrorResponseData
+        {
+            ResponseId = baseData.ResponseId,
+            InResponseTo = baseData.InResponseTo,
+            Destination = baseData.Destination,
+            IssueInstant = baseData.IssueInstant,
+            Issuer = baseData.Issuer,
+            StatusCode = baseData.StatusCode,
+            StatusMessage = baseData.StatusMessage,
+            SubStatusCode = baseData.SubStatusCode,
+            RelayState = baseData.RelayState,
+            AssertionConsumerServiceUrl = baseData.AssertionConsumerServiceUrl
+        };
+    }
+
+    /// <summary>
+    /// Extracts a SAML LogoutResponse from an HTTP-Redirect binding (302 with SAMLResponse in query string).
+    /// </summary>
+    public static SamlLogoutResponseData ExtractSamlLogoutResponseFromRedirect(HttpResponseMessage response)
+    {
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        var location = response.Headers.Location;
+        location.ShouldNotBeNull();
+
+        var query = HttpUtility.ParseQueryString(location.Query);
+        var encodedResponse = query["SAMLResponse"];
+        encodedResponse.ShouldNotBeNullOrWhiteSpace("SAMLResponse not found in redirect query string");
+
+        // Decode: URL-decode → base64-decode → deflate-decompress
+        var compressedBytes = Convert.FromBase64String(encodedResponse);
+        using var inputStream = new MemoryStream(compressedBytes);
+        using var deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress);
+        using var outputStream = new MemoryStream();
+        deflateStream.CopyTo(outputStream);
+        var responseXml = Encoding.UTF8.GetString(outputStream.ToArray());
+
+        var relayState = query["RelayState"];
+        var destination = location.GetLeftPart(UriPartial.Path);
+
+        var (samlpNs, samlNs, logoutResponseElement) = ParseSamlLogoutResponseXml(responseXml);
+        var baseData = ParseCommonResponseElements(logoutResponseElement, samlNs, samlpNs, relayState, destination);
+
+        return new SamlLogoutResponseData
         {
             ResponseId = baseData.ResponseId,
             InResponseTo = baseData.InResponseTo,
@@ -546,6 +589,28 @@ internal static class SamlTestHelpers
         return targetCookie?.Value.ToString();
     }
 
+    public static string? ExtractStateIdFromReturnUrl(HttpResponseMessage response)
+    {
+        var location = response.Headers.Location;
+        if (location == null)
+        {
+            return null;
+        }
+
+        var locationQuery = HttpUtility.ParseQueryString(location.Query);
+        var returnUrl = locationQuery["ReturnUrl"];
+        if (returnUrl == null)
+        {
+            return null;
+        }
+
+        // returnUrl is a relative path like /Saml2/SSO/Callback?samlStateId=xxx
+        // Parse it by prepending a placeholder scheme+host
+        var uri = new Uri("https://placeholder" + returnUrl);
+        var returnUrlQuery = HttpUtility.ParseQueryString(uri.Query);
+        return returnUrlQuery["samlStateId"];
+    }
+
     public static X509Certificate2 CreateTestSigningCertificate(TimeProvider timeProvider, string subject = "CN=Test SP Signing Certificate")
     {
         using var rsa = RSA.Create(2048);
@@ -558,6 +623,32 @@ internal static class SamlTestHelpers
             timeProvider.GetUtcNow().AddYears(10));
 
         return X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx), null, X509KeyStorageFlags.Exportable);
+    }
+
+    public static string SignAuthNRequestXmlWithComments(string authNRequestXml, X509Certificate2 certificate)
+    {
+        var doc = new XmlDocument { PreserveWhitespace = true, XmlResolver = null };
+        doc.LoadXml(authNRequestXml);
+
+        var signedXml = new SignedXml(doc) { SigningKey = certificate.GetRSAPrivateKey() };
+
+        var reference = new Reference { Uri = "#" + doc.DocumentElement!.GetAttribute("ID") };
+        reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+        reference.AddTransform(new XmlDsigExcC14NWithCommentsTransform());
+        signedXml.AddReference(reference);
+
+        signedXml.KeyInfo = new KeyInfo();
+        signedXml.KeyInfo.AddClause(new KeyInfoX509Data(certificate));
+
+        signedXml.ComputeSignature();
+
+        var signatureElement = signedXml.GetXml();
+
+        // Insert signature after Issuer element per SAML spec
+        var issuerElement = doc.DocumentElement!.GetElementsByTagName("Issuer", "urn:oasis:names:tc:SAML:2.0:assertion")[0];
+        doc.DocumentElement.InsertAfter(signatureElement, issuerElement);
+
+        return doc.OuterXml;
     }
 
     public static string SignAuthNRequestXml(string authNRequestXml, X509Certificate2 certificate)
@@ -864,5 +955,45 @@ internal static class SamlTestHelpers
 
     public record SamlLogoutResponseData : SamlResponseBase
     {
+    }
+
+    /// <summary>
+    /// Encodes and signs a SAML request XML for HTTP-Redirect binding using the SP's signing certificate.
+    /// </summary>
+    public static async Task<string> EncodeAndSignRequest(
+        string xml,
+        SamlServiceProvider sp,
+        Ct ct = default)
+    {
+        var encoded = await EncodeRequest(xml, ct);
+
+        // Sign the request using the SP's certificate
+        var certificate = sp.Certificates!.First(c => c.Use.HasFlag(KeyUse.Signing)).Certificate;
+        var (signature, sigAlg) = SignAuthNRequestRedirect(encoded, null, certificate);
+
+        return $"{encoded}&SigAlg={Uri.EscapeDataString(sigAlg)}&Signature={Uri.EscapeDataString(signature)}";
+    }
+
+    /// <summary>
+    /// Signs in a user via SSO and extracts the session index and NameID from the SAML response.
+    /// </summary>
+    public static async Task<(string SessionIndex, string NameId)> PerformSigninAndExtractSessionInfo(
+        SamlFixture fixture,
+        SamlServiceProvider samlServiceProvider,
+        Ct ct = default)
+    {
+        var signinRequest = fixture.Builder.AuthNRequestXml(destination: new Uri($"{fixture.Url()}/Saml2/SSO"));
+        var encoded = await EncodeAndSignRequest(signinRequest, samlServiceProvider, ct);
+        var signinResult = await fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={encoded}", ct);
+        var samlResult = await ExtractSamlSuccessFromPostAsync(signinResult, ct);
+        if (string.IsNullOrWhiteSpace(samlResult.Assertion.AuthnStatement?.SessionIndex))
+        {
+            throw new InvalidOperationException("SAMLResult did not have a valid session index");
+        }
+
+        var nameId = samlResult.Assertion.Subject?.NameId
+            ?? throw new InvalidOperationException("SAMLResult did not have a NameID");
+
+        return (samlResult.Assertion.AuthnStatement.SessionIndex, nameId);
     }
 }

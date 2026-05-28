@@ -38,4 +38,9 @@ public static class EventCategories
     /// Device flow related events
     /// </summary>
     public const string DeviceFlow = "Device";
+
+    /// <summary>
+    /// SAML related events
+    /// </summary>
+    public const string Saml = "Saml";
 }

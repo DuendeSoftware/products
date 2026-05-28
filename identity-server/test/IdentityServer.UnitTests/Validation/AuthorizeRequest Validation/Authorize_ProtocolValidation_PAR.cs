@@ -12,6 +12,7 @@ namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
 public class Authorize_ProtocolValidation_Valid_PAR
 {
+    private readonly FakeTimeProvider _timeProvider = new();
     private const string Category = "AuthorizeRequest Protocol Validation - PAR";
 
     [Fact]
@@ -22,7 +23,7 @@ public class Authorize_ProtocolValidation_Valid_PAR
         var par = new DeserializedPushedAuthorizationRequest
         {
             ReferenceValue = Guid.NewGuid().ToString(),
-            ExpiresAtUtc = DateTime.UtcNow.AddMinutes(5),
+            ExpiresAtUtc = _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(5),
             PushedParameters = new NameValueCollection
             {
                 { OidcConstants.AuthorizeRequest.ClientId, initiallyPushedClientId }
@@ -49,12 +50,12 @@ public class Authorize_ProtocolValidation_Valid_PAR
         var par = new DeserializedPushedAuthorizationRequest
         {
             ReferenceValue = Guid.NewGuid().ToString(),
-            ExpiresAtUtc = DateTime.UtcNow.AddSeconds(-1),
+            ExpiresAtUtc = _timeProvider.GetUtcNow().UtcDateTime.AddSeconds(-1),
             PushedParameters = new NameValueCollection()
         };
 
-        var validator = Factory.CreateRequestObjectValidator();
-        var result = RequestObjectValidator.ValidatePushedAuthorizationExpiration(par, authorizeRequest);
+        var validator = Factory.CreateRequestObjectValidator(timeProvider: _timeProvider);
+        var result = validator.ValidatePushedAuthorizationExpiration(par, authorizeRequest);
 
         result.ShouldNotBeNull();
         result.IsError.ShouldBe(true);

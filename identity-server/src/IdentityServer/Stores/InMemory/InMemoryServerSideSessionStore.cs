@@ -14,6 +14,17 @@ namespace Duende.IdentityServer.Stores;
 public class InMemoryServerSideSessionStore : IServerSideSessionStore
 {
     private readonly ConcurrentDictionary<string, ServerSideSession> _store = new();
+    private readonly TimeProvider _timeProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemoryServerSideSessionStore"/> class.
+    /// </summary>
+    /// <param name="timeProvider">The time provider.</param>
+    public InMemoryServerSideSessionStore(TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        _timeProvider = timeProvider;
+    }
 
 
 
@@ -113,7 +124,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetAndRemoveExpiredSession");
 
         var results = _store.Values
-            .Where(x => x.Expires < DateTime.UtcNow)
+            .Where(x => x.Expires < _timeProvider.GetUtcNow().UtcDateTime)
             .OrderBy(x => x.Key)
             .Take(count)
             .ToArray();

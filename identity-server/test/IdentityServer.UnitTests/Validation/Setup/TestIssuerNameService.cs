@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Saml.Services;
 using Duende.IdentityServer.Services;
 
 namespace UnitTests.Validation.Setup;
 
-internal class TestIssuerNameService : IIssuerNameService
+internal class TestIssuerNameService : IIssuerNameService, ISaml2IssuerNameService
 {
     private readonly string _value;
 

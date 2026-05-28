@@ -373,3 +373,120 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+CREATE TABLE [SamlServiceProviders] (
+    [Id] int NOT NULL IDENTITY,
+    [EntityId] nvarchar(200) NOT NULL,
+    [DisplayName] nvarchar(200) NULL,
+    [Description] nvarchar(1000) NULL,
+    [Enabled] bit NOT NULL,
+    [ClockSkewSeconds] float NULL,
+    [RequestMaxAgeSeconds] float NULL,
+    [AssertionLifetimeSeconds] float NULL,
+    [SingleLogoutServiceLocation] nvarchar(400) NULL,
+    [SingleLogoutServiceBinding] int NULL,
+    [RequireSignedAuthnRequests] bit NULL,
+    [RequireSignedLogoutResponses] bit NULL,
+    [AllowIdpInitiated] bit NOT NULL,
+    [DefaultNameIdFormat] nvarchar(2000) NULL,
+    [EmailNameIdClaimType] nvarchar(200) NULL,
+    [SigningBehavior] int NULL,
+    [AllowedSignatureAlgorithms] nvarchar(max) NULL,
+    [Created] datetime2 NOT NULL,
+    [Updated] datetime2 NULL,
+    [LastAccessed] datetime2 NULL,
+    [NonEditable] bit NOT NULL,
+    CONSTRAINT [PK_SamlServiceProviders] PRIMARY KEY ([Id])
+);
+GO
+
+CREATE TABLE [SamlAllowedScopes] (
+    [Id] int NOT NULL IDENTITY,
+    [Scope] nvarchar(200) NOT NULL,
+    [SamlServiceProviderId] int NOT NULL,
+    CONSTRAINT [PK_SamlAllowedScopes] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlAllowedScopes_SamlServiceProviders_SamlServiceProviderId] FOREIGN KEY ([SamlServiceProviderId]) REFERENCES [SamlServiceProviders] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [SamlAssertionConsumerServices] (
+    [Id] int NOT NULL IDENTITY,
+    [Location] nvarchar(400) NOT NULL,
+    [Binding] nvarchar(200) NOT NULL,
+    [Index] int NOT NULL,
+    [IsDefault] bit NOT NULL,
+    [SamlServiceProviderId] int NOT NULL,
+    CONSTRAINT [PK_SamlAssertionConsumerServices] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlAssertionConsumerServices_SamlServiceProviders_SamlServiceProviderId] FOREIGN KEY ([SamlServiceProviderId]) REFERENCES [SamlServiceProviders] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [SamlAuthnContextMappings] (
+    [Id] int NOT NULL IDENTITY,
+    [OidcValue] nvarchar(250) NOT NULL,
+    [SamlAuthnContextClassRef] nvarchar(500) NOT NULL,
+    [SamlServiceProviderId] int NOT NULL,
+    CONSTRAINT [PK_SamlAuthnContextMappings] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlAuthnContextMappings_SamlServiceProviders_SamlServiceProviderId] FOREIGN KEY ([SamlServiceProviderId]) REFERENCES [SamlServiceProviders] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [SamlCertificates] (
+    [Id] int NOT NULL IDENTITY,
+    [Data] nvarchar(4000) NOT NULL,
+    [Use] int NOT NULL,
+    [SamlServiceProviderId] int NOT NULL,
+    CONSTRAINT [PK_SamlCertificates] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlCertificates_SamlServiceProviders_SamlServiceProviderId] FOREIGN KEY ([SamlServiceProviderId]) REFERENCES [SamlServiceProviders] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [SamlClaimMappings] (
+    [Id] int NOT NULL IDENTITY,
+    [ClaimType] nvarchar(250) NOT NULL,
+    [SamlAttributeName] nvarchar(250) NOT NULL,
+    [SamlServiceProviderId] int NOT NULL,
+    CONSTRAINT [PK_SamlClaimMappings] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlClaimMappings_SamlServiceProviders_SamlServiceProviderId] FOREIGN KEY ([SamlServiceProviderId]) REFERENCES [SamlServiceProviders] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [SamlRequestedClaimTypes] (
+    [Id] int NOT NULL IDENTITY,
+    [ClaimType] nvarchar(250) NOT NULL,
+    [SamlServiceProviderId] int NOT NULL,
+    CONSTRAINT [PK_SamlRequestedClaimTypes] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlRequestedClaimTypes_SamlServiceProviders_SamlServiceProviderId] FOREIGN KEY ([SamlServiceProviderId]) REFERENCES [SamlServiceProviders] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlAllowedScopes_SamlServiceProviderId_Scope] ON [SamlAllowedScopes] ([SamlServiceProviderId], [Scope]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlAssertionConsumerServices_SamlServiceProviderId_Location] ON [SamlAssertionConsumerServices] ([SamlServiceProviderId], [Location]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlAuthnContextMappings_SamlServiceProviderId_OidcValue] ON [SamlAuthnContextMappings] ([SamlServiceProviderId], [OidcValue]);
+GO
+
+CREATE INDEX [IX_SamlCertificates_SamlServiceProviderId] ON [SamlCertificates] ([SamlServiceProviderId]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlClaimMappings_SamlServiceProviderId_ClaimType] ON [SamlClaimMappings] ([SamlServiceProviderId], [ClaimType]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlRequestedClaimTypes_SamlServiceProviderId_ClaimType] ON [SamlRequestedClaimTypes] ([SamlServiceProviderId], [ClaimType]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlServiceProviders_EntityId] ON [SamlServiceProviders] ([EntityId]);
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260508184433_AddSamlServiceProviders', N'10.0.4');
+GO
+
+COMMIT;
+GO
+

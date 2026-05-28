@@ -9,8 +9,14 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Bindings;
 using Duende.IdentityServer.Saml.Models;
+using Duende.IdentityServer.Saml.Services;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using UnitTests.Common;
 
 namespace UnitTests.Validation.EndSessionRequestValidation;
@@ -41,8 +47,10 @@ public class EndSessionRequestValidatorTests
             _userSession,
             _mockLogoutNotificationService,
             _mockSamlLogoutNotificationService,
+            TimeProvider.System,
             _mockEndSessionMessageStore,
-            TestLogger.Create<EndSessionRequestValidator>());
+            TestLogger.Create<EndSessionRequestValidator>(),
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance));
     }
 
     [Fact]
@@ -295,7 +303,7 @@ public class EndSessionRequestValidatorTests
         };
         _mockEndSessionMessageStore.Messages["endSessionId123"] = new Message<LogoutNotificationContext>(context, DateTime.UtcNow);
 
-        var samlLogout = new MockSamlFrontChannelLogout();
+        var samlLogout = MockSamlFrontChannelLogout.Create();
         _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(samlLogout);
 
         var parameters = new NameValueCollection
@@ -332,7 +340,7 @@ public class EndSessionRequestValidatorTests
         _mockEndSessionMessageStore.Messages["endSessionId123"] = new Message<LogoutNotificationContext>(context, DateTime.UtcNow);
 
         _mockLogoutNotificationService.FrontChannelLogoutNotificationsUrls.Add("http://client1.com/logout");
-        var samlLogout = new MockSamlFrontChannelLogout();
+        var samlLogout = MockSamlFrontChannelLogout.Create();
         _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(samlLogout);
 
         var parameters = new NameValueCollection
@@ -396,7 +404,7 @@ public class EndSessionRequestValidatorTests
         };
         _mockEndSessionMessageStore.Messages["endSessionId123"] = new Message<LogoutNotificationContext>(context, DateTime.UtcNow);
 
-        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(new MockSamlFrontChannelLogout());
+        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(MockSamlFrontChannelLogout.Create());
 
         var parameters = new NameValueCollection
         {
@@ -442,9 +450,9 @@ public class EndSessionRequestValidatorTests
         };
         _mockEndSessionMessageStore.Messages["endSessionId123"] = new Message<LogoutNotificationContext>(context, DateTime.UtcNow);
 
-        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(new MockSamlFrontChannelLogout());
-        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(new MockSamlFrontChannelLogout());
-        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(new MockSamlFrontChannelLogout());
+        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(MockSamlFrontChannelLogout.Create());
+        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(MockSamlFrontChannelLogout.Create());
+        _mockSamlLogoutNotificationService.SamlFrontChannelLogouts.Add(MockSamlFrontChannelLogout.Create());
 
         var parameters = new NameValueCollection
         {
@@ -457,11 +465,280 @@ public class EndSessionRequestValidatorTests
         result.SamlFrontChannelLogouts.Count().ShouldBe(3);
     }
 
-    private class MockSamlFrontChannelLogout : ISamlFrontChannelLogout
+    private class MockSamlFrontChannelLogout
     {
-        public SamlBinding SamlBinding => SamlBinding.HttpRedirect;
-        public Uri Destination => new Uri("https://sp.example.com/slo");
-        public string EncodedContent => "encoded";
-        public string RelayState => null;
+        public static SamlLogoutRequestContext Create()
+        {
+            var doc = new System.Xml.XmlDocument();
+            doc.LoadXml("<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_test\" Version=\"2.0\" IssueInstant=\"2024-01-01T00:00:00Z\"><saml:Issuer>test</saml:Issuer></samlp:LogoutRequest>");
+            return new SamlLogoutRequestContext(new OutboundSaml2Message
+            {
+                Name = SamlConstants.RequestProperties.SAMLRequest,
+                Destination = "https://sp.example.com/slo",
+                Binding = SamlConstants.Bindings.HttpRedirect,
+                Xml = doc.DocumentElement!,
+                RelayState = null
+            }, "_req-id", "https://sp.example.com");
+        }
+    }
+
+    [Fact]
+    public async Task MatchingSidInTokenHintShouldReturnSuccess()
+    {
+        _userSession.SessionId = "session-abc";
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sid", "session-abc") },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.Subject.ShouldNotBeNull();
+        result.ValidatedRequest.SessionId.ShouldBe("session-abc");
+    }
+
+    [Fact]
+    public async Task MismatchingSidInTokenHintShouldReturnError()
+    {
+        _userSession.SessionId = "session-abc";
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sid", "session-xyz") },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task MatchingSidButMismatchingSubShouldReturnSuccess()
+    {
+        // sid takes precedence over sub — matching sid wins even if sub doesn't match
+        _userSession.SessionId = "session-abc";
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[]
+            {
+                new Claim("sid", "session-abc"),
+                new Claim("sub", "different-user")  // mismatching sub — ignored because sid is present
+            },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task NoSidWithMatchingSubShouldReturnSuccess()
+    {
+        // fallback to sub comparison when no sid
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task NoSidWithMismatchingSubShouldReturnError()
+    {
+        // fallback to sub comparison when no sid — mismatch fails
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sub", "different-user") },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task NoSubNoSidInTokenShouldReturnSuccess()
+    {
+        // no claims to match — token hint proceeds without sub/sid validation
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("aud", "some-client") },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task TokenWithSidAndNullSessionIdShouldFallBackToSub()
+    {
+        // session has no sid (null), token has sid → falls back to sub comparison
+        _userSession.SessionId = null;
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[]
+            {
+                new Claim("sid", "session-abc"),
+                new Claim("sub", _user.GetSubjectId())
+            },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task OverrideReturningRequiresConfirmationShouldSetFlagAndSucceed()
+    {
+        _userSession.SessionId = "session-abc";
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var subject = new RequiresConfirmationEndSessionRequestValidator(
+            _options,
+            _stubTokenValidator,
+            _stubRedirectUriValidator,
+            _userSession,
+            _mockLogoutNotificationService,
+            _mockSamlLogoutNotificationService,
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance),
+            TimeProvider.System,
+            _mockEndSessionMessageStore,
+            TestLogger.Create<EndSessionRequestValidator>());
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await subject.ValidateAsync(parameters, _user, _ct);
+
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.RequiresConfirmation.ShouldBeTrue();
+        result.ValidatedRequest.Subject.ShouldNotBeNull();
+        result.ValidatedRequest.SessionId.ShouldBe("session-abc");
+        result.ValidatedRequest.ClientIds.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task PermissiveOverrideShouldAcceptMismatchedSessions()
+    {
+        // Demonstrates the extensibility use case: a subclass can always return Valid
+        _userSession.SessionId = "session-xyz";
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[]
+            {
+                new Claim("sid", "session-different"),  // mismatching sid
+                new Claim("sub", "different-user")      // mismatching sub
+            },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var subject = new PermissiveEndSessionRequestValidator(
+            _options,
+            _stubTokenValidator,
+            _stubRedirectUriValidator,
+            _userSession,
+            _mockLogoutNotificationService,
+            _mockSamlLogoutNotificationService,
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance),
+            TimeProvider.System,
+            _mockEndSessionMessageStore,
+            TestLogger.Create<EndSessionRequestValidator>());
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", "id_token");
+
+        var result = await subject.ValidateAsync(parameters, _user, _ct);
+        result.IsError.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Test subclass that always returns RequiresConfirmation from ValidateIdTokenHintAsync (strict override).
+    /// </summary>
+    private sealed class RequiresConfirmationEndSessionRequestValidator : EndSessionRequestValidator
+    {
+        public RequiresConfirmationEndSessionRequestValidator(
+            IdentityServerOptions options,
+            ITokenValidator tokenValidator,
+            IRedirectUriValidator uriValidator,
+            IUserSession userSession,
+            ILogoutNotificationService logoutNotificationService,
+            ISamlLogoutNotificationService samlLogoutNotificationService,
+            ISamlLogoutSessionStore samlLogoutSessionStore,
+            TimeProvider timeProvider,
+            IMessageStore<LogoutNotificationContext> endSessionMessageStore,
+            ILogger<EndSessionRequestValidator> logger)
+            : base(options, tokenValidator, uriValidator, userSession, logoutNotificationService,
+                  samlLogoutNotificationService, timeProvider, endSessionMessageStore, logger, samlLogoutSessionStore)
+        {
+        }
+
+        protected override Task<EndSessionHintValidationResult> ValidateIdTokenHintAsync(
+            EndSessionHintValidationContext context, Ct ct) =>
+            Task.FromResult(EndSessionHintValidationResult.RequiresConfirmation());
+    }
+
+    /// <summary>
+    /// Test subclass that always returns Valid from ValidateIdTokenHintAsync (permissive override).
+    /// </summary>
+    private sealed class PermissiveEndSessionRequestValidator : EndSessionRequestValidator
+    {
+        public PermissiveEndSessionRequestValidator(
+            IdentityServerOptions options,
+            ITokenValidator tokenValidator,
+            IRedirectUriValidator uriValidator,
+            IUserSession userSession,
+            ILogoutNotificationService logoutNotificationService,
+            ISamlLogoutNotificationService samlLogoutNotificationService,
+            ISamlLogoutSessionStore samlLogoutSessionStore,
+            TimeProvider timeProvider,
+            IMessageStore<LogoutNotificationContext> endSessionMessageStore,
+            ILogger<EndSessionRequestValidator> logger)
+            : base(options, tokenValidator, uriValidator, userSession, logoutNotificationService,
+                  samlLogoutNotificationService, timeProvider, endSessionMessageStore, logger, samlLogoutSessionStore)
+        {
+        }
+
+        protected override Task<EndSessionHintValidationResult> ValidateIdTokenHintAsync(
+            EndSessionHintValidationContext context, Ct ct) =>
+            Task.FromResult(EndSessionHintValidationResult.Valid());
     }
 }

@@ -16,7 +16,6 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Hosting.FederatedSignOut;
 using Duende.IdentityServer.Internal;
-using Duende.IdentityServer.Internal.Saml;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
@@ -25,6 +24,7 @@ using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Infrastructure;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Services.KeyManagement;
@@ -36,6 +36,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -49,10 +51,13 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class IdentityServerBuilderExtensionsCore
 {
     /// <summary>
-    /// Adds the required platform services.
+    /// Registers the fundamental ASP.NET Core platform services required by IdentityServer,
+    /// including <see cref="IHttpContextAccessor"/>, the options infrastructure, and a named
+    /// <see cref="HttpClient"/> factory. Also registers <see cref="IdentityServerOptions"/> and
+    /// <c>PersistentGrantOptions</c> as resolvable singletons from the options system.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add platform services to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddRequiredPlatformServices(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -62,24 +67,30 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransient(
             resolver => resolver.GetRequiredService<IOptions<IdentityServerOptions>>().Value.PersistentGrants);
         builder.Services.AddHttpClient();
+        builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerOptions>>(
+            sp => new PostConfigureLicenseKey(sp.GetService<IConfiguration>() ?? new ConfigurationBuilder().Build()));
 
         return builder;
     }
 
     /// <summary>
     /// Adds the default infrastructure for cookie authentication in IdentityServer.
+    /// Registers the default and external cookie authentication schemes and the necessary
+    /// decorators and post-configuration hooks required for IdentityServer's session management.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add cookie authentication to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddCookieAuthentication(this IIdentityServerBuilder builder) => builder
             .AddDefaultCookieHandlers()
             .AddCookieAuthenticationExtensions();
 
     /// <summary>
-    /// Adds the default cookie handlers and corresponding configuration
+    /// Adds the default cookie handlers and corresponding configuration.
+    /// Registers the IdentityServer default cookie scheme and the external cookie scheme used
+    /// for temporarily holding external identity provider claims during sign-in.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add cookie handlers to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddDefaultCookieHandlers(this IIdentityServerBuilder builder)
     {
         builder.Services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme)
@@ -91,10 +102,12 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the necessary decorators for cookie authentication required by IdentityServer
+    /// Adds the necessary decorators for cookie authentication required by IdentityServer.
+    /// Registers post-configuration for cookie options, and decorates <see cref="IAuthenticationService"/>
+    /// and <see cref="IAuthenticationHandlerProvider"/> to support federated sign-out.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add cookie authentication extensions to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddCookieAuthenticationExtensions(this IIdentityServerBuilder builder)
     {
         builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureInternalCookieOptions>();
@@ -105,10 +118,12 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the default endpoints.
+    /// Registers all default IdentityServer protocol endpoints and their corresponding HTTP response writers.
+    /// Endpoints include: authorize, token, discovery, userinfo, end-session, introspection, revocation,
+    /// device authorization, backchannel authentication, pushed authorization, check-session, and JWKS.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add endpoints to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddDefaultEndpoints(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<IEndpointRouter, EndpointRouter>();
@@ -153,13 +168,15 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds an endpoint.
+    /// Registers a custom protocol endpoint handler and maps it to the specified path.
+    /// The endpoint is registered as a transient service and added to the endpoint routing table.
     /// </summary>
-    /// <typeparam name="TEndpoint"></typeparam>
-    /// <param name="builder">The builder.</param>
-    /// <param name="name">The name.</param>
-    /// <param name="path">The path.</param>
-    /// <param name="isMatch">Custom IsMatch method for the endpoint. Defaults to null and default matching algorithm.</param>
+    /// <typeparam name="TEndpoint">The <see cref="IEndpointHandler"/> implementation to register.</typeparam>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the endpoint to.</param>
+    /// <param name="name">The logical name of the endpoint (e.g. <c>EndpointNames.Authorize</c>).</param>
+    /// <param name="path">The URL path at which the endpoint is served.</param>
+    /// <param name="isMatch">An optional custom matching function for the endpoint. Defaults to <see langword="null"/>,
+    /// which uses the default path-based matching algorithm.</param>
     public static IIdentityServerBuilder AddEndpoint<TEndpoint>(this IIdentityServerBuilder builder, string name, PathString path, Func<HttpContext, bool>? isMatch = null)
         where TEndpoint : class, IEndpointHandler
     {
@@ -176,7 +193,8 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds an <see cref="IHttpResponseWriter{T}"/> for an <see cref="IEndpointResult"/>.
+    /// Registers a custom <see cref="IHttpResponseWriter{T}"/> for a specific <see cref="IEndpointResult"/> type,
+    /// allowing customization of how a particular endpoint result is serialized to the HTTP response.
     /// </summary>
     public static IIdentityServerBuilder AddHttpWriter<TResult, TWriter>(this IIdentityServerBuilder builder)
         where TResult : class, IEndpointResult
@@ -187,9 +205,12 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the core services.
+    /// Registers the core IdentityServer services that are not protocol-endpoint-specific.
+    /// This includes server URL helpers, issuer name resolution, secret parsing and validation pipelines,
+    /// extension grant validation, JWT request validation, user session management, CORS infrastructure,
+    /// SAML no-op stubs, concurrency locks, empty default stores, licensing, and diagnostic services.
     /// </summary>
-    /// <param name="builder">The builder.</param>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add core services to.</param>
     public static IIdentityServerBuilder AddCoreServices(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<IServerUrls, DefaultServerUrls>();
@@ -218,12 +239,26 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<ISamlServiceProviderStore, EmptySamlServiceProviderStore>();
         builder.Services.TryAddScoped<ISamlLogoutNotificationService, NopSamlLogoutNotificationService>();
 
+        builder.Services.TryAddTransient<IConnectedApplicationStore, ConnectedApplicationStore>();
+
         builder.Services.TryAddSingleton(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
 
         builder.Services.TryAddTransient<IClientStore, EmptyClientStore>();
         builder.Services.TryAddTransient<IResourceStore, EmptyResourceStore>();
 
         builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
+
+        builder.Services.AddSingleton(resolver =>
+        {
+            var jsonResolver = new PolymorphicJsonTypeResolver();
+            var identityServerOptions = resolver.GetRequiredService<IOptions<IdentityServerOptions>>().Value;
+            var registration = jsonResolver.AddPolymorphicType<IdentityProvider>("$type");
+            foreach (var (type, providerType) in identityServerOptions.DynamicProviders.ProviderTypes)
+            {
+                registration.AddDerivedType(providerType.IdentityProviderType, type);
+            }
+            return jsonResolver;
+        });
 
         builder.Services.AddSingleton<LicenseAccessor>();
         builder.Services.AddSingleton<ProtocolRequestCounter>();
@@ -246,18 +281,24 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<IDiagnosticEntry, ResourceInfoDiagnosticEntry>();
         builder.Services.AddSingleton<DiagnosticSummary>();
         builder.Services.AddSingleton(serviceProvider => new DiagnosticDataService(
-            DateTime.UtcNow,
-            serviceProvider.GetServices<IDiagnosticEntry>()));
+            serviceProvider.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime,
+            serviceProvider.GetServices<IDiagnosticEntry>(),
+            serviceProvider.GetRequiredService<TimeProvider>()));
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
         return builder;
     }
 
     /// <summary>
-    /// Adds the pluggable services.
+    /// Registers the default implementations of all pluggable IdentityServer services.
+    /// This includes token creation and validation, claims generation, refresh token handling,
+    /// consent management, CORS policy, profile service, event sink, device flow, backchannel
+    /// authentication throttling, pushed authorization, session coordination, and HTTP clients
+    /// for back-channel logout and JWT request URI fetching.
+    /// All registrations use <c>TryAdd</c> so they can be replaced by custom implementations.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add pluggable services to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddPluggableServices(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddTransient<IPersistedGrantService, DefaultPersistedGrantService>();
@@ -314,10 +355,13 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds key management services.
+    /// Registers the automatic key management services used by IdentityServer to create, rotate,
+    /// and retire signing keys without manual intervention. Includes the key manager, key store
+    /// (defaulting to the file system), key protector (using ASP.NET Core Data Protection),
+    /// and an in-memory key store cache.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add key management services to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddKeyManagement(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddTransient<IAutomaticKeyManagerKeyStore, AutomaticKeyManagerKeyStore>();
@@ -336,15 +380,21 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the core services for dynamic external providers.
+    /// Registers the core infrastructure for the dynamic external identity providers feature.
+    /// This includes a dynamic <see cref="IAuthenticationSchemeProvider"/> decorator that loads
+    /// provider schemes on demand, a no-op <see cref="IIdentityProviderStore"/> default, and
+    /// per-request and singleton caches for dynamically loaded authentication schemes.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add dynamic provider core services to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddDynamicProvidersCore(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient(svcs => svcs.GetRequiredService<IdentityServerOptions>().DynamicProviders);
         builder.Services.AddTransientDecorator<IAuthenticationSchemeProvider, DynamicAuthenticationSchemeProvider>();
         builder.Services.TryAddSingleton<IIdentityProviderStore, NopIdentityProviderStore>();
+        builder.Services.TryAddSingleton<IdentityProviderOptionsMonitorCache>();
+        builder.Services.TryAddSingleton<IHybridCacheSerializer<IdentityProvider>, PolymorphicHybridCacheSerializer<IdentityProvider>>();
+        builder.Services.TryAddSingleton<IIdentityProviderFactory, DynamicIdentityProviderFactory>();
         // the per-request cache is to ensure that a scheme loaded from the cache is still available later in the
         // request and made available anywhere else during this request (in case the static cache times out across
         // 2 calls within the same request)
@@ -354,10 +404,13 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the validators.
+    /// Registers the default implementations of all request validators used by IdentityServer's protocol endpoints.
+    /// Includes validators for authorization, token, end-session, introspection, revocation, device authorization,
+    /// backchannel authentication, pushed authorization, resource owner password, redirect URIs, DPoP proofs,
+    /// and client/identity provider configuration. All registrations use <c>TryAdd</c> so they can be replaced.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add validators to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddValidators(this IIdentityServerBuilder builder)
     {
         // core
@@ -392,10 +445,13 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the response generators.
+    /// Registers the default response generators for all IdentityServer protocol endpoints.
+    /// Includes generators for token, userinfo, introspection, authorize, discovery, revocation,
+    /// device authorization, backchannel authentication, and pushed authorization responses.
+    /// All registrations use <c>TryAdd</c> so they can be replaced by custom implementations.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add response generators to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddResponseGenerators(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddTransient<ITokenResponseGenerator, TokenResponseGenerator>();
@@ -413,10 +469,12 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the default secret parsers.
+    /// Registers the default secret parsers for extracting client credentials from incoming requests.
+    /// Adds <c>BasicAuthenticationSecretParser</c> (HTTP Basic authentication header) and
+    /// <c>PostBodySecretParser</c> (form-encoded request body) as the default parsers.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add secret parsers to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddDefaultSecretParsers(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<ISecretParser, BasicAuthenticationSecretParser>();
@@ -426,10 +484,11 @@ public static class IdentityServerBuilderExtensionsCore
     }
 
     /// <summary>
-    /// Adds the default secret validators.
+    /// Registers the default secret validator for verifying client credentials.
+    /// Adds <c>HashedSharedSecretValidator</c>, which validates shared secrets stored as SHA-256 or SHA-512 hashes.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add secret validators to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddDefaultSecretValidators(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<ISecretValidator, HashedSharedSecretValidator>();

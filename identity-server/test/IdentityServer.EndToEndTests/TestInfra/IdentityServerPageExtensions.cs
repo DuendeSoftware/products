@@ -12,17 +12,16 @@ public static class IdentityServerPageExtensions
         await page.GetLink("Secure").ClickAsync();
         await page.GetByLabel("Username").FillAsync(userName);
         await page.GetByLabel("Password").FillAsync(password);
-        await page.GetButton("Login").ClickAsync();
-
-        // page.Url.ShouldEndWith("/Secure");
+        await page.GetButton("Login").ClickAndWaitForNetworkIdleAsync();
     }
 
     public static async Task Logout(this IPage page)
     {
-        await page.GetLink("Logout").ClickAsync();
-        page.GetByText("You are now logged out").ShouldNotBeNull();
+        await page.GetLink("Logout").ClickAndWaitForNetworkIdleAsync();
+        await page.GetByText("You are now logged out")
+            .WaitForAsync(new() { State = WaitForSelectorState.Visible });
         // Click on "Click here to return..."
-        await page.GetLink("here").ClickAsync();
+        await page.GetLink("here").ClickAndWaitForNetworkIdleAsync();
         // Logout link is hidden if not logged in
         (await page.GetLink("Logout").CountAsync()).ShouldBe(0);
     }
@@ -30,22 +29,29 @@ public static class IdentityServerPageExtensions
     public static async Task RenewTokens(this IPage page)
     {
         // Renew Tokens is on the secure page, so make sure we're there
-        await page.GetLink("Secure").ClickAsync();
+        await page.GetLink("Secure").ClickAndWaitForNetworkIdleAsync();
 
         var oldAccessToken = await page.GetDisplayedAccessToken();
-        await page.GetLink("Renew Tokens").ClickAsync();
+        await page.GetLink("Renew Tokens").ClickAndWaitForNetworkIdleAsync();
         var newAccessToken = await page.GetDisplayedAccessToken();
         newAccessToken.ShouldNotBe(oldAccessToken);
     }
 
     public static async Task CallApi(this IPage page)
     {
-        await page.GetLink("Call API").ClickAsync();
+        await page.GetLink("Call API").ClickAndWaitForNetworkIdleAsync();
         var apiResult = await page.Locator("pre").TextContentAsync();
         apiResult.ShouldNotBeNull();
         apiResult.ShouldContain("jti");
         apiResult.ShouldContain("sub");
         apiResult.ShouldContain("iss");
+    }
+
+    private static async Task ClickAndWaitForNetworkIdleAsync(this ILocator locator)
+    {
+        var page = locator.Page;
+        await locator.ClickAsync();
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
 
     private static ILocator GetLink(this IPage page, string name)

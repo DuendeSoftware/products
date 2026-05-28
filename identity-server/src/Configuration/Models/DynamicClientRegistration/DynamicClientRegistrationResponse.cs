@@ -11,6 +11,18 @@ namespace Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 /// <summary>
 /// Represents the response to a successful dynamic client registration request.
 /// </summary>
+/// <remarks>
+/// This class extends <see cref="DynamicClientRegistrationRequest"/> by adding server-generated
+/// properties that are not set by the caller: the assigned <see cref="ClientId"/>, the
+/// generated <see cref="ClientSecret"/> (when applicable), its expiration
+/// (<see cref="ClientSecretExpiresAt"/>), and the supported <see cref="ResponseTypes"/>.
+/// <para>
+/// The constructor that accepts both a <see cref="DynamicClientRegistrationRequest"/> and a
+/// <see cref="Client"/> copies values from the persisted client model where possible, so that
+/// the response accurately reflects the client as it was stored rather than echoing back the
+/// raw request values.
+/// </para>
+/// </remarks>
 public class DynamicClientRegistrationResponse : DynamicClientRegistrationRequest, IDynamicClientRegistrationResponse
 {
     /// <summary>

@@ -57,7 +57,7 @@ public class ClientSecretValidator : IClientSecretValidator
         {
             await RaiseFailureEventAsync("unknown", "No client id found", ct);
 
-            _logger.LogError("No client identifier found");
+            _logger.LogDebug("No client identifier found");
 
             fail.Error = IdentityModel.OidcConstants.TokenErrors.InvalidRequest;
             return fail;
@@ -69,7 +69,7 @@ public class ClientSecretValidator : IClientSecretValidator
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Unknown client", ct);
 
-            _logger.LogError("No client with id '{clientId}' found. aborting", parsedSecret.Id);
+            _logger.LogDebug("No client with id '{clientId}' found. aborting", parsedSecret.Id);
             return fail;
         }
 

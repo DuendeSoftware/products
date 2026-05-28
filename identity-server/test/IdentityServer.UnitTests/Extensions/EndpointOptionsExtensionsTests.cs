@@ -146,10 +146,10 @@ public class EndpointOptionsExtensionsTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void IsEndpointEnabledShouldReturnExpectedForSamlSigninEndpoint(bool expectedIsEndpointEnabled)
+    public void IsEndpointEnabledShouldReturnExpectedForSamlSingleSignOnServiceEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableSamlSigninEndpoint = expectedIsEndpointEnabled;
-        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlSignin));
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlSingleSignOnService));
 
         actual.ShouldBe(expectedIsEndpointEnabled);
     }
@@ -157,43 +157,10 @@ public class EndpointOptionsExtensionsTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void IsEndpointEnabledShouldReturnExpectedForSamlSigninCallbackEndpoint(bool expectedIsEndpointEnabled)
+    public void IsEndpointEnabledShouldReturnExpectedForSamlSingleSignOnCallbackEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableSamlSigninCallbackEndpoint = expectedIsEndpointEnabled;
-        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlSigninCallback));
-
-        actual.ShouldBe(expectedIsEndpointEnabled);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void IsEndpointEnabledShouldReturnExpectedForSamlIdpInitiatedEndpoint(bool expectedIsEndpointEnabled)
-    {
-        _options.EnableSamlIdpInitiatedEndpoint = expectedIsEndpointEnabled;
-        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlIdpInitiated));
-
-        actual.ShouldBe(expectedIsEndpointEnabled);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void IsEndpointEnabledShouldReturnExpectedForSamlLogoutEndpoint(bool expectedIsEndpointEnabled)
-    {
-        _options.EnableSamlLogoutEndpoint = expectedIsEndpointEnabled;
-        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlLogout));
-
-        actual.ShouldBe(expectedIsEndpointEnabled);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void IsEndpointEnabledShouldReturnExpectedForSamlLogoutCallbackEndpoint(bool expectedIsEndpointEnabled)
-    {
-        _options.EnableSamlLogoutCallbackEndpoint = expectedIsEndpointEnabled;
-        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlLogoutCallback));
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.SamlSingleSignOnCallback));
 
         actual.ShouldBe(expectedIsEndpointEnabled);
     }

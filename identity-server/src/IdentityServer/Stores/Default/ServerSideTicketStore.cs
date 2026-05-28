@@ -22,9 +22,11 @@ public class ServerSideTicketStore : IServerSideTicketStore
     private readonly IdentityServerOptions _options;
     private readonly IIssuerNameService _issuerNameService;
     private readonly IServerSideSessionStore _store;
+    private readonly IPersistedGrantStore _persistedGrantStore;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IDataProtector _protector;
     private readonly ILogger<ServerSideTicketStore> _logger;
+    private readonly TimeProvider _timeProvider;
 
     /// <summary>
     /// ctor
@@ -32,23 +34,29 @@ public class ServerSideTicketStore : IServerSideTicketStore
     /// <param name="options"></param>
     /// <param name="issuerNameService"></param>
     /// <param name="store"></param>
+    /// <param name="persistedGrantStore"></param>
     /// <param name="dataProtectionProvider"></param>
     /// <param name="httpContextAccessor"></param>
     /// <param name="logger"></param>
+    /// <param name="timeProvider"></param>
     public ServerSideTicketStore(
         IdentityServerOptions options,
         IIssuerNameService issuerNameService,
         IServerSideSessionStore store,
+        IPersistedGrantStore persistedGrantStore,
         IDataProtectionProvider dataProtectionProvider,
         IHttpContextAccessor httpContextAccessor,
-        ILogger<ServerSideTicketStore> logger)
+        ILogger<ServerSideTicketStore> logger,
+        TimeProvider timeProvider)
     {
         _options = options;
         _issuerNameService = issuerNameService;
         _store = store;
+        _persistedGrantStore = persistedGrantStore;
         _httpContextAccessor = httpContextAccessor;
         _protector = dataProtectionProvider.CreateProtector("Duende.SessionManagement.ServerSideTicketStore");
         _logger = logger;
+        _timeProvider = timeProvider;
     }
 
     /// <inheritdoc />
@@ -75,8 +83,8 @@ public class ServerSideTicketStore : IServerSideTicketStore
         {
             Key = key,
             Scheme = ticket.AuthenticationScheme,
-            Created = ticket.GetIssued(),
-            Renewed = ticket.GetIssued(),
+            Created = ticket.GetIssued(_timeProvider),
+            Renewed = ticket.GetIssued(_timeProvider),
             Expires = ticket.GetExpiration(),
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId(),
@@ -141,7 +149,21 @@ public class ServerSideTicketStore : IServerSideTicketStore
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         if (isNew)
         {
-            session.Created = ticket.GetIssued();
+            _logger.LogDebug("Session overwrite detected for key {key}; revoking grants for prior subject id {subjectId} and session id {sessionId}", key, session.SubjectId, session.SessionId);
+
+            await _persistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
+            {
+                SubjectId = session.SubjectId,
+                SessionId = session.SessionId,
+                Types = [
+                    IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                    IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
+                    IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,
+                    IdentityServerConstants.PersistedGrantTypes.BackChannelAuthenticationRequest,
+                ]
+            }, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+
+            session.Created = ticket.GetIssued(_timeProvider);
             session.SubjectId = sub;
             session.SessionId = sid;
         }
@@ -151,7 +173,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             // when issuing a new cookie on top of an existing cookie, the AuthenticationTicket passed above is new (and not the prior one loaded from the ticket store)
             ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
         }
-        session.Renewed = ticket.GetIssued();
+        session.Renewed = ticket.GetIssued(_timeProvider);
         session.Expires = ticket.GetExpiration();
         session.DisplayName = name;
         session.Ticket = ticket.Serialize(_protector);
@@ -237,7 +259,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
                 SessionId = item.Ticket.GetSessionId(),
                 DisplayName = item.Ticket.GetDisplayName(_options.ServerSideSessions.UserDisplayNameClaimType),
                 Created = item.Created,
-                Renewed = item.Ticket.GetIssued(),
+                Renewed = item.Ticket.GetIssued(_timeProvider),
                 Expires = item.Ticket.GetExpiration(),
                 Issuer = item.Ticket.GetIssuer(),
                 ClientIds = item.Ticket.Properties.GetClientList().ToList().AsReadOnly(),

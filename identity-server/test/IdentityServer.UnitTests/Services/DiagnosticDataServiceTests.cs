@@ -11,13 +11,14 @@ namespace IdentityServer.UnitTests.Services;
 public class DiagnosticDataServiceTests
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
+    private readonly FakeTimeProvider _timeProvider = new();
 
     [Fact]
     public async Task GetJsonBytesAsync_WithNoEntries_ShouldReturnEmptyJsonObject()
     {
         var serverStartTime = DateTime.UtcNow.AddMinutes(-5);
         var entries = new List<IDiagnosticEntry>();
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonBytesAsync(_ct);
 
@@ -33,7 +34,7 @@ public class DiagnosticDataServiceTests
         {
             new TestDiagnosticEntry("TestProperty", "TestValue")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonBytesAsync(_ct);
 
@@ -52,7 +53,7 @@ public class DiagnosticDataServiceTests
             new TestDiagnosticEntry("Property2", "Value2"),
             new TestDiagnosticEntry("Property3", "Value3")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonBytesAsync(_ct);
 
@@ -66,13 +67,13 @@ public class DiagnosticDataServiceTests
     [Fact]
     public async Task GetJsonBytesAsync_ShouldPassCorrectDiagnosticContext()
     {
-        var serverStartTime = DateTime.UtcNow.AddMinutes(-5);
+        var serverStartTime = _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(-5);
         var capturedContext = new TestDiagnosticEntry.ContextCapture();
         var entries = new List<IDiagnosticEntry>
         {
             new TestDiagnosticEntry("TestProperty", "TestValue", capturedContext)
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         await service.GetJsonBytesAsync(_ct);
 
@@ -90,7 +91,7 @@ public class DiagnosticDataServiceTests
             new TestDiagnosticEntry("Property1", "Value1"),
             new TestDiagnosticEntry("Property2", "Value2")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonBytesAsync(_ct);
 
@@ -105,7 +106,7 @@ public class DiagnosticDataServiceTests
     {
         var serverStartTime = DateTime.UtcNow.AddMinutes(-5);
         var entries = new List<IDiagnosticEntry>();
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonStringAsync(_ct);
 
@@ -120,7 +121,7 @@ public class DiagnosticDataServiceTests
         {
             new TestDiagnosticEntry("TestProperty", "TestValue")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonStringAsync(_ct);
 
@@ -138,7 +139,7 @@ public class DiagnosticDataServiceTests
             new TestDiagnosticEntry("Property2", "Value2"),
             new TestDiagnosticEntry("Property3", "Value3")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonStringAsync(_ct);
 
@@ -156,7 +157,7 @@ public class DiagnosticDataServiceTests
         {
             new TestDiagnosticEntry("Property", "Value with émojis 🎉")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonStringAsync(_ct);
 
@@ -173,7 +174,7 @@ public class DiagnosticDataServiceTests
             new TestDiagnosticEntry("Property1", "Value1"),
             new TestDiagnosticEntry("Property2", "Value2")
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var stringResult = await service.GetJsonStringAsync(_ct);
         var bytesResult = await service.GetJsonBytesAsync(_ct);
@@ -190,7 +191,7 @@ public class DiagnosticDataServiceTests
         {
             new ComplexTestDiagnosticEntry()
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonBytesAsync(_ct);
 
@@ -210,7 +211,7 @@ public class DiagnosticDataServiceTests
         {
             new AsyncTestDiagnosticEntry()
         };
-        var service = new DiagnosticDataService(serverStartTime, entries);
+        var service = new DiagnosticDataService(serverStartTime, entries, _timeProvider);
 
         var result = await service.GetJsonBytesAsync(_ct);
 

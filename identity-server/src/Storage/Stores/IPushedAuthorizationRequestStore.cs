@@ -10,41 +10,46 @@ using Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Stores;
 
 /// <summary>
-/// The interface for a service that stores pushed authorization requests.
+/// Persists, retrieves, and consumes pushed authorization requests (PAR) as defined by
+/// RFC 9126. In the PAR flow, a client first pushes its authorization parameters to the
+/// PAR endpoint and receives a <c>request_uri</c>. The client then uses that URI at the
+/// authorization endpoint instead of sending parameters in the query string. This store
+/// manages the lifecycle of those pending requests, keyed by a hash of the reference
+/// value embedded in the <c>request_uri</c>.
 /// </summary>
 public interface IPushedAuthorizationRequestStore
 {
     /// <summary>
-    /// Stores the pushed authorization request.
+    /// Persists a new pushed authorization request.
     /// </summary>
-    /// <param name="pushedAuthorizationRequest">The request.</param>
+    /// <param name="pushedAuthorizationRequest">The pushed authorization request to store.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, Ct ct);
 
     /// <summary>
-    /// Consumes the pushed authorization request, indicating that it should not
-    /// be used again. Repeated use could indicate some form of replay attack,
-    /// but also could indicate that an end user refreshed their browser or
-    /// otherwise retried a request that consumed the pushed authorization
-    /// request.
+    /// Marks a pushed authorization request as consumed so that it cannot be used again.
+    /// Repeated use of the same <c>request_uri</c> could indicate a replay attack, but
+    /// may also occur when an end user refreshes their browser during the authorization
+    /// flow.
     /// </summary>
-    /// <param name="referenceValueHash">The hash of the reference value of the
-    /// pushed authorization request. The reference value is the identifier
-    /// within the request_uri parameter.</param>
+    /// <param name="referenceValueHash">
+    /// The hash of the reference value embedded in the <c>request_uri</c> parameter
+    /// (i.e., the portion after <c>urn:ietf:params:oauth:request_uri:</c>).
+    /// </param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     Task ConsumeByHashAsync(string referenceValueHash, Ct ct);
 
     /// <summary>
-    /// Gets the pushed authorization request.
+    /// Gets the pushed authorization request identified by the hash of its reference value.
     /// </summary>
-    /// <param name="referenceValueHash">The hash of the reference value of the
-    /// pushed authorization request. The reference value is the identifier
-    /// within the request_uri parameter.</param>
+    /// <param name="referenceValueHash">
+    /// The hash of the reference value embedded in the <c>request_uri</c> parameter
+    /// (i.e., the portion after <c>urn:ietf:params:oauth:request_uri:</c>).
+    /// </param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns>The pushed authorization request, or null if the request does
-    /// not exist or was previously consumed.
+    /// <returns>
+    /// The <see cref="PushedAuthorizationRequest"/> associated with the specified hash,
+    /// or <see langword="null"/> if the request does not exist or was previously consumed.
     /// </returns>
     Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash, Ct ct);
 }

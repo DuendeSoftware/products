@@ -522,6 +522,42 @@ public class ServerSideSessionTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task explicit_logout_should_send_exactly_one_backchannel_logout_notification()
+    {
+        _pipeline.Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
+
+        await _pipeline.LoginAsync("alice");
+
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+
+        _pipeline.BackChannelMessageHandler.InvokeCount.ShouldBe(0);
+
+        _pipeline.BackChannelMessageHandler.OnInvoke = async msg =>
+        {
+            var form = await msg.Content.ReadAsStringAsync();
+            var parsed = System.Web.HttpUtility.ParseQueryString(form);
+            var jwt = parsed["logout_token"];
+            jwt.ShouldNotBeNullOrEmpty();
+            var handler = new JsonWebTokenHandler();
+            var token = handler.ReadJsonWebToken(jwt);
+            token.Issuer.ShouldBe(IdentityServerPipeline.BaseUrl);
+            token.GetClaim("sub").Value.ShouldBe("alice");
+        };
+
+        await _pipeline.LogoutAsync();
+
+        _pipeline.BackChannelMessageHandler.InvokeCount.ShouldBe(1);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task expired_sessions_should_revoke_refresh_token()
     {
         await _pipeline.LoginAsync("alice");
@@ -1022,6 +1058,32 @@ public class ServerSideSessionTests
         }
     }
 
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task changing_users_should_revoke_prior_sessions_grants()
+    {
+        // login as bob and get a refresh token
+        await _pipeline.LoginAsync("bob");
+
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+
+        // verify bob has grants
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "bob" }, _ct)).ShouldNotBeEmpty();
+
+        // login as alice — overwrites the same session key with a new SessionId
+        await _pipeline.LoginAsync("alice");
+
+        // bob's grants should have been cleaned up during the session overwrite
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "bob" }, _ct)).ShouldBeEmpty();
+    }
 
     [Fact]
     public async Task claim_issuers_should_be_persisted()

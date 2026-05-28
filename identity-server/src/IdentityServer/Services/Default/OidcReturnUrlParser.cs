@@ -1,56 +1,45 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Collections.Specialized;
+#nullable enable
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Services;
 
-internal class OidcReturnUrlParser : IReturnUrlParser
+internal sealed class OidcReturnUrlParser : IReturnUrlParser
 {
     private readonly IdentityServerOptions _options;
     private readonly IAuthorizeRequestValidator _validator;
     private readonly IUserSession _userSession;
     private readonly IServerUrls _urls;
     private readonly ILogger _logger;
-    private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
 
     public OidcReturnUrlParser(
         IdentityServerOptions options,
         IAuthorizeRequestValidator validator,
         IUserSession userSession,
         IServerUrls urls,
-        ILogger<OidcReturnUrlParser> logger,
-        IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
+        ILogger<OidcReturnUrlParser> logger)
     {
         _options = options;
         _validator = validator;
         _userSession = userSession;
         _urls = urls;
         _logger = logger;
-        _authorizationParametersMessageStore = authorizationParametersMessageStore;
     }
 
-    public async Task<AuthorizationRequest> ParseAsync(string returnUrl, Ct ct)
+    public async Task<IAuthenticationContext?> ParseAsync(string returnUrl, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("OidcReturnUrlParser.Parse");
 
         if (IsValidReturnUrl(returnUrl))
         {
             var parameters = returnUrl.ReadQueryStringAsNameValueCollection();
-            if (_authorizationParametersMessageStore != null)
-            {
-                var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
-                var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId, ct);
-                parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
-            }
 
             var user = await _userSession.GetUserAsync(ct);
             var result = await _validator.ValidateAsync(parameters, ct, user);

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text;
-using Duende.IdentityServer.Internal.Saml.Infrastructure;
+using Duende.IdentityServer.Saml.Infrastructure;
 
 namespace UnitTests.Saml;
 

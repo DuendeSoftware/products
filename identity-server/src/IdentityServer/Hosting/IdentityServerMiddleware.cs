@@ -60,7 +60,12 @@ public class IdentityServerMiddleware
 
         context.Response.OnStarting(async () =>
         {
-            if (context.TryGetExpiredUserSession(out var expiredUserSession))
+            // When a user explicitly logs out, IdentityServerAuthenticationService.SignOutAsync
+            // already triggers backchannel logout and sets the BackChannelLogoutTriggered flag.
+            // We must check that flag here to avoid sending a duplicate notification, because
+            // ServerSideTicketStore.RemoveAsync unconditionally sets the expired session flag
+            // for any session removal — including explicit logout, not just actual expiration.
+            if (context.TryGetExpiredUserSession(out var expiredUserSession) && !context.GetBackChannelLogoutTriggered())
             {
                 _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
 

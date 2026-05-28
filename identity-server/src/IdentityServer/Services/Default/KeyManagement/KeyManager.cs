@@ -132,7 +132,9 @@ public class KeyManager : IKeyManager
             _logger.LogTrace("Entering new key lock.");
 
             // need to create new key, but another thread might have already so acquiring lock.
+#pragma warning disable CS0618 // CacheLockTimeout is obsolete but still used by KeyManager for IConcurrencyLock
             if (false == await _newKeyLock.LockAsync((int)_options.Caching.CacheLockTimeout.TotalMilliseconds))
+#pragma warning restore CS0618
             {
                 throw new Exception($"Failed to obtain new key lock for: '{GetType()}'");
             }

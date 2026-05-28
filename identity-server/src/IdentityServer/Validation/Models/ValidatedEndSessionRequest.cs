@@ -53,4 +53,17 @@ public class ValidatedEndSessionRequest : ValidatedRequest
     /// Contains full session data including EntityIds, NameIds, and SessionIndexes required for logout notifications.
     /// </summary>
     public IReadOnlyCollection<SamlSpSessionData> SamlSessions { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the logout UI should prompt the user to confirm
+    /// the logout. This is set to <c>true</c> when the id_token_hint validation returns
+    /// <see cref="EndSessionHintValidationOutcome.RequiresConfirmation"/>.
+    /// </summary>
+    /// <remarks>
+    /// This flag propagates to <see cref="Duende.IdentityServer.Models.LogoutMessage"/> and then to
+    /// <see cref="Duende.IdentityServer.Models.LogoutRequest.ShowSignoutPrompt"/>.
+    /// Custom logout UI implementations must respect <see cref="Duende.IdentityServer.Models.LogoutRequest.ShowSignoutPrompt"/>
+    /// to enforce the confirmation prompt per OIDC RP-Initiated Logout requirements.
+    /// </remarks>
+    public bool RequiresConfirmation { get; set; }
 }

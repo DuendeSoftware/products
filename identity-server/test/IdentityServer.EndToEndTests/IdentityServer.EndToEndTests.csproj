@@ -21,7 +21,7 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
+    <ProjectReference Include="..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
     <ProjectReference Include="..\..\aspire\AppHosts\All\All.csproj" />
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>

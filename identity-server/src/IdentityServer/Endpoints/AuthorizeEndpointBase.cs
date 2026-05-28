@@ -33,7 +33,6 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
     private readonly IAuthorizeRequestValidator _validator;
 
     private readonly IConsentMessageStore _consentResponseStore;
-    private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
 
     protected AuthorizeEndpointBase(
         IEventService events,
@@ -43,8 +42,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         IAuthorizeInteractionResponseGenerator interactionGenerator,
         IAuthorizeResponseGenerator authorizeResponseGenerator,
         IUserSession userSession,
-        IConsentMessageStore consentResponseStore,
-        IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
+        IConsentMessageStore consentResponseStore)
     {
         _events = events;
         _options = options;
@@ -54,7 +52,6 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         _authorizeResponseGenerator = authorizeResponseGenerator;
         UserSession = userSession;
         _consentResponseStore = consentResponseStore;
-        _authorizationParametersMessageStore = authorizationParametersMessageStore;
     }
 
     protected ILogger Logger { get; private set; }
@@ -72,15 +69,6 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         else
         {
             Logger.LogDebug("No user present in authorize request");
-        }
-
-        if (checkConsentResponse && _authorizationParametersMessageStore != null)
-        {
-            var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
-            var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId, ct);
-            parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
-
-            await _authorizationParametersMessageStore.DeleteAsync(messageStoreId, ct);
         }
 
         // validate request

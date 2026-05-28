@@ -10,24 +10,45 @@ using Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Services;
 
 /// <summary>
-///  Provide services be used by the user interface to communicate with IdentityServer for backchannel authentication requests.
+/// Provides services used by the user interface to communicate with IdentityServer for
+/// Client-Initiated Backchannel Authentication (CIBA) login requests.
+/// This service is available from the dependency injection system and is typically injected
+/// as a constructor parameter into MVC controllers that implement the CIBA user interaction UI.
 /// </summary>
 public interface IBackchannelAuthenticationInteractionService
 {
     /// <summary>
-    /// Returns the pending login requests for the current user.
+    /// Returns all pending CIBA login requests for the currently authenticated user.
+    /// Use this to display a list of pending authentication requests that the user needs to approve or deny.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>
+    /// A read-only collection of <see cref="BackchannelUserLoginRequest"/> objects representing
+    /// the pending login requests awaiting the current user's action.
+    /// </returns>
     Task<IReadOnlyCollection<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(Ct ct);
 
     /// <summary>
-    /// Returns the login request for the id.
+    /// Returns the CIBA login request identified by the given internal store identifier.
+    /// Use this to retrieve the details of a specific pending request so the user can review and act on it.
     /// </summary>
+    /// <param name="id">The internal store identifier of the backchannel login request.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>
+    /// The <see cref="BackchannelUserLoginRequest"/> for the given <paramref name="id"/>,
+    /// or <c>null</c> if no matching request is found.
+    /// </returns>
     Task<BackchannelUserLoginRequest?> GetLoginRequestByInternalIdAsync(string id, Ct ct);
 
     /// <summary>
-    /// Completes the login request with the provided response for the current user or the subject passed.
+    /// Completes the CIBA login request with the provided response for the current user or the subject passed.
+    /// Setting scopes on the <see cref="CompleteBackchannelLoginRequest"/> grants the request;
+    /// leaving scopes null or empty denies it.
     /// </summary>
-    /// <param name="completionRequest">The completion request.</param>
+    /// <param name="completionRequest">
+    /// The completion request containing the internal request ID, the consented scopes,
+    /// an optional description, and optionally an explicit subject and session ID.
+    /// </param>
     /// <param name="ct">The cancellation token.</param>
     Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest, Ct ct);
 }

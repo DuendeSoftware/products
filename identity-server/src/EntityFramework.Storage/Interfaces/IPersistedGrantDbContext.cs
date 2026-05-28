@@ -56,6 +56,30 @@ public interface IPersistedGrantDbContext : IDisposable
     DbSet<PushedAuthorizationRequest> PushedAuthorizationRequests { get; set; }
 
     /// <summary>
+    /// Gets or sets the SAML signin states.
+    /// </summary>
+    /// <value>
+    /// The SAML signin states.
+    /// </value>
+    DbSet<SamlSigninState> SamlSigninStates { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SAML logout sessions.
+    /// </summary>
+    /// <value>
+    /// The SAML logout sessions.
+    /// </value>
+    DbSet<SamlLogoutSession> SamlLogoutSessions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SAML logout session request indices.
+    /// </summary>
+    /// <value>
+    /// The SAML logout session request indices.
+    /// </value>
+    DbSet<SamlLogoutSessionRequestIndex> SamlLogoutSessionRequestIndices { get; set; }
+
+    /// <summary>
     /// Saves the changes.
     /// </summary>
     /// <returns></returns>

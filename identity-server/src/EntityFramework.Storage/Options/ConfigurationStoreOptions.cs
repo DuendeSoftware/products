@@ -214,6 +214,46 @@ public class ConfigurationStoreOptions
     public TableConfiguration IdentityProvider { get; set; } = new TableConfiguration("IdentityProviders");
 
     /// <summary>
+    /// Gets or sets the SAML Service Provider table configuration.
+    /// </summary>
+    public TableConfiguration SamlServiceProvider { get; set; } = new TableConfiguration("SamlServiceProviders");
+
+    /// <summary>
+    /// Gets or sets the SAML Assertion Consumer Service table configuration.
+    /// </summary>
+    public TableConfiguration SamlAssertionConsumerService { get; set; } = new TableConfiguration("SamlAssertionConsumerServices");
+
+    /// <summary>
+    /// Gets or sets the SAML Single Logout Service table configuration.
+    /// </summary>
+    public TableConfiguration SamlSingleLogoutService { get; set; } = new TableConfiguration("SamlSingleLogoutServices");
+
+    /// <summary>
+    /// Gets or sets the SAML Certificate table configuration.
+    /// </summary>
+    public TableConfiguration SamlCertificate { get; set; } = new TableConfiguration("SamlCertificates");
+
+    /// <summary>
+    /// Gets or sets the SAML Claim Mapping table configuration.
+    /// </summary>
+    public TableConfiguration SamlClaimMapping { get; set; } = new TableConfiguration("SamlClaimMappings");
+
+    /// <summary>
+    /// Gets or sets the SAML AuthnContext Mapping table configuration.
+    /// </summary>
+    public TableConfiguration SamlAuthnContextMapping { get; set; } = new TableConfiguration("SamlAuthnContextMappings");
+
+    /// <summary>
+    /// Gets or sets the SAML Allowed Scope table configuration.
+    /// </summary>
+    public TableConfiguration SamlAllowedScope { get; set; } = new TableConfiguration("SamlAllowedScopes");
+
+    /// <summary>
+    /// Gets or sets the SAML Requested Claim Type table configuration.
+    /// </summary>
+    public TableConfiguration SamlRequestedClaimType { get; set; } = new TableConfiguration("SamlRequestedClaimTypes");
+
+    /// <summary>
     /// Gets or set if EF DbContext pooling is enabled.
     /// </summary>
     public bool EnablePooling { get; set; }

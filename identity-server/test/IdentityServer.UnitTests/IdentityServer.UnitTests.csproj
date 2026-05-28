@@ -6,7 +6,9 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Duende.Extensions.Caching.Memory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
   </ItemGroup>
   <ItemGroup>
@@ -16,12 +18,26 @@
     <None Update="identityserver_testing.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="Saml\SamlXmlReaderXmlFileTests\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Saml\SamlXmlWriterXmlFileTests\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+    <ProjectReference Include="..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
     <ProjectReference Include="..\..\src\AspNetIdentity\IdentityServer.AspNetIdentity.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+    <!--
+      The EntityFramework project is needed for SAML signin state mapper tests.
+      Unlike other mappers (which live in EntityFramework.Storage), the SAML mappers
+      must live in EntityFramework because SamlAuthenticationState and its type graph
+      are in the IdentityServer project, not Storage, and EntityFramework.Storage
+      cannot reference IdentityServer.
+    -->
+    <ProjectReference Include="..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\EntityFramework.Storage\IdentityServer.EntityFramework.Storage.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Licensing\v2\licenses\" />

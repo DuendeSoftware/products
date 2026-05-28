@@ -99,6 +99,7 @@ public static class IdentityServerConstants
         public const string UserInfoRequestValidation = "UserInfoRequestValidation";
         public const string DeviceCodeValidation = "DeviceCodeValidation";
         public const string BackchannelAuthenticationRequestIdValidation = "BackchannelAuthenticationRequestIdValidation";
+        public const string SamlSsoEndpoint = "SamlSsoEndpoint";
     }
 
 
@@ -219,11 +220,10 @@ public static class IdentityServerConstants
         public const string OAuthMetadata = "OAuthMetadata";
 
         public const string SamlMetadata = "SamlMetadata";
-        public const string SamlSignin = "SamlSignin";
-        public const string SamlSigninCallback = "SamlSigninCallback";
-        public const string SamlIdpInitiated = "SamlIdpInitiated";
-        public const string SamlLogout = "SamlLogout";
-        public const string SamlLogoutCallback = "SamlLogoutCallback";
+        public const string SamlSingleSignOnService = "Saml2 SingleSignOnService";
+        public const string SamlSingleSignOnCallback = "Saml2 SingleSignOnCallback";
+        public const string SamlSingleLogoutService = "Saml2 SingleLogoutService";
+        public const string SamlSingleLogoutCallback = "Saml2 SingleLogoutCallback";
     }
 
     public static class ContentSecurityPolicyHashes
@@ -246,7 +246,7 @@ public static class IdentityServerConstants
         /// <summary>
         /// The hash of the inline script used for SAML auto-post form submissions.
         /// </summary>
-        public const string SamlAutoPostScript = "sha256-x5thY6OTOhOhd8GSiineDdcCYxqXyCOfbLSHMWmHPjw=";
+        public const string SamlAutoPostScript = "sha256-1cDf9gWlS6Mjg+iEJCbdzTerOHORw4iNiJr4endY8Ng=";
     }
 
     public static class ProtocolRoutePaths
@@ -278,12 +278,6 @@ public static class IdentityServerConstants
         public const string MtlsDeviceAuthorization = MtlsPathPrefix + "/deviceauthorization";
 
         public const string SamlPathPrefix = "saml";
-        public const string SamlMetadata = SamlPathPrefix + "/metadata";
-        public const string SamlSignin = SamlPathPrefix + "/signin";
-        public const string SamlSigninCallback = SamlPathPrefix + "/signin_callback";
-        public const string SamlIdpInitiated = SamlPathPrefix + "/idp-initiated";
-        public const string SamlLogout = SamlPathPrefix + "/logout";
-        public const string SamlLogoutCallback = SamlPathPrefix + "/logout_callback";
 
         public static readonly string[] CorsPaths =
         {

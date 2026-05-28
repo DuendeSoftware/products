@@ -18,10 +18,10 @@ public class ValidatedDeviceAuthorizationRequest : ValidatedRequest
     public IEnumerable<string> RequestedScopes { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether this instance is open identifier request.
+    /// Gets or sets a value indicating whether this instance is an OpenID Connect flow request.
     /// </summary>
     /// <value>
-    ///   <c>true</c> if this instance is open identifier request; otherwise, <c>false</c>.
+    ///   <c>true</c> if this instance is an OpenID Connect flow request; otherwise, <c>false</c>.
     /// </value>
     public bool IsOpenIdRequest { get; set; }
 

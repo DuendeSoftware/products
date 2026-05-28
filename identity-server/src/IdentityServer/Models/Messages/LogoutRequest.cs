@@ -50,6 +50,7 @@ public class LogoutMessage
             ClientIds = request.ClientIds;
             SamlSessions = request.SamlSessions;
             UiLocales = request.UiLocales;
+            RequiresConfirmation = request.RequiresConfirmation;
 
             if (request.PostLogOutUri != null)
             {
@@ -122,6 +123,13 @@ public class LogoutMessage
     public string? UiLocales { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the logout UI should prompt the user to confirm
+    /// the logout. Set to <c>true</c> when the id_token_hint validation returns
+    /// <see cref="Duende.IdentityServer.Validation.EndSessionHintValidationOutcome.RequiresConfirmation"/>.
+    /// </summary>
+    public bool RequiresConfirmation { get; set; }
+
+    /// <summary>
     /// Gets the entire parameter collection.
     /// </summary>
     public IDictionary<string, string[]> Parameters { get; set; } = new Dictionary<string, string[]>();
@@ -132,7 +140,8 @@ public class LogoutMessage
     internal bool ContainsPayload => ClientId.IsPresent()
         || ClientIds?.Count > 0
         || SamlServiceProviderEntityId.IsPresent()
-        || SamlSessions?.Count > 0;
+        || SamlSessions?.Count > 0
+        || RequiresConfirmation;
 }
 
 /// <summary>
@@ -160,6 +169,7 @@ public class LogoutRequest
             SamlLogoutRequestId = message.SamlLogoutRequestId;
             SamlRelayState = message.SamlRelayState;
             SamlSessions = message.SamlSessions;
+            RequiresConfirmation = message.RequiresConfirmation;
             Parameters = message.Parameters.FromFullDictionary();
         }
 
@@ -226,6 +236,19 @@ public class LogoutRequest
     public string? UiLocales { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the logout UI should prompt the user to confirm
+    /// the logout. Set to <c>true</c> when the id_token_hint validation returns
+    /// <see cref="Duende.IdentityServer.Validation.EndSessionHintValidationOutcome.RequiresConfirmation"/>.
+    /// </summary>
+    /// <remarks>
+    /// This flag is advisory — the logout UI must respect <see cref="ShowSignoutPrompt"/>
+    /// to enforce the confirmation prompt. Custom logout UI implementations must check
+    /// <see cref="ShowSignoutPrompt"/> to meet the OIDC spec's requirement to prompt the user
+    /// when the id_token_hint does not match the current session.
+    /// </remarks>
+    public bool RequiresConfirmation { get; set; }
+
+    /// <summary>
     /// Gets the entire parameter collection.
     /// </summary>
     public NameValueCollection Parameters { get; } = new NameValueCollection();
@@ -244,5 +267,5 @@ public class LogoutRequest
     /// <value>
     ///   <c>true</c> if the signout prompt should be shown; otherwise, <c>false</c>.
     /// </value>
-    public bool ShowSignoutPrompt => ClientId.IsMissing();
+    public bool ShowSignoutPrompt => ClientId.IsMissing() || RequiresConfirmation;
 }

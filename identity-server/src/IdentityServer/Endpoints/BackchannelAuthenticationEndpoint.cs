@@ -74,6 +74,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         if (clientResult.IsError)
         {
             var error = clientResult.Error ?? OidcConstants.BackchannelAuthenticationRequestErrors.InvalidClient;
+            _logger.LogWarning("Client validation failed for backchannel authentication endpoint: {error}", error);
             Telemetry.Metrics.BackChannelAuthenticationFailure(
                 clientResult.Client?.ClientId, error);
             return Error(error);

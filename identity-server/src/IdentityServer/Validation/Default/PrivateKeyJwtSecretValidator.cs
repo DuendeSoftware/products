@@ -87,8 +87,25 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKeys = trustedKeys,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = parsedSecret.Id,
+            ValidateIssuer = true,
+
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
+
+            ClockSkew = _options.JwtValidationClockSkew,
+            ValidAlgorithms = _options.SupportedClientAssertionSigningAlgorithms
+        };
+
+        var issuer = await _issuerNameService.GetCurrentAsync(ct);
+
         // Decide whether to enforce strict audience validation or not.
-        var enforceStrictAud = _options.Preview.StrictClientAssertionAudienceValidation;
+        var enforceStrictAud = _options.StrictClientAssertionAudienceValidation;
 
         try
         {
@@ -110,23 +127,6 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             _logger.LogError(ex, "Error reading JWT header.");
             return fail;
         }
-
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            IssuerSigningKeys = trustedKeys,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = parsedSecret.Id,
-            ValidateIssuer = true,
-
-            RequireSignedTokens = true,
-            RequireExpirationTime = true,
-
-            ClockSkew = _options.JwtValidationClockSkew,
-            ValidAlgorithms = _options.SupportedClientAssertionSigningAlgorithms
-        };
-
-        var issuer = await _issuerNameService.GetCurrentAsync(ct);
 
         if (enforceStrictAud)
         {
@@ -160,14 +160,13 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
                 // token endpoint URL
                 string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.Token),
                 // issuer URL + token (legacy support)
-                string.Concat((await _issuerNameService.GetCurrentAsync(ct)).EnsureTrailingSlash(), ProtocolRoutePaths.Token),
+                string.Concat(issuer.EnsureTrailingSlash(), ProtocolRoutePaths.Token),
                 // issuer URL
                 issuer,
                 // CIBA endpoint: https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#auth_request
                 string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.BackchannelAuthentication),
                 // PAR endpoint: https://datatracker.ietf.org/doc/html/rfc9126#name-request
                 string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.PushedAuthorization),
-
             }.Distinct();
         }
 

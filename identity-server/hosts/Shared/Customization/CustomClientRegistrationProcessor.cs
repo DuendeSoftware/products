@@ -15,7 +15,8 @@ namespace Duende.IdentityServer.Hosts.Shared.Customization;
 public sealed class CustomClientRegistrationProcessor(
     IdentityServerConfigurationOptions options,
     IClientConfigurationStore dcrStore,
-    IClientStore clientStore) : DynamicClientRegistrationRequestProcessor(options, dcrStore)
+    TimeProvider timeProvider,
+    IClientStore clientStore) : DynamicClientRegistrationRequestProcessor(options, dcrStore, timeProvider)
 {
 
     protected override async Task<IStepResult> AddClientId(DynamicClientRegistrationContext context, Ct ct)

@@ -11,6 +11,7 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
@@ -421,14 +422,18 @@ public class DiscoveryEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task Can_enable_preview_feature_of_document_discovery_cache()
+    public async Task discovery_document_is_cached_when_distributed_cache_is_registered()
     {
         var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            services.AddSingleton(TimeProvider.System);
+            services.AddSingleton<IDistributedCache>(sp => new FakeDistributedCache(sp.GetRequiredService<TimeProvider>()));
+        };
         pipeline.Initialize("/root");
 
-        pipeline.Options.Preview.EnableDiscoveryDocumentCache = true;
-
-        pipeline.Options.Preview.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
+        pipeline.Options.Discovery.EnableDiscoveryDocumentCache = true;
+        pipeline.Options.Discovery.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
 
         // cache
         _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
@@ -468,15 +473,12 @@ public class DiscoveryEndpointTests
             result.Entries.Add("Joe", "Good Stuff"));
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task discovery_can_be_configured_via_CustomEntries_option_regardless_of_caching(bool enableCache)
+    public async Task discovery_can_be_configured_via_CustomEntries_option_regardless_of_caching()
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
-        pipeline.Options.Preview.EnableDiscoveryDocumentCache = enableCache;
         pipeline.Options.Discovery.CustomEntries.Add("foo", "bar");
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
@@ -484,11 +486,9 @@ public class DiscoveryEndpointTests
         result.TryGetString("foo").ShouldBe("bar");
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task discovery_can_be_customized_via_modifying_entries_collection_only_if_caching_disabled(bool enableCache)
+    public async Task discovery_can_be_customized_via_modifying_entries_collection_when_caching_disabled()
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += services =>
@@ -496,18 +496,32 @@ public class DiscoveryEndpointTests
             services.AddSingleton<IHttpResponseWriter<DiscoveryDocumentResult>, DiscoCustomizaztion>();
         };
         pipeline.Initialize();
-        pipeline.Options.Preview.EnableDiscoveryDocumentCache = enableCache;
+
+        var response = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+
+        data.ShouldContainKey("foo");
+        data["foo"].GetString().ShouldBe("bar");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task discovery_cannot_be_customized_via_modifying_entries_collection_when_caching_enabled()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            services.AddSingleton(TimeProvider.System);
+            services.AddSingleton<IDistributedCache>(sp => new FakeDistributedCache(sp.GetRequiredService<TimeProvider>()));
+            services.AddSingleton<IHttpResponseWriter<DiscoveryDocumentResult>, DiscoCustomizaztion>();
+        };
+        pipeline.Initialize();
+        pipeline.Options.Discovery.EnableDiscoveryDocumentCache = true;
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
 
-        if (enableCache)
-        {
-            result.IsError.ShouldBeTrue();
-        }
-        else
-        {
-            result.TryGetString("foo").ShouldBe("bar");
-        }
+        result.IsError.ShouldBeTrue();
     }
 
     [Fact]

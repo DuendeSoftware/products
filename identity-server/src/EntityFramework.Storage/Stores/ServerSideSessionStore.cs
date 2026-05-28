@@ -28,15 +28,22 @@ public class ServerSideSessionStore : IServerSideSessionStore
     protected readonly ILogger<ServerSideSessionStore> Logger;
 
     /// <summary>
+    /// The time provider.
+    /// </summary>
+    protected readonly TimeProvider TimeProvider;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ServerSideSessionStore"/> class.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <exception cref="ArgumentNullException">context</exception>
-    public ServerSideSessionStore(IPersistedGrantDbContext context, ILogger<ServerSideSessionStore> logger)
+    public ServerSideSessionStore(IPersistedGrantDbContext context, ILogger<ServerSideSessionStore> logger, TimeProvider timeProvider)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         Logger = logger;
+        TimeProvider = timeProvider;
     }
 
 
@@ -241,7 +248,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetAndRemoveExpiredSessions");
 
         var entities = await Context.ServerSideSessions
-                            .Where(x => x.Expires < DateTime.UtcNow)
+                            .Where(x => x.Expires < TimeProvider.GetUtcNow().UtcDateTime)
                             .OrderBy(x => x.Id)
                             .Take(count)
                             .ToArrayAsync(ct);

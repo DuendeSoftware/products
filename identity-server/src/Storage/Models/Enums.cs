@@ -10,12 +10,13 @@ namespace Duende.IdentityServer.Models;
 public enum SubjectTypes
 {
     /// <summary>
-    /// global - use the native subject id
+    /// Global subject type — uses the native subject identifier as-is across all clients.
     /// </summary>
     Global = 0,
 
     /// <summary>
-    /// ppid - scope the subject id to the client
+    /// Pairwise pseudonymous identifier (PPID) — the subject identifier is scoped to the client,
+    /// so different clients receive different subject values for the same user.
     /// </summary>
     Ppid = 1
 }
@@ -26,44 +27,49 @@ public enum SubjectTypes
 public enum AccessTokenType
 {
     /// <summary>
-    /// Self-contained Json Web Token
+    /// Self-contained JSON Web Token (JWT). The token carries all claims inline and can be validated
+    /// without contacting IdentityServer. This is the default.
     /// </summary>
     Jwt = 0,
 
     /// <summary>
-    /// Reference token
+    /// Reference token. The token is an opaque handle; resource servers must call the introspection
+    /// endpoint to validate it and retrieve its claims.
     /// </summary>
     Reference = 1
 }
 
 /// <summary>
-/// Token usage types.
+/// Token usage types for refresh tokens.
 /// </summary>
 public enum TokenUsage
 {
     /// <summary>
-    /// Re-use the refresh token handle
+    /// The refresh token handle stays the same when refreshing tokens. This is the default.
     /// </summary>
     ReUse = 0,
 
     /// <summary>
-    /// Issue a new refresh token handle every time
+    /// A new refresh token handle is issued every time the refresh token is used.
+    /// The previous handle is invalidated.
     /// </summary>
     OneTimeOnly = 1
 }
 
 /// <summary>
-/// Token expiration types.
+/// Token expiration types for refresh tokens.
 /// </summary>
 public enum TokenExpiration
 {
     /// <summary>
-    /// Sliding token expiration
+    /// Sliding expiration — when the refresh token is used, its lifetime is renewed by
+    /// <c>SlidingRefreshTokenLifetime</c>. The lifetime will not exceed <c>AbsoluteRefreshTokenLifetime</c>.
     /// </summary>
     Sliding = 0,
 
     /// <summary>
-    /// Absolute token expiration
+    /// Absolute expiration — the refresh token expires at a fixed point in time determined by
+    /// <c>AbsoluteRefreshTokenLifetime</c>. This is the default.
     /// </summary>
     Absolute = 1
 }
@@ -74,12 +80,12 @@ public enum TokenExpiration
 public enum CspLevel
 {
     /// <summary>
-    /// Level 1
+    /// CSP Level 1 — uses the <c>sandbox</c> directive for basic iframe isolation.
     /// </summary>
     One = 0,
 
     /// <summary>
-    /// Level 2
+    /// CSP Level 2 — uses the <c>frame-ancestors</c> directive for more precise embedding control.
     /// </summary>
     Two = 1
 }

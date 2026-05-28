@@ -4,10 +4,11 @@
 
 #nullable enable
 
+using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -25,8 +26,21 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryCaching(this IIdentityServerBuilder builder)
     {
-        builder.Services.TryAddSingleton<IMemoryCache, MemoryCache>();
-        builder.Services.TryAddTransient(typeof(ICache<>), typeof(DefaultCache<>));
+        if (!builder.Services.Any(d =>
+                d.ServiceType == typeof(HybridCache) &&
+                d.IsKeyedService &&
+                ServiceProviderKeys.ConfigurationStoreCache.Equals(d.ServiceKey)))
+        {
+            builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ConfigurationStoreCache);
+        }
+
+        if (!builder.Services.Any(d =>
+                d.ServiceType == typeof(HybridCache) &&
+                d.IsKeyedService &&
+                ServiceProviderKeys.OperationalStoreCache.Equals(d.ServiceKey)))
+        {
+            builder.Services.AddKeyedHybridCache(ServiceProviderKeys.OperationalStoreCache);
+        }
 
         return builder;
     }

@@ -3,12 +3,15 @@
 
 
 using System.Text.RegularExpressions;
+using System.Xml;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Bindings;
+using Duende.IdentityServer.Saml.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Testing;
@@ -120,16 +123,7 @@ public class EndSessionCallbackResultTests
     public async Task saml_http_redirect_logout_should_render_iframe()
     {
         _result.IsError = false;
-        _result.SamlFrontChannelLogouts =
-        [
-            new MockSamlFrontChannelLogout
-            {
-                SamlBinding = SamlBinding.HttpRedirect,
-                Destination = new Uri("https://sp.example.com/slo"),
-                EncodedContent = "SAMLRequest=abc123&SigAlg=xyz&Signature=sig",
-                RelayState = null
-            }
-        ];
+        _result.SamlFrontChannelLogouts = [CreateRedirectMessage("https://sp.example.com/slo")];
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
 
@@ -137,33 +131,13 @@ public class EndSessionCallbackResultTests
         using var rdr = new StreamReader(_context.Response.Body);
         var html = await rdr.ReadToEndAsync();
 
-        html.ShouldContain("<iframe loading='eager' allow='' src='https://sp.example.com/slo?SAMLRequest=abc123&amp;SigAlg=xyz&amp;Signature=sig'></iframe>");
-    }
-
-    [Fact]
-    public async Task saml_http_post_logout_should_render_iframe_with_srcdoc()
-    {
-        _result.IsError = false;
-        _result.SamlFrontChannelLogouts =
-        [
-            new MockSamlFrontChannelLogout
-            {
-                SamlBinding = SamlBinding.HttpPost,
-                Destination = new Uri("https://sp.example.com/slo"),
-                EncodedContent = "base64encodedlogoutrequest",
-                RelayState = "state123"
-            }
-        ];
-
-        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
-
-        _context.Response.Body.Seek(0, SeekOrigin.Begin);
-        using var rdr = new StreamReader(_context.Response.Body);
-        var html = await rdr.ReadToEndAsync();
-
-        html.ShouldContain("<iframe sandbox=");
-        html.ShouldContain("srcdoc=");
-        html.ShouldContain("https://sp.example.com/slo");
+        // Should render a redirect iframe with the destination and a signed query string
+        var match = Regex.Match(html, @"<iframe loading='eager' allow='' src='(https://sp\.example\.com/slo\?[^']+)'></iframe>");
+        match.Success.ShouldBeTrue("Expected redirect iframe with full URL");
+        var src = match.Groups[1].Value;
+        src.ShouldContain("SAMLRequest=");
+        src.ShouldContain("SigAlg=");
+        src.ShouldContain("Signature=");
     }
 
     [Fact]
@@ -171,16 +145,7 @@ public class EndSessionCallbackResultTests
     {
         _result.IsError = false;
         _result.FrontChannelLogoutUrls = ["http://oidc-client.com/logout"];
-        _result.SamlFrontChannelLogouts =
-        [
-            new MockSamlFrontChannelLogout
-            {
-                SamlBinding = SamlBinding.HttpRedirect,
-                Destination = new Uri("https://sp.example.com/slo"),
-                EncodedContent = "SAMLRequest=abc",
-                RelayState = null
-            }
-        ];
+        _result.SamlFrontChannelLogouts = [CreateRedirectMessage("https://sp.example.com/slo")];
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
 
@@ -189,7 +154,10 @@ public class EndSessionCallbackResultTests
         var html = await rdr.ReadToEndAsync();
 
         html.ShouldContain("<iframe loading='eager' allow='' src='http://oidc-client.com/logout'></iframe>");
-        html.ShouldContain("<iframe loading='eager' allow='' src='https://sp.example.com/slo?SAMLRequest=abc'></iframe>");
+        // SAML redirect iframe should have full signed query string
+        var match = Regex.Match(html, @"<iframe loading='eager' allow='' src='(https://sp\.example\.com/slo\?[^']+)'></iframe>");
+        match.Success.ShouldBeTrue("Expected SAML redirect iframe");
+        match.Groups[1].Value.ShouldContain("SAMLRequest=");
     }
 
     [Fact]
@@ -198,20 +166,8 @@ public class EndSessionCallbackResultTests
         _result.IsError = false;
         _result.SamlFrontChannelLogouts =
         [
-            new MockSamlFrontChannelLogout
-            {
-                SamlBinding = SamlBinding.HttpRedirect,
-                Destination = new Uri("https://sp1.example.com/slo"),
-                EncodedContent = "SAMLRequest=sp1",
-                RelayState = null
-            },
-            new MockSamlFrontChannelLogout
-            {
-                SamlBinding = SamlBinding.HttpPost,
-                Destination = new Uri("https://sp2.example.com/slo"),
-                EncodedContent = "base64sp2",
-                RelayState = null
-            }
+            CreateRedirectMessage("https://sp1.example.com/slo"),
+            CreateRedirectMessage("https://sp2.example.com/slo")
         ];
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
@@ -220,8 +176,61 @@ public class EndSessionCallbackResultTests
         using var rdr = new StreamReader(_context.Response.Body);
         var html = await rdr.ReadToEndAsync();
 
-        html.ShouldContain("https://sp1.example.com/slo");
-        html.ShouldContain("https://sp2.example.com/slo");
+        // Both redirect iframes
+        var sp1Match = Regex.Match(html, @"<iframe loading='eager' allow='' src='(https://sp1\.example\.com/slo\?[^']+)'></iframe>");
+        sp1Match.Success.ShouldBeTrue("Expected redirect iframe for sp1");
+        sp1Match.Groups[1].Value.ShouldContain("SAMLRequest=");
+
+        var sp2Match = Regex.Match(html, @"<iframe loading='eager' allow='' src='(https://sp2\.example\.com/slo\?[^']+)'></iframe>");
+        sp2Match.Success.ShouldBeTrue("Expected redirect iframe for sp2");
+        sp2Match.Groups[1].Value.ShouldContain("SAMLRequest=");
+    }
+
+    [Fact]
+    public async Task SamlFrontChannelLogoutsShouldIncludeSelfInFrameSrc()
+    {
+        _result.IsError = false;
+        _result.SamlFrontChannelLogouts = [CreateRedirectMessage("https://sp.example.com/slo")];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        var csp = _context.Response.Headers.ContentSecurityPolicy.First();
+        csp.ShouldContain("frame-src https://sp.example.com 'self'");
+    }
+
+    [Fact]
+    public async Task OidcOnlyLogoutsShouldNotIncludeSelfInFrameSrc()
+    {
+        _result.IsError = false;
+        _result.FrontChannelLogoutUrls = ["http://oidc-client.com/logout"];
+        _result.SamlFrontChannelLogouts = [];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        var csp = _context.Response.Headers.ContentSecurityPolicy.First();
+        csp.ShouldContain("frame-src http://oidc-client.com");
+        csp.ShouldNotContain("'self'");
+    }
+
+    [Fact]
+    public async Task SamlRedirectLogoutWithExistingQueryStringShouldProduceValidUrl()
+    {
+        _result.IsError = false;
+        _result.SamlFrontChannelLogouts = [CreateRedirectMessage("https://sp.example.com/slo?existing=value")];
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        // The destination already has a query string, so SAML params should be appended with &
+        var match = Regex.Match(html, @"<iframe loading='eager' allow='' src='(https://sp\.example\.com/slo\?[^']+)'></iframe>");
+        match.Success.ShouldBeTrue("Expected redirect iframe with full URL");
+        var src = match.Groups[1].Value;
+        src.ShouldContain("existing=value&amp;SAMLRequest=");
+        src.ShouldNotContain("?&");
+        src.ShouldNotContain("??");
     }
 
     [Fact]
@@ -230,13 +239,14 @@ public class EndSessionCallbackResultTests
         _result.IsError = false;
         _result.SamlFrontChannelLogouts =
         [
-            new MockSamlFrontChannelLogout
+            new SamlLogoutRequestContext(new OutboundSaml2Message
             {
-                SamlBinding = (SamlBinding)999, // Unknown binding
-                Destination = new Uri("https://sp.example.com/slo"),
-                EncodedContent = "content",
+                Name = SamlConstants.RequestProperties.SAMLRequest,
+                Destination = "https://sp.example.com/slo",
+                Binding = "urn:oasis:names:tc:SAML:2.0:bindings:UNKNOWN",
+                Xml = CreateDummyXml(),
                 RelayState = null
-            }
+            }, "_req-id", "https://sp.example.com")
         ];
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
@@ -248,11 +258,20 @@ public class EndSessionCallbackResultTests
         html.ShouldNotContain("https://sp.example.com/slo");
     }
 
-    private class MockSamlFrontChannelLogout : ISamlFrontChannelLogout
+    private static SamlLogoutRequestContext CreateRedirectMessage(string destination) => new(new OutboundSaml2Message
     {
-        public required SamlBinding SamlBinding { get; init; }
-        public required Uri Destination { get; init; }
-        public required string EncodedContent { get; init; }
-        public required string RelayState { get; init; }
+        Name = SamlConstants.RequestProperties.SAMLRequest,
+        Destination = destination,
+        Binding = SamlConstants.Bindings.HttpRedirect,
+        Xml = CreateDummyXml(),
+        RelayState = null,
+        SigningCertificate = TestCert.Load()
+    }, "_req-id", "https://sp.example.com");
+
+    private static XmlElement CreateDummyXml()
+    {
+        var doc = new XmlDocument();
+        doc.LoadXml("<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_test\" Version=\"2.0\" IssueInstant=\"2024-01-01T00:00:00Z\"><saml:Issuer>test</saml:Issuer></samlp:LogoutRequest>");
+        return doc.DocumentElement!;
     }
 }

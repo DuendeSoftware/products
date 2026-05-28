@@ -208,7 +208,7 @@ public class HttpContextExtensionsTests
     public async Task GetIdentityServerSignoutFrameCallbackUrlAsync_without_logout_message_returns_null_if_no_saml_service_providers_have_front_channel_logout()
     {
         var sp = CreateSamlServiceProvider("https://sp.example.com");
-        sp.SingleLogoutServiceUrl = null;
+        sp.SingleLogoutServiceUrls.Clear();
         var context = CreateContextWithUserSessionAndSaml("Test", [], [sp]);
 
         var result = await context.GetIdentityServerSignoutFrameCallbackUrlAsync();
@@ -258,6 +258,32 @@ public class HttpContextExtensionsTests
             SubjectId = "Test",
             SessionId = "session-id",
             ClientIds = [],
+            SamlSessions = [
+                new SamlSpSessionData
+                {
+                    EntityId = "https://sp.example.com",
+                    NameId = "user@example.com",
+                    NameIdFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+                    SessionIndex = "session1"
+                }
+            ]
+        };
+
+        var result = await context.GetIdentityServerSignoutFrameCallbackUrlAsync(logoutMessage);
+
+        result.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task GetIdentityServerSignoutFrameCallbackUrlAsync_with_logout_message_and_null_ClientIds_does_not_throw()
+    {
+        var sp = CreateSamlServiceProvider("https://sp.example.com");
+        var context = CreateContextWithUserSessionAndSaml("Test", [], [sp]);
+        var logoutMessage = new LogoutMessage
+        {
+            SubjectId = "Test",
+            SessionId = "session-id",
+            ClientIds = null,
             SamlSessions = [
                 new SamlSpSessionData
                 {
@@ -382,16 +408,78 @@ public class HttpContextExtensionsTests
         result.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task GetIdentityServerSignoutFrameCallbackUrlAsync_sets_SamlLogoutId_for_saml_initiated_logout()
+    {
+        var sp = CreateSamlServiceProvider("https://sp.example.com");
+        var context = CreateContextWithUserSessionAndSaml("Test", [], [sp]);
+        var logoutMessage = new LogoutMessage
+        {
+            SubjectId = "Test",
+            SessionId = "session-id",
+            ClientIds = [],
+            SamlServiceProviderEntityId = "https://sp.example.com",
+            SamlSessions = [
+                new SamlSpSessionData
+                {
+                    EntityId = "https://sp.example.com",
+                    NameId = "user@example.com",
+                    NameIdFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+                    SessionIndex = "session1"
+                }
+            ]
+        };
+
+        var result = await context.GetIdentityServerSignoutFrameCallbackUrlAsync(logoutMessage, logoutId: "test-logout-id");
+
+        result.ShouldNotBeNull();
+        var messageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>() as MockMessageStore<LogoutNotificationContext>;
+        var storedMessage = messageStore!.Messages.Values.Single();
+        storedMessage.Data.SamlLogoutId.ShouldBe("test-logout-id");
+    }
+
+    [Fact]
+    public async Task GetIdentityServerSignoutFrameCallbackUrlAsync_does_not_set_SamlLogoutId_for_non_saml_initiated_logout()
+    {
+        var sp = CreateSamlServiceProvider("https://sp.example.com");
+        var context = CreateContextWithUserSessionAndSaml("Test", [], [sp]);
+        var logoutMessage = new LogoutMessage
+        {
+            SubjectId = "Test",
+            SessionId = "session-id",
+            ClientIds = [],
+            // No SamlServiceProviderEntityId — this is NOT a SAML-initiated logout
+            SamlSessions = [
+                new SamlSpSessionData
+                {
+                    EntityId = "https://sp.example.com",
+                    NameId = "user@example.com",
+                    NameIdFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+                    SessionIndex = "session1"
+                }
+            ]
+        };
+
+        var result = await context.GetIdentityServerSignoutFrameCallbackUrlAsync(logoutMessage, logoutId: "test-logout-id");
+
+        result.ShouldNotBeNull();
+        var messageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>() as MockMessageStore<LogoutNotificationContext>;
+        var storedMessage = messageStore!.Messages.Values.Single();
+        storedMessage.Data.SamlLogoutId.ShouldBeNull();
+    }
+
     private static SamlServiceProvider CreateSamlServiceProvider(string entityId) => new SamlServiceProvider
     {
         EntityId = entityId,
         DisplayName = "Test Service Provider",
-        AssertionConsumerServiceUrls = [new Uri($"{entityId}/acs")],
-        SingleLogoutServiceUrl = new SamlEndpointType
+        AssertionConsumerServiceUrls = [
+            new IndexedEndpoint { Location = $"{entityId}/acs", Binding = SamlBinding.HttpPost }
+        ],
+        SingleLogoutServiceUrls = [new SamlEndpointType
         {
             Binding = SamlBinding.HttpRedirect,
-            Location = new Uri($"{entityId}/slo")
-        },
+            Location = $"{entityId}/slo"
+        }],
         Enabled = true
     };
 

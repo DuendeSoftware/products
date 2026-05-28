@@ -62,6 +62,15 @@ public static class AuthenticationTicketExtensions
     public static DateTime GetIssued(this AuthenticationTicket ticket) => ticket.Properties.IssuedUtc?.UtcDateTime ?? DateTime.UtcNow;
 
     /// <summary>
+    /// Extracts the issuance time, using the provided <see cref="TimeProvider"/> as fallback when <see cref="AuthenticationProperties.IssuedUtc"/> is null.
+    /// </summary>
+    public static DateTime GetIssued(this AuthenticationTicket ticket, TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        return ticket.Properties.IssuedUtc?.UtcDateTime ?? timeProvider.GetUtcNow().UtcDateTime;
+    }
+
+    /// <summary>
     /// Extracts the expiration time
     /// </summary>
     public static DateTime? GetExpiration(this AuthenticationTicket ticket) => ticket.Properties.ExpiresUtc?.UtcDateTime;

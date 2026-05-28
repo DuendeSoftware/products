@@ -10,135 +10,137 @@ using Duende.IdentityServer.ResponseHandling;
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// Options for aspects of the user interface.
+/// Settings for user-facing UI pages, including URLs, query parameter names, and other
+/// behavior related to interactive authorization flows.
 /// </summary>
 public class UserInteractionOptions
 {
     /// <summary>
-    /// Gets or sets the login URL. If a local URL, the value must start with a leading slash.
+    /// Gets or sets the URL of the login page. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <value>
-    /// The login URL.
-    /// </value>
+    /// <remarks>
+    /// When not set, IdentityServer uses the default route configured by the UI template.
+    /// </remarks>
     public string? LoginUrl { get; set; } //= Constants.UIConstants.DefaultRoutePaths.Login.EnsureLeadingSlash();
 
     /// <summary>
-    /// Gets or sets the login return URL parameter.
+    /// Gets or sets the name of the query parameter appended to the login URL that carries the return URL
+    /// after successful authentication.
     /// </summary>
-    /// <value>
-    /// The login return URL parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"returnUrl"</c>.</remarks>
     public string? LoginReturnUrlParameter { get; set; } //= Constants.UIConstants.DefaultRoutePathParams.Login;
 
     /// <summary>
-    /// Gets or sets the logout URL. If a local URL, the value must start with a leading slash.
+    /// Gets or sets the URL of the logout page. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <value>
-    /// The logout URL.
-    /// </value>
+    /// <remarks>
+    /// When not set, IdentityServer uses the default route configured by the UI template.
+    /// </remarks>
     public string? LogoutUrl { get; set; } //= Constants.UIConstants.DefaultRoutePaths.Logout.EnsureLeadingSlash();
 
     /// <summary>
-    /// Gets or sets the logout identifier parameter.
+    /// Gets or sets the name of the query parameter appended to the logout URL that carries the logout
+    /// message identifier.
     /// </summary>
-    /// <value>
-    /// The logout identifier parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"logoutId"</c>.</remarks>
     public string LogoutIdParameter { get; set; } = Constants.UIConstants.DefaultRoutePathParams.Logout;
 
     /// <summary>
-    /// Gets or sets the consent URL. If a local URL, the value must start with a leading slash.
+    /// Gets or sets the URL of the consent page. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <value>
-    /// The consent URL.
-    /// </value>
+    /// <remarks>Defaults to <c>"/consent"</c>.</remarks>
     public string ConsentUrl { get; set; } = Constants.UIConstants.DefaultRoutePaths.Consent.EnsureLeadingSlash();
 
     /// <summary>
-    /// Gets or sets the consent return URL parameter.
+    /// Gets or sets the name of the query parameter appended to the consent URL that carries the return URL
+    /// after the user grants or denies consent.
     /// </summary>
-    /// <value>
-    /// The consent return URL parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"returnUrl"</c>.</remarks>
     public string ConsentReturnUrlParameter { get; set; } = Constants.UIConstants.DefaultRoutePathParams.Consent;
 
     /// <summary>
-    /// Gets or sets the create account (or register) URL, for use with the OIDC prompt parameter. If a local URL, the value must start with a leading slash.
+    /// Gets or sets the URL of the account creation (registration) page, used when an authorization request
+    /// includes <c>prompt=create</c>. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <value>
-    /// The create account URL.
-    /// </value>
+    /// <remarks>
+    /// Defaults to <c>null</c>. When set, the <c>prompt=create</c> parameter redirects users
+    /// to this URL, and <c>"create"</c> is added to the <c>prompt_values_supported</c> array
+    /// in the discovery document. When not set, <c>prompt=create</c> is ignored.
+    /// </remarks>
     public string? CreateAccountUrl { get; set; } // null by default to omit support in discovery
 
     /// <summary>
-    /// Gets or sets the create account (or register) return URL parameter.
+    /// Gets or sets the name of the query parameter appended to the create-account URL that carries the
+    /// return URL after account creation.
     /// </summary>
-    /// <value>
-    /// The create account return URL parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"returnUrl"</c>.</remarks>
     public string CreateAccountReturnUrlParameter { get; set; } = Constants.UIConstants.DefaultRoutePathParams.CreateAccount;
 
     /// <summary>
-    /// Gets or sets the error URL. If a local URL, the value must start with a leading slash.
+    /// Gets or sets the URL of the error page. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <value>
-    /// The error URL.
-    /// </value>
+    /// <remarks>Defaults to <c>"/error"</c>.</remarks>
     public string ErrorUrl { get; set; } = Constants.UIConstants.DefaultRoutePaths.Error.EnsureLeadingSlash();
 
     /// <summary>
-    /// Gets or sets the error identifier parameter.
+    /// Gets or sets the name of the query parameter appended to the error URL that carries the error message
+    /// identifier.
     /// </summary>
-    /// <value>
-    /// The error identifier parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"errorId"</c>.</remarks>
     public string ErrorIdParameter { get; set; } = Constants.UIConstants.DefaultRoutePathParams.Error;
 
     /// <summary>
-    /// Gets or sets the custom redirect return URL parameter.
+    /// Gets or sets the name of the query parameter appended to a custom redirect URL from the authorization
+    /// endpoint that carries the return URL.
     /// </summary>
-    /// <value>
-    /// The custom redirect return URL parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"returnUrl"</c>.</remarks>
     public string CustomRedirectReturnUrlParameter { get; set; } = Constants.UIConstants.DefaultRoutePathParams.Custom;
 
     /// <summary>
-    /// Gets or sets the cookie message threshold. This limits how many cookies are created, and older ones will be purged.
+    /// Gets or sets the maximum number of message cookies of any type that IdentityServer will create.
+    /// Older cookies are purged once this limit is reached.
     /// </summary>
-    /// <value>
-    /// The cookie message threshold.
-    /// </value>
+    /// <remarks>
+    /// Defaults to 2. This limit exists because browsers cap the total number and size of
+    /// cookies per domain. In practice, this value controls how many concurrent browser tabs a
+    /// user can have open while interacting with IdentityServer.
+    /// </remarks>
     public int CookieMessageThreshold { get; set; } = Constants.UIConstants.CookieMessageThreshold;
 
     /// <summary>
-    /// Gets or sets the device verification URL.  If a local URL, the value must start with a leading slash.
+    /// Gets or sets the URL of the device verification page used in the OAuth 2.0 Device Authorization
+    /// Grant. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <value>
-    /// The device verification URL.
-    /// </value>
+    /// <remarks>Defaults to <c>"/device"</c>.</remarks>
     public string DeviceVerificationUrl { get; set; } = Constants.UIConstants.DefaultRoutePaths.DeviceVerification;
 
     /// <summary>
-    /// Gets or sets the device verification user code parameter.
+    /// Gets or sets the name of the query parameter appended to the device verification URL that carries
+    /// the user code.
     /// </summary>
-    /// <value>
-    /// The device verification user code parameter.
-    /// </value>
+    /// <remarks>Defaults to <c>"userCode"</c>.</remarks>
     public string DeviceVerificationUserCodeParameter { get; set; } = Constants.UIConstants.DefaultRoutePathParams.UserCode;
 
     /// <summary>
-    /// Flag that allows return URL validation to accept full URL that includes the IdentityServer origin. Defaults to false.
+    /// Gets or sets a value indicating whether return URL validation accepts absolute URLs that include the IdentityServer
+    /// origin.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>false</c>. When <c>true</c>, return URLs such as
+    /// <c>https://identity.example.com/connect/authorize/callback</c> are accepted in addition
+    /// to relative paths.
+    /// </remarks>
     public bool AllowOriginInReturnUrl { get; set; }
 
     /// <summary>
-    /// The collection of OIDC prompt modes supported and that will be published
-    /// in discovery. By default, this includes all values in <see
-    /// cref="Constants.SupportedPromptModes"/>. If the <see
-    /// cref="CreateAccountUrl"/> option is set, then the "create" value is also
-    /// included. If additional prompt values are added, a customized <see
-    /// cref="IAuthorizeInteractionResponseGenerator"/> is also required to
-    /// handle those values.
+    /// Gets or sets the collection of OIDC <c>prompt</c> parameter values that IdentityServer supports and
+    /// publishes in the <c>prompt_values_supported</c> discovery document array.
     /// </summary>
+    /// <remarks>
+    /// By default, this includes all values in <see cref="Constants.SupportedPromptModes"/>.
+    /// When <see cref="CreateAccountUrl"/> is set, <c>"create"</c> is also included
+    /// automatically. Adding custom prompt values requires a corresponding customization of
+    /// <see cref="IAuthorizeInteractionResponseGenerator"/> to handle those values.
+    /// </remarks>
     public ICollection<string> PromptValuesSupported { get; set; } = new HashSet<string>(Constants.SupportedPromptModes);
 }

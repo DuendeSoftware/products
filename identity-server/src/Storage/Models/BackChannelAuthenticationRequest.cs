@@ -14,68 +14,71 @@ namespace Duende.IdentityServer.Models;
 public class BackChannelAuthenticationRequest
 {
     /// <summary>
-    /// The identifier for this request in the store.
+    /// Gets or sets the identifier for this request in the store.
     /// </summary>
     public string InternalId { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the creation time.
+    /// Gets or sets the UTC time when this backchannel authentication request was created.
     /// </summary>
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the life time in seconds.
+    /// Gets or sets the lifetime of this backchannel authentication request in seconds.
     /// </summary>
     public int Lifetime { get; set; }
 
     /// <summary>
-    /// Gets or sets the ID of the client.
+    /// Gets or sets the ID of the client that initiated this backchannel authentication request.
     /// </summary>
     public string ClientId { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the subject.
+    /// Gets or sets the subject (user) for whom the login request is intended.
     /// </summary>
     public ClaimsPrincipal Subject { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the requested scopes.
+    /// Gets or sets the scopes that were requested in this backchannel authentication request.
     /// </summary>
     public IEnumerable<string> RequestedScopes { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the requested resource indicators.
+    /// Gets or sets the resource indicators that were requested in this backchannel authentication request.
     /// </summary>
     public IEnumerable<string>? RequestedResourceIndicators { get; set; }
 
     /// <summary>
-    /// Gets or sets the authentication context reference classes.
+    /// Gets or sets the authentication context reference classes (<c>acr_values</c>) used in this request.
     /// </summary>
     public ICollection<string>? AuthenticationContextReferenceClasses { get; set; }
 
     /// <summary>
-    /// Gets or sets the tenant.
+    /// Gets or sets the tenant value extracted from the <c>acr_values</c> used in this request.
     /// </summary>
     public string? Tenant { get; set; }
 
     /// <summary>
-    /// Gets or sets the idp.
+    /// Gets or sets the identity provider (idp) value extracted from the <c>acr_values</c> used in this request.
     /// </summary>
     public string? IdP { get; set; }
 
     /// <summary>
-    /// Gets or sets the binding message.
+    /// Gets or sets the binding message used in this request. This is a human-readable identifier
+    /// that the client and authorization server display to the user to bind the request to the user's action.
     /// </summary>
     public string? BindingMessage { get; set; }
 
 
     /// <summary>
-    /// Gets or sets a value indicating whether this instance has been completed.
+    /// Gets or sets a value indicating whether this backchannel authentication request has been completed
+    /// (i.e. the user has approved or denied the request).
     /// </summary>
     public bool IsComplete { get; set; }
 
     /// <summary>
-    /// Gets or sets the authorized scopes.
+    /// Gets or sets the scopes that the user approved when completing this backchannel authentication request.
+    /// <c>null</c> until the request is complete.
     /// </summary>
     public IEnumerable<string>? AuthorizedScopes { get; set; }
 

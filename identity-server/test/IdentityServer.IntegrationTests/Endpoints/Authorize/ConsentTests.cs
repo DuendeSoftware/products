@@ -10,10 +10,8 @@ using System.Text;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Duende.IdentityServer.Stores.Default;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Test;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
@@ -116,22 +114,10 @@ public class ConsentTests
         _mockPipeline.ConsentWasCalled.ShouldBeTrue();
     }
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task consent_page_should_have_authorization_params(Type storeType)
+    public async Task consent_page_should_have_authorization_params()
     {
-        if (storeType != null)
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-            _mockPipeline.Initialize();
-        }
-
         var user = new IdentityServerUser("bob") { Tenant = "tenant_value" };
         await _mockPipeline.LoginAsync(user.CreatePrincipal());
 
@@ -163,22 +149,10 @@ public class ConsentTests
         _mockPipeline.ConsentRequest.ValidatedResources.RawScopeValues.ShouldBe(["openid", "api1", "api2"], true);
     }
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task consent_response_should_allow_successful_authorization_response(Type storeType)
+    public async Task consent_response_should_allow_successful_authorization_response()
     {
-        if (storeType != null)
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-            _mockPipeline.Initialize();
-        }
-
         await _mockPipeline.LoginAsync("bob");
 
         _mockPipeline.ConsentResponse = new ConsentResponse()
@@ -273,27 +247,15 @@ public class ConsentTests
         authorization.State.ShouldBe("123_state");
     }
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task consent_response_of_temporarily_unavailable_should_return_error_to_client(Type storeType)
+    public async Task consent_response_of_temporarily_unavailable_should_return_error_to_client()
     {
-        if (storeType != null)
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-            _mockPipeline.Initialize();
-        }
-
         await _mockPipeline.LoginAsync("bob");
 
         _mockPipeline.ConsentResponse = new ConsentResponse()
         {
-            Error = AuthorizationError.TemporarilyUnavailable,
+            Error = InteractionError.TemporarilyUnavailable,
             ErrorDescription = "some description"
         };
         _mockPipeline.BrowserClient.StopRedirectingAfter = 2;
@@ -316,27 +278,15 @@ public class ConsentTests
         authorization.ErrorDescription.ShouldBe("some description");
     }
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task consent_response_of_unmet_authentication_requirements_should_return_error_to_client(Type storeType)
+    public async Task consent_response_of_unmet_authentication_requirements_should_return_error_to_client()
     {
-        if (storeType != null)
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-            _mockPipeline.Initialize();
-        }
-
         await _mockPipeline.LoginAsync("bob");
 
         _mockPipeline.ConsentResponse = new ConsentResponse()
         {
-            Error = AuthorizationError.UnmetAuthenticationRequirements,
+            Error = InteractionError.UnmetAuthenticationRequirements,
             ErrorDescription = "some description"
         };
         _mockPipeline.BrowserClient.StopRedirectingAfter = 2;

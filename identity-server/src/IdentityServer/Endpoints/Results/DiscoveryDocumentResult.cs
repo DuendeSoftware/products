@@ -15,7 +15,7 @@ namespace Duende.IdentityServer.Endpoints.Results;
 public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
 {
     private Dictionary<string, object> _entries = new();
-    private readonly bool _isUsingPreviewFeature;
+    private readonly bool _isCachingEnabled;
 
     /// <summary>
     /// Gets the maximum age.
@@ -43,20 +43,20 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
     {
         get
         {
-            if (_isUsingPreviewFeature)
+            if (_isCachingEnabled)
             {
                 throw new InvalidOperationException(
-                    "DUENDEPREVIEW001: Cannot get Entries when using the cache preview feature.");
+                    "Cannot get Entries when discovery document caching is enabled. Use CustomEntries on DiscoveryOptions instead.");
             }
 
             return _entries;
         }
         set
         {
-            if (_isUsingPreviewFeature)
+            if (_isCachingEnabled)
             {
                 throw new InvalidOperationException(
-                    "DUENDEPREVIEW001: Cannot set Entries when using the preview feature.");
+                    "Cannot set Entries when discovery document caching is enabled. Use CustomEntries on DiscoveryOptions instead.");
             }
 
             _entries = value ?? throw new ArgumentNullException(nameof(value));
@@ -85,7 +85,7 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
     /// </remarks>
     internal DiscoveryDocumentResult(string json, int? maxAge)
     {
-        _isUsingPreviewFeature = true;
+        _isCachingEnabled = true;
         Json = json ?? throw new ArgumentNullException(nameof(json));
         MaxAge = maxAge;
     }
@@ -94,11 +94,11 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
     /// Initializes a new instance of the <see cref="DiscoveryDocumentResult" /> class.
     /// </summary>
     /// <param name="entries">The entries.</param>
-    /// <param name="isUsingPreviewFeature">Enable preview feature</param>
+    /// <param name="isCachingEnabled">Indicates that discovery document caching is enabled, preventing direct access to <see cref="Entries"/>.</param>
     /// <param name="maxAge">The maximum age.</param>
     /// <exception cref="System.ArgumentNullException">entries</exception>
-    internal DiscoveryDocumentResult(Dictionary<string, object> entries, bool isUsingPreviewFeature, int? maxAge)
-        : this(entries, maxAge) => _isUsingPreviewFeature = true;
+    internal DiscoveryDocumentResult(Dictionary<string, object> entries, bool isCachingEnabled, int? maxAge)
+        : this(entries, maxAge) => _isCachingEnabled = isCachingEnabled;
 }
 
 internal class DiscoveryDocumentHttpWriter : IHttpResponseWriter<DiscoveryDocumentResult>

@@ -1,6 +1,6 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
-  <Import Project="../../src.props" />
+  <Import Project="../src.props" />
   <Import Project="../identity-server.props" />
   <PropertyGroup>
     <PackageTags>OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;ASP.NET Core</PackageTags>

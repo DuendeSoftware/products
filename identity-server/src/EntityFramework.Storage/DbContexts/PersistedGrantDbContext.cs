@@ -68,6 +68,15 @@ public class PersistedGrantDbContext<TContext> : DbContext, IPersistedGrantDbCon
     public DbSet<PushedAuthorizationRequest> PushedAuthorizationRequests { get; set; }
 
     /// <inheritdoc/>
+    public DbSet<SamlSigninState> SamlSigninStates { get; set; }
+
+    /// <inheritdoc/>
+    public DbSet<SamlLogoutSession> SamlLogoutSessions { get; set; }
+
+    /// <inheritdoc/>
+    public DbSet<SamlLogoutSessionRequestIndex> SamlLogoutSessionRequestIndices { get; set; }
+
+    /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         if (StoreOptions is null)

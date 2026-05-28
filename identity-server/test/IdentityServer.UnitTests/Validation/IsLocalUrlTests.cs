@@ -65,7 +65,7 @@ public class IsLocalUrlTests
     [MemberData(nameof(TestCases))]
     public async Task GetAuthorizationContextAsync(string returnUrl, bool expected)
     {
-        var interactionService = new DefaultIdentityServerInteractionService(null, null, null, null, null, null, null,
+        var interactionService = new DefaultIdentityServerInteractionService(new IdentityServerOptions(), null!, null!, null!, null!, null!, null!, null!,
             GetReturnUrlParser(), new LoggerFactory().CreateLogger<DefaultIdentityServerInteractionService>());
         var actual = await interactionService.GetAuthorizationContextAsync(returnUrl, _ct);
         if (expected)

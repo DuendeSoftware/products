@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer.Internal.Saml.Infrastructure;
+using Duende.IdentityServer.Saml.Services;
 
 namespace UnitTests.Common;
 
@@ -22,4 +22,6 @@ internal class MockSamlSigningService : ISamlSigningService
         var certBytes = _certificate.Export(X509ContentType.Cert);
         return Task.FromResult(Convert.ToBase64String(certBytes));
     }
+
+    public Task<IReadOnlyList<X509Certificate2>> GetAllSigningCertificatesAsync(CancellationToken ct) => Task.FromResult<IReadOnlyList<X509Certificate2>>([_certificate]);
 }

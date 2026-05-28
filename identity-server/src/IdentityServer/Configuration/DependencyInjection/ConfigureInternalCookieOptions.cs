@@ -13,8 +13,13 @@ namespace Duende.IdentityServer.Configuration;
 internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAuthenticationOptions>
 {
     private readonly IdentityServerOptions _idsrv;
+    private readonly TimeProvider _timeProvider;
 
-    public ConfigureInternalCookieOptions(IdentityServerOptions idsrv) => _idsrv = idsrv;
+    public ConfigureInternalCookieOptions(IdentityServerOptions idsrv, TimeProvider timeProvider)
+    {
+        _idsrv = idsrv;
+        _timeProvider = timeProvider;
+    }
 
     public void Configure(CookieAuthenticationOptions options)
     {
@@ -76,7 +81,7 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
 
         async Task Callback(CookieSlidingExpirationContext context)
         {
-            await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
+            await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context, _timeProvider);
             await inner?.Invoke(context)!;
         }
     }

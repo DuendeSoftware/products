@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Models;
 /// <summary>
 /// Models an OIDC identity provider
 /// </summary>
-public class OidcProvider : IdentityProvider
+public record OidcProvider : IdentityProvider
 {
     /// <summary>
     /// Ctor
@@ -26,7 +26,7 @@ public class OidcProvider : IdentityProvider
     }
 
     /// <summary>
-    /// The base address of the OIDC provider.
+    /// Gets or sets the base address of the OIDC provider.
     /// </summary>
     public string? Authority
     {
@@ -34,7 +34,7 @@ public class OidcProvider : IdentityProvider
         set => this["Authority"] = value;
     }
     /// <summary>
-    /// The response type. Defaults to "id_token".
+    /// Gets or sets the response type. Defaults to "id_token".
     /// </summary>
     public string ResponseType
     {
@@ -42,7 +42,7 @@ public class OidcProvider : IdentityProvider
         set => this["ResponseType"] = value;
     }
     /// <summary>
-    /// The client id.
+    /// Gets or sets the client id.
     /// </summary>
     public string? ClientId
     {
@@ -50,7 +50,11 @@ public class OidcProvider : IdentityProvider
         set => this["ClientId"] = value;
     }
     /// <summary>
-    /// The client secret. By default this is the plaintext client secret and great consideration should be taken if this value is to be stored as plaintext in the store.
+    /// Gets or sets the client secret used to authenticate with the external OIDC provider.
+    /// By default this is the plaintext client secret — great consideration should be taken if this value is to be stored
+    /// as plaintext in the store. It is possible to store this in a protected way and then unprotect when loading from
+    /// the store by implementing a custom <c>IIdentityProviderStore</c> or registering a custom
+    /// <c>IConfigureNamedOptions&lt;OpenIdConnectOptions&gt;</c>.
     /// </summary>
     public string? ClientSecret
     {
@@ -58,7 +62,7 @@ public class OidcProvider : IdentityProvider
         set => this["ClientSecret"] = value;
     }
     /// <summary>
-    /// Space separated list of scope values.
+    /// Gets or sets the space-separated list of scope values to request from the external OIDC provider. Defaults to <c>openid</c>.
     /// </summary>
     public string Scope
     {
@@ -66,7 +70,7 @@ public class OidcProvider : IdentityProvider
         set => this["Scope"] = value;
     }
     /// <summary>
-    /// Indicates if userinfo endpoint is to be contacted. Defaults to true.
+    /// Gets or sets a value indicating whether the userinfo endpoint is to be contacted. Defaults to true.
     /// </summary>
     public bool GetClaimsFromUserInfoEndpoint
     {
@@ -74,7 +78,7 @@ public class OidcProvider : IdentityProvider
         set => this["GetClaimsFromUserInfoEndpoint"] = value ? "true" : "false";
     }
     /// <summary>
-    /// Indicates if PKCE should be used. Defaults to true.
+    /// Gets or sets a value indicating whether PKCE should be used. Defaults to true.
     /// </summary>
     public bool UsePkce
     {
@@ -83,7 +87,7 @@ public class OidcProvider : IdentityProvider
     }
 
     /// <summary>
-    /// Parses the scope into a collection.
+    /// Gets the collection of individual scope values parsed from the <see cref="Scope"/> string.
     /// </summary>
     public IEnumerable<string> Scopes
     {

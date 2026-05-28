@@ -44,6 +44,7 @@ public static class EventIds
     public const int UnhandledException = ErrorEventsStart + 0;
     public const int InvalidClientConfiguration = ErrorEventsStart + 1;
     public const int InvalidIdentityProviderConfiguration = ErrorEventsStart + 2;
+    public const int InvalidSamlServiceProviderConfiguration = ErrorEventsStart + 3;
 
     //////////////////////////////////////////////////////
     /// Grants related events
@@ -76,4 +77,16 @@ public static class EventIds
     private const int DiagnosticEventsStart = 7000;
 
     public const int DiagnosticSummaryLogged = DiagnosticEventsStart + 0;
+
+    //////////////////////////////////////////////////////
+    /// SAML related events
+    //////////////////////////////////////////////////////
+    private const int SamlEventsStart = 8000;
+
+    public const int SamlSsoSuccess = SamlEventsStart + 0;
+    public const int SamlSsoFailure = SamlEventsStart + 1;
+    public const int SamlSloSuccess = SamlEventsStart + 10;
+    public const int SamlSloFailure = SamlEventsStart + 11;
+    public const int SamlAuthnRequestValidationFailure = SamlEventsStart + 20;
+    public const int SamlLogoutRequestValidationFailure = SamlEventsStart + 21;
 }

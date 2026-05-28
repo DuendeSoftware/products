@@ -118,7 +118,15 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
                 return AuthenticateResult.Fail("Invalid or missing client_id from access token");
             }
 
-            var proofToken = Context.Request.Headers[OidcConstants.HttpHeaders.DPoP].FirstOrDefault();
+            var dpopHeader = Context.Request.Headers[OidcConstants.HttpHeaders.DPoP];
+            if (dpopHeader.Count > 1)
+            {
+                Context.Items["DPoP-Error"] = OidcConstants.TokenErrors.InvalidDPoPProof;
+                Context.Items["DPoP-ErrorDescription"] = "Too many DPoP headers provided.";
+                return AuthenticateResult.Fail("Too many DPoP headers provided.");
+            }
+
+            var proofToken = dpopHeader.FirstOrDefault();
             var validationContext = new DPoPProofValidationContext
             {
                 ProofToken = proofToken,

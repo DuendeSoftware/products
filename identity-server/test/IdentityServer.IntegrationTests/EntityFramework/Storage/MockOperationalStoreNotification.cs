@@ -11,9 +11,11 @@ public class MockOperationalStoreNotification : IOperationalStoreNotification
 {
     public readonly List<IEnumerable<PersistedGrant>> PersistedGrantNotifications = new();
     public readonly List<IEnumerable<DeviceFlowCodes>> DeviceFlowCodeNotifications = new();
+    public readonly List<IEnumerable<SamlLogoutSession>> SamlLogoutSessionNotifications = new();
 
     public Action<IEnumerable<PersistedGrant>> OnPersistedGrantsRemoved = _ => { };
     public Action<IEnumerable<DeviceFlowCodes>> OnDeviceFlowCodesRemoved = _ => { };
+    public Action<IEnumerable<SamlLogoutSession>> OnSamlLogoutSessionsRemoved = _ => { };
 
     public Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, Ct _)
     {
@@ -29,4 +31,10 @@ public class MockOperationalStoreNotification : IOperationalStoreNotification
         return Task.CompletedTask;
     }
 
+    public Task SamlLogoutSessionsRemovedAsync(IEnumerable<SamlLogoutSession> samlLogoutSessions, Ct _)
+    {
+        OnSamlLogoutSessionsRemoved(samlLogoutSessions);
+        SamlLogoutSessionNotifications.Add(samlLogoutSessions);
+        return Task.CompletedTask;
+    }
 }

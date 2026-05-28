@@ -44,7 +44,10 @@ public static class Telemetry
             public const string PushedAuthorizationRequest = "tokenservice.pushed_authorization_request";
             public const string ResourceOwnerAuthentication = "tokenservice.resourceowner_authentication";
             public const string Revocation = "tokenservice.revocation";
+            public const string SamlServiceProviderConfigValidation = "tokenservice.saml_serviceprovider.config_validation";
             public const string TokenIssued = "tokenservice.token_issued";
+            public const string SamlSso = "tokenservice.saml.sso";
+            public const string SamlSlo = "tokenservice.saml.slo";
         }
 
         /// <summary>
@@ -71,6 +74,8 @@ public static class Telemetry
             public const string RefreshTokenIssued = "refresh_token_issued";
             public const string ProofType = "proof_type";
             public const string IdTokenIssued = "id_token_issued";
+            public const string SpEntityId = "sp_entity_id";
+            public const string Binding = "binding";
         }
 
         /// <summary>
@@ -328,6 +333,33 @@ public static class Telemetry
         }
 
         /// <summary>
+        /// SAML service provider configuration validation counter
+        /// </summary>
+        public static readonly Counter<long> SamlServiceProviderValidationCounter =
+            Meter.CreateCounter<long>(Counters.SamlServiceProviderConfigValidation);
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlServiceProviderValidationCounter"/>
+        /// </summary>
+        /// <param name="entityId">Entity ID of the service provider</param>
+        public static void SamlServiceProviderValidation(string entityId)
+        {
+            Success();
+            SamlServiceProviderValidationCounter.Add(1, tag: new(Tags.SpEntityId, entityId));
+        }
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlServiceProviderValidationCounter"/> on errors
+        /// </summary>
+        /// <param name="entityId">Entity ID of the service provider</param>
+        /// <param name="error">Error message</param>
+        public static void SamlServiceProviderValidationFailure(string entityId, string error)
+        {
+            Failure(error);
+            SamlServiceProviderValidationCounter.Add(1, new(Tags.SpEntityId, entityId), new(Tags.Error, error));
+        }
+
+        /// <summary>
         /// Introspection success counter
         /// </summary>
         public static readonly Counter<long> IntrospectionCounter =
@@ -501,6 +533,61 @@ public static class Telemetry
                 new(Tags.GrantType, grantType),
                 new(Tags.AuthorizeRequestType, requestType),
                 new(Tags.Error, error));
+        }
+
+        /// <summary>
+        /// SAML SSO counter.
+        /// </summary>
+        public static readonly Counter<long> SamlSsoCounter =
+            Meter.CreateCounter<long>(Counters.SamlSso);
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlSsoCounter"/>
+        /// </summary>
+        /// <param name="spEntityId">SP entity ID</param>
+        /// <param name="binding">Binding used</param>
+        public static void SamlSso(string spEntityId, string binding)
+        {
+            Success();
+            SamlSsoCounter.Add(1, new(Tags.SpEntityId, spEntityId), new(Tags.Binding, binding));
+        }
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlSsoCounter"/> on errors
+        /// </summary>
+        /// <param name="spEntityId">SP entity ID</param>
+        /// <param name="error">Error</param>
+        public static void SamlSsoFailure(string spEntityId, string error)
+        {
+            Failure(error);
+            SamlSsoCounter.Add(1, new(Tags.SpEntityId, spEntityId), new(Tags.Error, error));
+        }
+
+        /// <summary>
+        /// SAML SLO counter.
+        /// </summary>
+        public static readonly Counter<long> SamlSloCounter =
+            Meter.CreateCounter<long>(Counters.SamlSlo);
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlSloCounter"/>
+        /// </summary>
+        /// <param name="spEntityId">SP entity ID</param>
+        public static void SamlSlo(string spEntityId)
+        {
+            Success();
+            SamlSloCounter.Add(1, tag: new(Tags.SpEntityId, spEntityId));
+        }
+
+        /// <summary>
+        /// Helper method to increase <see cref="SamlSloCounter"/> on errors
+        /// </summary>
+        /// <param name="spEntityId">SP entity ID</param>
+        /// <param name="error">Error</param>
+        public static void SamlSloFailure(string spEntityId, string error)
+        {
+            Failure(error);
+            SamlSloCounter.Add(1, new(Tags.SpEntityId, spEntityId), new(Tags.Error, error));
         }
     }
 }

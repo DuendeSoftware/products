@@ -1,0 +1,40 @@
+<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+					ID="x123" Version="2.0" IssueInstant="2023-11-24T22:44:14Z"
+					Destination="https://idp.example.com/Sso"
+					Consent="urn:oasis:names:tc:SAML:2.0:consent:obtained"
+					AssertionConsumerServiceURL = "https://sp.example.com/Acs"
+					AssertionConsumerServiceIndex = "42"
+					ForceAuthn="true" IsPassive="true"
+					ProtocolBinding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+					AttributeConsumingServiceIndex="17"
+					ProviderName="test">
+	<saml:Issuer>https://sp.example.com/Metadata</saml:Issuer>
+	<samlp:Extensions></samlp:Extensions>
+	<saml:Subject>
+		<saml:NameID>abc12345</saml:NameID>
+	</saml:Subject>
+	<samlp:NameIDPolicy
+		   Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted"
+           AllowCreate="true"
+           SPNameQualifier= "urn:oasis:names:tc:SAML:1.1:nameid-format:persistent" />
+	<saml:Conditions NotBefore="2023-11-24T22:44:14Z" />
+	<samlp:RequestedAuthnContext Comparison="better">
+		<saml:AuthnContextClassRef>urn:ContextClassRef</saml:AuthnContextClassRef>
+		<saml:AuthnContextClassRef>urn:AnotherContextClassRef</saml:AuthnContextClassRef>
+	</samlp:RequestedAuthnContext>
+	<samlp:Scoping ProxyCount="1">
+		<samlp:IDPList>
+			<samlp:IDPEntry
+				ProviderID="https://stubidp.sustainsys.com/Metadata"
+				Name="Sustainsys Stub Idp"
+				Loc="https://stubidp.sustainsys.com"/>
+			<samlp:IDPEntry
+				ProviderID="https://idp.example.com/Metadata"
+				Name="Example Stub Idp"
+				Loc="https://idp.example.com/SsoEndpoint"/>
+			<samlp:GetComplete>https://example.com/GetComplete</samlp:GetComplete>
+		</samlp:IDPList>
+		<samlp:RequesterID>https://example.com/RequesterID?query=123</samlp:RequesterID>
+		<samlp:RequesterID>https://example.com/RequesterID?query=123</samlp:RequesterID>
+	</samlp:Scoping>
+</samlp:AuthnRequest>

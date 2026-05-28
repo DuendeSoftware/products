@@ -4,6 +4,7 @@ using IdentityServerHost.Pages;
 using IdentityServerHost.Pages.Admin.ApiScopes;
 using IdentityServerHost.Pages.Admin.Clients;
 using IdentityServerHost.Pages.Admin.IdentityScopes;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +18,7 @@ internal static class HostingExtensions
     public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
     {
         // Write most logs to the console but diagnostic data to a file.
-        // See https://docs.duendesoftware.com/identityserver/diagnostics/data
+        // See https://duende.link/diagnostics
         _ = builder.Services.AddSerilog(lc =>
         {
             _ = lc.WriteTo.Logger(consoleLogger =>
@@ -121,7 +122,12 @@ internal static class HostingExtensions
             _ = builder.Services.AddTransient<ApiScopeRepository>();
         }
 
-        // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
+        // add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // see more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+                   .SetApplicationName("IdentityServer");
+
+        // if you want to use server-side sessions: https://duende.link/p/session-management
         // then enable it
         //isBuilder.AddServerSideSessions();
         //

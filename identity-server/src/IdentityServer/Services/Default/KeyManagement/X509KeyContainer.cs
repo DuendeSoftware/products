@@ -89,28 +89,24 @@ public class X509KeyContainer : KeyContainer
     {
         if (_cert == null)
         {
-
-#pragma warning disable SYSLIB0057 // Type or member is obsolete
-            // TODO - Use X509CertificateLoader in a future release (when we drop NET8 support)
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
                 {
-                    _cert = new X509Certificate2(Convert.FromBase64String(CertificateRawData));
+                    _cert = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(CertificateRawData), null);
                 }
                 // handling this as it typically means the user profile is not loaded, and this is about the best way to detect this.
                 // when the user profile is not loaded, using X509KeyStorageFlags.MachineKeySet is the only way for this to work on windows.
                 // https://stackoverflow.com/questions/52750160/what-is-the-rationale-for-all-the-different-x509keystorageflags/52840537#52840537
                 catch (CryptographicException ex) when (ex.HResult == unchecked((int)0x80070002)) // File not found
                 {
-                    _cert = new X509Certificate2(Convert.FromBase64String(CertificateRawData), (string)null, X509KeyStorageFlags.MachineKeySet);
+                    _cert = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(CertificateRawData), null, X509KeyStorageFlags.MachineKeySet);
                 }
             }
             else
             {
-                _cert = new X509Certificate2(Convert.FromBase64String(CertificateRawData));
+                _cert = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(CertificateRawData), null);
             }
-#pragma warning restore SYSLIB0057 // Type or member is obsolete
 
         }
 

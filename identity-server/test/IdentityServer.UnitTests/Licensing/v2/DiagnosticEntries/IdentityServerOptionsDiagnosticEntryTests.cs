@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 using Microsoft.Extensions.Options;
@@ -59,6 +58,8 @@ public class IdentityServerOptionsDiagnosticEntryTests
         identityServerOptions.GetProperty("EmitStateHash").GetBoolean().ShouldBeTrue();
         identityServerOptions.GetProperty("StrictJarValidation").GetBoolean().ShouldBeTrue();
         identityServerOptions.GetProperty("ValidateTenantOnAuthorization").GetBoolean().ShouldBeTrue();
+        identityServerOptions.GetProperty("SupportedClientAssertionSigningAlgorithms").EnumerateArray().Select(e => e.GetString()).ShouldBe(["RS256", "ES256"]);
+        identityServerOptions.GetProperty("SupportedRequestObjectSigningAlgorithms").EnumerateArray().Select(e => e.GetString()).ShouldBe(["SHA256", "SHA512"]);
         identityServerOptions.TryGetProperty("Endpoints", out _).ShouldBeTrue();
         identityServerOptions.TryGetProperty("Discovery", out _).ShouldBeTrue();
         identityServerOptions.TryGetProperty("Authentication", out _).ShouldBeTrue();
@@ -79,10 +80,5 @@ public class IdentityServerOptionsDiagnosticEntryTests
         identityServerOptions.TryGetProperty("Diagnostics", out _).ShouldBeTrue();
 
         identityServerOptions.GetProperty("JwtValidationClockSkew").GetString().ShouldBe(TimeSpan.FromMinutes(1).ToString());
-        var supportedClientAssertionSigningAlgorithms = identityServerOptions.TryGetStringArray("SupportedClientAssertionSigningAlgorithms");
-        supportedClientAssertionSigningAlgorithms.ShouldBe(["RS256", "ES256"]);
-        var supportedRequestObjectSigningAlgorithms = identityServerOptions.TryGetStringArray("SupportedRequestObjectSigningAlgorithms");
-        supportedRequestObjectSigningAlgorithms.ShouldBe(["SHA256", "SHA512"]);
-        identityServerOptions.TryGetProperty("Preview", out _).ShouldBeTrue();
     }
 }

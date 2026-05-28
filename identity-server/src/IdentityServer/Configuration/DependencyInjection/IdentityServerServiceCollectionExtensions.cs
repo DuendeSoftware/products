@@ -17,17 +17,24 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class IdentityServerServiceCollectionExtensions
 {
     /// <summary>
-    /// Creates a builder.
+    /// Creates an <see cref="IIdentityServerBuilder"/> that wraps the given service collection,
+    /// providing a fluent API for further IdentityServer configuration.
     /// </summary>
-    /// <param name="services">The services.</param>
-    /// <returns></returns>
+    /// <param name="services">The ASP.NET Core service collection to wrap.</param>
+    /// <returns>An <see cref="IIdentityServerBuilder"/> for chaining additional IdentityServer configuration.</returns>
     public static IIdentityServerBuilder AddIdentityServerBuilder(this IServiceCollection services) => new IdentityServerBuilder(services);
 
     /// <summary>
-    /// Adds IdentityServer.
+    /// Registers IdentityServer and all of its required services into the ASP.NET Core dependency injection container.
+    /// This includes platform services, cookie authentication, core services, all protocol endpoints,
+    /// pluggable services (token creation, consent, events, etc.), automatic key management,
+    /// dynamic external identity providers, request validators, response generators, and default
+    /// secret parsers and validators. In-memory stores for persisted grants and pushed authorization
+    /// requests are registered as defaults; replace them with durable implementations for production.
     /// </summary>
-    /// <param name="services">The services.</param>
-    /// <returns></returns>
+    /// <param name="services">The ASP.NET Core service collection to register IdentityServer services into.</param>
+    /// <returns>An <see cref="IIdentityServerBuilder"/> for chaining additional IdentityServer configuration such as
+    /// signing credentials, client/resource stores, and custom services.</returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services)
     {
         var builder = services.AddIdentityServerBuilder();
@@ -54,11 +61,14 @@ public static class IdentityServerServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds IdentityServer.
+    /// Registers IdentityServer and all of its required services into the ASP.NET Core dependency injection container,
+    /// applying the provided configuration delegate to <see cref="IdentityServerOptions"/> before registration.
     /// </summary>
-    /// <param name="services">The services.</param>
-    /// <param name="setupAction">The setup action.</param>
-    /// <returns></returns>
+    /// <param name="services">The ASP.NET Core service collection to register IdentityServer services into.</param>
+    /// <param name="setupAction">A delegate used to configure <see cref="IdentityServerOptions"/>, such as setting
+    /// the issuer URI, enabling CORS, customizing endpoint paths, or adjusting token lifetimes.</param>
+    /// <returns>An <see cref="IIdentityServerBuilder"/> for chaining additional IdentityServer configuration such as
+    /// signing credentials, client/resource stores, and custom services.</returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services, Action<IdentityServerOptions> setupAction)
     {
         services.Configure(setupAction);
@@ -66,11 +76,14 @@ public static class IdentityServerServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds the IdentityServer.
+    /// Registers IdentityServer and all of its required services into the ASP.NET Core dependency injection container,
+    /// binding <see cref="IdentityServerOptions"/> from the provided <see cref="IConfiguration"/> section.
     /// </summary>
-    /// <param name="services">The services.</param>
-    /// <param name="configuration">The configuration.</param>
-    /// <returns></returns>
+    /// <param name="services">The ASP.NET Core service collection to register IdentityServer services into.</param>
+    /// <param name="configuration">An <see cref="IConfiguration"/> section (e.g. from <c>appsettings.json</c>)
+    /// whose values are bound to <see cref="IdentityServerOptions"/>.</param>
+    /// <returns>An <see cref="IIdentityServerBuilder"/> for chaining additional IdentityServer configuration such as
+    /// signing credentials, client/resource stores, and custom services.</returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<IdentityServerOptions>(configuration);
@@ -79,9 +92,11 @@ public static class IdentityServerServiceCollectionExtensions
 
     /// <summary>
     /// Configures the OpenIdConnect handlers to persist the state parameter into the server-side IDistributedCache.
+    /// This prevents the state cookie from growing too large when using external identity providers.
     /// </summary>
-    /// <param name="services">The services.</param>
-    /// <param name="schemes">The schemes to configure. If none provided, then all OpenIdConnect schemes will use the cache.</param>
+    /// <param name="services">The ASP.NET Core service collection to configure.</param>
+    /// <param name="schemes">The OpenIdConnect authentication scheme names to configure. If none are provided,
+    /// all registered OpenIdConnect schemes will use the distributed cache for state storage.</param>
     public static IServiceCollection AddOidcStateDataFormatterCache(this IServiceCollection services, params string[] schemes)
     {
         services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>>(

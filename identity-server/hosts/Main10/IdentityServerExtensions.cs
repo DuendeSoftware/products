@@ -9,6 +9,9 @@ using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Hosts.Shared.Configuration;
 using Duende.IdentityServer.Hosts.Shared.Customization;
 using Microsoft.AspNetCore.Authentication.Certificate;
+using Microsoft.AspNetCore.Authentication.WsFederation;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
@@ -66,7 +69,7 @@ internal static class IdentityServerExtensions
             .AddCustomTokenRequestValidator<ParameterizedScopeTokenRequestValidator>()
             .AddScopeParser<ParameterizedScopeParser>()
             .AddMutualTlsSecretValidators()
-            .AddInMemoryOidcProviders(
+            .AddInMemoryIdentityProviders(
             [
                 new Duende.IdentityServer.Models.OidcProvider
                 {
@@ -76,11 +79,21 @@ internal static class IdentityServerExtensions
                     ClientId = "login",
                     ResponseType = "id_token",
                     Scope = "openid profile"
+                },
+                new WsFedProvider
+                {
+                    Scheme = "dynamicprovider-entra-wsfed",
+                    DisplayName = "Entra ID (via WS-Fed Dynamic Provider)",
+                    MetadataAddress = "https://login.microsoftonline.com/{tenant-id}/federationmetadata/2007-06/federationmetadata.xml",
+                    Wtrealm = "api://{client-id}"
                 }
             ])
             .AddLicenseSummary()
             .AddSaml()
-            .AddInMemorySamlServiceProviders(SamlServiceProviders.Get());
+            .AddInMemorySamlServiceProviders(SamlServiceProviders.Get())
+            .AddDynamicProvider<WsFederationHandler, WsFederationOptions, WsFedProvider, WsFedConfigureOptions>("wsfed");
+
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<WsFederationOptions>, WsFederationPostConfigureOptions>());
 
         builder.Services.AddIdentityServerConfiguration(opt => { })
             .AddInMemoryClientConfigurationStore();

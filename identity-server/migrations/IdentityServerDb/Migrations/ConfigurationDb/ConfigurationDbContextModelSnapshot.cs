@@ -17,7 +17,7 @@ namespace IdentityServerDb.Migrations.ConfigurationDb
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -875,6 +875,256 @@ namespace IdentityServerDb.Migrations.ConfigurationDb
                     b.ToTable("IdentityResourceProperties", (string)null);
                 });
 
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlAllowedScope", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SamlServiceProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamlServiceProviderId", "Scope")
+                        .IsUnique();
+
+                    b.ToTable("SamlAllowedScopes", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlAssertionConsumerService", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Binding")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Index")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<int>("SamlServiceProviderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamlServiceProviderId", "Location")
+                        .IsUnique();
+
+                    b.ToTable("SamlAssertionConsumerServices", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlAuthnContextMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("OidcValue")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("SamlAuthnContextClassRef")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("SamlServiceProviderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamlServiceProviderId", "OidcValue")
+                        .IsUnique();
+
+                    b.ToTable("SamlAuthnContextMappings", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlCertificate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("SamlServiceProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Use")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamlServiceProviderId");
+
+                    b.ToTable("SamlCertificates", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlClaimMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("SamlAttributeName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("SamlServiceProviderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamlServiceProviderId", "ClaimType")
+                        .IsUnique();
+
+                    b.ToTable("SamlClaimMappings", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlRequestedClaimType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("SamlServiceProviderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamlServiceProviderId", "ClaimType")
+                        .IsUnique();
+
+                    b.ToTable("SamlRequestedClaimTypes", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowIdpInitiated")
+                        .HasColumnType("bit");
+
+                    b.PrimitiveCollection<string>("AllowedSignatureAlgorithms")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("AssertionLifetimeSeconds")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("ClockSkewSeconds")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DefaultNameIdFormat")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("EmailNameIdClaimType")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("LastAccessed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("NonEditable")
+                        .HasColumnType("bit");
+
+                    b.Property<double?>("RequestMaxAgeSeconds")
+                        .HasColumnType("float");
+
+                    b.Property<bool?>("RequireSignedAuthnRequests")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("RequireSignedLogoutResponses")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("SigningBehavior")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SingleLogoutServiceBinding")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SingleLogoutServiceLocation")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<DateTime?>("Updated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId")
+                        .IsUnique();
+
+                    b.ToTable("SamlServiceProviders", (string)null);
+                });
+
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.ApiResourceClaim", b =>
                 {
                     b.HasOne("Duende.IdentityServer.EntityFramework.Entities.ApiResource", "ApiResource")
@@ -1062,6 +1312,72 @@ namespace IdentityServerDb.Migrations.ConfigurationDb
                     b.Navigation("IdentityResource");
                 });
 
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlAllowedScope", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", "SamlServiceProvider")
+                        .WithMany("AllowedScopes")
+                        .HasForeignKey("SamlServiceProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlServiceProvider");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlAssertionConsumerService", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", "SamlServiceProvider")
+                        .WithMany("AssertionConsumerServiceUrls")
+                        .HasForeignKey("SamlServiceProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlServiceProvider");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlAuthnContextMapping", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", "SamlServiceProvider")
+                        .WithMany("AuthnContextMappings")
+                        .HasForeignKey("SamlServiceProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlServiceProvider");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlCertificate", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", "SamlServiceProvider")
+                        .WithMany("Certificates")
+                        .HasForeignKey("SamlServiceProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlServiceProvider");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlClaimMapping", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", "SamlServiceProvider")
+                        .WithMany("ClaimMappings")
+                        .HasForeignKey("SamlServiceProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlServiceProvider");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlRequestedClaimType", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", "SamlServiceProvider")
+                        .WithMany("RequestedClaimTypes")
+                        .HasForeignKey("SamlServiceProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlServiceProvider");
+                });
+
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.ApiResource", b =>
                 {
                     b.Navigation("Properties");
@@ -1106,6 +1422,21 @@ namespace IdentityServerDb.Migrations.ConfigurationDb
                     b.Navigation("Properties");
 
                     b.Navigation("UserClaims");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlServiceProvider", b =>
+                {
+                    b.Navigation("AllowedScopes");
+
+                    b.Navigation("AssertionConsumerServiceUrls");
+
+                    b.Navigation("AuthnContextMappings");
+
+                    b.Navigation("Certificates");
+
+                    b.Navigation("ClaimMappings");
+
+                    b.Navigation("RequestedClaimTypes");
                 });
 #pragma warning restore 612, 618
         }

@@ -20,11 +20,14 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class IdentityServerBuilderExtensionsCrypto
 {
     /// <summary>
-    /// Sets the signing credential.
+    /// Registers the provided <see cref="SigningCredentials"/> as the active signing key used by IdentityServer
+    /// to sign tokens. The key must be asymmetric and use a supported signing algorithm (RS256, RS384, RS512,
+    /// PS256, PS384, PS512, ES256, ES384, or ES512). The key is also registered as a validation key and
+    /// will appear in the JWKS discovery document.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="credential">The credential.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the signing credential to.</param>
+    /// <param name="credential">The <see cref="SigningCredentials"/> containing the asymmetric key and algorithm to use for token signing.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, SigningCredentials credential)
     {
         if (!(credential.Key is AsymmetricSecurityKey
@@ -65,14 +68,16 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Sets the signing credential.
+    /// Registers an X.509 certificate as the active signing credential used by IdentityServer to sign tokens.
+    /// The certificate must have a private key. The signing algorithm name is appended to the key ID to allow
+    /// the same certificate to be used with multiple algorithms (e.g. RS256 and PS256).
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="certificate">The certificate.</param>
-    /// <param name="signingAlgorithm">The signing algorithm (defaults to RS256)</param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="InvalidOperationException">X509 certificate does not have a private key.</exception>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the signing credential to.</param>
+    /// <param name="certificate">The X.509 certificate with a private key to use for token signing.</param>
+    /// <param name="signingAlgorithm">The signing algorithm to use (defaults to RS256).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="certificate"/> is <see langword="null"/>.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the certificate does not have a private key.</exception>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, X509Certificate2 certificate, string signingAlgorithm = SecurityAlgorithms.RsaSha256)
     {
         ArgumentNullException.ThrowIfNull(certificate);
@@ -91,14 +96,16 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Sets the signing credential.
+    /// Loads an X.509 certificate from the Windows certificate store by name and registers it as the
+    /// active signing credential used by IdentityServer to sign tokens.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="name">The name.</param>
-    /// <param name="location">The location.</param>
-    /// <param name="nameType">Name parameter can be either a distinguished name or a thumbprint</param>
-    /// <param name="signingAlgorithm">The signing algorithm (defaults to RS256)</param>
-    /// <exception cref="InvalidOperationException">certificate: '{name}'</exception>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the signing credential to.</param>
+    /// <param name="name">The subject distinguished name or thumbprint of the certificate to locate in the store.</param>
+    /// <param name="location">The certificate store location to search (defaults to <see cref="StoreLocation.LocalMachine"/>).</param>
+    /// <param name="nameType">Specifies whether <paramref name="name"/> is a distinguished name or a thumbprint
+    /// (defaults to <see cref="NameType.SubjectDistinguishedName"/>).</param>
+    /// <param name="signingAlgorithm">The signing algorithm to use (defaults to RS256).</param>
+    /// <exception cref="InvalidOperationException">Thrown when the certificate cannot be found in the store.</exception>
     public static IIdentityServerBuilder AddSigningCredential(
         this IIdentityServerBuilder builder,
         string name,
@@ -116,12 +123,13 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Sets the signing credential.
+    /// Registers the provided <see cref="SecurityKey"/> with the specified algorithm as the active signing
+    /// credential used by IdentityServer to sign tokens.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="key">The key.</param>
-    /// <param name="signingAlgorithm">The signing algorithm</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the signing credential to.</param>
+    /// <param name="key">The asymmetric security key to use for token signing.</param>
+    /// <param name="signingAlgorithm">The signing algorithm identifier (e.g. <c>RS256</c>, <c>ES256</c>).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, SecurityKey key, string signingAlgorithm)
     {
         var credential = new SigningCredentials(key, signingAlgorithm);
@@ -129,12 +137,13 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Sets an RSA-based signing credential.
+    /// Registers an RSA key with the specified RSA signing algorithm as the active signing credential
+    /// used by IdentityServer to sign tokens.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="key">The RSA key.</param>
-    /// <param name="signingAlgorithm">The signing algorithm</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the signing credential to.</param>
+    /// <param name="key">The RSA security key to use for token signing.</param>
+    /// <param name="signingAlgorithm">The RSA-based signing algorithm to use (e.g. RS256, PS256).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, RsaSecurityKey key, IdentityServerConstants.RsaSigningAlgorithm signingAlgorithm)
     {
         var credential = new SigningCredentials(key, CryptoHelper.GetRsaSigningAlgorithmValue(signingAlgorithm));
@@ -142,12 +151,13 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Sets an ECDsa-based signing credential.
+    /// Registers an ECDsa key with the specified ECDsa signing algorithm as the active signing credential
+    /// used by IdentityServer to sign tokens.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="key">The ECDsa key.</param>
-    /// <param name="signingAlgorithm">The signing algorithm</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the signing credential to.</param>
+    /// <param name="key">The ECDsa security key to use for token signing.</param>
+    /// <param name="signingAlgorithm">The ECDsa-based signing algorithm to use (e.g. ES256, ES384, ES512).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, ECDsaSecurityKey key, IdentityServerConstants.ECDsaSigningAlgorithm signingAlgorithm)
     {
         var credential = new SigningCredentials(key, CryptoHelper.GetECDsaSigningAlgorithmValue(signingAlgorithm));
@@ -155,13 +165,18 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Sets the temporary signing credential.
+    /// Creates a temporary RSA signing key for use during development and testing. The generated key is
+    /// persisted to a local <c>.jwk</c> file by default so it survives application restarts during development.
+    /// <para>
+    /// <strong>Not recommended for production use.</strong> Use <see cref="AddSigningCredential(IIdentityServerBuilder, SigningCredentials)"/>
+    /// or automatic key management for production deployments.
+    /// </para>
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="persistKey">Specifies if the temporary key should be persisted to disk.</param>
-    /// <param name="filename">The filename.</param>
-    /// <param name="signingAlgorithm">The signing algorithm (defaults to RS256)</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the developer signing credential to.</param>
+    /// <param name="persistKey">Whether to persist the generated key to disk so it survives restarts. Defaults to <see langword="true"/>.</param>
+    /// <param name="filename">The file path where the key is persisted. Defaults to <c>tempkey.jwk</c> in the current directory.</param>
+    /// <param name="signingAlgorithm">The RSA signing algorithm to use (defaults to RS256).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddDeveloperSigningCredential(
         this IIdentityServerBuilder builder,
         bool persistKey = true,
@@ -196,11 +211,13 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Adds the validation keys.
+    /// Registers one or more additional keys for validating tokens. These keys are used by the internal
+    /// token validator and are published in the JWKS discovery document. Use this to support key rollover
+    /// by adding the previous signing key as a validation-only key while the new key is used for signing.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="keys">The keys.</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add validation keys to.</param>
+    /// <param name="keys">One or more <see cref="SecurityKeyInfo"/> instances describing the keys and their algorithms.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddValidationKey(this IIdentityServerBuilder builder, params SecurityKeyInfo[] keys)
     {
         builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(keys));
@@ -209,12 +226,13 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Adds an RSA-based validation key.
+    /// Registers an RSA key as an additional validation key. The key will be used by the internal token
+    /// validator and published in the JWKS discovery document. Useful for key rollover scenarios.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="key">The RSA key</param>
-    /// <param name="signingAlgorithm">The RSA-based signing algorithm</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the validation key to.</param>
+    /// <param name="key">The RSA security key to register for token validation.</param>
+    /// <param name="signingAlgorithm">The RSA-based signing algorithm associated with this key (defaults to RS256).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddValidationKey(
         this IIdentityServerBuilder builder,
         RsaSecurityKey key,
@@ -230,12 +248,13 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Adds an ECDSA-based validation key.
+    /// Registers an ECDSA key as an additional validation key. The key will be used by the internal token
+    /// validator and published in the JWKS discovery document. Useful for key rollover scenarios.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="key">The ECDSA key</param>
-    /// <param name="signingAlgorithm">The ECDSA-based signing algorithm</param>
-    /// <returns></returns>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the validation key to.</param>
+    /// <param name="key">The ECDSA security key to register for token validation.</param>
+    /// <param name="signingAlgorithm">The ECDSA-based signing algorithm associated with this key (defaults to ES256).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
     public static IIdentityServerBuilder AddValidationKey(
         this IIdentityServerBuilder builder,
         ECDsaSecurityKey key,
@@ -251,13 +270,14 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Adds the validation key.
+    /// Registers an X.509 certificate as an additional validation key. The key will be used by the internal
+    /// token validator and published in the JWKS discovery document. Useful for key rollover scenarios.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="certificate">The certificate.</param>
-    /// <param name="signingAlgorithm">The signing algorithm</param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the validation key to.</param>
+    /// <param name="certificate">The X.509 certificate whose public key is registered for token validation.</param>
+    /// <param name="signingAlgorithm">The signing algorithm associated with this certificate (defaults to RS256).</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="certificate"/> is <see langword="null"/>.</exception>
     public static IIdentityServerBuilder AddValidationKey(
         this IIdentityServerBuilder builder,
         X509Certificate2 certificate,
@@ -279,13 +299,16 @@ public static class IdentityServerBuilderExtensionsCrypto
     }
 
     /// <summary>
-    /// Adds the validation key from the certificate store.
+    /// Loads an X.509 certificate from the Windows certificate store by name and registers it as an
+    /// additional validation key. The key will be used by the internal token validator and published
+    /// in the JWKS discovery document. Useful for key rollover scenarios.
     /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="name">The name.</param>
-    /// <param name="location">The location.</param>
-    /// <param name="nameType">Name parameter can be either a distinguished name or a thumbprint</param>
-    /// <param name="signingAlgorithm">The signing algorithm</param>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the validation key to.</param>
+    /// <param name="name">The subject distinguished name or thumbprint of the certificate to locate in the store.</param>
+    /// <param name="location">The certificate store location to search (defaults to <see cref="StoreLocation.LocalMachine"/>).</param>
+    /// <param name="nameType">Specifies whether <paramref name="name"/> is a distinguished name or a thumbprint
+    /// (defaults to <see cref="NameType.SubjectDistinguishedName"/>).</param>
+    /// <param name="signingAlgorithm">The signing algorithm associated with this certificate (defaults to RS256).</param>
     public static IIdentityServerBuilder AddValidationKey(
         this IIdentityServerBuilder builder,
         string name,

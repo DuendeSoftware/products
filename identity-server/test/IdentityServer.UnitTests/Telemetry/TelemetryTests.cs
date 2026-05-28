@@ -8,6 +8,8 @@ namespace IdentityServer.UnitTests.Telemetry;
 
 public class TelemetryTests
 {
+    private const string OperationCounterName = "tokenservice.operation";
+
     [Fact]
     public void ServiceName_is_Duende_IdentityServer() => Duende.IdentityServer.Telemetry.ServiceName.ShouldBe("Duende.IdentityServer");
 
@@ -29,7 +31,7 @@ public class TelemetryTests
         Duende.IdentityServer.Telemetry.Metrics.Failure("oops");
 
         results.Count.ShouldBe(1);
-        results[0].Name.ShouldBe("tokenservice.operation");
+        results[0].Name.ShouldBe(OperationCounterName);
         results[0].Value.ShouldBe(1);
     }
 
@@ -59,7 +61,8 @@ public class TelemetryTests
 
         listener.InstrumentPublished = (instrument, meterListener) =>
         {
-            if (instrument.Meter.Name == Duende.IdentityServer.Telemetry.ServiceName)
+            if (instrument.Meter.Name == Duende.IdentityServer.Telemetry.ServiceName &&
+                instrument.Name == OperationCounterName)
             {
                 meterListener.EnableMeasurementEvents(instrument);
             }

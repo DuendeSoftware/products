@@ -73,7 +73,7 @@ public class DefaultClaimsService : IClaimsService
                 additionalClaimTypes)
             {
                 RequestedResources = resources,
-                ValidatedRequest = request
+                ProtocolRequest = request
             };
 
             await Profile.GetProfileDataAsync(context, ct);
@@ -186,7 +186,7 @@ public class DefaultClaimsService : IClaimsService
                 additionalClaimTypes.Distinct())
             {
                 RequestedResources = resourceResult,
-                ValidatedRequest = request
+                ProtocolRequest = request
             };
 
             await Profile.GetProfileDataAsync(context, ct);

@@ -7,23 +7,28 @@
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// Configures device flow
+/// Settings for the OAuth 2.0 Device Authorization Grant (device flow), which allows
+/// input-constrained devices to obtain tokens via a secondary device.
 /// </summary>
 public class DeviceFlowOptions
 {
     /// <summary>
-    /// Gets or sets the default type of the user code.
+    /// Gets or sets the default user code type used when generating device flow user codes, unless overridden
+    /// at the client level.
     /// </summary>
-    /// <value>
-    /// The default type of the user code.
-    /// </value>
+    /// <remarks>
+    /// Defaults to <see cref="IdentityServerConstants.UserCodeTypes.Numeric"/>, which produces
+    /// a 9-digit numeric code.
+    /// </remarks>
     public string DefaultUserCodeType { get; set; } = IdentityServerConstants.UserCodeTypes.Numeric;
 
     /// <summary>
-    /// Gets or sets the polling interval in seconds.
+    /// Gets or sets the minimum polling interval, in seconds, that clients must respect when polling the
+    /// token endpoint during a device flow.
     /// </summary>
-    /// <value>
-    /// The interval in seconds.
-    /// </value>
+    /// <remarks>
+    /// Defaults to 5 seconds. Clients that poll more frequently will receive a
+    /// <c>slow_down</c> error response.
+    /// </remarks>
     public int Interval { get; set; } = 5;
 }

@@ -8,10 +8,10 @@ namespace Duende.IdentityServer.Stores.Default;
 
 internal static class ServerSideSessionCookieEvents
 {
-    public static Task OnCheckSlidingExpiration(CookieSlidingExpirationContext context)
+    public static Task OnCheckSlidingExpiration(CookieSlidingExpirationContext context, TimeProvider timeProvider)
     {
         if (context.Properties.Items.ContainsKey(IdentityServerConstants.ForceCookieRenewalFlag) &&
-            (context.Properties.ExpiresUtc == null || DateTimeOffset.UtcNow < context.Properties.ExpiresUtc))
+            (context.Properties.ExpiresUtc == null || timeProvider.GetUtcNow() < context.Properties.ExpiresUtc))
         {
             context.ShouldRenew = true;
             context.Properties.Items.Remove(IdentityServerConstants.ForceCookieRenewalFlag);

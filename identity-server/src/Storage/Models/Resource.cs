@@ -17,32 +17,33 @@ public abstract class Resource
     private string DebuggerDisplay => Name ?? $"{{{typeof(Resource)}}}";
 
     /// <summary>
-    /// Indicates if this resource is enabled. Defaults to true.
+    /// Gets or sets a value indicating whether this resource is enabled and can be requested. Defaults to <c>true</c>.
     /// </summary>
     public bool Enabled { get; set; } = true;
 
     /// <summary>
-    /// The unique name of the resource.
+    /// Gets or sets the unique name of the resource. For API scopes, this is the value clients use in the scope parameter.
+    /// For API resources, this value is added to the audience of the outgoing access token.
     /// </summary>
     public string Name { get; set; } = default!;
 
     /// <summary>
-    /// Display name of the resource.
+    /// Gets or sets the display name of the resource. This value can be used on the consent screen.
     /// </summary>
     public string? DisplayName { get; set; }
 
     /// <summary>
-    /// Description of the resource.
+    /// Gets or sets the description of the resource. This value can be used on the consent screen.
     /// </summary>
     public string? Description { get; set; }
 
     /// <summary>
-    /// Specifies whether this scope is shown in the discovery document. Defaults to true.
+    /// Gets or sets a value indicating whether this scope is shown in the discovery document. Defaults to <c>true</c>.
     /// </summary>
     public bool ShowInDiscoveryDocument { get; set; } = true;
 
     /// <summary>
-    /// List of associated user claims that should be included when this resource is requested.
+    /// Gets or sets the collection of associated user claim types that should be included when this resource is requested.
     /// </summary>
     public ICollection<string> UserClaims { get; set; } = new HashSet<string>();
 

@@ -165,7 +165,7 @@ internal class LicenseValidator<T>
                 ValidIssuer = "https://duendesoftware.com",
                 ValidAudience = "IdentityServer",
                 IssuerSigningKey = key,
-#pragma warning disable CA5404 // This is validated elsewhere
+#pragma warning disable CA5404 // License key lifetime is validated separately by LicenseValidator.ValidateExpiration()
                 ValidateLifetime = false
 #pragma warning restore CA5404
             };

@@ -8,10 +8,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Duende.Extensions.Caching.Memory" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
     <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="Verify.XunitV3" />
@@ -30,7 +32,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+    <ProjectReference Include="..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
     <ProjectReference Include="..\..\src\Configuration\IdentityServer.Configuration.csproj" />
     <ProjectReference Include="..\..\src\Configuration.EntityFramework\IdentityServer.Configuration.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />

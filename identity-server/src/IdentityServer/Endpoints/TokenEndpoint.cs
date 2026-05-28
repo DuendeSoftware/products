@@ -92,6 +92,7 @@ internal class TokenEndpoint : IEndpointHandler
         if (clientResult.IsError)
         {
             var errorMsg = clientResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
+            _logger.LogWarning("Client validation failed for token endpoint: {error}", errorMsg);
             Telemetry.Metrics.TokenIssuedFailure(clientResult.Client?.ClientId, null, null, errorMsg);
             return Error(errorMsg);
         }

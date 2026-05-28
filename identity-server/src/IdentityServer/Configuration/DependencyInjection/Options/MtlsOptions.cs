@@ -7,40 +7,46 @@
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// Options for Mutual TLS features
+/// Settings for Mutual TLS (mTLS) support, which enables certificate-bound tokens and
+/// X.509 client certificate authentication.
 /// </summary>
 public class MutualTlsOptions
 {
     /// <summary>
-    /// Specifies if MTLS support should be enabled
+    /// Gets or sets a value indicating whether Mutual TLS support is enabled. When disabled, mTLS endpoints and certificate-bound token
+    /// features are not available.
     /// </summary>
+    /// <remarks>Defaults to <c>false</c>.</remarks>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies the name of the authentication handler for X.509 client certificates
+    /// Gets or sets the name of the ASP.NET Core authentication handler used to authenticate X.509 client
+    /// certificates.
     /// </summary>
+    /// <remarks>Defaults to <c>"Certificate"</c>.</remarks>
     public string ClientCertificateAuthenticationScheme { get; set; } = "Certificate";
 
     /// <summary>
-    /// Specifies a separate domain to run the MTLS endpoints on.
+    /// Gets or sets a subdomain or full domain name on which the mTLS protocol endpoints are hosted.
+    /// When not set, mTLS endpoints use path-based routing under the main IdentityServer domain.
     /// </summary>
-    /// <remarks>If the string does not contain any dots, it is treated as a 
-    /// subdomain. For example, if the non-mTLS endpoints are hosted at 
-    /// example.com, configuring this option with the value "mtls" means that 
-    /// mtls is required for requests to mtls.example.com.
-    /// 
-    /// If the string contains dots, it is treated as a complete domain.
-    /// mTLS will be required for requests whose host name matches the 
-    /// configured domain name completely, including the port number. 
-    /// This allows for separate domains for the mTLS and non-mTLS endpoints. 
-    /// For example, identity.example.com and mtls.example.com.
+    /// <remarks>
+    /// A value without dots (e.g., <c>"mtls"</c>) is treated as a subdomain of the main
+    /// IdentityServer host. A value containing dots (e.g., <c>"identityserver-mtls.io"</c>) is
+    /// treated as a fully qualified domain name. When a full domain name is used, the
+    /// <c>IssuerUri</c> must also be set to a fixed value.
     /// </remarks>
     public string? DomainName { get; set; }
 
     /// <summary>
-    /// Specifies whether a cnf claim gets emitted for access tokens if a client certificate was present.
-    /// Normally the cnf claims only gets emitted if the client used the client certificate for authentication,
-    /// setting this to true, will set the claim regardless of the authentication method. (defaults to false).
+    /// Gets or sets a value indicating whether a <c>cnf</c> (confirmation) claim in access tokens is emitted whenever a client certificate
+    /// is present on the request, regardless of whether the certificate was used for client
+    /// authentication.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>false</c>. When <c>false</c>, the <c>cnf</c> claim is only emitted when
+    /// the client authenticated using its certificate. Set to <c>true</c> to bind tokens to the
+    /// certificate even when another authentication method was used.
+    /// </remarks>
     public bool AlwaysEmitConfirmationClaim { get; set; }
 }

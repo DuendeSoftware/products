@@ -75,8 +75,24 @@ public class OperationalStoreOptions
     public TableConfiguration PushedAuthorizationRequests { get; set; } = new TableConfiguration("PushedAuthorizationRequests");
 
     /// <summary>
+    /// Gets or sets the SAML signin states table configuration.
+    /// </summary>
+    public TableConfiguration SamlSigninStates { get; set; } = new TableConfiguration("SamlSigninStates");
+
+    /// <summary>
+    /// Gets or sets the SAML logout sessions table configuration.
+    /// </summary>
+    public TableConfiguration SamlLogoutSessions { get; set; } = new TableConfiguration("SamlLogoutSessions");
+
+    /// <summary>
+    /// Gets or sets the SAML logout session request index table configuration.
+    /// </summary>
+    public TableConfiguration SamlLogoutSessionRequestIndices { get; set; } = new TableConfiguration("SamlLogoutSessionRequestIndices");
+
+    /// <summary>
     /// Gets or sets a value indicating whether stale entries will be automatically cleaned up from the database.
     /// This is implemented by periodically connecting to the database (according to the TokenCleanupInterval) from the hosting application.
+    /// Cleanup includes persisted grants, device codes, pushed authorization requests, SAML signin states, and SAML logout sessions.
     /// Defaults to false.
     /// </summary>
     /// <value>
@@ -120,6 +136,8 @@ public class OperationalStoreOptions
 
     /// <summary>
     /// Gets or sets the number of records to remove at a time. Defaults to 100.
+    /// This batch size is used when cleaning up persisted grants, device codes,
+    /// pushed authorization requests, SAML signin states, and SAML logout sessions.
     /// </summary>
     /// <value>
     /// The size of the token cleanup batch.

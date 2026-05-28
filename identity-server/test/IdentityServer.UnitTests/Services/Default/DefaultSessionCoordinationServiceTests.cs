@@ -24,7 +24,8 @@ public class DefaultSessionCoordinationServiceTests
             new InMemoryPersistedGrantStore(),
             new InMemoryClientStore([]),
             stubBackChannelLogoutClient,
-            new NullLogger<DefaultSessionCoordinationService>());
+            new NullLogger<DefaultSessionCoordinationService>(),
+            new FakeTimeProvider());
 
         await Service.ProcessExpirationAsync(new UserSession
         {

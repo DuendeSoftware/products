@@ -4,6 +4,7 @@
 
 using System.Security.Claims;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 
 namespace UnitTests.Common;
@@ -11,6 +12,7 @@ namespace UnitTests.Common;
 public class MockProfileService : IProfileService
 {
     public ICollection<Claim> ProfileClaims { get; set; } = new HashSet<Claim>();
+    public List<SamlAttribute> SamlAttributesToReturn { get; } = [];
     public bool IsActive { get; set; } = true;
 
     public bool GetProfileWasCalled => ProfileContext != null;
@@ -23,6 +25,7 @@ public class MockProfileService : IProfileService
     {
         ProfileContext = context;
         context.IssuedClaims = ProfileClaims.ToList();
+        context.SamlAttributes.AddRange(SamlAttributesToReturn);
         return Task.CompletedTask;
     }
 

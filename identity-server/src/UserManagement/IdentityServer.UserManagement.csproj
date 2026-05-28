@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Duende.IdentityServer.UserManagement</PackageId>
+    <TargetFramework>net10.0</TargetFramework>
+    <Description>Duende UserManagement Integration for Duende IdentityServer</Description>
+    <AssemblyName>Duende.IdentityServer.UserManagement</AssemblyName>
+    <RootNamespace>Duende.IdentityServer.UserManagement</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.UserManagement" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IdentityServer\IdentityServer.csproj" />
+  </ItemGroup>
+
+</Project>

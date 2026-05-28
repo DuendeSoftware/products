@@ -63,9 +63,12 @@ public static class ConfigurationServiceCollectionExtensions
         builder.Services.AddTransient(
             resolver => resolver.GetRequiredService<IOptionsMonitor<IdentityServerConfigurationOptions>>().CurrentValue);
 
+        builder.Services.TryAddSingleton(TimeProvider.System);
         builder.Services.TryAddTransient<IDynamicClientRegistrationValidator, DynamicClientRegistrationValidator>();
         builder.Services.TryAddTransient<IDynamicClientRegistrationRequestProcessor, DynamicClientRegistrationRequestProcessor>();
         builder.Services.TryAddTransient<IDynamicClientRegistrationResponseGenerator, DynamicClientRegistrationResponseGenerator>();
+        builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerConfigurationOptions>>(
+            sp => new PostConfigureLicenseKey(sp.GetService<IConfiguration>() ?? new ConfigurationBuilder().Build()));
 
         return builder;
     }

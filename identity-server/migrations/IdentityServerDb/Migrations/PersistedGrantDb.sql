@@ -130,3 +130,60 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+CREATE TABLE [SamlLogoutSessions] (
+    [Id] bigint NOT NULL IDENTITY,
+    [LogoutId] nvarchar(200) NOT NULL,
+    [SerializedSession] nvarchar(max) NOT NULL,
+    [ExpiresAtUtc] datetime2 NOT NULL,
+    [Version] bigint NOT NULL,
+    CONSTRAINT [PK_SamlLogoutSessions] PRIMARY KEY ([Id])
+);
+GO
+
+CREATE TABLE [SamlSigninStates] (
+    [Id] bigint NOT NULL IDENTITY,
+    [StateId] uniqueidentifier NOT NULL,
+    [SerializedState] nvarchar(max) NOT NULL,
+    [ExpiresAtUtc] datetime2 NOT NULL,
+    [ServiceProviderEntityId] nvarchar(200) NOT NULL,
+    CONSTRAINT [PK_SamlSigninStates] PRIMARY KEY ([Id])
+);
+GO
+
+CREATE TABLE [SamlLogoutSessionRequestIndices] (
+    [Id] bigint NOT NULL IDENTITY,
+    [RequestId] nvarchar(200) NOT NULL,
+    [SamlLogoutSessionId] bigint NOT NULL,
+    CONSTRAINT [PK_SamlLogoutSessionRequestIndices] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SamlLogoutSessionRequestIndices_SamlLogoutSessions_SamlLogoutSessionId] FOREIGN KEY ([SamlLogoutSessionId]) REFERENCES [SamlLogoutSessions] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlLogoutSessionRequestIndices_RequestId] ON [SamlLogoutSessionRequestIndices] ([RequestId]);
+GO
+
+CREATE INDEX [IX_SamlLogoutSessionRequestIndices_SamlLogoutSessionId] ON [SamlLogoutSessionRequestIndices] ([SamlLogoutSessionId]);
+GO
+
+CREATE INDEX [IX_SamlLogoutSessions_ExpiresAtUtc] ON [SamlLogoutSessions] ([ExpiresAtUtc]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlLogoutSessions_LogoutId] ON [SamlLogoutSessions] ([LogoutId]);
+GO
+
+CREATE INDEX [IX_SamlSigninStates_ExpiresAtUtc] ON [SamlSigninStates] ([ExpiresAtUtc]);
+GO
+
+CREATE UNIQUE INDEX [IX_SamlSigninStates_StateId] ON [SamlSigninStates] ([StateId]);
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260514190656_AddSamlOperationalTables', N'10.0.4');
+GO
+
+COMMIT;
+GO
+

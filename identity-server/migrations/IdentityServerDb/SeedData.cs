@@ -14,6 +14,7 @@ public class SeedData
     public static void EnsureSeedData(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
         using (var context = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>())
         {
@@ -23,11 +24,11 @@ public class SeedData
         using (var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>())
         {
             context.Database.Migrate();
-            EnsureSeedData(context);
+            EnsureSeedData(context, configuration);
         }
     }
 
-    private static void EnsureSeedData(ConfigurationDbContext context)
+    private static void EnsureSeedData(ConfigurationDbContext context, IConfiguration configuration)
     {
         Console.WriteLine("Seeding database...");
 
@@ -89,7 +90,7 @@ public class SeedData
 
         if (!context.IdentityProviders.Any())
         {
-            Console.WriteLine("OidcIdentityProviders being populated");
+            Console.WriteLine("IdentityProviders being populated");
             _ = context.IdentityProviders.Add(new OidcProvider
             {
                 Scheme = "demoidsrv",
@@ -98,11 +99,27 @@ public class SeedData
                 ClientId = "login",
             }.ToEntity());
 
+            // Seed a WS-Federation provider to demonstrate custom IdentityProvider types.
+            // The WsFedProvider derived type is defined in the host projects; here we seed
+            // the raw entity with the "wsfed" type and properties in the dictionary.
+            // Configure WsFed:MetadataAddress and WsFed:Wtrealm via user secrets.
+            // See identity-server/hosts/EntityFramework10/README.md for setup instructions.
+            var wsFedMetadata = configuration["WsFed:MetadataAddress"] ?? "https://login.microsoftonline.com/{tenant-id}/federationmetadata/2007-06/federationmetadata.xml";
+            var wsFedWtrealm = configuration["WsFed:Wtrealm"] ?? "api://{client-id}";
+            _ = context.IdentityProviders.Add(new Duende.IdentityServer.EntityFramework.Entities.IdentityProvider
+            {
+                Scheme = "dynamicprovider-entra-wsfed",
+                DisplayName = "Entra ID (via WS-Fed Dynamic Provider)",
+                Type = "wsfed",
+                Enabled = true,
+                Properties = $"{{\"MetadataAddress\":\"{wsFedMetadata}\",\"Wtrealm\":\"{wsFedWtrealm}\"}}"
+            });
+
             _ = context.SaveChanges();
         }
         else
         {
-            Console.WriteLine("OidcIdentityProviders already populated");
+            Console.WriteLine("IdentityProviders already populated");
         }
 
         Console.WriteLine("Done seeding database.");

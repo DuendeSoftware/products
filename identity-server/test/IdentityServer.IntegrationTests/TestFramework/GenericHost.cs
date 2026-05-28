@@ -42,6 +42,10 @@ public class GenericHost
         // not calling dispose on scope on purpose
         _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
 
+    public T Resolve<T>(object serviceKey) =>
+        // not calling dispose on scope on purpose
+        _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredKeyedService<T>(serviceKey);
+
     public string Url(string path = "")
     {
         if (!path.StartsWith('/'))

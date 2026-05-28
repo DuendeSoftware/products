@@ -9,30 +9,35 @@ using Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Stores;
 
 /// <summary>
-/// Interface to model storage of serialized keys.
+/// Persists and retrieves serialized cryptographic signing keys used by the automatic
+/// key management feature. IdentityServer uses this store to durably store keys so that
+/// they survive server restarts and can be shared across multiple server instances.
+/// Keys are stored as <see cref="SerializedKey"/> objects whose <c>Data</c> property
+/// contains the authoritative, optionally data-protected, serialized key material.
 /// </summary>
 public interface ISigningKeyStore
 {
     /// <summary>
-    /// Returns all the keys in storage.
+    /// Returns all signing keys currently held in the store.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>
+    /// A read-only collection of all <see cref="SerializedKey"/> objects in the store.
+    /// Returns an empty collection when no keys have been persisted.
+    /// </returns>
     Task<IReadOnlyCollection<SerializedKey>> LoadKeysAsync(Ct ct);
 
     /// <summary>
-    /// Persists new key in storage.
+    /// Persists a new signing key in the store.
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="key">The serialized key to store.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     Task StoreKeyAsync(SerializedKey key, Ct ct);
 
     /// <summary>
-    /// Deletes key from storage.
+    /// Removes the signing key with the specified identifier from the store.
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">The unique identifier of the key to delete.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
     Task DeleteKeyAsync(string id, Ct ct);
 }

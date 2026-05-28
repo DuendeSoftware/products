@@ -302,11 +302,6 @@ internal static class Constants
         public const string LogoutUriParameterValue = "wsignoutcleanup1.0";
     }
 
-    public static class AuthorizationParamsStore
-    {
-        public const string MessageStoreIdParameterName = "authzId";
-    }
-
     public static class CurveOids
     {
         public const string P256 = "1.2.840.10045.3.1.7";

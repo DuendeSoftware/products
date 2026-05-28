@@ -40,4 +40,7 @@ public static class SamlStatusCodes
 
     /// <summary>The identity provider cannot authenticate the presenter in a manner that satisfies the IsPassive constraint of the request.</summary>
     public const string NoPassive = "urn:oasis:names:tc:SAML:2.0:status:NoPassive";
+
+    /// <summary>Used with a top-level status code of Success to indicate that not all requested logouts were successful.</summary>
+    public const string PartialLogout = "urn:oasis:names:tc:SAML:2.0:status:PartialLogout";
 }

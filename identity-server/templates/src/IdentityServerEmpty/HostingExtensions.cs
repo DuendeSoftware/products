@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 using Serilog;
 using Serilog.Filters;
 
@@ -9,7 +10,7 @@ internal static class HostingExtensions
     public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
     {
         // Set up logging to write regular entries to console, and diagnostics data to a file.
-        // See https://docs.duendesoftware.com/identityserver/diagnostics/data
+        // See https://duende.link/diagnostics
         _ = builder.Services.AddSerilog(lc =>
         {
             _ = lc.WriteTo.Logger(consoleLogger =>
@@ -50,6 +51,11 @@ internal static class HostingExtensions
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(Config.Clients)
             .AddLicenseSummary();
+
+        // add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // see more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+                   .SetApplicationName("IdentityServer");
 
         return builder.Build();
     }

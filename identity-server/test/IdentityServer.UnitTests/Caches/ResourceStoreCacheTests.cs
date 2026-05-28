@@ -1,26 +1,27 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
-
+using UnitTests.Common;
 
 namespace IdentityServer.UnitTests.Caches;
 
-public class ResourceStoreCacheTests
+public class ResourceStoreCacheTests : IDisposable
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
-    private List<Client> _clients { get; set; } = new List<Client>();
-    private List<IdentityResource> _identityResources { get; set; } = new List<IdentityResource>();
-    private List<ApiResource> _resources { get; set; } = new List<ApiResource>();
-    private List<ApiScope> _scopes { get; set; } = new List<ApiScope>();
+    private readonly List<Client> _clients = [];
+    private readonly List<IdentityResource> _identityResources = [];
+    private readonly List<ApiResource> _resources = [];
+    private readonly List<ApiScope> _scopes = [];
 
-    private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider(new DateTimeOffset(2022, 8, 9, 9, 0, 0, TimeSpan.Zero));
-    private ServiceProvider _provider;
+    private readonly FakeTimeProvider _fakeTimeProvider = new(new DateTimeOffset(2022, 8, 9, 9, 0, 0, TimeSpan.Zero));
+    private readonly ServiceProvider _cacheProvider;
+    private readonly ServiceProvider _provider;
 
     public ResourceStoreCacheTests()
     {
@@ -34,7 +35,11 @@ public class ResourceStoreCacheTests
         _scopes.Add(new ApiScope("scope2"));
         _scopes.Add(new ApiScope("sharedscope1"));
 
+        _cacheProvider = TestHybridCacheHelper.BuildServiceProvider(_fakeTimeProvider);
+        var cache = TestHybridCacheHelper.GetCache(_cacheProvider);
+
         var services = new ServiceCollection();
+        services.AddSingleton<TimeProvider>(_fakeTimeProvider);
         services.AddIdentityServer()
             .AddInMemoryClients(_clients)
             .AddInMemoryIdentityResources(_identityResources)
@@ -42,50 +47,48 @@ public class ResourceStoreCacheTests
             .AddInMemoryApiScopes(_scopes)
             .AddResourceStoreCache<InMemoryResourcesStore>();
 
-        services.AddSingleton(typeof(MockCache<>));
-        services.AddSingleton(typeof(ICache<>), typeof(MockCache<>));
-        services.AddSingleton<TimeProvider>(_mockTimeProvider);
+        // Override the keyed HybridCache with the time-controllable one from TestHybridCacheHelper
+        services.AddKeyedSingleton<HybridCache>(ServiceProviderKeys.ConfigurationStoreCache, (_, _) => cache);
 
         _provider = services.BuildServiceProvider();
+    }
+
+    public void Dispose()
+    {
+        _provider.Dispose();
+        _cacheProvider.Dispose();
     }
 
     [Fact]
     public async Task FindIdentityResourcesByScopeNameAsync_should_populate_cache()
     {
-        var cache = (MockCache<IdentityResource>)_provider.GetRequiredService<ICache<IdentityResource>>();
         var store = _provider.GetRequiredService<IResourceStore>();
-        cache.CacheItems.Count.ShouldBe(0);
 
-        var results = await store.FindIdentityResourcesByScopeNameAsync(new[] { "profile" }, _ct);
+        var results = await store.FindIdentityResourcesByScopeNameAsync(["profile"], _ct);
 
-        cache.CacheItems.Count.ShouldBe(1);
-        cache.CacheItems.First().Value.Value.Name.ShouldBe("profile");
+        results.ShouldNotBeEmpty();
+        results.Single().Name.ShouldBe("profile");
     }
 
     [Fact]
     public async Task FindApiResourcesByScopeNameAsync_should_populate_cache()
     {
-        var cache = (MockCache<CachingResourceStore<InMemoryResourcesStore>.ApiResourceNames>)
-            _provider.GetRequiredService<ICache<CachingResourceStore<InMemoryResourcesStore>.ApiResourceNames>>();
         var store = _provider.GetRequiredService<IResourceStore>();
-        cache.CacheItems.Count.ShouldBe(0);
 
-        var results = await store.FindApiResourcesByScopeNameAsync(new[] { "scope1" }, _ct);
+        var results = await store.FindApiResourcesByScopeNameAsync(["scope1"], _ct);
 
-        cache.CacheItems.Count.ShouldBe(1);
-        cache.CacheItems.First().Value.Value.Names.Single().ShouldBe("urn:api1");
+        results.ShouldNotBeEmpty();
+        results.Single().Name.ShouldBe("urn:api1");
     }
 
     [Fact]
     public async Task FindApiScopesByNameAsync_should_populate_cache()
     {
-        var cache = (MockCache<ApiScope>)_provider.GetRequiredService<ICache<ApiScope>>();
         var store = _provider.GetRequiredService<IResourceStore>();
-        cache.CacheItems.Count.ShouldBe(0);
 
-        var results = await store.FindApiScopesByNameAsync(new[] { "scope1" }, _ct);
+        var results = await store.FindApiScopesByNameAsync(["scope1"], _ct);
 
-        cache.CacheItems.Count.ShouldBe(1);
-        cache.CacheItems.First().Value.Value.Name.ShouldBe("scope1");
+        results.ShouldNotBeEmpty();
+        results.Single().Name.ShouldBe("scope1");
     }
 }

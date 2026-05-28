@@ -204,9 +204,8 @@ public class AuthorizeEndpointBaseTests
             IAuthorizeInteractionResponseGenerator interactionGenerator,
             IAuthorizeResponseGenerator authorizeResponseGenerator,
             IUserSession userSession,
-            IConsentMessageStore consentResponseStore,
-            IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
-            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession, consentResponseStore, authorizationParametersMessageStore)
+            IConsentMessageStore consentResponseStore)
+            : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession, consentResponseStore)
         {
         }
 

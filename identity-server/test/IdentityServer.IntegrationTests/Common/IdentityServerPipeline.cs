@@ -598,13 +598,17 @@ public class IdentityServerPipeline
 
 public class MockMessageHandler : DelegatingHandler
 {
+    private int _invokeCount;
+
     public bool InvokeWasCalled { get; set; }
+    public int InvokeCount => Volatile.Read(ref _invokeCount);
     public Func<HttpRequestMessage, Task> OnInvoke { get; set; }
     public HttpResponseMessage Response { get; set; } = new HttpResponseMessage(HttpStatusCode.OK);
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct _)
     {
         InvokeWasCalled = true;
+        Interlocked.Increment(ref _invokeCount);
 
         if (OnInvoke != null)
         {

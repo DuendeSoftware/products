@@ -8,12 +8,12 @@ namespace Duende.IdentityServer.Models;
 /// <summary>
 /// Represents a SAML endpoint with location and binding.
 /// </summary>
-public class SamlEndpointType
+public record SamlEndpointType
 {
     /// <summary>
     /// Gets or sets the URL of the endpoint.
     /// </summary>
-    public Uri Location { get; set; } = default!;
+    public string Location { get; set; } = default!;
 
     /// <summary>
     /// Gets or sets the SAML binding used by the endpoint.

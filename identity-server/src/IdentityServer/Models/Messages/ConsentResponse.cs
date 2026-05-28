@@ -14,7 +14,7 @@ public class ConsentResponse
     /// <summary>
     /// Error, if any, for the consent response.
     /// </summary>
-    public AuthorizationError? Error { get; set; }
+    public InteractionError? Error { get; set; }
 
     /// <summary>
     /// Error description.
@@ -52,45 +52,4 @@ public class ConsentResponse
     /// The description of the device.
     /// </value>
     public string? Description { get; set; }
-}
-
-/// <summary>
-/// Enum to model interaction authorization errors.
-/// </summary>
-public enum AuthorizationError
-{
-    /// <summary>
-    /// Access denied
-    /// </summary>
-    AccessDenied,
-
-    /// <summary>
-    /// Interaction required
-    /// </summary>
-    InteractionRequired,
-
-    /// <summary>
-    /// Login required
-    /// </summary>
-    LoginRequired,
-
-    /// <summary>
-    /// Account selection required
-    /// </summary>
-    AccountSelectionRequired,
-
-    /// <summary>
-    /// Consent required
-    /// </summary>
-    ConsentRequired,
-
-    /// <summary>
-    /// Temporarily unavailable
-    /// </summary>
-    TemporarilyUnavailable,
-
-    /// <summary>
-    /// Unmet Authentication Requirements
-    /// </summary>
-    UnmetAuthenticationRequirements,
 }

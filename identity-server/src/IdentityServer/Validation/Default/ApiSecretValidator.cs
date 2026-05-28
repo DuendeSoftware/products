@@ -61,7 +61,7 @@ public class ApiSecretValidator : IApiSecretValidator
         {
             await RaiseFailureEventAsync("unknown", "No API id or secret found", ct);
 
-            _logger.LogError("No API secret found");
+            _logger.LogDebug("No API secret found");
             return fail;
         }
 
@@ -71,7 +71,7 @@ public class ApiSecretValidator : IApiSecretValidator
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Unknown API resource", ct);
 
-            _logger.LogError("No API resource with that name found. aborting");
+            _logger.LogDebug("No API resource with that name found. aborting");
             return fail;
         }
 

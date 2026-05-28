@@ -10,8 +10,6 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
-using Duende.IdentityServer.Stores;
-using Duende.IdentityServer.Stores.Default;
 using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Builder;
@@ -184,22 +182,10 @@ public class AuthorizeTests
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
     }
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task signin_request_should_have_authorization_params(Type storeType)
+    public async Task signin_request_should_have_authorization_params()
     {
-        if (storeType != null)
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-            _mockPipeline.Initialize();
-        }
-
         var url = _mockPipeline.CreateAuthorizeUrl(
             clientId: "client1",
             responseType: "id_token",
@@ -341,22 +327,10 @@ public class AuthorizeTests
         authorization.State.ShouldBe("123_state");
     }
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task login_response_and_consent_response_should_receive_authorization_response(Type storeType)
+    public async Task login_response_and_consent_response_should_receive_authorization_response()
     {
-        if (storeType != null)
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-            _mockPipeline.Initialize();
-        }
-
         _mockPipeline.Subject = new IdentityServerUser("bob").CreatePrincipal();
 
         _mockPipeline.ConsentResponse = new ConsentResponse()
@@ -1469,31 +1443,17 @@ public class AuthorizeTests
     }
 
 
-    [Theory]
-    [InlineData((Type)null)]
-    [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
-    [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
+    [Fact]
     [Trait("Category", Category)]
-    public async Task custom_request_should_have_authorization_params(Type storeType)
+    public async Task custom_request_should_have_authorization_params()
     {
         var mockAuthzInteractionService = new MockAuthzInteractionService();
         mockAuthzInteractionService.Response.RedirectUrl = "/custom";
 
-        if (storeType != null)
+        _mockPipeline.OnPostConfigureServices += services =>
         {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizeInteractionResponseGenerator), svc => mockAuthzInteractionService);
-                services.AddTransient(typeof(IAuthorizationParametersMessageStore), storeType);
-            };
-        }
-        else
-        {
-            _mockPipeline.OnPostConfigureServices += services =>
-            {
-                services.AddTransient(typeof(IAuthorizeInteractionResponseGenerator), svc => mockAuthzInteractionService);
-            };
-        }
+            services.AddTransient(typeof(IAuthorizeInteractionResponseGenerator), svc => mockAuthzInteractionService);
+        };
         _mockPipeline.Initialize();
 
 

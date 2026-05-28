@@ -8,10 +8,12 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Services.Default;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -321,8 +323,8 @@ public class DynamicProvidersTests
         var redirectUri = response.Headers.Location.ToString();
         redirectUri.ShouldStartWith("https://server/federation/idp1/signin");
 
-        var cache = _host.Resolve<ICache<IdentityProvider>>() as DefaultCache<IdentityProvider>;
-        await cache.RemoveAsync("test", _ct);
+        var cache = _host.Resolve<HybridCache>(ServiceProviderKeys.ConfigurationStoreCache);
+        await cache.RemoveAsync(CacheKey.For<IdentityProvider>("idp1"), _ct);
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
 

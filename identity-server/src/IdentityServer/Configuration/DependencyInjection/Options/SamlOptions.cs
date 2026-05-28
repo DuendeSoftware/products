@@ -4,9 +4,10 @@
 #nullable enable
 
 using System.Collections.ObjectModel;
-using System.Security.Claims;
 using Duende.IdentityServer.Models;
-using SamlConstants = Duende.IdentityServer.Internal.Saml.SamlConstants;
+using Duende.IdentityServer.Saml.Xml;
+using SamlConstants = Duende.IdentityServer.Saml.SamlConstants;
+using Samlp = Duende.IdentityServer.Saml.Samlp;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -16,34 +17,23 @@ namespace Duende.IdentityServer.Configuration;
 public class SamlOptions
 {
     /// <summary>
-    /// Gets or sets the metadata validity duration (optional).
-    /// If set, metadata will include a validUntil attribute.
-    /// Defaults to 7 days.
+    /// The Entity Id of this SAML 2.0 Identity Provider. Defaults to null,
+    /// which derives the entity ID from the OIDC issuer combined with <see cref="EntityIdPath"/>.
     /// </summary>
-    public TimeSpan? MetadataValidityDuration { get; set; } = TimeSpan.FromDays(7);
+    public string? EntityId { get; set; }
+
+    /// <summary>
+    /// Path component appended to the OIDC issuer to form the SAML entity ID.
+    /// Ignored if <see cref="EntityId"/> is set explicitly.
+    /// Defaults to "/Saml2".
+    /// </summary>
+    public string EntityIdPath { get; set; } = SamlConstants.Defaults.Saml2Path;
 
     /// <summary>
     /// Gets or sets whether the IdP requires signed AuthnRequests.
-    /// Defaults to false.
+    /// Defaults to true.
     /// </summary>
-    public bool WantAuthnRequestsSigned { get; set; }
-
-    /// <summary>
-    /// Default attribute name format to use when SP doesn't specify.
-    /// Common values:
-    /// - "urn:oasis:names:tc:SAML:2.0:attrname-format:uri" (for OID format)
-    /// - "urn:oasis:names:tc:SAML:2.0:attrname-format:basic" (for simple names)
-    /// Default: Uri (most common)
-    /// </summary>
-    public string DefaultAttributeNameFormat { get; set; }
-        = SamlConstants.AttributeNameFormats.Uri;
-
-    /// <summary>
-    /// Default claim type to use when resolving a persistent name identifier based on where
-    /// the host application has populated the value. Persistent name identifiers will not be
-    /// generated and are the responsibility of the host application to create.
-    /// </summary>
-    public string DefaultPersistentNameIdentifierClaimType { get; set; } = ClaimTypes.NameIdentifier;
+    public bool WantAuthnRequestsSigned { get; set; } = true;
 
     /// <summary>
     /// Default mappings from claim types to SAML attribute names.
@@ -53,7 +43,7 @@ public class SamlOptions
     /// Includes common OIDC to SAML attribute mappings by default.
     /// Service providers can override these mappings via SamlServiceProvider.ClaimMappings.
     ///
-    /// If a claim type is not in this dictionary, the claim will be excluded from the SAML assertion.
+    /// If a claim type is not in this dictionary, it will be passed through using the claim type as the attribute name.
     /// </summary>
     public ReadOnlyDictionary<string, string> DefaultClaimMappings { get; init; } =
         new(new Dictionary<string, string>
@@ -64,16 +54,37 @@ public class SamlOptions
         });
 
     /// <summary>
+    /// Default mappings from OIDC acr/amr claim values to SAML AuthnContextClassRef URIs.
+    /// Key: OIDC acr or amr value (e.g., "pwd", "mfa", "external")
+    /// Value: SAML AuthnContextClassRef URI (e.g., "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport")
+    ///
+    /// Used during AuthnStatement generation. The generator checks acr first, then amr claims
+    /// against this map. If no match is found, falls back to Unspecified.
+    /// Service providers can override via <see cref="SamlServiceProvider.AuthnContextMappings"/>.
+    /// </summary>
+    public ReadOnlyDictionary<string, string> DefaultAuthnContextMappings { get; init; } =
+        new(new Dictionary<string, string>
+        {
+            ["pwd"] = SamlConstants.AuthnContextClasses.PasswordProtectedTransport,
+            ["external"] = SamlConstants.AuthnContextClasses.Unspecified,
+        });
+
+    /// <summary>
     /// Gets or sets the supported NameID formats.
-    /// Defaults to EmailAddress, Persistent, Transient, and Unspecified.
+    /// Defaults to EmailAddress and Unspecified.
     /// </summary>
     public Collection<string> SupportedNameIdFormats { get; init; } =
     [
         SamlConstants.NameIdentifierFormats.EmailAddress,
-        SamlConstants.NameIdentifierFormats.Persistent,
-        SamlConstants.NameIdentifierFormats.Transient,
         SamlConstants.NameIdentifierFormats.Unspecified
     ];
+
+    /// <summary>
+    /// Gets or sets the claim type used to source the value for email NameID format.
+    /// Defaults to <c>"email"</c>. Per-SP override is available via
+    /// <c>SamlServiceProvider.EmailNameIdClaimType</c>.
+    /// </summary>
+    public string EmailNameIdClaimType { get; set; } = "email";
 
     /// <summary>
     /// Gets or sets the default clock skew tolerance for SAML message validation.
@@ -82,10 +93,40 @@ public class SamlOptions
     public TimeSpan DefaultClockSkew { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
+    /// Gets or sets whether LogoutResponse messages must be signed or delivered over a trusted
+    /// binding (TLS or higher). Defaults to <c>true</c> per SAML 2.0 Profiles §4.4.4.
+    /// Individual service providers can override this via
+    /// <see cref="SamlServiceProvider.RequireSignedLogoutResponses"/>.
+    /// </summary>
+    public bool RequireSignedLogoutResponses { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets the default maximum age for SAML authentication requests.
     /// Defaults to 5 minutes.
     /// </summary>
     public TimeSpan DefaultRequestMaxAge { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Gets or sets the default lifetime for SAML assertions. This controls how long
+    /// the generated assertion is valid (the window between NotBefore and NotOnOrAfter).
+    /// Defaults to 5 minutes.
+    /// </summary>
+    public TimeSpan DefaultAssertionLifetime { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Gets or sets the lifetime of SAML signin state entries. This controls how long
+    /// the signin state is retained while the user completes authentication.
+    /// Defaults to 15 minutes.
+    /// </summary>
+    public TimeSpan SigninStateLifetime { get; set; } = TimeSpan.FromMinutes(15);
+
+    /// <summary>
+    /// Gets or sets the lifetime of SAML logout session entries. This controls how long
+    /// the logout session tracking state is retained while front-channel logout iframes
+    /// complete and SP responses are collected.
+    /// Defaults to 5 minutes.
+    /// </summary>
+    public TimeSpan LogoutSessionLifetime { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// Gets or sets the default signing behavior for SAML messages.
@@ -101,61 +142,143 @@ public class SamlOptions
     public int MaxRelayStateLength { get; set; } = 80;
 
     /// <summary>
-    /// Gets or sets the name of the cookie used to store the SAML sign-in state identifier.
-    /// Defaults to "__IdsSvr_SamlSigninState".
+    /// Maximum size of an inbound SAML message, in characters. For typical SAML
+    /// content (ASCII XML, base64 payloads) this is approximately equal to bytes.
+    /// Default: 1,048,576.
     /// </summary>
-    public string SigninStateCookieName { get; set; } = "__IdsSvr_SamlSigninState";
+    public int MaxMessageSize { get; set; } = 1_048_576;
 
     /// <summary>
-    /// Gets or sets the user interaction options for SAML endpoints.
+    /// Gets or sets the endpoint options for SAML.
     /// </summary>
-    public SamlUserInteractionOptions UserInteraction { get; set; } = new();
+    public SamlEndpointOptions Endpoints { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the metadata generation options.
+    /// </summary>
+    public SamlMetadataOptions Metadata { get; } = new();
+
+    /// <summary>
+    /// Optional callback invoked when XML read errors occur while parsing an
+    /// <see cref="Samlp.AuthnRequest"/>. The callback can inspect and remove errors from
+    /// <see cref="ReadErrorInspectorContext{T}.Errors"/> to suppress exceptions. The callback
+    /// also has access to the partially-parsed <c>context.Data</c> and the raw XML via
+    /// <c>context.XmlSource</c>, allowing it to fix values (e.g., parse a quirky date format
+    /// and populate the corresponding property directly).
+    /// Consumers needing per-SP behavior can branch on <c>context.Data.Issuer</c>.
+    /// </summary>
+    /// <remarks>
+    /// <c>context.Data.Issuer</c> is unvalidated at callback time — it has not yet been
+    /// verified against the configured service provider store. Do not make security-sensitive
+    /// decisions based solely on the issuer value without additional verification.
+    /// </remarks>
+    public Action<ReadErrorInspectorContext<Samlp.AuthnRequest>>? AuthnRequestErrorInspector { get; set; }
+
+    /// <summary>
+    /// Optional callback invoked when XML read errors occur while parsing a
+    /// <see cref="Samlp.LogoutRequest"/>. The callback can inspect and remove errors from
+    /// <see cref="ReadErrorInspectorContext{T}.Errors"/> to suppress exceptions. The callback
+    /// also has access to the partially-parsed <c>context.Data</c> and the raw XML via
+    /// <c>context.XmlSource</c>, allowing it to fix values (e.g., parse a quirky date format
+    /// and populate the corresponding property directly).
+    /// Consumers needing per-SP behavior can branch on <c>context.Data.Issuer</c>.
+    /// </summary>
+    /// <remarks>
+    /// <c>context.Data.Issuer</c> is unvalidated at callback time — it has not yet been
+    /// verified against the configured service provider store. Do not make security-sensitive
+    /// decisions based solely on the issuer value without additional verification.
+    /// </remarks>
+    public Action<ReadErrorInspectorContext<Samlp.LogoutRequest>>? LogoutRequestErrorInspector { get; set; }
+
+    /// <summary>
+    /// Optional callback invoked when XML read errors occur while parsing a
+    /// <see cref="Samlp.LogoutResponse"/>. The callback can inspect and remove errors from
+    /// <see cref="ReadErrorInspectorContext{T}.Errors"/> to suppress exceptions. The callback
+    /// also has access to the partially-parsed <c>context.Data</c> and the raw XML via
+    /// <c>context.XmlSource</c>, allowing it to fix values (e.g., parse a quirky date format
+    /// and populate the corresponding property directly).
+    /// Consumers needing per-SP behavior can branch on <c>context.Data.Issuer</c>.
+    /// </summary>
+    /// <remarks>
+    /// <c>context.Data.Issuer</c> is unvalidated at callback time — it has not yet been
+    /// verified against the configured service provider store. Do not make security-sensitive
+    /// decisions based solely on the issuer value without additional verification.
+    /// </remarks>
+    public Action<ReadErrorInspectorContext<Samlp.LogoutResponse>>? LogoutResponseErrorInspector { get; set; }
 }
 
 /// <summary>
-/// Options for SAML user interaction endpoint paths.
+/// Options for SAML endpoint paths and bindings.
 /// </summary>
-public class SamlUserInteractionOptions
+public sealed class SamlEndpointOptions
 {
     /// <summary>
-    /// Gets or sets the base route for all SAML endpoints.
-    /// Default: "/saml".
+    /// Gets or sets the path for the SAML 2.0 Single Sign-On Service endpoint.
+    /// Default: "/Saml2/SSO".
     /// </summary>
-    public string Route { get; set; } = SamlConstants.Urls.SamlRoute;
+    public string SingleSignOnServicePath { get; set; } = SamlConstants.Defaults.SingleSignOnServicePath;
 
     /// <summary>
-    /// Gets or sets the path for the SAML metadata endpoint.
-    /// Default: "/metadata".
+    /// Bindings supported for the Single Sign-On Service endpoint.
+    /// Set to empty to disable the endpoint.
+    /// Defaults to HTTP-Redirect and HTTP-POST.
     /// </summary>
-    public string Metadata { get; set; } = SamlConstants.Urls.Metadata;
+    public ICollection<string> SingleSignOnServiceBindings { get; set; } =
+    [
+        SamlConstants.Bindings.HttpRedirect,
+        SamlConstants.Bindings.HttpPost
+    ];
 
     /// <summary>
-    /// Gets or sets the path for the SAML sign-in endpoint.
-    /// Default: "/signin".
+    /// Gets or sets the path for the SAML 2.0 Single Sign-On callback endpoint.
+    /// Default: "/Saml2/SSO/Callback".
     /// </summary>
-    public string SignInPath { get; set; } = SamlConstants.Urls.SignIn;
+    public string SingleSignOnCallbackPath { get; set; } = SamlConstants.Defaults.SingleSignOnCallbackPath;
 
     /// <summary>
-    /// Gets or sets the path for the SAML sign-in callback endpoint.
-    /// Default: "/signin_callback".
+    /// Bindings supported for SingleLogoutService. Set to empty to
+    /// disable endpoint.
     /// </summary>
-    public string SignInCallbackPath { get; set; } = SamlConstants.Urls.SigninCallback;
-
-    /// <summary>
-    /// Gets or sets the path for the IdP-initiated SSO endpoint.
-    /// Default: "/idp-initiated".
-    /// </summary>
-    public string IdpInitiatedPath { get; set; } = SamlConstants.Urls.IdpInitiated;
+    public ICollection<string> SingleLogoutServiceBindings { get; set; } =
+    [
+        SamlConstants.Bindings.HttpRedirect,
+        SamlConstants.Bindings.HttpPost
+    ];
 
     /// <summary>
     /// Gets or sets the path for the SAML single logout endpoint.
-    /// Default: "/logout".
+    /// Default: "/Saml2/SLO".
     /// </summary>
-    public string SingleLogoutPath { get; set; } = SamlConstants.Urls.SingleLogout;
+    public string SingleLogoutServicePath { get; set; } = SamlConstants.Defaults.SingleLogoutServicePath;
 
     /// <summary>
     /// Gets or sets the path for the SAML single logout callback endpoint.
-    /// Default: "/logout_callback".
+    /// Default: "/Saml2/SLO/Callback".
     /// </summary>
-    public string SingleLogoutCallbackPath { get; set; } = SamlConstants.Urls.SingleLogoutCallback;
+    public string SingleLogoutCallbackPath { get; set; } = SamlConstants.Defaults.SingleLogoutCallbackPath;
+
+    /// <summary>
+    /// Gets or sets the query string parameter name used to pass the SAML
+    /// sign-in state identifier through the return URL.
+    /// Default: "samlStateId".
+    /// </summary>
+    public string StateIdParameterName { get; set; } = "samlStateId";
+}
+
+/// <summary>
+/// Options for SAML metadata generation.
+/// </summary>
+public sealed class SamlMetadataOptions
+{
+    /// <summary>
+    /// Gets or sets the cache duration for generated metadata.
+    /// Defaults to 12 hours.
+    /// </summary>
+    public TimeSpan CacheDuration { get; set; } = TimeSpan.FromHours(12);
+
+    /// <summary>
+    /// Gets or sets the absolute expiry duration for generated metadata.
+    /// Defaults to 5 days.
+    /// </summary>
+    public TimeSpan ExpiryDuration { get; set; } = TimeSpan.FromDays(5);
 }

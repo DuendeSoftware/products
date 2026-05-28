@@ -11,6 +11,7 @@ internal static class IdentityServerConstants
     public static class ProtocolTypes
     {
         public const string OpenIdConnect = "oidc";
+        public const string Saml2p = "saml2p";
     }
 
     public static class SecretTypes

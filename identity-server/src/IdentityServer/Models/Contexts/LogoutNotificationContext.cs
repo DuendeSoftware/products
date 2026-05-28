@@ -41,7 +41,20 @@ public class LogoutNotificationContext
     public IReadOnlyCollection<SamlSpSessionData> SamlSessions { get; set; } = [];
 
     /// <summary>
+    /// The EntityId of the SAML Service Provider that initiated the logout request, if any.
+    /// This SP should be excluded from front-channel logout notifications because it will
+    /// receive a LogoutResponse instead.
+    /// </summary>
+    public string? SamlInitiatingServiceProviderEntityId { get; set; }
+
+    /// <summary>
     /// Indicates why the user's session ended, if known.
     /// </summary>
     public LogoutNotificationReason? LogoutReason { get; set; }
+
+    /// <summary>
+    /// The logout ID that correlates this context to the SAML logout session store.
+    /// Set only for SAML-initiated logouts; <see langword="null"/> for OIDC-initiated logouts.
+    /// </summary>
+    public string? SamlLogoutId { get; set; }
 }

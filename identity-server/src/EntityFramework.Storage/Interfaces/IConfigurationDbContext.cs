@@ -64,6 +64,14 @@ public interface IConfigurationDbContext : IDisposable
     DbSet<IdentityProvider> IdentityProviders { get; set; }
 
     /// <summary>
+    /// Gets or sets the SAML Service Providers.
+    /// </summary>
+    /// <value>
+    /// The SAML Service Providers.
+    /// </value>
+    DbSet<SamlServiceProvider> SamlServiceProviders { get; set; }
+
+    /// <summary>
     /// Saves the changes.
     /// </summary>
     /// <returns></returns>

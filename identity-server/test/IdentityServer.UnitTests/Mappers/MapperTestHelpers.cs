@@ -3,6 +3,8 @@
 
 
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace IdentityServer.UnitTests.Mappers;
 
@@ -125,6 +127,11 @@ public static class MapperTestHelpers
             return long.MaxValue;
         }
 
+        if (type == typeof(double))
+        {
+            return double.MaxValue;
+        }
+
         if (type == typeof(bool))
         {
             return true;
@@ -145,10 +152,30 @@ public static class MapperTestHelpers
             return TimeSpan.MaxValue;
         }
 
+        if (type == typeof(Uri))
+        {
+            return new Uri("https://non-default.example.com/");
+        }
+
+        if (type == typeof(X509Certificate2))
+        {
+            return CreateTestCertificate();
+        }
+
         if (type.IsEnum)
         {
             var values = Enum.GetValues(type);
             return values.GetValue(values.Length - 1);
+        }
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>))
+        {
+            var itemType = type.GetGenericArguments()[0];
+            var setType = typeof(HashSet<>).MakeGenericType(itemType);
+            var set = Activator.CreateInstance(setType);
+            var nonDefaultValue = GetNonDefaultValue(itemType);
+            setType.GetMethod("Add")?.Invoke(set, new[] { nonDefaultValue });
+            return set;
         }
 
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))
@@ -191,6 +218,17 @@ public static class MapperTestHelpers
         }
 
         return Activator.CreateInstance(type);
+    }
+
+    internal static X509Certificate2 CreateTestCertificate()
+    {
+        using var rsa = RSA.Create(2048);
+        var request = new CertificateRequest(
+            "CN=Test Certificate",
+            rsa,
+            HashAlgorithmName.SHA256,
+            RSASignaturePadding.Pkcs1);
+        return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
     }
 
 

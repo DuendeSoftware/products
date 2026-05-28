@@ -1,0 +1,2 @@
+<saml:AuthnRequest xmlns:saml="urn:oasis:names:tc:SAML:2.0:protocol"
+				   ID="x123" IssueInstant="2023-11-24T22:44:14Z" />

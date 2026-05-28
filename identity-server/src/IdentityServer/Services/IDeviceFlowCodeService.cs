@@ -26,7 +26,7 @@ public interface IDeviceFlowCodeService
     /// </summary>
     /// <param name="userCode">The user code.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>The <see cref="DeviceCode"/> if found; otherwise <c>null</c>.</returns>
     Task<DeviceCode?> FindByUserCodeAsync(string userCode, Ct ct);
 
     /// <summary>

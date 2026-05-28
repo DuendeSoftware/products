@@ -13,12 +13,18 @@ namespace Duende.IdentityServer.Models;
 /// <summary>
 /// Represents contextual information about a authorization request.
 /// </summary>
-public class AuthorizationRequest
+public class AuthorizationRequest : IAuthenticationContext
 {
     /// <summary>
     /// The client.
     /// </summary>
     public Client Client { get; set; } = default!;
+
+#pragma warning disable CA1033 // Explicit interface implementation on unsealed public type is intentional —
+    // preserves the existing Client-centric public API surface.
+    /// <inheritdoc />
+    IConnectedApplication IAuthenticationContext.Application => Client;
+#pragma warning restore CA1033
 
     /// <summary>
     /// The display mode passed from the authorization request.

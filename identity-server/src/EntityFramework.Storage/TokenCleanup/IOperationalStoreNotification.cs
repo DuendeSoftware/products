@@ -28,4 +28,20 @@ public interface IOperationalStoreNotification
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, Ct ct);
+
+    /// <summary>
+    /// Notification for SAML signin states being removed.
+    /// </summary>
+    /// <param name="samlSigninStates">The SAML signin states being removed.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns></returns>
+    Task SamlSigninStatesRemovedAsync(IEnumerable<SamlSigninState> samlSigninStates, Ct ct) => Task.CompletedTask;
+
+    /// <summary>
+    /// Notification for SAML logout sessions being removed.
+    /// </summary>
+    /// <param name="samlLogoutSessions">The SAML logout sessions being removed.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns></returns>
+    Task SamlLogoutSessionsRemovedAsync(IEnumerable<SamlLogoutSession> samlLogoutSessions, Ct ct) => Task.CompletedTask;
 }

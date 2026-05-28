@@ -66,7 +66,7 @@ public class IntrospectionResult : EndpointResult<IntrospectionResult>
     }
 }
 
-internal class IntrospectionHttpWriter(IIssuerNameService issuerNameService, ITokenCreationService tokenCreationService)
+internal class IntrospectionHttpWriter(IIssuerNameService issuerNameService, ITokenCreationService tokenCreationService, TimeProvider timeProvider)
     : IHttpResponseWriter<IntrospectionResult>
 {
     public async Task WriteHttpResponse(IntrospectionResult result, HttpContext context)
@@ -81,7 +81,7 @@ internal class IntrospectionHttpWriter(IIssuerNameService issuerNameService, ITo
                 Type = JwtClaimTypes.JwtTypes.IntrospectionJwtResponse,
                 Issuer = await issuerNameService.GetCurrentAsync(context.RequestAborted),
                 Audiences = [result.CallerName],
-                CreationTime = DateTime.UtcNow,
+                CreationTime = timeProvider.GetUtcNow().UtcDateTime,
                 Claims = [new Claim("token_introspection", ObjectSerializer.ToString(result.Entries), IdentityServerConstants.ClaimValueTypes.Json)]
             };
             var jwt = await tokenCreationService.CreateTokenAsync(token, context.RequestAborted);

@@ -16,9 +16,8 @@ public static class SamlServiceProviders
     public static IEnumerable<SamlServiceProvider> Get()
     {
         // Load the SP certificate once. When present, it enables AuthnRequest signature
-        // validation and assertion encryption. The same certificate serves both purposes.
+        // validation and assertion encryption.
         var spCert = LoadSpCertificate();
-        var spCerts = spCert != null ? new[] { spCert } : [];
 
         return
         [
@@ -28,22 +27,26 @@ public static class SamlServiceProviders
                 DisplayName = "MvcSaml Sample Client",
                 Enabled = true,
                 // ACS URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Acs
-                AssertionConsumerServiceUrls = [new Uri("https://localhost:44350/Saml2/Acs")],
-                // SLO URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Logout
-                SingleLogoutServiceUrl = new SamlEndpointType
+                AssertionConsumerServiceUrls = [new IndexedEndpoint
                 {
-                    Location = new Uri("https://localhost:44350/Saml2/Logout"),
+                    Location = "https://localhost:44350/Saml2/Acs",
+                    Binding = SamlBinding.HttpPost
+                }],
+                // SLO URL follows the Sustainsys.Saml2 convention: <base>/Saml2/Logout
+                SingleLogoutServiceUrls = [new SamlEndpointType
+                {
+                    Location = "https://localhost:44350/Saml2/Logout",
                     Binding = SamlBinding.HttpRedirect
-                },
+                }],
                 // Sign the assertion (not the response envelope) — the Sustainsys default expectation
                 SigningBehavior = SamlSigningBehavior.SignAssertion,
                 // When the SP certificate is present, require signed AuthnRequests, register the
                 // SP's public key for signature validation, and encrypt assertions with it.
                 // The same certificate serves both purposes — signing and encryption.
                 RequireSignedAuthnRequests = spCert != null,
-                SigningCertificates = spCerts,
-                EncryptAssertions = spCert != null,
-                EncryptionCertificates = spCerts,
+                Certificates = spCert != null
+                    ? [new ServiceProviderCertificate { Certificate = spCert, Use = KeyUse.Both }]
+                    : null,
             }
         ];
     }

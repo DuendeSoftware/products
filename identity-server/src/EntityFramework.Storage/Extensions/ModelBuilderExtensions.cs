@@ -237,6 +237,50 @@ public static class ModelBuilderExtensions
             entity.HasIndex(x => x.ReferenceValueHash).IsUnique();
             entity.HasIndex(x => x.ExpiresAtUtc);
         });
+
+        modelBuilder.Entity<SamlSigninState>(entity =>
+        {
+            entity.ToTable(storeOptions.SamlSigninStates);
+
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.StateId).IsRequired();
+            entity.Property(x => x.SerializedState).IsRequired();
+            entity.Property(x => x.ExpiresAtUtc).IsRequired();
+            entity.Property(x => x.ServiceProviderEntityId).HasMaxLength(200).IsRequired();
+
+            entity.HasIndex(x => x.StateId).IsUnique();
+            entity.HasIndex(x => x.ExpiresAtUtc);
+        });
+
+        modelBuilder.Entity<SamlLogoutSession>(entity =>
+        {
+            entity.ToTable(storeOptions.SamlLogoutSessions);
+
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.LogoutId).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.SerializedSession).IsRequired();
+            entity.Property(x => x.ExpiresAtUtc).IsRequired();
+            entity.Property(x => x.Version).IsConcurrencyToken();
+
+            entity.HasIndex(x => x.LogoutId).IsUnique();
+            entity.HasIndex(x => x.ExpiresAtUtc);
+        });
+
+        modelBuilder.Entity<SamlLogoutSessionRequestIndex>(entity =>
+        {
+            entity.ToTable(storeOptions.SamlLogoutSessionRequestIndices);
+
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.RequestId).HasMaxLength(200).IsRequired();
+
+            entity.HasIndex(x => x.RequestId).IsUnique();
+
+            entity.HasOne(x => x.SamlLogoutSession)
+                .WithMany(x => x.RequestIndices)
+                .HasForeignKey(x => x.SamlLogoutSessionId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     /// <summary>
@@ -389,6 +433,100 @@ public static class ModelBuilderExtensions
             entity.Property(x => x.DisplayName).HasMaxLength(200);
 
             entity.HasIndex(x => x.Scheme).IsUnique();
+        });
+    }
+
+    /// <summary>
+    /// Configures the SAML Service Provider context.
+    /// </summary>
+    /// <param name="modelBuilder">The model builder.</param>
+    /// <param name="storeOptions">The store options.</param>
+    public static void ConfigureSamlServiceProviderContext(this ModelBuilder modelBuilder, ConfigurationStoreOptions storeOptions)
+    {
+        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
+        {
+            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        }
+
+        modelBuilder.Entity<SamlServiceProvider>(sp =>
+        {
+            sp.ToTable(storeOptions.SamlServiceProvider);
+            sp.HasKey(x => x.Id);
+
+            sp.Property(x => x.EntityId).HasMaxLength(200).IsRequired();
+            sp.Property(x => x.DisplayName).HasMaxLength(200);
+            sp.Property(x => x.Description).HasMaxLength(1000);
+            sp.Property(x => x.DefaultNameIdFormat).HasMaxLength(2000);
+            sp.Property(x => x.EmailNameIdClaimType).HasMaxLength(200);
+
+            sp.HasIndex(x => x.EntityId).IsUnique();
+
+            sp.HasMany(x => x.AssertionConsumerServiceUrls).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.SingleLogoutServiceUrls).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.Certificates).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.ClaimMappings).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.AuthnContextMappings).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.AllowedScopes).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            sp.HasMany(x => x.RequestedClaimTypes).WithOne(x => x.SamlServiceProvider).HasForeignKey(x => x.SamlServiceProviderId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SamlAssertionConsumerService>(acs =>
+        {
+            acs.ToTable(storeOptions.SamlAssertionConsumerService);
+            acs.Property(x => x.Location).HasMaxLength(400).IsRequired();
+            acs.Property(x => x.Binding).HasMaxLength(200).IsRequired();
+
+            acs.HasIndex(x => new { x.SamlServiceProviderId, x.Location }).IsUnique();
+        });
+
+        modelBuilder.Entity<SamlSingleLogoutService>(slo =>
+        {
+            slo.ToTable(storeOptions.SamlSingleLogoutService);
+            slo.Property(x => x.Location).HasMaxLength(400).IsRequired();
+            slo.Property(x => x.Binding).HasMaxLength(200).IsRequired();
+
+            slo.HasIndex(x => new { x.SamlServiceProviderId, x.Binding }).IsUnique();
+        });
+
+        modelBuilder.Entity<SamlCertificate>(cert =>
+        {
+            cert.ToTable(storeOptions.SamlCertificate);
+            cert.Property(x => x.Data).HasMaxLength(4000).IsRequired();
+            cert.Property(x => x.Use).IsRequired();
+        });
+
+        modelBuilder.Entity<SamlClaimMapping>(mapping =>
+        {
+            mapping.ToTable(storeOptions.SamlClaimMapping);
+            mapping.Property(x => x.ClaimType).HasMaxLength(250).IsRequired();
+            mapping.Property(x => x.SamlAttributeName).HasMaxLength(250).IsRequired();
+
+            mapping.HasIndex(x => new { x.SamlServiceProviderId, x.ClaimType }).IsUnique();
+        });
+
+        modelBuilder.Entity<SamlAuthnContextMapping>(mapping =>
+        {
+            mapping.ToTable(storeOptions.SamlAuthnContextMapping);
+            mapping.Property(x => x.OidcValue).HasMaxLength(250).IsRequired();
+            mapping.Property(x => x.SamlAuthnContextClassRef).HasMaxLength(500).IsRequired();
+
+            mapping.HasIndex(x => new { x.SamlServiceProviderId, x.OidcValue }).IsUnique();
+        });
+
+        modelBuilder.Entity<SamlAllowedScope>(scope =>
+        {
+            scope.ToTable(storeOptions.SamlAllowedScope);
+            scope.Property(x => x.Scope).HasMaxLength(200).IsRequired();
+
+            scope.HasIndex(x => new { x.SamlServiceProviderId, x.Scope }).IsUnique();
+        });
+
+        modelBuilder.Entity<SamlRequestedClaimType>(rct =>
+        {
+            rct.ToTable(storeOptions.SamlRequestedClaimType);
+            rct.Property(x => x.ClaimType).HasMaxLength(250).IsRequired();
+
+            rct.HasIndex(x => new { x.SamlServiceProviderId, x.ClaimType }).IsUnique();
         });
     }
 }

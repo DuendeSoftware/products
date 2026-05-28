@@ -24,16 +24,24 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     protected readonly IClientConfigurationStore Store;
 
     /// <summary>
+    /// The time provider.
+    /// </summary>
+    protected readonly TimeProvider TimeProvider;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="DynamicClientRegistrationRequestProcessor"/> class.
     /// </summary>
     /// <param name="options">The IdentityServer.Configuration options.</param>
     /// <param name="store">The client configuration store.</param>
+    /// <param name="timeProvider">The time provider.</param>
     public DynamicClientRegistrationRequestProcessor(
         IdentityServerConfigurationOptions options,
-        IClientConfigurationStore store)
+        IClientConfigurationStore store,
+        TimeProvider timeProvider)
     {
         Options = options;
         Store = store;
+        TimeProvider = timeProvider;
     }
 
 
@@ -120,7 +128,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
         DateTime? lifetime = Options.DynamicClientRegistration.SecretLifetime switch
         {
             null => null,
-            TimeSpan t => DateTime.UtcNow.Add(t)
+            TimeSpan t => TimeProvider.GetUtcNow().UtcDateTime.Add(t)
         };
         var secret = new Secret(plainText.ToSha256(), lifetime);
         return Task.FromResult((secret, plainText));

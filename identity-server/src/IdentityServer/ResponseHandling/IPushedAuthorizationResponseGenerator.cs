@@ -10,9 +10,18 @@ namespace Duende.IdentityServer.ResponseHandling;
 
 
 /// <summary>
-/// Service that generates response models for the pushed authorization endpoint. This service encapsulates the behavior that
-/// is needed to create a response model from a validated request. 
+/// Generates response models for the pushed authorization endpoint (RFC 9126). The response
+/// contains a <c>request_uri</c> that the client can use in a subsequent authorization request
+/// to reference the pushed authorization parameters, along with the expiration of that URI.
+/// This service encapsulates the behavior needed to create a response model from a validated
+/// pushed authorization request.
 /// </summary>
+/// <remarks>
+/// The default implementation stores the pushed authorization request and returns the
+/// <c>request_uri</c> and expiration. Override this interface or extend the default
+/// implementation to customize the pushed authorization response, for example to change the
+/// format of the <c>request_uri</c> or to adjust the expiration time.
+/// </remarks>
 public interface IPushedAuthorizationResponseGenerator
 {
     /// <summary>
@@ -20,6 +29,9 @@ public interface IPushedAuthorizationResponseGenerator
     /// </summary>
     /// <param name="request">The validated pushed authorization request.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns>A task that contains response model indicating either success or failure.</returns>
+    /// <returns>
+    /// A task that contains a <see cref="PushedAuthorizationResponse"/> indicating either
+    /// success (with the <c>request_uri</c> and expiration) or failure.
+    /// </returns>
     Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, Ct ct);
 }

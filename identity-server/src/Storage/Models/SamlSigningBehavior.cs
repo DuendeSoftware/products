@@ -8,6 +8,7 @@ namespace Duende.IdentityServer.Models;
 /// <summary>
 /// Specifies the signing behavior for SAML messages and assertions.
 /// </summary>
+[Flags]
 public enum SamlSigningBehavior
 {
     /// <summary>
@@ -34,5 +35,5 @@ public enum SamlSigningBehavior
     /// Provides maximum security but increases message size.
     /// Use for high-security environments.
     /// </summary>
-    SignBoth = 3
+    SignBoth = SignResponse | SignAssertion
 }

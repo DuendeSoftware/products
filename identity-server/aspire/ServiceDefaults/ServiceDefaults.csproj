@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
+    <ProjectReference Include="..\..\shared\AppHost.Abstractions\AppHost.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 

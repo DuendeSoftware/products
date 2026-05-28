@@ -32,7 +32,6 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
     private readonly List<SamlServiceProvider> _serviceProviders = [];
     private ClaimsPrincipal? _userToSignIn;
     private bool _shouldGenerateSigningCertificate;
-    private bool _shouldRequireEncryptedAssertions;
 
     public async Task LoginUserAtIdentityProvider()
     {
@@ -46,8 +45,6 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
         // the fake time provider because the SustainSys library does not rely on TimeProvider
         // and we need to use current times
         _shouldGenerateSigningCertificate = true;
-
-    public void RequireEncryptedAssertions() => _shouldRequireEncryptedAssertions = true;
 
     public async ValueTask InitializeAsync()
     {
@@ -74,12 +71,11 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
             EntityId = "https://localhost:5001/Saml2",
             DisplayName = "Test Service Provider",
             Enabled = true,
-            AssertionConsumerServiceUrls = [new Uri($"{SpHost!.Uri()}/Saml2/Acs")],
+            AllowedScopes = new HashSet<string> { "openid", "profile" },
+            AssertionConsumerServiceUrls = [new IndexedEndpoint { Location = $"{SpHost!.Uri()}/Saml2/Acs", Binding = SamlBinding.HttpPost }],
             SigningBehavior = SamlSigningBehavior.SignAssertion,
             RequireSignedAuthnRequests = publicCertificate != null,
-            SigningCertificates = publicCertificate == null ? null : new[] { publicCertificate },
-            EncryptionCertificates = publicCertificate == null ? null : new[] { publicCertificate },
-            EncryptAssertions = _shouldRequireEncryptedAssertions
+            Certificates = publicCertificate == null ? null : [new ServiceProviderCertificate { Certificate = publicCertificate, Use = KeyUse.Both }],
         });
 
         BrowserClient = SpHost.CreateClient();
@@ -103,6 +99,11 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
                         options.KeyManagement.Enabled = false;
                     })
                     .AddSigningCredential(selfSignedCertificate)
+                    .AddInMemoryIdentityResources(
+                    [
+                        new IdentityResource("openid", ["sub"]),
+                        new IdentityResource("profile", ["name", "family_name", "given_name"])
+                    ])
                     .AddSaml()
                     .AddInMemorySamlServiceProviders(_serviceProviders);
             },
@@ -155,11 +156,11 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
                         }
 
                         opt.IdentityProviders.Add(
-                            new IdentityProvider(new Sustainsys.Saml2.Metadata.EntityId(identityProviderHostUri), opt.SPOptions)
+                            new IdentityProvider(new Sustainsys.Saml2.Metadata.EntityId($"{identityProviderHostUri}/Saml2"), opt.SPOptions)
                             {
                                 LoadMetadata = true,
-                                MetadataLocation = $"{identityProviderHostUri}/saml/metadata",
-                                SingleSignOnServiceUrl = new Uri($"{identityProviderHostUri}/saml/signin"),
+                                MetadataLocation = $"{identityProviderHostUri}/Saml2",
+                                SingleSignOnServiceUrl = new Uri($"{identityProviderHostUri}/Saml2/SSO"),
                                 WantAuthnRequestsSigned = signingCertificate != null
                             });
                     });

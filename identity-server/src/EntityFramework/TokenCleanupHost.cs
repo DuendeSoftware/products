@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Helper to cleanup expired persisted grants.
+/// Helper to cleanup expired persisted grants, device codes, pushed authorization requests, and SAML signin states.
 /// </summary>
 public class TokenCleanupHost : IHostedService
 {

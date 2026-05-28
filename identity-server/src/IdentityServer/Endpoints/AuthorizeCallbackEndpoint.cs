@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
 
-internal class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
+internal sealed class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
 {
     public AuthorizeCallbackEndpoint(
         IEventService events,
@@ -26,9 +26,8 @@ internal class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
         IAuthorizeInteractionResponseGenerator interactionGenerator,
         IAuthorizeResponseGenerator authorizeResponseGenerator,
         IUserSession userSession,
-        IConsentMessageStore consentResponseStore,
-        IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
-        : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession, consentResponseStore, authorizationParametersMessageStore)
+        IConsentMessageStore consentResponseStore)
+        : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession, consentResponseStore)
     {
     }
 

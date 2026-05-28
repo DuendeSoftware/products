@@ -20,14 +20,13 @@ internal abstract class BaseDiscoveryEndpoint(
 
     protected async Task<IEndpointResult> GetDiscoveryDocument(HttpContext context, string baseUrl, string issuerUri)
     {
-        if (Options.Preview.EnableDiscoveryDocumentCache)
+        if (Options.Discovery.EnableDiscoveryDocumentCache)
         {
-            var distributedCache = context.RequestServices.GetRequiredService<IDistributedCache>();
+            var distributedCache = context.RequestServices.GetService<IDistributedCache>();
             if (distributedCache is not null)
             {
                 return await GetCachedDiscoveryDocument(distributedCache, baseUrl, issuerUri, context.RequestAborted);
             }
-            // fall through to default implementation if there is no cache provider registered
         }
 
         var response = await ResponseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri, context.RequestAborted);
@@ -51,12 +50,12 @@ internal abstract class BaseDiscoveryEndpoint(
         var entries =
             await ResponseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri, ct);
 
-        var expirationFromNow = Options.Preview.DiscoveryDocumentCacheDuration;
+        var expirationFromNow = Options.Discovery.DiscoveryDocumentCacheDuration;
 
         var result =
             new DiscoveryDocumentResult(
                 entries,
-                isUsingPreviewFeature: true,
+                isCachingEnabled: true,
                 maxAge: Options.Discovery.ResponseCacheInterval);
 
         await cache.SetStringAsync(key, result.Json, new DistributedCacheEntryOptions

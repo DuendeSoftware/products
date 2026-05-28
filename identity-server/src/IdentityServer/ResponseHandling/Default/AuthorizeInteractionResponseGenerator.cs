@@ -87,12 +87,12 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
 
             var error = consent.Error switch
             {
-                AuthorizationError.AccountSelectionRequired => OidcConstants.AuthorizeErrors.AccountSelectionRequired,
-                AuthorizationError.ConsentRequired => OidcConstants.AuthorizeErrors.ConsentRequired,
-                AuthorizationError.InteractionRequired => OidcConstants.AuthorizeErrors.InteractionRequired,
-                AuthorizationError.LoginRequired => OidcConstants.AuthorizeErrors.LoginRequired,
-                AuthorizationError.TemporarilyUnavailable => OidcConstants.AuthorizeErrors.TemporarilyUnavailable,
-                AuthorizationError.UnmetAuthenticationRequirements => OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements,
+                InteractionError.AccountSelectionRequired => OidcConstants.AuthorizeErrors.AccountSelectionRequired,
+                InteractionError.ConsentRequired => OidcConstants.AuthorizeErrors.ConsentRequired,
+                InteractionError.InteractionRequired => OidcConstants.AuthorizeErrors.InteractionRequired,
+                InteractionError.LoginRequired => OidcConstants.AuthorizeErrors.LoginRequired,
+                InteractionError.TemporarilyUnavailable => OidcConstants.AuthorizeErrors.TemporarilyUnavailable,
+                InteractionError.UnmetAuthenticationRequirements => OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements,
                 _ => OidcConstants.AuthorizeErrors.AccessDenied
             };
 
@@ -363,12 +363,12 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
 
                     var error = consent.Error switch
                     {
-                        AuthorizationError.AccountSelectionRequired => OidcConstants.AuthorizeErrors.AccountSelectionRequired,
-                        AuthorizationError.ConsentRequired => OidcConstants.AuthorizeErrors.ConsentRequired,
-                        AuthorizationError.InteractionRequired => OidcConstants.AuthorizeErrors.InteractionRequired,
-                        AuthorizationError.LoginRequired => OidcConstants.AuthorizeErrors.LoginRequired,
-                        AuthorizationError.TemporarilyUnavailable => OidcConstants.AuthorizeErrors.TemporarilyUnavailable,
-                        AuthorizationError.UnmetAuthenticationRequirements => OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements,
+                        InteractionError.AccountSelectionRequired => OidcConstants.AuthorizeErrors.AccountSelectionRequired,
+                        InteractionError.ConsentRequired => OidcConstants.AuthorizeErrors.ConsentRequired,
+                        InteractionError.InteractionRequired => OidcConstants.AuthorizeErrors.InteractionRequired,
+                        InteractionError.LoginRequired => OidcConstants.AuthorizeErrors.LoginRequired,
+                        InteractionError.TemporarilyUnavailable => OidcConstants.AuthorizeErrors.TemporarilyUnavailable,
+                        InteractionError.UnmetAuthenticationRequirements => OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements,
                         _ => OidcConstants.AuthorizeErrors.AccessDenied
                     };
 

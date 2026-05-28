@@ -10,7 +10,10 @@ using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Hosts.Shared.Configuration;
 using Duende.IdentityServer.Hosts.Shared.Customization;
 using Microsoft.AspNetCore.Authentication.Certificate;
+using Microsoft.AspNetCore.Authentication.WsFederation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
@@ -89,7 +92,11 @@ internal static class IdentityServerExtensions
             .AddCustomTokenRequestValidator<ParameterizedScopeTokenRequestValidator>()
             .AddScopeParser<ParameterizedScopeParser>()
             .AddMutualTlsSecretValidators()
-            .AddLicenseSummary();
+            .AddConfigurationStoreCache()
+            .AddLicenseSummary()
+            .AddDynamicProvider<WsFederationHandler, WsFederationOptions, WsFedProvider, WsFedConfigureOptions>("wsfed");
+
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<WsFederationOptions>, WsFederationPostConfigureOptions>());
 
         builder.Services.AddDistributedMemoryCache();
 

@@ -29,11 +29,17 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             }
 
             // The db context is only created once, so before each test
-            // we destroy any persisted grants that are left-over
+            // we destroy any persisted grants etc. that are left-over
             using (var context = new PersistedGrantDbContext(options))
             {
                 var existing = context.PersistedGrants.ToArray();
                 context.PersistedGrants.RemoveRange(existing);
+
+                var existingDeviceCodeFlows = context.DeviceFlowCodes.ToArray();
+                context.DeviceFlowCodes.RemoveRange(existingDeviceCodeFlows);
+
+                var existingParRequests = context.PushedAuthorizationRequests.ToArray();
+                context.PushedAuthorizationRequests.RemoveRange(existingParRequests);
                 context.SaveChanges();
             }
         }
@@ -96,47 +102,55 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task CleanupGrantsAsync_WhenBothExpiredAndValidGrantsExists_ExpectOnlyExpiredGrantsRemoved(DbContextOptions<PersistedGrantDbContext> options)
     {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
         StoreOptions.TokenCleanupBatchSize = 20;
 
-        var expiredGrants = Enumerable.Range(1, 45)
-            .Select(i =>
-                new PersistedGrant
-                {
-                    Key = "expired-" + i,
-                    ClientId = "app1",
-                    Type = "reference",
-                    SubjectId = "123",
-                    Expiration = DateTime.UtcNow.AddMinutes(-i),
-                    Data = "{!}"
-                });
-
-        var validGrants = Enumerable.Range(1, 15)
-            .Select(i =>
-                new PersistedGrant
-                {
-                    Key = "valid-" + i,
-                    ClientId = "app1",
-                    Type = "reference",
-                    SubjectId = "123",
-                    Expiration = DateTime.UtcNow.AddMinutes(i),
-                    Data = "{!}"
-                });
-
-        await using (var context = new PersistedGrantDbContext(options))
+        try
         {
-            context.PersistedGrants.AddRange(expiredGrants);
-            context.PersistedGrants.AddRange(validGrants);
-            await context.SaveChangesAsync();
+            var expiredGrants = Enumerable.Range(1, 45)
+                .Select(i =>
+                    new PersistedGrant
+                    {
+                        Key = "expired-" + i,
+                        ClientId = "app1",
+                        Type = "reference",
+                        SubjectId = "123",
+                        Expiration = DateTime.UtcNow.AddMinutes(-i),
+                        Data = "{!}"
+                    });
+
+            var validGrants = Enumerable.Range(1, 15)
+                .Select(i =>
+                    new PersistedGrant
+                    {
+                        Key = "valid-" + i,
+                        ClientId = "app1",
+                        Type = "reference",
+                        SubjectId = "123",
+                        Expiration = DateTime.UtcNow.AddMinutes(i),
+                        Data = "{!}"
+                    });
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PersistedGrants.AddRange(expiredGrants);
+                context.PersistedGrants.AddRange(validGrants);
+                await context.SaveChangesAsync();
+            }
+
+            await CreateSut(options).CleanupGrantsAsync(_ct);
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                var remaining = context.PersistedGrants.ToList();
+
+                remaining.Count.ShouldBe(15);
+                remaining.All(r => r.Key.StartsWith("valid-")).ShouldBeTrue();
+            }
         }
-
-        await CreateSut(options).CleanupGrantsAsync(_ct);
-
-        await using (var context = new PersistedGrantDbContext(options))
+        finally
         {
-            var remaining = context.PersistedGrants.ToList();
-
-            remaining.Count.ShouldBe(15);
-            remaining.All(r => r.Key.StartsWith("valid-")).ShouldBeTrue();
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
         }
     }
 
@@ -254,90 +268,168 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
-    public async Task CleanupGrantsAsync_ExpectBatchSizeIsRespected(DbContextOptions<PersistedGrantDbContext> options)
+    public async Task CleanupGrantsAsync_WhenExpiredGrantsExceedBatchSize_FastPath_ExpectAllExpiredGrantsRemoved(DbContextOptions<PersistedGrantDbContext> options)
     {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
         StoreOptions.TokenCleanupBatchSize = 20;
 
-        var expectedPageCount = 5;
-
-        await using (var context = new PersistedGrantDbContext(options))
+        try
         {
-            context.PersistedGrants.ToList().ShouldBeEmpty();
-
-            for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
-            {
-                var expiredGrant = new PersistedGrant
+            var expiredGrants = Enumerable.Range(1, 45)
+                .Select(i => new PersistedGrant
                 {
-                    Expiration = DateTime.UtcNow.AddMinutes(-1),
-
-                    Key = Guid.NewGuid().ToString(),
-                    Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                    Key = "expired-" + i,
                     ClientId = "app1",
+                    Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                    SubjectId = "123",
+                    Expiration = DateTime.UtcNow.AddMinutes(-i),
                     Data = "{!}"
-                };
-                context.PersistedGrants.Add(expiredGrant);
+                });
+
+            var validGrants = Enumerable.Range(1, 10)
+                .Select(i => new PersistedGrant
+                {
+                    Key = "valid-" + i,
+                    ClientId = "app1",
+                    Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                    SubjectId = "123",
+                    Expiration = DateTime.UtcNow.AddMinutes(i),
+                    Data = "{!}"
+                });
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PersistedGrants.AddRange(expiredGrants);
+                context.PersistedGrants.AddRange(validGrants);
+                await context.SaveChangesAsync();
             }
 
-            await context.SaveChangesAsync();
+            // No IOperationalStoreNotification — exercises the fast path
+            await CreateSut(options).CleanupGrantsAsync(_ct);
 
-            context.PersistedGrants.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                var remaining = context.PersistedGrants.ToList();
+                remaining.Count.ShouldBe(10);
+                remaining.All(r => r.Key.StartsWith("valid-")).ShouldBeTrue();
+            }
         }
-
-        var mockNotifications = new MockOperationalStoreNotification();
-
-        await CreateSut(options, svcs =>
+        finally
         {
-            svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
-        }).CleanupGrantsAsync(_ct);
-
-        // The right number of batches executed
-        mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount);
-
-        // Each batch contained the expected number of grants
-        foreach (var notification in mockNotifications.PersistedGrantNotifications)
-        {
-            notification.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
-        }
-
-        // All grants are removed because they were all expired
-        await using (var context = new PersistedGrantDbContext(options))
-        {
-            context.PersistedGrants.ToList().ShouldBeEmpty();
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
         }
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
-    public async Task CleanupGrantsAsync_InsertsBetweenBatches_ExpectAdditionalBatches(DbContextOptions<PersistedGrantDbContext> options)
+    public async Task CleanupGrantsAsync_WhenConsumedGrantsExceedBatchSize_FastPath_ExpectAllConsumedGrantsRemoved(DbContextOptions<PersistedGrantDbContext> options)
     {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
+        StoreOptions.TokenCleanupBatchSize = 20;
+
+        try
+        {
+            var consumedGrants = Enumerable.Range(1, 45)
+                .Select(i => new PersistedGrant
+                {
+                    Key = "consumed-" + i,
+                    ClientId = "app1",
+                    Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                    SubjectId = "123",
+                    Expiration = DateTime.UtcNow.AddDays(3),
+                    ConsumedTime = DateTime.UtcNow.AddMinutes(-i),
+                    Data = "{!}"
+                });
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PersistedGrants.AddRange(consumedGrants);
+                await context.SaveChangesAsync();
+            }
+
+            // No IOperationalStoreNotification — exercises the fast path
+            await CreateSut(options, removeConsumedTokens: true).CleanupGrantsAsync(_ct);
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PersistedGrants.ToList().ShouldBeEmpty();
+            }
+        }
+        finally
+        {
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_WhenExpiredDeviceCodesExceedBatchSize_FastPath_ExpectAllExpiredDeviceCodesRemoved(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
+        StoreOptions.TokenCleanupBatchSize = 20;
+
+        try
+        {
+            var expiredCodes = Enumerable.Range(1, 45)
+                .Select(i => new DeviceFlowCodes
+                {
+                    DeviceCode = "expired-" + i,
+                    UserCode = "user-" + i,
+                    ClientId = "app1",
+                    SubjectId = "123",
+                    CreationTime = DateTime.UtcNow.AddDays(-4),
+                    Expiration = DateTime.UtcNow.AddMinutes(-i),
+                    Data = "{!}"
+                });
+
+            var validCodes = Enumerable.Range(1, 10)
+                .Select(i => new DeviceFlowCodes
+                {
+                    DeviceCode = "valid-" + i,
+                    UserCode = "valid-user-" + i,
+                    ClientId = "app1",
+                    SubjectId = "123",
+                    CreationTime = DateTime.UtcNow.AddDays(-1),
+                    Expiration = DateTime.UtcNow.AddMinutes(i),
+                    Data = "{!}"
+                });
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.DeviceFlowCodes.AddRange(expiredCodes);
+                context.DeviceFlowCodes.AddRange(validCodes);
+                await context.SaveChangesAsync();
+            }
+
+            // No IOperationalStoreNotification — exercises the fast path
+            await CreateSut(options).CleanupGrantsAsync(_ct);
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                var remaining = context.DeviceFlowCodes.ToList();
+                remaining.Count.ShouldBe(10);
+                remaining.All(r => r.DeviceCode.StartsWith("valid-")).ShouldBeTrue();
+            }
+        }
+        finally
+        {
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_ExpectBatchSizeIsRespected(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
         StoreOptions.TokenCleanupBatchSize = 20;
 
         var expectedPageCount = 5;
 
-        await using (var context = new PersistedGrantDbContext(options))
+        try
         {
-            for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
+            await using (var context = new PersistedGrantDbContext(options))
             {
-                var expiredGrant = new PersistedGrant
-                {
-                    Expiration = DateTime.UtcNow.AddMinutes(-1),
+                context.PersistedGrants.ToList().ShouldBeEmpty();
 
-                    Key = Guid.NewGuid().ToString(),
-                    Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
-                    ClientId = "app1",
-                    Data = "{!}"
-                };
-                context.PersistedGrants.Add(expiredGrant);
-            }
-
-            await context.SaveChangesAsync();
-        }
-
-        // Whenever we cleanup a batch of grants, a new (expired) grant is inserted
-        var mockNotifications = new MockOperationalStoreNotification()
-        {
-            OnPersistedGrantsRemoved = grants =>
-            {
-                using (var context = new PersistedGrantDbContext(options))
+                for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
                 {
                     var expiredGrant = new PersistedGrant
                     {
@@ -346,39 +438,123 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                         Key = Guid.NewGuid().ToString(),
                         Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
                         ClientId = "app1",
-                        Data = "{Extra grant created between pages}"
+                        Data = "{!}"
                     };
                     context.PersistedGrants.Add(expiredGrant);
-                    context.SaveChanges();
                 }
+
+                await context.SaveChangesAsync();
+
+                context.PersistedGrants.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
             }
-        };
 
-        await CreateSut(options, svcs =>
-        {
-            svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
-        }).CleanupGrantsAsync(_ct);
+            var mockNotifications = new MockOperationalStoreNotification();
 
-        // Each batch created an extra grant, so we do an extra batch to clean up
-        // the extras
-        mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount + 1);
+            await CreateSut(options, svcs => { svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications); })
+                .CleanupGrantsAsync(_ct);
 
-        // Each batch had the expected number of grants. Most batches had the batch size grants
-        for (var i = 0; i < expectedPageCount; i++)
-        {
-            mockNotifications.PersistedGrantNotifications[i].Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
+            // The right number of batches executed
+            mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount);
+
+            // Each batch contained the expected number of grants
+            foreach (var notification in mockNotifications.PersistedGrantNotifications)
+            {
+                notification.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
+            }
+
+            // All grants are removed because they were all expired
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PersistedGrants.ToList().ShouldBeEmpty();
+            }
         }
-
-        // The last batch had the extras - there is one extra per page
-        mockNotifications.PersistedGrantNotifications.Last().Count().ShouldBe(expectedPageCount);
-
-        // In the end, all but one get deleted
-        // One final grant will be left behind, created by the last notification to fire
-        // We can treat this as the first grant created after the job ran, 
-        // we just are able to observe it because it was created in the final batch's notification
-        await using (var context = new PersistedGrantDbContext(options))
+        finally
         {
-            context.PersistedGrants.Count().ShouldBe(1);
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_InsertsBetweenBatches_ExpectAdditionalBatches(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
+        StoreOptions.TokenCleanupBatchSize = 20;
+
+        var expectedPageCount = 5;
+
+        try
+        {
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
+                {
+                    var expiredGrant = new PersistedGrant
+                    {
+                        Expiration = DateTime.UtcNow.AddMinutes(-1),
+
+                        Key = Guid.NewGuid().ToString(),
+                        Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                        ClientId = "app1",
+                        Data = "{!}"
+                    };
+                    context.PersistedGrants.Add(expiredGrant);
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+            // Whenever we cleanup a batch of grants, a new (expired) grant is inserted
+            var mockNotifications = new MockOperationalStoreNotification()
+            {
+                OnPersistedGrantsRemoved = grants =>
+                {
+                    using (var context = new PersistedGrantDbContext(options))
+                    {
+                        var expiredGrant = new PersistedGrant
+                        {
+                            Expiration = DateTime.UtcNow.AddMinutes(-1),
+
+                            Key = Guid.NewGuid().ToString(),
+                            Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
+                            ClientId = "app1",
+                            Data = "{Extra grant created between pages}"
+                        };
+                        context.PersistedGrants.Add(expiredGrant);
+                        context.SaveChanges();
+                    }
+                }
+            };
+
+            await CreateSut(options, svcs =>
+            {
+                svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
+            }).CleanupGrantsAsync(_ct);
+
+            // Each batch created an extra grant, so we do an extra batch to clean up
+            // the extras
+            mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount + 1);
+
+            // Each batch had the expected number of grants. Most batches had the batch size grants
+            for (var i = 0; i < expectedPageCount; i++)
+            {
+                mockNotifications.PersistedGrantNotifications[i].Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
+            }
+
+            // The last batch had the extras - there is one extra per page
+            mockNotifications.PersistedGrantNotifications.Last().Count().ShouldBe(expectedPageCount);
+
+            // In the end, all but one get deleted
+            // One final grant will be left behind, created by the last notification to fire
+            // We can treat this as the first grant created after the job ran,
+            // we just are able to observe it because it was created in the final batch's notification
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PersistedGrants.Count().ShouldBe(1);
+            }
+        }
+        finally
+        {
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
         }
     }
 
@@ -425,6 +601,162 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             context.PersistedGrants.FirstOrDefault(x => x.Id == newConsumedGrant.Id).ShouldNotBeNull();
             context.PersistedGrants.FirstOrDefault(x => x.Id == oldConsumedGrant.Id).ShouldBeNull();
         }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_WhenExpiredParRequestsExist_ExpectExpiredParRequestsRemoved(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var expiredRequest = new PushedAuthorizationRequest
+        {
+            Parameters = "{!}",
+            ReferenceValueHash = "reference",
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(-3)
+        };
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.PushedAuthorizationRequests.Add(expiredRequest);
+            await context.SaveChangesAsync();
+        }
+
+        await CreateSut(options).CleanupGrantsAsync(_ct);
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.PushedAuthorizationRequests.FirstOrDefault(x => x.Id == expiredRequest.Id).ShouldBeNull();
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_WhenValidParRequestsExist_ExpectValidParRequestsInDb(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var validRequest = new PushedAuthorizationRequest
+        {
+            Parameters = "{!}",
+            ReferenceValueHash = "reference",
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(3)
+        };
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.PushedAuthorizationRequests.Add(validRequest);
+            await context.SaveChangesAsync();
+        }
+
+        await CreateSut(options).CleanupGrantsAsync(_ct);
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.PushedAuthorizationRequests.FirstOrDefault(x => x.Id == validRequest.Id).ShouldNotBeNull();
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_WhenBothExpiredAndValidParRequestsExists_ExpectOnlyExpiredParRequestsRemoved(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var originalTokenCleanupBatchSize = StoreOptions.TokenCleanupBatchSize;
+        StoreOptions.TokenCleanupBatchSize = 20;
+
+        try
+        {
+            var expiredRequests = Enumerable.Range(1, 45)
+                .Select(i =>
+                    new PushedAuthorizationRequest
+                    {
+                        Parameters = "{!}",
+                        ReferenceValueHash = "exp-reference-" + i,
+                        ExpiresAtUtc = DateTime.UtcNow.AddMinutes(-i)
+                    });
+
+            var validRequests = Enumerable.Range(1, 15)
+                .Select(i =>
+                    new PushedAuthorizationRequest
+                    {
+                        Parameters = "{!}",
+                        ReferenceValueHash = "reference-" + i,
+                        ExpiresAtUtc = DateTime.UtcNow.AddMinutes(i)
+                    });
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                context.PushedAuthorizationRequests.AddRange(expiredRequests);
+                context.PushedAuthorizationRequests.AddRange(validRequests);
+                await context.SaveChangesAsync();
+            }
+
+            await CreateSut(options).CleanupGrantsAsync(_ct);
+
+            await using (var context = new PersistedGrantDbContext(options))
+            {
+                var remaining = context.PushedAuthorizationRequests.ToList();
+
+                remaining.Count.ShouldBe(15);
+                remaining.All(r => r.ReferenceValueHash.StartsWith("reference-")).ShouldBeTrue();
+            }
+        }
+        finally
+        {
+            StoreOptions.TokenCleanupBatchSize = originalTokenCleanupBatchSize;
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_WhenExpiredSamlLogoutSessionsExist_ExpectExpiredSessionsRemoved(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var expiredSession = new SamlLogoutSession
+        {
+            LogoutId = Guid.NewGuid().ToString("N"),
+            SerializedSession = "{}",
+            ExpiresAtUtc = DateTime.UtcNow.AddMinutes(-5),
+        };
+        var validSession = new SamlLogoutSession
+        {
+            LogoutId = Guid.NewGuid().ToString("N"),
+            SerializedSession = "{}",
+            ExpiresAtUtc = DateTime.UtcNow.AddMinutes(5),
+        };
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.SamlLogoutSessions.Add(expiredSession);
+            context.SamlLogoutSessions.Add(validSession);
+            await context.SaveChangesAsync();
+        }
+
+        await CreateSut(options).CleanupGrantsAsync(_ct);
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.SamlLogoutSessions.FirstOrDefault(x => x.LogoutId == expiredSession.LogoutId).ShouldBeNull();
+            context.SamlLogoutSessions.FirstOrDefault(x => x.LogoutId == validSession.LogoutId).ShouldNotBeNull();
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task CleanupGrantsAsync_WhenExpiredSamlLogoutSessionsExist_ExpectNotificationFired(DbContextOptions<PersistedGrantDbContext> options)
+    {
+        var expiredSession = new SamlLogoutSession
+        {
+            LogoutId = Guid.NewGuid().ToString("N"),
+            SerializedSession = "{}",
+            ExpiresAtUtc = DateTime.UtcNow.AddMinutes(-5),
+        };
+
+        await using (var context = new PersistedGrantDbContext(options))
+        {
+            context.SamlLogoutSessions.Add(expiredSession);
+            await context.SaveChangesAsync();
+        }
+
+        var notification = new MockOperationalStoreNotification();
+        var sut = CreateSut(options, services =>
+        {
+            services.AddSingleton<IOperationalStoreNotification>(notification);
+        });
+
+        await sut.CleanupGrantsAsync(_ct);
+
+        notification.SamlLogoutSessionNotifications.ShouldNotBeEmpty();
     }
 
     private TokenCleanupService CreateSut(

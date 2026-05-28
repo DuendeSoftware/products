@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Duende.IdentityServer.Internal.Saml;
+using Duende.IdentityServer.Saml;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
@@ -21,7 +22,7 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Content.Headers.ContentType
             .ShouldNotBeNull()
@@ -36,6 +37,11 @@ public class SamlMetadataEndpointTests
         {
             sb.Replace(hostUri, "https://localhost");
         });
+        settings.AddScrubber(sb =>
+        {
+            var scrubbed = Regex.Replace(sb.ToString(), @"ID=""[^""]+""", @"ID=""_SCRUBBED""");
+            sb.Clear().Append(scrubbed);
+        });
 
         await Verify(content, settings);
     }
@@ -46,18 +52,23 @@ public class SamlMetadataEndpointTests
     {
         Fixture.ConfigureSamlOptions = options =>
         {
-            options.MetadataValidityDuration = TimeSpan.FromDays(30);
+            options.Metadata.ExpiryDuration = TimeSpan.FromDays(30);
         };
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
 
         var expectedValidUntil = Fixture.Now.Add(TimeSpan.FromDays(30)).UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
-        content.ShouldContain($"validUntil=\"{expectedValidUntil}\"");
+        doc.Root.ShouldNotBeNull()
+            .Attribute("validUntil")
+            .ShouldNotBeNull()
+            .Value
+            .ShouldBe(expectedValidUntil);
     }
 
     [Fact]
@@ -71,12 +82,18 @@ public class SamlMetadataEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+        var md = XNamespace.Get("urn:oasis:names:tc:SAML:2.0:metadata");
 
-        content.ShouldContain("WantAuthnRequestsSigned=\"true\"");
+        var idpDescriptor = doc.Descendants(md + "IDPSSODescriptor").Single();
+        idpDescriptor.Attribute("WantAuthnRequestsSigned")
+            .ShouldNotBeNull()
+            .Value
+            .ShouldBe("true");
     }
 
     [Fact]
@@ -92,14 +109,20 @@ public class SamlMetadataEndpointTests
 
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+        var md = XNamespace.Get("urn:oasis:names:tc:SAML:2.0:metadata");
 
-        content.ShouldContain("<NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>");
-        content.ShouldContain("<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>");
-        content.ShouldNotContain("<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>");
+        var formats = doc.Descendants(md + "NameIDFormat")
+            .Select(e => e.Value)
+            .ToList();
+
+        formats.Count.ShouldBe(2);
+        formats[0].ShouldBe(SamlConstants.NameIdentifierFormats.EmailAddress);
+        formats[1].ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
     }
 
     [Fact]
@@ -108,15 +131,24 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+        var ns = XNamespace.Get("urn:oasis:names:tc:SAML:2.0:metadata");
 
-        content.ShouldContain("<SingleLogoutService");
-        content.ShouldContain("Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\"");
-        content.ShouldContain("Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\"");
-        content.ShouldContain("/saml/logout");
+        var sloServices = doc.Descendants(ns + "SingleLogoutService").ToList();
+        sloServices.ShouldNotBeEmpty("Metadata should include SingleLogoutService elements");
+
+        var bindings = sloServices.Select(s => s.Attribute("Binding")?.Value).ToList();
+        bindings.ShouldContain("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+        bindings.ShouldContain("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
+
+        foreach (var slo in sloServices)
+        {
+            slo.Attribute("Location")!.Value.ShouldContain("/Saml2/SLO");
+        }
     }
 
     [Fact]
@@ -125,7 +157,7 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
@@ -143,7 +175,7 @@ public class SamlMetadataEndpointTests
     {
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
@@ -158,35 +190,6 @@ public class SamlMetadataEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task metadata_urls_should_be_correct_when_route_has_trailing_slash()
-    {
-        Fixture.ConfigureSamlOptions = options =>
-        {
-            // Configure with trailing slash to ensure it's handled correctly
-            options.UserInteraction.Route = "/saml/";
-        };
-
-        await Fixture.InitializeAsync();
-
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        var content = await result.Content.ReadAsStringAsync(_ct);
-
-        // Should not have double slashes
-        content.ShouldNotContain("saml//signin");
-        content.ShouldNotContain("saml//logout");
-
-        var locationUrls = GetServiceLocationUrls(content, "SingleSignOnService", "SingleLogoutService");
-
-        foreach (var location in locationUrls)
-        {
-            location.ShouldNotEndWith("/");
-        }
-    }
-
-    [Fact]
-    [Trait("Category", Category)]
     public async Task metadata_urls_should_handle_edge_case_route_configurations()
     {
         // Verify that default configuration produces clean URLs
@@ -194,7 +197,7 @@ public class SamlMetadataEndpointTests
         // at the unit level in BuildServiceUrl unit tests
         await Fixture.InitializeAsync();
 
-        var result = await Fixture.Client.GetAsync("/saml/metadata", _ct);
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var content = await result.Content.ReadAsStringAsync(_ct);
@@ -208,6 +211,86 @@ public class SamlMetadataEndpointTests
 
             // Should not have trailing slashes
             location.ShouldNotEndWith("/");
+        }
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_be_served_at_custom_entity_id_path()
+    {
+        Fixture.ConfigureSamlOptions = options =>
+        {
+            options.EntityId = "https://idp.example.com/custom/saml";
+        };
+
+        await Fixture.InitializeAsync();
+
+        // Metadata should be available at the path component of the entity ID
+        var result = await Fixture.Client.GetAsync("/custom/saml", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.Content.Headers.ContentType
+            .ShouldNotBeNull()
+            .MediaType
+            .ShouldBe(SamlConstants.ContentTypes.Metadata);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_not_be_served_at_old_path_when_entity_id_is_custom()
+    {
+        Fixture.ConfigureSamlOptions = options =>
+        {
+            options.EntityId = "https://idp.example.com/custom/saml";
+        };
+
+        await Fixture.InitializeAsync();
+
+        // Default path should no longer serve metadata
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_fall_back_to_metadata_path_for_urn_entity_id()
+    {
+        Fixture.ConfigureSamlOptions = options =>
+        {
+            options.EntityId = "urn:my:custom:idp";
+        };
+
+        await Fixture.InitializeAsync();
+
+        // URN entity IDs can't derive a path, so fall back to Endpoints.MetadataPath (default: /Saml2)
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.Content.Headers.ContentType
+            .ShouldNotBeNull()
+            .MediaType
+            .ShouldBe(SamlConstants.ContentTypes.Metadata);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_include_single_logout_service_elements()
+    {
+        await Fixture.InitializeAsync();
+
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+        var ns = XNamespace.Get("urn:oasis:names:tc:SAML:2.0:metadata");
+
+        var sloServices = doc.Descendants(ns + "SingleLogoutService").ToList();
+        sloServices.ShouldNotBeEmpty("Metadata should include SingleLogoutService elements");
+
+        foreach (var slo in sloServices)
+        {
+            slo.Attribute("Binding").ShouldNotBeNull();
+            slo.Attribute("Location").ShouldNotBeNull();
+            slo.Attribute("Location")!.Value.ShouldContain("/Saml2/SLO");
         }
     }
 

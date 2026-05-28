@@ -5,45 +5,43 @@
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// The Pushed Authorization Options.
+/// Settings for Pushed Authorization Requests (PAR), which allow clients to push authorization
+/// parameters to IdentityServer before initiating the authorization flow.
 /// </summary>
 public class PushedAuthorizationOptions
 {
     /// <summary>
-    /// Specifies whether pushed authorization requests are globally required.
-    /// Defaults to false.
+    /// Gets or sets a value indicating whether all clients are required to use Pushed Authorization Requests globally. When enabled, the
+    /// authorize endpoint will reject requests that were not previously pushed via the PAR
+    /// endpoint.
     /// </summary>
     /// <remarks>
-    /// There is also a per-client configuration flag in the Client
-    /// configuration. Pushed authorization is required for a client if either
-    /// this global configuration flag is enabled or if the flag is set for that
-    /// client.
+    /// Defaults to <c>false</c>. Individual clients can also require PAR via their own
+    /// <c>RequirePushedAuthorization</c> configuration flag; PAR is required for a client if
+    /// either this global flag or the per-client flag is set.
     /// </remarks>
     public bool Required { get; set; }
 
     /// <summary>
-    /// Lifetime of pushed authorization requests in seconds.
-    ///
-    /// The pushed authorization request's lifetime begins when the request to
-    /// the PAR endpoint is received, and is validated until the authorize
-    /// endpoint returns a response to the client application. Note that user
-    /// interaction, such as entering credentials or granting consent, may need
-    /// to occur before the authorize endpoint can do so. Setting the lifetime
-    /// too low will likely cause login failures for interactive users, if
-    /// pushed authorization requests expire before those users complete
-    /// authentication. Some security profiles, such as the FAPI 2.0 Security
-    /// Profile recommend an expiration within 10 minutes to prevent attackers
-    /// from pre-generating requests. To balance these constraints, the Lifetime
-    /// defaults to 10 minutes.
+    /// Gets or sets the lifetime of pushed authorization requests, in seconds.
     /// </summary>
-    /// <remarks>There is also a per-client configuration setting that takes
-    /// precedence over this global configuration.
+    /// <remarks>
+    /// Defaults to 600 seconds (10 minutes). The lifetime begins when the PAR endpoint receives
+    /// the request and must cover the entire interactive login flow, including user interaction
+    /// such as entering credentials and granting consent. Setting this too low will cause login
+    /// failures for interactive users. Security profiles such as FAPI 2.0 recommend a maximum
+    /// of 10 minutes to limit the window for pre-generated request attacks. A per-client
+    /// configuration setting takes precedence over this global value.
     /// </remarks>
     public int Lifetime { get; set; } = 60 * 10;
 
     /// <summary>
-    /// Specifies whether clients may use redirect uris that were not previously
-    /// registered. Defaults to false. 
+    /// Gets or sets a value indicating whether clients may use redirect URIs in pushed authorization requests that were not
+    /// previously registered.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>false</c>. Enable with caution; allowing unregistered redirect URIs
+    /// reduces the protection that pre-registration provides against open redirect attacks.
+    /// </remarks>
     public bool AllowUnregisteredPushedRedirectUris { get; set; }
 }

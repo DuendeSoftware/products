@@ -93,6 +93,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         if (clientValidationResult.IsError)
         {
             var error = clientValidationResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
+            _logger.LogWarning("Client validation failed for revocation endpoint: {error}", error);
             Telemetry.Metrics.RevocationFailure(clientValidationResult.Client?.ClientId, error);
             return new TokenRevocationErrorResult(error);
         }

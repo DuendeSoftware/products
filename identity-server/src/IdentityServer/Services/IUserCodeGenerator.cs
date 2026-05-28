@@ -31,6 +31,6 @@ public interface IUserCodeGenerator
     /// Generates the user code.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>A unique user code string.</returns>
     Task<string> GenerateAsync(Ct ct);
 }

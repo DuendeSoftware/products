@@ -6,10 +6,15 @@ using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Internal;
-using Duende.IdentityServer.Internal.Saml;
-using Duende.IdentityServer.Internal.Saml.SingleLogout;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Bindings;
+using Duende.IdentityServer.Saml.Infrastructure;
+using Duende.IdentityServer.Saml.ResponseHandling;
+using Duende.IdentityServer.Saml.Serialization;
+using Duende.IdentityServer.Saml.Services;
+using Duende.IdentityServer.Saml.Validation;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Services.KeyManagement;
@@ -17,7 +22,6 @@ using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
-
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccessor serviceCollectionAccessor)
@@ -57,11 +61,26 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
         },
         {
             "SAML", [
-                new(typeof(ISamlClaimsMapper), []),
-                new(typeof(ISamlFrontChannelLogout), [typeof(SamlHttpPostFrontChannelLogout), typeof(SamlHttpRedirectFrontChannelLogout)]),
-                new(typeof(ISamlInteractionService),[]),
-                new(typeof(ISamlLogoutNotificationService), [typeof(NopSamlLogoutNotificationService)]),
-                new(typeof(ISamlSigninInteractionResponseGenerator),[]),
+                new(typeof(IAuthnRequestValidator), [typeof(AuthnRequestValidator)]),
+                new(typeof(ILogoutRequestValidator), [typeof(LogoutRequestValidator)]),
+                new(typeof(ISaml2SloResponseGenerator), [typeof(Saml2SloResponseGenerator)]),
+                new(typeof(ISaml2FrontChannelLogoutRequestBuilder), [typeof(Saml2FrontChannelLogoutRequestBuilder)]),
+                new(typeof(IIdpInitiatedSsoService), [typeof(Duende.IdentityServer.Saml.Services.Default.DefaultIdpInitiatedSsoService)]),
+                new(typeof(IFrontChannelBinding), [typeof(HttpPostBinding), typeof(HttpRedirectBinding)]),
+                new(typeof(IHttpRedirectBinding), [typeof(HttpRedirectBinding)]),
+                new(typeof(ISamlLogoutNotificationService), [typeof(NopSamlLogoutNotificationService), typeof(Saml2LogoutNotificationService)]),
+                new(typeof(ISamlLogoutSessionStore), [typeof(InMemorySamlLogoutSessionStore)]),
+                new(typeof(ISamlSigninStateStore), [typeof(InMemorySamlSigninStateStore)]),
+                new(typeof(ISamlSigninStateSerializer), []),
+                new(typeof(ISamlSigningService), [typeof(SamlSigningService)]),
+                new(typeof(ISaml2IssuerNameService), [typeof(Saml2IssuerNameService)]),
+                new(typeof(ISaml2MetadataResponseGenerator), [typeof(Saml2MetadataResponseGenerator)]),
+                new(typeof(ISaml2SsoInteractionResponseGenerator), [typeof(Saml2SsoInteractionResponseGenerator)]),
+                new(typeof(ISaml2SsoResponseGenerator), [typeof(Saml2SSoResponseGenerator)]),
+                new(typeof(ISamlNameIdGenerator), [typeof(Duende.IdentityServer.Saml.Services.Default.DefaultSamlNameIdGenerator)]),
+                new(typeof(ISamlResourceResolver), [typeof(Duende.IdentityServer.Saml.Services.Default.DefaultSamlResourceResolver)]),
+                new(typeof(ISamlXmlReader), [typeof(SamlXmlReader)]),
+                new(typeof(ISamlXmlWriter), [typeof(SamlXmlWriter)]),
             ]
         },
         {
@@ -72,7 +91,6 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IBackchannelAuthenticationUserNotificationService), [typeof(NopBackchannelAuthenticationUserNotificationService)]),
                 new(typeof(IBackChannelLogoutHttpClient), [typeof(DefaultBackChannelLogoutHttpClient)]),
                 new(typeof(IBackChannelLogoutService), [typeof(DefaultBackChannelLogoutService)]),
-                new(typeof(ICache<>), [typeof(DefaultCache<>)]),
                 new(typeof(IClaimsService), [typeof(DefaultClaimsService)]),
                 new(typeof(IConsentService), [typeof(DefaultConsentService)]),
                 new(typeof(ICorsPolicyService), [typeof(DefaultCorsPolicyService)]),
@@ -94,7 +112,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IPushedAuthorizationService), [typeof(PushedAuthorizationService)]),
                 new(typeof(IRefreshTokenService), [typeof(DefaultRefreshTokenService)]),
                 new(typeof(IReplayCache), [typeof(DefaultReplayCache)]),
-                new(typeof(IReturnUrlParser), [typeof(OidcReturnUrlParser)]),
+                new(typeof(IReturnUrlParser), [typeof(OidcReturnUrlParser), typeof(SamlReturnUrlParser)]),
                 new(typeof(IServerUrls), [typeof(DefaultServerUrls)]),
                 new(typeof(ISessionCoordinationService), [typeof(DefaultSessionCoordinationService)]),
                 new(typeof(ISessionManagementService), []),
@@ -110,12 +128,15 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
         },
         {
             "Stores", [
+                new(typeof(IAuthenticationContext), []),
+                new(typeof(IConnectedApplication), []),
+                new(typeof(IConnectedApplicationStore), [typeof(ConnectedApplicationStore)]),
                 new(typeof(IAuthorizationCodeStore), [typeof(DefaultAuthorizationCodeStore)]),
-                new(typeof(IAuthorizationParametersMessageStore), []),
                 new(typeof(IBackChannelAuthenticationRequestStore), [typeof(DefaultBackChannelAuthenticationRequestStore)]),
                 new(typeof(IClientStore), [typeof(EmptyClientStore)]),
                 new(typeof(IConsentMessageStore), [typeof(ConsentMessageStore)]),
                 new(typeof(IDeviceFlowStore), []),
+                new(typeof(IIdentityProviderFactory), [typeof(DynamicIdentityProviderFactory)]),
                 new(typeof(IIdentityProviderStore), [typeof(NopIdentityProviderStore)]),
                 new(typeof(IMessageStore<>), [typeof(ProtectedDataMessageStore<>)]),
                 new(typeof(IPersistentGrantSerializer), [typeof(PersistentGrantSerializer)]),
@@ -160,6 +181,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IRedirectUriValidator), [typeof(StrictRedirectUriValidator)]),
                 new(typeof(IResourceOwnerPasswordValidator), [typeof(NotSupportedResourceOwnerPasswordValidator)]),
                 new(typeof(IResourceValidator), [typeof(DefaultResourceValidator)]),
+                new(typeof(ISamlServiceProviderConfigurationValidator), [typeof(DefaultSamlServiceProviderConfigurationValidator)]),
                 new(typeof(IScopeParser), [typeof(DefaultScopeParser)]),
                 new(typeof(ISecretParser), [typeof(BasicAuthenticationSecretParser), typeof(PostBodySecretParser)]),
                 new(typeof(ISecretsListParser), [typeof(SecretParser)]),
@@ -169,6 +191,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(ITokenRevocationRequestValidator), [typeof(TokenRevocationRequestValidator)]),
                 new(typeof(ITokenValidator), [typeof(TokenValidator)]),
                 new(typeof(IUserInfoRequestValidator), [typeof(UserInfoRequestValidator)]),
+                new(typeof(IValidatedRequest), []),
             ]
         }
     };

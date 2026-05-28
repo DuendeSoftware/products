@@ -677,6 +677,105 @@ public class DPoPProofValidatorTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task htu_with_query_string_should_pass_validation()
+    {
+        // RFC 9449 §4.3 step 9: query and fragment must be ignored when comparing htu
+        _payload["htu"] = "https://identityserver/connect/token?foo=bar";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task htu_with_fragment_should_pass_validation()
+    {
+        // RFC 9449 §4.3 step 9: query and fragment must be ignored when comparing htu
+        _payload["htu"] = "https://identityserver/connect/token#fragment";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task htu_with_query_and_fragment_should_pass_validation()
+    {
+        // RFC 9449 §4.3 step 9: query and fragment must be ignored when comparing htu
+        _payload["htu"] = "https://identityserver/connect/token?foo=bar#fragment";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task context_url_with_query_string_should_pass_validation()
+    {
+        // RFC 9449 §4.3 step 9: query and fragment on the request URL must also be ignored
+        _context.Url = "https://identityserver/connect/token?foo=bar";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task htu_with_different_scheme_case_should_pass_validation()
+    {
+        // RFC 3986 §6.2.2.1: scheme is case-insensitive
+        _payload["htu"] = "HTTPS://identityserver/connect/token";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task htu_with_different_host_case_should_pass_validation()
+    {
+        // RFC 3986 §6.2.2.1: host is case-insensitive
+        _payload["htu"] = "https://IdentityServer/connect/token";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task htu_with_different_path_case_should_fail_validation()
+    {
+        // RFC 3986 §6.2.2.1: path is case-sensitive
+        _payload["htu"] = "https://identityserver/connect/Token";
+
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task missing_iat_should_fail_validation()
     {
         _payload.Remove("iat");

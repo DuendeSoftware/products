@@ -15,8 +15,12 @@ namespace Duende.IdentityServer.Validation;
 /// <summary>
 /// Base class for a validated authorize or token request
 /// </summary>
-public class ValidatedRequest
+public class ValidatedRequest : IValidatedRequest
 {
+#pragma warning disable CA1033 // Interface methods should be callable by child types
+    /// <inheritdoc />
+    IConnectedApplication? IValidatedRequest.Application => Client;
+#pragma warning restore CA1033
     /// <summary>
     /// Gets or sets the raw request data
     /// </summary>

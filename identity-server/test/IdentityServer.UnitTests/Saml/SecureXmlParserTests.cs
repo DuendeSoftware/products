@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using System.Xml;
-using Duende.IdentityServer.Internal.Saml.Infrastructure;
+using Duende.IdentityServer.Saml.Infrastructure;
+using Duende.IdentityServer.Saml.Xml;
+using UnitTests.Common;
 
 namespace UnitTests.Saml;
 
@@ -152,7 +154,7 @@ public class SecureXmlParserTests
     public void load_xml_document_with_message_exceeding_max_size_should_throw_xml_exception()
     {
         // Arrange - Create XML larger than 1MB
-        var largeContent = new string('X', SecureXmlParser.MaxMessageSize + 1);
+        var largeContent = new string('X', SecureXmlParser.DefaultMaxMessageSize + 1);
         var largeXml = $"<root>{largeContent}</root>";
 
         // Act & Assert
@@ -160,12 +162,12 @@ public class SecureXmlParserTests
             SecureXmlParser.LoadXmlDocument(largeXml));
 
         exception.Message.ShouldContain("exceeds maximum allowed size");
-        exception.Message.ShouldContain(SecureXmlParser.MaxMessageSize.ToString());
+        exception.Message.ShouldContain(SecureXmlParser.DefaultMaxMessageSize.ToString());
     }
 
     [Fact]
     [Trait("Category", Category)]
-    public void load_xml_document_with_comments_should_ignore_comments()
+    public void load_xml_document_with_comments_should_preserve_comments()
     {
         // Arrange - XML with comments
         var xmlWithComments = @"<root>
@@ -177,12 +179,12 @@ public class SecureXmlParserTests
         // Act
         var doc = SecureXmlParser.LoadXmlDocument(xmlWithComments);
 
-        // Assert
+        // Assert - Comments must be preserved because the exc-c14n#WithComments
+        // transform includes them in signed data. Stripping would break signature validation.
         doc.ShouldNotBeNull();
-        // Comments should be ignored (not present in the document)
         var comments = doc.SelectNodes("//comment()");
         comments.ShouldNotBeNull();
-        comments!.Count.ShouldBe(0);
+        comments!.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -306,7 +308,7 @@ public class SecureXmlParserTests
     public void load_x_element_with_message_exceeding_max_size_should_throw_xml_exception()
     {
         // Arrange
-        var largeContent = new string('X', SecureXmlParser.MaxMessageSize + 1);
+        var largeContent = new string('X', SecureXmlParser.DefaultMaxMessageSize + 1);
         var largeXml = $"<root>{largeContent}</root>";
 
         // Act & Assert
@@ -320,5 +322,48 @@ public class SecureXmlParserTests
     [Trait("Category", Category)]
     public void max_message_size_should_be_1_mb() =>
         // Assert
-        SecureXmlParser.MaxMessageSize.ShouldBe(1048576);
+        SecureXmlParser.DefaultMaxMessageSize.ShouldBe(1048576);
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void SignedXmlWithCommentsRoundTripsThoughParser()
+    {
+        // Arrange — build a minimal signed XML document that contains a comment
+        // within the signed content. The signature uses exc-c14n#WithComments,
+        // so the comment is part of the digest. If the parser strips comments,
+        // the digest will no longer match and verification will fail.
+        var doc = new XmlDocument();
+        doc.LoadXml("""
+            <Root ID="test-id">
+              <!-- This comment is covered by the signature -->
+              <Child>value</Child>
+            </Root>
+            """);
+
+        var cert = TestCert.Load();
+        var root = doc.DocumentElement!;
+        var child = root.SelectSingleNode("Child")!;
+        root.Sign(cert, child);
+
+        var signedXml = doc.OuterXml;
+
+        // Act — round-trip through SecureXmlParser (the code under test)
+        var parsed = SecureXmlParser.LoadXmlDocument(signedXml);
+
+        // Assert — the comment survived parsing
+        var comments = parsed.SelectNodes("//comment()");
+        comments.ShouldNotBeNull();
+        comments!.Count.ShouldBe(1);
+
+        // Assert — the signature still validates after parsing
+        var sigElement = parsed.GetElementsByTagName("Signature", "http://www.w3.org/2000/09/xmldsig#")[0] as XmlElement;
+        sigElement.ShouldNotBeNull();
+
+        var (error, workingKey) = sigElement!.VerifySignature(
+            [new SigningKey { Certificate = cert }],
+            ["http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", "http://www.w3.org/2001/04/xmlenc#sha256"]);
+
+        error.ShouldBeNull();
+        workingKey.ShouldNotBeNull();
+    }
 }

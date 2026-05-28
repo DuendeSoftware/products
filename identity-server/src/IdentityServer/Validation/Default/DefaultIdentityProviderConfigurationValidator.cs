@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 
@@ -50,6 +51,19 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
 
             return;
         }
+
+        if (context.IdentityProvider is SamlProvider saml)
+        {
+            var samlContext = new IdentityProviderConfigurationValidationContext<SamlProvider>(saml);
+            await ValidateSamlProviderAsync(samlContext);
+
+            if (!samlContext.IsValid)
+            {
+                context.SetError(samlContext.ErrorMessage);
+            }
+
+            return;
+        }
     }
 
     /// <summary>
@@ -80,4 +94,74 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
 
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Validates the SAML identity provider.
+    /// </summary>
+    protected virtual Task ValidateSamlProviderAsync(IdentityProviderConfigurationValidationContext<SamlProvider> context)
+    {
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.IdpEntityId))
+        {
+            context.SetError("IdpEntityId is missing.");
+            return Task.CompletedTask;
+        }
+
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.SingleSignOnServiceUrl))
+        {
+            context.SetError("SingleSignOnServiceUrl is missing.");
+            return Task.CompletedTask;
+        }
+
+        if (!Uri.TryCreate(context.IdentityProvider.SingleSignOnServiceUrl, UriKind.Absolute, out _))
+        {
+            context.SetError("SingleSignOnServiceUrl is not a valid absolute URL.");
+            return Task.CompletedTask;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.IdentityProvider.SingleLogoutServiceUrl) &&
+            !Uri.TryCreate(context.IdentityProvider.SingleLogoutServiceUrl, UriKind.Absolute, out _))
+        {
+            context.SetError("SingleLogoutServiceUrl is not a valid absolute URL.");
+            return Task.CompletedTask;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.IdentityProvider.SigningCertificateBase64))
+        {
+            try
+            {
+                var certBytes = Convert.FromBase64String(context.IdentityProvider.SigningCertificateBase64);
+                X509CertificateLoader.LoadCertificate(certBytes);
+            }
+            catch (Exception)
+            {
+                context.SetError("SigningCertificateBase64 is not a valid X.509 certificate.");
+                return Task.CompletedTask;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.IdentityProvider.SpSigningCertificateBase64))
+        {
+            try
+            {
+                var certBytes = Convert.FromBase64String(context.IdentityProvider.SpSigningCertificateBase64);
+                var password = context.IdentityProvider.SpSigningCertificatePassword;
+                X509CertificateLoader.LoadPkcs12(certBytes, password);
+            }
+            catch (Exception)
+            {
+                context.SetError("SpSigningCertificateBase64 is not a valid PKCS#12 certificate.");
+                return Task.CompletedTask;
+            }
+        }
+
+        var binding = context.IdentityProvider.BindingType;
+        if (!binding.Equals("redirect", StringComparison.OrdinalIgnoreCase) &&
+            !binding.Equals("post", StringComparison.OrdinalIgnoreCase))
+        {
+            context.SetError("BindingType must be 'redirect' or 'post'.");
+        }
+
+        return Task.CompletedTask;
+    }
 }
+

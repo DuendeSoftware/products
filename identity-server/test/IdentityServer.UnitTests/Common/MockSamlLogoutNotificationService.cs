@@ -3,17 +3,19 @@
 
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Services;
 
 namespace UnitTests.Common;
 
 public class MockSamlLogoutNotificationService : ISamlLogoutNotificationService
 {
     public bool GetSamlFrontChannelLogoutsAsyncCalled { get; set; }
-    public List<ISamlFrontChannelLogout> SamlFrontChannelLogouts { get; set; } = [];
+    public List<SamlLogoutRequestContext> SamlFrontChannelLogouts { get; set; } = [];
+    public int SkippedCount { get; set; }
 
-    public Task<IReadOnlyCollection<ISamlFrontChannelLogout>> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct _)
+    public Task<SamlLogoutNotificationResult> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct _)
     {
         GetSamlFrontChannelLogoutsAsyncCalled = true;
-        return Task.FromResult<IReadOnlyCollection<ISamlFrontChannelLogout>>(SamlFrontChannelLogouts);
+        return Task.FromResult(new SamlLogoutNotificationResult(SamlFrontChannelLogouts, SkippedCount));
     }
 }

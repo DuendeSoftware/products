@@ -9,64 +9,104 @@ using Microsoft.AspNetCore.Http;
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// Configures the login and logout views and behavior.
+/// Configures login, logout, and cookie behavior for interactive users.
 /// </summary>
 public class AuthenticationOptions
 {
     /// <summary>
-    /// Sets the cookie authentication scheme configured by the host used for interactive users. If not set, the scheme will be inferred from the host's default authentication scheme.
-    /// This setting is typically used when AddPolicyScheme is used in the host as the default scheme.
+    /// Gets or sets the cookie authentication scheme used for interactive users. When not set, the scheme is
+    /// inferred from the host's default authentication scheme.
     /// </summary>
+    /// <remarks>
+    /// This setting is typically needed when <c>AddPolicyScheme</c> is used as the default
+    /// authentication scheme in the host application, so that IdentityServer can resolve the
+    /// correct underlying cookie scheme.
+    /// </remarks>
     public string? CookieAuthenticationScheme { get; set; }
 
     /// <summary>
-    /// Sets the cookie lifetime (only effective if the IdentityServer-provided cookie handler is used)
+    /// Gets or sets the lifetime of the authentication cookie. Only effective when the IdentityServer-provided
+    /// cookie handler is used.
     /// </summary>
+    /// <remarks>
+    /// Defaults to 10 hours (<see cref="Constants.DefaultCookieTimeSpan"/>).
+    /// </remarks>
     public TimeSpan CookieLifetime { get; set; } = Constants.DefaultCookieTimeSpan;
 
     /// <summary>
-    /// Specifies if the cookie should be sliding or not (only effective if the built-in cookie middleware is used)
+    /// Gets or sets a value indicating whether the authentication cookie uses sliding expiration. Only effective when
+    /// the IdentityServer-provided cookie handler is used.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>false</c>. When <c>true</c>, the cookie expiration is reset on each
+    /// authenticated request, keeping active users logged in.
+    /// </remarks>
     public bool CookieSlidingExpiration { get; set; }
 
     /// <summary>
-    /// Specifies the SameSite mode for the internal authentication and temp cookie
+    /// Gets or sets the <c>SameSite</c> mode applied to internal authentication and temporary cookies.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <see cref="SameSiteMode.None"/>, which is required for cross-site scenarios
+    /// such as iframes used by the check-session endpoint.
+    /// </remarks>
     public SameSiteMode CookieSameSiteMode { get; set; } = SameSiteMode.None;
 
     /// <summary>
-    /// Indicates if user must be authenticated to accept parameters to end session endpoint. Defaults to false.
+    /// Gets or sets a value indicating whether the user must be authenticated before IdentityServer will accept sign-out
+    /// parameters on the end-session endpoint.
     /// </summary>
-    /// <value>
-    /// <c>true</c> if required; otherwise, <c>false</c>.
-    /// </value>
+    /// <remarks>
+    /// Defaults to <c>false</c>. When <c>true</c>, unauthenticated requests to the end-session
+    /// endpoint will not process logout parameters such as <c>id_token_hint</c>.
+    /// </remarks>
     public bool RequireAuthenticatedUserForSignOutMessage { get; set; }
 
     /// <summary>
-    /// Gets or sets the name of the cookie used for the check session endpoint.
+    /// Gets or sets the name of the cookie used by the check-session endpoint to track the user's session state.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <see cref="IdentityServerConstants.DefaultCheckSessionCookieName"/>
+    /// (<c>"idsrv.session"</c>).
+    /// </remarks>
     public string CheckSessionCookieName { get; set; } = IdentityServerConstants.DefaultCheckSessionCookieName;
 
     /// <summary>
-    /// Gets or sets the domain of the cookie used for the check session endpoint. Defaults to null.
+    /// Gets or sets the domain of the cookie used by the check-session endpoint.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>null</c>, which means the cookie is scoped to the current host.
+    /// </remarks>
     public string? CheckSessionCookieDomain { get; set; }
 
     /// <summary>
-    /// Gets or sets the SameSite mode of the cookie used for the check session endpoint. Defaults to SameSiteMode.None.
+    /// Gets or sets the <c>SameSite</c> mode of the cookie used by the check-session endpoint.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <see cref="SameSiteMode.None"/> to support cross-origin iframe-based
+    /// session monitoring.
+    /// </remarks>
     public SameSiteMode CheckSessionCookieSameSiteMode { get; set; } = SameSiteMode.None;
 
     /// <summary>
-    /// If set, will require frame-src CSP headers being emitted on the end session callback endpoint which renders iframes to clients for front-channel sign out notification.
+    /// Gets or sets a value indicating whether Content Security Policy headers on the end-session endpoint are enabled.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>true</c>. When enabled, the end-session endpoint emits CSP headers
+    /// including <c>default-src 'none'</c>, a <c>style-src</c> with the expected style hash,
+    /// and additional fetch directives. Despite the property name referencing <c>frame-src</c>,
+    /// the full set of CSP fetch directives is applied.
+    /// </remarks>
     public bool RequireCspFrameSrcForSignout { get; set; } = true;
 
     /// <summary>
-    /// When enabled, all clients' token lifetimes (e.g. refresh tokens) will be tied to the user's session lifetime.
-    /// This means when the user logs out, any revokable tokens will be removed.
-    /// If using server-side sessions, expired sessions will also remove any revokable tokens, and backchannel logout will be triggered.
-    /// An individual client can override this setting with its own CoordinateLifetimeWithUserSession configuration setting.
+    /// Gets or sets a value indicating whether all clients' token lifetimes are tied to the user's session lifetime at IdentityServer.
     /// </summary>
+    /// <remarks>
+    /// Defaults to <c>false</c>. When enabled, logging out revokes all revocable tokens
+    /// (e.g., refresh tokens) for the user. When server-side sessions are also used, expired
+    /// sessions trigger token revocation and back-channel logout. Individual clients can override
+    /// this behavior via their own <c>CoordinateLifetimeWithUserSession</c> setting.
+    /// </remarks>
     public bool CoordinateClientLifetimesWithUserSession { get; set; }
 }

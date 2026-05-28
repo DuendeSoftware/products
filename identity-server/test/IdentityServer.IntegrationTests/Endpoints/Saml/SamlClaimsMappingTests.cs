@@ -6,7 +6,6 @@ using System.Net;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Saml;
 using Microsoft.Extensions.DependencyInjection;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 
@@ -26,7 +25,9 @@ public class SamlClaimsMappingTests
     public async Task claims_should_use_default_mappings_for_standard_claims()
     {
         // Arrange - default mappings should be active
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var sp = Build.SamlServiceProvider();
+        sp.RequestedClaimTypes = ["name", "email", "role"];
+        Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
         var claims = new List<Claim>
@@ -44,7 +45,7 @@ public class SamlClaimsMappingTests
         var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -71,8 +72,11 @@ public class SamlClaimsMappingTests
     [Trait("Category", Category)]
     public async Task unmapped_claims_should_be_excluded_from_assertion()
     {
-        // Arrange - only default mappings active
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        // Arrange - only request the "name" claim; unmapped claims are excluded
+        // because they are not in RequestedClaimTypes
+        var sp = Build.SamlServiceProvider();
+        sp.RequestedClaimTypes = ["name"];
+        Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
         var claims = new List<Claim>
@@ -90,7 +94,7 @@ public class SamlClaimsMappingTests
         var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -120,6 +124,7 @@ public class SamlClaimsMappingTests
             ["email"] = "mail", // Override default mapping
             ["department"] = "ou" // Custom mapping
         });
+        spWithCustomMappings.RequestedClaimTypes = ["email", "department"];
 
         Fixture.ServiceProviders.Add(spWithCustomMappings);
         await Fixture.InitializeAsync();
@@ -138,7 +143,7 @@ public class SamlClaimsMappingTests
         var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -163,57 +168,12 @@ public class SamlClaimsMappingTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task custom_claim_mapper_should_replace_default_mapping_logic()
-    {
-        // Arrange - register custom mapper via ConfigureServices
-        var customMapper = new TestSamlClaimsMapper();
-        Fixture.ConfigureServices = services =>
-        {
-            services.AddSingleton<ISamlClaimsMapper>(customMapper);
-        };
-
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
-        await Fixture.InitializeAsync();
-
-        var claims = new List<Claim>
-        {
-            new(JwtClaimTypes.Subject, "user123"),
-            new("email", "test@example.com"),
-            new("name", "Should be ignored")
-        };
-
-        Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
-        await Fixture.Client.GetAsync("/__signin", _ct);
-
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-
-        // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        // Assert
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-
-        var attributes = successResponse.Assertion.Attributes;
-        attributes.ShouldNotBeNull();
-
-        // Verify custom mapper output appears
-        var customAttr = attributes.FirstOrDefault(a => a.Name == "CUSTOM_MAPPED");
-        customAttr.ShouldNotBeNull();
-        customAttr.Value.ShouldBe("custom_value");
-
-        // Verify default mappings were NOT applied (custom mapper replaces everything)
-        attributes.ShouldNotContain(a => a.Name == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
-        attributes.ShouldNotContain(a => a.Name == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
-    }
-
-    [Fact]
-    [Trait("Category", Category)]
     public async Task multi_valued_claims_should_be_grouped_into_single_attribute()
     {
         // Arrange
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var sp = Build.SamlServiceProvider();
+        sp.RequestedClaimTypes = ["role"];
+        Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
         var claims = new List<Claim>
@@ -231,7 +191,7 @@ public class SamlClaimsMappingTests
         var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -259,18 +219,23 @@ public class SamlClaimsMappingTests
         // Arrange - configure custom global mappings via ConfigureServices
         Fixture.ConfigureServices = services =>
         {
-            // Replace the registered SamlOptions with our custom instance
-            services.AddSingleton(Microsoft.Extensions.Options.Options.Create(new SamlOptions
+            // Configure custom global claim mappings via IdentityServerOptions.Saml
+            services.PostConfigure<IdentityServerOptions>(options =>
             {
-                DefaultClaimMappings = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
+                options.Saml = new SamlOptions
                 {
-                    ["email"] = "emailAddress",
-                    ["department"] = "dept"
-                })
-            }));
+                    DefaultClaimMappings = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
+                    {
+                        ["email"] = "emailAddress",
+                        ["department"] = "dept"
+                    })
+                };
+            });
         };
 
-        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        var sp = Build.SamlServiceProvider();
+        sp.RequestedClaimTypes = ["email", "department"];
+        Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
         var claims = new List<Claim>
@@ -287,7 +252,7 @@ public class SamlClaimsMappingTests
         var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
 
         // Act
-        var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.Client.GetAsync($"/Saml2/SSO?SAMLRequest={urlEncoded}", _ct);
 
         // Assert
         result.StatusCode.ShouldBe(HttpStatusCode.OK);

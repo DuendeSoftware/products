@@ -4,6 +4,7 @@ using Duende.IdentityServer;
 using IdentityServerTemplate.Pages.Admin.ApiScopes;
 using IdentityServerTemplate.Pages.Admin.Clients;
 using IdentityServerTemplate.Pages.Admin.IdentityScopes;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +19,7 @@ internal static class HostingExtensions
     public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
     {
         // Write most logs to the console but diagnostic data to a file.
-        // See https://docs.duendesoftware.com/identityserver/diagnostics/data
+        // See https://duende.link/diagnostics
         _ = builder.Services.AddSerilog(lc =>
         {
             _ = lc.WriteTo.Logger(consoleLogger =>
@@ -136,6 +137,11 @@ internal static class HostingExtensions
             _ = builder.Services.AddTransient<IdentityScopeRepository>();
             _ = builder.Services.AddTransient<ApiScopeRepository>();
         }
+
+        // add `.PersistKeysTo…()` and `.ProtectKeysWith…()` calls
+        // see more at https://docs.duendesoftware.com/general/data-protection
+        _ = builder.Services.AddDataProtection()
+                   .SetApplicationName("IdentityServer");
 
         // this adds the necessary config for the portal page
         _ = builder.Services.AddTransient<Pages.Portal.ClientRepository>();

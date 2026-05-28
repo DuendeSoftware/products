@@ -27,7 +27,26 @@ public class IsActiveContext
         }
 
         Subject = subject;
-        Client = client;
+        Application = client;
+        Caller = caller;
+
+        IsActive = true;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IsActiveContext"/> class.
+    /// </summary>
+    public IsActiveContext(ClaimsPrincipal subject, IConnectedApplication application, string caller)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(application);
+        if (caller.IsMissing())
+        {
+            throw new ArgumentNullException(nameof(caller));
+        }
+
+        Subject = subject;
+        Application = application;
         Caller = caller;
 
         IsActive = true;
@@ -42,12 +61,12 @@ public class IsActiveContext
     public ClaimsPrincipal Subject { get; set; }
 
     /// <summary>
-    /// Gets or sets the client.
+    /// Gets or sets the connected application (OIDC client or SAML service provider).
     /// </summary>
     /// <value>
-    /// The client.
+    /// The connected application.
     /// </value>
-    public Client Client { get; set; }
+    public IConnectedApplication? Application { get; set; }
 
     /// <summary>
     /// Gets or sets the caller.

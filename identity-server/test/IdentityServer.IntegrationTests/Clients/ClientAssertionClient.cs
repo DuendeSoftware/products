@@ -21,6 +21,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 public class ClientAssertionClient
 {
     private const string TokenEndpoint = "https://idsvr4/connect/token";
+    private const string Issuer = "https://idsvr4";
     private const string ClientId = "certificate_base64_valid";
 
     private readonly HttpClient _client;
@@ -211,7 +212,7 @@ public class ClientAssertionClient
         var payload = GetPayload(response);
 
         payload.Count.ShouldBe(8);
-        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["iss"].GetString().ShouldBe(Issuer);
         payload["aud"].GetString().ShouldBe("api");
         payload["client_id"].GetString().ShouldBe(ClientId);
         payload.Keys.ShouldContain("iat");
@@ -236,7 +237,7 @@ public class ClientAssertionClient
 
         var token = new JwtSecurityToken(
             clientId,
-            TokenEndpoint,
+            Issuer,
             new List<Claim>()
             {
                 new Claim("jti", Guid.NewGuid().ToString()),
@@ -250,6 +251,8 @@ public class ClientAssertionClient
                 SecurityAlgorithms.RsaSha256
             )
         );
+
+        token.Header["typ"] = JwtClaimTypes.JwtTypes.ClientAuthentication;
 
         var tokenHandler = new JwtSecurityTokenHandler();
         return tokenHandler.WriteToken(token);

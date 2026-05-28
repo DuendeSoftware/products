@@ -1,0 +1,1 @@
+<samlp:Response ID="x123" Version="2.0" IssueInstant="2025-10-07T11:13:32Z" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"><samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Requester" /></samlp:Status></samlp:Response>

@@ -9,14 +9,17 @@ using Duende.IdentityServer.Events;
 namespace Duende.IdentityServer.Services;
 
 /// <summary>
-/// Models persistence of events
+/// Handles the persistence or forwarding of IdentityServer events raised by <see cref="IEventService"/>.
+/// Implement this interface to integrate IdentityServer's event stream with an external system
+/// such as a logging framework, audit database, or SIEM solution.
 /// </summary>
 public interface IEventSink
 {
     /// <summary>
-    /// Raises the specified event.
+    /// Persists or forwards the specified event to the underlying storage or external system.
+    /// Called by <see cref="IEventService"/> for every event that passes the configured event filter.
     /// </summary>
-    /// <param name="evt">The event.</param>
+    /// <param name="evt">The event to persist or forward.</param>
     /// <param name="ct">The cancellation token.</param>
     Task PersistAsync(Event evt, Ct ct);
 }

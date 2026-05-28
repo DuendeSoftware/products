@@ -9,9 +9,8 @@ using System.Text.Encodings.Web;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.Internal.Saml;
-using Duende.IdentityServer.Internal.Saml.Infrastructure;
-using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Bindings;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -69,7 +68,16 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
         {
             var sb = new StringBuilder();
             var origins = result.Result.FrontChannelLogoutUrls?.Select(x => x.GetOrigin()) ?? [];
-            origins = origins.Concat(result.Result.SamlFrontChannelLogouts.Select(x => x.Destination.OriginalString));
+            origins = origins.Concat(result.Result.SamlFrontChannelLogouts.Select(x => x.Message.Destination.GetOrigin()));
+
+            // When SAML SPs receive a front-channel LogoutRequest in an iframe, they respond
+            // with a redirect back to the IdP's SLO endpoint. Allow 'self' so the browser
+            // permits that redirect within the iframe.
+            if (result.Result.SamlFrontChannelLogouts.Any())
+            {
+                origins = origins.Append("'self'");
+            }
+
             foreach (var origin in origins.Distinct())
             {
                 sb.Append(origin);
@@ -79,21 +87,8 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
                 }
             }
 
-            if (result.Result.SamlFrontChannelLogouts.Any())
-            {
-                // the hash matches the embedded style element being used below
-                // and the SAML auto-post script hash allows the inline script in the iframe srcdoc
-                context.Response.AddStyleAndScriptCspHeaders(
-                    _options.Csp,
-                    IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle,
-                    IdentityServerConstants.ContentSecurityPolicyHashes.SamlAutoPostScript,
-                    sb.ToString());
-            }
-            else
-            {
-                // the hash matches the embedded style element being used below
-                context.Response.AddStyleCspHeaders(_options.Csp, IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle, sb.ToString());
-            }
+            // the hash matches the embedded style element being used below
+            context.Response.AddStyleCspHeaders(_options.Csp, IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle, sb.ToString());
         }
     }
 
@@ -113,22 +108,19 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
 
         if (result.Result.SamlFrontChannelLogouts.Any())
         {
-            foreach (var samlFrontChannelLogout in result.Result.SamlFrontChannelLogouts)
+            foreach (var requestContext in result.Result.SamlFrontChannelLogouts)
             {
-                switch (samlFrontChannelLogout.SamlBinding)
+                var message = requestContext.Message;
+                if (message.Binding != SamlConstants.Bindings.HttpRedirect)
                 {
-                    case SamlBinding.HttpPost:
-                        var autoPostFormContent = HttpResponseBindings.GenerateAutoPostForm(SamlConstants.RequestProperties.SAMLRequest, samlFrontChannelLogout.EncodedContent, samlFrontChannelLogout.Destination, samlFrontChannelLogout.RelayState, includeCsp: true);
-                        sb.Append(CultureInfo.InvariantCulture, $"<iframe sandbox='allow-forms allow-scripts allow-same-origin' srcdoc='{HtmlEncoder.Default.Encode(autoPostFormContent)}'></iframe>");
-                        break;
-                    case SamlBinding.HttpRedirect:
-                        sb.Append(CultureInfo.InvariantCulture, $"<iframe loading='eager' allow='' src='{HtmlEncoder.Default.Encode($"{samlFrontChannelLogout.Destination}?{samlFrontChannelLogout.EncodedContent}")}'></iframe>");
-                        break;
-                    default:
-                        _logger.LogDebug("Unknown SAML Binding: {SamlBinding}", samlFrontChannelLogout.SamlBinding);
-                        break;
+                    _logger.LogDebug("Unsupported SAML Binding: {Binding}", message.Binding);
+                    continue;
                 }
 
+                var queryString = HttpRedirectBinding.GetQueryString(message);
+                var separator = message.Destination.Contains('?', StringComparison.Ordinal) ? "&" : "?";
+                var redirectUrl = $"{message.Destination}{separator}{queryString.TrimStart('?')}";
+                sb.Append(CultureInfo.InvariantCulture, $"<iframe loading='eager' allow='' src='{HtmlEncoder.Default.Encode(redirectUrl)}'></iframe>");
                 sb.AppendLine();
             }
         }

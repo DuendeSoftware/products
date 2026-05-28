@@ -15,7 +15,7 @@ namespace Duende.IdentityServer.Models;
 public class RefreshToken
 {
     /// <summary>
-    /// Gets or sets the creation time.
+    /// Gets or sets the UTC time when this refresh token was created.
     /// </summary>
     /// <value>
     /// The creation time.
@@ -23,7 +23,7 @@ public class RefreshToken
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the life time.
+    /// Gets or sets the lifetime of the refresh token in seconds.
     /// </summary>
     /// <value>
     /// The life time.
@@ -31,7 +31,8 @@ public class RefreshToken
     public int Lifetime { get; set; }
 
     /// <summary>
-    /// Gets or sets the consumed time.
+    /// Gets or sets the UTC time when this refresh token was consumed (redeemed for a new token).
+    /// <c>null</c> means the token has not been consumed yet.
     /// </summary>
     /// <value>
     /// The consumed time.
@@ -48,7 +49,8 @@ public class RefreshToken
     public Token? AccessToken { get; set; }
 
     /// <summary>
-    /// Gets or sets the resource indicator specific access token.
+    /// Gets or sets the resource indicator specific access tokens associated with this refresh token.
+    /// Keyed by resource indicator (empty string for the default resource).
     /// </summary>
     /// <value>
     /// The access token.
@@ -83,7 +85,7 @@ public class RefreshToken
     public ClaimsPrincipal Subject { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the version number.
+    /// Gets or sets the version number of the refresh token format. Used for backwards compatibility when deserializing persisted grants.
     /// </summary>
     /// <value>
     /// The version.
@@ -91,7 +93,7 @@ public class RefreshToken
     public int Version { get; set; } = 5;
 
     /// <summary>
-    /// Gets the client identifier.
+    /// Gets or sets the client identifier.
     /// </summary>
     /// <value>
     /// The client identifier.
@@ -107,7 +109,7 @@ public class RefreshToken
     public string? SubjectId => Subject?.FindFirst(JwtClaimTypes.Subject)?.Value;
 
     /// <summary>
-    /// Gets the session identifier.
+    /// Gets or sets the session identifier.
     /// </summary>
     /// <value>
     /// The session identifier.
@@ -115,7 +117,7 @@ public class RefreshToken
     public string? SessionId { get; set; }
 
     /// <summary>
-    /// Gets the description the user assigned to the device being authorized.
+    /// Gets or sets the description the user assigned to the device being authorized.
     /// </summary>
     /// <value>
     /// The description.
@@ -123,7 +125,7 @@ public class RefreshToken
     public string? Description { get; set; }
 
     /// <summary>
-    /// Gets the scopes.
+    /// Gets or sets the scopes that were authorized when this refresh token was issued.
     /// </summary>
     /// <value>
     /// The scopes.
@@ -131,13 +133,15 @@ public class RefreshToken
     public IEnumerable<string> AuthorizedScopes { get; set; } = default!;
 
     /// <summary>
-    /// The resource indicators. Null indicates there was no authorization step, thus no restrictions.
-    /// Non-null means there was an authorization step, and subsequent requested resource indicators must be in the original list.
+    /// Gets or sets the resource indicators authorized for this refresh token.
+    /// <c>null</c> indicates there was no authorization step with resource indicators, so there are no restrictions.
+    /// A non-null value means subsequent requested resource indicators must be a subset of this list.
     /// </summary>
     public IEnumerable<string>? AuthorizedResourceIndicators { get; set; }
 
     /// <summary>
-    /// The type of proof used for the refresh token. Null indicates refresh tokens created prior to this property being added.
+    /// Gets or sets the type of proof used to bind this refresh token (e.g. DPoP). <c>null</c> indicates refresh tokens
+    /// created prior to this property being added, or that no proof binding is used.
     /// </summary>
     public ProofType? ProofType { get; set; }
 }

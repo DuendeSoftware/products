@@ -8,6 +8,7 @@
 
     <IsTestProject>false</IsTestProject>
     <IsPackable>true</IsPackable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <Nullable>disable</Nullable><!-- TODO: enable nullable -->
 
     <PackageId>Duende.Templates</PackageId>
@@ -56,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer">
+    <PackageReference Include="MinVer" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

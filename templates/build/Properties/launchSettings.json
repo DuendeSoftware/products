@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "build": {
-      "commandName": "Project",
-      "workingDirectory": "$(projectdir)../"
-    }
-  }
-}

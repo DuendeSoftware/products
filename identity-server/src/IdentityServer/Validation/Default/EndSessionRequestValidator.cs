@@ -57,6 +57,16 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     protected ISamlLogoutNotificationService SamlLogoutNotificationService { get; }
 
     /// <summary>
+    /// The SAML logout session store.
+    /// </summary>
+    protected ISamlLogoutSessionStore SamlLogoutSessionStore { get; }
+
+    /// <summary>
+    /// The time provider.
+    /// </summary>
+    protected TimeProvider TimeProvider { get; }
+
+    /// <summary>
     /// The end session message store.
     /// </summary>
     protected readonly IMessageStore<LogoutNotificationContext> EndSessionMessageStore;
@@ -70,8 +80,10 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     /// <param name="userSession"></param>
     /// <param name="logoutNotificationService"></param>
     /// <param name="samlLogoutNotificationService"></param>
+    /// <param name="timeProvider"></param>
     /// <param name="endSessionMessageStore"></param>
     /// <param name="logger"></param>
+    /// <param name="samlLogoutSessionStore"></param>
     public EndSessionRequestValidator(
         IdentityServerOptions options,
         ITokenValidator tokenValidator,
@@ -79,8 +91,10 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         IUserSession userSession,
         ILogoutNotificationService logoutNotificationService,
         ISamlLogoutNotificationService samlLogoutNotificationService,
+        TimeProvider timeProvider,
         IMessageStore<LogoutNotificationContext> endSessionMessageStore,
-        ILogger<EndSessionRequestValidator> logger)
+        ILogger<EndSessionRequestValidator> logger,
+        ISamlLogoutSessionStore samlLogoutSessionStore = null)
     {
         Options = options;
         TokenValidator = tokenValidator;
@@ -88,8 +102,10 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         UserSession = userSession;
         LogoutNotificationService = logoutNotificationService;
         SamlLogoutNotificationService = samlLogoutNotificationService;
+        TimeProvider = timeProvider;
         EndSessionMessageStore = endSessionMessageStore;
         Logger = logger;
+        SamlLogoutSessionStore = samlLogoutSessionStore;
     }
 
     /// <inheritdoc />
@@ -137,21 +153,29 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
 
             validatedRequest.SetClient(tokenValidationResult.Client);
 
-            // validate sub claim against currently logged on user
-            var subClaim = tokenValidationResult.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
-            if (subClaim != null && isAuthenticated)
+            if (isAuthenticated)
             {
-                if (subject.GetSubjectId() != subClaim.Value)
+                var sessionId = await UserSession.GetSessionIdAsync(ct);
+                var hintValidationContext = new EndSessionHintValidationContext(subject, tokenValidationResult, sessionId);
+                var hintResult = await ValidateIdTokenHintAsync(hintValidationContext, ct);
+
+                switch (hintResult.Outcome)
                 {
-                    return Invalid("Current user does not match identity token", validatedRequest);
+                    case EndSessionHintValidationOutcome.Invalid:
+                        return Invalid(hintResult.ErrorMessage, validatedRequest);
+
+                    case EndSessionHintValidationOutcome.Valid:
+                    case EndSessionHintValidationOutcome.RequiresConfirmation:
+                        validatedRequest.Subject = subject;
+                        validatedRequest.SessionId = sessionId;
+                        validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
+                        validatedRequest.SamlSessions = await UserSession.GetSamlSessionListAsync(ct);
+                        if (hintResult.Outcome == EndSessionHintValidationOutcome.RequiresConfirmation)
+                        {
+                            validatedRequest.RequiresConfirmation = true;
+                        }
+                        break;
                 }
-
-                validatedRequest.Subject = subject;
-                validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
-                validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
-
-                var samlSessions = await UserSession.GetSamlSessionListAsync(ct);
-                validatedRequest.SamlSessions = samlSessions;
             }
 
             var redirectUri = parameters.Get(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
@@ -236,6 +260,65 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         Logger.LogInformation("End session request validation success:{@details}", log);
     }
 
+    /// <summary>
+    /// Validates the id_token_hint's claims (sub/sid) against the current user session.
+    /// Override this method to customize how the id_token_hint is matched to the session.
+    /// </summary>
+    /// <param name="context">
+    /// The context containing the current authenticated user, the token validation result
+    /// (with all token claims), and the current session ID.
+    /// </param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>
+    /// An <see cref="EndSessionHintValidationResult"/> indicating whether the hint is valid,
+    /// invalid, or requires user confirmation.
+    /// </returns>
+    /// <remarks>
+    /// The default implementation uses a sid-first strategy: if a <c>sid</c> claim is present
+    /// in the token and the current session has a session ID, the two are compared. If no <c>sid</c>
+    /// is present, or the current session has no session ID, the <c>sub</c> claim is compared
+    /// against the authenticated user's subject ID as a fallback.
+    /// If neither claim is present, the hint is treated as valid.
+    /// <para>
+    /// <b>Security note</b>: Returning <see cref="EndSessionHintValidationResult.Valid"/> unconditionally
+    /// (i.e., accepting any id_token_hint regardless of sub/sid match) creates a cross-user logout
+    /// vector. An attacker holding any valid id_token_hint can silently log out other users when the
+    /// signout prompt is suppressed. Ensure custom overrides apply appropriate validation logic.
+    /// </para>
+    /// </remarks>
+    protected virtual Task<EndSessionHintValidationResult> ValidateIdTokenHintAsync(
+        EndSessionHintValidationContext context, Ct ct)
+    {
+        var sidClaim = context.TokenValidationResult.Claims
+            .FirstOrDefault(c => c.Type == JwtClaimTypes.SessionId);
+
+        if (sidClaim != null && context.SessionId != null)
+        {
+            // Sid-based comparison (preferred per OIDC RP-Initiated Logout spec)
+            if (context.SessionId != sidClaim.Value)
+            {
+                return Task.FromResult(EndSessionHintValidationResult.Invalid(
+                    "Session ID in id_token_hint does not match current session"));
+            }
+            return Task.FromResult(EndSessionHintValidationResult.Valid());
+        }
+
+        var subClaim = context.TokenValidationResult.Claims
+            .FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
+
+        if (subClaim != null)
+        {
+            // Sub-based comparison (fallback when no sid is present)
+            if (context.Subject.GetSubjectId() != subClaim.Value)
+            {
+                return Task.FromResult(EndSessionHintValidationResult.Invalid(
+                    "Current user does not match identity token"));
+            }
+        }
+
+        return Task.FromResult(EndSessionHintValidationResult.Valid());
+    }
+
     /// <inheritdoc />
     public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, Ct ct)
     {
@@ -251,8 +334,49 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             result.IsError = false;
             result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data, ct);
 
-            var samlFrontChannelLogouts = await SamlLogoutNotificationService.GetSamlFrontChannelLogoutsAsync(endSessionMessage.Data, ct);
-            result.SamlFrontChannelLogouts = samlFrontChannelLogouts;
+            var notificationResult = await SamlLogoutNotificationService.GetSamlFrontChannelLogoutsAsync(endSessionMessage.Data, ct);
+            result.SamlFrontChannelLogouts = notificationResult.Messages;
+
+            // Populate the logout session store for SAML-initiated logouts so that
+            // SingleLogoutCallbackEndpoint can determine success/partial based on responses.
+            if (endSessionMessage.Data.SamlLogoutId == null && notificationResult.Messages.Count > 0)
+            {
+                Logger.LogWarning(
+                    "SAML front-channel logouts exist but SamlLogoutId is null. " +
+                    "SP logout response tracking will be unavailable for this session");
+            }
+
+            if (endSessionMessage.Data.SamlLogoutId != null)
+            {
+                if (SamlLogoutSessionStore is null)
+                {
+                    Logger.LogError(
+                        "SAML logout session tracking was requested but ISamlLogoutSessionStore is not registered. " +
+                        "Ensure SAML support is configured via AddSaml().");
+                    result.IsError = true;
+                    result.Error = "SAML logout session store not configured";
+                    return result;
+                }
+
+                var expectedResponses = new Dictionary<string, ExpectedSpLogout>();
+                foreach (var requestContext in notificationResult.Messages)
+                {
+                    expectedResponses[requestContext.RequestId] = new ExpectedSpLogout(requestContext.SpEntityId);
+                }
+
+                // Always store the session, even with empty ExpectedResponses.
+                // An empty session means no other SPs needed notification (single-SP case) → Success.
+                // A missing session means tracking state was lost → PartialLogout.
+                var session = new SamlLogoutSession
+                {
+                    LogoutId = endSessionMessage.Data.SamlLogoutId,
+                    ExpectedResponses = expectedResponses,
+                    SkippedSpCount = notificationResult.SkippedCount,
+                    CreatedUtc = TimeProvider.GetUtcNow(),
+                    ExpiresAtUtc = TimeProvider.GetUtcNow().Add(Options.Saml.LogoutSessionLifetime).UtcDateTime
+                };
+                await SamlLogoutSessionStore.StoreAsync(session, ct);
+            }
         }
         else
         {

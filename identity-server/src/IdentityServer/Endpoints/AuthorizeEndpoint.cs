@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
 
-internal class AuthorizeEndpoint : AuthorizeEndpointBase
+internal sealed class AuthorizeEndpoint : AuthorizeEndpointBase
 {
     public AuthorizeEndpoint(
         IEventService events,
@@ -27,9 +27,8 @@ internal class AuthorizeEndpoint : AuthorizeEndpointBase
         IAuthorizeInteractionResponseGenerator interactionGenerator,
         IAuthorizeResponseGenerator authorizeResponseGenerator,
         IUserSession userSession,
-        IConsentMessageStore consentResponseStore,
-        IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
-        : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession, consentResponseStore, authorizationParametersMessageStore)
+        IConsentMessageStore consentResponseStore)
+        : base(events, logger, options, validator, interactionGenerator, authorizeResponseGenerator, userSession, consentResponseStore)
     {
     }
 

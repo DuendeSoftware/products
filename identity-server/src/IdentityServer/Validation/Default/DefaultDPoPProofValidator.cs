@@ -251,7 +251,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             var key = new Microsoft.IdentityModel.Tokens.JsonWebKey(result.JsonWebKey);
             var tvp = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
-#pragma warning disable CA5404 // This is intentional
+#pragma warning disable CA5404 // DPoP proof tokens (RFC 9449) are self-issued by clients with no issuer/audience; freshness is validated separately in ValidatePayloadAsync/ValidateFreshnessAsync
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateLifetime = false,
@@ -331,7 +331,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return;
         }
 
-        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpUrl, out var htu) || context.Url?.Equals(htu) == false)
+        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpUrl, out var htu) || !IsHtuMatch(context.Url, htu as string))
         {
             result.IsError = true;
             result.ErrorDescription = "Invalid 'htu' value.";
@@ -549,5 +549,28 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Compares the expected URL with the htu claim value, ignoring query and fragment
+    /// components as required by RFC 9449 §4.3 step 9. Applies syntax-based and scheme-based
+    /// normalization per RFC 3986 §6.2.2 and §6.2.3 as recommended by RFC 9449 §4.3.
+    /// </summary>
+    private static bool IsHtuMatch(string expectedUrl, string htu)
+    {
+        if (!Uri.TryCreate(expectedUrl, UriKind.Absolute, out var expectedUri) ||
+            !Uri.TryCreate(htu, UriKind.Absolute, out var htuUri))
+        {
+            return false;
+        }
+
+        // Scheme and host are case-insensitive per RFC 3986 §6.2.2.1
+        // Path is case-sensitive per RFC 3986 §6.2.2.1
+        // Query and fragment are ignored per RFC 9449 §4.3 step 9
+        // Default ports are normalized per RFC 3986 §6.2.3
+        return string.Equals(expectedUri.Scheme, htuUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(expectedUri.Host, htuUri.Host, StringComparison.OrdinalIgnoreCase) &&
+               expectedUri.Port == htuUri.Port &&
+               string.Equals(expectedUri.AbsolutePath, htuUri.AbsolutePath, StringComparison.Ordinal);
     }
 }

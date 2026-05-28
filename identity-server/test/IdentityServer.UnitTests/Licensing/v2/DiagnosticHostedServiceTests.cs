@@ -25,7 +25,7 @@ public class DiagnosticHostedServiceTests
             secondDiagnosticEntry,
             thirdDiagnosticEntry
         };
-        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries);
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries, new FakeTimeProvider());
         var diagnosticSummary = new DiagnosticSummary(diagnosticService, new IdentityServerOptions(), new StubLoggerFactory(diagnosticSummaryLogger));
 
         var options = Options.Create(new IdentityServerOptions());

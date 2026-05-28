@@ -278,7 +278,8 @@ internal static class Factory
         JwtRequestValidator jwtRequestValidator = null,
         IJwtRequestUriHttpClient jwtRequestUriHttpClient = null,
         IPushedAuthorizationService pushedAuthorizationService = null,
-        IdentityServerOptions options = null)
+        IdentityServerOptions options = null,
+        TimeProvider timeProvider = null)
     {
         jwtRequestValidator ??= new JwtRequestValidator("https://identityserver",
             new LoggerFactory().CreateLogger<JwtRequestValidator>());
@@ -293,7 +294,8 @@ internal static class Factory
             jwtRequestUriHttpClient,
             pushedAuthorizationService,
             options,
-            TestLogger.Create<RequestObjectValidator>());
+            TestLogger.Create<RequestObjectValidator>(),
+            timeProvider ?? new FakeTimeProvider());
     }
 
     public static TokenValidator CreateTokenValidator(

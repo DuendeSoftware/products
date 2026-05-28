@@ -14,6 +14,7 @@ namespace IdentityServer.UnitTests.Licensing.V2;
 public class DiagnosticSummaryTests
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
+    private readonly FakeTimeProvider _timeProvider = new();
 
     [Fact]
     public async Task PrintSummary_ShouldCallWriteAsyncOnEveryDiagnosticEntry()
@@ -28,7 +29,7 @@ public class DiagnosticSummaryTests
             secondDiagnosticEntry,
             thirdDiagnosticEntry
         };
-        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries);
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries, _timeProvider);
         var summary = new DiagnosticSummary(diagnosticService, new IdentityServerOptions(), new StubLoggerFactory(logger));
 
         await summary.PrintSummary(_ct);
@@ -46,7 +47,7 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = chunkSize * 2 };
-        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry], _timeProvider);
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary(_ct);
@@ -66,7 +67,7 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 2, OutputCharacter = '€' };
-        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry], _timeProvider);
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
 
@@ -83,7 +84,7 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = options.Diagnostics.ChunkSize * 2 };
-        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry], _timeProvider);
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
 
@@ -100,7 +101,7 @@ public class DiagnosticSummaryTests
         var options = new IdentityServerOptions();
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 100000 };
-        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry], _timeProvider);
         var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary(_ct);

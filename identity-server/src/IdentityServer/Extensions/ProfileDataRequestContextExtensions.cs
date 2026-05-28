@@ -45,9 +45,9 @@ public static class ProfileDataRequestContextExtensions
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="logger">The logger.</param>
-    public static void LogProfileRequest(this ProfileDataRequestContext context, ILogger logger) => logger.LogDebug("Get profile called for subject {subject} from client {client} with claim types {claimTypes} via {caller}",
+    public static void LogProfileRequest(this ProfileDataRequestContext context, ILogger logger) => logger.LogDebug("Get profile called for subject {subject} from application {application} with claim types {claimTypes} via {caller}",
             context.Subject.GetSubjectId(),
-            context.Client.ClientName ?? context.Client.ClientId,
+            context.Application?.DisplayName ?? context.Application?.Identifier,
             context.RequestedClaimTypes,
             context.Caller);
 

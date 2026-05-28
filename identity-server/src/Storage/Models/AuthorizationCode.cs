@@ -14,7 +14,7 @@ namespace Duende.IdentityServer.Models;
 public class AuthorizationCode
 {
     /// <summary>
-    /// Gets or sets the creation time.
+    /// Gets or sets the UTC time when this authorization code was created.
     /// </summary>
     /// <value>
     /// The creation time.
@@ -22,7 +22,7 @@ public class AuthorizationCode
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the life time in seconds.
+    /// Gets or sets the lifetime of this authorization code in seconds.
     /// </summary>
     /// <value>
     /// The life time.
@@ -30,7 +30,7 @@ public class AuthorizationCode
     public int Lifetime { get; set; }
 
     /// <summary>
-    /// Gets or sets the ID of the client.
+    /// Gets or sets the ID of the client that requested this authorization code.
     /// </summary>
     /// <value>
     /// The ID of the client.
@@ -38,7 +38,7 @@ public class AuthorizationCode
     public string ClientId { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the subject.
+    /// Gets or sets the authenticated subject (user) associated with this authorization code.
     /// </summary>
     /// <value>
     /// The subject.
@@ -46,15 +46,15 @@ public class AuthorizationCode
     public ClaimsPrincipal Subject { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets a value indicating whether this code is an OpenID Connect code.
+    /// Gets or sets a value indicating whether this authorization code was issued as part of an OpenID Connect flow.
     /// </summary>
     /// <value>
-    /// <c>true</c> if this instance is open identifier; otherwise, <c>false</c>.
+    /// <c>true</c> if this instance is an OpenID Connect flow; otherwise, <c>false</c>.
     /// </value>
     public bool IsOpenId { get; set; }
 
     /// <summary>
-    /// Gets or sets the requested scopes.
+    /// Gets or sets the scopes that were requested when this authorization code was issued.
     /// </summary>
     /// <value>
     /// The requested scopes.
@@ -62,12 +62,13 @@ public class AuthorizationCode
     public IEnumerable<string> RequestedScopes { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the requested resource indicators.
+    /// Gets or sets the resource indicators that were requested when this authorization code was issued.
     /// </summary>
     public IEnumerable<string>? RequestedResourceIndicators { get; set; }
 
     /// <summary>
-    /// Gets or sets the redirect URI.
+    /// Gets or sets the redirect URI that was used in the authorization request.
+    /// The token endpoint will validate that the same redirect URI is presented when redeeming the code.
     /// </summary>
     /// <value>
     /// The redirect URI.
@@ -75,7 +76,7 @@ public class AuthorizationCode
     public string RedirectUri { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the nonce.
+    /// Gets or sets the nonce from the authorization request, used to prevent replay attacks in OpenID Connect flows.
     /// </summary>
     /// <value>
     /// The nonce.
@@ -83,7 +84,7 @@ public class AuthorizationCode
     public string? Nonce { get; set; }
 
     /// <summary>
-    /// Gets or sets the hashed state (to output s_hash claim).
+    /// Gets or sets the hashed state value from the authorization request, used to produce the <c>s_hash</c> claim.
     /// </summary>
     /// <value>
     /// The hashed state.
@@ -91,7 +92,7 @@ public class AuthorizationCode
     public string? StateHash { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether consent was shown.
+    /// Gets or sets a value indicating whether the consent screen was shown to the user during this authorization request.
     /// </summary>
     /// <value>
     ///   <c>true</c> if consent was shown; otherwise, <c>false</c>.
@@ -99,7 +100,7 @@ public class AuthorizationCode
     public bool WasConsentShown { get; set; }
 
     /// <summary>
-    /// Gets or sets the session identifier.
+    /// Gets or sets the session identifier associated with the user's authentication session at the time this code was issued.
     /// </summary>
     /// <value>
     /// The session identifier.
@@ -107,7 +108,8 @@ public class AuthorizationCode
     public string SessionId { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the code challenge.
+    /// Gets or sets the PKCE code challenge sent in the authorization request.
+    /// Must be verified against the code verifier when the code is redeemed.
     /// </summary>
     /// <value>
     /// The code challenge.
@@ -115,7 +117,7 @@ public class AuthorizationCode
     public string? CodeChallenge { get; set; }
 
     /// <summary>
-    /// Gets or sets the code challenge method.
+    /// Gets or sets the PKCE code challenge method (e.g. <c>S256</c> or <c>plain</c>).
     /// </summary>
     /// <value>
     /// The code challenge method
@@ -123,12 +125,12 @@ public class AuthorizationCode
     public string? CodeChallengeMethod { get; set; }
 
     /// <summary>
-    /// The thumbprint of the associated DPoP proof key, if one was used.
+    /// Gets or sets the thumbprint of the DPoP proof key associated with this authorization code, if DPoP was used.
     /// </summary>
     public string? DPoPKeyThumbprint { get; set; }
 
     /// <summary>
-    /// Gets the description the user assigned to the device being authorized.
+    /// Gets or sets the description the user assigned to the device being authorized.
     /// </summary>
     /// <value>
     /// The description.
@@ -136,7 +138,7 @@ public class AuthorizationCode
     public string? Description { get; set; }
 
     /// <summary>
-    /// Gets or sets properties
+    /// Gets or sets additional properties associated with this authorization code.
     /// </summary>
     /// <value>
     /// The properties

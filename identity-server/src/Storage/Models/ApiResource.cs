@@ -80,23 +80,24 @@ public class ApiResource : Resource
     }
 
     /// <summary>
-    /// Indicates if this API resource requires the resource indicator to request it, 
+    /// Gets or sets a value indicating whether this API resource requires the resource indicator to request it, 
     /// and expects access tokens issued to it will only ever contain this API resource as the audience.
     /// </summary>
     public bool RequireResourceIndicator { get; set; }
 
     /// <summary>
-    /// The API secret is used for the introspection endpoint. The API can authenticate with introspection using the API name and secret.
+    /// Gets or sets the collection of API secrets used for the introspection endpoint. The API can authenticate with introspection using the API name and secret.
     /// </summary>
     public ICollection<Secret> ApiSecrets { get; set; } = new HashSet<Secret>();
 
     /// <summary>
-    /// Models the scopes this API resource allows.
+    /// Gets or sets the collection of API scope names that this API resource exposes. Scopes must be created separately using <see cref="ApiScope"/>.
     /// </summary>
     public ICollection<string> Scopes { get; set; } = new HashSet<string>();
 
     /// <summary>
-    /// Signing algorithm for access token. If empty, will use the server default signing algorithm.
+    /// Gets or sets the collection of allowed signing algorithms for access tokens issued to this resource.
+    /// If empty, the server default signing algorithm is used.
     /// </summary>
     public ICollection<string> AllowedAccessTokenSigningAlgorithms { get; set; } = new HashSet<string>();
 }

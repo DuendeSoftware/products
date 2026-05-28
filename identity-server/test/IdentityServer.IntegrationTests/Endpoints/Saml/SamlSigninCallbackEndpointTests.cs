@@ -1,17 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 using System.Collections.ObjectModel;
 using System.Net;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Web;
 using Duende.IdentityModel;
-using Duende.IdentityServer.Internal.Saml.SingleSignin;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.Mvc;
+using Duende.IdentityServer.Saml;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
-using StateId = Duende.IdentityServer.Internal.Saml.SingleSignin.Models.StateId;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
@@ -34,30 +33,20 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.Client.GetAsync("/__signin", _ct);
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        signinResult.Headers.Location.ShouldNotBeNull();
-
-        var stateId = ExtractStateIdFromCookie(signinResult);
-        stateId.ShouldNotBeNull();
-
-        // Remove state from store so the next request is sent with a state id that for state which no longer exists
+        // Remove state so the next request has a state id that points to non-existent state
         var samlSigninStateStore = Fixture.Get<ISamlSigninStateStore>();
-        await samlSigninStateStore.RetrieveSigninRequestStateAsync(new StateId(Guid.Parse(stateId)), _ct);
+        await samlSigninStateStore.RemoveSigninRequestStateAsync(Guid.Parse(stateId), _ct);
 
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe($"The request {stateId} could not be found.");
+        var errorMessage = await Fixture.GetErrorFromRedirect(result, _ct);
+        errorMessage.ShouldBe("SAML authentication state not found or expired");
     }
 
     [Fact]
@@ -72,43 +61,38 @@ public class SamlSigninCallbackEndpointTests
         await Fixture.Client.GetAsync("/__signin", _ct);
 
         // Do not make request to the sign-in endpoint first so no state id is created
+        var result = await Fixture.Client.GetAsync("/Saml2/SSO/Callback", _ct);
 
-        var result = await Fixture.Client.GetAsync("/saml/signin_callback", _ct);
-
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("No state id could be found.");
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var errorMessage = await Fixture.GetErrorMessage(result.RequestMessage?.RequestUri, _ct);
+        errorMessage.ShouldBe("Missing or invalid SAML state identifier");
     }
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task callback_redirects_to_login_when_user_not_authenticated_and_state_is_found()
+    public async Task callback_redirects_to_login_when_user_not_authenticated()
     {
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
         await Fixture.InitializeAsync();
 
-        Fixture.UserToSignIn =
-            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
-        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
+        var stateId = await InitiateFlowAndExtractStateId();
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-        redirectUri.ToString().ShouldStartWith("/saml/signin_callback");
-
-        await Fixture.NonRedirectingClient.GetAsync("/__signout", _ct);
-
-        var result = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin_callback", _ct);
+        // Do not sign in — the callback should redirect to the login page
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var resultRedirectUri = result.Headers.Location;
-        resultRedirectUri.ShouldNotBeNull();
-        HttpUtility.UrlDecode(resultRedirectUri.ToString()).ShouldBe($"{Fixture.LoginUrl}?ReturnUrl={Fixture.SignInCallbackUrl}");
+        var location = result.Headers.Location;
+        location.ShouldNotBeNull();
+
+        var resolved = new Uri(new Uri(IdentityServerPipeline.BaseUrl), location);
+        resolved.AbsolutePath.ShouldBe(Fixture.LoginUrl.ToString());
+
+        var returnUrl = HttpUtility.ParseQueryString(resolved.Query)["ReturnUrl"];
+        returnUrl.ShouldNotBeNull();
+
+        var returnUri = new Uri(new Uri(IdentityServerPipeline.BaseUrl), returnUrl);
+        returnUri.AbsolutePath.ShouldBe("/Saml2/SSO/Callback");
+        HttpUtility.ParseQueryString(returnUri.Query)["samlStateId"].ShouldBe(stateId);
     }
 
     [Fact]
@@ -119,26 +103,18 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
         Fixture.ClearServiceProvidersAsync();
 
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe($"Service Provider '{sp.EntityId}' is not registered or is disabled");
+        var errorMessage = await Fixture.GetErrorFromRedirect(result, _ct);
+        errorMessage.ShouldBe("Service provider not found");
     }
 
     [Fact]
@@ -149,65 +125,51 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
-        // Ideally we would fetch the SP via a store and update it, but since the store doesn't provide that functionality
-        // we'll rely on everything being in memory and holding onto a reference to the SP in the store for now
+        // Disabling the SP causes InMemorySamlServiceProviderStore.FindByEntityIdAsync
+        // to return null (it filters by Enabled), so the endpoint reports "not found".
         sp.Enabled = false;
 
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe($"Service Provider '{sp.EntityId}' is not registered or is disabled");
+        var errorMessage = await Fixture.GetErrorFromRedirect(result, _ct);
+        errorMessage.ShouldBe("Service provider not found");
     }
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task callback_state_is_not_persisted_after_successful_login()
+    public async Task callback_state_survives_after_successful_login_allowing_retries()
     {
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
         await Fixture.InitializeAsync();
+
+        var stateId = await InitiateFlowAndExtractStateId();
 
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
-        var firstResult = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var firstResult = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         // First use succeeds
         firstResult.StatusCode.ShouldBe(HttpStatusCode.OK);
         var html = await firstResult.Content.ReadAsStringAsync(_ct);
         html.ShouldContain("SAMLResponse");
 
-        // Second callback with same stateId (replay attack)
-        var secondResult = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        // Second callback with same stateId succeeds too — state is intentionally
+        // not deleted after use. The TTL handles cleanup, and leaving state alive
+        // allows the user to retry (e.g., browser reload) if the response doesn't
+        // reach the SP on the first attempt.
+        var secondResult = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
-        //  Second use should fail
-        secondResult.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await secondResult.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("No state id could be found.");
+        secondResult.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var secondHtml = await secondResult.Content.ReadAsStringAsync(_ct);
+        secondHtml.ShouldContain("SAMLResponse");
     }
 
     [Fact]
@@ -217,28 +179,19 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
+        // Advance time past the state TTL so the stored state expires
+        Fixture.Data.FakeTimeProvider.Advance(TimeSpan.FromMinutes(16));
 
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        signinResult.Headers.Location.ShouldNotBeNull();
-
-        var stateId = ExtractStateIdFromCookie(signinResult);
-
-        Fixture.Data.FakeTimeProvider.Advance(TimeSpan.FromMinutes(11));
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
-
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe($"The request {stateId} could not be found.");
+        var errorMessage = await Fixture.GetErrorFromRedirect(result, _ct);
+        errorMessage.ShouldBe("SAML authentication state not found or expired");
     }
 
     [Fact]
@@ -248,21 +201,14 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
         await Fixture.InitializeAsync();
 
+        var specificRelayState = "test-relay-state-123";
+        var stateId = await InitiateFlowAndExtractStateId(relayState: specificRelayState);
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var specificRelayState = "test-relay-state-123";
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}&RelayState={specificRelayState}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var samlResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
@@ -279,19 +225,13 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -312,19 +252,13 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -345,19 +279,13 @@ public class SamlSigninCallbackEndpointTests
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var stateId = await InitiateFlowAndExtractStateId();
+
         Fixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        var redirectUri = signinResult.Headers.Location;
-        redirectUri.ShouldNotBeNull();
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -387,8 +315,11 @@ public class SamlSigninCallbackEndpointTests
             ["manager"] = "manager",
             ["cost_center"] = "cc"
         });
+        sp.RequestedClaimTypes = [JwtClaimTypes.Subject, JwtClaimTypes.Name, JwtClaimTypes.Email, JwtClaimTypes.Role, "department", "location", "employee_id", "manager", "cost_center"];
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
+
+        var stateId = await InitiateFlowAndExtractStateId();
 
         // Create user with many claims
         var claims = new List<Claim>
@@ -408,14 +339,7 @@ public class SamlSigninCallbackEndpointTests
         Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        signinResult.Headers.Location.ShouldNotBeNull();
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -434,8 +358,17 @@ public class SamlSigninCallbackEndpointTests
     {
         var sp = Build.SamlServiceProvider();
         sp.SigningBehavior = SamlSigningBehavior.SignAssertion;
+        sp.RequestedClaimTypes = [JwtClaimTypes.Name, "description", "xml_data"];
+        sp.ClaimMappings = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
+        {
+            [JwtClaimTypes.Name] = JwtClaimTypes.Name,
+            ["description"] = "description",
+            ["xml_data"] = "xml_data"
+        });
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
+
+        var stateId = await InitiateFlowAndExtractStateId();
 
         var claims = new List<Claim>
         {
@@ -448,14 +381,7 @@ public class SamlSigninCallbackEndpointTests
         Fixture.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
         await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
 
-        var authnRequestXml = Build.AuthNRequestXml();
-        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
-        var signinResult = await Fixture.NonRedirectingClient.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
-
-        signinResult.StatusCode.ShouldBe(HttpStatusCode.Found);
-        signinResult.Headers.Location.ShouldNotBeNull();
-
-        var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", _ct);
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (responseXml, _, _) = await ExtractSamlResponse(result, _ct);
@@ -468,8 +394,104 @@ public class SamlSigninCallbackEndpointTests
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
         successResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Success");
 
-        var nameAttribute = successResponse.Assertion.Attributes?.FirstOrDefault(a => a.Name == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+        var nameAttribute = successResponse.Assertion.Attributes?.FirstOrDefault(a => a.Name == JwtClaimTypes.Name);
         nameAttribute.ShouldNotBeNull();
         nameAttribute.Value.ShouldBe("Test <User> & \"Company\"");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task callback_redirects_to_login_when_force_authn_and_user_did_not_reauthenticate()
+    {
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        // Sign in user at T0
+        Fixture.UserToSignIn =
+            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
+
+        // Advance time so the ForceAuthn request's state.CreatedUtc > auth_time
+        Fixture.Data.FakeTimeProvider.Advance(TimeSpan.FromMinutes(1));
+
+        // Initiate ForceAuthn flow — user is already authenticated but ForceAuthn
+        // should require re-authentication
+        var stateId = await InitiateForceAuthnFlowAndExtractStateId();
+
+        // Hit callback WITHOUT re-authenticating — auth_time is still T0,
+        // but state.CreatedUtc is T0+1min, so the check should fail
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
+
+        result.StatusCode.ShouldBe(HttpStatusCode.Found);
+        var location = result.Headers.Location;
+        location.ShouldNotBeNull();
+
+        var resolved = new Uri(new Uri(IdentityServerPipeline.BaseUrl), location);
+        resolved.AbsolutePath.ShouldBe(Fixture.LoginUrl.ToString());
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task callback_succeeds_when_force_authn_and_user_reauthenticated()
+    {
+        Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        await Fixture.InitializeAsync();
+
+        // Sign in user at T0
+        Fixture.UserToSignIn =
+            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
+
+        // Advance time so the ForceAuthn request's state.CreatedUtc > auth_time
+        Fixture.Data.FakeTimeProvider.Advance(TimeSpan.FromMinutes(1));
+
+        var stateId = await InitiateForceAuthnFlowAndExtractStateId();
+
+        // Re-authenticate (simulates user completing login page)
+        Fixture.Data.FakeTimeProvider.Advance(TimeSpan.FromSeconds(5));
+        Fixture.UserToSignIn =
+            new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id")], "Test"));
+        await Fixture.NonRedirectingClient.GetAsync("/__signin", _ct);
+
+        // Now callback should succeed — auth_time is after state.CreatedUtc
+        var result = await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SSO/Callback?samlStateId={stateId}", _ct);
+
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var html = await result.Content.ReadAsStringAsync(_ct);
+        html.ShouldContain("SAMLResponse");
+    }
+
+    private async Task<string> InitiateForceAuthnFlowAndExtractStateId()
+    {
+        var authnRequestXml = Build.AuthNRequestXml(forceAuthn: true);
+        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
+        var url = $"/Saml2/SSO?SAMLRequest={urlEncoded}";
+
+        var ssoResult = await Fixture.NonRedirectingClient.GetAsync(url, _ct);
+
+        ssoResult.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+
+        var stateId = ExtractStateIdFromReturnUrl(ssoResult);
+        stateId.ShouldNotBeNullOrEmpty("samlStateId should be present in the ReturnUrl of the SSO redirect");
+        return stateId!;
+    }
+
+    private async Task<string> InitiateFlowAndExtractStateId(string? relayState = null)
+    {
+        var authnRequestXml = Build.AuthNRequestXml();
+        var urlEncoded = await EncodeRequest(authnRequestXml, _ct);
+        var url = $"/Saml2/SSO?SAMLRequest={urlEncoded}";
+        if (relayState != null)
+        {
+            url += $"&RelayState={relayState}";
+        }
+
+        var ssoResult = await Fixture.NonRedirectingClient.GetAsync(url, _ct);
+
+        ssoResult.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+
+        var stateId = ExtractStateIdFromReturnUrl(ssoResult);
+        stateId.ShouldNotBeNullOrEmpty("samlStateId should be present in the ReturnUrl of the SSO redirect");
+        return stateId!;
     }
 }

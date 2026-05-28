@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
 using Microsoft.AspNetCore.Http;
 
@@ -136,5 +137,68 @@ public class EndpointHelpersTests
         var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
 
         result.ShouldBeFalse();
+    }
+}
+
+public sealed class SamlMetadataHelpersTests
+{
+    [Fact]
+    public void ResolveMetadataPath_ReturnsEntityIdPath_WhenEntityIdIsNull()
+    {
+        var options = new SamlOptions { EntityId = null, EntityIdPath = "/my-idp" };
+
+        var path = EndpointHelpers.SamlMetadataHelpers.ResolveMetadataPath(options);
+
+        path.ShouldBe("/my-idp");
+    }
+
+    [Fact]
+    public void ResolveMetadataPath_ReturnsPathComponent_WhenEntityIdIsHttpsUrl()
+    {
+        var options = new SamlOptions { EntityId = "https://idp.example.com/custom/saml" };
+
+        var path = EndpointHelpers.SamlMetadataHelpers.ResolveMetadataPath(options);
+
+        path.ShouldBe("/custom/saml");
+    }
+
+    [Fact]
+    public void ResolveMetadataPath_ReturnsPathComponent_WhenEntityIdIsHttpUrl()
+    {
+        var options = new SamlOptions { EntityId = "http://idp.example.com/saml2" };
+
+        var path = EndpointHelpers.SamlMetadataHelpers.ResolveMetadataPath(options);
+
+        path.ShouldBe("/saml2");
+    }
+
+    [Fact]
+    public void ResolveMetadataPath_FallsBackToEntityIdPath_WhenEntityIdIsUrn()
+    {
+        var options = new SamlOptions { EntityId = "urn:my:custom:idp", EntityIdPath = "/fallback" };
+
+        var path = EndpointHelpers.SamlMetadataHelpers.ResolveMetadataPath(options);
+
+        path.ShouldBe("/fallback");
+    }
+
+    [Fact]
+    public void ResolveMetadataPath_FallsBackToEntityIdPath_WhenEntityIdIsUrlWithNoPath()
+    {
+        var options = new SamlOptions { EntityId = "https://idp.example.com", EntityIdPath = "/my-idp" };
+
+        var path = EndpointHelpers.SamlMetadataHelpers.ResolveMetadataPath(options);
+
+        path.ShouldBe("/my-idp");
+    }
+
+    [Fact]
+    public void ResolveMetadataPath_UsesDefaultEntityIdPath_WhenEntityIdIsNull()
+    {
+        var options = new SamlOptions();
+
+        var path = EndpointHelpers.SamlMetadataHelpers.ResolveMetadataPath(options);
+
+        path.ShouldBe("/Saml2");
     }
 }

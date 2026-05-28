@@ -5,10 +5,10 @@
 
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
@@ -64,13 +64,11 @@ internal class SamlFixture : IAsyncLifetime
 
     public Uri ConsentUrl = new Uri("/consent", UriKind.Relative);
 
-    public Uri SignInCallbackUrl = new Uri("/saml/signin_callback", UriKind.Relative);
+    public Uri SignInCallbackUrl = new Uri("/Saml2/SSO/Callback", UriKind.Relative);
 
     public Uri LogoutUrl = new Uri("/account/logout", UriKind.Relative);
 
     public ClaimsPrincipal? UserToSignIn { get; set; }
-
-    public bool? UserMetRequestedAuthnContextRequirements { get; set; }
 
     public AuthenticationProperties? PropsToSignIn { get; set; }
 
@@ -92,6 +90,8 @@ internal class SamlFixture : IAsyncLifetime
         return IdentityServerPipeline.BaseUrl + path;
     }
 
+    public string SamlIssuer() => $"{Url()}/Saml2";
+
     public T Get<T>() where T : notnull => _pipeline.Resolve<T>();
 
     public async ValueTask InitializeAsync()
@@ -99,6 +99,19 @@ internal class SamlFixture : IAsyncLifetime
         var selfSignedCertificate = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(StableSigningCert), null);
 
         _pipeline = new IdentityServerPipeline();
+
+        _pipeline.IdentityScopes.AddRange(
+        [
+            new IdentityResource("openid", ["sub"]),
+            new IdentityResource("profile", ["name", "family_name", "given_name", "middle_name",
+                "nickname", "preferred_username", "profile", "picture", "website", "gender",
+                "birthdate", "zoneinfo", "locale", "updated_at"]),
+            new IdentityResource("email", ["email", "email_verified"]),
+            // Catch-all resource for custom claim types used across integration tests
+            new IdentityResource("custom", ["role", "department", "location", "employee_id",
+                "manager", "cost_center", "description", "xml_data", "idp", "amr", "auth_time",
+                "phone_number"])
+        ]);
 
         _pipeline.OnPreConfigureServices += services =>
         {
@@ -120,9 +133,6 @@ internal class SamlFixture : IAsyncLifetime
             });
             services.Configure(ConfigureIdentityServerOptions);
 
-            // Configure SAML options
-            services.Configure(ConfigureSamlOptions);
-
             // Replace the developer signing credential with our X509 certificate
             // Remove the ISigningCredentialStore registration added by AddDeveloperSigningCredential
             var signingCredentialDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(ISigningCredentialStore));
@@ -135,7 +145,7 @@ internal class SamlFixture : IAsyncLifetime
             services.AddIdentityServerBuilder()
                 .AddSigningCredential(selfSignedCertificate)
                 .AddProfileService<DefaultProfileService>()
-                .AddSaml()
+                .AddSaml(ConfigureSamlOptions)
                 .AddInMemorySamlServiceProviders(_serviceProviders);
 
             ConfigureServices(services);
@@ -214,7 +224,6 @@ internal class SamlFixture : IAsyncLifetime
             {
                 path.Run(async ctx =>
                 {
-                    var samlInteractionService = ctx.RequestServices.GetRequiredService<ISamlInteractionService>();
                     var props = PropsToSignIn ?? new AuthenticationProperties();
                     if (UserToSignIn?.Identity == null)
                     {
@@ -223,12 +232,6 @@ internal class SamlFixture : IAsyncLifetime
                     }
 
                     await ctx.SignInAsync(UserToSignIn, props);
-
-                    if (UserMetRequestedAuthnContextRequirements.HasValue)
-                    {
-                        await samlInteractionService.StoreRequestedAuthnContextResultAsync(
-                            UserMetRequestedAuthnContextRequirements.Value, ctx.RequestAborted);
-                    }
 
                     ctx.Response.StatusCode = 204;
                 });
@@ -243,22 +246,6 @@ internal class SamlFixture : IAsyncLifetime
                 });
             });
 
-            app.Map("/__authentication-request", path =>
-            {
-                path.Run(async ctx =>
-                {
-                    var samlInteractionService = ctx.RequestServices.GetRequiredService<ISamlInteractionService>();
-                    var authenticationRequest =
-                        await samlInteractionService.GetAuthenticationRequestContextAsync(_ct);
-
-                    if (authenticationRequest == null)
-                    {
-                        throw new InvalidOperationException("Could not find authentication request");
-                    }
-
-                    await ctx.Response.WriteAsJsonAsync(authenticationRequest.RequestedAuthnContext);
-                });
-            });
         };
 
         _pipeline.Initialize(enableLogging: true);
@@ -284,4 +271,33 @@ internal class SamlFixture : IAsyncLifetime
     /// Removes all service providers from the fixture after initialization.
     /// </summary>
     public void ClearServiceProvidersAsync() => _serviceProviders.Clear();
+
+    public async Task<string?> GetErrorMessage(Uri? requestMessageRequestUri, CancellationToken ct)
+    {
+        requestMessageRequestUri.ShouldNotBeNull();
+
+        var queryStringValues = HttpUtility.ParseQueryString(requestMessageRequestUri.Query);
+
+        var errorId = queryStringValues["errorId"];
+
+        var errorStore = Get<IMessageStore<ErrorMessage>>();
+
+        var error = await errorStore.ReadAsync(errorId, ct);
+
+        return error.Data.ErrorDescription;
+    }
+
+    public async Task<string?> GetErrorFromRedirect(HttpResponseMessage response, CancellationToken ct)
+    {
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Redirect);
+        var location = response.Headers.Location;
+        location.ShouldNotBeNull();
+
+        if (!location.IsAbsoluteUri)
+        {
+            location = new Uri(new Uri(IdentityServerPipeline.BaseUrl), location);
+        }
+
+        return await GetErrorMessage(location, ct);
+    }
 }
