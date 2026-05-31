@@ -26,24 +26,4 @@ internal static partial class Log
 
     [LoggerMessage(Message = $"User deregister failed for subject {{{LogParameters.SubjectId}}}")]
     internal static partial void UserDeregisterFailed(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    // Username set
-    [LoggerMessage(Message = $"Starting username set for subject {{{LogParameters.SubjectId}}}")]
-    internal static partial void UserNameSetStarting(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    [LoggerMessage(Message = $"Username set succeeded for subject {{{LogParameters.SubjectId}}}")]
-    internal static partial void UserNameSetSucceeded(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    [LoggerMessage(Message = $"Username set failed for subject {{{LogParameters.SubjectId}}}")]
-    internal static partial void UserNameSetFailed(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    // Username remove
-    [LoggerMessage(Message = $"Starting username removal for subject {{{LogParameters.SubjectId}}}")]
-    internal static partial void UserNameRemoveStarting(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    [LoggerMessage(Message = $"Username removal succeeded for subject {{{LogParameters.SubjectId}}}")]
-    internal static partial void UserNameRemoveSucceeded(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    [LoggerMessage(Message = $"Username removal failed for subject {{{LogParameters.SubjectId}}}")]
-    internal static partial void UserNameRemoveFailed(this ILogger logger, LogLevel level, UserSubjectId subjectId);
 }

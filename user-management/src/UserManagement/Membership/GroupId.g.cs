@@ -15,8 +15,13 @@ partial record GroupId : IStringValue<GroupId>
     // Constructor for controlled creation
     private GroupId(string value) => Value = value;
 
+    /// <summary>Gets the underlying string value of this <see cref="GroupId"/>.</summary>
     public string Value { get; }
 
+    /// <summary>Creates a <see cref="GroupId" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="GroupId" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="GroupId" />.</exception>
     public static GroupId Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -26,9 +31,18 @@ partial record GroupId : IStringValue<GroupId>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="GroupId" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="GroupId" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out GroupId? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="GroupId" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="GroupId" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out GroupId? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -57,10 +71,17 @@ partial record GroupId : IStringValue<GroupId>
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="GroupId"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="GroupId"/> instance.</returns>
     public static implicit operator GroupId(string value) => Create(value);
 
+    /// <inheritdoc />
     public override string ToString() => Value;
 
+    /// <summary>Creates a new <see cref="GroupId"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="GroupId"/> from.</param>
+    /// <returns>A new <see cref="GroupId"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static GroupId? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

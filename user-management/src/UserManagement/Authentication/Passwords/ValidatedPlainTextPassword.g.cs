@@ -5,9 +5,9 @@
 
 namespace Duende.UserManagement.Authentication.Passwords;
 
-partial record PlainTextPassword
+partial record ValidatedPlainTextPassword
 {
 
-    internal static PlainTextPassword Load(string value) => new PlainTextPassword(value);
+    internal static ValidatedPlainTextPassword Load(string value) => new ValidatedPlainTextPassword(value);
 
 }

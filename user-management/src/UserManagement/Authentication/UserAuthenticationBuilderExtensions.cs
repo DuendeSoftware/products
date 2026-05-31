@@ -10,10 +10,18 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication;
 
+/// <summary>
+/// Extension methods for <see cref="IUserAuthenticationBuilder"/> to configure authentication features.
+/// </summary>
 public static class UserAuthenticationBuilderExtensions
 {
     extension(IUserAuthenticationBuilder builder)
     {
+        /// <summary>
+        /// Configures user authentication options using the provided delegate.
+        /// </summary>
+        /// <param name="configure">The configuration action to apply.</param>
+        /// <returns>The builder for chaining.</returns>
         public IUserAuthenticationBuilder Configure(Action<UserAuthenticationOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
@@ -24,35 +32,35 @@ public static class UserAuthenticationBuilderExtensions
         }
 
         /// <summary>
-        /// Configures user authentication to use a custom OTP sender implementation.
+        /// Configures user authentication to use a custom OTP dispatcher implementation.
         /// </summary>
-        /// <typeparam name="TSender">The type of OTP sender to register.</typeparam>
+        /// <typeparam name="TDispatcher">The type of OTP dispatcher to register.</typeparam>
         /// <returns>The builder for chaining.</returns>
-        public IUserAuthenticationBuilder UseOtpSender<TSender>()
-            where TSender : class, IOtpSender
+        public IUserAuthenticationBuilder UseOtpDispatcher<TDispatcher>()
+            where TDispatcher : class, IOtpDispatcher
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            _ = builder.Services.AddSingleton<IOtpSender, TSender>();
+            _ = builder.Services.AddSingleton<IOtpDispatcher, TDispatcher>();
 
             return builder;
         }
 
         /// <summary>
-        /// Configures user authentication to use the SMTP OTP sender for email.
+        /// Configures user authentication to use the SMTP OTP dispatcher for email.
         /// </summary>
-        /// <param name="configure">Configuration action for SMTP OTP sender options.</param>
+        /// <param name="configure">Configuration action for SMTP OTP dispatcher options.</param>
         /// <returns>The builder for chaining.</returns>
-        public IUserAuthenticationBuilder UseSmtpOtpSender(Action<SmtpOtpSenderOptions> configure)
+        public IUserAuthenticationBuilder UseSmtpOtpDispatcher(Action<SmtpOtpDispatcherOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
             _ = builder.Services
-                .AddSingleton<IOtpSender, SmtpOtpSender>()
+                .AddSingleton<IOtpDispatcher, SmtpOtpDispatcher>()
                 .AddSingleton<IEmailContentFactory, EmailContentFactory>()
-                .AddOptions<SmtpOtpSenderOptions>()
+                .AddOptions<SmtpOtpDispatcherOptions>()
                 .Services
-                .AddSingleton<IValidateOptions<SmtpOtpSenderOptions>, SmtpOtpSenderOptionsValidator>()
+                .AddSingleton<IValidateOptions<SmtpOtpDispatcherOptions>, SmtpOtpDispatcherOptionsValidator>()
                 .Configure(configure);
 
             return builder;

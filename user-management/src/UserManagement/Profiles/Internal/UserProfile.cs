@@ -10,28 +10,21 @@ internal sealed class UserProfile
 {
     private readonly Dictionary<AttributeCode, AttributeValue> _attributes;
 
-    private UserProfile(UserProfileId id, UserSubjectId subjectId, UserName? userName, IEnumerable<AttributeValue> attributes)
+    private UserProfile(UserProfileId id, UserSubjectId subjectId, IEnumerable<AttributeValue> attributes)
     {
         Id = id;
         SubjectId = subjectId;
-        UserName = userName;
         _attributes = attributes.ToDictionary(a => a.Code, a => a);
     }
 
     internal UserProfile(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes) :
-        this(UserProfileId.New(), subjectId, userName: null, attributes)
+        this(UserProfileId.New(), subjectId, attributes)
     {
     }
 
     internal UserProfileId Id { get; }
 
     internal UserSubjectId SubjectId { get; }
-
-    internal UserName? UserName { get; private set; }
-
-    internal void SetUserName(UserName userName) => UserName = userName;
-
-    internal void RemoveUserName() => UserName = null;
 
     internal IReadOnlyDictionary<AttributeCode, AttributeValue> Attributes => _attributes;
 
@@ -44,6 +37,6 @@ internal sealed class UserProfile
         }
     }
 
-    internal static UserProfile Load(UserProfileId id, UserSubjectId subjectId, UserName? userName, IEnumerable<AttributeValue> attributes) =>
-        new(id, subjectId, userName, attributes);
+    internal static UserProfile Load(UserProfileId id, UserSubjectId subjectId, IEnumerable<AttributeValue> attributes)
+        => new(id, subjectId, attributes);
 }

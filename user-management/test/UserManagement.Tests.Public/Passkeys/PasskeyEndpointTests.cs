@@ -64,7 +64,7 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
     {
         await _fixture.InitializeAsync();
 
-        var (subjectId, _, _) = await _fixture.SeedAuthenticatorsAsync();
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
 
         await UserAuthenticationFixture.SignInClientAsync(_fixture.NonRedirectingClient, subjectId.ToString());
 
@@ -109,8 +109,8 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
     {
         await _fixture.InitializeAsync();
 
-        var (subjectId, userName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey");
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
+        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, "Test Passkey");
 
         // Discoverable begin (no userName required)
         var beginResponse =
@@ -153,122 +153,6 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
     }
 
     [Fact]
-    public async Task Authenticate_complete_returns_ok_when_userName_matches_credential_owner()
-    {
-        await _fixture.InitializeAsync();
-
-        var (subjectId, userName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey");
-
-        var beginResponse =
-            await _fixture.NonRedirectingClient.PostAsync("/passkeys/authenticate/discoverable/begin", null, _ct);
-        beginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var beginJson = await beginResponse.Content.ReadFromJsonAsync<JsonElement>(_ct);
-        var challengeId = beginJson.GetProperty("challengeId").GetGuid();
-        var challenge = beginJson.GetProperty("options").GetProperty("challenge").GetString()!;
-
-        var clientData =
-            WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Get, challenge, _fixture.Origin);
-        var authenticatorData =
-            WebAuthnFixtures.CreateAuthenticatorData(_fixture.RelyingPartyId, flags: 0x01, signCount: 1);
-        var clientDataBytes = WebAuthnFixtures.DecodeBase64Url(clientData);
-        var signature = WebAuthnFixtures.CreateValidSignature(ecdsa, authenticatorData, clientDataBytes);
-
-        var completeBody = CreateCompleteAuthenticationRequest(
-            challengeId,
-            credentialId,
-            clientData,
-            authenticatorData,
-            signature,
-            userName.ToString());
-
-        var completeResponse =
-            await _fixture.NonRedirectingClient.PostAsJsonAsync("/passkeys/authenticate/complete", completeBody, _ct);
-
-        completeResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        completeResponse.Headers.Contains("Set-Cookie").ShouldBeTrue();
-    }
-
-    [Fact]
-    public async Task Authenticate_complete_returns_bad_request_when_userName_is_invalid()
-    {
-        await _fixture.InitializeAsync();
-
-        var (subjectId, userName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey");
-
-        var beginResponse =
-            await _fixture.NonRedirectingClient.PostAsync("/passkeys/authenticate/discoverable/begin", null, _ct);
-        beginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var beginJson = await beginResponse.Content.ReadFromJsonAsync<JsonElement>(_ct);
-        var challengeId = beginJson.GetProperty("challengeId").GetGuid();
-        var challenge = beginJson.GetProperty("options").GetProperty("challenge").GetString()!;
-
-        var clientData =
-            WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Get, challenge, _fixture.Origin);
-        var authenticatorData =
-            WebAuthnFixtures.CreateAuthenticatorData(_fixture.RelyingPartyId, flags: 0x01, signCount: 1);
-        var clientDataBytes = WebAuthnFixtures.DecodeBase64Url(clientData);
-        var signature = WebAuthnFixtures.CreateValidSignature(ecdsa, authenticatorData, clientDataBytes);
-
-        var completeBody = CreateCompleteAuthenticationRequest(
-            challengeId,
-            credentialId,
-            clientData,
-            authenticatorData,
-            signature,
-            "   ");
-
-        var response = await _fixture.NonRedirectingClient.PostAsJsonAsync(
-            "/passkeys/authenticate/complete", completeBody, _ct);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        _ = problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("Unable to authenticate with passkey.");
-    }
-
-    [Fact]
-    public async Task Authenticate_complete_returns_bad_request_when_userName_does_not_match_credential_owner()
-    {
-        await _fixture.InitializeAsync();
-
-        var (subjectId, userName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (_, otherUserName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey");
-
-        var beginResponse =
-            await _fixture.NonRedirectingClient.PostAsync("/passkeys/authenticate/discoverable/begin", null, _ct);
-        beginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var beginJson = await beginResponse.Content.ReadFromJsonAsync<JsonElement>(_ct);
-        var challengeId = beginJson.GetProperty("challengeId").GetGuid();
-        var challenge = beginJson.GetProperty("options").GetProperty("challenge").GetString()!;
-
-        var clientData =
-            WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Get, challenge, _fixture.Origin);
-        var authenticatorData =
-            WebAuthnFixtures.CreateAuthenticatorData(_fixture.RelyingPartyId, flags: 0x01, signCount: 1);
-        var clientDataBytes = WebAuthnFixtures.DecodeBase64Url(clientData);
-        var signature = WebAuthnFixtures.CreateValidSignature(ecdsa, authenticatorData, clientDataBytes);
-
-        var completeBody = CreateCompleteAuthenticationRequest(
-            challengeId,
-            credentialId,
-            clientData,
-            authenticatorData,
-            signature,
-            otherUserName.ToString());
-
-        var response = await _fixture.NonRedirectingClient.PostAsJsonAsync(
-            "/passkeys/authenticate/complete", completeBody, _ct);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(_ct);
-        _ = problemDetails.ShouldNotBeNull();
-        problemDetails.Detail.ShouldBe("Unable to authenticate with passkey.");
-    }
-
-    [Fact]
     public async Task Authenticate_complete_returns_generic_error_on_failure()
     {
         await _fixture.InitializeAsync();
@@ -301,7 +185,7 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
     {
         await _fixture.InitializeAsync();
 
-        var (subjectId, _, _) = await _fixture.SeedAuthenticatorsAsync();
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
         await UserAuthenticationFixture.SignInClientAsync(_fixture.NonRedirectingClient, subjectId.ToString());
 
         var completeBody = new
@@ -400,25 +284,4 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
         content.ShouldNotContain("/passkeys/");
     }
 
-    private static PasskeyCompleteAuthenticationRequest CreateCompleteAuthenticationRequest(
-        Guid challengeId,
-        byte[] credentialId,
-        string clientDataJson,
-        byte[] authenticatorData,
-        string signature,
-        string userName) =>
-        new()
-        {
-            ChallengeId = challengeId,
-            Id = Base64Url.EncodeToString(credentialId),
-            RawId = Base64Url.EncodeToString(credentialId),
-            Type = PasskeyConstants.CredentialType.PublicKey,
-            Response = new AuthenticatorAssertionResponse
-            {
-                ClientDataJSON = clientDataJson,
-                AuthenticatorData = Base64Url.EncodeToString(authenticatorData),
-                Signature = signature
-            },
-            UserName = userName
-        };
 }

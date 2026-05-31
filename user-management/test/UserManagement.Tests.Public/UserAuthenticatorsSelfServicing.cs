@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
-using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement;
@@ -20,19 +19,23 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     private readonly Ct _ct = TestContext.Current.CancellationToken;
     private IPasswordAuth _passwordAuth = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
-    private IUserSelfService _userSelfService = null!;
     private ServiceProvider _serviceProvider = null!;
     private FakeTimeProvider _timeProvider = null!;
-    private IUserProfileAdmin _profileAdmin = null!;
+    private IUserProfileSelfService _profileSelfService = null!;
+    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private FakeOtpDispatcher _otpDispatcher = null!;
+    private IOtpSender _otpSender = null!;
 
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
         _passwordAuth = _serviceProvider.GetRequiredService<IPasswordAuth>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        _userSelfService = _serviceProvider.GetRequiredService<IUserSelfService>();
         _timeProvider = _serviceProvider.GetRequiredService<FakeTimeProvider>();
-        _profileAdmin = _serviceProvider.GetRequiredService<IUserProfileAdmin>();
+        _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _otpDispatcher = _serviceProvider.GetRequiredService<FakeOtpDispatcher>();
+        _otpSender = _serviceProvider.GetRequiredService<IOtpSender>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -84,8 +87,9 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     {
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var address = TestData.CreateOtpAddress();
+        var (otp, token) = await SendOtpAsync(address);
 
-        var added = await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address, _ct);
+        var added = await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, otp, token, _ct);
 
         added.ShouldBeTrue();
         (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull()
@@ -93,61 +97,48 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Cannot_add_OtpAddress_with_incorrect_otp()
+    {
+        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var address = TestData.CreateOtpAddress();
+        var (_, token) = await SendOtpAsync(address);
+        var wrongOtp = PlainTextOtp.Create("00000000");
+
+        var added = await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, wrongOtp, token, _ct);
+
+        added.ShouldBeFalse();
+        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull()
+            .OtpAddresses.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Cannot_add_OtpAddress_with_incorrect_token()
+    {
+        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var address = TestData.CreateOtpAddress();
+        var (otp, _) = await SendOtpAsync(address);
+        var wrongToken = OtpToken.New();
+
+        var added = await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, otp, wrongToken, _ct);
+
+        added.ShouldBeFalse();
+        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull()
+            .OtpAddresses.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task Can_add_OtpAddressIfExists()
     {
         var address = TestData.CreateOtpAddress();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address, _ct)).ShouldBeTrue();
+        var (otp1, token1) = await SendOtpAsync(address);
+        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, otp1, token1, _ct)).ShouldBeTrue();
 
-        var added = await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address, _ct);
+        var (otp2, token2) = await SendOtpAsync(address);
+        var added = await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, otp2, token2, _ct);
 
         added.ShouldBeTrue();
         (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().OtpAddresses.ShouldBe([address]);
-    }
-
-    [Fact]
-    public async Task Can_replace_OtpAddress()
-    {
-        var address1 = TestData.CreateOtpAddress();
-        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address1, _ct)).ShouldBeTrue();
-        var address2 = TestData.CreateOtpAddress();
-
-        var replaced = await _authenticatorsSelfService.TryReplaceOtpAddressAsync(user.SubjectId, address1, address2, _ct);
-
-        replaced.ShouldBeTrue();
-        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().OtpAddresses.ShouldBe([address2]);
-    }
-
-    [Fact]
-    public async Task Can_replace_OtpAddressIfOldNotExists()
-    {
-        var address1 = TestData.CreateOtpAddress();
-        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address1, _ct)).ShouldBeTrue();
-        var address2 = TestData.CreateOtpAddress();
-        var address3 = TestData.CreateOtpAddress();
-
-        var replaced = await _authenticatorsSelfService.TryReplaceOtpAddressAsync(user.SubjectId, address2, address3, _ct);
-
-        replaced.ShouldBeTrue();
-        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull()
-            .OtpAddresses.ShouldBe([address1, address3]);
-    }
-
-    [Fact]
-    public async Task Can_replace_OtpAddressIfNewExists()
-    {
-        var address1 = TestData.CreateOtpAddress();
-        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address1, _ct)).ShouldBeTrue();
-        var address2 = TestData.CreateOtpAddress();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address2, _ct)).ShouldBeTrue();
-
-        var replaced = await _authenticatorsSelfService.TryReplaceOtpAddressAsync(user.SubjectId, address1, address2, _ct);
-
-        replaced.ShouldBeTrue();
-        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().OtpAddresses.ShouldBe([address2]);
     }
 
     [Fact]
@@ -155,7 +146,8 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     {
         var address = TestData.CreateOtpAddress();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address, _ct)).ShouldBeTrue();
+        var (otp, token) = await SendOtpAsync(address);
+        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, otp, token, _ct)).ShouldBeTrue();
 
         var removed = await _authenticatorsSelfService.TryRemoveOtpAddressAsync(user.SubjectId, address, _ct);
 
@@ -168,7 +160,8 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     {
         var address = TestData.CreateOtpAddress();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, address, _ct)).ShouldBeTrue();
+        var (otp, token) = await SendOtpAsync(address);
+        (await _authenticatorsSelfService.TryAddOtpAddressAsync(user.SubjectId, otp, token, _ct)).ShouldBeTrue();
         (await _authenticatorsSelfService.TryRemoveOtpAddressAsync(user.SubjectId, address, _ct)).ShouldBeTrue();
 
         var removed = await _authenticatorsSelfService.TryRemoveOtpAddressAsync(user.SubjectId, address, _ct);
@@ -408,15 +401,19 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     [Trait("PasswordHashing", "True")]
     public async Task Can_set_password()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
         var (password, supplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
 
         var isSet = await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, password, _ct);
 
         isSet.ShouldBeTrue();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, supplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
@@ -424,8 +421,13 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     public async Task Cannot_set_password_if_has_password()
     {
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         var (originalPassword, originalSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, originalPassword, _ct)).ShouldBeTrue();
         var (newPassword, newSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
@@ -433,8 +435,8 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
         var isSet = await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, newPassword, _ct);
 
         isSet.ShouldBeFalse();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
 
     [Fact]
@@ -442,8 +444,13 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     public async Task Can_change_password()
     {
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         var (originalPassword, originalSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, originalPassword, _ct)).ShouldBeTrue();
         var (newPassword, newSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
@@ -451,8 +458,8 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
         var changed = await _authenticatorsSelfService.TryChangePasswordAsync(user.SubjectId, originalSupplied, newPassword, _ct);
 
         changed.ShouldBeTrue();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
@@ -460,8 +467,13 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     public async Task Cannot_change_password_if_old_password_not_provided()
     {
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         var (originalPassword, originalSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, originalPassword, _ct)).ShouldBeTrue();
         var (_, otherSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
@@ -470,9 +482,9 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
         var changed = await _authenticatorsSelfService.TryChangePasswordAsync(user.SubjectId, otherSupplied, newPassword, _ct);
 
         changed.ShouldBeFalse();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, otherSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, otherSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
 
     [Fact]
@@ -480,8 +492,13 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     public async Task Can_reset_password()
     {
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         var (originalPassword, originalSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, originalPassword, _ct)).ShouldBeTrue();
         var (newPassword, newSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
@@ -489,59 +506,37 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
         var isReset = await _authenticatorsSelfService.TryResetPasswordAsync(user.SubjectId, newPassword, _ct);
 
         isReset.ShouldBeTrue();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, newSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
     [Trait("PasswordHashing", "True")]
     public async Task Cannot_reset_password_if_has_no_password()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         var (password, supplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
 
         var isReset = await _authenticatorsSelfService.TryResetPasswordAsync(user.SubjectId, password, _ct);
 
         isReset.ShouldBeFalse();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, supplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
 
-    [Fact]
-    public async Task Can_authenticate_with_username_when_username_is_set_before_creation_of_authenticator()
+    private async Task<(PlainTextOtp Otp, OtpToken Token)> SendOtpAsync(OtpAddress address)
     {
-        var subjectId = UserSubjectId.New();
-
-        // We create a profile before creating the authenticator
-        _ = (await _profileAdmin.TryAddAsync(subjectId, ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-
-        // then we set the username on the profile
-        (await _userSelfService.TrySetUserNameAsync(subjectId, userName, _ct)).ShouldBeTrue();
-
-        // Only then do we actually create the authenticator.
-        _ = (await _authenticatorsSelfService.TryRegisterAsync(subjectId, TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-
-        var (pwd, provided) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, subjectId, _ct);
-
-        (await _authenticatorsSelfService.TrySetPasswordAsync(subjectId, pwd, _ct)).ShouldBeTrue();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, provided, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-    }
-
-    [Fact]
-    public async Task Can_authenticate_with_password_after_modifying_username()
-    {
-        var subjectId = UserSubjectId.New();
-
-        _ = (await _profileAdmin.TryAddAsync(subjectId, ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-        _ = (await _authenticatorsSelfService.TryRegisterAsync(subjectId, TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var (pwd, provided) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, subjectId, _ct);
-        (await _userSelfService.TrySetUserNameAsync(subjectId, userName, _ct)).ShouldBeTrue();
-        (await _authenticatorsSelfService.TrySetPasswordAsync(subjectId, pwd, _ct)).ShouldBeTrue();
-
-
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, provided, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        var callCountBefore = _otpDispatcher.Calls.Count;
+        var result = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
+        result.Sent.ShouldBeTrue();
+        var otp = _otpDispatcher.Calls.ElementAt(callCountBefore).Otp;
+        return (otp, result.Token.Value);
     }
 
     private static async Task<ServiceProvider> CreateServiceProvider(
@@ -552,8 +547,8 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
             .AddLogging()
             .AddSingleton(new FakeTimeProvider())
             .AddSingleton<TimeProvider>(provider => provider.GetRequiredService<FakeTimeProvider>())
-            .AddSingleton(new FakeOtpSender())
-            .AddSingleton<IOtpSender>(provider => provider.GetRequiredService<FakeOtpSender>());
+            .AddSingleton(new FakeOtpDispatcher())
+            .AddSingleton<IOtpDispatcher>(provider => provider.GetRequiredService<FakeOtpDispatcher>());
 
         _ = services.AddUserManagementInternal(users =>
         {

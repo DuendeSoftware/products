@@ -3,6 +3,9 @@
 
 namespace Duende.UserManagement.Authentication.Totp;
 
+/// <summary>
+/// Strongly-typed name for a TOTP authenticator registered by a user (e.g., "Default", "Work Phone").
+/// </summary>
 [StringValue]
 public partial record TotpAuthenticatorName
 {
@@ -11,8 +14,10 @@ public partial record TotpAuthenticatorName
     // so we may as well use some reasonable number.
     internal const int MaxLength = 255;
 
+    /// <summary>Gets the string value of the authenticator name.</summary>
     public string Value { get; }
 
+    /// <summary>The default TOTP authenticator name.</summary>
     public static TotpAuthenticatorName Default { get; } = Create("Default");
 
     static string Normalize(string value) => value.Trim();

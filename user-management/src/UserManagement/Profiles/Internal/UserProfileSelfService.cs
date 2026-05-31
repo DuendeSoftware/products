@@ -30,6 +30,7 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, Attribu
         var profile = new UserProfile(subjectId, attributes);
         if (await repo.CreateAsync(profile, ct) is CreateResult.Success)
         {
+            licenseValidator.ValidateUserCount();
             logger.UserProfileRegistered(LogLevel.Debug, subjectId);
             return new Profiles.UserProfile(profile);
         }

@@ -15,6 +15,10 @@ partial record PlainTextOtp : IStringValue<PlainTextOtp>
     // Constructor for controlled creation
     private PlainTextOtp(string value) => Value = value;
 
+    /// <summary>Creates a <see cref="PlainTextOtp" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="PlainTextOtp" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="PlainTextOtp" />.</exception>
     public static PlainTextOtp Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -24,9 +28,18 @@ partial record PlainTextOtp : IStringValue<PlainTextOtp>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="PlainTextOtp" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="PlainTextOtp" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out PlainTextOtp? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="PlainTextOtp" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="PlainTextOtp" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out PlainTextOtp? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -68,8 +81,14 @@ partial record PlainTextOtp : IStringValue<PlainTextOtp>
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="PlainTextOtp"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="PlainTextOtp"/> instance.</returns>
     public static implicit operator PlainTextOtp(string value) => Create(value);
 
+    /// <summary>Creates a new <see cref="PlainTextOtp"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="PlainTextOtp"/> from.</param>
+    /// <returns>A new <see cref="PlainTextOtp"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static PlainTextOtp? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

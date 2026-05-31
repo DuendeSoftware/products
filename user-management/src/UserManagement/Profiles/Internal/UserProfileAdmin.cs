@@ -31,6 +31,7 @@ internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSche
         var profile = new UserProfile(subjectId, attributes);
         if (await repo.CreateAsync(profile, ct) is CreateResult.Success)
         {
+            licenseValidator.ValidateUserCount();
             logger.UserProfileCreated(LogLevel.Debug, subjectId);
             return new Profiles.UserProfile(profile);
         }
@@ -89,6 +90,6 @@ internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSche
             .Where(kvp => attributes.Contains(kvp.Key) && schema.AttributeDefinitions.ContainsKey(kvp.Key))
             .Select(kvp => kvp.Value);
         var collection = new AttributeValueCollection(schema, values);
-        return new UserProfileAttributeProjection(profile.SubjectId, profile.UserName, collection);
+        return new UserProfileAttributeProjection(profile.SubjectId, collection);
     }
 }

@@ -17,7 +17,5 @@ internal static class TestData
     internal static ExternalAuthenticator CreateExternalAuthenticator() =>
         new(ExternalAuthenticatorName.Create("test"), OpaqueSubjectId.Create($"sub-{Count()}"));
 
-    internal static UserName CreateUserName() => UserName.Create($"UserName{Count()}");
-
     private static int Count() => Interlocked.Increment(ref _counter);
 }

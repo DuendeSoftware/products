@@ -56,5 +56,6 @@ public sealed record AdminError(
     public static AdminError InvalidValue(string propertyName, string reason) =>
         new("invalid_value", $"The value for '{propertyName}' is invalid: {reason}", [propertyName]);
 
+    /// <inheritdoc/>
     public override string ToString() => $"{Code}: {Message} {string.Join(',', PropertyNames ?? [])}";
 }

@@ -7,6 +7,7 @@ using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Passwords;
 using Duende.UserManagement.Authentication.RecoveryCodes;
 using Duende.UserManagement.Authentication.Totp;
+using Duende.UserManagement.Profiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,8 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
     private IRecoveryCodeAuth _recoveryCodeAuth = null!;
     private ITotpAuth _totpAuth = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
+    private IUserProfileSelfService _profileSelfService = null!;
+    private IUserProfileSchemaAdmin _schemaAdmin = null!;
     private IUserSelfService _userSelfService = null!;
     private ServiceProvider _serviceProvider = null!;
     private FakeTimeProvider _timeProvider = null!;
@@ -37,6 +40,8 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         _recoveryCodeAuth = _serviceProvider.GetRequiredService<IRecoveryCodeAuth>();
         _totpAuth = _serviceProvider.GetRequiredService<ITotpAuth>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         _userSelfService = _serviceProvider.GetRequiredService<IUserSelfService>();
         _timeProvider = _serviceProvider.GetRequiredService<FakeTimeProvider>();
     }
@@ -46,97 +51,112 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
     [Fact]
     public async Task Password_authentication_rejects_after_threshold_and_allows_after_throttle_duration()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
 
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, correctPassword, _ct)).ShouldBeTrue();
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
 
         _timeProvider.SetUtcNow(_timeProvider.GetUtcNow().AddMinutes(6));
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
     public async Task Successful_password_authentication_resets_failure_count()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
 
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, correctPassword, _ct)).ShouldBeTrue();
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
     public async Task First_successful_password_authentication_does_not_get_blocked_by_policy_context_creation()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
 
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, correctPassword, _ct)).ShouldBeTrue();
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
     public async Task Password_authentication_starts_a_fresh_window_after_failure_window_expires()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
 
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, correctPassword, _ct)).ShouldBeTrue();
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
 
         _timeProvider.SetUtcNow(_timeProvider.GetUtcNow().AddMinutes(16));
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
     public async Task Incorrect_old_password_in_change_password_counts_toward_password_throttling()
     {
-        var userName = TestData.CreateUserName();
         var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (originalPassword, originalSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, user.SubjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
         var newPassword = await TestData.CreatePasswordAsync(_authenticatorsSelfService, user.SubjectId, _ct);
 
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await _authenticatorsSelfService.TrySetPasswordAsync(user.SubjectId, originalPassword, _ct)).ShouldBeTrue();
 
         (await _authenticatorsSelfService.TryChangePasswordAsync(user.SubjectId, wrongSupplied, newPassword, _ct)).ShouldBeFalse();
         (await _authenticatorsSelfService.TryChangePasswordAsync(user.SubjectId, wrongSupplied, newPassword, _ct)).ShouldBeFalse();
 
         (await _authenticatorsSelfService.TryChangePasswordAsync(user.SubjectId, originalSupplied, newPassword, _ct)).ShouldBeFalse();
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
 
         _timeProvider.SetUtcNow(_timeProvider.GetUtcNow().AddMinutes(6));
 
-        _ = (await _passwordAuth.TryAuthenticateAsync(userName, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await _passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, originalSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
@@ -177,23 +197,27 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
     {
         await using var serviceProvider = await CreateServiceProviderWithConcurrentBarrierPolicy();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = serviceProvider.GetRequiredService<IUserSelfService>();
         var passwordAuth = serviceProvider.GetRequiredService<IPasswordAuth>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userName = TestData.CreateUserName();
+        var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, user.SubjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, ct: _ct);
 
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(schemaAdmin, _ct);
+        var schema = await profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await selfService.TrySetPasswordAsync(user.SubjectId, correctPassword, _ct)).ShouldBeTrue();
 
         var attempts = await Task.WhenAll(
-            Task.Run(() => passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct), _ct),
-            Task.Run(() => passwordAuth.TryAuthenticateAsync(userName, wrongSupplied, _ct), _ct));
+            Task.Run(() => passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct), _ct),
+            Task.Run(() => passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, wrongSupplied, _ct), _ct));
 
         attempts.ShouldAllBe(result => result is PasswordAuthenticationResult.Failure);
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
 
     [Fact]
@@ -243,16 +267,20 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
     {
         await using var serviceProvider = await CreateServiceProviderWithConcurrentBarrierPolicy();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = serviceProvider.GetRequiredService<IUserSelfService>();
         var passwordAuth = serviceProvider.GetRequiredService<IPasswordAuth>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userName = TestData.CreateUserName();
+        var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, user.SubjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, ct: _ct);
         var newPassword = await TestData.CreatePasswordAsync(passwordFactory, user.SubjectId, _ct);
 
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(schemaAdmin, _ct);
+        var schema = await profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
         (await selfService.TrySetPasswordAsync(user.SubjectId, correctPassword, _ct)).ShouldBeTrue();
 
         var attempts = await Task.WhenAll(
@@ -260,7 +288,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
             Task.Run(() => selfService.TryChangePasswordAsync(user.SubjectId, wrongSupplied, newPassword, _ct), _ct));
 
         attempts.ShouldAllBe(result => result == false);
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, _ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
 
     [Fact]
@@ -272,18 +300,22 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
             configureServices: services => _ = services.Replace(ServiceDescriptor.Transient<IAuthenticationAttemptPolicy, AlwaysRejectAuthenticationAttemptPolicy>()));
 
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = serviceProvider.GetRequiredService<IUserSelfService>();
         var passwordAuth = serviceProvider.GetRequiredService<IPasswordAuth>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         var ct = TestContext.Current.CancellationToken;
-        var userName = TestData.CreateUserName();
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, user.SubjectId, ct);
 
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(schemaAdmin, ct);
+        var schema = await profileSelfService.GetSchemaAsync(ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), ct)).ShouldNotBeNull();
         (await selfService.TrySetPasswordAsync(user.SubjectId, correctPassword, ct)).ShouldBeTrue();
 
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
 
     // --- Velocity throttling tests ---
@@ -299,31 +331,35 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
             // Set failure threshold high so only velocity fires
             options.Throttling.MaxFailedAttempts = 100;
         });
-        var userSelfService = serviceProvider.GetRequiredService<IUserSelfService>();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passwordAuth = serviceProvider.GetRequiredService<IPasswordAuth>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
         var ct = TestContext.Current.CancellationToken;
 
-        var userName = TestData.CreateUserName();
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, user.SubjectId, ct);
 
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(schemaAdmin, ct);
+        var schema = await profileSelfService.GetSchemaAsync(ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), ct)).ShouldNotBeNull();
         (await selfService.TrySetPasswordAsync(user.SubjectId, correctPassword, ct)).ShouldBeTrue();
 
         // 3 successful attempts — hits velocity threshold
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
 
         // 4th attempt within window — should be rejected even with correct credentials
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>();
 
         // After velocity throttle duration, should be allowed again
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddSeconds(31));
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     [Fact]
@@ -402,26 +438,30 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
             options.Throttling.MaxFailedAttempts = 100;
         });
 
-        var userSelfService = serviceProvider.GetRequiredService<IUserSelfService>();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passwordAuth = serviceProvider.GetRequiredService<IPasswordAuth>();
         var recoveryCodeAuth = serviceProvider.GetRequiredService<IRecoveryCodeAuth>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         var ct = TestContext.Current.CancellationToken;
 
-        var userName = TestData.CreateUserName();
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, user.SubjectId, ct);
         var codes = (await selfService.TryCreateRecoveryCodesAsync(user.SubjectId, ct)).ShouldNotBeNull();
 
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(schemaAdmin, ct);
+        var schema = await profileSelfService.GetSchemaAsync(ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), ct)).ShouldNotBeNull();
         (await selfService.TrySetPasswordAsync(user.SubjectId, correctPassword, ct)).ShouldBeTrue();
 
         // Exhaust velocity for password authenticator
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>(); // velocity blocked
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Failure>(); // velocity blocked
 
         // Recovery code authenticator should still work (different authenticator, separate velocity counter)
         (await recoveryCodeAuth.TryAuthenticateAsync(user.SubjectId, codes.ElementAt(0), ct)).ShouldBeTrue();
@@ -437,30 +477,34 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
             options.Throttling.VelocityThrottleDuration = TimeSpan.FromSeconds(30);
             options.Throttling.MaxFailedAttempts = 100;
         });
-        var userSelfService = serviceProvider.GetRequiredService<IUserSelfService>();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passwordAuth = serviceProvider.GetRequiredService<IPasswordAuth>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
         var ct = TestContext.Current.CancellationToken;
 
-        var userName = TestData.CreateUserName();
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), ct)).ShouldNotBeNull();
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, user.SubjectId, ct);
 
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct)).ShouldBeTrue();
+        await TestData.AddAttributeDefinitions(schemaAdmin, ct);
+        var schema = await profileSelfService.GetSchemaAsync(ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), ct)).ShouldNotBeNull();
         (await selfService.TrySetPasswordAsync(user.SubjectId, correctPassword, ct)).ShouldBeTrue();
 
         // 3 attempts — hits velocity threshold
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
 
         // Advance time past both velocity window AND throttle duration
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddSeconds(31));
 
         // Timestamps are now outside the velocity window — should be allowed
-        _ = (await passwordAuth.TryAuthenticateAsync(userName, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
+        _ = (await passwordAuth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, correctSupplied, ct)).ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
     private sealed class AlwaysRejectAuthenticationAttemptPolicy : IAuthenticationAttemptPolicy

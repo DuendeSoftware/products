@@ -5,11 +5,20 @@ using Duende.UserManagement.Authentication.Internal.Passkeys;
 
 namespace Duende.UserManagement.Authentication;
 
+/// <summary>
+/// Top-level options for configuring user authentication HTTP endpoints.
+/// </summary>
 public sealed class UserAuthenticationEndpointOptions
 {
+    /// <summary>
+    /// Route options for passkey-related endpoints.
+    /// </summary>
     public PasskeysRouteOptions Passkeys { get; init; } = new();
 }
 
+/// <summary>
+/// Route configuration for passkey HTTP endpoints.
+/// </summary>
 public sealed class PasskeysRouteOptions
 {
     /// <summary>

@@ -5,6 +5,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Otp;
+using Duende.UserManagement.Authentication.Otp.Internal;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 using Duende.UserManagement.Authentication.Passwords;
@@ -21,16 +22,17 @@ namespace Duende.UserManagement.Authentication.Internal;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserAuthenticatorsSelfService(
     UserAuthenticatorsRepository repo,
+    OtpVerifier otpVerifier,
     IAuthenticationAttemptPolicy authenticationAttemptPolicy,
     ILogger<UserAuthenticatorsSelfService> logger,
     IOptions<UserAuthenticationOptions> options,
     TimeProvider timeProvider,
     PasswordHashAlgorithms passwordHashAlgorithms,
-    PlainTextPasswordFactory passwordFactory,
+    ValidatedPlainTextPasswordFactory passwordFactory,
     UserManagementLicenseValidator licenseValidator)
     : IUserAuthenticatorsSelfService
 {
-    public async Task<PlainTextPassword> CreatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
+    public async Task<ValidatedPlainTextPassword> ValidatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
     {
         licenseValidator.ValidatePassword();
         var result = await passwordFactory.CreateAsync(userId, passwordString, ct);
@@ -38,12 +40,12 @@ internal sealed class UserAuthenticatorsSelfService(
         {
             PasswordCreationResult.Success success => success.Password,
             PasswordCreationResult.Failed failed => throw new FormatException(
-                $"The value is not a valid {nameof(PlainTextPassword)}. {string.Join(" ", failed.Errors)}"),
+                $"The value is not a valid {nameof(ValidatedPlainTextPassword)}. {string.Join(" ", failed.Errors)}"),
             _ => throw new InvalidOperationException("Unexpected password creation result.")
         };
     }
 
-    public Task<PasswordCreationResult> TryCreatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
+    public Task<PasswordCreationResult> TryValidatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
     {
         licenseValidator.ValidatePassword();
         return passwordFactory.CreateAsync(userId, passwordString, ct);
@@ -54,7 +56,13 @@ internal sealed class UserAuthenticatorsSelfService(
         licenseValidator.ValidateExternalIdpLinking();
         using var scope = logger.BeginSubjectScope(subjectId);
         var user = new UserAuthenticators(subjectId, [], [authenticator]);
-        return await repo.CreateAsync(user, ct) is CreateResult.Success ? new Authentication.UserAuthenticators(user) : null;
+        if (await repo.CreateAsync(user, ct) is CreateResult.Success)
+        {
+            licenseValidator.ValidateUserCount();
+            return new Authentication.UserAuthenticators(user);
+        }
+
+        return null;
     }
 
     public async Task<Authentication.UserAuthenticators?> TryGetAsync(UserSubjectId subjectId, Ct ct) =>
@@ -63,13 +71,22 @@ internal sealed class UserAuthenticatorsSelfService(
     public async Task<Authentication.UserAuthenticators?> TryGetAsync(ExternalAuthenticator authenticator, Ct ct) =>
         await repo.TryReadAsync(authenticator, ct) is ({ } user, _) ? new Authentication.UserAuthenticators(user) : null;
 
-    public async Task<bool> TryAddOtpAddressAsync(UserSubjectId subjectId, OtpAddress address, Ct ct)
+    public async Task<bool> TryAddOtpAddressAsync(UserSubjectId subjectId, PlainTextOtp otp, OtpToken token, Ct ct)
     {
         licenseValidator.ValidateOtp();
         using var scope = logger.BeginSubjectScope(subjectId);
+
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
             logger.UserNotFound(LogLevel.Warning, subjectId);
+            return false;
+        }
+
+        var address = await otpVerifier.TryVerifyAsync(otp, token, ct);
+
+        if (address is null)
+        {
+            logger.OtpVerificationFailed(LogLevel.Information, subjectId);
             return false;
         }
 
@@ -78,32 +95,6 @@ internal sealed class UserAuthenticatorsSelfService(
         if (succeeded)
         {
             logger.OtpAddressAdded(LogLevel.Information, subjectId);
-        }
-
-        return succeeded;
-    }
-
-    public async Task<bool> TryReplaceOtpAddressAsync(
-        UserSubjectId subjectId, OtpAddress oldAddress, OtpAddress newAddress, Ct ct)
-    {
-        licenseValidator.ValidateOtp();
-        using var scope = logger.BeginSubjectScope(subjectId);
-        if (await repo.TryReadAsync(subjectId, ct) is not { } record)
-        {
-            logger.UserNotFound(LogLevel.Warning, subjectId);
-            return false;
-        }
-
-        record.UserAuthenticators.Remove([oldAddress]);
-        record.UserAuthenticators.Add([newAddress]);
-        var succeeded = await repo.UpdateAsync(record.UserAuthenticators, record.Version, ct) is UpdateResult.Success;
-        if (succeeded)
-        {
-            logger.OtpAddressReplaced(LogLevel.Information, subjectId);
-        }
-        else
-        {
-            logger.OtpAddressReplaceFailed(LogLevel.Warning, subjectId);
         }
 
         return succeeded;
@@ -287,7 +278,7 @@ internal sealed class UserAuthenticatorsSelfService(
         return succeeded ? codes : null;
     }
 
-    public async Task<bool> TrySetPasswordAsync(UserSubjectId subjectId, PlainTextPassword password, Ct ct)
+    public async Task<bool> TrySetPasswordAsync(UserSubjectId subjectId, ValidatedPlainTextPassword password, Ct ct)
     {
         licenseValidator.ValidatePassword();
         using var scope = logger.BeginSubjectScope(subjectId);
@@ -312,7 +303,7 @@ internal sealed class UserAuthenticatorsSelfService(
     }
 
     public async Task<bool> TryChangePasswordAsync(
-        UserSubjectId subjectId, NonValidatedPassword oldPassword, PlainTextPassword newPassword, Ct ct)
+        UserSubjectId subjectId, NonValidatedPassword oldPassword, ValidatedPlainTextPassword newPassword, Ct ct)
     {
         licenseValidator.ValidatePassword();
         using var scope = logger.BeginSubjectScope(subjectId);
@@ -387,7 +378,7 @@ internal sealed class UserAuthenticatorsSelfService(
         return isChanged;
     }
 
-    public async Task<bool> TryResetPasswordAsync(UserSubjectId subjectId, PlainTextPassword password, Ct ct)
+    public async Task<bool> TryResetPasswordAsync(UserSubjectId subjectId, ValidatedPlainTextPassword password, Ct ct)
     {
         licenseValidator.ValidatePassword();
         using var scope = logger.BeginSubjectScope(subjectId);
@@ -431,36 +422,6 @@ internal static class AuthenticationFailureRecorder
         // is a single retry: enough to handle the normal two-request race, while expecting higher-level
         // protections to absorb true flood scenarios.
         if (await repo.TryReadAsync(subjectId, ct) is not { } retryRecord)
-        {
-            return;
-        }
-
-        var now = timeProvider.GetUtcNow();
-        retryRecord.UserAuthenticators.RecordAttempt(key, now, velocityWindow);
-        retryRecord.UserAuthenticators.RecordFailedAttempt(key, now, failureWindow, maxFailedAttempts);
-        if (await repo.UpdateAsync(retryRecord.UserAuthenticators, retryRecord.Version, ct) is not UpdateResult.Success)
-        {
-            logger.FailedAttemptRetryOptimisticConcurrencyConflict(LogLevel.Error);
-        }
-    }
-
-    internal static async Task RetryFailedAttemptAsync(
-        UserName userName,
-        AuthenticatorKey key,
-        UserAuthenticatorsRepository repo,
-        ILogger logger,
-        TimeProvider timeProvider,
-        TimeSpan failureWindow,
-        TimeSpan velocityWindow,
-        int maxFailedAttempts,
-        Ct ct)
-    {
-        // We intentionally retry exactly once here. Without a retry, two simultaneous requests can
-        // undercount a failed attempt due to optimistic concurrency. Retrying many times improves
-        // accuracy under contention, but also makes timing behavior more variable. The chosen trade-off
-        // is a single retry: enough to handle the normal two-request race, while expecting higher-level
-        // protections to absorb true flood scenarios.
-        if (await repo.TryReadAsync(userName, ct) is not { } retryRecord)
         {
             return;
         }

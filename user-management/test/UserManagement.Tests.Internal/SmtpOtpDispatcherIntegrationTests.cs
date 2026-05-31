@@ -18,15 +18,15 @@ public sealed class SmtpServerFixture : IDisposable
     public void Dispose() => Server.Stop();
 }
 
-public class SmtpOtpSenderIntegrationTests(SmtpServerFixture fixture) : IClassFixture<SmtpServerFixture>
+public class SmtpOtpDispatcherIntegrationTests(SmtpServerFixture fixture) : IClassFixture<SmtpServerFixture>
 {
     private readonly SimpleSmtpServer _smtpServer = fixture.Server;
 
     [Fact]
-    public async Task Send_with_valid_address_sends_email_successfully()
+    public async Task Dispatch_with_valid_address_dispatches_email_successfully()
     {
         _smtpServer.ClearReceivedEmail();
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "127.0.0.1",
             Port = _smtpServer.Configuration.Port,
@@ -35,12 +35,12 @@ public class SmtpOtpSenderIntegrationTests(SmtpServerFixture fixture) : IClassFi
             EnableSsl = false,
             Domain = "example.com"
         };
-        var sender = new SmtpOtpSender(Options.Create(options), new EmailContentFactory(Options.Create(options)), NullLogger<SmtpOtpSender>.Instance);
+        var dispatcher = new SmtpOtpDispatcher(Options.Create(options), new EmailContentFactory(Options.Create(options)), NullLogger<SmtpOtpDispatcher>.Instance);
         var emailAddress = EmailAddress.Create("user@example.com");
         var address = new OtpAddress(OtpChannel.Email, emailAddress);
         PlainTextOtp.TryCreate("123456", out var otp).ShouldBeTrue();
 
-        await sender.SendAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None);
+        await dispatcher.DispatchAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None);
 
         _smtpServer.ReceivedEmailCount.ShouldBe(1);
         var message = _smtpServer.ReceivedEmail[0];
@@ -53,10 +53,10 @@ public class SmtpOtpSenderIntegrationTests(SmtpServerFixture fixture) : IClassFi
     }
 
     [Fact]
-    public async Task Send_with_html_template_sends_html_email()
+    public async Task Dispatch_with_html_template_dispatches_html_email()
     {
         _smtpServer.ClearReceivedEmail();
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "127.0.0.1",
             Port = _smtpServer.Configuration.Port,
@@ -65,12 +65,12 @@ public class SmtpOtpSenderIntegrationTests(SmtpServerFixture fixture) : IClassFi
             EnableSsl = false,
             HtmlTemplate = "<html><body><h1>{Code}</h1><p>Expires: {ExpiresMinutes}min</p></body></html>"
         };
-        var sender = new SmtpOtpSender(Options.Create(options), new EmailContentFactory(Options.Create(options)), NullLogger<SmtpOtpSender>.Instance);
+        var dispatcher = new SmtpOtpDispatcher(Options.Create(options), new EmailContentFactory(Options.Create(options)), NullLogger<SmtpOtpDispatcher>.Instance);
         var emailAddress = EmailAddress.Create("user@example.com");
         var address = new OtpAddress(OtpChannel.Email, emailAddress);
         PlainTextOtp.TryCreate("654321", out var otp).ShouldBeTrue();
 
-        await sender.SendAsync(address, otp!.Value, TimeSpan.FromMinutes(10), Ct.None);
+        await dispatcher.DispatchAsync(address, otp!.Value, TimeSpan.FromMinutes(10), Ct.None);
 
         _smtpServer.ReceivedEmailCount.ShouldBe(1);
         var message = _smtpServer.ReceivedEmail[0];
@@ -80,10 +80,10 @@ public class SmtpOtpSenderIntegrationTests(SmtpServerFixture fixture) : IClassFi
     }
 
     [Fact]
-    public async Task Send_with_custom_subject_uses_custom_subject()
+    public async Task Dispatch_with_custom_subject_uses_custom_subject()
     {
         _smtpServer.ClearReceivedEmail();
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "127.0.0.1",
             Port = _smtpServer.Configuration.Port,
@@ -92,12 +92,12 @@ public class SmtpOtpSenderIntegrationTests(SmtpServerFixture fixture) : IClassFi
             EnableSsl = false,
             SubjectTemplate = "Your code is {Code}"
         };
-        var sender = new SmtpOtpSender(Options.Create(options), new EmailContentFactory(Options.Create(options)), NullLogger<SmtpOtpSender>.Instance);
+        var dispatcher = new SmtpOtpDispatcher(Options.Create(options), new EmailContentFactory(Options.Create(options)), NullLogger<SmtpOtpDispatcher>.Instance);
         var emailAddress = EmailAddress.Create("user@example.com");
         var address = new OtpAddress(OtpChannel.Email, emailAddress);
         PlainTextOtp.TryCreate("999888", out var otp).ShouldBeTrue();
 
-        await sender.SendAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None);
+        await dispatcher.DispatchAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None);
 
         _smtpServer.ReceivedEmailCount.ShouldBe(1);
         _smtpServer.ReceivedEmail[0].Headers["Subject"].ShouldBe("Your code is 999-888");

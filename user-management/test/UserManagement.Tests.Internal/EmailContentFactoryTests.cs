@@ -10,7 +10,7 @@ namespace Duende.Platform.UserManagement;
 
 public class EmailContentFactoryTests
 {
-    private readonly SmtpOtpSenderOptions _defaultOptions = new()
+    private readonly SmtpOtpDispatcherOptions _defaultOptions = new()
     {
         Host = "localhost",
         Port = 1025,
@@ -74,7 +74,7 @@ public class EmailContentFactoryTests
     [Fact]
     public async Task Create_without_domain_uses_generic_message()
     {
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "localhost",
             Port = 1025,
@@ -94,7 +94,7 @@ public class EmailContentFactoryTests
     [Fact]
     public async Task Create_with_html_template_returns_html()
     {
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "localhost",
             Port = 1025,
@@ -117,7 +117,7 @@ public class EmailContentFactoryTests
     [Fact]
     public async Task Create_with_plain_text_template_returns_plain_text()
     {
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "localhost",
             Port = 1025,
@@ -138,7 +138,7 @@ public class EmailContentFactoryTests
     [Fact]
     public async Task Create_with_subject_template_uses_custom_subject()
     {
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "localhost",
             Port = 1025,
@@ -158,7 +158,7 @@ public class EmailContentFactoryTests
     [Fact]
     public async Task Create_template_replaces_all_placeholders()
     {
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "localhost",
             Port = 1025,
@@ -179,7 +179,7 @@ public class EmailContentFactoryTests
     [Fact]
     public async Task Create_template_without_domain_uses_default_text()
     {
-        var options = new SmtpOtpSenderOptions
+        var options = new SmtpOtpDispatcherOptions
         {
             Host = "localhost",
             Port = 1025,
@@ -196,7 +196,7 @@ public class EmailContentFactoryTests
         result.Body.ShouldBe("Code: 1234-5678 on our official website");
     }
 
-    private EmailContentFactory CreateFactory(SmtpOtpSenderOptions? options = null)
+    private EmailContentFactory CreateFactory(SmtpOtpDispatcherOptions? options = null)
     {
         var opts = Options.Create(options ?? _defaultOptions);
         return new EmailContentFactory(opts);

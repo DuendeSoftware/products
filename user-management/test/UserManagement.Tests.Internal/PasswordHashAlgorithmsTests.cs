@@ -3,7 +3,6 @@
 
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
-using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Passwords;
 using Microsoft.Extensions.Options;
 

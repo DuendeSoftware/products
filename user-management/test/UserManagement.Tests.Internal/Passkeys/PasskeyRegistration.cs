@@ -18,7 +18,6 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     private IPasskeyCeremonies _ceremonies = null!;
     private WebAuthnRegistrationCeremony _webAuthnRegistrationCeremony = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
-    private IUserSelfService _userSelfService = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public async ValueTask InitializeAsync()
@@ -27,7 +26,6 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         _ceremonies = _serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         _webAuthnRegistrationCeremony = _serviceProvider.GetRequiredService<WebAuthnRegistrationCeremony>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        _userSelfService = _serviceProvider.GetRequiredService<IUserSelfService>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -468,7 +466,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task Challenge_is_deleted_after_successful_registration()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -490,7 +488,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task Challenge_is_deleted_after_failed_registration()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -714,7 +712,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task CompleteRegistrationAsync_with_explicit_default_port_succeeds()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -940,10 +938,10 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task Second_Passkey_registration_adds_second_credential_to_user()
     {
-        var (userSubjectId, userName) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
 
         // Register first passkey
-        var firstSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, userName.ToString(), "Test User", _ct);
+        var firstSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct);
         var firstCredentialId = RandomNumberGenerator.GetBytes(32);
         var firstClientData =
             WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, firstSession.Options.Challenge, "https://example.com");
@@ -956,7 +954,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         (await _authenticatorsSelfService.TryAddPasskeyAsync(userSubjectId, firstSuccess.Credential, _ct)).ShouldBeTrue();
 
         // Register second passkey
-        var secondSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, userName.ToString(), "Test User", _ct);
+        var secondSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct);
         var secondCredentialId = RandomNumberGenerator.GetBytes(32);
         var secondClientData =
             WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, secondSession.Options.Challenge, "https://example.com");
@@ -978,10 +976,10 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task BeginAsync_excludes_existing_credentials()
     {
-        var (userSubjectId, userName) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
 
         // Register first passkey
-        var firstSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, userName.ToString(), "Test User", _ct);
+        var firstSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct);
         var firstCredentialId = RandomNumberGenerator.GetBytes(32);
         var firstClientData =
             WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, firstSession.Options.Challenge, "https://example.com");
@@ -993,7 +991,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         var firstSuccess = firstResult.ShouldBeOfType<PasskeyRegistrationCompleteResult.Success>();
         (await _authenticatorsSelfService.TryAddPasskeyAsync(userSubjectId, firstSuccess.Credential, _ct)).ShouldBeTrue();
 
-        var secondSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, userName.ToString(), "Test User", _ct);
+        var secondSession = await _ceremonies.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct);
 
         // Assert: Verify excludeCredentials contains the first passkey's credential ID
         _ = secondSession.Options.ExcludeCredentials.ShouldHaveSingleItem();
@@ -1132,7 +1130,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task CompleteRegistrationAsync_with_backup_eligible_flag_sets_backup_eligible()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -1152,7 +1150,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task CompleteRegistrationAsync_with_backed_up_credential_sets_both_flags()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -1172,7 +1170,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task CompleteRegistrationAsync_without_backup_flags_defaults_to_false()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -1192,7 +1190,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     [Fact]
     public async Task CompleteRegistrationAsync_with_backed_up_but_not_eligible_returns_failure()
     {
-        var (userSubjectId, _) = await CreateUserAsync();
+        var userSubjectId = await CreateUserAsync();
         var session = await _ceremonies.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
 
@@ -1349,11 +1347,6 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         _ = result.ShouldBeOfType<PasskeyRegistrationCompleteResult.Success>();
     }
 
-    private async Task<(UserSubjectId UserSubjectId, UserName UserName)> CreateUserAsync()
-    {
-        var userName = TestData.CreateUserName();
-        var authenticators = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        (await _userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, _ct)).ShouldBeTrue();
-        return (authenticators.SubjectId, userName);
-    }
+    private async Task<UserSubjectId> CreateUserAsync() =>
+        (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull().SubjectId;
 }

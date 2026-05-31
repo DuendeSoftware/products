@@ -6,6 +6,7 @@
     <Description>Duende UserManagement Integration for Duende IdentityServer</Description>
     <AssemblyName>Duende.UserManagement.IdentityServer8</AssemblyName>
     <RootNamespace>Duende.IdentityServer</RootNamespace>
+    <NoWarn>$(NoWarn);ca1812</NoWarn> <!-- never instantiated internal class-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Duende.UserManagement" />
-    <ProjectReference Include="..\..\..\identity-server\src\IdentityServer\IdentityServer.csproj" />
+    <PackageReference Include="Duende.IdentityServer" />
+    <ProjectReference Include="..\UserManagement\UserManagement.csproj" />
   </ItemGroup>
 
 </Project>

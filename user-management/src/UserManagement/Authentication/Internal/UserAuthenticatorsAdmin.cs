@@ -40,9 +40,13 @@ internal sealed class UserAuthenticatorsAdmin(
 
         using var scope = logger.BeginSubjectScope(subjectId);
         var user = new UserAuthenticators(subjectId, materializedOtpAddresses, materializedExternalAuthenticators);
-        return await repo.CreateAsync(user, ct) is CreateResult.Success
-            ? new Authentication.UserAuthenticators(user)
-            : null;
+        if (await repo.CreateAsync(user, ct) is CreateResult.Success)
+        {
+            licenseValidator.ValidateUserCount();
+            return new Authentication.UserAuthenticators(user);
+        }
+
+        return null;
     }
 
     public async Task<Authentication.UserAuthenticators?> TryGetAsync(UserSubjectId subjectId, Ct ct)
@@ -52,9 +56,6 @@ internal sealed class UserAuthenticatorsAdmin(
             ? new Authentication.UserAuthenticators(user)
             : null;
     }
-
-    public async Task<Authentication.UserAuthenticators?> TryGetAsync(UserName userName, Ct ct) =>
-        await repo.TryReadAsync(userName, ct) is ({ } user, _) ? new Authentication.UserAuthenticators(user) : null;
 
     public async Task<bool> TryAddOtpAddressesAsync(
         UserSubjectId subjectId, IEnumerable<OtpAddress> addresses, Ct ct)

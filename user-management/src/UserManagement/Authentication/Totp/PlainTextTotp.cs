@@ -5,13 +5,18 @@ using Duende.UserManagement.Authentication.Internal;
 
 namespace Duende.UserManagement.Authentication.Totp;
 
+/// <summary>
+/// Represents a plain text TOTP (Time-based One-Time Password) code submitted by a user for verification.
+/// </summary>
 [StringValue]
 public partial record PlainTextTotp
 {
     internal static byte Length => 6;
 
+    /// <summary>Gets the normalized TOTP code string value.</summary>
     public string Value { get; }
 
+    /// <summary>Returns a redacted string to prevent accidental logging of TOTP values.</summary>
     public override string ToString() => GetType().ToString();
 
     static string Normalize(string value) =>

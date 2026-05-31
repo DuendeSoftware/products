@@ -10,8 +10,14 @@ partial record NonValidatedPassword
     // Constructor for controlled creation
     private NonValidatedPassword(string value) => Value = value;
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="NonValidatedPassword"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="NonValidatedPassword"/> instance.</returns>
     public static implicit operator NonValidatedPassword(string value) => Create(value);
 
+    /// <summary>Creates a new <see cref="NonValidatedPassword"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="NonValidatedPassword"/> from.</param>
+    /// <returns>A new <see cref="NonValidatedPassword"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static NonValidatedPassword? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

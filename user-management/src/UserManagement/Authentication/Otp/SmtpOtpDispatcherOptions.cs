@@ -5,18 +5,26 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Duende.UserManagement.Authentication.Otp;
 
-public sealed class SmtpOtpSenderOptions
+/// <summary>
+/// Configuration options for the SMTP-based OTP email dispatcher.
+/// </summary>
+public sealed class SmtpOtpDispatcherOptions
 {
+    /// <summary>Gets or sets the SMTP server hostname.</summary>
     [Required]
     public string Host { get; set; } = null!;
 
+    /// <summary>Gets or sets the SMTP server port. Defaults to 1025.</summary>
     public int Port { get; set; } = 1025;
 
+    /// <summary>Gets or sets a value indicating whether SSL is enabled. Defaults to <c>true</c>.</summary>
     public bool EnableSsl { get; set; } = true;
 
+    /// <summary>Gets or sets the sender email address.</summary>
     [Required]
     public string FromEmail { get; set; } = null!;
 
+    /// <summary>Gets or sets the sender display name.</summary>
     [Required]
     public string FromName { get; set; } = null!;
 

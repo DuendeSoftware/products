@@ -78,6 +78,12 @@ internal sealed class UserImporter(
         var updatedCount = results.Count(r => r.Status == UserImportStatus.Updated);
         var skippedCount = results.Count(r => r.Status == UserImportStatus.Skipped);
         var failedCount = results.Count(r => r.Status == UserImportStatus.Failed);
+
+        if (successCount > 0)
+        {
+            licenseValidator.ValidateUserCount();
+        }
+
         logger.BatchImportCompleted(LogLevel.Debug, successCount, updatedCount, skippedCount, failedCount);
         return batchResult;
     }
@@ -177,11 +183,6 @@ internal sealed class UserImporter(
         {
             var profile = new Profiles.Internal.UserProfile(record.SubjectId, record.ProfileAttributes);
 
-            if (record.UserName is not null)
-            {
-                profile.SetUserName(record.UserName.Value);
-            }
-
             var (aspectOp, aspectRef) = await profileRepo.CreateAspectBatchOperationAsync(profile, ct);
             profileOp = aspectOp;
             aspectRefs.Add(aspectRef);
@@ -189,14 +190,14 @@ internal sealed class UserImporter(
 
         if (record.Authenticators is not null)
         {
-            var authenticators = BuildAuthenticators(record.SubjectId, record.Authenticators, record.UserName);
+            var authenticators = BuildAuthenticators(record.SubjectId, record.Authenticators);
             authOp = authenticatorsRepo.CreateAspectBatchOperation(authenticators);
             aspectRefs.Add(UserAuthenticatorsRepository.GetAspectRef(authenticators));
         }
 
         // UserDso is always first
         var userDsoIndex = operations.Count;
-        operations.Add(UserRepository.CreateBatchOperation(userDsoId, record.SubjectId, record.UserName, aspectRefs));
+        operations.Add(UserRepository.CreateBatchOperation(userDsoId, record.SubjectId, aspectRefs));
 
         if (profileOp is not null)
         {
@@ -322,11 +323,9 @@ internal sealed class UserImporter(
         AttributeSchema? schema,
         Ct ct)
     {
-        var userName = record.UserName;
-
-        if (record.ProfileAttributes is not null || userName is not null)
+        if (record.ProfileAttributes is not null)
         {
-            var mergeError = await MergeProfileAsync(targetSubjectId, record.ProfileAttributes, userName, schema, ct);
+            var mergeError = await MergeProfileAsync(targetSubjectId, record.ProfileAttributes, schema, ct);
             if (mergeError is not null)
             {
                 return Fail(record.SubjectId, mergeError);
@@ -335,7 +334,7 @@ internal sealed class UserImporter(
 
         if (record.Authenticators is not null)
         {
-            var mergeError = await MergeAuthenticatorsAsync(targetSubjectId, record.Authenticators, record.UserName, ct);
+            var mergeError = await MergeAuthenticatorsAsync(targetSubjectId, record.Authenticators, ct);
             if (mergeError is not null)
             {
                 return Fail(record.SubjectId, mergeError);
@@ -354,7 +353,7 @@ internal sealed class UserImporter(
         return new UserImportResult { SubjectId = record.SubjectId, Status = UserImportStatus.Updated };
     }
 
-    private async Task<string?> MergeProfileAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection? attributes, UserName? userName, AttributeSchema? schema, Ct ct)
+    private async Task<string?> MergeProfileAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection? attributes, AttributeSchema? schema, Ct ct)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
@@ -384,11 +383,6 @@ internal sealed class UserImporter(
                 profile.ReplaceAttributes(merged.Validate());
             }
 
-            if (userName is not null)
-            {
-                profile.SetUserName(userName.Value);
-            }
-
             var updateResult = await profileRepo.UpdateAsync(profile, version, ct);
             if (updateResult is UpdateResult.Success)
             {
@@ -406,14 +400,14 @@ internal sealed class UserImporter(
         return "Failed to merge profile attributes after retries.";
     }
 
-    private async Task<string?> MergeAuthenticatorsAsync(UserSubjectId subjectId, AuthenticatorImport import, UserName? userName, Ct ct)
+    private async Task<string?> MergeAuthenticatorsAsync(UserSubjectId subjectId, AuthenticatorImport import, Ct ct)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
             var existing = await authenticatorsRepo.TryReadAsync(subjectId, ct);
             if (existing is not ({ } authenticators, var version))
             {
-                var created = BuildAuthenticators(subjectId, import, userName);
+                var created = BuildAuthenticators(subjectId, import);
                 var createResult = await authenticatorsRepo.CreateAsync(created, ct);
                 if (createResult is not CreateResult.Success)
                 {
@@ -421,11 +415,6 @@ internal sealed class UserImporter(
                 }
 
                 return null;
-            }
-
-            if (userName is not null)
-            {
-                authenticators.SetUserName(userName.Value);
             }
 
             if (import.Password is not null)
@@ -493,17 +482,12 @@ internal sealed class UserImporter(
         return "Failed to update authenticators after retries.";
     }
 
-    private UserAuthenticators BuildAuthenticators(UserSubjectId subjectId, AuthenticatorImport import, UserName? userName)
+    private UserAuthenticators BuildAuthenticators(UserSubjectId subjectId, AuthenticatorImport import)
     {
         var otpAddresses = import.OtpAddresses ?? [];
         var externalAuthenticators = import.ExternalAuthenticators ?? [];
 
         var authenticators = new UserAuthenticators(subjectId, otpAddresses, externalAuthenticators);
-
-        if (userName is not null)
-        {
-            authenticators.SetUserName(userName.Value);
-        }
 
         if (import.Password is not null)
         {

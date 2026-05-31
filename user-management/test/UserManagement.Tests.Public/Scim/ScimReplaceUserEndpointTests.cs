@@ -351,6 +351,21 @@ public sealed class ScimReplaceUserEndpointTests(ITestOutputHelper output, WebSe
         public string? FamilyName { get; init; }
     }
 
+    [Fact]
+    public async Task Replace_user_with_whitespace_userName_returns_400()
+    {
+        await Fixture.InitializeAsync();
+        var (createResponse, createBody) = await Fixture.Client.CreateUserAsync("whitespace-test");
+        createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var id = ScimHttpClient.GetUserId(createBody);
+
+        var payload = new { schemas = new[] { ScimHttpClient.UserSchemaUrn }, userName = "   " };
+        var response = await Fixture.Client.PutAsync(
+            $"{ScimHttpClient.UsersRoute}/{id}", ScimHttpClient.ScimJsonContent(payload));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
     private sealed record ScimEmail
     {
         [JsonPropertyName("value")]

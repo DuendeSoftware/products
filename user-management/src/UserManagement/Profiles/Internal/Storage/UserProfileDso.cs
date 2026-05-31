@@ -10,7 +10,7 @@ internal static class UserProfileDso
 {
     internal static readonly EntityType EntityType = new(1500, "UserProfileDso");
 
-    internal sealed record V1(Guid Id, string SubjectId, string? UserName, List<AttributeValueDso.V1> Attributes) : IDataStorageObject
+    internal sealed record V1(Guid Id, string SubjectId, List<AttributeValueDso.V1> Attributes) : IDataStorageObject
     {
         public static DataStorageObjectVersion DsoVersion { get; } = new(EntityType, 1);
     }

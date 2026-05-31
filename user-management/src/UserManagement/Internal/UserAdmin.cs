@@ -2,9 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.Internal.Operations;
+using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Storage;
+using Duende.UserManagement.Membership;
+using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -13,51 +16,14 @@ namespace Duende.UserManagement.Internal;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserAdmin(
     IStoreFactory storeFactory,
-    UserRepository userRepository,
     ILogger<UserAdmin> logger,
+    IUserProfileAdmin profileAdmin,
+    IMembershipAdmin membershipAdmin,
+    IUserAuthenticatorsAdmin authenticatorsAdmin,
     UserManagementLicenseValidator licenseValidator,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     UserProfileRepository? profileRepo = null) : IUserAdmin
 {
-    private readonly UserNameCoordinator _batchBuilder = new(
-        storeFactory, userRepository, authenticatorsRepo, profileRepo);
-
-    public async Task<bool> TrySetUserNameAsync(UserSubjectId subjectId, UserName userName, Ct ct)
-    {
-        licenseValidator.ValidateAdministration();
-        using var scope = logger.BeginSubjectScope(subjectId);
-        logger.UserNameSetStarting(LogLevel.Debug, subjectId);
-        var result = await _batchBuilder.TrySetUserNameAsync(subjectId, userName, ct);
-        if (result)
-        {
-            logger.UserNameSetSucceeded(LogLevel.Information, subjectId);
-        }
-        else
-        {
-            logger.UserNameSetFailed(LogLevel.Warning, subjectId);
-        }
-
-        return result;
-    }
-
-    public async Task<bool> TryRemoveUserNameAsync(UserSubjectId subjectId, Ct ct)
-    {
-        licenseValidator.ValidateAdministration();
-        using var scope = logger.BeginSubjectScope(subjectId);
-        logger.UserNameRemoveStarting(LogLevel.Debug, subjectId);
-        var result = await _batchBuilder.TryRemoveUserNameAsync(subjectId, ct);
-        if (result)
-        {
-            logger.UserNameRemoveSucceeded(LogLevel.Information, subjectId);
-        }
-        else
-        {
-            logger.UserNameRemoveFailed(LogLevel.Warning, subjectId);
-        }
-
-        return result;
-    }
-
     public async Task<bool> TryRemoveAsync(UserSubjectId subjectId, Ct ct)
     {
         licenseValidator.ValidateAdministration();
@@ -78,6 +44,7 @@ internal sealed class UserAdmin(
         var result = await ExecuteBatchAsync(operations, ct);
         if (result)
         {
+            licenseValidator.ValidateUserCount();
             logger.UserDeleteSucceeded(LogLevel.Information, subjectId);
         }
         else
@@ -87,6 +54,12 @@ internal sealed class UserAdmin(
 
         return result;
     }
+
+    public IMembershipAdmin Membership => membershipAdmin;
+
+    public IUserProfileAdmin Profiles => profileAdmin;
+
+    public IUserAuthenticatorsAdmin Authenticators => authenticatorsAdmin;
 
     private async Task<bool> ExecuteBatchAsync(List<IStoreOperation> operations, Ct ct)
     {

@@ -8,18 +8,22 @@ namespace Duende.UserManagement.Authentication.Passwords;
 
 /// <summary>
 /// Represents a password supplied in response to an authentication challenge.
-/// Unlike <see cref="PlainTextPassword"/>, this type applies only minimal validation
+/// Unlike <see cref="ValidatedPlainTextPassword"/>, this type applies only minimal validation
 /// (not null, not empty, and within the maximum length) so that authentication can
 /// succeed regardless of the current password complexity policy.
 /// </summary>
 [StringValue]
 public partial record NonValidatedPassword
 {
+    /// <summary>
+    /// The maximum allowed length for a non-validated password, determined by the PBKDF2 PRF input limit.
+    /// </summary>
     public static readonly int MaxLength =
         Pbkdf2MaxPasswordLength.For(new Pbkdf2Inputs().PseudorandomFunctionName);
 
     internal string Value { get; }
 
+    /// <summary>Returns a redacted string to prevent accidental logging of password values.</summary>
     public override string ToString() => GetType().ToString();
 
     /// <summary>

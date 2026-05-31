@@ -23,7 +23,7 @@ internal sealed class MembershipRepository(UserRepository userRepository)
         }
 
         // User doesn't exist yet — create a minimal UserDso
-        var createResult = await userRepository.CreateAsync(subjectId, null, ct);
+        var createResult = await userRepository.CreateAsync(subjectId, ct);
 
         // Handle race condition: another request may have created the user concurrently
         if (createResult is not CreateResult.Success)

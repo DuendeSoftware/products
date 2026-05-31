@@ -5,11 +5,13 @@ using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Operations;
+using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Passwords;
 using Duende.UserManagement.Authentication.Passwords.Internal;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Modules;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Profiles;
@@ -34,8 +36,9 @@ internal sealed class ScimUserCommandProcessor(
     IUserAdmin userAdmin,
     ILogger<ScimUserCommandProcessor> logger,
     TimeProvider timeProvider,
+    UserManagementLicenseValidator licenseValidator,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
-    PlainTextPasswordFactory? passwordFactory = null,
+    ValidatedPlainTextPasswordFactory? passwordFactory = null,
     PasswordHashAlgorithms? passwordHashAlgorithms = null)
 {
     private bool IsAuthenticationEnabled => features.OfType<UserAuthenticationFeature>().Any();
@@ -126,7 +129,7 @@ internal sealed class ScimUserCommandProcessor(
         var schemaResult = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct);
         var schema = schemaResult?.AttributeSchema;
 
-        if (string.IsNullOrEmpty(body.UserName))
+        if (string.IsNullOrWhiteSpace(body.UserName))
         {
             logger.ScimReplaceUserValidationFailed(LogLevel.Information, id, "userName is required.");
             return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, "userName is required.");
@@ -150,11 +153,6 @@ internal sealed class ScimUserCommandProcessor(
             var (existingProfile, version) = profileExistingResult.Value;
             existingProfile.ReplaceAttributes(mapping.Attributes!);
 
-            if (mapping.UserName is not null)
-            {
-                existingProfile.SetUserName(mapping.UserName.Value);
-            }
-
             var profileUpdateResult = await profileRepo.UpdateAsync(existingProfile, version, ct);
             switch (profileUpdateResult)
             {
@@ -162,7 +160,7 @@ internal sealed class ScimUserCommandProcessor(
                     break;
                 case UpdateResult.KeyConflict:
                     return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                        "A user with the same userName or unique attribute already exists.");
+                        "A user with the same unique attribute value already exists.");
                 default:
                     logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
                     return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user profile.");
@@ -172,11 +170,6 @@ internal sealed class ScimUserCommandProcessor(
         {
             var newProfile = new UserProfile(subjectId, mapping.Attributes!);
 
-            if (mapping.UserName is not null)
-            {
-                newProfile.SetUserName(mapping.UserName.Value);
-            }
-
             var createResult = await profileRepo.CreateAsync(newProfile, ct);
             switch (createResult)
             {
@@ -184,38 +177,9 @@ internal sealed class ScimUserCommandProcessor(
                     break;
                 case CreateResult.KeyConflict:
                     return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                        "A user with the same userName or unique attribute already exists.");
+                        "A user with the same unique attribute value already exists.");
                 default:
                     return ScimOperationResult.Error(500, "An unexpected error occurred while creating the user profile.");
-            }
-        }
-
-        if (IsAuthenticationEnabled)
-        {
-            var authRepo = serviceProvider.GetRequiredService<UserAuthenticatorsRepository>();
-            var authExistingResult = await authRepo.TryReadAsync(subjectId, ct);
-
-            if (authExistingResult is not null)
-            {
-                var (existingAuth, authCurrentVersion) = authExistingResult.Value;
-                existingAuth.SetUserName(mapping.UserName!.Value);
-
-                var authUpdateResult = await authRepo.UpdateAsync(existingAuth, authCurrentVersion, ct);
-                switch (authUpdateResult)
-                {
-                    case UpdateResult.Success:
-                        break;
-                    case UpdateResult.DoesNotExist:
-                        return ScimOperationResult.Error(404, "User not found.");
-                    case UpdateResult.UnexpectedVersion:
-                        return ScimOperationResult.Error(412, "Precondition failed: ETag mismatch.");
-                    case UpdateResult.KeyConflict:
-                        return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                            "A user with the same userName or unique attribute already exists.");
-                    default:
-                        logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
-                        return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user.");
-                }
             }
         }
 
@@ -340,7 +304,7 @@ internal sealed class ScimUserCommandProcessor(
         }
         foreach (var op in body.Operations)
         {
-            var applyResult = ApplyOperation(op, authenticators, profile, attributes, schema);
+            var applyResult = ApplyOperation(op, attributes, schema);
             if (!applyResult.Success)
             {
                 return applyResult.Error!;
@@ -363,7 +327,7 @@ internal sealed class ScimUserCommandProcessor(
                 break;
             case UpdateResult.KeyConflict:
                 return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                    "A user with the same userName or unique attribute already exists.");
+                    "A user with the same unique attribute value already exists.");
             default:
                 logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
                 return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user profile.");
@@ -383,7 +347,7 @@ internal sealed class ScimUserCommandProcessor(
                     return ScimOperationResult.Error(412, "Precondition failed: ETag mismatch.");
                 case UpdateResult.KeyConflict:
                     return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                        "A user with the same userName or unique attribute already exists.");
+                        "A user with the same unique attribute value already exists.");
                 default:
                     logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
                     return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user.");
@@ -418,19 +382,15 @@ internal sealed class ScimUserCommandProcessor(
         var subjectId = UserSubjectId.New();
         var profile = new UserProfile(subjectId, mapping.Attributes!);
 
-        if (mapping.UserName is not null)
-        {
-            profile.SetUserName(mapping.UserName.Value);
-        }
-
         var profileCreateResult = await profileRepo.CreateAsync(profile, ct);
         switch (profileCreateResult)
         {
             case CreateResult.Success:
+                licenseValidator.ValidateUserCount();
                 break;
             case CreateResult.KeyConflict:
                 return Result.Create(ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                    "A user with the same userName or unique attribute already exists."));
+                    "A user with the same unique attribute value already exists."));
             default:
                 logger.ScimCreateUserRepositoryFailed(LogLevel.Warning);
                 return Result.Create(ScimOperationResult.Error(500, "An unexpected error occurred while creating the user profile."));
@@ -466,11 +426,6 @@ internal sealed class ScimUserCommandProcessor(
 
         var authenticators = new UserAuthenticators(subjectId, [], []);
 
-        if (mapping.UserName is not null)
-        {
-            authenticators.SetUserName(mapping.UserName.Value);
-        }
-
         if (mapping.Password is not null)
         {
             var passwordResult = await passwordFactory.CreateAsync(subjectId, mapping.Password, ct);
@@ -493,7 +448,7 @@ internal sealed class ScimUserCommandProcessor(
         {
             CreateResult.Success => result,
             CreateResult.KeyConflict => Result.Create(ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                "A user with the same userName or unique attribute already exists.")),
+                "A user with the same unique attribute value already exists.")),
             _ => Result.Create(ScimOperationResult.Error(500, "An unexpected error occurred while creating the user."))
         };
     }
@@ -506,10 +461,8 @@ internal sealed class ScimUserCommandProcessor(
         internal static ApplyResult FromError(ScimOperationResult error) => new() { Success = false, Error = error };
     }
 
-    private ApplyResult ApplyOperation(
+    private static ApplyResult ApplyOperation(
         ScimPatchOperation op,
-        UserAuthenticators? authenticators,
-        UserProfile profile,
         AttributeValueCollection attributes,
         AttributeSchema? schema)
     {
@@ -518,24 +471,22 @@ internal sealed class ScimUserCommandProcessor(
 #pragma warning restore CA1308
         return opLower switch
         {
-            ScimConstants.PatchOps.Add => ApplyAdd(op, authenticators, profile, attributes, schema),
-            ScimConstants.PatchOps.Replace => ApplyReplace(op, authenticators, profile, attributes, schema),
-            ScimConstants.PatchOps.Remove => ApplyRemove(op, authenticators, profile, attributes, schema),
+            ScimConstants.PatchOps.Add => ApplyAdd(op, attributes, schema),
+            ScimConstants.PatchOps.Replace => ApplyReplace(op, attributes, schema),
+            ScimConstants.PatchOps.Remove => ApplyRemove(op, attributes, schema),
             _ => ApplyResult.FromError(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
                 $"Unsupported operation '{op.Op}'. Supported: {ScimConstants.PatchOps.Add}, {ScimConstants.PatchOps.Replace}, {ScimConstants.PatchOps.Remove}."))
         };
     }
 
-    private ApplyResult ApplyAdd(
+    private static ApplyResult ApplyAdd(
         ScimPatchOperation op,
-        UserAuthenticators? authenticators,
-        UserProfile profile,
         AttributeValueCollection attributes,
         AttributeSchema? schema)
     {
         if (op.Path is null)
         {
-            return ApplyValueObjectKeys(op, authenticators, profile, attributes, schema);
+            return ApplyValueObjectKeys(op, attributes, schema);
         }
 
         var valueError = RequireValue(op);
@@ -545,7 +496,7 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         var existingComplexSnapshot = SnapshotComplexAttribute(op.Path, attributes, schema);
-        var setResult = ApplyAttributeValue(op.Path, op.Value!.Value, authenticators, profile, attributes, schema);
+        var setResult = ApplyAttributeValue(op.Path, op.Value!.Value, attributes, schema);
         if (!setResult.Success)
         {
             return setResult;
@@ -556,16 +507,14 @@ internal sealed class ScimUserCommandProcessor(
             : ApplyResult.Ok;
     }
 
-    private ApplyResult ApplyReplace(
+    private static ApplyResult ApplyReplace(
         ScimPatchOperation op,
-        UserAuthenticators? authenticators,
-        UserProfile profile,
         AttributeValueCollection attributes,
         AttributeSchema? schema)
     {
         if (op.Path is null)
         {
-            return ApplyValueObjectKeys(op, authenticators, profile, attributes, schema);
+            return ApplyValueObjectKeys(op, attributes, schema);
         }
 
         var valueError = RequireValue(op);
@@ -574,13 +523,11 @@ internal sealed class ScimUserCommandProcessor(
             return valueError;
         }
 
-        return ApplyAttributeValue(op.Path, op.Value!.Value, authenticators, profile, attributes, schema);
+        return ApplyAttributeValue(op.Path, op.Value!.Value, attributes, schema);
     }
 
-    private ApplyResult ApplyValueObjectKeys(
+    private static ApplyResult ApplyValueObjectKeys(
         ScimPatchOperation op,
-        UserAuthenticators? authenticators,
-        UserProfile profile,
         AttributeValueCollection attributes,
         AttributeSchema? schema)
     {
@@ -592,7 +539,7 @@ internal sealed class ScimUserCommandProcessor(
 
         foreach (var prop in valueObj.EnumerateObject())
         {
-            var attrResult = ApplyAttributeValue(prop.Name, prop.Value, authenticators, profile, attributes, schema);
+            var attrResult = ApplyAttributeValue(prop.Name, prop.Value, attributes, schema);
             if (!attrResult.Success)
             {
                 return attrResult;
@@ -667,10 +614,8 @@ internal sealed class ScimUserCommandProcessor(
         return ApplyResult.Ok;
     }
 
-    private ApplyResult ApplyRemove(
+    private static ApplyResult ApplyRemove(
         ScimPatchOperation op,
-        UserAuthenticators? authenticators,
-        UserProfile profile,
         AttributeValueCollection attributes,
         AttributeSchema? schema)
     {
@@ -688,12 +633,10 @@ internal sealed class ScimUserCommandProcessor(
 
         if (op.Path.Equals(ScimConstants.Attributes.UserName, StringComparison.OrdinalIgnoreCase))
         {
-            if (IsAuthenticationEnabled)
+            if (AttributeCode.TryCreate(ScimConstants.UserNameAttributeName, out var userName))
             {
-                authenticators?.RemoveUserName();
+                _ = attributes.Remove(userName);
             }
-
-            profile.RemoveUserName();
 
             return ApplyResult.Ok;
         }
@@ -729,11 +672,9 @@ internal sealed class ScimUserCommandProcessor(
         return ApplyResult.Ok;
     }
 
-    private ApplyResult ApplyAttributeValue(
+    private static ApplyResult ApplyAttributeValue(
         string path,
         JsonElement value,
-        UserAuthenticators? authenticators,
-        UserProfile profile,
         AttributeValueCollection attributes,
         AttributeSchema? schema)
     {
@@ -747,36 +688,48 @@ internal sealed class ScimUserCommandProcessor(
         {
             if (value.ValueKind == JsonValueKind.Null)
             {
-                if (IsAuthenticationEnabled)
+                if (schema is null ||
+                    !AttributeCode.TryCreate(ScimConstants.UserNameAttributeName, out var userNameCode) ||
+                    !schema.AttributeDefinitions.ContainsKey(userNameCode))
                 {
-                    authenticators?.RemoveUserName();
+                    return ApplyResult.Ok;
                 }
 
-                profile.RemoveUserName();
-
+                _ = attributes.Remove(userNameCode);
                 return ApplyResult.Ok;
             }
 
-            if (value.ValueKind != JsonValueKind.String)
+            if (schema is null)
+            {
+                return ApplyResult.FromError(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidPath,
+                    "userName attribute is not available without a registered schema."));
+            }
+
+            if (!AttributeCode.TryCreate(ScimConstants.UserNameAttributeName, out var userName))
+            {
+                return ApplyResult.FromError(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidPath,
+                    "userName attribute name is invalid."));
+            }
+
+            if (!schema.AttributeDefinitions.TryGetValue(userName, out var userNameDef))
+            {
+                return ApplyResult.FromError(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidPath,
+                    "userName is not defined in the schema."));
+            }
+
+            if (!userNameDef.IsUnique)
             {
                 return ApplyResult.FromError(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
-                    "userName must be a string."));
+                    "userName attribute must be configured as unique."));
             }
 
-            var userNameStr = value.GetString() ?? string.Empty;
-            if (!UserName.TryCreate(userNameStr, out var parsedName))
+            if (value.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(value.GetString()))
             {
                 return ApplyResult.FromError(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
-                    $"Invalid userName value: '{userNameStr}'."));
+                    "userName must be a non-empty string."));
             }
 
-            if (IsAuthenticationEnabled)
-            {
-                authenticators?.SetUserName(parsedName.Value);
-            }
-
-            profile.SetUserName(parsedName.Value);
-
+            attributes.Set(userName, value.GetString()!);
             return ApplyResult.Ok;
         }
 

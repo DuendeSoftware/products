@@ -98,10 +98,10 @@ internal sealed class OtpWorkflow
         return true;
     }
 
-    internal static OtpAddress? TryAuthenticate(OtpWorkflow? authenticator, PlainTextOtp otp, TimeProvider timeProvider)
+    internal static OtpAddress? TryVerify(OtpWorkflow? workflow, PlainTextOtp otp, TimeProvider timeProvider)
     {
         // time consistency
-        if (authenticator?.HashedOtp is null)
+        if (workflow?.HashedOtp is null)
         {
             var masterKey = Pbkdf2MasterKey.DeriveFrom(otp.Text, new Pbkdf2Inputs());
             _ = masterKey.Equals(masterKey);
@@ -111,17 +111,17 @@ internal sealed class OtpWorkflow
         {
             var now = timeProvider.GetUtcNow();
 
-            var masterKey = Pbkdf2MasterKey.DeriveFrom(otp.Text, authenticator.HashedOtp.Inputs);
-            var otpIsValid = masterKey.Equals(authenticator.HashedOtp.MasterKey);
+            var masterKey = Pbkdf2MasterKey.DeriveFrom(otp.Text, workflow.HashedOtp.Inputs);
+            var otpIsValid = masterKey.Equals(workflow.HashedOtp.MasterKey);
 
-            authenticator._attempts.Add(now);
+            workflow._attempts.Add(now);
 
-            if (now >= authenticator.OtpExpiresAt)
+            if (now >= workflow.OtpExpiresAt)
             {
                 return null;
             }
 
-            if (authenticator._attempts.Count >= MaxAttempts)
+            if (workflow._attempts.Count >= MaxAttempts)
             {
                 return null;
             }
@@ -131,13 +131,13 @@ internal sealed class OtpWorkflow
                 return null;
             }
 
-            authenticator.HashedOtp = null;
-            authenticator.Token = null;
-            authenticator.OtpExpiresAt = null;
-            authenticator.OtpCreationBlockedUntil = null;
-            authenticator._attempts.Clear();
+            workflow.HashedOtp = null;
+            workflow.Token = null;
+            workflow.OtpExpiresAt = null;
+            workflow.OtpCreationBlockedUntil = null;
+            workflow._attempts.Clear();
 
-            return authenticator.Address;
+            return workflow.Address;
         }
     }
 

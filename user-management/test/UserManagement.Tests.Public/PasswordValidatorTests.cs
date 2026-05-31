@@ -54,7 +54,7 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
         await using var sp = await CreateServiceProviderWithValidator<RejectAllValidator>();
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var result = await selfService.TryCreatePasswordAsync(UserSubjectId.New(), $"ABcd12!@{Guid.NewGuid()}", _ct);
+        var result = await selfService.TryValidatePasswordAsync(UserSubjectId.New(), $"ABcd12!@{Guid.NewGuid()}", _ct);
 
         var failed = result.ShouldBeOfType<PasswordCreationResult.Failed>();
         failed.Errors.ShouldContain("All passwords rejected by test validator");
@@ -79,7 +79,7 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
         await using var sp = await CreateServiceProviderWithTwoValidators<AcceptAllValidator, RejectAllValidator>();
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var result = await selfService.TryCreatePasswordAsync(UserSubjectId.New(), $"ABcd12!@{Guid.NewGuid()}", _ct);
+        var result = await selfService.TryValidatePasswordAsync(UserSubjectId.New(), $"ABcd12!@{Guid.NewGuid()}", _ct);
 
         _ = result.ShouldBeOfType<PasswordCreationResult.Failed>();
     }
@@ -106,7 +106,7 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
 
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var result = await selfService.TryCreatePasswordAsync(UserSubjectId.New(), $"ABcd12!@{Guid.NewGuid()}", _ct);
+        var result = await selfService.TryValidatePasswordAsync(UserSubjectId.New(), $"ABcd12!@{Guid.NewGuid()}", _ct);
 
         _ = result.ShouldBeOfType<PasswordCreationResult.Failed>();
     }

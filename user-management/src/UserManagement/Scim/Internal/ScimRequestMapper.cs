@@ -32,16 +32,12 @@ internal static class ScimRequestMapper
         internal string? ErrorDetail { get; private set; }
         internal string? ErrorScimType { get; private set; }
         internal ValidatedAttributeValueCollection? Attributes { get; private set; }
-        internal UserName? UserName { get; private set; }
-        internal string? ExternalId { get; private set; }
         internal string? Password { get; private set; }
 
         internal static MappingResult Success(
             ValidatedAttributeValueCollection attributes,
-            UserName? userName,
-            string? externalId,
             string? password) =>
-            new() { IsSuccess = true, Attributes = attributes, UserName = userName, ExternalId = externalId, Password = password };
+            new() { IsSuccess = true, Attributes = attributes, Password = password };
         internal static MappingResult Failure(string detail) =>
             new() { IsSuccess = false, ErrorDetail = detail };
 
@@ -55,24 +51,42 @@ internal static class ScimRequestMapper
     /// </summary>
     internal static MappingResult Map(ScimUserRequest request, AttributeSchema? schema)
     {
-        // Parse userName
-        UserName? userName = null;
-        if (request.UserName is not null)
-        {
-            if (!UserName.TryCreate(request.UserName, out var parsedName))
-            {
-                return MappingResult.Failure(
-                    $"Invalid userName value: '{request.UserName}'.",
-                    ScimConstants.ErrorTypes.InvalidValue);
-            }
-
-            userName = parsedName;
-        }
-
         // Build the attribute collection
         var collection = schema is not null
             ? new AttributeValueCollection(schema)
             : new AttributeValueCollection(AttributeSchema.Empty);
+
+        var userName = request.UserName;
+        if (userName is not null)
+        {
+            if (schema is null)
+            {
+                return MappingResult.Failure(
+                    "userName is not defined in the schema.",
+                    ScimConstants.ErrorTypes.InvalidValue);
+            }
+
+            if (AttributeCode.TryCreate(ScimConstants.UserNameAttributeName, out var userNameCode))
+            {
+                if (schema.AttributeDefinitions.TryGetValue(userNameCode, out var userNameDef))
+                {
+                    if (!userNameDef.IsUnique)
+                    {
+                        return MappingResult.Failure(
+                            "userName attribute must be configured as unique.",
+                            ScimConstants.ErrorTypes.InvalidValue);
+                    }
+
+                    collection.Set(userNameCode, userName);
+                }
+                else
+                {
+                    return MappingResult.Failure(
+                        "userName is not defined in the schema.",
+                        ScimConstants.ErrorTypes.InvalidValue);
+                }
+            }
+        }
 
         // Handle externalId — store as schema attribute "externalid"
         var externalId = request.ExternalId;
@@ -133,7 +147,7 @@ internal static class ScimRequestMapper
             }
         }
 
-        return MappingResult.Success(collection.Validate(), userName, externalId, request.Password);
+        return MappingResult.Success(collection.Validate(), request.Password);
     }
 
     private static MappingResult? MapJsonElement(

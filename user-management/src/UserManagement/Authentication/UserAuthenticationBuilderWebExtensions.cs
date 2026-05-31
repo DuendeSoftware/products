@@ -8,16 +8,29 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.UserManagement.Authentication;
 
+/// <summary>
+/// Extension methods for <see cref="IUserAuthenticationBuilder"/> to configure web/HTTP authentication endpoints.
+/// </summary>
 public static class UserAuthenticationBuilderWebExtensions
 {
     extension(IUserAuthenticationBuilder builder)
     {
+        /// <summary>
+        /// Configures user authentication endpoint options using the provided delegate.
+        /// </summary>
+        /// <param name="options">The configuration action to apply.</param>
+        /// <returns>The builder for chaining.</returns>
         public IUserAuthenticationBuilder ConfigureEndpoints(Action<UserAuthenticationEndpointOptions> options)
         {
             _ = builder.Services.Configure(options);
             return builder;
         }
 
+        /// <summary>
+        /// Configures user authentication endpoint options from the provided configuration section.
+        /// </summary>
+        /// <param name="configurationSection">The configuration section to bind.</param>
+        /// <returns>The builder for chaining.</returns>
         public IUserAuthenticationBuilder ConfigureEndpoints(IConfigurationSection configurationSection)
         {
             _ = builder.Services.Configure<UserAuthenticationEndpointOptions>(configurationSection);

@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
+using Duende.Storage.EntityAttributeValue;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Passwords;
+using Duende.UserManagement.Profiles;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Platform.UserManagement;
@@ -18,15 +20,21 @@ public sealed class PasswordExpirationTests
         await UsersServiceProviderFactory.CreateWithOptionsAsync(options =>
             options.Passwords.MaxAgeDays = maxAgeDays);
 
-    private static async Task<(UserSubjectId SubjectId, UserName UserName)> RegisterUserWithPasswordAsync(
+    private static async Task<(UserSubjectId SubjectId, AttributeCode Code, object Value)> RegisterUserWithPasswordAsync(
         IUserAuthenticatorsSelfService selfService,
-        IUserSelfService userSelfService,
+        IUserProfileSelfService profileSelfService,
+        IUserProfileSchemaAdmin schemaAdmin,
         Ct ct)
     {
         var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-        (await userSelfService.TrySetUserNameAsync(user.SubjectId, userName, ct)).ShouldBeTrue();
-        return (user.SubjectId, userName);
+
+        await TestData.AddAttributeDefinitions(schemaAdmin, ct);
+        var schema = await profileSelfService.GetSchemaAsync(ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(user.SubjectId, attributes.Validate(), ct)).ShouldNotBeNull();
+
+        return (user.SubjectId, attribute.Code, attribute.UntypedValue);
     }
 
     [Fact]
@@ -34,18 +42,19 @@ public sealed class PasswordExpirationTests
     {
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: 30);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = sp.GetRequiredService<IUserSelfService>();
+        var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
         var passwordAuth = sp.GetRequiredService<IPasswordAuth>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
-        var (subjectId, userName) = await RegisterUserWithPasswordAsync(selfService, userSelfService, _ct);
+        var (subjectId, code, value) = await RegisterUserWithPasswordAsync(selfService, profileSelfService, schemaAdmin, _ct);
         var (password, supplied) = await TestData.CreatePasswordPairAsync(selfService, subjectId, _ct);
         (await selfService.TrySetPasswordAsync(subjectId, password, _ct)).ShouldBeTrue();
 
         // Advance time by 10 days — still within the 30-day window
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddDays(10));
 
-        var result = await passwordAuth.TryAuthenticateAsync(userName, supplied, _ct);
+        var result = await passwordAuth.TryAuthenticateAsync(code, value, supplied, _ct);
         var success = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         success.UserSubjectId.ShouldBe(subjectId);
     }
@@ -55,18 +64,19 @@ public sealed class PasswordExpirationTests
     {
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: 30);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = sp.GetRequiredService<IUserSelfService>();
+        var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
         var passwordAuth = sp.GetRequiredService<IPasswordAuth>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
-        var (subjectId, userName) = await RegisterUserWithPasswordAsync(selfService, userSelfService, _ct);
+        var (subjectId, code, value) = await RegisterUserWithPasswordAsync(selfService, profileSelfService, schemaAdmin, _ct);
         var (password, supplied) = await TestData.CreatePasswordPairAsync(selfService, subjectId, _ct);
         (await selfService.TrySetPasswordAsync(subjectId, password, _ct)).ShouldBeTrue();
 
         // Advance time past the 30-day expiry
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddDays(31));
 
-        var result = await passwordAuth.TryAuthenticateAsync(userName, supplied, _ct);
+        var result = await passwordAuth.TryAuthenticateAsync(code, value, supplied, _ct);
         var expired = result.ShouldBeOfType<PasswordAuthenticationResult.Expired>();
         expired.UserSubjectId.ShouldBe(subjectId);
     }
@@ -76,18 +86,19 @@ public sealed class PasswordExpirationTests
     {
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: null);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = sp.GetRequiredService<IUserSelfService>();
+        var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
         var passwordAuth = sp.GetRequiredService<IPasswordAuth>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
-        var (subjectId, userName) = await RegisterUserWithPasswordAsync(selfService, userSelfService, _ct);
+        var (subjectId, code, value) = await RegisterUserWithPasswordAsync(selfService, profileSelfService, schemaAdmin, _ct);
         var (password, supplied) = await TestData.CreatePasswordPairAsync(selfService, subjectId, _ct);
         (await selfService.TrySetPasswordAsync(subjectId, password, _ct)).ShouldBeTrue();
 
         // Advance time by many years
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddDays(3650));
 
-        var result = await passwordAuth.TryAuthenticateAsync(userName, supplied, _ct);
+        var result = await passwordAuth.TryAuthenticateAsync(code, value, supplied, _ct);
         _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 
@@ -96,11 +107,12 @@ public sealed class PasswordExpirationTests
     {
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: 30);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = sp.GetRequiredService<IUserSelfService>();
+        var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
         var passwordAuth = sp.GetRequiredService<IPasswordAuth>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
-        var (subjectId, userName) = await RegisterUserWithPasswordAsync(selfService, userSelfService, _ct);
+        var (subjectId, code, value) = await RegisterUserWithPasswordAsync(selfService, profileSelfService, schemaAdmin, _ct);
         var (password, supplied) = await TestData.CreatePasswordPairAsync(selfService, subjectId, _ct);
         (await selfService.TrySetPasswordAsync(subjectId, password, _ct)).ShouldBeTrue();
 
@@ -108,7 +120,7 @@ public sealed class PasswordExpirationTests
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddDays(31));
 
         // Confirm it's expired
-        var expiredResult = await passwordAuth.TryAuthenticateAsync(userName, supplied, _ct);
+        var expiredResult = await passwordAuth.TryAuthenticateAsync(code, value, supplied, _ct);
         _ = expiredResult.ShouldBeOfType<PasswordAuthenticationResult.Expired>();
 
         // Reset the password (admin reset, not change — since change requires old password auth which would also be expired)
@@ -118,7 +130,7 @@ public sealed class PasswordExpirationTests
         // Advance time by 10 more days — still within the new 30-day window
         timeProvider.SetUtcNow(timeProvider.GetUtcNow().AddDays(10));
 
-        var result = await passwordAuth.TryAuthenticateAsync(userName, newSupplied, _ct);
+        var result = await passwordAuth.TryAuthenticateAsync(code, value, newSupplied, _ct);
         _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
     }
 }

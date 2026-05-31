@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal.Storage;
@@ -26,7 +25,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
             ToDso(workflow),
             [
                 DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(workflow.Address)),
-                .. workflow.Token.HasValue ? [DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(workflow.Token.Value))] : Array.Empty<DataStorageKey>()
+                .. workflow.Token != null ? [DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(workflow.Token))] : Array.Empty<DataStorageKey>()
             ],
             [],
             Expiration.NoExpiration,
@@ -43,7 +42,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
             expectedVersion,
             [
                 DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(workflow.Address)),
-                .. workflow.Token.HasValue ? [DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(workflow.Token.Value))] : Array.Empty<DataStorageKey>()
+                .. workflow.Token != null ? [DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(workflow.Token))] : Array.Empty<DataStorageKey>()
             ],
             [],
             expiration: Expiration.NoExpiration,
@@ -73,7 +72,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
         workflow.Id.Uuid.Value,
         new OtpAddressDso.V1(workflow.Address.Channel.Value, workflow.Address.SubjectId.ToDso()),
         workflow.HashedOtp?.ToDso(),
-        workflow.Token?.Uuid.Value,
+        workflow.Token?.Value,
         workflow.OtpExpiresAt,
         workflow.OtpCreationBlockedUntil,
         workflow.Attempts.ToList());
@@ -89,7 +88,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
         OtpWorkflowId.Load(dso.Id),
         OtpAddress.Load(OtpChannel.Load(dso.Address.Channel), dso.Address.SubjectId.ToValueObject()),
         dso.HashedOtp?.ToValueObject(),
-        dso.Token.HasValue ? OtpToken.Load(UuidV7.From(dso.Token.Value)) : null,
+        dso.Token.HasValue ? OtpToken.Load(dso.Token.Value) : null,
         dso.OtpExpiresAt,
         dso.OtpCreationBlockedUntil,
         dso.Attempts);

@@ -1,11 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Internal;
 using Duende.UserManagement.Internal.Licensing;
+using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +15,8 @@ namespace Duende.UserManagement.Authentication.Passwords.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class PasswordAuth(
-    UserAuthenticatorsRepository repo,
+    UserAuthenticatorsRepository authenticatorsRepo,
+    UserProfileRepository profileRepo,
     IAuthenticationAttemptPolicy attemptPolicy,
     ILogger<PasswordAuth> logger,
     IOptions<UserAuthenticationOptions> options,
@@ -21,58 +24,64 @@ internal sealed class PasswordAuth(
     PasswordHashAlgorithms algorithms,
     UserManagementLicenseValidator licenseValidator) : IPasswordAuth
 {
-    public async Task<PasswordAuthenticationResult> TryAuthenticateAsync(UserName userName, NonValidatedPassword password, Ct ct)
+    public async Task<PasswordAuthenticationResult> TryAuthenticateAsync(
+        AttributeCode code, object value, NonValidatedPassword password, Ct ct)
     {
         licenseValidator.ValidatePassword();
-        using var userNameScope = logger.BeginUserNameScope(userName);
-        logger.PasswordAuthenticationStarted(LogLevel.Debug, userName);
+        using var attributeScope = logger.BeginAttributeScope(code, value);
+        logger.PasswordAuthenticationStarted(LogLevel.Debug, code, value);
 
-        var record = await repo.TryReadAsync(userName, ct);
+        var profileRecord = await profileRepo.TryReadAsync(code, value, ct);
+        var authenticatorsRecord = profileRecord is null ? null : await authenticatorsRepo.TryReadAsync(profileRecord.Value.UserProfile.SubjectId, ct);
         var key = new AuthenticatorKey.Password();
 
-        if (record is null)
+        if (profileRecord is null)
         {
-            logger.PasswordAuthenticationUserNotFound(LogLevel.Information, userName);
+            logger.PasswordAuthenticationUserProfileNotFound(LogLevel.Information, code, value);
+        }
+        else if (authenticatorsRecord is null)
+        {
+            logger.PasswordAuthenticationUserAuthenticatorsNotFound(LogLevel.Information, code, value);
         }
         else
         {
-            var attemptInfo = record.Value.UserAuthenticators.GetFailureState(key);
+            var attemptInfo = authenticatorsRecord.Value.UserAuthenticators.GetFailureState(key);
             var context = new AuthenticationAttemptContext(
-                record.Value.UserAuthenticators.SubjectId,
+                authenticatorsRecord.Value.UserAuthenticators.SubjectId,
                 new AuthenticatorAttemptInfo(key, attemptInfo.FailedAttemptCount, attemptInfo.LastFailedAtUtc, attemptInfo.RecentAttemptTimestamps.AsReadOnly(), attemptInfo.LockoutCount));
 
             if (await attemptPolicy.EvaluateAsync(context, ct) is AuthenticationAttemptDecision.Reject)
             {
-                logger.PasswordAuthenticationThrottled(LogLevel.Warning, userName);
+                logger.PasswordAuthenticationThrottled(LogLevel.Warning, code, value);
                 _ = Authentication.Internal.UserAuthenticators.TryAuthenticate(null, password, algorithms.Preferred, algorithms.All);
                 return PasswordAuthenticationResult.Failure.Instance;
             }
         }
 
-        var result = Authentication.Internal.UserAuthenticators.TryAuthenticate(record?.UserAuthenticators, password, algorithms.Preferred, algorithms.All);
+        var result = Authentication.Internal.UserAuthenticators.TryAuthenticate(authenticatorsRecord?.UserAuthenticators, password, algorithms.Preferred, algorithms.All);
 
-        if (record is not null)
+        if (authenticatorsRecord is not null)
         {
-            using var subjectIdScope = logger.BeginSubjectScope(record.Value.UserAuthenticators.SubjectId);
+            using var subjectIdScope = logger.BeginSubjectScope(authenticatorsRecord.Value.UserAuthenticators.SubjectId);
             var now = timeProvider.GetUtcNow();
-            record.Value.UserAuthenticators.RecordAttempt(key, now, options.Value.Throttling.EffectiveVelocityRetentionWindow);
+            authenticatorsRecord.Value.UserAuthenticators.RecordAttempt(key, now, options.Value.Throttling.EffectiveVelocityRetentionWindow);
 
             if (result.Authenticated)
             {
-                logger.PasswordAuthenticationSucceeded(LogLevel.Information, userName);
-                record.Value.UserAuthenticators.ResetFailedAttempts(key);
+                logger.PasswordAuthenticationSucceeded(LogLevel.Information, code, value);
+                authenticatorsRecord.Value.UserAuthenticators.ResetFailedAttempts(key);
 
                 if (result.NeedsRehash)
                 {
-                    var previousAlgorithmId = record.Value.UserAuthenticators.HashedPassword?.AlgorithmId;
-                    record.Value.UserAuthenticators.RehashPassword(password.Value, algorithms.Preferred);
+                    var previousAlgorithmId = authenticatorsRecord.Value.UserAuthenticators.HashedPassword?.AlgorithmId;
+                    authenticatorsRecord.Value.UserAuthenticators.RehashPassword(password.Value, algorithms.Preferred);
                     logger.PasswordRehashed(LogLevel.Information, previousAlgorithmId, algorithms.Preferred.AlgorithmId);
                 }
             }
             else
             {
-                logger.PasswordAuthenticationFailed(LogLevel.Information, userName);
-                record.Value.UserAuthenticators.RecordFailedAttempt(
+                logger.PasswordAuthenticationFailed(LogLevel.Information, code, value);
+                authenticatorsRecord.Value.UserAuthenticators.RecordFailedAttempt(
                     key,
                     now,
                     options.Value.Throttling.FailureWindow,
@@ -80,16 +89,16 @@ internal sealed class PasswordAuth(
             }
         }
 
-        if (record is not null && await repo.UpdateAsync(record.Value.UserAuthenticators, record.Value.Version, ct) is not UpdateResult.Success)
+        if (authenticatorsRecord is not null && await authenticatorsRepo.UpdateAsync(authenticatorsRecord.Value.UserAuthenticators, authenticatorsRecord.Value.Version, ct) is not UpdateResult.Success)
         {
             if (!result.Authenticated)
             {
                 logger.OptimisticConcurrencyRetry(LogLevel.Warning);
 
                 await AuthenticationFailureRecorder.RetryFailedAttemptAsync(
-                    userName,
+                    authenticatorsRecord.Value.UserAuthenticators.SubjectId,
                     key,
-                    repo,
+                    authenticatorsRepo,
                     logger,
                     timeProvider,
                     options.Value.Throttling.FailureWindow,
@@ -101,12 +110,12 @@ internal sealed class PasswordAuth(
             return PasswordAuthenticationResult.Failure.Instance;
         }
 
-        if (!result.Authenticated || record is null)
+        if (!result.Authenticated || authenticatorsRecord is null)
         {
             return PasswordAuthenticationResult.Failure.Instance;
         }
 
-        return CheckExpiration(record.Value.UserAuthenticators, options.Value.Passwords.MaxAgeDays, timeProvider.GetUtcNow());
+        return CheckExpiration(authenticatorsRecord.Value.UserAuthenticators, options.Value.Passwords.MaxAgeDays, timeProvider.GetUtcNow());
     }
 
     private PasswordAuthenticationResult CheckExpiration(

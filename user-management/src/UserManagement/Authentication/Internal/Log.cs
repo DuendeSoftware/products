@@ -62,11 +62,8 @@ internal static partial class Log
     [LoggerMessage(Message = $"OTP address removed for subject {{{LogParameters.SubjectId}}}.")]
     internal static partial void OtpAddressRemoved(this ILogger logger, LogLevel level, UserSubjectId subjectId);
 
-    [LoggerMessage(Message = $"OTP address replaced for subject {{{LogParameters.SubjectId}}}.")]
-    internal static partial void OtpAddressReplaced(this ILogger logger, LogLevel level, UserSubjectId subjectId);
-
-    [LoggerMessage(Message = $"OTP address replace failed for subject {{{LogParameters.SubjectId}}}.")]
-    internal static partial void OtpAddressReplaceFailed(this ILogger logger, LogLevel level, UserSubjectId subjectId);
+    [LoggerMessage(Message = $"OTP verification failed for subject {{{LogParameters.SubjectId}}}.")]
+    internal static partial void OtpVerificationFailed(this ILogger logger, LogLevel level, UserSubjectId subjectId);
 
     // Recovery codes — self-service
     [LoggerMessage(Message = $"Recovery codes created for subject {{{LogParameters.SubjectId}}}.")]

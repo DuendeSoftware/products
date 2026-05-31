@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
-using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
@@ -83,19 +82,6 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
         var user = await _authenticatorsAdmin.TryGetAsync(subjectId, _ct);
 
         user.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task Can_get_by_UserName()
-    {
-        var otpAddress = TestData.CreateOtpAddress();
-        var userName = TestData.CreateUserName();
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [otpAddress], [], _ct)).ShouldNotBeNull().SubjectId;
-        (await _userAdmin.TrySetUserNameAsync(subjectId, userName, _ct)).ShouldBeTrue();
-
-        var user = await _authenticatorsAdmin.TryGetAsync(userName, _ct);
-
-        user.ShouldNotBeNull().SubjectId.ShouldBe(subjectId);
     }
 
     [Fact]

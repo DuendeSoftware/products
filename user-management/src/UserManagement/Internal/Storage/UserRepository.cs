@@ -12,18 +12,17 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 {
     internal enum Keys
     {
-        SubjectId = 1,
-        UserName = 2,
+        SubjectId = 1
     }
 
-    internal async Task<CreateResult> CreateAsync(UserSubjectId subjectId, UserName? userName, Ct ct)
+    internal async Task<CreateResult> CreateAsync(UserSubjectId subjectId, Ct ct)
     {
         var store = storeFactory.GetStore();
         var id = UuidV7.New();
         return await store.CreateAsync(
             id,
-            new UserDso.V1(id.Value, subjectId.Value, userName?.Value, []),
-            BuildKeys(subjectId, userName),
+            new UserDso.V1(id.Value, subjectId.Value, []),
+            [DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId))],
             [],
             Expiration.NoExpiration,
             [],
@@ -37,67 +36,44 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
         return result.Found ? ((UserDso.V1)result.Dso, result.Version.Value) : null;
     }
 
-    internal async Task<UpdateResult> UpdateAsync(UserDso.V1 user, int expectedVersion, Ct ct)
-    {
-        var store = storeFactory.GetStore();
-        UserName? userName = null;
-        if (!string.IsNullOrWhiteSpace(user.UserName))
-        {
-            userName = UserName.Load(user.UserName);
-        }
-
-        return await store.UpdateAsync(
+    internal async Task<UpdateResult> UpdateAsync(UserDso.V1 user, int expectedVersion, Ct ct) =>
+        await storeFactory.GetStore().UpdateAsync(
             UuidV7.From(user.Id),
             user,
             expectedVersion,
-            BuildKeys(UserSubjectId.Load(user.SubjectId), userName),
+            [DataStorageKey.Create(UserSubjectIdDskV1.Create(UserSubjectId.Load(user.SubjectId)))],
             [],
             expiration: Expiration.NoExpiration,
             [],
             ct);
-    }
 
-    internal static CreateOperation CreateBatchOperation(UserSubjectId subjectId, UserName? userName, IReadOnlyList<UserDso.AspectRef> aspects)
+    internal static CreateOperation CreateBatchOperation(UserSubjectId subjectId, IReadOnlyList<UserDso.AspectRef> aspects)
     {
         var id = UuidV7.New();
-        return CreateBatchOperation(id, subjectId, userName, aspects);
+        return CreateBatchOperation(id, subjectId, aspects);
     }
 
-    internal static CreateOperation CreateBatchOperation(UuidV7 id, UserSubjectId subjectId, UserName? userName, IReadOnlyList<UserDso.AspectRef> aspects) =>
+    internal static CreateOperation CreateBatchOperation(UuidV7 id, UserSubjectId subjectId, IReadOnlyList<UserDso.AspectRef> aspects) =>
         CreateOperation.For(
             id,
-            new UserDso.V1(id.Value, subjectId.Value, userName?.Value, aspects),
-            BuildKeys(subjectId, userName),
+            new UserDso.V1(id.Value, subjectId.Value, aspects),
+            [DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId))],
             [],
             Expiration.NoExpiration);
 
-    internal static UpdateOperation UpdateBatchOperation(UserDso.V1 user, int expectedVersion)
-    {
-        UserName? userName = null;
-        if (!string.IsNullOrWhiteSpace(user.UserName))
-        {
-            userName = UserName.Load(user.UserName);
-        }
-
-        var keys = BuildKeys(UserSubjectId.Load(user.SubjectId), userName);
-        return UpdateOperation.For(
+    internal static UpdateOperation UpdateBatchOperation(UserDso.V1 user, int expectedVersion) =>
+        UpdateOperation.For(
             UuidV7.From(user.Id),
             user,
             expectedVersion,
-            keys,
+            [DataStorageKey.Create(UserSubjectIdDskV1.Create(UserSubjectId.Load(user.SubjectId)))],
             [],
             Expiration.NoExpiration);
-    }
 
-    private static List<DataStorageKey> BuildKeys(UserSubjectId subjectId, UserName? userName)
+    internal async Task<long> GetCountAsync(Ct ct)
     {
-        List<DataStorageKey> keys = [DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId))];
-        if (userName is not null)
-        {
-            keys.Add(DataStorageKey.Create(UserNameDskV1.Create(userName.Value)));
-        }
-
-        return keys;
+        var store = storeFactory.GetStore();
+        return await store.CountAsync(UserDso.EntityType, null, ct);
     }
 
     internal static DeleteOperation DeleteBatchOperation(UserSubjectId subjectId) =>

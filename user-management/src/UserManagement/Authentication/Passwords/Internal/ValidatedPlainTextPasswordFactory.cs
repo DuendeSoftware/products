@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication.Passwords.Internal;
 
-internal sealed class PlainTextPasswordFactory(
+internal sealed class ValidatedPlainTextPasswordFactory(
     IOptions<UserAuthenticationOptions> options,
     IEnumerable<IPasswordValidator> passwordValidators)
 {
@@ -34,7 +34,7 @@ internal sealed class PlainTextPasswordFactory(
             }
         }
 
-        return new PasswordCreationResult.Success(new PlainTextPassword(passwordString, userId));
+        return new PasswordCreationResult.Success(new ValidatedPlainTextPassword(passwordString, userId));
     }
 
     private List<string> ValidateComplexity(string passwordString)

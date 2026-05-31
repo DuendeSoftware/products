@@ -4,6 +4,7 @@
     <RootNamespace>Duende.UserManagement</RootNamespace>
     <AssemblyName>Duende.UserManagement.TestInfrastructure</AssemblyName>
     <NoWarn>$(NoWarn);IDE0130</NoWarn><!-- Namespace does not match folder structure --><!-- TODO: remove? -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn><!-- Missing XML comment - not required in test infrastructure -->
     <PackageId>Duende.UserManagement.TestInfrastructure</PackageId>
   </PropertyGroup>
   <PropertyGroup>

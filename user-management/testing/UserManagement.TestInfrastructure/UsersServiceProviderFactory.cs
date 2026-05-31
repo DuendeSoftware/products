@@ -52,8 +52,8 @@ public sealed class UsersServiceProviderFactory
             .AddLogging()
             .AddSingleton(new FakeTimeProvider())
             .AddSingleton<TimeProvider>(provider => provider.GetRequiredService<FakeTimeProvider>())
-            .AddSingleton(new FakeOtpSender())
-            .AddSingleton<IOtpSender>(provider => provider.GetRequiredService<FakeOtpSender>());
+            .AddSingleton(new FakeOtpDispatcher())
+            .AddSingleton<IOtpDispatcher>(provider => provider.GetRequiredService<FakeOtpDispatcher>());
 
         _ = services.AddUserManagementInternal(users =>
         {

@@ -8,16 +8,16 @@ using Microsoft.Extensions.Options;
 namespace Duende.UserManagement.Authentication.Otp.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class SmtpOtpSender(
-    IOptions<SmtpOtpSenderOptions> options,
+internal sealed class SmtpOtpDispatcher(
+    IOptions<SmtpOtpDispatcherOptions> options,
     IEmailContentFactory emailContentFactory,
-    ILogger<SmtpOtpSender> logger) : IOtpSender
+    ILogger<SmtpOtpDispatcher> logger) : IOtpDispatcher
 {
-    private readonly SmtpOtpSenderOptions _options = options.Value;
+    private readonly SmtpOtpDispatcherOptions _options = options.Value;
 
-    public bool CanSend(OtpAddress address) => address.Channel == OtpChannel.Email && address.SubjectId is EmailAddress;
+    public bool CanDispatch(OtpAddress address) => address.Channel == OtpChannel.Email && address.SubjectId is EmailAddress;
 
-    public async Task SendAsync(OtpAddress address, PlainTextOtp otp, TimeSpan expiresAfter, Ct ct)
+    public async Task DispatchAsync(OtpAddress address, PlainTextOtp otp, TimeSpan expiresAfter, Ct ct)
     {
         if (address.Channel != OtpChannel.Email)
         {

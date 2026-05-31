@@ -35,37 +35,6 @@ public sealed class UserAdministration : IAsyncLifetime
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
 
     [Fact]
-    public async Task Can_set_UserName()
-    {
-        var otpAddress = TestData.CreateOtpAddress();
-        var userName = TestData.CreateUserName();
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [otpAddress], [], _ct)).ShouldNotBeNull().SubjectId;
-        _ = (await _profileAdmin.TryAddAsync(subjectId, ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
-
-        var result = await _userAdmin.TrySetUserNameAsync(subjectId, userName, _ct);
-
-        result.ShouldBeTrue();
-        (await _authenticatorsAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().UserName.ShouldBe(userName);
-        (await _profileAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().UserName.ShouldBe(userName);
-    }
-
-    [Fact]
-    public async Task Can_remove_UserName()
-    {
-        var otpAddress = TestData.CreateOtpAddress();
-        var userName = TestData.CreateUserName();
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [otpAddress], [], _ct)).ShouldNotBeNull().SubjectId;
-        _ = (await _profileAdmin.TryAddAsync(subjectId, ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
-        (await _userAdmin.TrySetUserNameAsync(subjectId, userName, _ct)).ShouldBeTrue();
-
-        var result = await _userAdmin.TryRemoveUserNameAsync(subjectId, _ct);
-
-        result.ShouldBeTrue();
-        (await _authenticatorsAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().UserName.ShouldBeNull();
-        (await _profileAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().UserName.ShouldBeNull();
-    }
-
-    [Fact]
     public async Task Can_remove_user()
     {
         var user = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [TestData.CreateOtpAddress()], [], _ct)).ShouldNotBeNull();

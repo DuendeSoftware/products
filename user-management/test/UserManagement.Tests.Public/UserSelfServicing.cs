@@ -19,7 +19,6 @@ public sealed class UserSelfServicing : IAsyncLifetime
     private IGroupAdmin _groupAdmin = null!;
     private IMembershipAdmin _membershipAdmin = null!;
     private IUserSelfService _userSelfService = null!;
-    private IUserProfileAdmin _profileAdmin = null!;
     private IUserProfileSelfService _profileSelfService = null!;
     private ServiceProvider _serviceProvider = null!;
 
@@ -29,40 +28,11 @@ public sealed class UserSelfServicing : IAsyncLifetime
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         _groupAdmin = _serviceProvider.GetRequiredService<IGroupAdmin>();
         _membershipAdmin = _serviceProvider.GetRequiredService<IMembershipAdmin>();
-        _profileAdmin = _serviceProvider.GetRequiredService<IUserProfileAdmin>();
         _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
         _userSelfService = _serviceProvider.GetRequiredService<IUserSelfService>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
-
-    [Fact]
-    public async Task Can_set_UserName()
-    {
-        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        _ = (await _profileAdmin.TryAddAsync(user.SubjectId, ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
-        var userName = TestData.CreateUserName();
-
-        var result = await _userSelfService.TrySetUserNameAsync(user.SubjectId, userName, _ct);
-
-        result.ShouldBeTrue();
-        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().UserName.ShouldBe(userName);
-        (await _profileAdmin.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().UserName.ShouldBe(userName);
-    }
-
-    [Fact]
-    public async Task Can_remove_UserName()
-    {
-        var user = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        _ = (await _profileAdmin.TryAddAsync(user.SubjectId, ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
-        (await _userSelfService.TrySetUserNameAsync(user.SubjectId, TestData.CreateUserName(), _ct)).ShouldBeTrue();
-
-        var result = await _userSelfService.TryRemoveUserNameAsync(user.SubjectId, _ct);
-
-        result.ShouldBeTrue();
-        (await _authenticatorsSelfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().UserName.ShouldBeNull();
-        (await _profileAdmin.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull().UserName.ShouldBeNull();
-    }
 
     [Fact]
     public async Task Can_deregister()

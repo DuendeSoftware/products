@@ -5,9 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication.Otp.Internal;
 
-internal sealed class EmailContentFactory(IOptions<SmtpOtpSenderOptions> options) : IEmailContentFactory
+internal sealed class EmailContentFactory(IOptions<SmtpOtpDispatcherOptions> options) : IEmailContentFactory
 {
-    private readonly SmtpOtpSenderOptions _options = options.Value;
+    private readonly SmtpOtpDispatcherOptions _options = options.Value;
 
     public Task<EmailContent> CreateAsync(PlainTextOtp otp, TimeSpan expiresAfter, Ct ct)
     {

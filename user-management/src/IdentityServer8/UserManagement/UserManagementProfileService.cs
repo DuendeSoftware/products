@@ -123,11 +123,6 @@ public class UserManagementProfileService : IProfileService
             claims.Add(new Claim(attribute.Code.ToString(), value, valueType));
         }
 
-        if (profile.UserName is { } userName)
-        {
-            claims.Add(new Claim(JwtClaimTypes.PreferredUserName, userName.ToString()));
-        }
-
         claims.AddRange(await GetRoleClaimsAsync(context, profile.SubjectId, ct));
 
         context.AddRequestedClaims(claims);
@@ -173,6 +168,9 @@ public class UserManagementProfileService : IProfileService
     protected virtual Task<UserProfile?> FindUserAsync(UserSubjectId subjectId, Ct ct) =>
         _userProfileAdmin!.TryGetAsync(subjectId, ct);
 
+    /// <summary>
+    /// Gets role claims for the specified user.
+    /// </summary>
     protected virtual async Task<IEnumerable<Claim>> GetRoleClaimsAsync(ProfileDataRequestContext context, UserSubjectId subjectId, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(context);

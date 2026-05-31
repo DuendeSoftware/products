@@ -97,6 +97,17 @@ public sealed class ScimCreateUserEndpointTests(ITestOutputHelper output, WebSer
     }
 
     [Fact]
+    public async Task Create_user_with_whitespace_userName_returns_400()
+    {
+        await Fixture.InitializeAsync();
+
+        var payload = new { schemas = new[] { ScimHttpClient.UserSchemaUrn }, userName = "   " };
+        var response = await Fixture.Client.PostAsync(ScimHttpClient.UsersRoute, ScimHttpClient.ScimJsonContent(payload));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task Create_user_with_wrong_schema_returns_400_invalidSyntax()
     {
         await Fixture.InitializeAsync();

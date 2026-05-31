@@ -15,6 +15,10 @@ partial record ExternalAuthenticatorName : IStringValue<ExternalAuthenticatorNam
     // Constructor for controlled creation
     private ExternalAuthenticatorName(string value) => Value = value;
 
+    /// <summary>Creates a <see cref="ExternalAuthenticatorName" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="ExternalAuthenticatorName" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="ExternalAuthenticatorName" />.</exception>
     public static ExternalAuthenticatorName Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -24,9 +28,18 @@ partial record ExternalAuthenticatorName : IStringValue<ExternalAuthenticatorNam
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="ExternalAuthenticatorName" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="ExternalAuthenticatorName" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out ExternalAuthenticatorName? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="ExternalAuthenticatorName" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="ExternalAuthenticatorName" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out ExternalAuthenticatorName? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -57,10 +70,17 @@ partial record ExternalAuthenticatorName : IStringValue<ExternalAuthenticatorNam
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="ExternalAuthenticatorName"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="ExternalAuthenticatorName"/> instance.</returns>
     public static implicit operator ExternalAuthenticatorName(string value) => Create(value);
 
+    /// <inheritdoc />
     public override string ToString() => Value;
 
+    /// <summary>Creates a new <see cref="ExternalAuthenticatorName"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="ExternalAuthenticatorName"/> from.</param>
+    /// <returns>A new <see cref="ExternalAuthenticatorName"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static ExternalAuthenticatorName? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

@@ -12,7 +12,7 @@ public abstract record PasswordCreationResult
     /// The password was successfully created.
     /// </summary>
     /// <param name="Password">The validated plain text password.</param>
-    public sealed record Success(PlainTextPassword Password) : PasswordCreationResult;
+    public sealed record Success(ValidatedPlainTextPassword Password) : PasswordCreationResult;
 
     /// <summary>
     /// The password could not be created because it failed validation.

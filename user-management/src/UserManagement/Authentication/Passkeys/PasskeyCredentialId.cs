@@ -77,13 +77,17 @@ public readonly struct PasskeyCredentialId : IEquatable<PasskeyCredentialId>
     /// </summary>
     public string ToBase64String() => Convert.ToBase64String(ToBytes());
 
+    /// <summary>Returns the credential ID as a Base64 string.</summary>
     public override string ToString() => ToBase64String();
 
+    /// <summary>Determines whether this instance equals the specified object.</summary>
     public override bool Equals(object? obj) => obj is PasskeyCredentialId other && Equals(other);
 
+    /// <summary>Determines whether this instance equals another <see cref="PasskeyCredentialId"/> using constant-time comparison.</summary>
     public bool Equals(PasskeyCredentialId other) =>
         CryptographicOperations.FixedTimeEquals(Bytes, other.Bytes);
 
+    /// <summary>Returns a hash code for this credential ID.</summary>
     public override int GetHashCode()
     {
         var hash = new HashCode();
@@ -95,9 +99,11 @@ public readonly struct PasskeyCredentialId : IEquatable<PasskeyCredentialId>
         return hash.ToHashCode();
     }
 
+    /// <summary>Determines whether two <see cref="PasskeyCredentialId"/> instances are equal.</summary>
     public static bool operator ==(PasskeyCredentialId left, PasskeyCredentialId right) =>
         left.Equals(right);
 
+    /// <summary>Determines whether two <see cref="PasskeyCredentialId"/> instances are not equal.</summary>
     public static bool operator !=(PasskeyCredentialId left, PasskeyCredentialId right) =>
         !left.Equals(right);
 }

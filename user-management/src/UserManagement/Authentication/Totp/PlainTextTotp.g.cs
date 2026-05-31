@@ -15,6 +15,10 @@ partial record PlainTextTotp : IStringValue<PlainTextTotp>
     // Constructor for controlled creation
     private PlainTextTotp(string value) => Value = value;
 
+    /// <summary>Creates a <see cref="PlainTextTotp" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="PlainTextTotp" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="PlainTextTotp" />.</exception>
     public static PlainTextTotp Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -24,9 +28,18 @@ partial record PlainTextTotp : IStringValue<PlainTextTotp>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="PlainTextTotp" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="PlainTextTotp" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out PlainTextTotp? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="PlainTextTotp" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="PlainTextTotp" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out PlainTextTotp? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -64,8 +77,14 @@ partial record PlainTextTotp : IStringValue<PlainTextTotp>
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="PlainTextTotp"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="PlainTextTotp"/> instance.</returns>
     public static implicit operator PlainTextTotp(string value) => Create(value);
 
+    /// <summary>Creates a new <see cref="PlainTextTotp"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="PlainTextTotp"/> from.</param>
+    /// <returns>A new <see cref="PlainTextTotp"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static PlainTextTotp? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

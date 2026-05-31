@@ -162,9 +162,7 @@ internal sealed class UserProfileReader(IStoreFactory storeFactory, AttributeSch
             }
         }
 
-        var userName = dso.UserName is not null ? UserName.Load(dso.UserName) : (UserName?)null;
-
-        return new UserProfileListItem(subjectId, userName, attributes);
+        return new UserProfileListItem(subjectId, attributes);
     }
 
     private static object? ParseAttributeValue(object? rawValue, AttributeType type)

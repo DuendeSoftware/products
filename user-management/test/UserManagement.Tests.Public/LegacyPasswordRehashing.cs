@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
+using Duende.Storage.EntityAttributeValue;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Passwords;
+using Duende.UserManagement.Profiles;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Platform.UserManagement;
@@ -20,18 +22,24 @@ public sealed class LegacyPasswordRehashing
         var dbId = Guid.NewGuid();
 
         var externalAuth = TestData.CreateExternalAuthenticator();
-        var userName = TestData.CreateUserName();
         var passwordText = $"ABcd12!@{Guid.NewGuid()}";
 
         // Seed: set password using fake algorithm as preferred
         await using var seedProvider = await CreateProviderWithFakeAlgorithmAsPreferred(dbId);
 
         var selfService = seedProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        var profileSelfService = seedProvider.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = seedProvider.GetRequiredService<IUserProfileSchemaAdmin>();
 
         var authenticators = (await selfService.TryRegisterAsync(UserSubjectId.New(), externalAuth, _ct)).ShouldNotBeNull();
-        var userSelfService = seedProvider.GetRequiredService<IUserSelfService>();
-        (await userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, _ct)).ShouldBeTrue();
-        var password = await selfService.CreatePasswordAsync(authenticators.SubjectId, passwordText, _ct);
+
+        await TestData.AddAttributeDefinitions(schemaAdmin, _ct);
+        var schema = await profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var password = await selfService.ValidatePasswordAsync(authenticators.SubjectId, passwordText, _ct);
         (await selfService.TrySetPasswordAsync(authenticators.SubjectId, password, _ct)).ShouldBeTrue();
 
         // Authenticate: use PBKDF2 as preferred — should succeed and re-hash
@@ -40,7 +48,7 @@ public sealed class LegacyPasswordRehashing
             var auth = authProvider.GetRequiredService<IPasswordAuth>();
             var supplied = NonValidatedPassword.Create(passwordText);
 
-            var result = await auth.TryAuthenticateAsync(userName, supplied, _ct);
+            var result = await auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct);
 
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         }
@@ -51,7 +59,7 @@ public sealed class LegacyPasswordRehashing
             var auth = verifyProvider.GetRequiredService<IPasswordAuth>();
             var supplied = NonValidatedPassword.Create(passwordText);
 
-            var result = await auth.TryAuthenticateAsync(userName, supplied, _ct);
+            var result = await auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct);
 
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         }
@@ -68,42 +76,58 @@ public sealed class LegacyPasswordRehashing
 
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
         var auth = sp.GetRequiredService<IPasswordAuth>();
+        var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
+        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
 
         var externalAuth = TestData.CreateExternalAuthenticator();
-        var userName = TestData.CreateUserName();
         var rawPassword = $"ABcd12!@{Guid.NewGuid()}";
         var supplied = NonValidatedPassword.Create(rawPassword);
 
         var authenticators = (await selfService.TryRegisterAsync(UserSubjectId.New(), externalAuth, _ct)).ShouldNotBeNull();
-        var userSelfService = sp.GetRequiredService<IUserSelfService>();
-        (await userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, _ct)).ShouldBeTrue();
-        var password = await selfService.CreatePasswordAsync(authenticators.SubjectId, rawPassword, _ct);
+
+        await TestData.AddAttributeDefinitions(schemaAdmin, _ct);
+        var schema = await profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var password = await selfService.ValidatePasswordAsync(authenticators.SubjectId, rawPassword, _ct);
         (await selfService.TrySetPasswordAsync(authenticators.SubjectId, password, _ct)).ShouldBeTrue();
 
-        var result = await auth.TryAuthenticateAsync(userName, supplied, _ct);
+        var result = await auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct);
 
         var success = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         success.UserSubjectId.ShouldBe(authenticators.SubjectId);
     }
 
     [Fact]
-    public async Task authenticate_with_unregistered_algorithm_returns_null()
+    public async Task authenticate_with_unregistered_algorithm_returns_failure()
     {
         var dbId = Guid.NewGuid();
 
         var externalAuth = TestData.CreateExternalAuthenticator();
-        var userName = TestData.CreateUserName();
         var passwordText = $"ABcd12!@{Guid.NewGuid()}";
+        AttributeCode attributeCode;
+        object attributeValue;
 
         // Seed: set password using fake algorithm as preferred
         await using (var seedProvider = await CreateProviderWithFakeAlgorithmAsPreferred(dbId))
         {
             var selfService = seedProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+            var profileSelfService = seedProvider.GetRequiredService<IUserProfileSelfService>();
+            var schemaAdmin = seedProvider.GetRequiredService<IUserProfileSchemaAdmin>();
 
             var authenticators = (await selfService.TryRegisterAsync(UserSubjectId.New(), externalAuth, _ct)).ShouldNotBeNull();
-            var userSelfService = seedProvider.GetRequiredService<IUserSelfService>();
-            (await userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, _ct)).ShouldBeTrue();
-            var password = await selfService.CreatePasswordAsync(authenticators.SubjectId, passwordText, _ct);
+
+            await TestData.AddAttributeDefinitions(schemaAdmin, _ct);
+            var schema = await profileSelfService.GetSchemaAsync(_ct);
+            var attributes = TestData.CreateAttributes(schema);
+            var attribute = attributes.ElementAt(0);
+            attributeCode = attribute.Code;
+            attributeValue = attribute.UntypedValue;
+            _ = (await profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
+            var password = await selfService.ValidatePasswordAsync(authenticators.SubjectId, passwordText, _ct);
             (await selfService.TrySetPasswordAsync(authenticators.SubjectId, password, _ct)).ShouldBeTrue();
         }
 
@@ -113,7 +137,7 @@ public sealed class LegacyPasswordRehashing
             var auth = authProvider.GetRequiredService<IPasswordAuth>();
             var supplied = NonValidatedPassword.Create(passwordText);
 
-            var result = await auth.TryAuthenticateAsync(userName, supplied, _ct);
+            var result = await auth.TryAuthenticateAsync(attributeCode, attributeValue, supplied, _ct);
 
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Failure>();
         }

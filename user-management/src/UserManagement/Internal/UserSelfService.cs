@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.Internal.Operations;
+using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Storage;
+using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -13,51 +15,13 @@ namespace Duende.UserManagement.Internal;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserSelfService(
     IStoreFactory storeFactory,
-    UserRepository userRepository,
     ILogger<UserSelfService> logger,
+    IUserProfileSelfService profileSelfService,
+    IUserAuthenticatorsSelfService authenticatorsSelfService,
     UserManagementLicenseValidator licenseValidator,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     UserProfileRepository? profileRepo = null) : IUserSelfService
 {
-    private readonly UserNameCoordinator _batchBuilder = new(
-        storeFactory, userRepository, authenticatorsRepo, profileRepo);
-
-    public async Task<bool> TrySetUserNameAsync(UserSubjectId subjectId, UserName userName, Ct ct)
-    {
-        licenseValidator.ValidateSelfService();
-        using var scope = logger.BeginSubjectScope(subjectId);
-        logger.UserNameSetStarting(LogLevel.Debug, subjectId);
-        var result = await _batchBuilder.TrySetUserNameAsync(subjectId, userName, ct);
-        if (result)
-        {
-            logger.UserNameSetSucceeded(LogLevel.Information, subjectId);
-        }
-        else
-        {
-            logger.UserNameSetFailed(LogLevel.Warning, subjectId);
-        }
-
-        return result;
-    }
-
-    public async Task<bool> TryRemoveUserNameAsync(UserSubjectId subjectId, Ct ct)
-    {
-        licenseValidator.ValidateSelfService();
-        using var scope = logger.BeginSubjectScope(subjectId);
-        logger.UserNameRemoveStarting(LogLevel.Debug, subjectId);
-        var result = await _batchBuilder.TryRemoveUserNameAsync(subjectId, ct);
-        if (result)
-        {
-            logger.UserNameRemoveSucceeded(LogLevel.Information, subjectId);
-        }
-        else
-        {
-            logger.UserNameRemoveFailed(LogLevel.Warning, subjectId);
-        }
-
-        return result;
-    }
-
     public async Task<bool> TryDeregisterAsync(UserSubjectId subjectId, Ct ct)
     {
         licenseValidator.ValidateSelfService();
@@ -87,6 +51,9 @@ internal sealed class UserSelfService(
 
         return result;
     }
+
+    public IUserProfileSelfService Profiles => profileSelfService;
+    public IUserAuthenticatorsSelfService Authenticators => authenticatorsSelfService;
 
     private async Task<bool> ExecuteBatchAsync(List<IStoreOperation> operations, Ct ct)
     {

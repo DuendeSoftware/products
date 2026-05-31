@@ -9,9 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Platform.UserManagement;
 
-public class SmtpOtpSenderTests
+public class SmtpOtpDispatcherTests
 {
-    private readonly SmtpOtpSenderOptions _defaultOptions = new()
+    private readonly SmtpOtpDispatcherOptions _defaultOptions = new()
     {
         Host = "localhost",
         Port = 1025,
@@ -22,70 +22,70 @@ public class SmtpOtpSenderTests
     };
 
     [Fact]
-    public void Can_send_with_email_channel_returns_true()
+    public void Can_dispatch_with_email_channel_returns_true()
     {
-        var sender = CreateSmtpSender();
+        var dispatcher = CreateSmtpDispatcher();
         var address = new OtpAddress(OtpChannel.Email, EmailAddress.Create("user@example.com"));
 
-        var result = sender.CanSend(address);
+        var result = dispatcher.CanDispatch(address);
 
         result.ShouldBeTrue();
     }
 
     [Fact]
-    public void Can_send_with_non_email_channel_returns_false()
+    public void Can_dispatch_with_non_email_channel_returns_false()
     {
-        var sender = CreateSmtpSender();
+        var dispatcher = CreateSmtpDispatcher();
         var address = new OtpAddress(OtpChannel.Sms, PhoneNumber.Create("+1234567890"));
 
-        var result = sender.CanSend(address);
+        var result = dispatcher.CanDispatch(address);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void Can_send_with_email_channel_but_non_email_subject_id_returns_false()
+    public void Can_dispatch_with_email_channel_but_non_email_subject_id_returns_false()
     {
-        var sender = CreateSmtpSender();
+        var dispatcher = CreateSmtpDispatcher();
         var address = new OtpAddress(OtpChannel.Email, PhoneNumber.Create("+1234567890"));
 
-        var result = sender.CanSend(address);
+        var result = dispatcher.CanDispatch(address);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public async Task Send_with_invalid_channel_throws_argument_exception()
+    public async Task Dispatch_with_invalid_channel_throws_argument_exception()
     {
-        var sender = CreateSmtpSender();
+        var dispatcher = CreateSmtpDispatcher();
         var address = new OtpAddress(OtpChannel.Sms, PhoneNumber.Create("+1234567890"));
         PlainTextOtp.TryCreate("123456", out var otp).ShouldBeTrue();
 
         var exception = await Should.ThrowAsync<ArgumentException>(async () =>
-            await sender.SendAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None)
+            await dispatcher.DispatchAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None)
         );
 
         exception.ParamName.ShouldBe("address");
     }
 
     [Fact]
-    public async Task Send_with_invalid_subject_id_throws_argument_exception()
+    public async Task Dispatch_with_invalid_subject_id_throws_argument_exception()
     {
-        var sender = CreateSmtpSender();
+        var dispatcher = CreateSmtpDispatcher();
         var address = new OtpAddress(OtpChannel.Email, PhoneNumber.Create("+1234567890"));
         PlainTextOtp.TryCreate("123456", out var otp).ShouldBeTrue();
 
         var exception = await Should.ThrowAsync<ArgumentException>(async () =>
-            await sender.SendAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None)
+            await dispatcher.DispatchAsync(address, otp!.Value, TimeSpan.FromMinutes(5), Ct.None)
         );
 
         exception.ParamName.ShouldBe("address");
     }
 
-    private SmtpOtpSender CreateSmtpSender(SmtpOtpSenderOptions? options = null)
+    private SmtpOtpDispatcher CreateSmtpDispatcher(SmtpOtpDispatcherOptions? options = null)
     {
         var opts = Options.Create(options ?? _defaultOptions);
         var emailContentFactory = new EmailContentFactory(opts);
-        return new SmtpOtpSender(opts, emailContentFactory, NullLogger<SmtpOtpSender>.Instance);
+        return new SmtpOtpDispatcher(opts, emailContentFactory, NullLogger<SmtpOtpDispatcher>.Instance);
     }
 }

@@ -5,6 +5,8 @@ namespace Duende.UserManagement.Internal;
 
 internal static class LogParameters
 {
+    public const string AttributeCode = "attributeCode";
+    public const string AttributeValue = "attributeValue";
     public const string Version = "version";
     public const string NetVersion = "netversion";
     public const string Scheme = "scheme";
@@ -17,6 +19,5 @@ internal static class LogParameters
     public const string SubjectId = "subjectId";
     public const string GroupId = "groupId";
     public const string RoleId = "roleId";
-    public const string UserName = "userName";
     public const string Issuer = "issuer";
 }

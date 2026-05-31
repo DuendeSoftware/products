@@ -78,9 +78,9 @@ public class PasskeySecondFactorEndpointTests(WebServerFixture webServerFixture)
 
         await _fixture.InitializeAsync();
 
-        var (subjectId, userName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (firstCredentialId, _) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey 1");
-        var (secondCredentialId, _) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey 2");
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
+        var (firstCredentialId, _) = await _fixture.SeedPasskeyAsync(subjectId, "Test Passkey 1");
+        var (secondCredentialId, _) = await _fixture.SeedPasskeyAsync(subjectId, "Test Passkey 2");
 
         resolvedSubjectId = subjectId;
 
@@ -111,8 +111,8 @@ public class PasskeySecondFactorEndpointTests(WebServerFixture webServerFixture)
         ConfigureSecondFactorResolver(() => resolvedSubjectId);
         await _fixture.InitializeAsync();
 
-        var (subjectId, userName, _) = await _fixture.SeedAuthenticatorsAsync();
-        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, userName, "Test Passkey");
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
+        var (credentialId, ecdsa) = await _fixture.SeedPasskeyAsync(subjectId, "Test Passkey");
 
         resolvedSubjectId = subjectId;
 

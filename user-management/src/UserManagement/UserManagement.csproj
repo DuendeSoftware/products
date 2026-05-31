@@ -3,6 +3,8 @@
   <PropertyGroup>
     <AssemblyName>Duende.UserManagement</AssemblyName>
     <RootNamespace>Duende.UserManagement</RootNamespace>
+    <NoWarn>$(NoWarn);ca1812</NoWarn> <!-- never instantiated internal class-->
+
   </PropertyGroup>
 
   <ItemGroup>

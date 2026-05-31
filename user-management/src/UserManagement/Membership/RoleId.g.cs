@@ -15,8 +15,13 @@ partial record RoleId : IStringValue<RoleId>
     // Constructor for controlled creation
     private RoleId(string value) => Value = value;
 
+    /// <summary>Gets the underlying string value of this <see cref="RoleId"/>.</summary>
     public string Value { get; }
 
+    /// <summary>Creates a <see cref="RoleId" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="RoleId" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="RoleId" />.</exception>
     public static RoleId Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -26,9 +31,18 @@ partial record RoleId : IStringValue<RoleId>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="RoleId" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="RoleId" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out RoleId? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="RoleId" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="RoleId" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out RoleId? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -57,10 +71,17 @@ partial record RoleId : IStringValue<RoleId>
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="RoleId"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="RoleId"/> instance.</returns>
     public static implicit operator RoleId(string value) => Create(value);
 
+    /// <inheritdoc />
     public override string ToString() => Value;
 
+    /// <summary>Creates a new <see cref="RoleId"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="RoleId"/> from.</param>
+    /// <returns>A new <see cref="RoleId"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static RoleId? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

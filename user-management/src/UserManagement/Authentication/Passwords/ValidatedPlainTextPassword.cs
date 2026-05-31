@@ -5,8 +5,11 @@ using Duende.UserManagement.Authentication.Passwords.Internal;
 
 namespace Duende.UserManagement.Authentication.Passwords;
 
+/// <summary>
+/// Represents a plain text password that has been validated against the configured password policy.
+/// </summary>
 [StringValue]
-public partial record PlainTextPassword
+public partial record ValidatedPlainTextPassword
 {
     internal string Value { get; }
 
@@ -17,25 +20,31 @@ public partial record PlainTextPassword
     public UserSubjectId? ValidatedForUserId { get; }
 
     /// <summary>
-    /// Constructs a <see cref="PlainTextPassword"/> from an already validated password string.
-    /// This should only be called by <see cref="PlainTextPasswordFactory"/> after the string has been validated.
+    /// Constructs a <see cref="ValidatedPlainTextPassword"/> from an already validated password string.
+    /// This should only be called by <see cref="ValidatedPlainTextPasswordFactory"/> after the string has been validated.
     /// </summary>
-    internal PlainTextPassword(string value, UserSubjectId validatedForUserId)
+    internal ValidatedPlainTextPassword(string value, UserSubjectId validatedForUserId)
     {
         Value = value;
         ValidatedForUserId = validatedForUserId;
     }
 
     // Used by the source generator's Load method
-    private PlainTextPassword(string value)
+    private ValidatedPlainTextPassword(string value)
     {
         Value = value;
         ValidatedForUserId = null;
     }
 
+    /// <summary>Returns a redacted string to prevent accidental logging of password values.</summary>
     public override string ToString() => GetType().ToString();
 
-    public static implicit operator NonValidatedPassword(PlainTextPassword password)
+    /// <summary>
+    /// Implicitly converts a <see cref="ValidatedPlainTextPassword"/> to a <see cref="NonValidatedPassword"/>
+    /// for use in authentication operations.
+    /// </summary>
+    /// <param name="password">The plain text password to convert.</param>
+    public static implicit operator NonValidatedPassword(ValidatedPlainTextPassword password)
     {
         ArgumentNullException.ThrowIfNull(password);
         return password.ToNonValidatedPassword();

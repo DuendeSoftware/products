@@ -8,8 +8,14 @@ using Duende.UserManagement.Authentication.Totp;
 
 namespace Duende.UserManagement.Authentication;
 
+/// <summary>
+/// Top-level options for configuring user authentication features.
+/// </summary>
 public sealed class UserAuthenticationOptions
 {
+    /// <summary>
+    /// Configuration options for TOTP (Time-based One-Time Password) authentication.
+    /// </summary>
     public TotpOptions Totp { get; } = new();
 
     /// <summary>
@@ -17,6 +23,9 @@ public sealed class UserAuthenticationOptions
     /// </summary>
     public PasskeyOptions Passkeys { get; } = new();
 
+    /// <summary>
+    /// Configuration options for password hashing, validation, and history.
+    /// </summary>
     public PasswordOptions Passwords { get; } = new();
 
     /// <summary>

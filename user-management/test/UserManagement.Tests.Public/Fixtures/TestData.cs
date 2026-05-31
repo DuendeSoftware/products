@@ -97,15 +97,13 @@ internal static class TestData
     internal static ExternalAuthenticator CreateExternalAuthenticator() =>
         CreateExternalAuthenticator(SubjectIdTypes.First());
 
-    internal static UserName CreateUserName() => UserName.Create($"UserName{Count()}");
+    internal static async Task<ValidatedPlainTextPassword> CreatePasswordAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default) =>
+        await selfService.ValidatePasswordAsync(userId ?? UserSubjectId.New(), $"ABcd12!@{Count()}", ct);
 
-    internal static async Task<PlainTextPassword> CreatePasswordAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default) =>
-        await selfService.CreatePasswordAsync(userId ?? UserSubjectId.New(), $"ABcd12!@{Count()}", ct);
-
-    internal static async Task<(PlainTextPassword Password, NonValidatedPassword Supplied)> CreatePasswordPairAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default)
+    internal static async Task<(ValidatedPlainTextPassword Password, NonValidatedPassword Supplied)> CreatePasswordPairAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default)
     {
         var raw = $"ABcd12!@{Count()}";
-        var password = await selfService.CreatePasswordAsync(userId ?? UserSubjectId.New(), raw, ct);
+        var password = await selfService.ValidatePasswordAsync(userId ?? UserSubjectId.New(), raw, ct);
         return (password, NonValidatedPassword.Create(raw));
     }
 

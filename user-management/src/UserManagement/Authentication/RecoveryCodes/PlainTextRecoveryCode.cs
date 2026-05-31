@@ -5,6 +5,9 @@ using Duende.UserManagement.Authentication.Internal;
 
 namespace Duende.UserManagement.Authentication.RecoveryCodes;
 
+/// <summary>
+/// Represents a plain text recovery code that can be used for account recovery when other authenticators are unavailable.
+/// </summary>
 [StringValue]
 public partial record PlainTextRecoveryCode
 {
@@ -12,6 +15,7 @@ public partial record PlainTextRecoveryCode
 
     private static readonly byte MaxLength = Pbkdf2MaxPasswordLength.For(new Pbkdf2Inputs().PseudorandomFunctionName);
 
+    /// <summary>Gets the normalized recovery code string value.</summary>
     public string Value { get; }
 
     /// <summary>
@@ -19,8 +23,12 @@ public partial record PlainTextRecoveryCode
     /// </summary>
     public string Text => Value;
 
+    /// <summary>
+    /// Returns the recovery code as a collection of display groups for user-friendly presentation.
+    /// </summary>
     public IReadOnlyCollection<string> ToTextGroups() => [.. Value.ToGroups()];
 
+    /// <inheritdoc />
     public override string ToString() => GetType().ToString();
 
     internal static PlainTextRecoveryCode New() => new(Base32Crockford.Random(NewLength, false));

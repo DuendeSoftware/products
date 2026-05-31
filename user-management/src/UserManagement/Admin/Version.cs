@@ -3,6 +3,9 @@
 
 namespace Duende.UserManagement.Admin;
 
+/// <summary>
+/// Represents a strongly-typed version number used for optimistic concurrency control.
+/// </summary>
 [ValueOf<int>]
 public partial record DataVersion
 {

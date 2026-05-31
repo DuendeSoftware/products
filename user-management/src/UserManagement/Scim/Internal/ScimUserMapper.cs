@@ -15,8 +15,6 @@ internal static class ScimUserMapper
 {
     /// <summary>
     /// Maps a <see cref="UserProfile"/> and version to a <see cref="ScimUserResource"/>.
-    /// userName is sourced from the domain <see cref="UserName"/> property; externalId and
-    /// custom attributes are sourced from profile attributes.
     /// </summary>
     internal static ScimUserResource MapToResource(
         UserProfile profile,
@@ -45,13 +43,12 @@ internal static class ScimUserMapper
 
     /// <summary>
     /// Maps a <see cref="UserProfileListItem"/> to a <see cref="ScimUserResource"/> (for list responses, no version/ETag).
-    /// userName is sourced from the domain <see cref="UserName"/> property.
     /// </summary>
     internal static ScimUserResource MapToResource(UserProfileListItem item, string baseUrl, string routePrefix)
     {
         var id = item.SubjectId.Value;
         string? externalId = null;
-        var userName = item.UserName?.Value;
+        string? userName = null;
         var additionalAttributes = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var (name, value) in item.Attributes)
@@ -59,6 +56,10 @@ internal static class ScimUserMapper
             if (name.Equals(ScimConstants.ExternalIdAttributeName, StringComparison.OrdinalIgnoreCase))
             {
                 externalId = value.ToString();
+            }
+            else if (name.Equals(ScimConstants.UserNameAttributeName, StringComparison.OrdinalIgnoreCase))
+            {
+                userName = value.ToString();
             }
             else
             {
@@ -86,7 +87,7 @@ internal static class ScimUserMapper
         UserProfile profile)
     {
         string? externalId = null;
-        var userName = profile.UserName?.Value;
+        string? userName = null;
         var additionalAttributes = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var attribute in profile.Attributes.Values)
@@ -94,6 +95,10 @@ internal static class ScimUserMapper
             if (attribute.Code.Value.Equals(ScimConstants.ExternalIdAttributeName, StringComparison.OrdinalIgnoreCase))
             {
                 externalId = attribute.UntypedValue.ToString();
+            }
+            else if (attribute.Code.Value.Equals(ScimConstants.UserNameAttributeName, StringComparison.OrdinalIgnoreCase))
+            {
+                userName = attribute.UntypedValue.ToString();
             }
             else
             {

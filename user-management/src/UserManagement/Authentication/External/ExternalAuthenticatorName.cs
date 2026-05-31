@@ -3,6 +3,9 @@
 
 namespace Duende.UserManagement.Authentication.External;
 
+/// <summary>
+/// Strongly-typed name for an external authentication provider (e.g., "Google", "GitHub").
+/// </summary>
 [StringValue]
 public partial record ExternalAuthenticatorName
 {
@@ -11,6 +14,7 @@ public partial record ExternalAuthenticatorName
     // so we may as well use some reasonable number.
     internal const int MaxLength = 255;
 
+    /// <summary>Gets the string value of the provider name.</summary>
     public string Value { get; }
 
     static string Normalize(string value) => value.Trim();

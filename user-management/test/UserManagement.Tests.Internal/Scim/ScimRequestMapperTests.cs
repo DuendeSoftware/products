@@ -171,21 +171,6 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     }
 
     [Fact]
-    public void InvalidUserNameReturnsError()
-    {
-        var request = new ScimUserRequest
-        {
-            Schemas = [ScimConstants.UserSchemaUrn],
-            UserName = string.Empty // empty username is invalid
-        };
-
-        var result = ScimRequestMapper.Map(request, null);
-
-        result.IsSuccess.ShouldBeFalse();
-        _ = result.ErrorDetail.ShouldNotBeNull();
-    }
-
-    [Fact]
     public async Task InvalidValueTypeForAttributeReturnsError()
     {
         _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
@@ -213,7 +198,7 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     }
 
     [Fact]
-    public void NullSchemaAllowsUserNameOnlyRequest()
+    public void NullSchemaRejectsUserName()
     {
         var request = new ScimUserRequest
         {
@@ -223,9 +208,9 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
 
         var result = ScimRequestMapper.Map(request, null);
 
-        result.IsSuccess.ShouldBeTrue();
-        _ = result.UserName.ShouldNotBeNull();
-        result.UserName!.Value.ToString().ShouldBe("alice");
+        result.IsSuccess.ShouldBeFalse();
+        result.ErrorDetail.ShouldBe("userName is not defined in the schema.");
+        result.ErrorScimType.ShouldBe(ScimConstants.ErrorTypes.InvalidValue);
     }
 
     [Fact]
@@ -244,5 +229,44 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         _ = result.ErrorDetail.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task NonUniqueUserNameAttributeReturnsError()
+    {
+        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("username"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("User login name"),
+            IsUnique = false
+        }, _ct);
+        var schema = await GetSchemaAsync();
+        var request = new ScimUserRequest { Schemas = [ScimConstants.UserSchemaUrn], UserName = "alice" };
+
+        var result = ScimRequestMapper.Map(request, schema);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ErrorDetail.ShouldBe("userName attribute must be configured as unique.");
+        result.ErrorScimType.ShouldBe(ScimConstants.ErrorTypes.InvalidValue);
+    }
+
+    [Fact]
+    public async Task UserNameNotInSchemaReturnsError()
+    {
+        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("nickname"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("Nickname")
+        }, _ct);
+        var schema = await GetSchemaAsync();
+        var request = new ScimUserRequest { Schemas = [ScimConstants.UserSchemaUrn], UserName = "alice" };
+
+        var result = ScimRequestMapper.Map(request, schema);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ErrorDetail.ShouldBe("userName is not defined in the schema.");
+        result.ErrorScimType.ShouldBe(ScimConstants.ErrorTypes.InvalidValue);
     }
 }

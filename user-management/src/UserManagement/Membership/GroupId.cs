@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Duende.UserManagement.Membership;
 
+/// <summary>Represents a unique identifier for a group.</summary>
 [StringValue]
 public partial record GroupId
 {
@@ -13,5 +14,6 @@ public partial record GroupId
     [GeneratedRegex(@"^[a-zA-Z0-9\-_/\\]+$")]
     internal static partial Regex Regex();
 
+    /// <summary>Creates a new <see cref="GroupId"/> with a randomly generated value.</summary>
     public static GroupId New() => Create(Guid.NewGuid().ToString());
 }

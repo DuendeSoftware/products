@@ -30,7 +30,6 @@ internal sealed class UserAuthenticators
         IEnumerable<ExternalAuthenticator> externalAuthenticators,
         IEnumerable<TotpAuthenticator> totpAuthenticators,
         IEnumerable<Pbkdf2HashedPassword> recoveryCodes,
-        UserName? userName,
         HashedPassword? hashedPassword,
         IEnumerable<PasskeyCredential> passkeyCredentials,
         IEnumerable<KeyValuePair<AuthenticatorKey, AuthenticatorFailureState>> failureStates,
@@ -45,7 +44,6 @@ internal sealed class UserAuthenticators
         _passkeyCredentials = passkeyCredentials.ToDictionary(c => c.CredentialId, c => c);
         _failureStates = failureStates.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         _recoveryCodes = [.. recoveryCodes];
-        UserName = userName;
         HashedPassword = hashedPassword;
         _passwordHistory = [.. passwordHistory];
         PasswordSetAtUtc = passwordSetAtUtc;
@@ -62,7 +60,6 @@ internal sealed class UserAuthenticators
             externalAuthenticators,
             [],
             [],
-            null,
             null,
             [],
             [],
@@ -82,8 +79,6 @@ internal sealed class UserAuthenticators
     internal IReadOnlyCollection<ExternalAuthenticator> ExternalAuthenticators => _externalAuthenticators;
 
     internal IReadOnlyCollection<Pbkdf2HashedPassword> RecoveryCodes => _recoveryCodes;
-
-    internal UserName? UserName { get; private set; }
 
     internal HashedPassword? HashedPassword { get; private set; }
 
@@ -149,7 +144,7 @@ internal sealed class UserAuthenticators
         return codes;
     }
 
-    internal bool TrySetPassword(PlainTextPassword password, IPasswordHashAlgorithm algorithm, TimeProvider timeProvider)
+    internal bool TrySetPassword(ValidatedPlainTextPassword password, IPasswordHashAlgorithm algorithm, TimeProvider timeProvider)
     {
         if (HashedPassword is not null)
         {
@@ -166,7 +161,7 @@ internal sealed class UserAuthenticators
         return true;
     }
 
-    internal bool TryChangePassword(NonValidatedPassword oldPassword, PlainTextPassword newPassword,
+    internal bool TryChangePassword(NonValidatedPassword oldPassword, ValidatedPlainTextPassword newPassword,
         IPasswordHashAlgorithm preferredAlgorithm, IReadOnlyList<IPasswordHashAlgorithm> allAlgorithms, int historyCount, TimeProvider timeProvider)
     {
         if (newPassword.ValidatedForUserId != SubjectId)
@@ -190,7 +185,7 @@ internal sealed class UserAuthenticators
         return true;
     }
 
-    internal bool TryResetPassword(PlainTextPassword password, IPasswordHashAlgorithm algorithm,
+    internal bool TryResetPassword(ValidatedPlainTextPassword password, IPasswordHashAlgorithm algorithm,
         IReadOnlyList<IPasswordHashAlgorithm> allAlgorithms, int historyCount, TimeProvider timeProvider)
     {
         if (HashedPassword is null)
@@ -258,10 +253,6 @@ internal sealed class UserAuthenticators
 
     internal void RehashPassword(string password, IPasswordHashAlgorithm preferredAlgorithm) =>
         HashedPassword = HashedPassword.From(password, preferredAlgorithm);
-
-    internal void SetUserName(UserName userName) => UserName = userName;
-
-    internal void RemoveUserName() => UserName = null;
 
     internal AuthenticatorFailureState GetFailureState(AuthenticatorKey key) =>
         _failureStates.TryGetValue(key, out var state)
@@ -408,7 +399,6 @@ internal sealed class UserAuthenticators
         IEnumerable<ExternalAuthenticator> externalAuthenticators,
         IEnumerable<TotpAuthenticator> totpAuthenticators,
         IEnumerable<Pbkdf2HashedPassword> recoveryCodes,
-        UserName? userName,
         HashedPassword? hashedPassword,
         IEnumerable<PasskeyCredential> passkeyCredentials,
         IEnumerable<KeyValuePair<AuthenticatorKey, AuthenticatorFailureState>> failureStates,
@@ -421,7 +411,6 @@ internal sealed class UserAuthenticators
             externalAuthenticators,
             totpAuthenticators,
             recoveryCodes,
-            userName,
             hashedPassword,
             passkeyCredentials,
             failureStates,

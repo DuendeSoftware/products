@@ -87,6 +87,12 @@ internal static class ScimConstants
     }
 
     /// <summary>
+    /// Schema attribute name used to store the SCIM userName as a profile attribute.
+    /// Lowercase because AttributeName only accepts lowercase names.
+    /// </summary>
+    internal const string UserNameAttributeName = "username";
+
+    /// <summary>
     /// Schema attribute name used to store the SCIM externalId as a profile attribute.
     /// Lowercase because AttributeName only accepts lowercase names.
     /// </summary>

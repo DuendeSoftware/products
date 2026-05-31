@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication.Internal;
@@ -17,6 +18,9 @@ internal sealed class UserAuthenticationWebModule : IHttpModule
 {
     public static void Register(IServiceCollection services)
     {
+        // Passkey sign-in handler (replaceable by integrations like IdentityServer)
+        services.TryAddScoped<IPasskeySignInHandler, DefaultPasskeySignInHandler>();
+
         // Passkey endpoint handlers
         _ = services.AddScoped<PasskeyBeginRegistrationEndpoint>();
         _ = services.AddScoped<PasskeyCompleteRegistrationEndpoint>();

@@ -34,17 +34,18 @@ public sealed class ParallelAttacks : IAsyncLifetime
         }
 
         var auth = _serviceProvider.GetRequiredService<IOtpAuthenticator>();
+        var otpSender = _serviceProvider.GetRequiredService<IOtpSender>();
 
-        var sendResult = (await auth.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldNotBeNull();
+        var sendResult = (await otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldNotBeNull();
         sendResult.Sent.ShouldBeTrue();
 
-        var otpSender = _serviceProvider.GetRequiredService<FakeOtpSender>();
-        otpSender.Calls.ShouldNotBeEmpty();
-        var otp = otpSender.Calls.First().Otp;
+        var otpDispatcher = _serviceProvider.GetRequiredService<FakeOtpDispatcher>();
+        otpDispatcher.Calls.ShouldNotBeEmpty();
+        var otp = otpDispatcher.Calls.First().Otp;
 
         // act
         var attempts = await Task.WhenAll(Enumerable.Range(1, Environment.ProcessorCount)
-            .Select(_ => Task.Run(() => auth.TryAuthenticateAsync(otp, sendResult.Token.Value, _ct), _ct))
+            .Select(_ => Task.Run(() => auth.TryAuthenticateAsync(otp, sendResult.Token, _ct), _ct))
             .ToArray());
 
         // assert

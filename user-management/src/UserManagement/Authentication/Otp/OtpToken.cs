@@ -5,19 +5,25 @@ using Duende.Storage;
 
 namespace Duende.UserManagement.Authentication.Otp;
 
-public readonly record struct OtpToken
+/// <summary>
+/// An opaque token that identifies an active OTP session, returned when an OTP is sent
+/// and required to verify the code during authentication.
+/// </summary>
+[ValueOf<Guid>]
+public partial record OtpToken
 {
-    public OtpToken() => throw new InvalidOperationException();
+    internal static OtpToken New() => new(UuidV7.New().Value);
 
-    private OtpToken(UuidV7 uuid) => Uuid = uuid;
+    internal static bool TryValidate(Guid? input, out IReadOnlyList<string>? errors)
+    {
+        if (!UuidV7.TryValidate(input, out var uuid))
+        {
+            errors = new[] { "Otp token must be a UuidV7" };
+            return false;
+        }
 
-    internal UuidV7 Uuid { get; }
+        errors = null;
+        return true;
+    }
 
-    public override string ToString() => Uuid.ToString();
-
-    public static OtpToken Parse(string input) => new(UuidV7.From(Guid.Parse(input)));
-
-    internal static OtpToken New() => new(UuidV7.New());
-
-    internal static OtpToken Load(UuidV7 uuid) => new(uuid);
 }

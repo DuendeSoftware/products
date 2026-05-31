@@ -30,10 +30,16 @@ internal sealed record ResultDto
     public required object Options { get; init; }
 }
 
-public static class HttpResponsePasskeyExtensions
+/// <summary>
+/// Extension methods for <see cref="HttpResponse"/> to support passkey endpoint responses.
+/// </summary>
+internal static class HttpResponsePasskeyExtensions
 {
     extension(HttpResponse response)
     {
+        /// <summary>
+        /// Sets cache-control headers to prevent caching of the response.
+        /// </summary>
         public void SetNoCache()
         {
             if (!response.Headers.ContainsKey("Cache-Control"))
@@ -51,18 +57,31 @@ public static class HttpResponsePasskeyExtensions
             }
         }
 
+        /// <summary>
+        /// Serializes the object to JSON and writes it to the response with <c>application/json</c> content type.
+        /// </summary>
+        /// <param name="o">The object to serialize.</param>
         public async Task WriteJsonAsync(object o)
         {
             var json = ObjectSerializer.ToString(o);
             await response.WriteJsonAsync(json);
         }
 
+        /// <summary>
+        /// Serializes the object to JSON and writes it to the response with the specified content type.
+        /// </summary>
+        /// <param name="o">The object to serialize.</param>
+        /// <param name="contentType">The content type header value to set.</param>
         public async Task WriteJsonAsync(object o, string contentType)
         {
             var json = ObjectSerializer.ToString(o);
             await response.WriteJsonAsync(json, contentType);
         }
 
+        /// <summary>
+        /// Writes a JSON string to the response with <c>application/json</c> content type.
+        /// </summary>
+        /// <param name="json">The JSON string to write.</param>
         public async Task WriteJsonAsync(string json)
         {
             response.ContentType = "application/json; charset=UTF-8";
@@ -70,6 +89,11 @@ public static class HttpResponsePasskeyExtensions
             await response.Body.FlushAsync();
         }
 
+        /// <summary>
+        /// Writes a JSON string to the response with the specified content type.
+        /// </summary>
+        /// <param name="json">The JSON string to write.</param>
+        /// <param name="contentType">The content type header value to set.</param>
         public async Task WriteJsonAsync(string json, string contentType)
         {
             response.ContentType = contentType;

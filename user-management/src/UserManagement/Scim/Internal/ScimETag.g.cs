@@ -4,7 +4,6 @@
 #nullable enable
 
 using Duende.UserManagement;
-using System.Globalization;
 
 namespace Duende.UserManagement.Scim.Internal;
 
@@ -12,10 +11,17 @@ namespace Duende.UserManagement.Scim.Internal;
 partial record ScimETag : IValueOf<ScimETag, global::System.Int32>
 {
     // Constructor for controlled creation
+    /// <summary>Initializes a new instance of <see cref="ScimETag"/> with the specified value.</summary>
+    /// <param name="value">The underlying value.</param>
     private ScimETag(global::System.Int32 value) => Value = value;
 
+    /// <summary>Gets the underlying value of this <see cref="ScimETag"/>.</summary>
     public global::System.Int32 Value { get; }
 
+    /// <summary>Creates a <see cref="ScimETag"/> from the specified string, throwing if the value is invalid.</summary>
+    /// <param name="s">The string value to create the <see cref="ScimETag"/> from.</param>
+    /// <returns>A new <see cref="ScimETag"/> parsed from <paramref name="s"/>.</returns>
+    /// <exception cref="global::System.FormatException">Thrown when <paramref name="s"/> is not a valid value.</exception>
     public static ScimETag Create(string s)
     {
         if (!TryCreate(s, out var result))
@@ -25,13 +31,21 @@ partial record ScimETag : IValueOf<ScimETag, global::System.Int32>
         return result;
     }
 
+    /// <summary>Implicitly converts a <c>global::System.Int32</c> to a <see cref="ScimETag"/>.</summary>
+    /// <param name="value">The value to convert.</param>
+    /// <returns>A new <see cref="ScimETag"/> wrapping <paramref name="value"/>.</returns>
+
     public static implicit operator ScimETag(global::System.Int32 value)
     {
         return new ScimETag(value);
     }
 
-    public override string ToString() => Value.ToString(null, CultureInfo.InvariantCulture);
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString(null, global::System.Globalization.CultureInfo.InvariantCulture);
 
+    /// <summary>Creates a <see cref="ScimETag"/> from the specified string, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to parse, or <see langword="null"/>.</param>
+    /// <returns>A <see cref="ScimETag"/> if <paramref name="input"/> is non-empty; otherwise <see langword="null"/>.</returns>
     public static ScimETag? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))
@@ -42,5 +56,8 @@ partial record ScimETag : IValueOf<ScimETag, global::System.Int32>
         return Create(input);
     }
 
+    /// <summary>Loads a <see cref="ScimETag"/> directly from a stored value, bypassing validation. For infrastructure use only.</summary>
+    /// <param name="value">The raw stored value.</param>
+    /// <returns>A <see cref="ScimETag"/> wrapping <paramref name="value"/>.</returns>
     internal static ScimETag Load(global::System.Int32 value) => new ScimETag(value);
 }

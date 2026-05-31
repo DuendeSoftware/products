@@ -35,7 +35,7 @@ public sealed class PasswordCreation : IAsyncLifetime
     {
         const string password = "abcDEF789`~!X";
 
-        var exception = await Record.ExceptionAsync(async () => _ = await _factory.CreatePasswordAsync(UserSubjectId.New(), password, _ct));
+        var exception = await Record.ExceptionAsync(async () => _ = await _factory.ValidatePasswordAsync(UserSubjectId.New(), password, _ct));
 
         exception.ShouldBeNull();
     }
@@ -51,7 +51,7 @@ public sealed class PasswordCreation : IAsyncLifetime
     [InlineData("< MinUpper", "abcdEF789`~!x")]
     public async Task CannotParsePasswordsWhichDoNotMeetRequirements(string description, string password)
     {
-        var exception = await Record.ExceptionAsync(async () => _ = await _factory.CreatePasswordAsync(UserSubjectId.New(), password, _ct));
+        var exception = await Record.ExceptionAsync(async () => _ = await _factory.ValidatePasswordAsync(UserSubjectId.New(), password, _ct));
 
         _ = exception.ShouldBeOfType<FormatException>();
     }

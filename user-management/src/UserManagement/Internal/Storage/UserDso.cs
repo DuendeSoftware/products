@@ -12,7 +12,6 @@ internal static class UserDso
     internal sealed record V1(
         Guid Id,
         string SubjectId,
-        string? UserName,
         IReadOnlyList<AspectRef> Aspects) : IDataStorageObject
     {
         public static DataStorageObjectVersion DsoVersion { get; } = new(EntityType, 1);

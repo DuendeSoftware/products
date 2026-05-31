@@ -10,7 +10,7 @@ public sealed class UserDsoTests
     [Fact]
     public void add_or_update_aspect_ref_adds_new_aspect_when_not_present()
     {
-        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), null, []);
+        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), []);
         var aspectRef = new UserDso.AspectRef(Guid.NewGuid(), 1, 1000u);
 
         var updated = UserRepository.AddOrUpdateAspectRef(user, aspectRef);
@@ -23,7 +23,7 @@ public sealed class UserDsoTests
     public void add_or_update_aspect_ref_updates_existing_aspect_with_same_entity_type()
     {
         var existingRef = new UserDso.AspectRef(Guid.NewGuid(), 1, 1000u);
-        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), null, [existingRef]);
+        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), [existingRef]);
         var updatedRef = new UserDso.AspectRef(existingRef.Id, 2, 1000u);
 
         var updated = UserRepository.AddOrUpdateAspectRef(user, updatedRef);
@@ -36,7 +36,7 @@ public sealed class UserDsoTests
     public void add_or_update_aspect_ref_preserves_other_aspects()
     {
         var profileRef = new UserDso.AspectRef(Guid.NewGuid(), 1, 1500u);
-        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), null, [profileRef]);
+        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), [profileRef]);
         var authRef = new UserDso.AspectRef(Guid.NewGuid(), 1, 1000u);
 
         var updated = UserRepository.AddOrUpdateAspectRef(user, authRef);
@@ -49,7 +49,7 @@ public sealed class UserDsoTests
     [Fact]
     public void add_or_update_aspect_ref_does_not_mutate_original()
     {
-        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), null, []);
+        var user = new UserDso.V1(Guid.NewGuid(), Guid.NewGuid().ToString(), []);
         var aspectRef = new UserDso.AspectRef(Guid.NewGuid(), 1, 1000u);
 
         _ = UserRepository.AddOrUpdateAspectRef(user, aspectRef);

@@ -13,5 +13,5 @@ internal sealed record OtpWorkflowTokenDskV1 : IGuidDataStorageKey
 
     public Guid Value { get; }
 
-    public static OtpWorkflowTokenDskV1 Create(OtpToken token) => new(token.Uuid.Value);
+    public static OtpWorkflowTokenDskV1 Create(OtpToken token) => new(token.Value);
 }

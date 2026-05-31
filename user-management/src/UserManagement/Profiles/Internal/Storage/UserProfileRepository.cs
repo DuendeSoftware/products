@@ -27,9 +27,7 @@ internal sealed class UserProfileRepository(
 {
     internal enum Keys
     {
-        Attribute = 1,
-        SubjectId = 2,
-        UserName = 3,
+        SubjectId = 1,
     }
 
     internal async Task<CreateResult> CreateAsync(UserProfile profile, Ct ct)
@@ -204,12 +202,6 @@ internal sealed class UserProfileRepository(
         var aspectRef = new UserDso.AspectRef(profile.Id.Uuid.Value, 1, UserProfileDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(profile.SubjectId, ct);
 
-        // Inherit username from the root UserDso if the profile doesn't have one
-        if (profile.UserName is null && existingUser is var (existingUserDso, _) && existingUserDso.UserName is not null)
-        {
-            profile.SetUserName(UserName.Load(existingUserDso.UserName));
-        }
-
         var aspectOp = CreateOperation.For(
             profile.Id.Uuid,
             ToDso(profile),
@@ -221,10 +213,8 @@ internal sealed class UserProfileRepository(
             Expiration.NoExpiration);
 
         IStoreOperation userOp = existingUser is var (user, userVersion)
-            ? UserRepository.UpdateBatchOperation(
-                UserRepository.AddOrUpdateAspectRef(user with { UserName = profile.UserName?.Value ?? user.UserName }, aspectRef),
-                userVersion)
-            : UserRepository.CreateBatchOperation(profile.SubjectId, profile.UserName, [aspectRef]);
+            ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
+            : UserRepository.CreateBatchOperation(profile.SubjectId, [aspectRef]);
 
         return [userOp, aspectOp];
     }
@@ -247,10 +237,8 @@ internal sealed class UserProfileRepository(
         var existingUser = await userRepository.TryReadAsync(profile.SubjectId, ct);
 
         IStoreOperation userOp = existingUser is var (user, userVersion)
-            ? UserRepository.UpdateBatchOperation(
-                UserRepository.AddOrUpdateAspectRef(user with { UserName = profile.UserName?.Value ?? user.UserName }, aspectRef),
-                userVersion)
-            : UserRepository.CreateBatchOperation(profile.SubjectId, profile.UserName, [aspectRef]);
+            ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
+            : UserRepository.CreateBatchOperation(profile.SubjectId, [aspectRef]);
 
         return [userOp, aspectOp];
     }
@@ -303,14 +291,12 @@ internal sealed class UserProfileRepository(
     private static UserProfileDso.V1 ToDso(UserProfile entity) => new(
         entity.Id.Uuid.Value,
         entity.SubjectId.Value,
-        entity.UserName?.Value,
         [.. entity.Attributes.Values.Select(ToDso)]);
 
     private static UserProfile ToEntity(UserProfileDso.V1 dso, AttributeSchema? schema) =>
         UserProfile.Load(
             UserProfileId.Load(dso.Id),
             UserSubjectId.Load(dso.SubjectId),
-            dso.UserName is not null ? UserName.Load(dso.UserName) : (UserName?)null,
             ToValueObjects(dso.Attributes, schema));
 
     private static AttributeValueDso.V1 ToDso(AttributeValue vo) => new(
@@ -425,11 +411,6 @@ internal sealed class UserProfileRepository(
             }
         }
 
-        if (profile.UserName is not null)
-        {
-            keys.Add(DataStorageKey.Create(UserNameDskV1.Create(profile.UserName.Value)));
-        }
-
         return keys;
     }
 
@@ -437,12 +418,6 @@ internal sealed class UserProfileRepository(
     {
         var builder = new SearchFieldsBuilder();
 
-        if (profile.UserName is not null)
-        {
-            _ = builder.Add("userName", profile.UserName.Value);
-        }
-
-        // Add all schema attributes as search fields
         if (schema is null)
         {
             return builder.Build();

@@ -15,9 +15,6 @@ public sealed record UserImportRecord
     /// <summary>The subject ID for the user.</summary>
     public required UserSubjectId SubjectId { get; init; }
 
-    /// <summary>The username. When set and a profile is created or overwritten, also sets the username on the user profile and authenticator record.</summary>
-    public UserName? UserName { get; init; }
-
     /// <summary>
     /// Profile attributes to import. When null, no profile is created or updated.
     /// </summary>

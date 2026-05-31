@@ -4,6 +4,9 @@
 namespace Duende.UserManagement;
 
 // https://www.rfc-editor.org/rfc/rfc9493.html#name-opaque-identifier-format
+/// <summary>
+/// Represents an opaque subject identifier as defined by RFC 9493.
+/// </summary>
 [StringValue]
 public partial record OpaqueSubjectId : ISubjectId
 {

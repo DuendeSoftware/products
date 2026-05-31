@@ -3,8 +3,10 @@
 
 using Duende.IdentityServer.UserManagement;
 using Duende.UserManagement;
+using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Duende.IdentityServer;
 
@@ -26,6 +28,7 @@ public static class IdentityServerBuilderExtensions
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
 
+            builder.Services.TryAddScoped<IPasskeySignInHandler, IdentityServerPasskeySignInHandler>();
             _ = builder.Services.AddUserManagementInternal(configure);
             _ = builder.AddProfileService<UserManagementProfileService>();
 

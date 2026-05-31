@@ -12,7 +12,7 @@ public static class OtpTokens
     {
         var input = Guid.NewGuid().ToString();
 
-        var ex = Record.Exception(() => OtpToken.Parse(input));
+        var ex = Record.Exception(() => OtpToken.Create(input));
 
         _ = ex.ShouldBeOfType<FormatException>();
     }
@@ -21,7 +21,7 @@ public static class OtpTokens
     public static void String_is_input()
     {
         var input = Guid.CreateVersion7().ToString();
-        var instance = OtpToken.Parse(input);
+        var instance = OtpToken.Create(input);
 
         var @string = instance.ToString();
 

@@ -6,6 +6,7 @@ using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Passwords;
 using Duende.UserManagement.Import;
+using Duende.UserManagement.Profiles;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Platform.UserManagement;
@@ -16,7 +17,8 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     private readonly Ct _ct = TestContext.Current.CancellationToken;
     private IPasswordAuth _auth = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
-    private IUserSelfService _userSelfService = null!;
+    private IUserProfileSelfService _profileSelfService = null!;
+    private IUserProfileSchemaAdmin _schemaAdmin = null!;
     private ServiceProvider _serviceProvider = null!;
     private IUserImporter _importer = null!;
     private IPasswordHashAlgorithm _hashAlgorithm = null!;
@@ -26,7 +28,8 @@ public sealed class PasswordAuthentication : IAsyncLifetime
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
         _auth = _serviceProvider.GetRequiredService<IPasswordAuth>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        _userSelfService = _serviceProvider.GetRequiredService<IUserSelfService>();
+        _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         _importer = _serviceProvider.GetRequiredService<IUserImporter>();
         _hashAlgorithm = _serviceProvider.GetRequiredService<IPasswordHashAlgorithm>();
     }
@@ -36,13 +39,18 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     [Fact]
     public async Task Can_authenticate_with_correct_password()
     {
-        var userName = TestData.CreateUserName();
         var authenticators = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (password, supplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, authenticators.SubjectId, _ct);
-        (await _userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, _ct)).ShouldBeTrue();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         (await _authenticatorsSelfService.TrySetPasswordAsync(authenticators.SubjectId, password, _ct)).ShouldBe(true);
 
-        var actual = await _auth.TryAuthenticateAsync(userName, supplied, _ct);
+        var actual = await _auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct);
 
         actual.ShouldBeOfType<PasswordAuthenticationResult.Success>().UserSubjectId.ShouldBe(authenticators.SubjectId);
     }
@@ -50,14 +58,19 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_authenticate_with_incorrect_password()
     {
-        var userName = TestData.CreateUserName();
         var authenticators = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
         var (firstPassword, _) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, authenticators.SubjectId, _ct);
-        (await _userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, _ct)).ShouldBeTrue();
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
+        _ = (await _profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
         (await _authenticatorsSelfService.TrySetPasswordAsync(authenticators.SubjectId, firstPassword, _ct)).ShouldBe(true);
         var (_, secondSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
 
-        var actual = await _auth.TryAuthenticateAsync(userName, secondSupplied, _ct);
+        var actual = await _auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, secondSupplied, _ct);
 
         _ = actual.ShouldBeOfType<PasswordAuthenticationResult.Failure>();
     }
@@ -69,17 +82,21 @@ public sealed class PasswordAuthentication : IAsyncLifetime
         // "weak" has no uppercase, no digits, no symbols, and is below MinLength — the
         // factory would reject it. Import bypasses validation and stores the hash directly.
         const string rawPassword = "weak";
-        (await _authenticatorsSelfService.TryCreatePasswordAsync(UserSubjectId.New(), rawPassword, _ct) is PasswordCreationResult.Failed).ShouldBeTrue("password should violate the current policy");
+        (await _authenticatorsSelfService.TryValidatePasswordAsync(UserSubjectId.New(), rawPassword, _ct) is PasswordCreationResult.Failed).ShouldBeTrue("password should violate the current policy");
 
         var subjectId = UserSubjectId.New();
-        var userName = TestData.CreateUserName();
         var hashedData = _hashAlgorithm.Hash(rawPassword);
+
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _profileSelfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var attribute = attributes.ElementAt(0);
 
         var batch = await _importer.ImportAsync(
             [new UserImportRecord
             {
                 SubjectId = subjectId,
-                UserName = userName,
+                ProfileAttributes = attributes.Validate(),
                 Authenticators = new AuthenticatorImport
                 {
                     Password = new PasswordImport(hashedData)
@@ -91,7 +108,7 @@ public sealed class PasswordAuthentication : IAsyncLifetime
 
         // Act: authenticate using NonValidatedPassword, which applies only minimal validation
         var supplied = NonValidatedPassword.Create(rawPassword);
-        var actual = await _auth.TryAuthenticateAsync(userName, supplied, _ct);
+        var actual = await _auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct);
 
         // Assert: authentication succeeds despite the password violating the current policy
         actual.ShouldBeOfType<PasswordAuthenticationResult.Success>().UserSubjectId.ShouldBe(subjectId);

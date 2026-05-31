@@ -283,25 +283,6 @@ internal sealed class PasskeyCeremonies(
 
         var (user, userVersion) = foundUser.Value;
 
-        if (request.UserName is not null)
-        {
-            if (!UserName.TryCreate(request.UserName, out var userName))
-            {
-                return new PasskeyAuthenticationCompleteResult.Failure(
-                    AuthenticationCompleteError.InvalidClientData,
-                    "The provided user name is invalid.");
-            }
-
-            var namedUser = await userAuthenticatorsRepository.TryReadAsync(userName, ct);
-            if (namedUser?.UserAuthenticators.SubjectId != user.SubjectId)
-            {
-                logger.PasskeyAuthenticationCredentialUserMismatch(LogLevel.Information, credentialId.Value);
-                return new PasskeyAuthenticationCompleteResult.Failure(
-                    AuthenticationCompleteError.CredentialUserMismatch,
-                    "Credential does not belong to the specified user.");
-            }
-        }
-
         var credential = user.TryGet(credentialId.Value);
         if (credential is null)
         {

@@ -34,8 +34,7 @@ internal sealed class UserAuthenticatorsRepository(
         ExternalAuthenticator = 1,
         OtpAddress = 2,
         SubjectId = 3,
-        UserName = 4,
-        PasskeyCredentialId = 5
+        PasskeyCredentialId = 4
     }
 
     private readonly IDataProtector _dataProtector = dataProtectionProvider.CreateProtector(nameof(UserAuthenticators));
@@ -100,13 +99,6 @@ internal sealed class UserAuthenticatorsRepository(
     {
         var store = storeFactory.GetStore();
         var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorDskV1.Create(externalAuthenticator)), ct);
-        return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
-    }
-
-    internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(UserName userName, Ct ct)
-    {
-        var store = storeFactory.GetStore();
-        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserNameDskV1.Create(userName)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
@@ -187,12 +179,6 @@ internal sealed class UserAuthenticatorsRepository(
         var aspectRef = new UserDso.AspectRef(authenticators.Id.Uuid.Value, 1, UserAuthenticatorsDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(authenticators.SubjectId, ct);
 
-        // Inherit username from the root UserDso if the authenticator doesn't have one
-        if (authenticators.UserName is null && existingUser is var (existingUserDso, _) && existingUserDso.UserName is not null)
-        {
-            authenticators.SetUserName(UserName.Load(existingUserDso.UserName));
-        }
-
         var aspectOp = CreateOperation.For(
             authenticators.Id.Uuid,
             ToDso(authenticators),
@@ -204,10 +190,8 @@ internal sealed class UserAuthenticatorsRepository(
             Expiration.NoExpiration);
 
         IStoreOperation userOp = existingUser is var (user, userVersion)
-            ? UserRepository.UpdateBatchOperation(
-                UserRepository.AddOrUpdateAspectRef(user with { UserName = authenticators.UserName?.Value ?? user.UserName }, aspectRef),
-                userVersion)
-            : UserRepository.CreateBatchOperation(authenticators.SubjectId, authenticators.UserName, [aspectRef]);
+            ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
+            : UserRepository.CreateBatchOperation(authenticators.SubjectId, [aspectRef]);
 
         return [userOp, aspectOp];
     }
@@ -229,10 +213,8 @@ internal sealed class UserAuthenticatorsRepository(
         var existingUser = await userRepository.TryReadAsync(authenticators.SubjectId, ct);
 
         IStoreOperation userOp = existingUser is var (user, userVersion)
-            ? UserRepository.UpdateBatchOperation(
-                UserRepository.AddOrUpdateAspectRef(user with { UserName = authenticators.UserName?.Value ?? user.UserName }, aspectRef),
-                userVersion)
-            : UserRepository.CreateBatchOperation(authenticators.SubjectId, authenticators.UserName, [aspectRef]);
+            ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
+            : UserRepository.CreateBatchOperation(authenticators.SubjectId, [aspectRef]);
 
         return [userOp, aspectOp];
     }
@@ -247,7 +229,6 @@ internal sealed class UserAuthenticatorsRepository(
         ],
         [.. entity.TotpAuthenticators.Values.Select(ToDso)],
         [.. entity.RecoveryCodes.Select(a => a.ToDso())],
-        entity.UserName?.Value,
         entity.HashedPassword?.ToDso(),
         [.. entity.PasskeyCredentials.Values.Select(c => new PasskeyCredentialDso.V1(
             c.CredentialId.ToBytes(),
@@ -273,7 +254,6 @@ internal sealed class UserAuthenticatorsRepository(
             ExternalAuthenticator.Load(ExternalAuthenticatorName.Load(a.Name), a.SubjectId.ToValueObject())),
         [.. dso.TotpAuthenticators.Select(ToValueObject)],
         dso.RecoveryCodes.Select(a => a.ToValueObject()),
-        dso.UserName is not null ? UserName.Load(dso.UserName) : (UserName?)null,
         dso.HashedPassword?.ToValueObject(),
         dso.PasskeyCredentials.Select(c => new PasskeyCredential(
             PasskeyCredentialId.Load(c.CredentialId),
@@ -366,22 +346,12 @@ internal sealed class UserAuthenticatorsRepository(
             TotpAuthenticatorName.Load(dso.Name), PlainBytesTotpKey.Load(key), dso.LastSuccessfulTimeStep);
     }
 
-    private static List<DataStorageKey> GetJsonKeys(UserAuthenticators authenticators)
-    {
-        List<DataStorageKey> keys =
-        [
-            .. authenticators.OtpAddresses.Select(a => DataStorageKey.Create(OtpAddressDskV1.Create(a))),
-            .. authenticators.ExternalAuthenticators.Select(a => DataStorageKey.Create(ExternalAuthenticatorDskV1.Create(a))),
-            .. authenticators.PasskeyCredentials.Values.Select(c => DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(c.CredentialId)))
-        ];
-
-        if (authenticators.UserName is not null)
-        {
-            keys.Add(DataStorageKey.Create(UserNameDskV1.Create(authenticators.UserName.Value)));
-        }
-
-        return keys;
-    }
+    private static List<DataStorageKey> GetJsonKeys(UserAuthenticators authenticators) =>
+    [
+        .. authenticators.OtpAddresses.Select(a => DataStorageKey.Create(OtpAddressDskV1.Create(a))),
+        .. authenticators.ExternalAuthenticators.Select(a => DataStorageKey.Create(ExternalAuthenticatorDskV1.Create(a))),
+        .. authenticators.PasskeyCredentials.Values.Select(c => DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(c.CredentialId)))
+    ];
 
     internal sealed class Options
     {

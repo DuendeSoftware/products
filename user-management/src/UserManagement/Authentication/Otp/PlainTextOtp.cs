@@ -5,6 +5,9 @@ using Duende.UserManagement.Authentication.Internal;
 
 namespace Duende.UserManagement.Authentication.Otp;
 
+/// <summary>
+/// Represents a plain text OTP (One-Time Password) code submitted by a user for verification.
+/// </summary>
 [StringValue]
 public partial record PlainTextOtp
 {
@@ -13,6 +16,7 @@ public partial record PlainTextOtp
 
     private static readonly byte MaxLength = Pbkdf2MaxPasswordLength.For(new Pbkdf2Inputs().PseudorandomFunctionName);
 
+    /// <summary>Gets the normalized OTP string value.</summary>
     public string Value { get; }
 
     /// <summary>
@@ -20,8 +24,12 @@ public partial record PlainTextOtp
     /// </summary>
     public string Text => Value;
 
+    /// <summary>
+    /// Returns the OTP code as a collection of display groups for user-friendly presentation.
+    /// </summary>
     public IReadOnlyCollection<string> ToTextGroups() => [.. Value.ToGroups()];
 
+    /// <summary>Returns a redacted string to prevent accidental logging of OTP values.</summary>
     public override string ToString() => GetType().ToString();
 
     internal static PlainTextOtp New() => new(Base32Crockford.Random(NewLength, NumericOnly));

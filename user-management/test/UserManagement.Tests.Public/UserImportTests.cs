@@ -82,15 +82,24 @@ public sealed class UserImportTests : IAsyncLifetime
     public async Task import_with_hashed_password_allows_authentication()
     {
         var subjectId = UserSubjectId.New();
-        var userName = UserName.Create($"user_{Guid.NewGuid():N}"[..20]);
+        var userName = $"user_{Guid.NewGuid():N}"[..20];
         const string rawPassword = "ABcd12!@hashed";
         var hashedData = _hashAlgorithm.Hash(rawPassword);
+
+        var userNameCode = AttributeCode.Create("userName");
+        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+            new AttributeDefinition { Code = userNameCode, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("user id"), IsUnique = true },
+            _ct);
+
+        var schema = await _profileAdmin.GetSchemaAsync(_ct);
+        var attributes = new AttributeValueCollection(schema);
+        attributes.Set(userNameCode, userName);
 
         var batch = await _import.ImportAsync(
             [new UserImportRecord
             {
                 SubjectId = subjectId,
-                UserName = userName,
+                ProfileAttributes = attributes.Validate(),
                 Authenticators = new AuthenticatorImport
                 {
                     Password = new PasswordImport(hashedData)
@@ -100,29 +109,10 @@ public sealed class UserImportTests : IAsyncLifetime
 
         batch.Results.ShouldHaveSingleItem().Status.ShouldBe(UserImportStatus.Created);
         var suppliedPassword = NonValidatedPassword.Create(rawPassword);
-        var authenticated = await _passwordAuth.TryAuthenticateAsync(userName, suppliedPassword, _ct);
+        var authenticated = await _passwordAuth.TryAuthenticateAsync(userNameCode, userName, suppliedPassword, _ct);
         authenticated.ShouldBeOfType<PasswordAuthenticationResult.Success>().UserSubjectId.ShouldBe(subjectId);
     }
 
-    [Fact]
-    public async Task import_username_with_profile_sets_username_on_profile()
-    {
-        var subjectId = UserSubjectId.New();
-        var userName = UserName.Create($"user_{Guid.NewGuid():N}"[..20]);
-
-        _ = await _import.ImportAsync(
-            [new UserImportRecord
-            {
-                SubjectId = subjectId,
-                UserName = userName,
-                ProfileAttributes = ValidatedAttributeValueCollection.Empty,
-                Authenticators = new AuthenticatorImport()
-            }],
-            _ct);
-
-        var profile = (await _profileAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull();
-        profile.UserName.ShouldBe(userName);
-    }
     [Fact]
     public async Task import_with_otp_address_creates_authenticators()
     {
@@ -393,28 +383,39 @@ public sealed class UserImportTests : IAsyncLifetime
             new LambdaConflictResolver(_ => Task.FromResult<UserImportConflictResolution>(new UserImportConflictResolution.Skip())));
         var import = sp.GetRequiredService<IUserImporter>();
         var profileAdmin = sp.GetRequiredService<IUserProfileAdmin>();
+        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+
+        var userNameCode = AttributeCode.Create("userName");
+        _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+            new AttributeDefinition { Code = userNameCode, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("unique"), IsUnique = true },
+            _ct);
+
+        var schema = await profileAdmin.GetSchemaAsync(_ct);
 
         // Seed: import a user with a username so the username is taken
-        var takenUserName = UserName.Create($"user_{Guid.NewGuid():N}"[..20]);
+        var takenUserName = $"user_{Guid.NewGuid():N}"[..20];
         var existingSubjectId = UserSubjectId.New();
+        var existingAttributes = new AttributeValueCollection(schema);
+        existingAttributes.Set(userNameCode, takenUserName);
         _ = await import.ImportAsync(
             [new UserImportRecord
             {
                 SubjectId = existingSubjectId,
-                UserName = takenUserName,
+                ProfileAttributes = existingAttributes.Validate(),
                 Authenticators = new AuthenticatorImport()
             }],
             _ct);
 
-        // Act: import a new user with a profile AND the same username
+        // Act: import a new user with a profile with the same username
         // The batch create fails atomically ÔÇö neither profile nor auth is created
         var newSubjectId = UserSubjectId.New();
+        var newAttributes = new AttributeValueCollection(schema);
+        newAttributes.Set(userNameCode, takenUserName);
         var batch = await import.ImportAsync(
             [new UserImportRecord
             {
                 SubjectId = newSubjectId,
-                UserName = takenUserName,
-                ProfileAttributes = ValidatedAttributeValueCollection.Empty,
+                ProfileAttributes = newAttributes.Validate(),
                 Authenticators = new AuthenticatorImport()
             }],
             _ct);
@@ -516,13 +517,11 @@ public sealed class UserImportTests : IAsyncLifetime
     public async Task auth_only_import_succeeds_without_profile()
     {
         var subjectId = UserSubjectId.New();
-        var userName = UserName.Create($"user_{Guid.NewGuid():N}"[..20]);
 
         var batch = await _import.ImportAsync(
             [new UserImportRecord
             {
                 SubjectId = subjectId,
-                UserName = userName,
                 Authenticators = new AuthenticatorImport()
             }],
             _ct);
@@ -569,7 +568,7 @@ public sealed class UserImportTests : IAsyncLifetime
     {
         var dbId = Guid.NewGuid();
 
-        var userName = UserName.Create($"user_{Guid.NewGuid():N}"[..20]);
+        var userName = $"user_{Guid.NewGuid():N}"[..20];
         var passwordText = $"ABcd12!@{Guid.NewGuid()}";
         var subjectId = UserSubjectId.New();
         var otpAddress = new OtpAddress(OtpChannel.Email, EmailAddress.Create($"a{Guid.NewGuid():N}"[..20] + "@x.com"));
@@ -577,14 +576,25 @@ public sealed class UserImportTests : IAsyncLifetime
         // Step 1: Import user with password hashed by fake algorithm
         await using var importProvider = await CreateProviderWithFakeAlgorithm(preferFake: true, dbId: dbId);
         var importAdmin = importProvider.GetRequiredService<IUserImporter>();
+        var schemaAdmin = importProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var profileAdmin = importProvider.GetRequiredService<IUserProfileAdmin>();
         var fakeAlgo = importProvider.GetServices<IPasswordHashAlgorithm>()
             .Single(a => a.AlgorithmId == FakePasswordHashAlgorithm.Id);
+
+        var userNameCode = AttributeCode.Create("userName");
+        _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+            new AttributeDefinition { Code = userNameCode, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("user id"), IsUnique = true },
+            _ct);
+
+        var schema = await profileAdmin.GetSchemaAsync(_ct);
+        var attributes = new AttributeValueCollection(schema);
+        attributes.Set(userNameCode, userName);
 
         var hashedData = fakeAlgo.Hash(passwordText);
         var record = new UserImportRecord
         {
             SubjectId = subjectId,
-            UserName = userName,
+            ProfileAttributes = attributes.Validate(),
             Authenticators = new AuthenticatorImport
             {
                 Password = new PasswordImport(hashedData),
@@ -600,7 +610,7 @@ public sealed class UserImportTests : IAsyncLifetime
         {
             var auth = authProvider.GetRequiredService<IPasswordAuth>();
 
-            var result = await auth.TryAuthenticateAsync(userName, NonValidatedPassword.Create(passwordText), _ct);
+            var result = await auth.TryAuthenticateAsync(userNameCode, userName, NonValidatedPassword.Create(passwordText), _ct);
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         }
 
@@ -609,7 +619,7 @@ public sealed class UserImportTests : IAsyncLifetime
         {
             var auth = verifyProvider.GetRequiredService<IPasswordAuth>();
 
-            var result = await auth.TryAuthenticateAsync(userName, NonValidatedPassword.Create(passwordText), _ct);
+            var result = await auth.TryAuthenticateAsync(userNameCode, userName, NonValidatedPassword.Create(passwordText), _ct);
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
         }
     }

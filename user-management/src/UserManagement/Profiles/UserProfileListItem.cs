@@ -8,11 +8,9 @@ namespace Duende.UserManagement.Profiles;
 /// </summary>
 public sealed record UserProfileListItem
 {
-    internal UserProfileListItem(
-        UserSubjectId subjectId, UserName? userName, IReadOnlyDictionary<string, object> attributes)
+    internal UserProfileListItem(UserSubjectId subjectId, IReadOnlyDictionary<string, object> attributes)
     {
         SubjectId = subjectId;
-        UserName = userName;
         Attributes = attributes;
     }
 
@@ -20,11 +18,6 @@ public sealed record UserProfileListItem
     /// The unique subject identifier of the user.
     /// </summary>
     public UserSubjectId SubjectId { get; }
-
-    /// <summary>
-    /// The user name, if set.
-    /// </summary>
-    public UserName? UserName { get; }
 
     /// <summary>
     /// The schema attribute values, keyed by attribute name.

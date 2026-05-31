@@ -9,15 +9,15 @@ namespace Duende.UserManagement;
 
 using Call = (OtpAddress Address, PlainTextOtp Otp, TimeSpan ExpiresAfter);
 
-public sealed class FakeOtpSender : IOtpSender
+public sealed class FakeOtpDispatcher : IOtpDispatcher
 {
     private readonly List<Call> _calls = [];
 
     public IReadOnlyCollection<Call> Calls => [.. _calls];
 
-    public bool CanSend(OtpAddress address) => true;
+    public bool CanDispatch(OtpAddress address) => true;
 
-    public Task SendAsync(OtpAddress address, PlainTextOtp otp, TimeSpan expiresAfter, Ct ct)
+    public Task DispatchAsync(OtpAddress address, PlainTextOtp otp, TimeSpan expiresAfter, Ct ct)
     {
         _calls.Add((address, otp, expiresAfter));
         return Task.CompletedTask;

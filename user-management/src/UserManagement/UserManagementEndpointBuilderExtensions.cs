@@ -10,16 +10,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.UserManagement;
 
+/// <summary>
+/// Extension methods for mapping user management endpoints to an <see cref="IEndpointRouteBuilder"/>.
+/// </summary>
 public static class UserManagementEndpointBuilderExtensions
 {
     extension<T>(T builder) where T : IEndpointRouteBuilder
     {
+        /// <summary>
+        /// Maps the user management authentication endpoints.
+        /// </summary>
+        /// <returns>The endpoint route builder for chaining.</returns>
         public T MapUserManagement()
         {
             builder.ServiceProvider.GetRequiredService<UserAuthenticationWebModule>().MapEndpoints(builder);
             return builder;
         }
 
+        /// <summary>
+        /// Maps the SCIM endpoints.
+        /// </summary>
+        /// <returns>The endpoint route builder for chaining.</returns>
         [Experimental(diagnosticId: "duende_experimental", Message = "SCIM support is experimental and may change in future releases.")]
         public T MapScim()
         {

@@ -32,6 +32,8 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
 
     public Action<IUserAuthenticationBuilder> ConfigureBuilder { get; set; } = _ => { };
 
+    public Action<IServiceCollection> ConfigureServices { get; set; } = _ => { };
+
     public KestrelBasedTestServer App { get; private set; } = null!;
 
     public HttpClient Client { get; private set; } = null!;
@@ -82,6 +84,8 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
                     _ = users.AddSqliteStore(opt =>
                         opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
                 });
+
+                ConfigureServices(services);
             },
             app =>
             {
@@ -125,28 +129,25 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
 
     public async ValueTask DisposeAsync() => await App.DisposeAsync();
 
-    public async Task<(UserSubjectId SubjectId, UserName UserName, ExternalAuthenticator ExternalAuthenticator)> SeedAuthenticatorsAsync()
+    public async Task<(UserSubjectId SubjectId, ExternalAuthenticator ExternalAuthenticator)> SeedAuthenticatorsAsync()
     {
         using var scope = App.Services.CreateScope();
         var authenticatorsSelfService = scope.ServiceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var userSelfService = scope.ServiceProvider.GetRequiredService<IUserSelfService>();
 
         var externalAuthenticator = TestData.CreateExternalAuthenticator();
-        var userName = TestData.CreateUserName();
         var authenticators = (await authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), externalAuthenticator, Ct)).ShouldNotBeNull();
-        (await userSelfService.TrySetUserNameAsync(authenticators.SubjectId, userName, Ct)).ShouldBeTrue();
-        return (authenticators.SubjectId, userName, externalAuthenticator);
+        return (authenticators.SubjectId, externalAuthenticator);
     }
 
     public async Task<(byte[] CredentialId, ECDsa PrivateKey)> SeedPasskeyAsync(
-        UserSubjectId subjectId, UserName userName, string name)
+        UserSubjectId subjectId, string name)
     {
         using var scope = App.Services.CreateScope();
         var passkeyAuth = scope.ServiceProvider.GetRequiredService<IPasskeyCeremonies>();
         var authenticatorsSelfService = scope.ServiceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
 
         var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, userName.ToString(), "Test User", Ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", Ct);
         var credentialId = session.ChallengeId.ToByteArray();
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create,
@@ -168,14 +169,6 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
     {
         var response = await client.GetAsync($"/test-signin/{subjectId}");
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-
-    public async Task<UserSubjectId?> GetSubjectIdAsync(UserName userName)
-    {
-        using var scope = App.Services.CreateScope();
-        var authenticatorsAdmin = scope.ServiceProvider.GetRequiredService<IUserAuthenticatorsAdmin>();
-        var user = await authenticatorsAdmin.TryGetAsync(userName, Ct);
-        return user?.SubjectId;
     }
 
     private sealed class RuntimePasskeyOriginOptions

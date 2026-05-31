@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
-using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;

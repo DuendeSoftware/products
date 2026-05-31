@@ -5,7 +5,6 @@
 
 using System.Collections.Generic;
 using Duende.UserManagement;
-using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Duende.UserManagement.Admin;
@@ -14,10 +13,17 @@ namespace Duende.UserManagement.Admin;
 partial record DataVersion : IValueOf<DataVersion, global::System.Int32>
 {
     // Constructor for controlled creation
+    /// <summary>Initializes a new instance of <see cref="DataVersion"/> with the specified value.</summary>
+    /// <param name="value">The underlying value.</param>
     private DataVersion(global::System.Int32 value) => Value = value;
 
+    /// <summary>Gets the underlying value of this <see cref="DataVersion"/>.</summary>
     public global::System.Int32 Value { get; }
 
+    /// <summary>Creates a <see cref="DataVersion"/> from the specified string, throwing if the value is invalid.</summary>
+    /// <param name="s">The string value to create the <see cref="DataVersion"/> from.</param>
+    /// <returns>A new <see cref="DataVersion"/> parsed from <paramref name="s"/>.</returns>
+    /// <exception cref="global::System.FormatException">Thrown when <paramref name="s"/> is not a valid value.</exception>
     public static DataVersion Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -27,9 +33,18 @@ partial record DataVersion : IValueOf<DataVersion, global::System.Int32>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="DataVersion"/> from the specified string.</summary>
+    /// <param name="s">The string value to parse.</param>
+    /// <param name="result">When this method returns <see langword="true"/>, contains the created <see cref="DataVersion"/>; otherwise <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> is a valid value; otherwise <see langword="false"/>.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out DataVersion? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="DataVersion"/> from the specified string, returning validation errors on failure.</summary>
+    /// <param name="s">The string value to parse.</param>
+    /// <param name="result">When this method returns <see langword="true"/>, contains the created <see cref="DataVersion"/>; otherwise <see langword="null"/>.</param>
+    /// <param name="errors">When this method returns <see langword="false"/>, contains the validation error messages; otherwise <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> is a valid value; otherwise <see langword="false"/>.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out DataVersion? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -40,7 +55,7 @@ partial record DataVersion : IValueOf<DataVersion, global::System.Int32>
             return false;
         }
 
-        if (global::System.Int32.TryParse(s, CultureInfo.InvariantCulture, out var value))
+        if (global::System.Int32.TryParse(s, global::System.Globalization.CultureInfo.InvariantCulture, out var value))
         {
             var instance = new DataVersion(value);
             result = instance;
@@ -51,13 +66,21 @@ partial record DataVersion : IValueOf<DataVersion, global::System.Int32>
         return false;
     }
 
+    /// <summary>Implicitly converts a <c>global::System.Int32</c> to a <see cref="DataVersion"/>.</summary>
+    /// <param name="value">The value to convert.</param>
+    /// <returns>A new <see cref="DataVersion"/> wrapping <paramref name="value"/>.</returns>
+
     public static implicit operator DataVersion(global::System.Int32 value)
     {
         return new DataVersion(value);
     }
 
-    public override string ToString() => Value.ToString(null, CultureInfo.InvariantCulture);
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString(null, global::System.Globalization.CultureInfo.InvariantCulture);
 
+    /// <summary>Creates a <see cref="DataVersion"/> from the specified string, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to parse, or <see langword="null"/>.</param>
+    /// <returns>A <see cref="DataVersion"/> if <paramref name="input"/> is non-empty; otherwise <see langword="null"/>.</returns>
     public static DataVersion? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))
@@ -68,5 +91,8 @@ partial record DataVersion : IValueOf<DataVersion, global::System.Int32>
         return Create(input);
     }
 
+    /// <summary>Loads a <see cref="DataVersion"/> directly from a stored value, bypassing validation. For infrastructure use only.</summary>
+    /// <param name="value">The raw stored value.</param>
+    /// <returns>A <see cref="DataVersion"/> wrapping <paramref name="value"/>.</returns>
     internal static DataVersion Load(global::System.Int32 value) => new DataVersion(value);
 }

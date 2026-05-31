@@ -34,11 +34,4 @@ public sealed class PasskeyCompleteAuthenticationRequest
     /// The authenticator's assertion response.
     /// </summary>
     public required AuthenticatorAssertionResponse Response { get; init; }
-
-    /// <summary>
-    /// Optional user name (e.g., email) provided during login. When set, the server verifies
-    /// that the credential belongs to the user identified by this name, preventing cross-user
-    /// passkey authentication.
-    /// </summary>
-    public string? UserName { get; init; }
 }

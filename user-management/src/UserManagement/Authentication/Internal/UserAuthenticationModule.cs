@@ -43,6 +43,8 @@ internal sealed class UserAuthenticationModule : IDuendeModule
 
         // 2. Register authentication services
         _ = services.AddTransient<IOtpAuthenticator, OtpAuthenticator>();
+        _ = services.AddTransient<IOtpSender, OtpSender>();
+        _ = services.AddTransient<OtpVerifier>();
         _ = services.AddTransient<ITotpAuth, TotpAuth>();
         _ = services.AddTransient<IRecoveryCodeAuth, RecoveryCodeAuth>();
         _ = services.AddTransient<IPasswordAuth, PasswordAuth>();
@@ -80,8 +82,8 @@ internal sealed class UserAuthenticationModule : IDuendeModule
 
         // 6. Register misc services
         services.TryAddSingleton<TimeProvider>(_ => TimeProvider.System);
-        services.TryAddSingleton<IOtpSender, LogOtpSender>();
-        _ = services.AddTransient<PlainTextPasswordFactory>();
+        services.TryAddSingleton<IOtpDispatcher, LogOtpDispatcher>();
+        _ = services.AddTransient<ValidatedPlainTextPasswordFactory>();
         _ = services.AddTransient<IPasswordValidator, PasswordHistoryValidator>();
 
         // 7. Register repositories

@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Private.Licencing.V2;
+using Duende.UserManagement.Internal.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.UserManagement.Internal.Licensing;
 
@@ -9,7 +11,10 @@ namespace Duende.UserManagement.Internal.Licensing;
 /// User Management license validation. Delegates to the shared <see cref="LicenseValidator"/>
 /// infrastructure for rate-limited logging and entitlement checks.
 /// </summary>
-internal sealed class UserManagementLicenseValidator(LicenseValidator validator)
+internal sealed class UserManagementLicenseValidator(
+    LicenseValidator validator,
+    IServiceScopeFactory scopeFactory,
+    TimeProvider timeProvider)
 {
     internal void ValidateProfiles() => validator.ValidateFeature(SkuIds.UM_002);
 
@@ -49,6 +54,40 @@ internal sealed class UserManagementLicenseValidator(LicenseValidator validator)
     //       (DefaultAuthenticationAttemptPolicy.EvaluateAsync). Needs design clarification.
     internal void ValidatePerSpacePolicies() => validator.ValidateFeature(SkuIds.UM_016);
 
-    // TODO: We need to design and discuss a mechanism for how we want to retrieve the actual user count.
-    internal void ValidateUserCount(int actual) => validator.ValidateQuantized(SkuIds.UM_001, actual);
+    private long _lastUserCountCheckTicks;
+    private static readonly TimeSpan UserCountCheckInterval = TimeSpan.FromHours(1);
+
+    internal void ValidateUserCount()
+    {
+        var now = timeProvider.GetUtcNow().UtcTicks;
+        var last = Interlocked.Read(ref _lastUserCountCheckTicks);
+
+        if (now - last < UserCountCheckInterval.Ticks)
+        {
+            return;
+        }
+
+        if (Interlocked.CompareExchange(ref _lastUserCountCheckTicks, now, last) != last)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await using var scope = scopeFactory.CreateAsyncScope();
+                var userRepository = scope.ServiceProvider.GetRequiredService<UserRepository>();
+                var count = (int)Math.Min(await userRepository.GetCountAsync(CancellationToken.None), int.MaxValue);
+                validator.ValidateQuantized(SkuIds.UM_001, count);
+            }
+#pragma warning disable CA1031
+            catch
+#pragma warning restore CA1031
+            {
+                // License validation is soft, swallow failures silently.
+                // The next throttle window will retry.
+            }
+        });
+    }
 }
