@@ -23,7 +23,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             var rt = grants.Single(x => x.Type == "refresh_token");
             _ = rt.ShouldNotBeNull();
         }
@@ -35,7 +35,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             grants.ShouldBeEmpty();
         }
     }
@@ -58,7 +58,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             var rt = grants.Single(x => x.Type == "refresh_token");
             _ = rt.ShouldNotBeNull();
         }
@@ -70,7 +70,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             var rt = grants.Single(x => x.Type == "refresh_token");
             _ = rt.ShouldNotBeNull();
         }
@@ -100,7 +100,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             var rt = grants.Single(x => x.Type == "refresh_token");
             _ = rt.ShouldNotBeNull();
         }
@@ -112,7 +112,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             grants.ShouldBeEmpty();
         }
     }
@@ -145,7 +145,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             var rt = grants.Single(x => x.Type == "refresh_token");
             _ = rt.ShouldNotBeNull();
         }
@@ -157,7 +157,7 @@ public class RevokeRefreshTokenTests : BffTestBase
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = The.Sub
-            });
+            }, CancellationToken.None);
             var rt = grants.Single(x => x.Type == "refresh_token");
             _ = rt.ShouldNotBeNull();
         }

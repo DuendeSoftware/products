@@ -374,7 +374,7 @@ public class YarpAccessTokenRetrieverTests : BffTestBase
 
         return new BearerTokenResult()
         {
-            AccessToken = AccessToken.Parse(await tokens.CreateSecurityTokenAsync(token))
+            AccessToken = AccessToken.Parse(await tokens.CreateSecurityTokenAsync(token, CancellationToken.None))
         };
     }
 }

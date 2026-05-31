@@ -25,7 +25,7 @@ public class RedirectHandler(WriteTestOutput output) : DelegatingHandler
                 return response;
             }
 
-            if (response.StatusCode == HttpStatusCode.Found && response.Headers.Location != null)
+            if (response.StatusCode is HttpStatusCode.Found or HttpStatusCode.SeeOther && response.Headers.Location != null)
             {
                 output($"Redirecting from {originalUri} to {response.Headers.Location}");
 

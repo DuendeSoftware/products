@@ -25,7 +25,7 @@ internal class RedirectHandler() : DelegatingHandler
                 return response;
             }
 
-            if (response.StatusCode == HttpStatusCode.Found && response.Headers.Location != null)
+            if (response.StatusCode is HttpStatusCode.Found or HttpStatusCode.SeeOther && response.Headers.Location != null)
             {
                 var newUri = response.Headers.Location;
                 if (!newUri.IsAbsoluteUri)

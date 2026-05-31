@@ -130,7 +130,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
             var logoutId = ctx.Request.Query["logoutId"];
             var interaction = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
 
-            var signOutContext = await interaction.GetLogoutContextAsync(logoutId);
+            var signOutContext = await interaction.GetLogoutContextAsync(logoutId, ctx.RequestAborted);
 
             ctx.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
         });

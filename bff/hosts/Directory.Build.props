@@ -23,5 +23,7 @@
     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
     <!-- IDE1006: Naming rule violation (async suffix) - Razor Pages use OnGet/OnPost convention -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
   </PropertyGroup>
 </Project>

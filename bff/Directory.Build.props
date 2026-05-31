@@ -21,7 +21,6 @@
     <NoWarn>$(NoWarn);CA1034</NoWarn><!-- Nested types should not be visible -->
     <NoWarn>$(NoWarn);CA1040</NoWarn><!-- Avoid empty interfaces -->
     <NoWarn>$(NoWarn);CA2007</NoWarn><!-- Do not directly await a Task -->
-    <NoWarn>$(NoWarn);CS1591</NoWarn><!-- Missing XML comment for publicly visible type or member -->
     <NoWarn>$(NoWarn);NU1507</NoWarn><!-- There are 2 package sources defined in your configuration -->
   </PropertyGroup>
 

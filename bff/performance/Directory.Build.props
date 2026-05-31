@@ -15,6 +15,9 @@
 
     <!-- IDE1006: Naming rule violation (async suffix) - benchmark methods -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
+
+    <!-- CS1591: Missing XML comment - not required in performance/benchmark projects -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
   
 </Project>

@@ -6,5 +6,6 @@
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
     <Nullable>disable</Nullable><!-- TODO: enable nullable -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 </Project>

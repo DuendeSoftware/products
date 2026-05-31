@@ -6,5 +6,6 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <AnalysisMode>None</AnalysisMode>
     <WarningsAsErrors>true</WarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 </Project>

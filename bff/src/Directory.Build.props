@@ -20,6 +20,9 @@
 
     <!-- IDE1006: Naming rule violation (async suffix) - pre-existing in BFF code -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
+
+    <!-- CS1591: Missing XML comment - not yet enforced for BFF -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
 </Project>
