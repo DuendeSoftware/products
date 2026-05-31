@@ -11,5 +11,6 @@ namespace Duende.Storage.Internal;
 /// </remarks>
 public sealed record DataStorageObjectVersion(EntityType EntityType, uint SchemaVersion)
 {
+    /// <inheritdoc />
     public override string ToString() => $"{EntityType.Name}({EntityType.Id}) v{SchemaVersion}";
 }

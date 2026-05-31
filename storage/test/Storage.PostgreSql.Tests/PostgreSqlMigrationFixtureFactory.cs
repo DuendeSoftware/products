@@ -4,6 +4,7 @@
 using System.Globalization;
 using Duende.Storage.IntegrationTests;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 

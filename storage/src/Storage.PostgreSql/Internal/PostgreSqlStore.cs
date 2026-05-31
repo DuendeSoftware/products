@@ -16,6 +16,7 @@ using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
+using Duende.Storage.Schema;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using NpgsqlTypes;

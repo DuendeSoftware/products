@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
+  <Folder Name="/hosts/">
+    <Project Path="hosts/EavSchema/EavSchema.csproj" />
+    <Project Path="hosts/EntityLinking/EntityLinking.csproj" />
+    <Project Path="hosts/GettingStarted/GettingStarted.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Storage.CliPlugin/Storage.CliPlugin.csproj" />
     <Project Path="src/Storage.MsSql/Storage.MsSql.csproj" />

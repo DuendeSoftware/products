@@ -15,8 +15,13 @@ partial record OutboxEventName : IStringValue<OutboxEventName>
     // Constructor for controlled creation
     private OutboxEventName(string value) => Value = value;
 
+    /// <summary>Gets the underlying string value of this <see cref="OutboxEventName"/>.</summary>
     public string Value { get; }
 
+    /// <summary>Creates a <see cref="OutboxEventName" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="OutboxEventName" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="OutboxEventName" />.</exception>
     public static OutboxEventName Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -26,9 +31,18 @@ partial record OutboxEventName : IStringValue<OutboxEventName>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="OutboxEventName" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="OutboxEventName" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out OutboxEventName? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="OutboxEventName" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="OutboxEventName" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out OutboxEventName? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -53,10 +67,17 @@ partial record OutboxEventName : IStringValue<OutboxEventName>
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="OutboxEventName"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="OutboxEventName"/> instance.</returns>
     public static implicit operator OutboxEventName(string value) => Create(value);
 
+    /// <inheritdoc />
     public override string ToString() => Value;
 
+    /// <summary>Creates a new <see cref="OutboxEventName"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="OutboxEventName"/> from.</param>
+    /// <returns>A new <see cref="OutboxEventName"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static OutboxEventName? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

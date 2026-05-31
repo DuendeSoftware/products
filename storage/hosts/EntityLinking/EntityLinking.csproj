@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Duende.Storage.Samples.EntityLinking</RootNamespace>
+    <AssemblyName>Duende.Storage.Samples.EntityLinking</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Storage\Storage.csproj" />
+    <ProjectReference Include="..\..\src\Storage.Sqlite\Storage.Sqlite.csproj" />
+  </ItemGroup>
+
+</Project>

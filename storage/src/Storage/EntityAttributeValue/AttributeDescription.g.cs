@@ -15,8 +15,13 @@ partial record AttributeDescription : IStringValue<AttributeDescription>
     // Constructor for controlled creation
     private AttributeDescription(string value) => Value = value;
 
+    /// <summary>Gets the underlying string value of this <see cref="AttributeDescription"/>.</summary>
     public string Value { get; }
 
+    /// <summary>Creates a <see cref="AttributeDescription" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <returns>A new <see cref="AttributeDescription" /> instance.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="s" /> is not a valid <see cref="AttributeDescription" />.</exception>
     public static AttributeDescription Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -26,9 +31,18 @@ partial record AttributeDescription : IStringValue<AttributeDescription>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="AttributeDescription" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="AttributeDescription" />.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out AttributeDescription? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="AttributeDescription" /> from the specified string value.</summary>
+    /// <param name="s">The string value.</param>
+    /// <param name="result">When this method returns <see langword="true" />, contains the created <see cref="AttributeDescription" />.</param>
+    /// <param name="errors">When this method returns <see langword="false" />, contains the validation errors.</param>
+    /// <returns><see langword="true" /> if the value is valid; otherwise, <see langword="false" />.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out AttributeDescription? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -59,10 +73,17 @@ partial record AttributeDescription : IStringValue<AttributeDescription>
         return true;
     }
 
+    /// <summary>Implicitly converts a <see cref="string"/> to a <see cref="AttributeDescription"/>.</summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <returns>A new <see cref="AttributeDescription"/> instance.</returns>
     public static implicit operator AttributeDescription(string value) => Create(value);
 
+    /// <inheritdoc />
     public override string ToString() => Value;
 
+    /// <summary>Creates a new <see cref="AttributeDescription"/> from the specified string value, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to create the <see cref="AttributeDescription"/> from.</param>
+    /// <returns>A new <see cref="AttributeDescription"/> instance, or <see langword="null"/> if <paramref name="input"/> is null or empty.</returns>
     public static AttributeDescription? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))

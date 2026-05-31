@@ -3,6 +3,7 @@
 
 using Duende.Storage.IntegrationTests;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.Sqlite;

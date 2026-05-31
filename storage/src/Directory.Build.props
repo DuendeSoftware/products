@@ -5,6 +5,8 @@
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     <MinVerTagPrefix>storage-</MinVerTagPrefix>
     <Product>Duende Storage</Product>
+    <!-- CS1591: Missing XML comment - not yet enforced for all storage sub-projects -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
 </Project>

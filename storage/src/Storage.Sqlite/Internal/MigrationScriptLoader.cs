@@ -4,6 +4,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Duende.Storage.Schema;
 
 namespace Duende.Storage.Sqlite.Internal;
 

@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.Storage;
+namespace Duende.Storage.Querying;
 
 /// <summary>
 /// A SCIM-like search expression string (e.g., <c>displayName eq "Engineers"</c>).

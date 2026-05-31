@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.Storage;
+namespace Duende.Storage.Schema;
 
 /// <summary>
 /// Provides database schema management including migrations and verification.

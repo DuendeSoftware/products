@@ -15,6 +15,7 @@ using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
+using Duende.Storage.Schema;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using OutboxEventId = Duende.Storage.Internal.Outbox.OutboxEventId;

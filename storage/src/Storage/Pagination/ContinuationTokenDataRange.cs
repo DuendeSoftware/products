@@ -3,6 +3,9 @@
 
 namespace Duende.Storage.Pagination;
 
+/// <summary>
+/// Represents cursor-based pagination using a continuation token and page size.
+/// </summary>
 public sealed record ContinuationTokenDataRange
 {
     /// <summary>

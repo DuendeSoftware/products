@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite.Internal;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;

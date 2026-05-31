@@ -5,6 +5,7 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <IsTestProject>false</IsTestProject>
     <RootNamespace>Shouldly</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,7 +5,6 @@
 
 using System.Collections.Generic;
 using Duende.Storage;
-using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Duende.Storage.Pagination;
@@ -14,10 +13,17 @@ namespace Duende.Storage.Pagination;
 partial record PageNumber : IValueOf<PageNumber, global::System.Int32>
 {
     // Constructor for controlled creation
+    /// <summary>Initializes a new instance of <see cref="PageNumber"/> with the specified value.</summary>
+    /// <param name="value">The underlying value.</param>
     private PageNumber(global::System.Int32 value) => Value = value;
 
+    /// <summary>Gets the underlying value of this <see cref="PageNumber"/>.</summary>
     public global::System.Int32 Value { get; }
 
+    /// <summary>Creates a <see cref="PageNumber"/> from the specified string, throwing if the value is invalid.</summary>
+    /// <param name="s">The string value to create the <see cref="PageNumber"/> from.</param>
+    /// <returns>A new <see cref="PageNumber"/> parsed from <paramref name="s"/>.</returns>
+    /// <exception cref="global::System.FormatException">Thrown when <paramref name="s"/> is not a valid value.</exception>
     public static PageNumber Create(string s)
     {
         if (!TryCreate(s, out var result, out var errors))
@@ -27,9 +33,18 @@ partial record PageNumber : IValueOf<PageNumber, global::System.Int32>
         return result;
     }
 
+    /// <summary>Tries to create a <see cref="PageNumber"/> from the specified string.</summary>
+    /// <param name="s">The string value to parse.</param>
+    /// <param name="result">When this method returns <see langword="true"/>, contains the created <see cref="PageNumber"/>; otherwise <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> is a valid value; otherwise <see langword="false"/>.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out PageNumber? result)
         => TryCreate(s, out result, out _);
 
+    /// <summary>Tries to create a <see cref="PageNumber"/> from the specified string, returning validation errors on failure.</summary>
+    /// <param name="s">The string value to parse.</param>
+    /// <param name="result">When this method returns <see langword="true"/>, contains the created <see cref="PageNumber"/>; otherwise <see langword="null"/>.</param>
+    /// <param name="errors">When this method returns <see langword="false"/>, contains the validation error messages; otherwise <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> is a valid value; otherwise <see langword="false"/>.</returns>
     public static bool TryCreate(string? s, [NotNullWhen(true)] out PageNumber? result, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
     {
         result = null;
@@ -40,7 +55,7 @@ partial record PageNumber : IValueOf<PageNumber, global::System.Int32>
             return false;
         }
 
-        if (global::System.Int32.TryParse(s, CultureInfo.InvariantCulture, out var value))
+        if (global::System.Int32.TryParse(s, global::System.Globalization.CultureInfo.InvariantCulture, out var value))
         {
             if (!TryValidate(value, out var tryValidateErrors))
             {
@@ -56,6 +71,10 @@ partial record PageNumber : IValueOf<PageNumber, global::System.Int32>
         return false;
     }
 
+    /// <summary>Implicitly converts a <c>global::System.Int32</c> to a <see cref="PageNumber"/>.</summary>
+    /// <param name="value">The value to convert.</param>
+    /// <returns>A new <see cref="PageNumber"/> wrapping <paramref name="value"/>.</returns>
+    /// <exception cref="global::System.FormatException">Thrown when <paramref name="value"/> fails validation.</exception>
     public static implicit operator PageNumber(global::System.Int32 value)
     {
         if (!TryValidate(value, out var errors))
@@ -66,8 +85,12 @@ partial record PageNumber : IValueOf<PageNumber, global::System.Int32>
         return new PageNumber(value);
     }
 
-    public override string ToString() => Value.ToString(null, CultureInfo.InvariantCulture);
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString(null, global::System.Globalization.CultureInfo.InvariantCulture);
 
+    /// <summary>Creates a <see cref="PageNumber"/> from the specified string, or returns <see langword="null"/> if the input is null or empty.</summary>
+    /// <param name="input">The string value to parse, or <see langword="null"/>.</param>
+    /// <returns>A <see cref="PageNumber"/> if <paramref name="input"/> is non-empty; otherwise <see langword="null"/>.</returns>
     public static PageNumber? CreateOrDefault(string? input)
     {
         if (string.IsNullOrEmpty(input))
@@ -78,5 +101,8 @@ partial record PageNumber : IValueOf<PageNumber, global::System.Int32>
         return Create(input);
     }
 
+    /// <summary>Loads a <see cref="PageNumber"/> directly from a stored value, bypassing validation. For infrastructure use only.</summary>
+    /// <param name="value">The raw stored value.</param>
+    /// <returns>A <see cref="PageNumber"/> wrapping <paramref name="value"/>.</returns>
     internal static PageNumber Load(global::System.Int32 value) => new PageNumber(value);
 }

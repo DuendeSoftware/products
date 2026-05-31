@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.Internal.Builder;
+using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

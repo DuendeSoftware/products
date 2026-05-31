@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Duende.Storage;
+namespace Duende.Storage.Schema;
 
 /// <summary>
 /// A builder interface for configuring storage services.

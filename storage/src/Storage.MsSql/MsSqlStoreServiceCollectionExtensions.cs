@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.MsSql.Internal;
+using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
