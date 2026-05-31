@@ -51,7 +51,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
         _logger.LogDebug("Start pushed authorization request");
 
-        _features.FeatureUsed(LicenseFeature.PAR);
+        _features.ParUsed();
 
         NameValueCollection values;
         if (HttpMethods.IsPost(context.Request.Method))

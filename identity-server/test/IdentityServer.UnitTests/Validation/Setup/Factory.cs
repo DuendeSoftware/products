@@ -14,7 +14,6 @@ using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using UnitTests.Common;
 
@@ -137,7 +136,7 @@ internal static class Factory
             new DefaultDPoPProofValidator(options, new MockReplayCache(), new FakeTimeProvider(DateTimeOffset.UtcNow), new StubDataProtectionProvider(), new LoggerFactory().CreateLogger<DefaultDPoPProofValidator>()),
             new TestEventService(),
             new FakeTimeProvider(DateTimeOffset.UtcNow),
-            new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
+            LicenseUsageTracker.CreateForTests(),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
             new DefaultMtlsEndpointGenerator(serverUrls, Options.Create(options)),
@@ -268,7 +267,7 @@ internal static class Factory
             resourceValidator,
             userSession,
             requestObjectValidator,
-            new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
+            LicenseUsageTracker.CreateForTests(),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
             new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));

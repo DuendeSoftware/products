@@ -6,5 +6,6 @@
     <IsIdSrvProject>true</IsIdSrvProject>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <AnalysisMode>None</AnalysisMode>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 </Project>

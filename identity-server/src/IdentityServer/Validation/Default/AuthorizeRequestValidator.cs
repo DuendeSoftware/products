@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Duende.IdentityServer.Logging;
@@ -29,6 +30,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly IResourceValidator _resourceValidator;
     private readonly IUserSession _userSession;
     private readonly IRequestObjectValidator _requestObjectValidator;
+    private readonly IdentityServerLicenseValidator _licenseValidator;
     private readonly LicenseUsageTracker _licenseUsage;
     private readonly ClientLoadedTracker _clientLoadedTracker;
     private readonly ResourceLoadedTracker _resourceLoadedTracker;
@@ -47,6 +49,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         IResourceValidator resourceValidator,
         IUserSession userSession,
         IRequestObjectValidator requestObjectValidator,
+        IdentityServerLicenseValidator licenseValidator,
         LicenseUsageTracker licenseUsage,
         ClientLoadedTracker clientLoadedTracker,
         ResourceLoadedTracker resourceLoadedTracker,
@@ -59,11 +62,42 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _uriValidator = uriValidator;
         _resourceValidator = resourceValidator;
         _requestObjectValidator = requestObjectValidator;
+        _licenseValidator = licenseValidator;
         _userSession = userSession;
         _licenseUsage = licenseUsage;
         _clientLoadedTracker = clientLoadedTracker;
         _resourceLoadedTracker = resourceLoadedTracker;
         _sanitizedLogger = sanitizedLogger;
+    }
+
+    internal AuthorizeRequestValidator(
+        IdentityServerOptions options,
+        IIssuerNameService issuerNameService,
+        IClientStore clients,
+        ICustomAuthorizeRequestValidator customValidator,
+        IRedirectUriValidator uriValidator,
+        IResourceValidator resourceValidator,
+        IUserSession userSession,
+        IRequestObjectValidator requestObjectValidator,
+        LicenseUsageTracker licenseUsage,
+        ClientLoadedTracker clientLoadedTracker,
+        ResourceLoadedTracker resourceLoadedTracker,
+        SanitizedLogger<AuthorizeRequestValidator> sanitizedLogger)
+        : this(
+            options,
+            issuerNameService,
+            clients,
+            customValidator,
+            uriValidator,
+            resourceValidator,
+            userSession,
+            requestObjectValidator,
+            IdentityServerLicenseValidator.CreateForTests(),
+            licenseUsage,
+            clientLoadedTracker,
+            resourceLoadedTracker,
+            sanitizedLogger)
+    {
     }
 
     public async Task<AuthorizeRequestValidationResult> ValidateAsync(
@@ -168,7 +202,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
 
         _licenseUsage.ClientUsed(request.ClientId);
         _clientLoadedTracker.TrackClientLoaded(request.Client);
-        IdentityServerLicenseValidator.Instance.ValidateClient(request.ClientId);
+        _licenseValidator.ValidateClient(request.ClientId);
         _resourceLoadedTracker.TrackResources(request.ValidatedResources.Resources);
 
         return Valid(request);
@@ -565,7 +599,10 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         _licenseUsage.ResourceIndicatorsUsed(resourceIndicators!);
-        IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(resourceIndicators);
+        if (resourceIndicators is { Length: > 0 })
+        {
+            _licenseValidator.ValidateResourceIsolation();
+        }
 
         if (validatedResources.Resources.IdentityResources.Count > 0 && !request.IsOpenIdRequest)
         {

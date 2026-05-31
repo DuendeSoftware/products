@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,9 +22,8 @@ public class PostConfigureApplicationCookieTicketStoreTests
         // Register the dependencies of the usage tracker so that we can resolve it in PostConfigure
         var httpContextAccessor = new MockHttpContextAccessor(configureServices: sp =>
         {
-            sp.AddSingleton(TestLogger.Create<LicenseAccessor>());
-            sp.AddSingleton<LicenseAccessor>();
-            sp.AddSingleton<LicenseUsageTracker>();
+            sp.AddSingleton(_ => LicenseUsageTracker.CreateForTests());
+            sp.AddSingleton(_ => IdentityServerLicenseValidator.CreateForTests());
             sp.AddSingleton<ILoggerFactory>(new NullLoggerFactory());
         });
 

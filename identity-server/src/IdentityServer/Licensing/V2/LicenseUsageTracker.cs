@@ -4,136 +4,63 @@
 #nullable enable
 
 using System.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
+using Duende.Private.Licencing.V2;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Duende.IdentityServer.Licensing.V2;
 
-internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFactory loggerFactory)
+internal class LicenseUsageTracker(V2License license)
 {
-    private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
+    /// <summary>
+    /// Creates an unconfigured tracker for testing purposes.
+    /// </summary>
+    internal static LicenseUsageTracker CreateForTests() =>
+        new(new V2LicenseAccessor(static () => null, NullLogger<V2LicenseAccessor>.Instance).Current);
 
-    private readonly ConcurrentHashSet<LicenseFeature> _otherFeatures = new();
-    private readonly ConcurrentHashSet<LicenseFeature> _businessFeatures = new();
-    private readonly ConcurrentHashSet<LicenseFeature> _enterpriseFeatures = new();
+    private readonly ConcurrentHashSet<string> _featuresUsed = new();
     private readonly ConcurrentHashSet<string> _clientsUsed = new();
     private readonly ConcurrentHashSet<string> _issuersUsed = new();
 
-    private const int ClientLimitExceededThreshold = 5;
-    private const int IssuerLimitExceededThreshold = 1;
+    public void DPoPUsed() => _featuresUsed.Add(SkuIds.PTC_006);
 
-    public void FeatureUsed(LicenseFeature feature)
+    public void ResourceIsolationUsed() => _featuresUsed.Add(SkuIds.IS_001);
+
+    public void CibaUsed() => _featuresUsed.Add(SkuIds.PTC_022);
+
+    public void ParUsed() => _featuresUsed.Add(SkuIds.PTC_004);
+
+    public void DynamicProvidersUsed() => _featuresUsed.Add(SkuIds.PLT_005);
+
+    public void ServerSideSessionsUsed() => _featuresUsed.Add(SkuIds.PLT_021);
+
+    public void KeyManagementUsed() => _featuresUsed.Add(SkuIds.PLT_004);
+
+    public void ResourceIndicatorUsed(string? resourceIndicator)
     {
-        switch (feature)
+        if (!string.IsNullOrWhiteSpace(resourceIndicator))
         {
-            case LicenseFeature.ResourceIsolation:
-            case LicenseFeature.DynamicProviders:
-            case LicenseFeature.CIBA:
-            case LicenseFeature.DPoP:
-                _enterpriseFeatures.Add(feature);
-                break;
-            case LicenseFeature.KeyManagement:
-            case LicenseFeature.PAR:
-            case LicenseFeature.ServerSideSessions:
-            case LicenseFeature.DCR:
-                _businessFeatures.Add(feature);
-                break;
-            case LicenseFeature.ISV:
-            case LicenseFeature.Redistribution:
-                _otherFeatures.Add(feature);
-                break;
+            _featuresUsed.Add(SkuIds.IS_001);
         }
     }
 
-    public void ClientUsed(string clientId)
+    public void ResourceIndicatorsUsed(IEnumerable<string> resourceIndicators)
     {
-        var initialClientCount = _clientsUsed.Values.Count;
-
-        _clientsUsed.Add(clientId);
-
-        if (initialClientCount == _clientsUsed.Values.Count)
+        if (resourceIndicators?.Any() == true)
         {
-            return;
-        }
-
-        var license = licenseAccessor.Current;
-
-        if (license.IsConfigured)
-        {
-            if (license.Redistribution || !license.ClientLimit.HasValue)
-            {
-                return;
-            }
-
-            var clientLimitOverage = _clientsUsed.Values.Count - license.ClientLimit;
-            switch (clientLimitOverage)
-            {
-                case > ClientLimitExceededThreshold:
-                    _logger.ClientLimitExceededOverThreshold(license.ClientLimit.Value, _clientsUsed.Values.Count, license.ContactInfo, license.CompanyName, _clientsUsed.Values);
-                    break;
-                case > 0:
-                    _logger.ClientLimitExceededWithinOverageThreshold(license.ClientLimit.Value, _clientsUsed.Values.Count, license.ContactInfo, license.CompanyName, _clientsUsed.Values);
-                    break;
-            }
-        }
-        else
-        {
-            if (_clientsUsed.Values.Count > ClientLimitExceededThreshold)
-            {
-                _logger.ClientLimitWithNoLicenseExceeded(_clientsUsed.Values.Count, _clientsUsed.Values);
-            }
+            _featuresUsed.Add(SkuIds.IS_001);
         }
     }
 
-    public void IssuerUsed(string issuer)
-    {
-        var initialIssuerCount = _issuersUsed.Values.Count;
+    public void ClientUsed(string clientId) => _clientsUsed.Add(clientId);
 
-        _issuersUsed.Add(issuer);
-
-        if (initialIssuerCount == _issuersUsed.Values.Count)
-        {
-            return;
-        }
-
-        var license = licenseAccessor.Current;
-
-        if (license.IsConfigured)
-        {
-            if (license.Redistribution || !license.IssuerLimit.HasValue)
-            {
-                return;
-            }
-
-            var issuerLimitOverage = _issuersUsed.Values.Count - license.IssuerLimit;
-            switch (issuerLimitOverage)
-            {
-                case > IssuerLimitExceededThreshold:
-                    _logger.IssuerLimitExceededOverThreshold(license.IssuerLimit.Value, _issuersUsed.Values.Count, license.ContactInfo, license.CompanyName, _issuersUsed.Values);
-                    break;
-                case > 0:
-                    _logger.IssuerLimitExceededWithinOverageThreshold(license.IssuerLimit.Value, _issuersUsed.Values.Count, license.ContactInfo, license.CompanyName, _issuersUsed.Values);
-                    break;
-            }
-        }
-        else
-        {
-            if (_issuersUsed.Values.Count > IssuerLimitExceededThreshold)
-            {
-                _logger.IssuerLimitWithNoLicenseExceeded(_issuersUsed.Values.Count, _issuersUsed.Values);
-            }
-        }
-    }
+    public void IssuerUsed(string issuer) => _issuersUsed.Add(issuer);
 
     public LicenseUsageSummary GetSummary()
     {
-        var licenseEdition = licenseAccessor.Current.Edition?.ToString() ?? "None";
-        var featuresUsed = _enterpriseFeatures.Values
-            .Concat(_businessFeatures.Values)
-            .Concat(_otherFeatures.Values)
-            .Select(f => f.ToString())
-            .ToList()
-            .AsReadOnly();
-        return new LicenseUsageSummary(licenseEdition, _clientsUsed.Values, _issuersUsed.Values, featuresUsed);
+        var entitledSkus = license.IsConfigured
+            ? license.Entitlements.Select(e => Skus.Get(e.SkuId)?.Name).OfType<string>().ToList().AsReadOnly()
+            : (IReadOnlyCollection<string>)[];
+        return new LicenseUsageSummary(entitledSkus, _clientsUsed.Values, _issuersUsed.Values, _featuresUsed.Values);
     }
 
     private class ConcurrentHashSet<T> where T : notnull

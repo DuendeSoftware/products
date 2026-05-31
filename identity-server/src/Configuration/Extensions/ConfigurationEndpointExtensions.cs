@@ -1,14 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using Duende.IdentityServer.Configuration.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -17,8 +13,6 @@ namespace Duende.IdentityServer.Configuration;
 /// </summary>
 public static class ConfigurationEndpointExtensions
 {
-    internal static bool _licenseChecked;
-
     /// <summary>
     /// Maps the dynamic client registration endpoint.
     /// </summary>
@@ -31,14 +25,7 @@ public static class ConfigurationEndpointExtensions
 
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
     {
-        if (_licenseChecked == false)
-        {
-            var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
-            var options = endpoints.ServiceProvider.GetRequiredService<IOptions<IdentityServerConfigurationOptions>>().Value;
-
-            ConfigurationLicenseValidator.Instance.Initialize(loggerFactory, options);
-        }
-
-        _licenseChecked = true;
+        var licenseValidator = endpoints.ServiceProvider.GetRequiredService<IdentityServerConfigurationLicenseValidator>();
+        licenseValidator.ValidateDynamicClientRegistration();
     }
 }

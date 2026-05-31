@@ -4,8 +4,10 @@
 #nullable enable
 
 using Duende.IdentityServer.Internal.Saml.Sp;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Saml.Configuration;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Saml2HandlerOptions = Duende.IdentityServer.Internal.Saml.Sp.AspNetCore.Saml2Options;
@@ -81,7 +83,9 @@ public static class AuthenticationBuilderSamlServiceProviderExtensions
             new ConfigureSaml2OptionsFromServiceProvider(
                 scheme,
                 sp.GetRequiredService<IOptionsMonitor<SamlServiceProviderOptions>>(),
-                sp.GetRequiredService<TimeProvider>()));
+                sp.GetRequiredService<IHttpContextAccessor>(),
+                sp.GetRequiredService<TimeProvider>(),
+                sp.GetRequiredService<IdentityServerLicenseValidator>()));
 
         // Delegate to the existing internal AddSaml2 registration
         builder.AddSaml2(scheme, displayName, _ => { });

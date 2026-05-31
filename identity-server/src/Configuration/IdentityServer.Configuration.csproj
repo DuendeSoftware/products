@@ -7,6 +7,9 @@
     <Description>Configuration system for Duende IdentityServer</Description>
     <AssemblyName>Duende.IdentityServer.Configuration</AssemblyName>
     <RootNamespace>Duende.IdentityServer.Configuration</RootNamespace>
+
+    <!-- is an internal class that is apparently never instantiated -->
+    <NoWarn>$(NoWarn);CA1812</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Duende.IdentityModel" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+    <PackageReference Include="Duende.Private.Licensing" />
   </ItemGroup>
 
   <ItemGroup>

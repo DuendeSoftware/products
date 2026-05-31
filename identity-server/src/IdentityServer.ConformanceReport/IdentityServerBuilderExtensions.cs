@@ -3,6 +3,7 @@
 
 using Duende.ConformanceReport;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -32,14 +33,14 @@ public static class IdentityServerBuilderExtensions
         services.TryAddScoped<Func<ConformanceReportServerOptions>>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<IdentityServerOptions>>().Value;
-            return () => options.ToConformanceReportServerOptions();
+            return options.ToConformanceReportServerOptions;
         });
 
         // Register license info from IdentityServer license
-        _ = services.AddScoped(sp =>
+        services.TryAddSingleton(sp =>
         {
-            var license = sp.GetService<IdentityServerLicense>();
-            return license?.ToConformanceReportLicenseInfo() ?? new ConformanceReportLicenseInfo();
+            var licenseInformation = sp.GetRequiredService<LicenseInformation>();
+            return ToConformanceReportLicenseInfo(licenseInformation);
         });
 
         // Register client store adapter
@@ -48,16 +49,15 @@ public static class IdentityServerBuilderExtensions
         return builder;
     }
 
-    /// <summary>
-    /// Converts an IdentityServerLicense to ConformanceReportLicenseInfo.
-    /// </summary>
-    internal static ConformanceReportLicenseInfo ToConformanceReportLicenseInfo(this IdentityServerLicense license) =>
+    internal static ConformanceReportLicenseInfo ToConformanceReportLicenseInfo(
+        LicenseInformation licenseInformation) =>
         new()
         {
-            CompanyName = license.CompanyName,
-            ContactInfo = license.ContactInfo,
-            SerialNumber = license.SerialNumber,
-            Expiration = license.Expiration,
-            Edition = license.Edition.ToString()
+            CompanyName = licenseInformation.CompanyName,
+            ContactInfo = licenseInformation.ContactInfo,
+            Expiration = licenseInformation.Expiration?.UtcDateTime,
+            Edition = licenseInformation.EntitledSkus.Count > 0
+                ? string.Join(", ", licenseInformation.EntitledSkus)
+                : null
         };
 }

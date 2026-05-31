@@ -6,6 +6,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Saml.Bindings;
 using Duende.IdentityServer.Saml.Endpoints.Results;
 using Duende.IdentityServer.Saml.Models;
@@ -31,12 +32,15 @@ internal sealed class SingleSignOnServiceEndpoint(
     ISaml2IssuerNameService saml2IssuerNameService,
     ISaml2SsoInteractionResponseGenerator interactionResponseGenerator,
     ISaml2SsoResponseGenerator responseGenerator,
+    IdentityServerLicenseValidator licenseValidator,
     IEventService events,
     ILogger<SingleSignOnServiceEndpoint> logger) : IEndpointHandler
 {
     public async Task<IEndpointResult?> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.SamlSingleSignOnService + "Endpoint");
+
+        licenseValidator.ValidateSamlIdp();
 
         var binding = frontChannelBindings.FirstOrDefault(binding => binding.CanUnBind(context.Request));
         if (binding == null)
@@ -116,6 +120,11 @@ internal sealed class SingleSignOnServiceEndpoint(
                 Error = requestValidationResult.ErrorDescription,
                 SpEntityId = requestValidationResult.ValidatedRequest.AuthnRequest?.Issuer?.Value,
             };
+        }
+
+        if (validatedAuthnRequest.Saml2Sp?.EntityId is { } spEntityId)
+        {
+            licenseValidator.ValidateSamlServiceProvider(spEntityId);
         }
 
         var interactionResponse = await interactionResponseGenerator.ProcessInteractionAsync(validatedAuthnRequest, context.RequestAborted);

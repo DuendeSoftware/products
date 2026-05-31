@@ -19,6 +19,9 @@
 
     <!-- RS0027: API with optional parameter(s) should have the most parameters amongst its public overloads -->
     <NoWarn>$(NoWarn);RS0027</NoWarn>
+
+    <!-- CS1591: Missing XML comment - not yet enforced for IdentityServer -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   

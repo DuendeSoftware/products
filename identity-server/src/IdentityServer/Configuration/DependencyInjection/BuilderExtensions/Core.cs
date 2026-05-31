@@ -24,7 +24,11 @@ using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Saml.Endpoints;
 using Duende.IdentityServer.Saml.Infrastructure;
+using Duende.IdentityServer.Saml.ResponseHandling;
+using Duende.IdentityServer.Saml.Serialization;
+using Duende.IdentityServer.Saml.Services;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Services.KeyManagement;
@@ -32,6 +36,7 @@ using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
+using Duende.Private.Licencing.V2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -143,6 +148,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.AddEndpoint<TokenRevocationEndpoint>(EndpointNames.Revocation, ProtocolRoutePaths.Revocation.EnsureLeadingSlash());
         builder.AddEndpoint<TokenEndpoint>(EndpointNames.Token, ProtocolRoutePaths.Token.EnsureLeadingSlash());
         builder.AddEndpoint<UserInfoEndpoint>(EndpointNames.UserInfo, ProtocolRoutePaths.UserInfo.EnsureLeadingSlash());
+        builder.AddEndpoint<SpLogoutCompletionEndpoint>(EndpointNames.SamlSpLogoutCompletion, SamlConstants.Defaults.SpLogoutCompletionPath.EnsureLeadingSlash());
 
         builder.AddHttpWriter<AuthorizeInteractionPageResult, AuthorizeInteractionPageHttpWriter>();
         builder.AddHttpWriter<AuthorizeResult, AuthorizeHttpWriter>();
@@ -239,14 +245,22 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<ISamlServiceProviderStore, EmptySamlServiceProviderStore>();
         builder.Services.TryAddScoped<ISamlLogoutNotificationService, NopSamlLogoutNotificationService>();
 
+        // SP logout completion endpoint dependencies — registered here so the endpoint
+        // is available for both the static AddSamlServiceProvider() path and the
+        // AddSaml()/AddSamlDynamicProvider() paths.
+        builder.Services.TryAddSingleton<RsaCertificateFactory>();
+        builder.Services.TryAddSingleton<ISamlLogoutSessionStore, InMemorySamlLogoutSessionStore>();
+        builder.Services.TryAddScoped<ISamlSigningService, SamlSigningService>();
+        builder.Services.TryAddTransient<ISamlXmlWriter, SamlXmlWriter>();
+        builder.Services.TryAddTransient<ISaml2IssuerNameService, Saml2IssuerNameService>();
+        builder.Services.TryAddTransient<ISaml2SloResponseGenerator, Saml2SloResponseGenerator>();
+
         builder.Services.TryAddTransient<IConnectedApplicationStore, ConnectedApplicationStore>();
 
         builder.Services.TryAddSingleton(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
 
         builder.Services.TryAddTransient<IClientStore, EmptyClientStore>();
         builder.Services.TryAddTransient<IResourceStore, EmptyResourceStore>();
-
-        builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
 
         builder.Services.AddSingleton(resolver =>
         {
@@ -260,10 +274,34 @@ public static class IdentityServerBuilderExtensionsCore
             return jsonResolver;
         });
 
-        builder.Services.AddSingleton<LicenseAccessor>();
-        builder.Services.AddSingleton<ProtocolRequestCounter>();
+        builder.Services.TryAddSingleton(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<V2LicenseAccessor>>();
+            var options = sp.GetRequiredService<IOptions<IdentityServerOptions>>().Value;
+            var accessor = new V2LicenseAccessor(() => options.LicenseKey, logger);
+            return accessor.Current;
+        });
+
+        builder.Services.TryAddSingleton(sp =>
+        {
+            var license = sp.GetRequiredService<V2License>();
+            return new LicenseInformation
+            {
+                CompanyName = license.IsConfigured ? license.CompanyName : null,
+                ContactInfo = license.IsConfigured ? license.ContactInfo : null,
+                SerialNumber = license.IsConfigured ? license.SerialNumber : null,
+                IssuedAt = license.IsConfigured ? license.IssuedAt : null,
+                Expiration = license.IsConfigured ? license.Expiration : null,
+                IsConfigured = license.IsConfigured,
+                EntitledSkus = license.IsConfigured
+                    ? license.Entitlements.Select(e => Skus.Get(e.SkuId)?.Name).OfType<string>().ToList().AsReadOnly()
+                    : (IReadOnlyCollection<string>)[]
+            };
+        });
+
+        builder.Services.TryAddSingleton<LicenseValidator>();
+        builder.Services.TryAddSingleton<IdentityServerLicenseValidator>();
         builder.Services.AddSingleton<LicenseUsageTracker>();
-        builder.Services.AddSingleton<LicenseExpirationChecker>();
 
         builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
         builder.Services.AddSingleton<IDiagnosticEntry, AuthSchemeInfoDiagnosticEntry>();
@@ -315,6 +353,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<IMessageStore<LogoutMessage>, ProtectedDataMessageStore<LogoutMessage>>();
         builder.Services.TryAddTransient<IMessageStore<LogoutNotificationContext>, ProtectedDataMessageStore<LogoutNotificationContext>>();
         builder.Services.TryAddTransient<IMessageStore<ErrorMessage>, ProtectedDataMessageStore<ErrorMessage>>();
+        builder.Services.TryAddTransient<IMessageStore<SamlSpLogoutMessage>, ProtectedDataMessageStore<Duende.IdentityServer.Hosting.FederatedSignOut.SamlSpLogoutMessage>>();
         builder.Services.TryAddTransient<IIdentityServerInteractionService, DefaultIdentityServerInteractionService>();
         builder.Services.TryAddTransient<IDeviceFlowInteractionService, DefaultDeviceFlowInteractionService>();
         builder.Services.TryAddTransient<IBackchannelAuthenticationInteractionService, DefaultBackchannelAuthenticationInteractionService>();

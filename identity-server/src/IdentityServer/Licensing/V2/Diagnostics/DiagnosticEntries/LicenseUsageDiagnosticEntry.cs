@@ -29,7 +29,12 @@ internal class LicenseUsageDiagnosticEntry(LicenseUsageTracker licenseUsageTrack
         }
         writer.WriteEndArray();
 
-        writer.WriteString("LicenseEdition", licenseUsageSummary.LicenseEdition);
+        writer.WriteStartArray("EntitledSkus");
+        foreach (var sku in licenseUsageSummary.EntitledSkus)
+        {
+            writer.WriteStringValue(sku);
+        }
+        writer.WriteEndArray();
 
         writer.WriteEndObject();
 

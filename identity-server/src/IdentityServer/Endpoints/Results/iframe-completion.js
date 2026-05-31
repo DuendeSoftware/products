@@ -1,0 +1,1 @@
+(function(){var f=document.querySelectorAll("iframe");var c=f.length;var o=window.location.origin;if(c===0){window.parent.postMessage("logout-iframes-complete",o);return;}var n=0;f.forEach(function(i){i.addEventListener("load",function(){if(++n>=c)window.parent.postMessage("logout-iframes-complete",o);});});})();

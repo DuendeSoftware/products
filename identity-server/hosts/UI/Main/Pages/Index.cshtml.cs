@@ -2,20 +2,19 @@
 // See LICENSE in the project root for license information.
 
 using System.Reflection;
+using Duende.IdentityServer.Licensing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Duende.IdentityServer.UI.Pages.Home;
 
 [AllowAnonymous]
-public class Index : PageModel
+public class Index(LicenseInformation license) : PageModel
 {
-    public Index(IdentityServerLicense? license = null) => License = license;
-
     public string Version => typeof(Duende.IdentityServer.Hosting.IdentityServerMiddleware).Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             ?.InformationalVersion.Split('+').First()
             ?? "unavailable";
 
-    public IdentityServerLicense? License { get; }
+    public LicenseInformation License { get; } = license;
 }

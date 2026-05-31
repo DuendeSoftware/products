@@ -11,7 +11,6 @@ using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Microsoft.Extensions.Logging.Abstractions;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 
@@ -55,7 +54,7 @@ public class Authorize_ProtocolValidation_Resources
             _mockResourceValidator,
             _mockUserSession,
             Factory.CreateRequestObjectValidator(),
-            new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
+            LicenseUsageTracker.CreateForTests(),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
             new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));

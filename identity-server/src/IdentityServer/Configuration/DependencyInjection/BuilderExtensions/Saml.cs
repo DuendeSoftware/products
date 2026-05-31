@@ -10,7 +10,6 @@ using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Bindings;
 using Duende.IdentityServer.Saml.Endpoints;
 using Duende.IdentityServer.Saml.Endpoints.Results;
-using Duende.IdentityServer.Saml.Infrastructure;
 using Duende.IdentityServer.Saml.ResponseHandling;
 using Duende.IdentityServer.Saml.Serialization;
 using Duende.IdentityServer.Saml.Services;
@@ -82,16 +81,12 @@ public static class IdentityServerBuilderExtensionsSaml
     /// <returns></returns>
     private static IIdentityServerBuilder AddSamlServices(this IIdentityServerBuilder builder, SamlEndpointOptions endpoints)
     {
-        // Interface → Implementation (TryAddScoped for extensibility)
-        builder.Services.TryAddScoped<ISamlSigningService, SamlSigningService>();
         // Replace the no-op registered by AddCoreServices with the new implementation.
         builder.Services.Replace(ServiceDescriptor.Scoped<ISamlLogoutNotificationService, Saml2LogoutNotificationService>());
 
         // New SAML2 Dependencies
 
-        builder.Services.TryAddSingleton<RsaCertificateFactory>();
         builder.Services.TryAddSingleton<ISamlSigninStateStore, InMemorySamlSigninStateStore>();
-        builder.Services.TryAddSingleton<ISamlLogoutSessionStore, InMemorySamlLogoutSessionStore>();
         builder.AddEndpoint<SingleSignOnServiceEndpoint>(EndpointNames.SamlSingleSignOnService, endpoints.SingleSignOnServicePath.EnsureLeadingSlash());
         builder.AddEndpoint<SingleSignOnCallbackEndpoint>(EndpointNames.SamlSingleSignOnCallback, endpoints.SingleSignOnCallbackPath.EnsureLeadingSlash());
         builder.AddEndpoint<SingleLogoutServiceEndpoint>(EndpointNames.SamlSingleLogoutService, endpoints.SingleLogoutServicePath.EnsureLeadingSlash());
@@ -106,12 +101,10 @@ public static class IdentityServerBuilderExtensionsSaml
         builder.Services.TryAddTransient<IAuthnRequestValidator, AuthnRequestValidator>();
         builder.Services.TryAddTransient<ISamlResourceResolver, DefaultSamlResourceResolver>();
         builder.Services.TryAddTransient<ILogoutRequestValidator, LogoutRequestValidator>();
-        builder.Services.TryAddTransient<ISaml2SloResponseGenerator, Saml2SloResponseGenerator>();
         builder.Services.TryAddTransient<ISaml2FrontChannelLogoutRequestBuilder, Saml2FrontChannelLogoutRequestBuilder>();
         builder.Services.TryAddTransient<ISaml2SsoInteractionResponseGenerator, Saml2SsoInteractionResponseGenerator>();
         builder.Services.TryAddTransient<ISaml2SsoResponseGenerator, Saml2SSoResponseGenerator>();
         builder.Services.TryAddTransient<ISamlNameIdGenerator, DefaultSamlNameIdGenerator>();
-        builder.Services.TryAddTransient<ISaml2IssuerNameService, Saml2IssuerNameService>();
         builder.Services.TryAddTransient<IIdpInitiatedSsoService, DefaultIdpInitiatedSsoService>();
         builder.Services.TryAddTransient<ISaml2MetadataResponseGenerator, Saml2MetadataResponseGenerator>();
         builder.Services.AddTransient<IReturnUrlParser, SamlReturnUrlParser>();
@@ -133,8 +126,6 @@ public static class IdentityServerBuilderExtensionsSaml
                 EntityResolver = resolver.ResolveAsync
             };
         });
-        // The writer has state and must be transient.
-        builder.Services.TryAddTransient<ISamlXmlWriter, SamlXmlWriter>();
 
         // SAML service provider configuration validator
         builder.Services.TryAddTransient<ISamlServiceProviderConfigurationValidator, DefaultSamlServiceProviderConfigurationValidator>();

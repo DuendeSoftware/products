@@ -6,6 +6,7 @@ using System.Net;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Saml.ResponseHandling;
 using Duende.IdentityServer.Saml.Services;
 using Duende.IdentityServer.Services;
@@ -19,12 +20,16 @@ internal sealed class MetadataEndpoint(
     ISamlSigningService samlSigningService,
     ISaml2IssuerNameService saml2IssuerNameService,
     IOptions<IdentityServerOptions> identityServerOptions,
-    ISaml2MetadataResponseGenerator metadataResponseGenerator)
+    ISaml2MetadataResponseGenerator metadataResponseGenerator,
+    IdentityServerLicenseValidator licenseValidator)
     : IEndpointHandler
 {
     public async Task<IEndpointResult?> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.SamlMetadata + "Endpoint");
+
+        licenseValidator.ValidateSamlIdp();
+
         var options = identityServerOptions.Value;
 
         if (!options.Endpoints.EnableSamlMetadataEndpoint)

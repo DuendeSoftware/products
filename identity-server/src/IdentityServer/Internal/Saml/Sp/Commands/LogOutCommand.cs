@@ -283,9 +283,14 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
             options.SPOptions.Logger.WriteInformation("Got a logout request " + request.Id
                 + ", responding with logout response " + response.Id);
 
-            var result = Saml2Binding.Get(idp.SingleLogoutServiceBinding).Bind(
-                response, options.SPOptions.Logger, options.Notifications.LogoutResponseXmlCreated);
-            result.TerminateLocalSession = true;
+
+            // NOTE: this has been minimized to not interfere with federated logout. However,
+            // we need to keep a result with TerminateLocalSession set to true in order for the
+            // logout to be handled properly.
+            var result = new CommandResult
+            {
+                TerminateLocalSession = true
+            };
             return result;
         }
 

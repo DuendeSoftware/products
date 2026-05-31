@@ -4,12 +4,15 @@
 #nullable enable
 
 using System.Security.Cryptography.X509Certificates;
+using Duende.IdentityServer.Hosting.FederatedSignOut;
 using Duende.IdentityServer.Internal.Saml.Sp;
 using Duende.IdentityServer.Internal.Saml.Sp.AspNetCore;
 using Duende.IdentityServer.Internal.Saml.Sp.Bindings;
 using Duende.IdentityServer.Internal.Saml.Sp.Configuration;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,10 +29,12 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IIssuerNameService _issuerNameService;
     private readonly TimeProvider _timeProvider;
+    private readonly IdentityServerLicenseValidator _licenseValidator;
 
     public SamlConfigureOptions(
         IHttpContextAccessor httpContextAccessor,
         IIssuerNameService issuerNameService,
+        IdentityServerLicenseValidator licenseValidator,
         TimeProvider timeProvider,
         ILogger<SamlConfigureOptions> logger)
         : base(httpContextAccessor, logger)
@@ -37,6 +42,7 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         _httpContextAccessor = httpContextAccessor;
         _issuerNameService = issuerNameService ?? throw new ArgumentNullException(nameof(issuerNameService));
         _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+        _licenseValidator = licenseValidator;
     }
 
     protected override void Configure(ConfigureAuthenticationContext<Saml2Options, SamlProvider> context)
@@ -71,6 +77,30 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         options.SPOptions.WantAssertionsSigned = publicOptions?.WantAssertionsSigned
             ?? provider.WantAssertionsSigned;
 
+        // Wire up the LogoutResponseCreated notification so the AuthenticationRequestHandlerWrapper
+        // can intercept IdP-initiated logout and trigger federated sign-out for downstream clients.
+        var httpContextAccessor = _httpContextAccessor;
+        var existingLogoutResponseCreated = options.Notifications.LogoutResponseCreated;
+        options.Notifications.LogoutResponseCreated = (response, request, user, idp) =>
+        {
+            existingLogoutResponseCreated?.Invoke(response, request, user, idp);
+
+            var bindingUri = idp.SingleLogoutServiceBinding switch
+            {
+                Saml2BindingType.HttpRedirect => SamlConstants.Bindings.HttpRedirect,
+                Saml2BindingType.HttpPost => SamlConstants.Bindings.HttpPost,
+                _ => idp.SingleLogoutServiceBinding.ToString()
+            };
+
+            SamlSpLogoutContext.SetFromNotification(
+                httpContextAccessor.HttpContext,
+                idp.EntityId.Id,
+                request.Id.Value,
+                response.RelayState,
+                bindingUri,
+                idp.SingleLogoutServiceResponseUrl);
+        };
+
         // Add SP signing certificate if configured
         if (!string.IsNullOrWhiteSpace(provider.SpSigningCertificateBase64))
         {
@@ -87,6 +117,7 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         // Build and register the remote IdP
         if (!string.IsNullOrWhiteSpace(provider.IdpEntityId))
         {
+            _licenseValidator.ValidateSamlIdp(provider.IdpEntityId);
             var idp = BuildIdentityProvider(provider, options.SPOptions, _timeProvider, outboundSigningAlgorithm);
             options.IdentityProviders.Add(idp);
         }

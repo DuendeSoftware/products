@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Duende.IdentityServer.Internal.Saml.Sp.Commands;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
+using Duende.IdentityServer.Licensing;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +20,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         private readonly IOptionsMonitorCache<Saml2Options> optionsCache;
         private readonly IDataProtectionProvider dataProtectorProvider;
         private readonly TimeProvider _timeProvider;
+        private readonly IdentityServerLicenseValidator _licenseValidator;
 
         // Internal to be visible to tests.
         internal Saml2Options options;
@@ -34,11 +36,13 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         /// <param name="dataProtectorProvider">Data Protector Provider</param>
         /// <param name="optionsFactory">Factory for options</param>
         /// <param name="timeProvider">The time provider.</param>
+        /// <param name="licenseValidator">The identity server license validator.</param>
         public Saml2Handler(
             IOptionsMonitorCache<Saml2Options> optionsCache,
             IDataProtectionProvider dataProtectorProvider,
             IOptionsFactory<Saml2Options> optionsFactory,
-            TimeProvider timeProvider)
+            TimeProvider timeProvider,
+            IdentityServerLicenseValidator licenseValidator)
         {
             if (dataProtectorProvider == null)
             {
@@ -49,6 +53,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
             this.optionsCache = optionsCache;
             this.dataProtectorProvider = dataProtectorProvider;
             _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+            _licenseValidator = licenseValidator;
         }
 
         /// <InheritDoc />
@@ -82,6 +87,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         /// <InheritDoc />
         public async Task ChallengeAsync(AuthenticationProperties properties)
         {
+            _licenseValidator.ValidateSamlServiceProvider();
             properties = properties ?? new AuthenticationProperties();
 
             // Don't serialize the return url twice, move it to our location.
@@ -119,6 +125,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         {
             if (context.Request.Path.StartsWithSegments(options.SPOptions.ModulePath, StringComparison.Ordinal))
             {
+                _licenseValidator.ValidateSamlServiceProvider();
                 var commandName = context.Request.Path.Value.Substring(
                     options.SPOptions.ModulePath.Length).TrimStart('/');
 
@@ -141,6 +148,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         /// <returns>Task</returns>
         public async Task SignOutAsync(AuthenticationProperties properties)
         {
+            _licenseValidator.ValidateSamlServiceProvider();
             var request = context.ToHttpRequestData(options.CookieManager, dataProtector.Unprotect);
 
             // This is not the right behaviour for Asp.Net Core - we should do nothing if

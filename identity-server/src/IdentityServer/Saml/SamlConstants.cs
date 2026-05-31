@@ -42,6 +42,11 @@ public static class SamlConstants
         /// Default path for SLO callback endpoint (post-logout return)
         /// </summary>
         public const string SingleLogoutCallbackPath = "/Saml2/SLO/Callback";
+
+        /// <summary>
+        /// Default path for SP-side logout completion endpoint
+        /// </summary>
+        public const string SpLogoutCompletionPath = "/saml/slo/sp-complete";
     }
 
     public static class RequestProperties

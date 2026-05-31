@@ -12,11 +12,11 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Builder;
@@ -82,16 +82,15 @@ public static class IdentityServerApplicationBuilderExtensions
             var serviceProvider = scope.ServiceProvider;
 
             var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
-            var env = serviceProvider.GetRequiredService<IHostEnvironment>();
-            IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
 
-            var licenseExpirationChecker = serviceProvider.GetRequiredService<LicenseExpirationChecker>();
-            licenseExpirationChecker.CheckExpiration();
+            var licenseValidator = serviceProvider.GetRequiredService<IdentityServerLicenseValidator>();
+            licenseValidator.ValidateLicense();
 
             if (options.KeyManagement.Enabled)
             {
+                licenseValidator.ValidateKeyManagement();
                 var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
-                licenseUsage.FeatureUsed(LicenseFeature.KeyManagement);
+                licenseUsage.KeyManagementUsed();
             }
 
             TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");

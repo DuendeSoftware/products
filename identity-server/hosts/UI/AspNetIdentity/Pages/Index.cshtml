@@ -33,14 +33,14 @@
         </li>
     </ul>
 
-    @if(Model.License != null)
+    @if(Model.License.IsConfigured)
     {
         <h2>License</h2>
         <dl>
             <dt>Serial Number</dt>
             <dd>@Model.License.SerialNumber</dd>
             <dt>Expiration</dt>
-            <dd>@Model.License.Expiration!.Value.ToLongDateString()</dd>
+            <dd>@Model.License.Expiration!.Value.ToString("D")</dd>
         </dl>
     }
 </div>

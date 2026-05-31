@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Services;
@@ -28,7 +29,9 @@ public class IdentityServerMiddleware
     /// </summary>
     /// <param name="next">The next.</param>
     /// <param name="logger">The logger.</param>
-    public IdentityServerMiddleware(RequestDelegate next, ILogger<IdentityServerMiddleware> logger)
+    public IdentityServerMiddleware(
+        RequestDelegate next,
+        ILogger<IdentityServerMiddleware> logger)
     {
         _next = next;
         _sanitizedLogger = new SanitizedLogger<IdentityServerMiddleware>(logger);
@@ -98,7 +101,8 @@ public class IdentityServerMiddleware
                     var issuer = await issuerNameService.GetCurrentAsync(context.RequestAborted);
                     var licenseUsage = context.RequestServices.GetRequiredService<LicenseUsageTracker>();
                     licenseUsage.IssuerUsed(issuer);
-                    IdentityServerLicenseValidator.Instance.ValidateIssuer(issuer);
+                    var licenseValidator = context.RequestServices.GetRequiredService<IdentityServerLicenseValidator>();
+                    licenseValidator.ValidateIssuer(issuer);
 
                     _sanitizedLogger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);
 

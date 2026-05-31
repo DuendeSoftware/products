@@ -9,6 +9,7 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Duende.IdentityServer.Logging.Models;
@@ -42,6 +43,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly ClientLoadedTracker _clientLoadedTracker;
     private readonly ResourceLoadedTracker _resourceLoadedTracker;
     private readonly IMtlsEndpointGenerator _mtlsEndpointGenerator;
+    private readonly IdentityServerLicenseValidator _licenseValidator;
     private readonly ILogger _logger;
     private ValidatedTokenRequest _validatedRequest;
 
@@ -63,6 +65,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         IEventService events,
         TimeProvider timeProvider,
         LicenseUsageTracker licenseUsage,
+        IdentityServerLicenseValidator licenseValidator,
         ClientLoadedTracker clientLoadedTracker,
         ResourceLoadedTracker resourceLoadedTracker,
         IMtlsEndpointGenerator mtlsEndpointGenerator,
@@ -86,9 +89,58 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _refreshTokenService = refreshTokenService;
         _dPoPProofValidator = dPoPProofValidator;
         _events = events;
+        _licenseValidator = licenseValidator;
         _clientLoadedTracker = clientLoadedTracker;
         _resourceLoadedTracker = resourceLoadedTracker;
         _mtlsEndpointGenerator = mtlsEndpointGenerator;
+    }
+
+    internal TokenRequestValidator(
+        IdentityServerOptions options,
+        IIssuerNameService issuerNameService,
+        IServerUrls serverUrls,
+        IAuthorizationCodeStore authorizationCodeStore,
+        IResourceOwnerPasswordValidator resourceOwnerValidator,
+        IProfileService profile,
+        IDeviceCodeValidator deviceCodeValidator,
+        IBackchannelAuthenticationRequestIdValidator backchannelAuthenticationRequestIdValidator,
+        ExtensionGrantValidator extensionGrantValidator,
+        ICustomTokenRequestValidator customRequestValidator,
+        IResourceValidator resourceValidator,
+        IResourceStore resourceStore,
+        IRefreshTokenService refreshTokenService,
+        IDPoPProofValidator dPoPProofValidator,
+        IEventService events,
+        TimeProvider timeProvider,
+        LicenseUsageTracker licenseUsage,
+        ClientLoadedTracker clientLoadedTracker,
+        ResourceLoadedTracker resourceLoadedTracker,
+        IMtlsEndpointGenerator mtlsEndpointGenerator,
+        ILogger<TokenRequestValidator> logger)
+        : this(
+            options,
+            issuerNameService,
+            serverUrls,
+            authorizationCodeStore,
+            resourceOwnerValidator,
+            profile,
+            deviceCodeValidator,
+            backchannelAuthenticationRequestIdValidator,
+            extensionGrantValidator,
+            customRequestValidator,
+            resourceValidator,
+            resourceStore,
+            refreshTokenService,
+            dPoPProofValidator,
+            events,
+            timeProvider,
+            licenseUsage,
+            IdentityServerLicenseValidator.CreateForTests(),
+            clientLoadedTracker,
+            resourceLoadedTracker,
+            mtlsEndpointGenerator,
+            logger)
+    {
     }
 
     // only here for legacy unit tests
@@ -243,8 +295,8 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // DPoP
         if (context.DPoPProofToken.IsPresent())
         {
-            _licenseUsage.FeatureUsed(LicenseFeature.DPoP);
-            IdentityServerLicenseValidator.Instance.ValidateDPoP();
+            _licenseUsage.DPoPUsed();
+            _licenseValidator.ValidateDPoP();
 
             if (context.DPoPProofToken.Length > _options.InputLengthRestrictions.DPoPProofToken)
             {
@@ -317,7 +369,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         var clientId = customValidationContext.Result.ValidatedRequest.ClientId;
         _licenseUsage.ClientUsed(clientId);
         _clientLoadedTracker.TrackClientLoaded(customValidationContext.Result.ValidatedRequest.Client);
-        IdentityServerLicenseValidator.Instance.ValidateClient(clientId);
+        _licenseValidator.ValidateClient(clientId);
         _resourceLoadedTracker.TrackResources(customValidationContext.Result.ValidatedRequest.ValidatedResources.Resources);
 
         return customValidationContext.Result;
@@ -479,7 +531,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
+        if (!string.IsNullOrWhiteSpace(requestedIndicator))
+        {
+            _licenseValidator.ValidateResourceIsolation();
+        }
+
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
         /////////////////////////////////////////////
@@ -827,7 +883,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
+        if (!string.IsNullOrWhiteSpace(requestedIndicator))
+        {
+            _licenseValidator.ValidateResourceIsolation();
+        }
+
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
         _logger.LogDebug("Validation of refresh token request success");
@@ -909,7 +969,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
+        if (!string.IsNullOrWhiteSpace(requestedIndicator))
+        {
+            _licenseValidator.ValidateResourceIsolation();
+        }
+
         _validatedRequest.ValidatedResources = validatedResources;
 
         _logger.LogDebug("Validation of device code token request success");
@@ -930,8 +994,8 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.UnauthorizedClient);
         }
 
-        _licenseUsage.FeatureUsed(LicenseFeature.CIBA);
-        IdentityServerLicenseValidator.Instance.ValidateCiba();
+        _licenseUsage.CibaUsed();
+        _licenseValidator.ValidateCiba();
 
         /////////////////////////////////////////////
         // validate authentication request id parameter
@@ -998,7 +1062,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
+        if (!string.IsNullOrWhiteSpace(requestedIndicator))
+        {
+            _licenseValidator.ValidateResourceIsolation();
+        }
+
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
         _logger.LogDebug("Validation of CIBA token request success");
@@ -1181,7 +1249,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
+        if (!string.IsNullOrWhiteSpace(requestedIndicator))
+        {
+            _licenseValidator.ValidateResourceIsolation();
+        }
+
         _validatedRequest.ValidatedResources = resourceValidationResult.FilterByResourceIndicator(requestedIndicator);
 
         return null;

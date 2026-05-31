@@ -439,7 +439,7 @@ public class HttpContextExtensionsTests
     }
 
     [Fact]
-    public async Task GetIdentityServerSignoutFrameCallbackUrlAsync_does_not_set_SamlLogoutId_for_non_saml_initiated_logout()
+    public async Task GetIdentityServerSignoutFrameCallbackUrlAsync_sets_SamlLogoutId_when_saml_sessions_exist_even_without_saml_initiated_logout()
     {
         var sp = CreateSamlServiceProvider("https://sp.example.com");
         var context = CreateContextWithUserSessionAndSaml("Test", [], [sp]);
@@ -465,7 +465,7 @@ public class HttpContextExtensionsTests
         result.ShouldNotBeNull();
         var messageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>() as MockMessageStore<LogoutNotificationContext>;
         var storedMessage = messageStore!.Messages.Values.Single();
-        storedMessage.Data.SamlLogoutId.ShouldBeNull();
+        storedMessage.Data.SamlLogoutId.ShouldBe("test-logout-id");
     }
 
     private static SamlServiceProvider CreateSamlServiceProvider(string entityId) => new SamlServiceProvider

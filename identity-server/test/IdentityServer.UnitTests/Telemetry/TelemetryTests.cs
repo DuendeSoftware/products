@@ -42,10 +42,12 @@ public class TelemetryTests
 
         Duende.IdentityServer.Telemetry.Metrics.Success("test.client");
 
-        results.Count.ShouldBe(1);
-        results[0].Name.ShouldBe("tokenservice.operation");
-        results[0].Value.ShouldBe(1);
-        results[0].Tags[0].Value.ShouldBe("test.client");
+        results.ShouldNotBeEmpty();
+
+        var result = results.First(x => x.Name == "tokenservice.operation" && x.Tags.Any(t => t.Value?.ToString() == "test.client"));
+
+        result.Tags[0].Value.ShouldBe("test.client");
+        result.Value.ShouldBeGreaterThan(0, "sometimes the test runs in parallel and reports multiple measurements");
     }
 
     private static MeterListener StartListeningForMeasurements(

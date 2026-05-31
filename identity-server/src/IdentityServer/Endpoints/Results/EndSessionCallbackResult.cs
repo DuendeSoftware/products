@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -46,6 +45,14 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
     private readonly IdentityServerOptions _options;
     private readonly ILogger<EndSessionCallbackHttpWriter> _logger;
 
+    /// <summary>
+    /// Script that monitors all iframe load events and sends a postMessage to the
+    /// parent window when all downstream logout iframes have completed loading.
+    /// This enables the SAML SP logout flow to know when downstream notifications
+    /// are done before sending the LogoutResponse to the upstream IdP.
+    /// </summary>
+    internal static readonly string IframeCompletionScript = GetEmbeddedResource($"{typeof(EndSessionCallbackHttpWriter).Namespace}.iframe-completion.js");
+
     public async Task WriteHttpResponse(EndSessionCallbackResult result, HttpContext context)
     {
         if (result.Result.IsError)
@@ -80,15 +87,18 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
 
             foreach (var origin in origins.Distinct())
             {
-                sb.Append(origin);
                 if (sb.Length > 0)
                 {
                     sb.Append(' ');
                 }
+                sb.Append(origin);
             }
 
-            // the hash matches the embedded style element being used below
-            context.Response.AddStyleCspHeaders(_options.Csp, IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle, sb.ToString());
+            context.Response.AddStyleAndScriptCspHeaders(
+                _options.Csp,
+                IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle,
+                IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionCallbackScript,
+                sb.ToString());
         }
     }
 
@@ -125,6 +135,21 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
             }
         }
 
+        sb.Append(CultureInfo.InvariantCulture, $"<script>{IframeCompletionScript}</script>");
+
         return sb.ToString();
+    }
+
+    private static string GetEmbeddedResource(string resourceName)
+    {
+        var assembly = typeof(EndSessionCallbackHttpWriter).Assembly;
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
+        }
+
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 }

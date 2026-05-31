@@ -6,15 +6,17 @@ using Duende.IdentityServer.Configuration.Configuration;
 using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Configuration.ResponseGeneration;
 using Duende.IdentityServer.Configuration.Validation.DynamicClientRegistration;
+using Duende.Private.Licencing.V2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
-/// Builder class for setting up services for IdentityServer.Configuration. 
+/// Builder class for setting up services for IdentityServer.Configuration.
 /// </summary>
 public class IdentityServerConfigurationBuilder
 {
@@ -69,6 +71,16 @@ public static class ConfigurationServiceCollectionExtensions
         builder.Services.TryAddTransient<IDynamicClientRegistrationResponseGenerator, DynamicClientRegistrationResponseGenerator>();
         builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerConfigurationOptions>>(
             sp => new PostConfigureLicenseKey(sp.GetService<IConfiguration>() ?? new ConfigurationBuilder().Build()));
+
+        builder.Services.TryAddSingleton(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<V2LicenseAccessor>>();
+            var options = sp.GetRequiredService<IOptions<IdentityServerConfigurationOptions>>().Value;
+            var accessor = new V2LicenseAccessor(() => options.LicenseKey, logger);
+            return accessor.Current;
+        });
+        builder.Services.TryAddSingleton<LicenseValidator>();
+        builder.Services.TryAddSingleton<IdentityServerConfigurationLicenseValidator>();
 
         return builder;
     }

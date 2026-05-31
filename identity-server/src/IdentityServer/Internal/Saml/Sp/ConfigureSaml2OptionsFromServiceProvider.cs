@@ -4,10 +4,14 @@
 #nullable enable
 
 using System.Security.Cryptography.X509Certificates;
+using Duende.IdentityServer.Hosting.FederatedSignOut;
 using Duende.IdentityServer.Internal.Saml.Sp.Bindings;
 using Duende.IdentityServer.Internal.Saml.Sp.Configuration;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
+using Duende.IdentityServer.Licensing;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Configuration;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Saml2HandlerOptions = Duende.IdentityServer.Internal.Saml.Sp.AspNetCore.Saml2Options;
 using SpIdentityProvider = Duende.IdentityServer.Internal.Saml.Sp.IdentityProvider;
@@ -23,19 +27,27 @@ internal sealed class ConfigureSaml2OptionsFromServiceProvider : IConfigureNamed
 {
     private readonly string _scheme;
     private readonly IOptionsMonitor<SamlServiceProviderOptions> _spOptionsMonitor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly TimeProvider _timeProvider;
+    private readonly IdentityServerLicenseValidator _licenseValidator;
 
     public ConfigureSaml2OptionsFromServiceProvider(
         string scheme,
         IOptionsMonitor<SamlServiceProviderOptions> spOptionsMonitor,
-        TimeProvider timeProvider)
+        IHttpContextAccessor httpContextAccessor,
+        TimeProvider timeProvider,
+        IdentityServerLicenseValidator licenseValidator)
     {
         _scheme = scheme;
         _spOptionsMonitor = spOptionsMonitor;
+        _httpContextAccessor = httpContextAccessor;
         _timeProvider = timeProvider;
+        _licenseValidator = licenseValidator;
     }
 
-    public void Configure(Saml2HandlerOptions options) { }
+    public void Configure(Saml2HandlerOptions options)
+    {
+    }
 
     public void Configure(string? name, Saml2HandlerOptions options)
     {
@@ -87,13 +99,36 @@ internal sealed class ConfigureSaml2OptionsFromServiceProvider : IConfigureNamed
 
         if (!string.IsNullOrWhiteSpace(spOptions.IdpEntityId))
         {
+            _licenseValidator.ValidateSamlIdp(spOptions.IdpEntityId);
             var idp = BuildIdentityProvider(spOptions, options.SPOptions, _timeProvider);
             options.IdentityProviders.Add(idp);
         }
+
+        var httpContextAccessor = _httpContextAccessor;
+        var existingLogoutResponseCreated = options.Notifications.LogoutResponseCreated;
+        options.Notifications.LogoutResponseCreated = (response, request, user, idp) =>
+        {
+            existingLogoutResponseCreated?.Invoke(response, request, user, idp);
+
+            var bindingUri = idp.SingleLogoutServiceBinding switch
+            {
+                Saml2BindingType.HttpRedirect => SamlConstants.Bindings.HttpRedirect,
+                Saml2BindingType.HttpPost => SamlConstants.Bindings.HttpPost,
+                _ => idp.SingleLogoutServiceBinding.ToString()
+            };
+
+            SamlSpLogoutContext.SetFromNotification(
+                httpContextAccessor.HttpContext,
+                idp.EntityId.Id,
+                request.Id.Value,
+                response.RelayState,
+                bindingUri,
+                idp.SingleLogoutServiceResponseUrl);
+        };
     }
 
-    private static SpIdentityProvider BuildIdentityProvider(
-        SamlServiceProviderOptions provider, SPOptions spOptions, TimeProvider timeProvider)
+    private static SpIdentityProvider BuildIdentityProvider(SamlServiceProviderOptions provider, SPOptions spOptions,
+        TimeProvider timeProvider)
     {
         var idp = new SpIdentityProvider(new EntityId(provider.IdpEntityId!), spOptions, timeProvider)
         {

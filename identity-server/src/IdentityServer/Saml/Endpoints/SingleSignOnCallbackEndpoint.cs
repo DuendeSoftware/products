@@ -8,6 +8,7 @@ using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Saml.Bindings;
 using Duende.IdentityServer.Saml.Endpoints.Results;
 using Duende.IdentityServer.Saml.Models;
@@ -36,6 +37,7 @@ internal sealed class SingleSignOnCallbackEndpoint(
     ISaml2IssuerNameService issuerNameService,
     IServerUrls serverUrls,
     IEventService events,
+    IdentityServerLicenseValidator licenseValidator,
     IOptions<IdentityServerOptions> identityServerOptions) : IEndpointHandler
 {
     private readonly IdentityServerOptions _options = identityServerOptions.Value;
@@ -45,6 +47,8 @@ internal sealed class SingleSignOnCallbackEndpoint(
     public async Task<IEndpointResult?> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.SamlSingleSignOnCallback + "Endpoint");
+
+        licenseValidator.ValidateSamlIdp();
 
         var ct = context.RequestAborted;
 

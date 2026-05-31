@@ -4,7 +4,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Http;
 
@@ -12,8 +12,7 @@ namespace Duende.IdentityServer.Hosting;
 
 internal class EndpointRouter(
     IEnumerable<Endpoint> endpoints,
-    ProtocolRequestCounter requestCounter,
-    LicenseExpirationChecker licenseExpirationChecker,
+    IdentityServerLicenseValidator licenseValidator,
     IdentityServerOptions options,
     SanitizedLogger<EndpointRouter> sanitizedLogger)
     : IEndpointRouter
@@ -29,8 +28,7 @@ internal class EndpointRouter(
                 var endpointName = endpoint.Name;
                 sanitizedLogger.LogDebug("Request path {path} matched to endpoint type {endpoint}", context.Request.Path, endpointName);
 
-                requestCounter.Increment();
-                licenseExpirationChecker.CheckExpiration();
+                licenseValidator.ValidateLicense();
 
                 return GetEndpointHandler(endpoint, context);
             }

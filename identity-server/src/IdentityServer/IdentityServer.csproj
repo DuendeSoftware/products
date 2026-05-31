@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Duende.Private.Licensing" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" />
@@ -38,6 +39,10 @@
   <ItemGroup>
     <None Remove="Endpoints\Results\check-session-result.js" />
     <EmbeddedResource Include="Endpoints\Results\check-session-result.js" />
+    <None Remove="Endpoints\Results\iframe-completion.js" />
+    <EmbeddedResource Include="Endpoints\Results\iframe-completion.js" />
+    <None Remove="Hosting\FederatedSignOut\federated-signout.js" />
+    <EmbeddedResource Include="Hosting\FederatedSignOut\federated-signout.js" />
   </ItemGroup>
 
 </Project>

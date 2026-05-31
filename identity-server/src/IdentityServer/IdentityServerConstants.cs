@@ -224,6 +224,7 @@ public static class IdentityServerConstants
         public const string SamlSingleSignOnCallback = "Saml2 SingleSignOnCallback";
         public const string SamlSingleLogoutService = "Saml2 SingleLogoutService";
         public const string SamlSingleLogoutCallback = "Saml2 SingleLogoutCallback";
+        public const string SamlSpLogoutCompletion = "Saml2 SpLogoutCompletion";
     }
 
     public static class ContentSecurityPolicyHashes
@@ -247,6 +248,12 @@ public static class IdentityServerConstants
         /// The hash of the inline script used for SAML auto-post form submissions.
         /// </summary>
         public const string SamlAutoPostScript = "sha256-1cDf9gWlS6Mjg+iEJCbdzTerOHORw4iNiJr4endY8Ng=";
+
+        /// <summary>
+        /// The hash of the inline script used on the end session callback to signal
+        /// iframe completion via postMessage.
+        /// </summary>
+        public const string EndSessionCallbackScript = "sha256-yqj8umm7YHlcN+T4nLs7OI9mZe2oiIoV0I6YgNQZAiw=";
     }
 
     public static class ProtocolRoutePaths

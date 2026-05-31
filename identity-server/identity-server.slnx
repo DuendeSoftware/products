@@ -73,7 +73,6 @@
     <Project Path="src/IdentityServer.ConformanceReport/IdentityServer.ConformanceReport.csproj" />
     <Project Path="src/IdentityServer/IdentityServer.csproj" />
     <Project Path="src/Storage/IdentityServer.Storage.csproj" />
-    <Project Path="src/UserManagement/IdentityServer.UserManagement.csproj" />
   </Folder>
   <Folder Name="/templates/">
     <Project Path="templates/src/IdentityServer/IdentityServerTemplate.csproj" />
@@ -87,6 +86,5 @@
     <Project Path="test/IdentityServer.EndToEndTests/IdentityServer.EndToEndTests.csproj" />
     <Project Path="test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
-    <Project Path="test/IdentityServer.UserManagement.UnitTests/IdentityServer.UserManagement.UnitTests.csproj" />
   </Folder>
 </Solution>

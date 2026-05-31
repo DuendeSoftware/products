@@ -6,6 +6,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Saml.Bindings;
 using Duende.IdentityServer.Saml.Endpoints.Results;
 using Duende.IdentityServer.Saml.ResponseHandling;
@@ -32,11 +33,14 @@ internal sealed class SingleLogoutServiceEndpoint(
     IEventService events,
     IdentityServerOptions options,
     ISamlServiceProviderStore serviceProviderStore,
+    IdentityServerLicenseValidator licenseValidator,
     ILogger<SingleLogoutServiceEndpoint> logger) : IEndpointHandler
 {
     public async Task<IEndpointResult?> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.SamlSingleLogoutService + "Endpoint");
+
+        licenseValidator.ValidateSamlIdp();
 
         if (!HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsPost(context.Request.Method))
         {

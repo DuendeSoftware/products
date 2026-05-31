@@ -15,6 +15,7 @@
     <NoWarn>$(NoWarn);CA1309</NoWarn><!-- Use ordinal StringComparison -->
     <NoWarn>$(NoWarn);CA1310</NoWarn><!-- Specify StringComparison for correctness -->
     <NoWarn>$(NoWarn);CA1311</NoWarn><!-- Specify a culture or use an invariant version -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn><!-- Xml comments not required-->
     <NoWarn>$(NoWarn);CA1707</NoWarn><!-- Identifiers should not contain underscores -->
     <NoWarn>$(NoWarn);CA1708</NoWarn><!-- Identifiers should differ by more than case -->
     <NoWarn>$(NoWarn);CA1711</NoWarn><!-- Identifiers should not have incorrect suffix -->
@@ -39,5 +40,7 @@
     <NoWarn>$(NoWarn);CA2201</NoWarn><!-- Do not raise reserved exception types -->
     <NoWarn>$(NoWarn);CA2211</NoWarn><!-- Non-constant fields should not be visible -->
     <NoWarn>$(NoWarn);CA5350</NoWarn><!-- Do not use weak cryptographic algorithms -->
+
+
   </PropertyGroup>
 </Project>

@@ -4,6 +4,7 @@
 #nullable enable
 using System.Xml;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Bindings;
@@ -252,6 +253,7 @@ public sealed class ErrorInspectorConfigurationTests
             new TestEventService(),
             options,
             spStore,
+            IdentityServerLicenseValidator.CreateForTests(),
             NullLogger<SingleLogoutServiceEndpoint>.Instance);
     }
 
@@ -284,6 +286,7 @@ public sealed class ErrorInspectorConfigurationTests
             new StubIssuerNameService(IdpEntityId),
             new StubSsoInteractionResponseGenerator(),
             new StubSsoResponseGenerator(),
+            IdentityServerLicenseValidator.CreateForTests(),
             new TestEventService(),
             NullLogger<SingleSignOnServiceEndpoint>.Instance);
     }

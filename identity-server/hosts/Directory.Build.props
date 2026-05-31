@@ -5,5 +5,7 @@
     <AnalysisMode>None</AnalysisMode>
     <IsIdSrvProject>true</IsIdSrvProject>
     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+    <!-- CS1591: Missing XML comment - not required in host projects -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 </Project>

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Xml;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Bindings;
@@ -73,6 +74,7 @@ public sealed class SingleLogoutServiceEndpointTests
             new TestEventService(),
             options,
             spStore,
+            IdentityServerLicenseValidator.CreateForTests(),
             NullLogger<SingleLogoutServiceEndpoint>.Instance);
     }
 

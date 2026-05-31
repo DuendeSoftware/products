@@ -5,10 +5,9 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging.Abstractions;
 using UnitTests.Common;
 
 namespace UnitTests.Hosting;
@@ -25,10 +24,8 @@ public class EndpointRouterTests
         _pathMap = new Dictionary<string, Duende.IdentityServer.Hosting.Endpoint>();
         _endpoints = new List<Duende.IdentityServer.Hosting.Endpoint>();
         _options = new IdentityServerOptions();
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance);
-        var licenseExpirationChecker = new LicenseExpirationChecker(licenseAccessor, new FakeTimeProvider(), new NullLoggerFactory());
-        var protocolRequestCounter = new ProtocolRequestCounter(licenseAccessor, new NullLoggerFactory());
-        _subject = new EndpointRouter(_endpoints, protocolRequestCounter, licenseExpirationChecker, _options, new SanitizedLogger<EndpointRouter>(TestLogger.Create<EndpointRouter>()));
+        var licenseValidator = IdentityServerLicenseValidator.CreateForTests();
+        _subject = new EndpointRouter(_endpoints, licenseValidator, _options, new SanitizedLogger<EndpointRouter>(TestLogger.Create<EndpointRouter>()));
     }
 
     [Fact]

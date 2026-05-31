@@ -7,6 +7,7 @@
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging;
@@ -32,6 +33,7 @@ namespace Duende.IdentityServer.Validation;
 /// to a proof key.</param>
 /// <param name="serverUrls">The server urls service</param>
 /// <param name="licenseUsage">The feature manager</param>
+/// <param name="licenseValidator">The license validator</param>
 /// <param name="options">The IdentityServer Options</param>
 /// <param name="mtlsEndpointGenerator">The mTLS endpoint generator</param>
 /// <param name="logger">The logger</param>
@@ -40,15 +42,18 @@ internal class PushedAuthorizationRequestValidator(
     IDPoPProofValidator dpopProofValidator,
     IServerUrls serverUrls,
     LicenseUsageTracker licenseUsage,
+    IdentityServerLicenseValidator licenseValidator,
     IdentityServerOptions options,
     IMtlsEndpointGenerator mtlsEndpointGenerator,
     ILogger<PushedAuthorizationRequestValidator> logger) : IPushedAuthorizationRequestValidator
 {
+    private readonly IdentityServerLicenseValidator _licenseValidator = licenseValidator;
+
     public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context, Ct ct)
     {
         // Licensing
-        licenseUsage.FeatureUsed(LicenseFeature.PAR);
-        IdentityServerLicenseValidator.Instance.ValidatePar();
+        licenseUsage.ParUsed();
+        _licenseValidator.ValidatePar();
 
         // -- Request URI validation --
         var validatedRequest = await ValidateRequestUriAsync(context);

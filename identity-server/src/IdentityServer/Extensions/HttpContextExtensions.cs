@@ -54,12 +54,11 @@ public static class HttpContextExtensions
     /// </summary>
     /// <param name="context">The current HTTP context.</param>
     /// <param name="logoutMessage">The logout message, if one exists.</param>
-    /// <param name="logoutId">The logout message store ID. When present and the logout
-    /// was initiated by a SAML SP, this is stored in
+    /// <param name="logoutId">An identifier used to correlate SAML logout session tracking.
+    /// When present and downstream SAML SPs exist, this is stored in
     /// <see cref="LogoutNotificationContext.SamlLogoutId"/> so that the
     /// <c>EndSessionRequestValidator</c> can create a <c>SamlLogoutSession</c> to
-    /// track SP logout responses. Only set for SAML-initiated logouts (when
-    /// <see cref="LogoutMessage.SamlServiceProviderEntityId"/> is non-null).</param>
+    /// track SP logout responses.</param>
     internal static async Task<string> GetIdentityServerSignoutFrameCallbackUrlAsync(this HttpContext context, LogoutMessage logoutMessage = null, string logoutId = null)
     {
         var userSession = context.RequestServices.GetRequiredService<IUserSession>();
@@ -92,7 +91,7 @@ public static class HttpContextExtensions
                     ClientIds = clientIds,
                     SamlSessions = samlSessions,
                     SamlInitiatingServiceProviderEntityId = logoutMessage.SamlServiceProviderEntityId,
-                    SamlLogoutId = logoutMessage.SamlServiceProviderEntityId != null ? logoutId : null
+                    SamlLogoutId = samlSessions.Count > 0 ? logoutId : null
                 };
             }
         }
@@ -111,7 +110,8 @@ public static class HttpContextExtensions
                     SubjectId = currentSubId,
                     SessionId = await userSession.GetSessionIdAsync(context.RequestAborted),
                     ClientIds = clientIds,
-                    SamlSessions = samlSessions
+                    SamlSessions = samlSessions,
+                    SamlLogoutId = samlSessions.Count > 0 ? logoutId : null
                 };
             }
         }
