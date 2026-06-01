@@ -10,6 +10,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.ResponseHandling;
@@ -24,6 +25,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
     private readonly IClientSecretValidator _clientValidator;
     private readonly IPushedAuthorizationRequestValidator _parValidator;
     private readonly IPushedAuthorizationResponseGenerator _responseGenerator;
+    private readonly IdentityServerLicenseValidator _licenseValidator;
     private readonly LicenseUsageTracker _features;
     private readonly IdentityServerOptions _options;
     private readonly ILogger<PushedAuthorizationEndpoint> _logger;
@@ -32,6 +34,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         IClientSecretValidator clientValidator,
         IPushedAuthorizationRequestValidator parValidator,
         IPushedAuthorizationResponseGenerator responseGenerator,
+        IdentityServerLicenseValidator licenseValidator,
         LicenseUsageTracker features,
         IdentityServerOptions options,
         ILogger<PushedAuthorizationEndpoint> logger
@@ -40,6 +43,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         _clientValidator = clientValidator;
         _parValidator = parValidator;
         _responseGenerator = responseGenerator;
+        _licenseValidator = licenseValidator;
         _features = features;
         _options = options;
         _logger = logger;
@@ -50,6 +54,11 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.PushedAuthorization);
 
         _logger.LogDebug("Start pushed authorization request");
+
+        if (!_licenseValidator.ValidatePar())
+        {
+            return new StatusCodeResult(HttpStatusCode.NotFound);
+        }
 
         _features.ParUsed();
 

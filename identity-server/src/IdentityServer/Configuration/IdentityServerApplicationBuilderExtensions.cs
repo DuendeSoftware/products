@@ -14,6 +14,7 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Saml.Endpoints;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
@@ -88,9 +89,38 @@ public static class IdentityServerApplicationBuilderExtensions
 
             if (options.KeyManagement.Enabled)
             {
-                licenseValidator.ValidateKeyManagement();
                 var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
                 licenseUsage.KeyManagementUsed();
+
+                if (!licenseValidator.ValidateKeyManagement())
+                {
+                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Key Management feature.");
+                }
+            }
+
+            if (serviceProvider.GetService<IServerSideSessionsMarker>() != null)
+            {
+                if (!licenseValidator.ValidateServerSideSessions())
+                {
+                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Server-Side Sessions feature.");
+                }
+            }
+
+            if (serviceProvider.GetRequiredService<IIdentityProviderStore>() is not NopIdentityProviderStore)
+            {
+                if (!licenseValidator.ValidateDynamicProviders())
+                {
+                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Dynamic Identity Providers feature.");
+                }
+            }
+
+            // Try to get the SAML metadata endpoint. If it exists, then we need to validate the license for SAML.
+            if (serviceProvider.GetService<MetadataEndpoint>() != null)
+            {
+                if (!licenseValidator.ValidateSamlIdp())
+                {
+                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the SAML 2.0 Identity Provider feature.");
+                }
             }
 
             TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");

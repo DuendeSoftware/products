@@ -5,7 +5,6 @@
 using System.Xml;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
-using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Bindings;
@@ -57,7 +56,6 @@ public sealed class SingleLogoutCallbackEndpointTests
             issuerNameService,
             logoutSessionStore,
             new TestEventService(),
-            IdentityServerLicenseValidator.CreateForTests(),
             NullLogger<SingleLogoutCallbackEndpoint>.Instance);
     }
 

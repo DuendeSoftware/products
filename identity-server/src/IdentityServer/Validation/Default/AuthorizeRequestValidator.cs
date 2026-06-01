@@ -544,11 +544,20 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             }
         }
 
-
         //////////////////////////////////////////////////////////
         // check for resource indicators and valid format
         //////////////////////////////////////////////////////////
         var resourceIndicators = request.Raw.GetValues(OidcConstants.AuthorizeRequest.Resource);
+
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators!);
+        if (resourceIndicators is { Length: > 0 })
+        {
+            if (!_licenseValidator.ValidateResourceIsolation())
+            {
+                resourceIndicators = [];
+            }
+        }
+
         if (resourceIndicators == null)
         {
             request.RequestedResourceIndicators = [];
@@ -596,12 +605,6 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             {
                 return Invalid(request, OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope");
             }
-        }
-
-        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators!);
-        if (resourceIndicators is { Length: > 0 })
-        {
-            _licenseValidator.ValidateResourceIsolation();
         }
 
         if (validatedResources.Resources.IdentityResources.Count > 0 && !request.IsOpenIdRequest)

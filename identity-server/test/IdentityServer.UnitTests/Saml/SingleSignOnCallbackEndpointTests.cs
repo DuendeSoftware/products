@@ -8,7 +8,6 @@ using System.Xml;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
-using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Bindings;
@@ -96,7 +95,6 @@ public sealed class SingleSignOnCallbackEndpointTests
             issuerNameService,
             new MockServerUrls { Origin = "https://idp.example.com" },
             new TestEventService(),
-            IdentityServerLicenseValidator.CreateForTests(),
             Options.Create(new IdentityServerOptions
             {
                 UserInteraction = new UserInteractionOptions

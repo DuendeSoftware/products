@@ -296,7 +296,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
         if (context.DPoPProofToken.IsPresent())
         {
             _licenseUsage.DPoPUsed();
-            _licenseValidator.ValidateDPoP();
+            if (!_licenseValidator.ValidateDPoP())
+            {
+                IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the DPoP feature.");
+            }
 
             if (context.DPoPProofToken.Length > _options.InputLengthRestrictions.DPoPProofToken)
             {
@@ -533,7 +536,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         if (!string.IsNullOrWhiteSpace(requestedIndicator))
         {
-            _licenseValidator.ValidateResourceIsolation();
+            if (!_licenseValidator.ValidateResourceIsolation())
+            {
+                requestedIndicator = string.Empty;
+            }
         }
 
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
@@ -885,7 +891,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         if (!string.IsNullOrWhiteSpace(requestedIndicator))
         {
-            _licenseValidator.ValidateResourceIsolation();
+            if (!_licenseValidator.ValidateResourceIsolation())
+            {
+                requestedIndicator = string.Empty;
+            }
         }
 
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
@@ -969,10 +978,6 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        if (!string.IsNullOrWhiteSpace(requestedIndicator))
-        {
-            _licenseValidator.ValidateResourceIsolation();
-        }
 
         _validatedRequest.ValidatedResources = validatedResources;
 
@@ -1064,7 +1069,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         if (!string.IsNullOrWhiteSpace(requestedIndicator))
         {
-            _licenseValidator.ValidateResourceIsolation();
+            if (!_licenseValidator.ValidateResourceIsolation())
+            {
+                requestedIndicator = string.Empty;
+            }
         }
 
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
@@ -1251,7 +1259,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         if (!string.IsNullOrWhiteSpace(requestedIndicator))
         {
-            _licenseValidator.ValidateResourceIsolation();
+            if (!_licenseValidator.ValidateResourceIsolation())
+            {
+                requestedIndicator = string.Empty;
+            }
         }
 
         _validatedRequest.ValidatedResources = resourceValidationResult.FilterByResourceIndicator(requestedIndicator);

@@ -5,6 +5,7 @@ using Duende.IdentityServer.Internal.Saml.Sp;
 using Duende.IdentityServer.Internal.Saml.Sp.AspNetCore;
 using Duende.IdentityServer.Saml.Configuration;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Saml2HandlerOptions = Duende.IdentityServer.Internal.Saml.Sp.AspNetCore.Saml2Options;
@@ -15,15 +16,22 @@ public sealed class SamlStandaloneRegistrationTests
 {
     private const string Category = "SAML Standalone Registration Tests";
 
-    [Fact]
-    [Trait("Category", Category)]
-    public void AddSamlServiceProvider_registers_handler_for_default_scheme()
+    private static ServiceCollection CreateServices()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddLogging();
         services.AddOptions();
         services.AddDataProtection();
         services.AddAuthentication();
+        return services;
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void AddSamlServiceProvider_registers_handler_for_default_scheme()
+    {
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -45,11 +53,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_registers_handler_for_custom_scheme()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider("custom-saml", opts =>
@@ -71,11 +75,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_registers_post_configure()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -95,11 +95,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_registers_configure_from_service_provider()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -119,11 +115,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_handler_is_resolvable()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -143,11 +135,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_maps_sp_entity_id_to_handler_options()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -169,11 +157,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_maps_idp_configuration()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -202,11 +186,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_multiple_schemes_have_isolated_configuration()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider("scheme-a", opts =>
@@ -251,11 +231,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_validates_missing_sp_entity_id()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -275,11 +251,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_validates_missing_idp_entity_id()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -299,11 +271,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_validates_missing_single_sign_on_service_url()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>
@@ -324,11 +292,7 @@ public sealed class SamlStandaloneRegistrationTests
     [Trait("Category", Category)]
     public void AddSamlServiceProvider_validates_invalid_binding_type()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddOptions();
-        services.AddDataProtection();
-        services.AddAuthentication();
+        var services = CreateServices();
 
         services.AddIdentityServer();
         services.AddAuthentication().AddSamlServiceProvider(opts =>

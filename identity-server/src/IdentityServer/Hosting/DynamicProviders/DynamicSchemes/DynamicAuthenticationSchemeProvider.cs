@@ -18,7 +18,6 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
 {
     private readonly IAuthenticationSchemeProvider _inner;
     private readonly DynamicProviderOptions _options;
-    private readonly IdentityServerLicenseValidator _licenseValidator;
     private readonly LicenseUsageTracker _licenseUsageTracker;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<DynamicAuthenticationSchemeProvider> _logger;
@@ -33,7 +32,6 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
     {
         _inner = inner.Instance;
         _options = options;
-        _licenseValidator = licenseValidator;
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
         _licenseUsageTracker = licenseUsageTracker;
@@ -93,7 +91,6 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
                 var providerType = _options.FindProviderType(idp.Type);
                 if (providerType != null)
                 {
-                    _licenseValidator.ValidateDynamicProviders();
                     _licenseUsageTracker.DynamicProvidersUsed();
                     dynamicScheme = new DynamicAuthenticationScheme(idp, providerType.HandlerType);
                     cache.Add(name, dynamicScheme);

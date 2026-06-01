@@ -20,21 +20,22 @@ internal sealed class IdentityServerLicenseValidator(LicenseValidator validator)
     private readonly ConcurrentDictionary<string, byte> _samlServiceProviders = new();
     private readonly ConcurrentDictionary<string, byte> _samlIdps = new();
 
-    internal void ValidateDPoP() => validator.ValidateFeature(SkuIds.PTC_006);
+    internal bool ValidateDPoP() => validator.ValidateFeature(SkuIds.PTC_006);
 
-    internal void ValidateResourceIsolation() => validator.ValidateFeature(SkuIds.IS_001);
+    internal bool ValidateResourceIsolation() =>
+        validator.ValidateFeature(SkuIds.IS_001, "Resource indicators have been ignored and will not be used.");
 
-    internal void ValidateCiba() => validator.ValidateFeature(SkuIds.PTC_022);
+    internal bool ValidateCiba() => validator.ValidateFeature(SkuIds.PTC_022);
 
-    internal void ValidatePar() => validator.ValidateFeature(SkuIds.PTC_004);
+    internal bool ValidatePar() => validator.ValidateFeature(SkuIds.PTC_004);
 
-    internal void ValidateDynamicProviders() => validator.ValidateFeature(SkuIds.PLT_005);
+    internal bool ValidateDynamicProviders() => validator.ValidateFeature(SkuIds.PLT_005);
 
-    internal void ValidateServerSideSessions() => validator.ValidateFeature(SkuIds.PLT_021);
+    internal bool ValidateServerSideSessions() => validator.ValidateFeature(SkuIds.PLT_021);
 
-    internal void ValidateKeyManagement() => validator.ValidateFeature(SkuIds.PLT_004);
+    internal bool ValidateKeyManagement() => validator.ValidateFeature(SkuIds.PLT_004);
 
-    internal void ValidateSamlIdp() => validator.ValidateFeature(SkuIds.PTC_010);
+    internal bool ValidateSamlIdp() => validator.ValidateFeature(SkuIds.PTC_010);
 
     internal void ValidateSamlIdp(string entityId)
     {
@@ -46,7 +47,7 @@ internal sealed class IdentityServerLicenseValidator(LicenseValidator validator)
         validator.ValidateQuantized(SkuIds.PTC_014, _samlIdps.Count);
     }
 
-    internal void ValidateSamlServiceProvider() => validator.ValidateFeature(SkuIds.PTC_011);
+    internal bool ValidateSamlServiceProvider() => validator.ValidateFeature(SkuIds.PTC_011);
 
     internal void ValidateSamlServiceProvider(string entityId)
     {
@@ -80,10 +81,13 @@ internal sealed class IdentityServerLicenseValidator(LicenseValidator validator)
 
     internal void ValidateLicense() => validator.ValidateLicenseExpiry();
 
+    internal static void ThrowInvalidLicenseException(string message) => throw new Exception(message);
+
     internal static IdentityServerLicenseValidator CreateForTests()
     {
         var v2License = new V2LicenseAccessor(static () => null, NullLogger<V2LicenseAccessor>.Instance).Current;
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
         return new IdentityServerLicenseValidator(
-            new LicenseValidator(v2License, NullLogger<LicenseValidator>.Instance, TimeProvider.System));
+            new LicenseValidator(v2License, NullLogger<LicenseValidator>.Instance, TimeProvider.System, configuration));
     }
 }

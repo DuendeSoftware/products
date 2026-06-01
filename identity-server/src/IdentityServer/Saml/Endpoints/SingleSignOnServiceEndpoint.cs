@@ -40,8 +40,6 @@ internal sealed class SingleSignOnServiceEndpoint(
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.SamlSingleSignOnService + "Endpoint");
 
-        licenseValidator.ValidateSamlIdp();
-
         var binding = frontChannelBindings.FirstOrDefault(binding => binding.CanUnBind(context.Request));
         if (binding == null)
         {

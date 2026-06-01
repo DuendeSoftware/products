@@ -142,6 +142,13 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         // check for resource indicators and valid format
         //////////////////////////////////////////////////////////
         var resourceIndicators = _validatedRequest.Raw.GetValues(OidcConstants.AuthorizeRequest.Resource);
+        if (resourceIndicators is { Length: > 0 })
+        {
+            if (!_licenseValidator.ValidateResourceIsolation())
+            {
+                resourceIndicators = [];
+            }
+        }
         if (resourceIndicators == null)
         {
             _validatedRequest.RequestedResourceIndicators = [];
@@ -185,10 +192,6 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         }
 
         _licenseUsage.ResourceIndicatorsUsed(resourceIndicators);
-        if (resourceIndicators is { Length: > 0 })
-        {
-            _licenseValidator.ValidateResourceIsolation();
-        }
         _validatedRequest.ValidatedResources = validatedResources;
 
 

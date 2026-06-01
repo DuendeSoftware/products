@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
@@ -66,7 +65,6 @@ public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<C
                 return;
             }
 
-            _httpContextAccessor.HttpContext?.RequestServices.GetRequiredService<IdentityServerLicenseValidator>().ValidateServerSideSessions();
             var licenseUsage = _httpContextAccessor.HttpContext?.RequestServices.GetRequiredService<LicenseUsageTracker>();
             licenseUsage?.ServerSideSessionsUsed();
 

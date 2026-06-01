@@ -7,6 +7,7 @@ using Duende.IdentityServer.Internal.Saml.Sp.AspNetCore;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -27,6 +28,7 @@ public class SamlDynamicProviderTests
     public void add_saml_dynamic_provider_registers_saml_provider_type()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddLogging();
         services.AddOptions();
         services.AddDataProtection();
@@ -60,6 +62,7 @@ public class SamlDynamicProviderTests
         };
 
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddLogging();
         services.AddOptions();
         services.AddDataProtection();
@@ -98,6 +101,7 @@ public class SamlDynamicProviderTests
     public void saml_configure_options_is_registered()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddLogging();
         services.AddOptions();
         services.AddDataProtection();
@@ -120,6 +124,7 @@ public class SamlDynamicProviderTests
     public void post_configure_saml2_options_for_dynamic_is_registered()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddLogging();
         services.AddOptions();
         services.AddDataProtection();
@@ -141,6 +146,7 @@ public class SamlDynamicProviderTests
     public void saml_configure_options_defaults_sp_entity_id_from_issuer_when_not_set()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddLogging();
         services.AddOptions();
         services.AddDataProtection();

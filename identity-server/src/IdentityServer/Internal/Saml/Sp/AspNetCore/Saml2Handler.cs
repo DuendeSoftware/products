@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using Duende.IdentityServer.Internal.Saml.Sp.Commands;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
 using Duende.IdentityServer.Licensing;
@@ -87,7 +88,6 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         /// <InheritDoc />
         public async Task ChallengeAsync(AuthenticationProperties properties)
         {
-            _licenseValidator.ValidateSamlServiceProvider();
             properties = properties ?? new AuthenticationProperties();
 
             // Don't serialize the return url twice, move it to our location.
@@ -125,7 +125,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         {
             if (context.Request.Path.StartsWithSegments(options.SPOptions.ModulePath, StringComparison.Ordinal))
             {
-                _licenseValidator.ValidateSamlServiceProvider();
+                if (!_licenseValidator.ValidateSamlServiceProvider())
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    return true;
+                }
+
                 var commandName = context.Request.Path.Value.Substring(
                     options.SPOptions.ModulePath.Length).TrimStart('/');
 
@@ -148,7 +153,6 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         /// <returns>Task</returns>
         public async Task SignOutAsync(AuthenticationProperties properties)
         {
-            _licenseValidator.ValidateSamlServiceProvider();
             var request = context.ToHttpRequestData(options.CookieManager, dataProtector.Unprotect);
 
             // This is not the right behaviour for Asp.Net Core - we should do nothing if

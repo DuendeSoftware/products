@@ -253,7 +253,6 @@ public sealed class ErrorInspectorConfigurationTests
             new TestEventService(),
             options,
             spStore,
-            IdentityServerLicenseValidator.CreateForTests(),
             NullLogger<SingleLogoutServiceEndpoint>.Instance);
     }
 
