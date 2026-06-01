@@ -60,7 +60,8 @@ internal class LicenseUsageTracker(V2License license)
         var entitledSkus = license.IsConfigured
             ? license.Entitlements.Select(e => Skus.Get(e.SkuId)?.Name).OfType<string>().ToList().AsReadOnly()
             : (IReadOnlyCollection<string>)[];
-        return new LicenseUsageSummary(entitledSkus, _clientsUsed.Values, _issuersUsed.Values, _featuresUsed.Values);
+        var featuresUsed = _featuresUsed.Values.Select(f => Skus.Get(f)?.Name).OfType<string>().ToList().AsReadOnly();
+        return new LicenseUsageSummary(entitledSkus, _clientsUsed.Values, _issuersUsed.Values, featuresUsed);
     }
 
     private class ConcurrentHashSet<T> where T : notnull

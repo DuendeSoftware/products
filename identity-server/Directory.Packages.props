@@ -16,12 +16,12 @@
     <PackageVersion Include="Duende.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageVersion Include="Duende.IdentityModel" Version="8.1.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
-    <PackageVersion Include="Duende.IdentityServer" Version="8.0.0-preview.5" />
-    <PackageVersion Include="Duende.Private.Licensing" Version="2.0.0-preview.12" />
+    <PackageVersion Include="Duende.IdentityServer" Version="8.0.0-preview.6" />
+    <PackageVersion Include="Duende.Private.Licensing" Version="2.0.0" />
     <PackageVersion Include="Duende.RazorSlices" Version="1.0.0" />
-    <PackageVersion Include="Duende.Storage" Version="1.0.0-preview.5" />
-    <PackageVersion Include="Duende.Storage.PostgreSql" Version="1.0.0-preview.5" />
-    <PackageVersion Include="Duende.Storage.Sqlite" Version="1.0.0-preview.5" />
+    <PackageVersion Include="Duende.Storage" Version="1.0.0" />
+    <PackageVersion Include="Duende.Storage.PostgreSql" Version="1.0.0" />
+    <PackageVersion Include="Duende.Storage.Sqlite" Version="1.0.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.34.0" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.76.0" />
     <PackageVersion Include="Grpc.AspNetCore.Web" Version="2.76.0" />

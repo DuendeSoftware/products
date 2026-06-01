@@ -27,13 +27,13 @@ public class LicenseUsageTests
         var summary = _licenseUsageTracker.GetSummary();
 
         summary.FeaturesUsed.Count.ShouldBe(7);
-        summary.FeaturesUsed.ShouldContain("PLT-004"); // KeyManagement
-        summary.FeaturesUsed.ShouldContain("PTC-004"); // PAR
-        summary.FeaturesUsed.ShouldContain("PLT-021"); // ServerSideSessions
-        summary.FeaturesUsed.ShouldContain("IS-001");  // ResourceIsolation
-        summary.FeaturesUsed.ShouldContain("PLT-005"); // DynamicProviders
-        summary.FeaturesUsed.ShouldContain("PTC-022"); // CIBA
-        summary.FeaturesUsed.ShouldContain("PTC-006"); // DPoP
+        summary.FeaturesUsed.ShouldContain("Automatic Key Management");
+        summary.FeaturesUsed.ShouldContain("PAR (RFC 9126)");
+        summary.FeaturesUsed.ShouldContain("Server-side Sessions");
+        summary.FeaturesUsed.ShouldContain("Resource Isolation");
+        summary.FeaturesUsed.ShouldContain("Dynamic Providers");
+        summary.FeaturesUsed.ShouldContain("CIBA");
+        summary.FeaturesUsed.ShouldContain("DPoP (RFC 9449)");
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class LicenseUsageTests
 
         var summary = _licenseUsageTracker.GetSummary();
 
-        summary.FeaturesUsed.ShouldContain("IS-001");
+        summary.FeaturesUsed.ShouldContain("Resource Isolation");
     }
 
     [Fact]

@@ -26,7 +26,7 @@ public class LicenseUsageDiagnosticEntryTests
         summaryElement.TryGetStringArray("EntitledSkus").ShouldBeEmpty();
         summaryElement.GetProperty("ClientsUsedCount").GetInt32().ShouldBe(1);
         summaryElement.TryGetStringArray("IssuersUsed").ShouldBe(["https://localhost:50001"]);
-        summaryElement.TryGetStringArray("FeaturesUsed").ShouldBe(["PLT-004"]);
+        summaryElement.TryGetStringArray("FeaturesUsed").ShouldBe(["Automatic Key Management"]);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class LicenseUsageDiagnosticEntryTests
         summaryElement.TryGetStringArray("EntitledSkus").ShouldBeEmpty();
         summaryElement.GetProperty("ClientsUsedCount").GetInt32().ShouldBe(2);
         summaryElement.TryGetStringArray("IssuersUsed").ShouldContain(["https://localhost:50001", "https://localhost:50002"]);
-        summaryElement.TryGetStringArray("FeaturesUsed").ShouldContain(["PLT-004", "IS-001"]);
+        summaryElement.TryGetStringArray("FeaturesUsed").ShouldContain(["Automatic Key Management", "Resource Isolation"]);
     }
 
     [Fact]
@@ -88,6 +88,6 @@ public class LicenseUsageDiagnosticEntryTests
         summaryElement.TryGetStringArray("EntitledSkus").ShouldBeEmpty();
         summaryElement.GetProperty("ClientsUsedCount").GetInt32().ShouldBe(1);
         summaryElement.TryGetStringArray("IssuersUsed").ShouldBe(["https://localhost:50001"]);
-        summaryElement.TryGetStringArray("FeaturesUsed").ShouldBe(["PLT-004"]);
+        summaryElement.TryGetStringArray("FeaturesUsed").ShouldBe(["Automatic Key Management"]);
     }
 }
