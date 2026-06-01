@@ -12,12 +12,12 @@ namespace Duende.UserManagement;
 public interface IUserSelfService
 {
     /// <summary>
-    /// Attempts to deregister (delete) the specified user's account.
+    /// Attempts to delete the specified user authenticators and profile.
     /// </summary>
     /// <param name="subjectId">The subject identifier of the user.</param>
     /// <param name="ct">A cancellation token.</param>
-    /// <returns><c>true</c> if the account was deregistered successfully; otherwise, <c>false</c>.</returns>
-    Task<bool> TryDeregisterAsync(UserSubjectId subjectId, Ct ct);
+    /// <returns><c>true</c> if the account was deleted successfully; otherwise, <c>false</c>.</returns>
+    Task<bool> TryDeleteAsync(UserSubjectId subjectId, Ct ct);
 
     /// <summary>
     /// Gets the user profile self-service operations.

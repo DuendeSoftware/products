@@ -18,9 +18,12 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, Attribu
     public async Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) =>
         await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } record ? record.AttributeSchema : AttributeSchema.Empty;
 
-    public async Task<Profiles.UserProfile?> TryRegisterAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
+    public async Task<Profiles.UserProfile?> TryCreateAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
         if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
         {
@@ -54,7 +57,10 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, Attribu
 
     public async Task<Profiles.UserProfile?> TryUpdateAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
         if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
         {

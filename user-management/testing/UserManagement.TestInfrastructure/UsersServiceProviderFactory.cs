@@ -7,6 +7,7 @@ using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Otp;
 using Duende.UserManagement.Internal;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
@@ -49,6 +50,7 @@ public sealed class UsersServiceProviderFactory
 
         dbId ??= Guid.NewGuid();
         _ = services
+            .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
             .AddLogging()
             .AddSingleton(new FakeTimeProvider())
             .AddSingleton<TimeProvider>(provider => provider.GetRequiredService<FakeTimeProvider>())

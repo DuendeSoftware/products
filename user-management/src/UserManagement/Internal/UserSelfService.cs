@@ -22,9 +22,12 @@ internal sealed class UserSelfService(
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     UserProfileRepository? profileRepo = null) : IUserSelfService
 {
-    public async Task<bool> TryDeregisterAsync(UserSubjectId subjectId, Ct ct)
+    public async Task<bool> TryDeleteAsync(UserSubjectId subjectId, Ct ct)
     {
-        licenseValidator.ValidateSelfService();
+        if (!licenseValidator.ValidateSelfService())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Self-Service feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserDeregisterStarting(LogLevel.Debug, subjectId);
         List<IStoreOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];

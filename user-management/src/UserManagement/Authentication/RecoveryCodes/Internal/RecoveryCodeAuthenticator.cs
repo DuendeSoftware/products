@@ -12,17 +12,20 @@ using Microsoft.Extensions.Options;
 namespace Duende.UserManagement.Authentication.RecoveryCodes.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class RecoveryCodeAuth(
+internal sealed class RecoveryCodeAuthenticator(
     UserAuthenticatorsRepository repo,
     IAuthenticationAttemptPolicy attemptPolicy,
-    ILogger<RecoveryCodeAuth> logger,
+    ILogger<RecoveryCodeAuthenticator> logger,
     IOptions<UserAuthenticationOptions> options,
     TimeProvider timeProvider,
-    UserManagementLicenseValidator licenseValidator) : IRecoveryCodeAuth
+    UserManagementLicenseValidator licenseValidator) : IRecoveryCodeAuthenticator
 {
     public async Task<bool> TryAuthenticateAsync(UserSubjectId subjectId, PlainTextRecoveryCode recoveryCode, Ct ct)
     {
-        licenseValidator.ValidateRecoveryCode();
+        if (!licenseValidator.ValidateRecoveryCode())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Recovery Code feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.RecoveryCodeAuthenticationStarted(LogLevel.Debug, subjectId);
 

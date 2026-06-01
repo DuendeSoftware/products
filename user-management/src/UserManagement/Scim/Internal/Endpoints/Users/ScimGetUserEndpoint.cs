@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +15,6 @@ internal sealed class ScimGetUserEndpoint(
     UserProfileRepository profileRepo,
     IServerUrls serverUrls,
     IOptions<ScimEndpointOptions> scimOptions,
-    UserManagementLicenseValidator licenseValidator,
     ILogger<ScimGetUserEndpoint> logger)
 {
     internal async Task<IResult> HandleAsync(
@@ -26,8 +24,6 @@ internal sealed class ScimGetUserEndpoint(
         [FromQuery] string? excludedAttributes,
         Ct ct)
     {
-        licenseValidator.ValidateInboundScim();
-
         if (!Guid.TryParse(id, out var guid))
         {
             logger.ScimGetUserNotFound(LogLevel.Information, id);

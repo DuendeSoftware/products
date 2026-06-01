@@ -71,31 +71,31 @@ internal static class TestData
 
     internal static OtpAddress CreateOtpAddress() => CreateOtpAddress(SubjectIdTypes.First());
 
-    internal static ExternalAuthenticator CreateExternalAuthenticator(Type subjectIdType)
+    internal static ExternalAuthenticatorAddress CreateExternalAuthenticatorAddress(Type subjectIdType)
     {
         var count = Count();
-        var name = ExternalAuthenticatorName.Create($"{nameof(ExternalAuthenticator)}{count}");
+        var name = ExternalAuthenticatorName.Create($"{nameof(ExternalAuthenticatorAddress)}{count}");
 
         if (subjectIdType == typeof(EmailAddress))
         {
-            return new ExternalAuthenticator(name, EmailAddress.Create($"a{count}@b"));
+            return new ExternalAuthenticatorAddress(name, EmailAddress.Create($"a{count}@b"));
         }
 
         if (subjectIdType == typeof(OpaqueSubjectId))
         {
-            return new ExternalAuthenticator(name, OpaqueSubjectId.Create($"{count}"));
+            return new ExternalAuthenticatorAddress(name, OpaqueSubjectId.Create($"{count}"));
         }
 
         if (subjectIdType == typeof(PhoneNumber))
         {
-            return new ExternalAuthenticator(name, PhoneNumber.Create($"+1 234 567 890 {count}"));
+            return new ExternalAuthenticatorAddress(name, PhoneNumber.Create($"+1 234 567 890 {count}"));
         }
 
         throw new ArgumentOutOfRangeException(nameof(subjectIdType));
     }
 
-    internal static ExternalAuthenticator CreateExternalAuthenticator() =>
-        CreateExternalAuthenticator(SubjectIdTypes.First());
+    internal static ExternalAuthenticatorAddress CreateExternalAuthenticatorAddress() =>
+        CreateExternalAuthenticatorAddress(SubjectIdTypes.First());
 
     internal static async Task<ValidatedPlainTextPassword> CreatePasswordAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default) =>
         await selfService.ValidatePasswordAsync(userId ?? UserSubjectId.New(), $"ABcd12!@{Count()}", ct);
@@ -220,19 +220,29 @@ internal static class TestData
         }
     ];
 
+    internal static async Task<UserSubjectId> CreateUserAsync(
+        this IExternalAuthenticator externalAuthenticator,
+        ExternalAuthenticatorAddress address,
+        Ct ct)
+    {
+        var result = await externalAuthenticator.TryAuthenticateAsync(address, ct);
+        return result.ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
+    }
+
     internal static async Task<UserSubjectId> CreateUserWithTotpAuthenticator(
         this IUserAuthenticatorsSelfService selfService,
+        IExternalAuthenticator externalAuthenticator,
         ulong unixTimeSeconds,
         PlainTextTotp totp,
         FakeTimeProvider timeProvider,
         Ct ct)
     {
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), CreateExternalAuthenticator(), ct: ct)).ShouldNotBeNull();
+        var subjectId = await externalAuthenticator.CreateUserAsync(CreateExternalAuthenticatorAddress(), ct);
         timeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds((long)unixTimeSeconds));
-        (await selfService.TryAddTotpAuthenticatorAsync(user.SubjectId, TotpAuthenticatorName.Default, TotpKey, totp, ct))
+        (await selfService.TryAddTotpDeviceAsync(subjectId, TotpDeviceName.Default, TotpKey, totp, ct))
             .ShouldBeTrue();
 
-        return user.SubjectId;
+        return subjectId;
     }
 
     internal static PasskeyCredentialData CreatePasskeyCredential(string name) =>

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using Duende.Platform.UserManagement.Passkeys.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
     private readonly Ct _ct = TestContext.Current.CancellationToken;
     private IPasskeyCeremonies _ceremonies = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public async ValueTask InitializeAsync()
@@ -24,6 +26,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
         _ceremonies = _serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -535,11 +538,11 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
     [Fact]
     public async Task BeginAsync_with_user_without_Passkey_returns_no_passkey_registered()
     {
-        var authenticators =
-            (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        var subjectId =
+            (await _externalAuthenticator.TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct))
+            .ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var result = await _ceremonies.BeginAuthenticationAsync(authenticators.SubjectId, _ct);
+        var result = await _ceremonies.BeginAuthenticationAsync(subjectId, _ct);
 
         var failure = result.ShouldBeOfType<PasskeyAuthenticationBeginResult.Failure>();
         failure.Error.ShouldBe(AuthenticationBeginError.NoPasskeyRegistered);
@@ -769,8 +772,9 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
             options.Passkeys.ServerDomain = null);
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
+        var externalAuthenticator = serviceProvider.GetRequiredService<IExternalAuthenticator>();
         var (_, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: externalAuthenticator);
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = (PasskeyAuthenticationBeginResult.Success)beginResult;
@@ -814,7 +818,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var (_, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = (PasskeyAuthenticationBeginResult.Success)beginResult;
@@ -846,7 +850,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var (_, credentialId, _) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = (PasskeyAuthenticationBeginResult.Success)beginResult;
@@ -882,7 +886,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
 
         var (userSubjectId, credentialId) = await CreateUserWithPasskeyUsingAlgorithmAsync(
-            selfService, passkeyAuth, edDsaAlgorithm);
+            selfService, passkeyAuth, edDsaAlgorithm, serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(userSubjectId, _ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -982,7 +986,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var (_, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -1016,7 +1020,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var (userSubjectId, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -1134,7 +1138,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
         var (_, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -1170,7 +1174,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
         var (_, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(_ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -1215,7 +1219,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var (userSubjectId, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(userSubjectId, _ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -1250,7 +1254,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var (userSubjectId, credentialId, ecdsa) =
-            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth);
+            await CreateUserWithPasskey(authenticatorsSelfService, passkeyAuth, externalAuthenticator: serviceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var beginResult = await passkeyAuth.BeginAuthenticationAsync(userSubjectId, _ct);
         var beginSuccess = beginResult.ShouldBeOfType<PasskeyAuthenticationBeginResult.Success>();
@@ -1292,7 +1296,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var setupPasskeyAuth = setupServiceProvider.GetRequiredService<IPasskeyCeremonies>();
         var setupAuthenticatorsSelfService = setupServiceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var (userSubjectId, credentialId, ecdsa) =
-            await CreateUserWithPasskey(setupAuthenticatorsSelfService, setupPasskeyAuth);
+            await CreateUserWithPasskey(setupAuthenticatorsSelfService, setupPasskeyAuth, externalAuthenticator: setupServiceProvider.GetRequiredService<IExternalAuthenticator>());
 
         var authenticationOptions = new Action<UserAuthenticationOptions>(options =>
         {
@@ -1304,8 +1308,8 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
             await UsersServiceProviderFactory.CreateWithOptionsAsync(authenticationOptions);
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var authenticatorsSelfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        _ = (await authenticatorsSelfService.TryRegisterAsync(userSubjectId, TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        _ = (await serviceProvider.GetRequiredService<IUserAuthenticatorsAdmin>()
+            .TryAddAsync(userSubjectId, [], [TestData.CreateExternalAuthenticatorAddress()], _ct)).ShouldNotBeNull();
 
         var beginRegistration =
             await setupPasskeyAuth.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct);
@@ -1356,15 +1360,17 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         CreateUserWithPasskeyUsingAlgorithmAsync(
             IUserAuthenticatorsSelfService selfService,
             IPasskeyCeremonies ceremonies,
-            int algorithm)
+            int algorithm,
+            IExternalAuthenticator? externalAuthenticator = null)
     {
+        externalAuthenticator ??= _externalAuthenticator;
         // Create a user
-        var authenticators = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        var subjectId = (await externalAuthenticator.TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct))
+            .ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
         // Register a passkey with the specified algorithm
         var registrationSession =
-            await ceremonies.BeginRegistrationAsync(authenticators.SubjectId, "user@example.com", "Test User", _ct);
+            await ceremonies.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
         var credentialId = registrationSession.ChallengeId.ToByteArray();
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create,
@@ -1384,31 +1390,33 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var registrationResult =
             await ceremonies.CompleteRegistrationAsync(registrationRequest, _ct);
         var success = registrationResult.ShouldBeOfType<PasskeyRegistrationCompleteResult.Success>();
-        (await selfService.TryAddPasskeyAsync(authenticators.SubjectId, success.Credential, _ct)).ShouldBeTrue();
+        (await selfService.TryAddPasskeyAsync(subjectId, success.Credential, _ct)).ShouldBeTrue();
 
-        return (authenticators.SubjectId, credentialId);
+        return (subjectId, credentialId);
     }
 
     private async Task<(UserSubjectId UserSubjectId, byte[] CredentialId, ECDsa PrivateKey)>
         CreateUserWithPasskey(
             IUserAuthenticatorsSelfService? authenticatorsSelfService = null,
             IPasskeyCeremonies? passkeyAuth = null,
-            byte flags = 0x45) // UP + AT + UV
+            byte flags = 0x45, // UP + AT + UV
+            IExternalAuthenticator? externalAuthenticator = null)
     {
         authenticatorsSelfService ??= _authenticatorsSelfService;
         passkeyAuth ??= _ceremonies;
+        externalAuthenticator ??= _externalAuthenticator;
 
         // Create a user
-        var authenticators =
-            (await authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        var subjectId =
+            (await externalAuthenticator.TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct))
+            .ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
         // Generate a real EC key pair
         var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Register a passkey for the user with the real public key
         var registrationSession =
-            await passkeyAuth.BeginRegistrationAsync(authenticators.SubjectId, "user@example.com", "Test User", _ct);
+            await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
         var credentialId = registrationSession.ChallengeId.ToByteArray();
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create,
@@ -1427,10 +1435,10 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
         var registrationResult =
             await passkeyAuth.CompleteRegistrationAsync(registrationRequest, _ct);
         var success = registrationResult.ShouldBeOfType<PasskeyRegistrationCompleteResult.Success>();
-        (await authenticatorsSelfService.TryAddPasskeyAsync(authenticators.SubjectId, success.Credential, _ct))
+        (await authenticatorsSelfService.TryAddPasskeyAsync(subjectId, success.Credential, _ct))
             .ShouldBeTrue();
 
-        return (authenticators.SubjectId, credentialId, ecdsa);
+        return (subjectId, credentialId, ecdsa);
     }
 
     private async Task<(byte[] CredentialId, ECDsa PrivateKey)> AddPasskeyToUser(

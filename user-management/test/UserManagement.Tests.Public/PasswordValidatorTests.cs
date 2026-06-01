@@ -4,6 +4,7 @@
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passwords;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,11 +16,13 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
     private readonly Ct _ct = TestContext.Current.CancellationToken;
     private ServiceProvider _serviceProvider = null!;
     private IUserAuthenticatorsSelfService _selfService = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
 
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
         _selfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -27,10 +30,10 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
     [Fact]
     public async Task No_validators_registered_allows_password_to_be_set()
     {
-        var user = (await _selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var password = await TestData.CreatePasswordAsync(_selfService, user.SubjectId, _ct);
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var password = await TestData.CreatePasswordAsync(_selfService, subjectId, _ct);
 
-        var result = await _selfService.TrySetPasswordAsync(user.SubjectId, password, _ct);
+        var result = await _selfService.TrySetPasswordAsync(subjectId, password, _ct);
 
         result.ShouldBeTrue();
     }
@@ -40,10 +43,10 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
     {
         await using var sp = await CreateServiceProviderWithValidator<AcceptAllValidator>();
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var password = await TestData.CreatePasswordAsync(selfService, user.SubjectId, _ct);
+        var subjectId = await sp.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var password = await TestData.CreatePasswordAsync(selfService, subjectId, _ct);
 
-        var result = await selfService.TrySetPasswordAsync(user.SubjectId, password, _ct);
+        var result = await selfService.TrySetPasswordAsync(subjectId, password, _ct);
 
         result.ShouldBeTrue();
     }
@@ -66,10 +69,10 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
         await using var sp = await CreateServiceProviderWithValidator<BlocklistValidator>();
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var allowedUser = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var allowedPassword = await TestData.CreatePasswordAsync(selfService, allowedUser.SubjectId, _ct);
+        var allowedSubjectId = await sp.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var allowedPassword = await TestData.CreatePasswordAsync(selfService, allowedSubjectId, _ct);
 
-        var allowedResult = await selfService.TrySetPasswordAsync(allowedUser.SubjectId, allowedPassword, _ct);
+        var allowedResult = await selfService.TrySetPasswordAsync(allowedSubjectId, allowedPassword, _ct);
         allowedResult.ShouldBeTrue();
     }
 
@@ -89,10 +92,10 @@ public sealed class PasswordValidatorTests : IAsyncLifetime
     {
         await using var sp = await CreateServiceProviderWithTwoValidators<AcceptAllValidator, AcceptAllValidator>();
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var password = await TestData.CreatePasswordAsync(selfService, user.SubjectId, _ct);
+        var subjectId = await sp.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var password = await TestData.CreatePasswordAsync(selfService, subjectId, _ct);
 
-        var result = await selfService.TrySetPasswordAsync(user.SubjectId, password, _ct);
+        var result = await selfService.TrySetPasswordAsync(subjectId, password, _ct);
 
         result.ShouldBeTrue();
     }

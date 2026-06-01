@@ -27,7 +27,10 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> AssignRoleAsync(UserSubjectId subjectId, RoleId roleId, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
@@ -46,7 +49,10 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> RemoveRoleAsync(UserSubjectId subjectId, RoleId roleId, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
@@ -71,7 +77,10 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> AssignRoleToGroupAsync(RoleId roleId, GroupId groupId, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
         {
@@ -95,7 +104,10 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<RoleId>> RemoveRoleFromGroupAsync(RoleId roleId, GroupId groupId, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         var roleResult = await roleRepo.TryReadAsync(roleId, ct);
         if (!roleResult.HasValue)
         {
@@ -119,7 +131,10 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<GroupId>> AssignGroupAsync(UserSubjectId subjectId, GroupId groupId, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         var groupResult = await groupRepo.TryReadAsync(groupId, ct);
         if (!groupResult.HasValue)
@@ -138,7 +153,10 @@ internal sealed class MembershipAdmin(
 
     public async Task<SaveResult<GroupId>> RemoveGroupAsync(UserSubjectId subjectId, GroupId groupId, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         var groupResult = await groupRepo.TryReadAsync(groupId, ct);
         if (!groupResult.HasValue)

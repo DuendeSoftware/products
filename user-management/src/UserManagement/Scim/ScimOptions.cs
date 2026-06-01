@@ -23,7 +23,7 @@ public sealed class ScimOptions
     /// <summary>
     /// Whether the SCIM changePassword capability is supported.
     /// When <c>null</c> (default), auto-detected from DI by checking
-    /// whether <c>IPasswordAuth</c> is registered.
+    /// whether <c>IPasswordAuthenticator</c> is registered.
     /// </summary>
     public bool? ChangePassword { get; set; }
 

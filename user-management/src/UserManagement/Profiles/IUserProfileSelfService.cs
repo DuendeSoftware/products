@@ -6,7 +6,7 @@ using Duende.Storage.EntityAttributeValue;
 namespace Duende.UserManagement.Profiles;
 
 /// <summary>
-/// Provides self-service operations that allow end-users to register, retrieve, and update their own profiles.
+/// Provides self-service operations that allow end-users to create, retrieve, and update their own profiles.
 /// </summary>
 public interface IUserProfileSelfService
 {
@@ -18,14 +18,14 @@ public interface IUserProfileSelfService
     Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct);
 
     /// <summary>
-    /// Attempts to register a new user profile for the given subject identifier.
+    /// Attempts to create a new user profile for the given subject identifier.
     /// Returns <c>null</c> if a profile for the subject already exists.
     /// </summary>
-    /// <param name="subjectId">The subject identifier of the user to register.</param>
+    /// <param name="subjectId">The subject identifier of the user.</param>
     /// <param name="attributes">The validated attribute values to store on the new profile.</param>
     /// <param name="ct">A cancellation token.</param>
     /// <returns>The newly created <see cref="UserProfile"/>, or <c>null</c> if the subject already exists.</returns>
-    Task<UserProfile?> TryRegisterAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct);
+    Task<UserProfile?> TryCreateAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct);
 
     /// <summary>
     /// Attempts to retrieve the profile for the given subject identifier.

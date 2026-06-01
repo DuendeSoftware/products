@@ -40,12 +40,8 @@ public sealed class OtpAuthentication : IAsyncLifetime
         var address = TestData.CreateOtpAddress(subjectIdType);
 
         // act
-        var result = await _otpSender.TrySendOtpAsync(address, _ct);
-
-        // assert
-        _ = result.ShouldNotBeNull();
-        result.Sent.ShouldBeTrue();
-        _ = result.Token.ShouldNotBeNull();
+        var result = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
+        result.Token.ShouldNotBe(default);
         result.ExpiresAfter.ShouldBe(TimeSpan.FromMinutes(5));
         result.ExpiresAtUtc.ShouldBe(_timeProvider.GetUtcNow() + TimeSpan.FromMinutes(5));
         result.SendingBlockedFor.ShouldBe(TimeSpan.FromMinutes(1));
@@ -72,8 +68,7 @@ public sealed class OtpAuthentication : IAsyncLifetime
     public async Task CanAuthenticate(Type subjectIdType)
     {
         var address = TestData.CreateOtpAddress(subjectIdType);
-        var sendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
-        sendResult.Sent.ShouldBeTrue();
+        var sendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _otpDispatcher.Calls.ShouldNotBeEmpty();
         var otp = _otpDispatcher.Calls.First().Otp;
 
@@ -90,15 +85,13 @@ public sealed class OtpAuthentication : IAsyncLifetime
         // arrange
         var address = TestData.CreateOtpAddress(subjectIdType);
 
-        var firstSendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
-        firstSendResult.Sent.ShouldBeTrue();
+        var firstSendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _otpDispatcher.Calls.ShouldNotBeEmpty();
         var firstOtp = _otpDispatcher.Calls.First().Otp;
         var firstSuccess = (await _authenticator.TryAuthenticateAsync(firstOtp, firstSendResult.Token, _ct)).ShouldBeOfType<OtpAuthenticationResult.Success>();
         _otpDispatcher.ClearCalls();
 
-        var secondSendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
-        secondSendResult.Sent.ShouldBeTrue();
+        var secondSendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _otpDispatcher.Calls.ShouldNotBeEmpty();
         var secondOtp = _otpDispatcher.Calls.First().Otp;
 
@@ -115,12 +108,11 @@ public sealed class OtpAuthentication : IAsyncLifetime
     public async Task Cannot_send_otp_again_immediately()
     {
         var address = TestData.CreateOtpAddress();
-        _ = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
+        _ = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _timeProvider.Advance(TimeSpan.FromSeconds(30));
 
-        var result = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
+        var result = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Blocked>();
 
-        result.Sent.ShouldBeFalse();
         result.SendingBlockedFor.ShouldBe(TimeSpan.FromSeconds(30));
         result.SendingBlockedUntilUtc.ShouldBe(_timeProvider.GetUtcNow() + TimeSpan.FromSeconds(30));
     }
@@ -129,12 +121,10 @@ public sealed class OtpAuthentication : IAsyncLifetime
     public async Task Can_send_otp_again_after_waiting()
     {
         var address = TestData.CreateOtpAddress();
-        var firstResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
+        var firstResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _timeProvider.Advance(firstResult.SendingBlockedFor);
 
-        var result = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
-
-        result.Sent.ShouldBeTrue();
+        var result = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
     }
 
     [Fact]
@@ -150,8 +140,7 @@ public sealed class OtpAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_authenticate_with_the_incorrect_otp()
     {
-        var sendResult = (await _otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldNotBeNull();
-        sendResult.Sent.ShouldBeTrue();
+        var sendResult = (await _otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldBeOfType<SendOtpResult.Sent>();
 
         var result = await _authenticator.TryAuthenticateAsync(_incorrectOtp, sendResult.Token, _ct);
 
@@ -161,8 +150,7 @@ public sealed class OtpAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_attempt_to_authenticate_endlessly()
     {
-        var sendResult = (await _otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldNotBeNull();
-        sendResult.Sent.ShouldBeTrue();
+        var sendResult = (await _otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _otpDispatcher.Calls.ShouldNotBeEmpty();
         var correctOtp = _otpDispatcher.Calls.First().Otp;
         _ = await _authenticator.TryAuthenticateAsync(_incorrectOtp, sendResult.Token, _ct);
@@ -179,11 +167,10 @@ public sealed class OtpAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_authenticate_after_some_time()
     {
-        var sendResult = (await _otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldNotBeNull();
-        sendResult.Sent.ShouldBeTrue();
+        var sendResult = (await _otpSender.TrySendOtpAsync(TestData.CreateOtpAddress(), _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _otpDispatcher.Calls.ShouldNotBeEmpty();
         var otp = _otpDispatcher.Calls.First().Otp;
-        _timeProvider.Advance(sendResult.ExpiresAfter.Value);
+        _timeProvider.Advance(sendResult.ExpiresAfter);
 
         var result = await _authenticator.TryAuthenticateAsync(otp, sendResult.Token, _ct);
 
@@ -194,8 +181,7 @@ public sealed class OtpAuthentication : IAsyncLifetime
     public async Task Cannot_authenticate_again_without_sending_again()
     {
         var address = TestData.CreateOtpAddress();
-        var sendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldNotBeNull();
-        sendResult.Sent.ShouldBeTrue();
+        var sendResult = (await _otpSender.TrySendOtpAsync(address, _ct)).ShouldBeOfType<SendOtpResult.Sent>();
         _otpDispatcher.Calls.ShouldNotBeEmpty();
         var otp = _otpDispatcher.Calls.First().Otp;
         _ = (await _authenticator.TryAuthenticateAsync(otp, sendResult.Token, _ct)).ShouldBeOfType<OtpAuthenticationResult.Success>();

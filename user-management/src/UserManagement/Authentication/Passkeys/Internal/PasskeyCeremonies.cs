@@ -39,7 +39,10 @@ internal sealed class PasskeyCeremonies(
         string userDisplayName,
         Ct ct)
     {
-        licenseValidator.ValidatePasskey();
+        if (!licenseValidator.ValidatePasskey())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Passkey feature.");
+        }
         using var scope = logger.BeginSubjectScope(userSubjectId);
         ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         ArgumentException.ThrowIfNullOrWhiteSpace(userDisplayName);
@@ -152,7 +155,10 @@ internal sealed class PasskeyCeremonies(
 
     public async Task<PasskeyAuthenticationBeginResult> BeginAuthenticationAsync(Ct ct)
     {
-        licenseValidator.ValidatePasskey();
+        if (!licenseValidator.ValidatePasskey())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Passkey feature.");
+        }
         var challenge = WebAuthnCrypto.GenerateChallenge(_passkeyOptions.ChallengeSize);
 
         var passkeyAuthenticationChallenge = PasskeyAuthenticationChallenge.CreateDiscoverable(
@@ -178,7 +184,10 @@ internal sealed class PasskeyCeremonies(
         UserSubjectId userSubjectId,
         Ct ct)
     {
-        licenseValidator.ValidatePasskey();
+        if (!licenseValidator.ValidatePasskey())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Passkey feature.");
+        }
         using var scope = logger.BeginSubjectScope(userSubjectId);
         var challenge = WebAuthnCrypto.GenerateChallenge(_passkeyOptions.ChallengeSize);
 
@@ -225,7 +234,10 @@ internal sealed class PasskeyCeremonies(
         PasskeyCompleteAuthenticationRequest request,
         Ct ct)
     {
-        licenseValidator.ValidatePasskey();
+        if (!licenseValidator.ValidatePasskey())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Passkey feature.");
+        }
         ArgumentNullException.ThrowIfNull(request);
 
         var challengeId = PasskeyAuthenticationChallengeId.From(request.ChallengeId);

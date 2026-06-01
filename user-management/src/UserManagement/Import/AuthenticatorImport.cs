@@ -16,7 +16,7 @@ public sealed record AuthenticatorImport
     public IReadOnlyCollection<OtpAddress>? OtpAddresses { get; init; }
 
     /// <summary>External authenticators (federated identity providers) to import.</summary>
-    public IReadOnlyCollection<ExternalAuthenticator>? ExternalAuthenticators { get; init; }
+    public IReadOnlyCollection<ExternalAuthenticatorAddress>? ExternalAuthenticatorAddresses { get; init; }
 
     /// <summary>Passkey credentials to import.</summary>
     public IReadOnlyCollection<PasskeyImport>? Passkeys { get; init; }
@@ -25,7 +25,7 @@ public sealed record AuthenticatorImport
     public PasswordImport? Password { get; init; }
 
     /// <summary>TOTP authenticators to import (e.g., migrated authenticator keys).</summary>
-    public IReadOnlyCollection<TotpImport>? TotpAuthenticators { get; init; }
+    public IReadOnlyCollection<TotpDeviceImport>? TotpDevices { get; init; }
 
     /// <summary>Recovery codes to import (plain text, will be hashed on import).</summary>
     public IReadOnlyCollection<PlainTextRecoveryCode>? RecoveryCodes { get; init; }

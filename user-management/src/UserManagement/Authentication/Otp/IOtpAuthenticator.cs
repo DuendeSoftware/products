@@ -9,7 +9,9 @@ namespace Duende.UserManagement.Authentication.Otp;
 public interface IOtpAuthenticator
 {
     /// <summary>
-    /// Verifies an OTP code against the stored token for the given address.
+    /// Verifies an OTP code against the stored token.
+    /// On success, resolves the existing user associated with the OTP address
+    /// or creates a new user if none exists.
     /// </summary>
     /// <param name="otp">The plain text OTP code submitted by the user.</param>
     /// <param name="token">The token identifying the OTP challenge session.</param>

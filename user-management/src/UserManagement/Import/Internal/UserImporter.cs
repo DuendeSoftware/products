@@ -39,7 +39,10 @@ internal sealed class UserImporter(
 
     public async Task<UserImportBatchResult> ImportAsync(IReadOnlyList<UserImportRecord> records, Ct ct)
     {
-        licenseValidator.ValidateRegistration();
+        if (!licenseValidator.ValidateRegistration())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Registration feature.");
+        }
         logger.BatchImportStarted(LogLevel.Debug, records.Count);
 
         // Load schema once for the entire batch (only needed if any record has profile attributes)
@@ -428,9 +431,9 @@ internal sealed class UserImporter(
                 authenticators.Add(import.OtpAddresses);
             }
 
-            if (import.ExternalAuthenticators is not null)
+            if (import.ExternalAuthenticatorAddresses is not null)
             {
-                authenticators.Add(import.ExternalAuthenticators);
+                authenticators.Add(import.ExternalAuthenticatorAddresses);
             }
 
             if (import.Passkeys is not null)
@@ -452,11 +455,11 @@ internal sealed class UserImporter(
                 }
             }
 
-            if (import.TotpAuthenticators is not null)
+            if (import.TotpDevices is not null)
             {
-                foreach (var totp in import.TotpAuthenticators)
+                foreach (var device in import.TotpDevices)
                 {
-                    authenticators.LoadTotpAuthenticator(totp.Name, totp.Key);
+                    authenticators.LoadTotpDevice(device.Name, device.Key);
                 }
             }
 
@@ -485,9 +488,9 @@ internal sealed class UserImporter(
     private UserAuthenticators BuildAuthenticators(UserSubjectId subjectId, AuthenticatorImport import)
     {
         var otpAddresses = import.OtpAddresses ?? [];
-        var externalAuthenticators = import.ExternalAuthenticators ?? [];
+        var externalAuthenticatorAddresses = import.ExternalAuthenticatorAddresses ?? [];
 
-        var authenticators = new UserAuthenticators(subjectId, otpAddresses, externalAuthenticators);
+        var authenticators = new UserAuthenticators(subjectId, otpAddresses, externalAuthenticatorAddresses);
 
         if (import.Password is not null)
         {
@@ -514,11 +517,11 @@ internal sealed class UserImporter(
             }
         }
 
-        if (import.TotpAuthenticators is not null)
+        if (import.TotpDevices is not null)
         {
-            foreach (var totp in import.TotpAuthenticators)
+            foreach (var device in import.TotpDevices)
             {
-                authenticators.LoadTotpAuthenticator(totp.Name, totp.Key);
+                authenticators.LoadTotpDevice(device.Name, device.Key);
             }
         }
 

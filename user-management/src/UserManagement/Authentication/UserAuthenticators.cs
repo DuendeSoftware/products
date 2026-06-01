@@ -10,7 +10,7 @@ namespace Duende.UserManagement.Authentication;
 
 /// <summary>
 /// A read-only snapshot of all authenticators registered for a user, including OTP addresses,
-/// external authenticators, TOTP devices, passkeys, recovery codes, and password status.
+/// external authenticator addresses, TOTP devices, passkeys, recovery codes, and password status.
 /// </summary>
 public sealed record UserAuthenticators
 {
@@ -18,8 +18,8 @@ public sealed record UserAuthenticators
     {
         SubjectId = authenticators.SubjectId;
         OtpAddresses = authenticators.OtpAddresses;
-        ExternalAuthenticators = authenticators.ExternalAuthenticators;
-        TotpAuthenticatorNames = [.. authenticators.TotpAuthenticators.Keys];
+        ExternalAuthenticatorAddresses = authenticators.ExternalAuthenticatorAddresses;
+        TotpDeviceNames = [.. authenticators.TotpDevices.Keys];
         Passkeys = authenticators.PasskeyCredentials.Values
             .Select(c => new UserPasskey(c.CredentialId, c.Name, c.CreatedAt))
             .ToList();
@@ -31,10 +31,10 @@ public sealed record UserAuthenticators
     public UserSubjectId SubjectId { get; }
     /// <summary>Gets the OTP addresses registered for the user.</summary>
     public IReadOnlyCollection<OtpAddress> OtpAddresses { get; }
-    /// <summary>Gets the external authenticators registered for the user.</summary>
-    public IReadOnlyCollection<ExternalAuthenticator> ExternalAuthenticators { get; }
-    /// <summary>Gets the names of TOTP authenticators registered for the user.</summary>
-    public IReadOnlyCollection<TotpAuthenticatorName> TotpAuthenticatorNames { get; }
+    /// <summary>Gets the external authenticator addresses registered for the user.</summary>
+    public IReadOnlyCollection<ExternalAuthenticatorAddress> ExternalAuthenticatorAddresses { get; }
+    /// <summary>Gets the names of TOTP devices registered for the user.</summary>
+    public IReadOnlyCollection<TotpDeviceName> TotpDeviceNames { get; }
     /// <summary>Gets the passkeys registered for the user.</summary>
     public IReadOnlyCollection<UserPasskey> Passkeys { get; }
     /// <summary>Gets the number of remaining recovery codes for the user.</summary>

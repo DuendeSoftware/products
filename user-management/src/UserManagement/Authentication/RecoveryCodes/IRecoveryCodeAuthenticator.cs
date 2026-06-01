@@ -6,7 +6,7 @@ namespace Duende.UserManagement.Authentication.RecoveryCodes;
 /// <summary>
 /// Provides recovery code authentication for users who cannot access their primary authenticators.
 /// </summary>
-public interface IRecoveryCodeAuth
+public interface IRecoveryCodeAuthenticator
 {
     /// <summary>
     /// Attempts to authenticate a user using a recovery code. Consumes the code on success.

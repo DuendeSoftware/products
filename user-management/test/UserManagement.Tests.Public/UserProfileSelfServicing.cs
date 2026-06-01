@@ -32,7 +32,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         var schema = await _selfService.GetSchemaAsync(_ct);
         var attributes = TestData.CreateAttributes(schema);
 
-        var user = await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), _ct);
+        var user = await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct);
 
         _ = user.ShouldNotBeNull();
         user.Attributes.Values.ShouldBe(attributes, ignoreOrder: true);
@@ -44,9 +44,9 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
         var schema = await _selfService.GetSchemaAsync(_ct);
         var attributes = TestData.CreateAttributes(schema);
-        _ = (await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), ct: _ct)).ShouldNotBeNull();
+        _ = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), ct: _ct)).ShouldNotBeNull();
 
-        var profile = await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), ct: _ct);
+        var profile = await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), ct: _ct);
 
         profile.ShouldBeNull();
     }
@@ -54,7 +54,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
     [Fact]
     public async Task Can_get_by_SubjectId()
     {
-        var user = (await _selfService.TryRegisterAsync(UserSubjectId.New(), ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
 
         var actual = await _selfService.TryGetAsync(user.SubjectId, _ct);
 
@@ -70,7 +70,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
     [InlineData(typeof(string))]
     public async Task Can_set_new_attribute(Type type)
     {
-        var user = (await _selfService.TryRegisterAsync(UserSubjectId.New(), ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), ValidatedAttributeValueCollection.Empty, _ct)).ShouldNotBeNull();
         await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
         var schema = await _selfService.GetSchemaAsync(_ct);
         var attribute = TestData.CreateAttributes(schema).Single(a => a.UntypedValue.GetType() == type);
@@ -94,7 +94,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         var attribute = TestData.CreateAttributes(schema).Single(a => a.UntypedValue.GetType() == type);
         var attributes = new AttributeValueCollection(schema);
         attributes.Set(attribute);
-        var user = (await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
 
         var updatedUser = await TrySetAttribute(user.SubjectId, attribute);
 
@@ -115,7 +115,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         var initialAttributes = new AttributeValueCollection(schema);
         initialAttributes.Set(stringAttribute);
         initialAttributes.Set(intAttribute);
-        var user = (await _selfService.TryRegisterAsync(UserSubjectId.New(), initialAttributes.Validate(), _ct)).ShouldNotBeNull();
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), initialAttributes.Validate(), _ct)).ShouldNotBeNull();
 
         var initialUser = (await _selfService.TryGetAsync(user.SubjectId, _ct)).ShouldNotBeNull();
         initialUser.Attributes.Count.ShouldBe(2);
@@ -151,7 +151,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
             }, _ct)).ShouldBeTrue();
 
         // Act — try to register with a collection validated against the old schema version
-        var result = await _selfService.TryRegisterAsync(UserSubjectId.New(), attributesValidatedAgainstV1, _ct);
+        var result = await _selfService.TryCreateAsync(UserSubjectId.New(), attributesValidatedAgainstV1, _ct);
 
         // Assert — staleness check must reject the stale collection
         result.ShouldBeNull();
@@ -164,7 +164,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
         var schemaV1 = await _selfService.GetSchemaAsync(_ct);
         var initialAttributes = TestData.CreateAttributes(schemaV1).Validate();
-        var user = (await _selfService.TryRegisterAsync(UserSubjectId.New(), initialAttributes, _ct)).ShouldNotBeNull();
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), initialAttributes, _ct)).ShouldNotBeNull();
 
         // Capture a validated collection against the current schema version
         var attributesValidatedAgainstV1 = TestData.CreateAttributes(schemaV1).Validate();

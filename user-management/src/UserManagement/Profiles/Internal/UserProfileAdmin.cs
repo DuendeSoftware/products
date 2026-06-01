@@ -21,7 +21,10 @@ internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSche
 
     public async Task<Profiles.UserProfile?> TryAddAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
         if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
         {

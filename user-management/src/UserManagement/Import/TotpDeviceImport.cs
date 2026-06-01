@@ -6,8 +6,8 @@ using Duende.UserManagement.Authentication.Totp;
 namespace Duende.UserManagement.Import;
 
 /// <summary>
-/// A TOTP authenticator to import for a user.
+/// A TOTP device to import for a user.
 /// </summary>
-/// <param name="Name">The authenticator name (e.g., "Default").</param>
+/// <param name="Name">The device name (e.g., "Default").</param>
 /// <param name="Key">The TOTP secret key in plain bytes.</param>
-public sealed record TotpImport(TotpAuthenticatorName Name, PlainBytesTotpKey Key);
+public sealed record TotpDeviceImport(TotpDeviceName Name, PlainBytesTotpKey Key);

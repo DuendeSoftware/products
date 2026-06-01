@@ -15,7 +15,10 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
 {
     public async Task<SaveResult<RoleId>> CreateAsync(Membership.Role dto, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         // Check if a role with this name already exists
         var existing = await roleRepository.TryReadAsync(dto.Name, ct);
         if (existing.HasValue)
@@ -65,7 +68,10 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
 
     public async Task<SaveResult<RoleId>> UpdateAsync(RoleId id, Membership.Role dto, Admin.DataVersion expectedVersion, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         // Load existing role
         var existing = await roleRepository.TryReadAsync(id, ct);
         if (!existing.HasValue)
@@ -105,7 +111,10 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
 
     public async Task<SaveResult<RoleId>> DeleteAsync(RoleId id, Ct ct)
     {
-        licenseValidator.ValidateRolesAndGroups();
+        if (!licenseValidator.ValidateRolesAndGroups())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Roles and Groups feature.");
+        }
         // Check existence
         var existing = await roleRepository.TryReadAsync(id, ct);
         if (!existing.HasValue)

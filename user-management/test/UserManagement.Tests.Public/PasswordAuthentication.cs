@@ -4,6 +4,7 @@
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passwords;
 using Duende.UserManagement.Import;
 using Duende.UserManagement.Profiles;
@@ -15,8 +16,9 @@ namespace Duende.Platform.UserManagement;
 public sealed class PasswordAuthentication : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private IPasswordAuth _auth = null!;
+    private IPasswordAuthenticator _auth = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
     private IUserProfileSelfService _profileSelfService = null!;
     private IUserProfileSchemaAdmin _schemaAdmin = null!;
     private ServiceProvider _serviceProvider = null!;
@@ -26,8 +28,9 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _auth = _serviceProvider.GetRequiredService<IPasswordAuth>();
+        _auth = _serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
         _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
         _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
         _importer = _serviceProvider.GetRequiredService<IUserImporter>();
@@ -39,35 +42,35 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     [Fact]
     public async Task Can_authenticate_with_correct_password()
     {
-        var authenticators = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var (password, supplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, authenticators.SubjectId, _ct);
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var (password, supplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, subjectId, _ct);
 
         await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
         var schema = await _profileSelfService.GetSchemaAsync(_ct);
         var attributes = TestData.CreateAttributes(schema);
         var attribute = attributes.ElementAt(0);
-        _ = (await _profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
 
-        (await _authenticatorsSelfService.TrySetPasswordAsync(authenticators.SubjectId, password, _ct)).ShouldBe(true);
+        (await _authenticatorsSelfService.TrySetPasswordAsync(subjectId, password, _ct)).ShouldBe(true);
 
         var actual = await _auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, supplied, _ct);
 
-        actual.ShouldBeOfType<PasswordAuthenticationResult.Success>().UserSubjectId.ShouldBe(authenticators.SubjectId);
+        actual.ShouldBeOfType<PasswordAuthenticationResult.Success>().UserSubjectId.ShouldBe(subjectId);
     }
 
     [Fact]
     public async Task Cannot_authenticate_with_incorrect_password()
     {
-        var authenticators = (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var (firstPassword, _) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, authenticators.SubjectId, _ct);
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var (firstPassword, _) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, subjectId, _ct);
 
         await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
         var schema = await _profileSelfService.GetSchemaAsync(_ct);
         var attributes = TestData.CreateAttributes(schema);
         var attribute = attributes.ElementAt(0);
-        _ = (await _profileSelfService.TryRegisterAsync(authenticators.SubjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
 
-        (await _authenticatorsSelfService.TrySetPasswordAsync(authenticators.SubjectId, firstPassword, _ct)).ShouldBe(true);
+        (await _authenticatorsSelfService.TrySetPasswordAsync(subjectId, firstPassword, _ct)).ShouldBe(true);
         var (_, secondSupplied) = await TestData.CreatePasswordPairAsync(_authenticatorsSelfService, ct: _ct);
 
         var actual = await _auth.TryAuthenticateAsync(attribute.Code, attribute.UntypedValue, secondSupplied, _ct);

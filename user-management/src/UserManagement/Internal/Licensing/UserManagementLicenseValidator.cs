@@ -16,43 +16,47 @@ internal sealed class UserManagementLicenseValidator(
     IServiceScopeFactory scopeFactory,
     TimeProvider timeProvider)
 {
-    internal void ValidateProfiles() => validator.ValidateFeature(SkuIds.UM_002);
+    internal bool ValidateProfiles() => validator.ValidateFeature(SkuIds.UM_002);
 
-    internal void ValidateRolesAndGroups() => validator.ValidateFeature(SkuIds.UM_003);
+    internal bool ValidateRolesAndGroups() => validator.ValidateFeature(SkuIds.UM_003);
 
-    internal void ValidateOtp() => validator.ValidateFeature(SkuIds.UM_004);
+    internal bool ValidateOtp() => validator.ValidateFeature(SkuIds.UM_004);
 
-    internal void ValidateTotp() => validator.ValidateFeature(SkuIds.UM_005);
+    internal bool ValidateTotp() => validator.ValidateFeature(SkuIds.UM_005);
 
-    internal void ValidatePasskey() => validator.ValidateFeature(SkuIds.UM_006);
+    internal bool ValidatePasskey() => validator.ValidateFeature(SkuIds.UM_006);
 
-    internal void ValidateRecoveryCode() => validator.ValidateFeature(SkuIds.UM_007);
+    internal bool ValidateRecoveryCode() => validator.ValidateFeature(SkuIds.UM_007);
 
-    internal void ValidatePassword() => validator.ValidateFeature(SkuIds.UM_008);
+    internal bool ValidatePassword() => validator.ValidateFeature(SkuIds.UM_008);
 
     // TODO: UM-009 (Account Lockout) - deferred. Injection point is DefaultAuthenticationAttemptPolicy.EvaluateAsync
     //       but the relationship with UM-016 (Per-space Policies) needs clarification.
-    internal void ValidateAccountLockout() => validator.ValidateFeature(SkuIds.UM_009);
+    internal bool ValidateAccountLockout() => validator.ValidateFeature(SkuIds.UM_009);
 
-    internal void ValidateExternalIdpLinking() => validator.ValidateFeature(SkuIds.UM_010);
+    internal bool ValidateExternalIdpLinking() => validator.ValidateFeature(SkuIds.UM_010);
 
-    internal void ValidateSelfService() => validator.ValidateFeature(SkuIds.UM_011);
+    internal bool ValidateSelfService() => validator.ValidateFeature(SkuIds.UM_011);
 
-    internal void ValidateAdministration() => validator.ValidateFeature(SkuIds.UM_012);
+    internal bool ValidateAdministration() => validator.ValidateFeature(SkuIds.UM_012);
 
-    internal void ValidateRegistration() => validator.ValidateFeature(SkuIds.UM_013);
+    internal bool ValidateRegistration() => validator.ValidateFeature(SkuIds.UM_013);
 
-    internal void ValidateInboundScim() => validator.ValidateFeature(SkuIds.PLT_013);
+    internal bool ValidateInboundScim() => validator.ValidateFeature(SkuIds.PLT_013);
 
     // TODO: UM-014 (User Events) - deferred. We need to establish when this needs to be included.
-    internal void ValidateUserEvents() => validator.ValidateFeature(SkuIds.UM_014);
+    internal bool ValidateUserEvents() => validator.ValidateFeature(SkuIds.UM_014);
 
     // TODO: UM-015 (Advanced Password Policies) - deferred. Find the appropriate place to call this.
-    internal void ValidateAdvancedPasswordPolicies() => validator.ValidateFeature(SkuIds.UM_015);
+    internal bool ValidateAdvancedPasswordPolicies() => validator.ValidateFeature(SkuIds.UM_015);
 
     // TODO: UM-016 (Per-space Policies) - deferred. Same injection point as UM-009
     //       (DefaultAuthenticationAttemptPolicy.EvaluateAsync). Needs design clarification.
-    internal void ValidatePerSpacePolicies() => validator.ValidateFeature(SkuIds.UM_016);
+    internal bool ValidatePerSpacePolicies() => validator.ValidateFeature(SkuIds.UM_016);
+
+#pragma warning disable CA2201
+    internal static void ThrowInvalidLicenseException(string message) => throw new Exception(message);
+#pragma warning restore CA2201
 
     private long _lastUserCountCheckTicks;
     private static readonly TimeSpan UserCountCheckInterval = TimeSpan.FromHours(1);

@@ -20,7 +20,10 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryAddAttributeDefinitionAsync(AttributeDefinition definition, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         bool result;
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
@@ -46,7 +49,10 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryRemoveAttributeDefinitionAsync(AttributeCode code, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             return true;
@@ -69,7 +75,10 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryAddGroupAsync(AttributeGroup group, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         bool result;
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
@@ -95,7 +104,10 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> TryRemoveGroupAsync(AttributeGroupCode name, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             return true;
@@ -118,7 +130,10 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> ReorderAttributesAsync(AttributeGroupCode? group, IReadOnlyList<AttributeCode> orderedCodes, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             logger.SchemaAttributesReorderFailedSchemaNotFound(LogLevel.Debug);
@@ -172,7 +187,10 @@ internal sealed class UserProfileSchemaAdmin(AttributeSchemaRepository repo, ILo
 
     public async Task<bool> ReorderGroupsAsync(IReadOnlyList<AttributeGroupCode> orderedGroups, Ct ct)
     {
-        licenseValidator.ValidateProfiles();
+        if (!licenseValidator.ValidateProfiles())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
+        }
         if (await repo.TryReadAsync(UserProfileSchemaId.Value, ct) is not ({ } schema, var version))
         {
             logger.SchemaGroupsReorderFailedSchemaNotFound(LogLevel.Debug);

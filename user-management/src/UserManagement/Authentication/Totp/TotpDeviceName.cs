@@ -4,10 +4,10 @@
 namespace Duende.UserManagement.Authentication.Totp;
 
 /// <summary>
-/// Strongly-typed name for a TOTP authenticator registered by a user (e.g., "Default", "Work Phone").
+/// Strongly-typed name for a TOTP device registered by a user (e.g., "Default", "Work Phone").
 /// </summary>
 [StringValue]
-public partial record TotpAuthenticatorName
+public partial record TotpDeviceName
 {
     // Not that we really care about the exact number,
     // but we don't want people flooding the store with enormous values,
@@ -18,9 +18,9 @@ public partial record TotpAuthenticatorName
     public string Value { get; }
 
     /// <summary>The default TOTP authenticator name.</summary>
-    public static TotpAuthenticatorName Default { get; } = Create("Default");
+    public static TotpDeviceName Default { get; } = Create("Default");
 
     static string Normalize(string value) => value.Trim();
 
-    internal static TotpAuthenticatorName Load(string value) => new(value);
+    internal static TotpDeviceName Load(string value) => new(value);
 }

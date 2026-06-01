@@ -3,7 +3,6 @@
 
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Membership;
 using Duende.UserManagement.Scim.Internal.Endpoints.Users;
@@ -21,7 +20,6 @@ internal sealed class ScimSearchGroupsEndpoint(
     IServerUrls serverUrls,
     IOptions<ScimEndpointOptions> scimOptions,
     IOptions<ScimOptions> options,
-    UserManagementLicenseValidator licenseValidator,
     ILogger<ScimSearchGroupsEndpoint> logger)
 {
     internal async Task<IResult> HandleAsync(
@@ -29,8 +27,6 @@ internal sealed class ScimSearchGroupsEndpoint(
         HttpContext context,
         Ct ct)
     {
-        licenseValidator.ValidateInboundScim();
-
         var filter = body?.Filter;
         var resolvedStartIndex = Math.Max(1, body?.StartIndex ?? 1);
         var resolvedCount = body?.Count ?? 20;

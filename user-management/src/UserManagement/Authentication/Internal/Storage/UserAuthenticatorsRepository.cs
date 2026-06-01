@@ -94,11 +94,11 @@ internal sealed class UserAuthenticatorsRepository(
     }
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(
-        ExternalAuthenticator externalAuthenticator,
+        ExternalAuthenticatorAddress externalAuthenticatorAddress,
         Ct ct)
     {
         var store = storeFactory.GetStore();
-        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorDskV1.Create(externalAuthenticator)), ct);
+        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
@@ -224,10 +224,10 @@ internal sealed class UserAuthenticatorsRepository(
         entity.SubjectId.Value,
         [.. entity.OtpAddresses.Select(a => new OtpAddressDso.V1(a.Channel.Value, a.SubjectId.ToDso()))],
         [
-            .. entity.ExternalAuthenticators.Select(a =>
-                new ExternalAuthenticatorDso.V1(a.Name.Value, a.SubjectId.ToDso()))
+            .. entity.ExternalAuthenticatorAddresses.Select(a =>
+                new ExternalAuthenticatorAddressDso.V1(a.Name.Value, a.SubjectId.ToDso()))
         ],
-        [.. entity.TotpAuthenticators.Values.Select(ToDso)],
+        [.. entity.TotpDevices.Values.Select(ToDso)],
         [.. entity.RecoveryCodes.Select(a => a.ToDso())],
         entity.HashedPassword?.ToDso(),
         [.. entity.PasskeyCredentials.Values.Select(c => new PasskeyCredentialDso.V1(
@@ -250,9 +250,9 @@ internal sealed class UserAuthenticatorsRepository(
         UserAuthenticatorsId.Load(dso.Id),
         UserSubjectId.Load(dso.SubjectId),
         dso.OtpAddresses.Select(a => OtpAddress.Load(OtpChannel.Load(a.Channel), a.SubjectId.ToValueObject())),
-        dso.ExternalAuthenticators.Select(a =>
-            ExternalAuthenticator.Load(ExternalAuthenticatorName.Load(a.Name), a.SubjectId.ToValueObject())),
-        [.. dso.TotpAuthenticators.Select(ToValueObject)],
+        dso.ExternalAuthenticatorAddresses.Select(a =>
+            ExternalAuthenticatorAddress.Load(ExternalAuthenticatorName.Load(a.Name), a.SubjectId.ToValueObject())),
+        [.. dso.TotpDevices.Select(ToValueObject)],
         dso.RecoveryCodes.Select(a => a.ToValueObject()),
         dso.HashedPassword?.ToValueObject(),
         dso.PasskeyCredentials.Select(c => new PasskeyCredential(
@@ -304,7 +304,7 @@ internal sealed class UserAuthenticatorsRepository(
         {
             nameof(AuthenticatorKey.Password) => new AuthenticatorKey.Password(),
             nameof(AuthenticatorKey.Totp) => new AuthenticatorKey.Totp(
-                TotpAuthenticatorName.Load(
+                TotpDeviceName.Load(
                     !string.IsNullOrWhiteSpace(dso.AuthenticatorId)
                         ? dso.AuthenticatorId
                         : throw new InvalidOperationException(
@@ -318,38 +318,38 @@ internal sealed class UserAuthenticatorsRepository(
             AuthenticatorFailureState.Load(dso.FailedAttemptCount, dso.LastFailedAtUtc, dso.RecentAttemptTimestamps, dso.LockoutCount));
     }
 
-    private TotpAuthenticatorDso.V1 ToDso(TotpAuthenticator vo)
+    private TotpDeviceDso.V1 ToDso(TotpDevice vo)
     {
         var key = vo.Key.Bytes.ToArray();
         var storedKey = _options.ProtectTotpKeys
             ? _dataProtector
-                .CreateProtector(nameof(TotpAuthenticator))
-                .CreateProtector(nameof(TotpAuthenticator.Key))
+                .CreateProtector(nameof(TotpDevice))
+                .CreateProtector(nameof(TotpDevice.Key))
                 .Protect(key)
             : key;
 
-        return new TotpAuthenticatorDso.V1(
+        return new TotpDeviceDso.V1(
             vo.Name.Value, Convert.ToBase64String(storedKey), vo.LastSuccessfulTimeStep);
     }
 
-    private TotpAuthenticator ToValueObject(TotpAuthenticatorDso.V1 dso)
+    private TotpDevice ToValueObject(TotpDeviceDso.V1 dso)
     {
         var storedKey = Convert.FromBase64String(dso.Key);
         var key = _options.ProtectTotpKeys
             ? _dataProtector
-                .CreateProtector(nameof(TotpAuthenticator))
-                .CreateProtector(nameof(TotpAuthenticator.Key))
+                .CreateProtector(nameof(TotpDevice))
+                .CreateProtector(nameof(TotpDevice.Key))
                 .Unprotect(storedKey)
             : storedKey;
 
-        return TotpAuthenticator.Load(
-            TotpAuthenticatorName.Load(dso.Name), PlainBytesTotpKey.Load(key), dso.LastSuccessfulTimeStep);
+        return TotpDevice.Load(
+            TotpDeviceName.Load(dso.Name), PlainBytesTotpKey.Load(key), dso.LastSuccessfulTimeStep);
     }
 
     private static List<DataStorageKey> GetJsonKeys(UserAuthenticators authenticators) =>
     [
         .. authenticators.OtpAddresses.Select(a => DataStorageKey.Create(OtpAddressDskV1.Create(a))),
-        .. authenticators.ExternalAuthenticators.Select(a => DataStorageKey.Create(ExternalAuthenticatorDskV1.Create(a))),
+        .. authenticators.ExternalAuthenticatorAddresses.Select(a => DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(a))),
         .. authenticators.PasskeyCredentials.Values.Select(c => DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(c.CredentialId)))
     ];
 

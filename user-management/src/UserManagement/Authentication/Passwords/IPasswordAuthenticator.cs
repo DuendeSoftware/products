@@ -8,7 +8,7 @@ namespace Duende.UserManagement.Authentication.Passwords;
 /// <summary>
 /// Provides password-based authentication for users.
 /// </summary>
-public interface IPasswordAuth
+public interface IPasswordAuthenticator
 {
     /// <summary>
     /// Attempts to authenticate a user with the given attribute identifier and password.

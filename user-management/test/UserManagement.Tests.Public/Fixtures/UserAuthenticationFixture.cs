@@ -129,14 +129,14 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
 
     public async ValueTask DisposeAsync() => await App.DisposeAsync();
 
-    public async Task<(UserSubjectId SubjectId, ExternalAuthenticator ExternalAuthenticator)> SeedAuthenticatorsAsync()
+    public async Task<(UserSubjectId SubjectId, ExternalAuthenticatorAddress ExternalAuthenticatorAddress)> SeedAuthenticatorsAsync()
     {
         using var scope = App.Services.CreateScope();
-        var authenticatorsSelfService = scope.ServiceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        var externalAuthenticator = scope.ServiceProvider.GetRequiredService<IExternalAuthenticator>();
 
-        var externalAuthenticator = TestData.CreateExternalAuthenticator();
-        var authenticators = (await authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), externalAuthenticator, Ct)).ShouldNotBeNull();
-        return (authenticators.SubjectId, externalAuthenticator);
+        var externalAuthenticatorAddress = TestData.CreateExternalAuthenticatorAddress();
+        var subjectId = await externalAuthenticator.CreateUserAsync(externalAuthenticatorAddress, Ct);
+        return (subjectId, externalAuthenticatorAddress);
     }
 
     public async Task<(byte[] CredentialId, ECDsa PrivateKey)> SeedPasskeyAsync(

@@ -22,24 +22,30 @@ internal sealed class UserAuthenticatorsAdmin(
     public async Task<Authentication.UserAuthenticators?> TryAddAsync(
         UserSubjectId subjectId,
         IEnumerable<OtpAddress> otpAddresses,
-        IEnumerable<ExternalAuthenticator> externalAuthenticators,
+        IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses,
         Ct ct)
     {
-        var materializedExternalAuthenticators =
-            externalAuthenticators as ExternalAuthenticator[] ?? externalAuthenticators.ToArray();
-        if (materializedExternalAuthenticators.Length != 0)
+        var materializedExternalAuthenticatorAddresses =
+            externalAuthenticatorAddresses as ExternalAuthenticatorAddress[] ?? externalAuthenticatorAddresses.ToArray();
+        if (materializedExternalAuthenticatorAddresses.Length != 0)
         {
-            licenseValidator.ValidateExternalIdpLinking();
+            if (!licenseValidator.ValidateExternalIdpLinking())
+            {
+                UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the External IdP Linking feature.");
+            }
         }
 
         var materializedOtpAddresses = otpAddresses as OtpAddress[] ?? otpAddresses.ToArray();
         if (materializedOtpAddresses.Length != 0)
         {
-            licenseValidator.ValidateOtp();
+            if (!licenseValidator.ValidateOtp())
+            {
+                UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+            }
         }
 
         using var scope = logger.BeginSubjectScope(subjectId);
-        var user = new UserAuthenticators(subjectId, materializedOtpAddresses, materializedExternalAuthenticators);
+        var user = new UserAuthenticators(subjectId, materializedOtpAddresses, materializedExternalAuthenticatorAddresses);
         if (await repo.CreateAsync(user, ct) is CreateResult.Success)
         {
             licenseValidator.ValidateUserCount();
@@ -60,7 +66,10 @@ internal sealed class UserAuthenticatorsAdmin(
     public async Task<bool> TryAddOtpAddressesAsync(
         UserSubjectId subjectId, IEnumerable<OtpAddress> addresses, Ct ct)
     {
-        licenseValidator.ValidateOtp();
+        if (!licenseValidator.ValidateOtp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
@@ -80,7 +89,10 @@ internal sealed class UserAuthenticatorsAdmin(
     public async Task<bool> TryRemoveOtpAddressesAsync(
         UserSubjectId subjectId, IEnumerable<OtpAddress> addresses, Ct ct)
     {
-        licenseValidator.ValidateOtp();
+        if (!licenseValidator.ValidateOtp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
@@ -97,17 +109,20 @@ internal sealed class UserAuthenticatorsAdmin(
         return result;
     }
 
-    public async Task<bool> TryAddExternalAuthenticatorsAsync(
-        UserSubjectId subjectId, IEnumerable<ExternalAuthenticator> authenticators, Ct ct)
+    public async Task<bool> TryAddExternalAuthenticatorAddressesAsync(
+        UserSubjectId subjectId, IEnumerable<ExternalAuthenticatorAddress> addresses, Ct ct)
     {
-        licenseValidator.ValidateExternalIdpLinking();
+        if (!licenseValidator.ValidateExternalIdpLinking())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the External IdP Linking feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
             return false;
         }
 
-        user.Add(authenticators);
+        user.Add(addresses);
         var addResult = await repo.UpdateAsync(user, version, ct) is UpdateResult.Success;
         if (addResult)
         {
@@ -117,17 +132,20 @@ internal sealed class UserAuthenticatorsAdmin(
         return addResult;
     }
 
-    public async Task<bool> TryRemoveExternalAuthenticatorsAsync(
-        UserSubjectId subjectId, IEnumerable<ExternalAuthenticator> authenticators, Ct ct)
+    public async Task<bool> TryRemoveExternalAuthenticatorAddressesAsync(
+        UserSubjectId subjectId, IEnumerable<ExternalAuthenticatorAddress> addresses, Ct ct)
     {
-        licenseValidator.ValidateExternalIdpLinking();
+        if (!licenseValidator.ValidateExternalIdpLinking())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the External IdP Linking feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not ({ } user, var version))
         {
             return false;
         }
 
-        user.Remove(authenticators);
+        user.Remove(addresses);
         var removeResult = await repo.UpdateAsync(user, version, ct) is UpdateResult.Success;
         if (removeResult)
         {

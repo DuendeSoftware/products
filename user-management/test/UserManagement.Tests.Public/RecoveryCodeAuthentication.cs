@@ -4,6 +4,7 @@
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.RecoveryCodes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,8 +15,9 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly PlainTextRecoveryCode _incorrectCode;
-    private IRecoveryCodeAuth _auth = null!;
+    private IRecoveryCodeAuthenticator _auth = null!;
     private IUserAuthenticatorsSelfService _selfService = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public RecoveryCodeAuthentication()
@@ -31,8 +33,9 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
             // Recovery codes generate 10 codes; authenticating all in sequence exceeds the default velocity threshold
             options.Throttling.MaxAttemptsPerWindow = 20;
         });
-        _auth = _serviceProvider.GetRequiredService<IRecoveryCodeAuth>();
+        _auth = _serviceProvider.GetRequiredService<IRecoveryCodeAuthenticator>();
         _selfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -40,8 +43,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
     [Fact]
     public async Task Can_authenticate_with_all_codes()
     {
-        var subjectId = (await _selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         for (var i = 0; i < codes.Count; i++)
@@ -57,8 +59,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
     [Fact]
     public async Task Can_authenticate_with_all_codes_in_reverse_order()
     {
-        var subjectId = (await _selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         for (var i = codes.Count - 1; i >= 0; i--)
@@ -74,8 +75,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_authenticate_with_the_same_code_twice()
     {
-        var subjectId = (await _selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
         (await _auth.TryAuthenticateAsync(subjectId, codes.ElementAt(0), _ct)).ShouldBeTrue();
 
@@ -87,8 +87,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_authenticate_with_an_incorrect_code()
     {
-        var subjectId = (await _selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         _ = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         var authenticated = await _auth.TryAuthenticateAsync(subjectId, _incorrectCode, _ct);
@@ -99,8 +98,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
     [Fact]
     public async Task Default_count_produces_10_codes()
     {
-        var subjectId = (await _selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         codes.Count.ShouldBe(10);
@@ -116,8 +114,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
         });
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var subjectId = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await sp.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = (await selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         codes.Count.ShouldBe(5);
@@ -132,8 +129,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
         });
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var subjectId = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await sp.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = await selfService.TryCreateRecoveryCodesAsync(subjectId, _ct);
 
         codes.ShouldBeNull();
@@ -151,8 +147,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
             options.Throttling.MaxAttemptsPerWindow = 20;
         }, false, dbId: sharedDbId);
         var selfServiceEnabled = spEnabled.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var subjectId = (await selfServiceEnabled.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull().SubjectId;
+        var subjectId = await spEnabled.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var codes = (await selfServiceEnabled.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         // Now use a service provider with recovery codes disabled but the same backing store — auth should be rejected
@@ -160,7 +155,7 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
         {
             options.RecoveryCodes.Enabled = false;
         }, false, dbId: sharedDbId);
-        var auth = spDisabled.GetRequiredService<IRecoveryCodeAuth>();
+        var auth = spDisabled.GetRequiredService<IRecoveryCodeAuthenticator>();
 
         var authenticated = await auth.TryAuthenticateAsync(subjectId, codes.ElementAt(0), _ct);
 

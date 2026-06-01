@@ -18,6 +18,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     private readonly ServiceProvider _serviceProvider;
     private readonly UserRepository _userRepository;
     private readonly IUserAuthenticatorsSelfService _authSelfService;
+    private readonly IExternalAuthenticator _externalAuthenticator;
     private readonly IUserProfileSelfService _profileSelfService;
     private readonly IUserAdmin _userAdmin;
     private readonly IGroupAdmin _groupAdmin;
@@ -29,6 +30,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
         _serviceProvider = UsersServiceProviderFactory.CreateAsync().GetAwaiter().GetResult();
         _userRepository = _serviceProvider.GetRequiredService<UserRepository>();
         _authSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
         _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
         _userAdmin = _serviceProvider.GetRequiredService<IUserAdmin>();
         _groupAdmin = _serviceProvider.GetRequiredService<IGroupAdmin>();
@@ -37,14 +39,13 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
 
-    private static ExternalAuthenticator TestExternalAuthenticator() =>
+    private static ExternalAuthenticatorAddress TestExternalAuthenticatorAddress() =>
         new(ExternalAuthenticatorName.Create("test"), OpaqueSubjectId.Create("sub-test"));
 
     [Fact]
     public async Task creating_authenticators_also_creates_user_dso()
     {
-        var subjectId = UserSubjectId.New();
-        _ = (await _authSelfService.TryRegisterAsync(subjectId, TestExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await _externalAuthenticator.TryAuthenticateAsync(TestExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
         var user = await _userRepository.TryReadAsync(subjectId, _ct);
 
@@ -56,7 +57,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     public async Task creating_profile_also_creates_user_dso()
     {
         var subjectId = UserSubjectId.New();
-        _ = (await _profileSelfService.TryRegisterAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
 
         var user = await _userRepository.TryReadAsync(subjectId, _ct);
 
@@ -67,8 +68,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     [Fact]
     public async Task creating_authenticators_records_aspect_ref_in_user_dso()
     {
-        var subjectId = UserSubjectId.New();
-        _ = (await _authSelfService.TryRegisterAsync(subjectId, TestExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await _externalAuthenticator.TryAuthenticateAsync(TestExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
         var user = await _userRepository.TryReadAsync(subjectId, _ct);
 
@@ -80,7 +80,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     public async Task creating_profile_records_aspect_ref_in_user_dso()
     {
         var subjectId = UserSubjectId.New();
-        _ = (await _profileSelfService.TryRegisterAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
 
         var user = await _userRepository.TryReadAsync(subjectId, _ct);
 
@@ -92,7 +92,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     public async Task deleting_user_also_deletes_user_dso()
     {
         var subjectId = UserSubjectId.New();
-        _ = (await _profileSelfService.TryRegisterAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
 
         (await _userAdmin.TryRemoveAsync(subjectId, _ct)).ShouldBeTrue();
 

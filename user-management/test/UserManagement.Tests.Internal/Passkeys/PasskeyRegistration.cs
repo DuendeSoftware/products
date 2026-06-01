@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using Duende.Platform.UserManagement.Passkeys.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     private IPasskeyCeremonies _ceremonies = null!;
     private WebAuthnRegistrationCeremony _webAuthnRegistrationCeremony = null!;
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public async ValueTask InitializeAsync()
@@ -26,6 +28,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         _ceremonies = _serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         _webAuthnRegistrationCeremony = _serviceProvider.GetRequiredService<WebAuthnRegistrationCeremony>();
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -736,11 +739,10 @@ public sealed class PasskeyRegistration : IAsyncLifetime
             options.Passkeys.ServerDomain = null);
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, session.Options.Challenge, "https://example.com");
         var credentialId = RandomNumberGenerator.GetBytes(32);
@@ -760,11 +762,10 @@ public sealed class PasskeyRegistration : IAsyncLifetime
             options.Passkeys.ServerDomain = "example.com");
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, session.Options.Challenge, "https://example.com");
         var credentialId = RandomNumberGenerator.GetBytes(32);
@@ -1027,10 +1028,9 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         await using var serviceProvider = await UsersServiceProviderFactory.CreateWithOptionsAsync(options =>
             options.Passkeys.UserVerificationRequirement = PasskeyConstants.UserVerificationRequirement.Required);
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, session.Options.Challenge, "https://example.com");
         var credentialId = RandomNumberGenerator.GetBytes(32);
         // flags: 0x45 = UP (0x01) + UV (0x04) + AT (0x40)
@@ -1050,13 +1050,12 @@ public sealed class PasskeyRegistration : IAsyncLifetime
             options.Passkeys.ChallengeTimeout = TimeSpan.FromSeconds(300));
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
 
-        var externalAuthenticator = TestData.CreateExternalAuthenticator();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), externalAuthenticator, _ct)).ShouldNotBeNull();
+        var externalAuthenticatorAddress = TestData.CreateExternalAuthenticatorAddress();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(externalAuthenticatorAddress, _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         // Advance time beyond the configured timeout
         timeProvider.Advance(TimeSpan.FromSeconds(301));
@@ -1079,12 +1078,11 @@ public sealed class PasskeyRegistration : IAsyncLifetime
             options.Passkeys.ChallengeTimeout = TimeSpan.FromSeconds(300));
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
 
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         // Advance time to just under the configured timeout
         timeProvider.Advance(TimeSpan.FromSeconds(299));
@@ -1106,12 +1104,11 @@ public sealed class PasskeyRegistration : IAsyncLifetime
             options.Passkeys.ChallengeTimeout = TimeSpan.FromSeconds(60));
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
 
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         // Advance time beyond the custom timeout
         timeProvider.Advance(TimeSpan.FromSeconds(61));
@@ -1216,10 +1213,9 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         });
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, session.Options.Challenge, "https://app.example.com");
         var credentialId = RandomNumberGenerator.GetBytes(32);
@@ -1332,10 +1328,9 @@ public sealed class PasskeyRegistration : IAsyncLifetime
         });
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create, session.Options.Challenge, "https://auth.example.com");
         var credentialId = RandomNumberGenerator.GetBytes(32);
@@ -1348,5 +1343,6 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     }
 
     private async Task<UserSubjectId> CreateUserAsync() =>
-        (await _authenticatorsSelfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull().SubjectId;
+        (await _externalAuthenticator.TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct))
+        .ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 }

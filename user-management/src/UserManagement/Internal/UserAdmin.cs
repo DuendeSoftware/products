@@ -26,7 +26,10 @@ internal sealed class UserAdmin(
 {
     public async Task<bool> TryRemoveAsync(UserSubjectId subjectId, Ct ct)
     {
-        licenseValidator.ValidateAdministration();
+        if (!licenseValidator.ValidateAdministration())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Administration feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserDeleteStarting(LogLevel.Debug, subjectId);
         List<IStoreOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];

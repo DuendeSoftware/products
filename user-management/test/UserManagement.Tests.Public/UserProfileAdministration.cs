@@ -16,7 +16,7 @@ namespace Duende.Platform.UserManagement;
 public sealed class UserProfileAdministration : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<ExternalAuthenticator> _externalAuthenticators = [.. TestData.SubjectIdTypes.Select(TestData.CreateExternalAuthenticator)];
+    private readonly List<ExternalAuthenticatorAddress> _externalAuthenticatorAddresses = [.. TestData.SubjectIdTypes.Select(TestData.CreateExternalAuthenticatorAddress)];
     private readonly List<OtpAddress> _otpAddresses = [.. TestData.SubjectIdTypes.Select(TestData.CreateOtpAddress)];
     private IUserProfileAdmin _admin = null!;
     private IUserAdmin _userAdmin = null!;
@@ -30,7 +30,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
         _admin = _serviceProvider.GetRequiredService<IUserProfileAdmin>();
         _userAdmin = _serviceProvider.GetRequiredService<IUserAdmin>();
-        _externalAuthenticators.Count.ShouldBeGreaterThan(1);
+        _externalAuthenticatorAddresses.Count.ShouldBeGreaterThan(1);
         _otpAddresses.Count.ShouldBeGreaterThan(1);
         _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
     }

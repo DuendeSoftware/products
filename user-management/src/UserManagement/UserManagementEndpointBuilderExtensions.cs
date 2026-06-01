@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Duende.UserManagement.Authentication.Internal;
+using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Scim.Internal;
 using Duende.UserManagement.Scim.Internal.Endpoints;
 using Microsoft.AspNetCore.Routing;
@@ -34,6 +35,12 @@ public static class UserManagementEndpointBuilderExtensions
         [Experimental(diagnosticId: "duende_experimental", Message = "SCIM support is experimental and may change in future releases.")]
         public T MapScim()
         {
+            var licenseValidator = builder.ServiceProvider.GetRequiredService<UserManagementLicenseValidator>();
+            if (!licenseValidator.ValidateInboundScim())
+            {
+                UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Inbound SCIM feature.");
+            }
+
             builder.ServiceProvider.GetRequiredService<ScimMetadataModule>().MapEndpoints(builder);
             builder.ServiceProvider.GetRequiredService<ScimUsersHttpModule>().MapEndpoints(builder);
             builder.ServiceProvider.GetRequiredService<ScimGroupsModule>().MapEndpoints(builder);

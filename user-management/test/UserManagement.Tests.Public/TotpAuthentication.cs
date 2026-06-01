@@ -4,6 +4,7 @@
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Totp;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,16 +13,18 @@ namespace Duende.Platform.UserManagement;
 public sealed class TotpAuthentication : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private ITotpAuth _auth = null!;
+    private ITotpAuthenticator _auth = null!;
     private IUserAuthenticatorsSelfService _selfService = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
     private ServiceProvider _serviceProvider = null!;
     private FakeTimeProvider _timeProvider = null!;
 
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _auth = _serviceProvider.GetRequiredService<ITotpAuth>();
+        _auth = _serviceProvider.GetRequiredService<ITotpAuthenticator>();
         _selfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
+        _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
         _timeProvider = _serviceProvider.GetRequiredService<FakeTimeProvider>();
     }
 
@@ -38,10 +41,10 @@ public sealed class TotpAuthentication : IAsyncLifetime
     [InlineData(TestData.UnixTimeSeconds2603, TestData.Totp2603)]
     public async Task CanAuthenticate(long unixTimeSeconds, string totp)
     {
-        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
+        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(_externalAuthenticator, TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
         _timeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds));
 
-        var result = await _auth.TryAuthenticateAsync(subjectId, TotpAuthenticatorName.Default, PlainTextTotp.Create(totp), _ct);
+        var result = await _auth.TryAuthenticateAsync(subjectId, TotpDeviceName.Default, PlainTextTotp.Create(totp), _ct);
 
         result.ShouldBeTrue();
     }
@@ -57,11 +60,11 @@ public sealed class TotpAuthentication : IAsyncLifetime
     [InlineData(TestData.UnixTimeSeconds2603, TestData.Totp2603)]
     public async Task CannotAuthenticateMoreThanOnceWithAGivenTotp(long unixTimeSeconds, string totp)
     {
-        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
+        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(_externalAuthenticator, TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
         _timeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds));
-        (await _auth.TryAuthenticateAsync(subjectId, TotpAuthenticatorName.Default, PlainTextTotp.Create(totp), _ct)).ShouldBeTrue();
+        (await _auth.TryAuthenticateAsync(subjectId, TotpDeviceName.Default, PlainTextTotp.Create(totp), _ct)).ShouldBeTrue();
 
-        var result = await _auth.TryAuthenticateAsync(subjectId, TotpAuthenticatorName.Default, PlainTextTotp.Create(totp), _ct);
+        var result = await _auth.TryAuthenticateAsync(subjectId, TotpDeviceName.Default, PlainTextTotp.Create(totp), _ct);
 
         result.ShouldBeFalse();
     }
@@ -69,10 +72,10 @@ public sealed class TotpAuthentication : IAsyncLifetime
     [Fact]
     public async Task Cannot_authenticate_with_incorrect_totp()
     {
-        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
+        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(_externalAuthenticator, TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
         _timeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds((long)TestData.UnixTimeSeconds2005));
 
-        var result = await _auth.TryAuthenticateAsync(subjectId, TotpAuthenticatorName.Default, PlainTextTotp.Create("123456"), _ct);
+        var result = await _auth.TryAuthenticateAsync(subjectId, TotpDeviceName.Default, PlainTextTotp.Create("123456"), _ct);
 
         result.ShouldBeFalse();
     }
@@ -82,10 +85,10 @@ public sealed class TotpAuthentication : IAsyncLifetime
     [InlineData(TestData.Totp2005Plus30)]
     public async Task CanAuthenticateWithAcceptableClockDifferences(string totp)
     {
-        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
+        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(_externalAuthenticator, TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
         _timeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds((long)TestData.UnixTimeSeconds2005));
 
-        var result = await _auth.TryAuthenticateAsync(subjectId, TotpAuthenticatorName.Default, PlainTextTotp.Create(totp), _ct);
+        var result = await _auth.TryAuthenticateAsync(subjectId, TotpDeviceName.Default, PlainTextTotp.Create(totp), _ct);
 
         result.ShouldBeTrue();
     }
@@ -95,10 +98,10 @@ public sealed class TotpAuthentication : IAsyncLifetime
     [InlineData(TestData.Totp2005Plus60)]
     public async Task CannotAuthenticateWithUnacceptableClockDifferences(string totp)
     {
-        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
+        var subjectId = await _selfService.CreateUserWithTotpAuthenticator(_externalAuthenticator, TestData.UnixTimeSeconds2000, PlainTextTotp.Create(TestData.Totp2000), _timeProvider, _ct);
         _timeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds((long)TestData.UnixTimeSeconds2005));
 
-        var result = await _auth.TryAuthenticateAsync(subjectId, TotpAuthenticatorName.Default, PlainTextTotp.Create(totp), _ct);
+        var result = await _auth.TryAuthenticateAsync(subjectId, TotpDeviceName.Default, PlainTextTotp.Create(totp), _ct);
 
         result.ShouldBeFalse();
     }

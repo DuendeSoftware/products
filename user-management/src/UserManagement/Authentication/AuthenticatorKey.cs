@@ -21,7 +21,7 @@ public abstract record AuthenticatorKey
     /// A named TOTP authenticator.
     /// </summary>
     /// <param name="Name">The name of the TOTP authenticator.</param>
-    public sealed record Totp(TotpAuthenticatorName Name) : AuthenticatorKey;
+    public sealed record Totp(TotpDeviceName Name) : AuthenticatorKey;
 #pragma warning restore CA1724
 
     /// <summary>

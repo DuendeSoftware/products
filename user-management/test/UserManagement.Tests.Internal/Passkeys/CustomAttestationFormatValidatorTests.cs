@@ -4,7 +4,7 @@
 using System.Security.Cryptography;
 using Duende.Platform.UserManagement.Passkeys.Fixtures;
 using Duende.UserManagement;
-using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,10 +39,9 @@ public sealed class CustomAttestationFormatValidatorTests
         await using var serviceProvider = await CreateServiceProviderWithCustomValidator<FakeAttestationFormatValidator>();
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
-        var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct)).ShouldNotBeNull();
+        var subjectId = (await serviceProvider.GetRequiredService<IExternalAuthenticator>().TryAuthenticateAsync(TestData.CreateExternalAuthenticatorAddress(), _ct)).ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
 
         var clientData = WebAuthnFixtures.CreateClientDataJson(
             PasskeyConstants.ClientDataType.Create, session.Options.Challenge, "https://example.com");

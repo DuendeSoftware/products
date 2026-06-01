@@ -4,6 +4,7 @@
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passwords;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,10 +19,10 @@ public sealed class PasswordHistoryTests
         await UsersServiceProviderFactory.CreateWithOptionsAsync(options =>
             options.Passwords.HistoryCount = historyCount);
 
-    private static async Task<UserSubjectId> RegisterUserAsync(IUserAuthenticatorsSelfService selfService, Ct ct)
+    private static async Task<UserSubjectId> RegisterUserAsync(IExternalAuthenticator externalAuthenticator, Ct ct)
     {
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), ct)).ShouldNotBeNull();
-        return user.SubjectId;
+        var subjectId = await externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), ct);
+        return subjectId;
     }
 
     [Fact]
@@ -30,7 +31,7 @@ public sealed class PasswordHistoryTests
         await using var sp = await CreateServiceProviderAsync(historyCount: 3);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var userId = await RegisterUserAsync(selfService, _ct);
+        var userId = await RegisterUserAsync(sp.GetRequiredService<IExternalAuthenticator>(), _ct);
         var raw1 = $"ABcd12!@{Guid.NewGuid()}";
         var password1 = await selfService.ValidatePasswordAsync(userId, raw1, _ct);
 
@@ -49,7 +50,7 @@ public sealed class PasswordHistoryTests
         await using var sp = await CreateServiceProviderAsync(historyCount: 3);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var userId = await RegisterUserAsync(selfService, _ct);
+        var userId = await RegisterUserAsync(sp.GetRequiredService<IExternalAuthenticator>(), _ct);
         var raw1 = $"ABcd12!@{Guid.NewGuid()}";
         var password1 = await selfService.ValidatePasswordAsync(userId, raw1, _ct);
 
@@ -73,7 +74,7 @@ public sealed class PasswordHistoryTests
         await using var sp = await CreateServiceProviderAsync(historyCount: 3);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var userId = await RegisterUserAsync(selfService, _ct);
+        var userId = await RegisterUserAsync(sp.GetRequiredService<IExternalAuthenticator>(), _ct);
 
         // Set initial password (password1)
         var raw1 = $"ABcd12!@{Guid.NewGuid()}";
@@ -99,7 +100,7 @@ public sealed class PasswordHistoryTests
         await using var sp = await CreateServiceProviderAsync(historyCount: 0);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var userId = await RegisterUserAsync(selfService, _ct);
+        var userId = await RegisterUserAsync(sp.GetRequiredService<IExternalAuthenticator>(), _ct);
         var raw1 = $"ABcd12!@{Guid.NewGuid()}";
         var password1 = await selfService.ValidatePasswordAsync(userId, raw1, _ct);
 
@@ -121,7 +122,7 @@ public sealed class PasswordHistoryTests
         await using var sp = await CreateServiceProviderAsync(historyCount: 3);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
 
-        var userId = await RegisterUserAsync(selfService, _ct);
+        var userId = await RegisterUserAsync(sp.GetRequiredService<IExternalAuthenticator>(), _ct);
         var raw1 = $"ABcd12!@{Guid.NewGuid()}";
         var password1 = await selfService.ValidatePasswordAsync(userId, raw1, _ct);
         (await selfService.TrySetPasswordAsync(userId, password1, _ct)).ShouldBeTrue();

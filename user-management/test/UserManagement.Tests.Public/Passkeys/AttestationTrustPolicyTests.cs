@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.Passkeys;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -107,10 +108,9 @@ public sealed class AttestationTrustPolicyTests
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
         var clientData = WebAuthnFixtures.CreateClientDataJson(
             PasskeyConstants.ClientDataType.Create,
             session.Options.Challenge,
@@ -137,7 +137,7 @@ public sealed class AttestationTrustPolicyTests
         var context = capturedContext.Value.ShouldNotBeNull();
         context.Aaguid.ShouldBe(expectedAaguid);
         context.AttestationFormat.ShouldBe(PasskeyConstants.AttestationFormat.None);
-        context.UserSubjectId.ShouldBe(user.SubjectId);
+        context.UserSubjectId.ShouldBe(subjectId);
         context.CertificateChain.ShouldBeNull();
     }
 
@@ -159,10 +159,9 @@ public sealed class AttestationTrustPolicyTests
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var timeProvider = serviceProvider.GetRequiredService<TimeProvider>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
         var clientData = WebAuthnFixtures.CreateClientDataJson(
             PasskeyConstants.ClientDataType.Create,
             session.Options.Challenge,
@@ -193,7 +192,7 @@ public sealed class AttestationTrustPolicyTests
         var context = capturedContext.Value.ShouldNotBeNull();
         context.Aaguid.ShouldBe(expectedAaguid);
         context.AttestationFormat.ShouldBe(PasskeyConstants.AttestationFormat.Packed);
-        context.UserSubjectId.ShouldBe(user.SubjectId);
+        context.UserSubjectId.ShouldBe(subjectId);
         _ = context.CertificateChain.ShouldNotBeNull();
         context.CertificateChain.ShouldNotBeEmpty();
     }
@@ -202,10 +201,9 @@ public sealed class AttestationTrustPolicyTests
     {
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var selfService = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
-        var user = (await selfService.TryRegisterAsync(UserSubjectId.New(), TestData.CreateExternalAuthenticator(), _ct))
-            .ShouldNotBeNull();
+        var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
 
-        var session = await passkeyAuth.BeginRegistrationAsync(user.SubjectId, "user@example.com", "Test User", _ct);
+        var session = await passkeyAuth.BeginRegistrationAsync(subjectId, "user@example.com", "Test User", _ct);
         var clientData = WebAuthnFixtures.CreateClientDataJson(
             PasskeyConstants.ClientDataType.Create,
             session.Options.Challenge,

@@ -6,9 +6,9 @@ using Duende.UserManagement.Authentication.Internal.Storage;
 
 namespace Duende.UserManagement.Authentication.External.Internal.Storage;
 
-internal sealed record ExternalAuthenticatorDskV1 : IDataStorageKey
+internal sealed record ExternalAuthenticatorAddressDskV1 : IDataStorageKey
 {
-    private ExternalAuthenticatorDskV1(string name, string id)
+    private ExternalAuthenticatorAddressDskV1(string name, string id)
     {
         Name = name;
         Id = id;
@@ -27,6 +27,6 @@ internal sealed record ExternalAuthenticatorDskV1 : IDataStorageKey
     /// </summary>
     public string Id { get; }
 
-    public static ExternalAuthenticatorDskV1 Create(ExternalAuthenticator externalAuthenticator)
-        => new(externalAuthenticator.Name.ToString(), externalAuthenticator.SubjectId.ToString());
+    public static ExternalAuthenticatorAddressDskV1 Create(ExternalAuthenticatorAddress address)
+        => new(address.Name.ToString(), address.SubjectId.ToString());
 }

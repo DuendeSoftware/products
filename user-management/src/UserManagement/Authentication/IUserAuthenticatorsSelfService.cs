@@ -12,18 +12,18 @@ namespace Duende.UserManagement.Authentication;
 
 /// <summary>
 /// Self-service interface for users to manage their own authenticators, including passwords, OTP addresses,
-/// external authenticators, TOTP devices, passkeys, and recovery codes.
+/// external authenticator addresses, TOTP devices, passkeys, and recovery codes.
 /// </summary>
 public interface IUserAuthenticatorsSelfService
 {
     /// <summary>
     /// Creates a validated <see cref="ValidatedPlainTextPassword"/> from the given string, applying all configured password validators.
-    /// This password can then be used to set the password using <see cref="TrySetPasswordAsync"/>. 
+    /// This password can then be used to set the password using <see cref="TrySetPasswordAsync"/>.
     /// Throws if validation fails.
     /// </summary>
     /// <Remarks>
     ///  This method does NOT set the password on the user. It only validates the password string and returns the result.
-    ///  Call <see cref="TrySetPasswordAsync"/> to actually set the password on the user's authenticator record.   
+    ///  Call <see cref="TrySetPasswordAsync"/> to actually set the password on the user's authenticator record.
     /// </Remarks>
     /// <param name="userId">The subject ID of the user the password is being created for.</param>
     /// <param name="passwordString">The plain text password string to validate.</param>
@@ -32,27 +32,18 @@ public interface IUserAuthenticatorsSelfService
 
     /// <summary>
     /// Attempts to create a validated <see cref="ValidatedPlainTextPassword"/> from the given string.
-    /// This password can then be used to set the password using <see cref="TrySetPasswordAsync"/>. 
-    /// 
+    /// This password can then be used to set the password using <see cref="TrySetPasswordAsync"/>.
+    ///
     /// Returns a <see cref="PasswordCreationResult"/> indicating success or validation failure.
     /// </summary>
     /// <Remarks>
     ///  This method does NOT set the password on the user. It only validates the password string and returns the result.
-    ///  Call <see cref="TrySetPasswordAsync"/> to actually set the password on the user's authenticator record.   
+    ///  Call <see cref="TrySetPasswordAsync"/> to actually set the password on the user's authenticator record.
     /// </Remarks>
     /// <param name="userId">The subject ID of the user the password is being created for.</param>
     /// <param name="passwordString">The plain text password string to validate.</param>
     /// <param name="ct">Cancellation token.</param>
     Task<PasswordCreationResult> TryValidatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct);
-
-    /// <summary>
-    /// Registers an external authenticator for the specified user.
-    /// Returns <c>null</c> if the user record does not exist.
-    /// </summary>
-    /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticator">The external authenticator to register.</param>
-    /// <param name="ct">Cancellation token.</param>
-    Task<UserAuthenticators?> TryRegisterAsync(UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct);
 
     /// <summary>
     /// Retrieves the authenticator record for the specified user by subject ID.
@@ -61,14 +52,6 @@ public interface IUserAuthenticatorsSelfService
     /// <param name="subjectId">The subject ID of the user.</param>
     /// <param name="ct">Cancellation token.</param>
     public Task<UserAuthenticators?> TryGetAsync(UserSubjectId subjectId, Ct ct);
-
-    /// <summary>
-    /// Retrieves the authenticator record for the user associated with the given external authenticator.
-    /// Returns <c>null</c> if no record exists.
-    /// </summary>
-    /// <param name="authenticator">The external authenticator identifying the user.</param>
-    /// <param name="ct">Cancellation token.</param>
-    public Task<UserAuthenticators?> TryGetAsync(ExternalAuthenticator authenticator, Ct ct);
 
     /// <summary>
     /// Adds an OTP address to the specified user's authenticator record after verifying the OTP.
@@ -90,42 +73,42 @@ public interface IUserAuthenticatorsSelfService
     Task<bool> TryRemoveOtpAddressAsync(UserSubjectId subjectId, OtpAddress address, Ct ct);
 
     /// <summary>
-    /// Adds an external authenticator to the specified user's authenticator record.
+    /// Adds an external authenticator address to the specified user's authenticator record.
     /// Returns <c>false</c> if the user record does not exist.
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticator">The external authenticator to add.</param>
+    /// <param name="address">The external authenticator address to add.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<bool> TryAddExternalAuthenticatorAsync(UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct);
+    Task<bool> TryAddExternalAuthenticatorAddressAsync(UserSubjectId subjectId, ExternalAuthenticatorAddress address, Ct ct);
 
     /// <summary>
-    /// Removes an external authenticator from the specified user's authenticator record.
+    /// Removes an external authenticator address from the specified user's authenticator record.
     /// Returns <c>false</c> if the user record does not exist.
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticator">The external authenticator to remove.</param>
+    /// <param name="address">The external authenticator address to remove.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<bool> TryRemoveExternalAuthenticatorAsync(UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct);
+    Task<bool> TryRemoveExternalAuthenticatorAddressAsync(UserSubjectId subjectId, ExternalAuthenticatorAddress address, Ct ct);
 
     /// <summary>
-    /// Adds a TOTP authenticator to the specified user's authenticator record.
+    /// Adds a TOTP device to the specified user's authenticator record.
     /// Returns <c>false</c> if the user record does not exist or the TOTP code is invalid.
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticatorName">The name of the TOTP authenticator.</param>
+    /// <param name="deviceName">The name of the TOTP device.</param>
     /// <param name="key">The TOTP secret key bytes.</param>
     /// <param name="totp">The current TOTP code to verify the key is correct.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<bool> TryAddTotpAuthenticatorAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, PlainBytesTotpKey key, PlainTextTotp totp, Ct ct);
+    Task<bool> TryAddTotpDeviceAsync(UserSubjectId subjectId, TotpDeviceName deviceName, PlainBytesTotpKey key, PlainTextTotp totp, Ct ct);
 
     /// <summary>
-    /// Removes a TOTP authenticator from the specified user's authenticator record.
+    /// Removes a TOTP device from the specified user's authenticator record.
     /// Returns <c>false</c> if the user record does not exist.
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticatorName">The name of the TOTP authenticator to remove.</param>
+    /// <param name="deviceName">The name of the TOTP device to remove.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<bool> TryRemoveTotpAuthenticatorAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, Ct ct);
+    Task<bool> TryRemoveTotpDeviceAsync(UserSubjectId subjectId, TotpDeviceName deviceName, Ct ct);
 
     /// <summary>
     /// Adds a passkey credential to the specified user's authenticator record.
@@ -158,10 +141,10 @@ public interface IUserAuthenticatorsSelfService
     /// Returns <c>false</c> if the user record does not exist.
     /// </summary>
     /// <Remarks>
-    /// The user must already have an authenticator before you can create a password on it. 
-    /// If you are not using any other form of authentication, then you must first call <see cref="IUserAuthenticatorsAdmin.TryAddAsync"/> to 
+    /// The user must already have an authenticator before you can create a password on it.
+    /// If you are not using any other form of authentication, then you must first call <see cref="IUserAuthenticatorsAdmin.TryAddAsync"/> to
     /// create an empty Authenticator.
-    /// 
+    ///
     /// IE: await authenticatorsAdmin.TryAddAsync(profile.SubjectId, [], [], cancellationToken);
     /// </Remarks>
     /// <param name="subjectId">The subject ID of the user.</param>

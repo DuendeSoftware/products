@@ -4,6 +4,7 @@
 using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement.Internal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.UserManagement;
@@ -15,7 +16,9 @@ public sealed class MembershipServiceProviderFactory
         var services = new ServiceCollection();
 
         var dbId = Guid.NewGuid();
-        _ = services.AddLogging();
+        _ = services
+            .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
+            .AddLogging();
         _ = services.AddUserManagementInternal(users =>
         {
             _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");

@@ -5,7 +5,7 @@ using Duende.UserManagement.Authentication.Internal.Storage;
 
 namespace Duende.UserManagement.Authentication.External.Internal.Storage;
 
-internal static class ExternalAuthenticatorDso
+internal static class ExternalAuthenticatorAddressDso
 {
     internal sealed record V1(string Name, SubjectIdDso.V1 SubjectId);
 }

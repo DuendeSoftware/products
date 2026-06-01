@@ -7,9 +7,13 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.UserManagement;
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.Sqlite;
 using Duende.UserManagement;
+using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Membership;
 using Duende.UserManagement.Profiles;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -20,8 +24,10 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private ServiceProvider _sp = null!;
+    private IExternalAuthenticator _externalAuthenticator = null!;
     private IUserProfileAdmin _userProfileAdmin = null!;
     private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private IUserAuthenticatorsAdmin _authenticatorsAdmin = null!;
     private IMembershipAdmin _membershipAdmin = null!;
     private IRoleAdmin _roleAdmin = null!;
     private IGroupAdmin _groupAdmin = null!;
@@ -30,12 +36,14 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         _sp = await UsersServiceProviderFactory.CreateAsync();
+        _externalAuthenticator = _sp.GetRequiredService<IExternalAuthenticator>();
         _userProfileAdmin = _sp.GetRequiredService<IUserProfileAdmin>();
         _schemaAdmin = _sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        _authenticatorsAdmin = _sp.GetRequiredService<IUserAuthenticatorsAdmin>();
         _membershipAdmin = _sp.GetRequiredService<IMembershipAdmin>();
         _roleAdmin = _sp.GetRequiredService<IRoleAdmin>();
         _groupAdmin = _sp.GetRequiredService<IGroupAdmin>();
-        _sut = new UserManagementProfileService(NullLogger<UserManagementProfileService>.Instance, _userProfileAdmin, _membershipAdmin);
+        _sut = new UserManagementProfileService(NullLogger<UserManagementProfileService>.Instance, _authenticatorsAdmin, _userProfileAdmin, _membershipAdmin);
     }
 
     public ValueTask DisposeAsync() => _sp.DisposeAsync();
@@ -103,7 +111,12 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
 
     private async Task<UserSubjectId> CreateEmptyUser()
     {
-        var subjectId = UserSubjectId.New();
+        var externalAuthenticatorAddress = new ExternalAuthenticatorAddress(
+            ExternalAuthenticatorName.Create("test-ext"), OpaqueSubjectId.Create(Guid.NewGuid().ToString()));
+
+        var subjectId = (await _externalAuthenticator.TryAuthenticateAsync(externalAuthenticatorAddress, _ct))
+            .ShouldBeOfType<ExternalAuthenticationResult.Success>().UserSubjectId;
+
         var profile = await _userProfileAdmin.TryAddAsync(subjectId, ValidatedAttributeValueCollection.Empty, _ct);
         _ = profile.ShouldNotBeNull();
         return subjectId;
@@ -284,40 +297,122 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetProfileDataAsync_without_membership_and_profiles_adds_subject_claims()
+    public async Task GetProfileDataAsync_maps_all_scalar_types_with_correct_claim_value_types()
     {
-        var sut = new UserManagementProfileService(NullLogger<UserManagementProfileService>.Instance);
-        var sub = UserSubjectId.New().ToString();
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(JwtClaimTypes.Subject, sub),
-            new Claim("email", "alice@example.com")
-        ]));
-        var ctx = new ProfileDataRequestContext(subject, EmptyClient, "test", ["email"]);
+        // Define attributes for each scalar type
+        await DefineAttribute("age", new ScalarAttributeType(ScalarDataType.Integer));
+        await DefineAttribute("balance", new ScalarAttributeType(ScalarDataType.Decimal));
+        await DefineAttribute("birthday", new ScalarAttributeType(ScalarDataType.Date));
+        await DefineAttribute("registered_at", new ScalarAttributeType(ScalarDataType.DateTime));
+        await DefineAttribute("nickname", new ScalarAttributeType(ScalarDataType.String));
+        await DefineBoolAttribute("active");
 
-        await sut.GetProfileDataAsync(ctx, _ct);
+        var schema = await _userProfileAdmin.GetSchemaAsync(_ct);
+        var attributes = new AttributeValueCollection(schema);
+        attributes.Set(AttributeCode.Create("age"), 42);
+        attributes.Set(AttributeCode.Create("balance"), 123.45m);
+        attributes.Set(AttributeCode.Create("birthday"), new DateOnly(1990, 6, 15));
+        attributes.Set(AttributeCode.Create("registered_at"), new DateTimeOffset(2024, 1, 15, 10, 30, 0, TimeSpan.Zero));
+        attributes.Set(AttributeCode.Create("nickname"), "Bobby");
+        attributes.Set(AttributeCode.Create("active"), true);
 
-        ctx.IssuedClaims.ShouldContain(c => c.Type == "email" && c.Value == "alice@example.com");
+        var subjectId = UserSubjectId.New();
+        _ = (await _userProfileAdmin.TryAddAsync(subjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var ctx = MakeProfileContext(subjectId.ToString(), "age", "balance", "birthday", "registered_at", "nickname", "active");
+        await _sut.GetProfileDataAsync(ctx, _ct);
+
+        var ageClaim = ctx.IssuedClaims.Single(c => c.Type == "age");
+        ageClaim.Value.ShouldBe("42");
+        ageClaim.ValueType.ShouldBe(ClaimValueTypes.Integer32);
+
+        var balanceClaim = ctx.IssuedClaims.Single(c => c.Type == "balance");
+        balanceClaim.Value.ShouldBe("123.45");
+        balanceClaim.ValueType.ShouldBe(ClaimValueTypes.Double);
+
+        var birthdayClaim = ctx.IssuedClaims.Single(c => c.Type == "birthday");
+        birthdayClaim.Value.ShouldBe("1990-06-15");
+        birthdayClaim.ValueType.ShouldBe(ClaimValueTypes.Date);
+
+        var registeredClaim = ctx.IssuedClaims.Single(c => c.Type == "registered_at");
+        registeredClaim.Value.ShouldBe("2024-01-15T10:30:00.0000000+00:00");
+        registeredClaim.ValueType.ShouldBe(ClaimValueTypes.DateTime);
+
+        var nicknameClaim = ctx.IssuedClaims.Single(c => c.Type == "nickname");
+        nicknameClaim.Value.ShouldBe("Bobby");
+        nicknameClaim.ValueType.ShouldBe(ClaimValueTypes.String);
+
+        var activeClaim = ctx.IssuedClaims.Single(c => c.Type == "active");
+        activeClaim.Value.ShouldBe("true");
+        activeClaim.ValueType.ShouldBe(ClaimValueTypes.Boolean);
     }
 
     [Fact]
-    public async Task IsActiveAsync_without_membership_and_profiles_is_always_active()
+    public async Task GetProfileDataAsync_maps_list_attribute_as_multiple_claims()
     {
-        var sut = new UserManagementProfileService(NullLogger<UserManagementProfileService>.Instance);
-        var ctx = MakeIsActiveContext(UserSubjectId.New().ToString());
+        await DefineAttribute("tag", new ListAttributeType(new ScalarAttributeType(ScalarDataType.String)));
 
-        await sut.IsActiveAsync(ctx, _ct);
+        var schema = await _userProfileAdmin.GetSchemaAsync(_ct);
+        var attributes = new AttributeValueCollection(schema);
+        attributes.Set(AttributeCode.Create("tag"), ["alpha", "beta", "gamma"]);
 
-        ctx.IsActive.ShouldBeTrue();
+        var subjectId = UserSubjectId.New();
+        _ = (await _userProfileAdmin.TryAddAsync(subjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var ctx = MakeProfileContext(subjectId.ToString(), "tag");
+        await _sut.GetProfileDataAsync(ctx, _ct);
+
+        var tagClaims = ctx.IssuedClaims.Where(c => c.Type == "tag").ToList();
+        tagClaims.Count.ShouldBe(3);
+        tagClaims.Select(c => c.Value).ShouldBe(["alpha", "beta", "gamma"], ignoreOrder: true);
+        tagClaims.ShouldAllBe(c => c.ValueType == ClaimValueTypes.String);
     }
 
     [Fact]
-    public void DI_resolves_UserManagementProfileService_without_profiles_or_membership_registered()
+    public async Task GetProfileDataAsync_skips_complex_attribute_types()
+    {
+        await DefineAttribute("address", new ComplexAttributeType(
+            new Dictionary<AttributeCode, ComplexAttributeProperty>
+            {
+                [AttributeCode.Create("street")] = ComplexAttributeProperty.Of(ScalarDataType.String)
+            }));
+        await DefineStringAttribute("name");
+
+        var schema = await _userProfileAdmin.GetSchemaAsync(_ct);
+        var attributes = new AttributeValueCollection(schema);
+        attributes.Set(AttributeCode.Create("address"),
+            new Dictionary<string, object> { ["street"] = "123 Main St" });
+        attributes.Set(AttributeCode.Create("name"), "Alice");
+
+        var subjectId = UserSubjectId.New();
+        _ = (await _userProfileAdmin.TryAddAsync(subjectId, attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var ctx = MakeProfileContext(subjectId.ToString(), "address", "name");
+        await _sut.GetProfileDataAsync(ctx, _ct);
+
+        ctx.IssuedClaims.ShouldNotContain(c => c.Type == "address");
+        ctx.IssuedClaims.ShouldContain(c => c.Type == "name" && c.Value == "Alice");
+    }
+
+    private async Task DefineAttribute(string code, AttributeType attributeType) =>
+        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
+            new AttributeDefinition
+            {
+                Code = AttributeCode.Create(code),
+                AttributeType = attributeType,
+                Description = AttributeDescription.Create(code)
+            },
+            _ct)).ShouldBeTrue();
+
+    [Fact]
+    public void DI_resolves_UserManagementProfileService_when_AddUserManagement_is_configured()
     {
         var services = new ServiceCollection();
+        _ = services.AddSingleton<IConfiguration>(new ConfigurationRoot([]));
         _ = services.AddLogging();
-        _ = services.AddIdentityServer()
-            .AddUserManagement(_ => { });
+        _ = services
+            .AddIdentityServer()
+            .AddUserManagement(u => u.AddSqliteInMemoryStore());
 
         using var sp = services.BuildServiceProvider();
 

@@ -143,7 +143,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
             attributes.Set(AttributeCode.Create("department"), department);
         }
 
-        return (await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+        return (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
     }
 
     private Task<QueryResult<UserProfileListItem>> Query(string? filter, int pageNumber, int pageSize) =>
@@ -539,7 +539,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         var attributes = new AttributeValueCollection(schema);
         attributes.Set(nameAttr, "alice");
         attributes.Set(secretAttr, "topsecret");
-        _ = (await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
 
         // Act - filtering on the non-indexed attribute should throw NotSupportedException
         var ex = await Record.ExceptionAsync(() => Query("secret_note eq \"topsecret\""));
@@ -578,7 +578,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         var attributes = new AttributeValueCollection(schema);
         attributes.Set(searchableCode, "findme");
         attributes.Set(hiddenCode, "secret");
-        _ = (await _selfService.TryRegisterAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
 
         // Resolve the store directly to verify search-index behaviour
         var storeFactory = _serviceProvider.GetRequiredService<IStoreFactory>();

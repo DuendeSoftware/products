@@ -18,7 +18,10 @@ internal sealed class OtpAuthenticator(
 {
     public async Task<OtpAuthenticationResult> TryAuthenticateAsync(PlainTextOtp otp, OtpToken token, Ct ct)
     {
-        licenseValidator.ValidateOtp();
+        if (!licenseValidator.ValidateOtp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+        }
         logger.OtpVerificationStarted(LogLevel.Debug);
 
         var otpAddress = await otpVerifier.TryVerifyAsync(otp, token, ct);

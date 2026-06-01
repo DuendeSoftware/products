@@ -16,8 +16,8 @@ namespace Duende.UserManagement.Authentication.Internal;
 internal sealed class UserAuthenticators
 {
     private readonly HashSet<OtpAddress> _otpAddresses;
-    private readonly HashSet<ExternalAuthenticator> _externalAuthenticators;
-    private readonly Dictionary<TotpAuthenticatorName, TotpAuthenticator> _totpAuthenticators;
+    private readonly HashSet<ExternalAuthenticatorAddress> _externalAuthenticatorAddresses;
+    private readonly Dictionary<TotpDeviceName, TotpDevice> _totpDevices;
     private readonly Dictionary<PasskeyCredentialId, PasskeyCredential> _passkeyCredentials;
     private readonly Dictionary<AuthenticatorKey, AuthenticatorFailureState> _failureStates;
     private List<Pbkdf2HashedPassword> _recoveryCodes;
@@ -27,8 +27,8 @@ internal sealed class UserAuthenticators
         UserAuthenticatorsId id,
         UserSubjectId subjectId,
         IEnumerable<OtpAddress> otpAddresses,
-        IEnumerable<ExternalAuthenticator> externalAuthenticators,
-        IEnumerable<TotpAuthenticator> totpAuthenticators,
+        IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses,
+        IEnumerable<TotpDevice> totpDevices,
         IEnumerable<Pbkdf2HashedPassword> recoveryCodes,
         HashedPassword? hashedPassword,
         IEnumerable<PasskeyCredential> passkeyCredentials,
@@ -39,8 +39,8 @@ internal sealed class UserAuthenticators
         Id = id;
         SubjectId = subjectId;
         _otpAddresses = [.. otpAddresses];
-        _externalAuthenticators = [.. externalAuthenticators];
-        _totpAuthenticators = totpAuthenticators.ToDictionary(a => a.Name, a => a);
+        _externalAuthenticatorAddresses = [.. externalAuthenticatorAddresses];
+        _totpDevices = totpDevices.ToDictionary(a => a.Name, a => a);
         _passkeyCredentials = passkeyCredentials.ToDictionary(c => c.CredentialId, c => c);
         _failureStates = failureStates.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         _recoveryCodes = [.. recoveryCodes];
@@ -52,12 +52,12 @@ internal sealed class UserAuthenticators
     internal UserAuthenticators(
         UserSubjectId subjectId,
         IEnumerable<OtpAddress> otpAddresses,
-        IEnumerable<ExternalAuthenticator> externalAuthenticators) :
+        IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses) :
         this(
             UserAuthenticatorsId.New(),
             subjectId,
             otpAddresses,
-            externalAuthenticators,
+            externalAuthenticatorAddresses,
             [],
             [],
             null,
@@ -74,9 +74,10 @@ internal sealed class UserAuthenticators
 
     internal IReadOnlyCollection<OtpAddress> OtpAddresses => _otpAddresses;
 
-    internal IReadOnlyDictionary<TotpAuthenticatorName, TotpAuthenticator> TotpAuthenticators => _totpAuthenticators;
+    internal IReadOnlyDictionary<TotpDeviceName, TotpDevice> TotpDevices => _totpDevices;
 
-    internal IReadOnlyCollection<ExternalAuthenticator> ExternalAuthenticators => _externalAuthenticators;
+    internal IReadOnlyCollection<ExternalAuthenticatorAddress> ExternalAuthenticatorAddresses =>
+        _externalAuthenticatorAddresses;
 
     internal IReadOnlyCollection<Pbkdf2HashedPassword> RecoveryCodes => _recoveryCodes;
 
@@ -97,14 +98,16 @@ internal sealed class UserAuthenticators
 
     internal void Remove(IEnumerable<OtpAddress> addresses) => _otpAddresses.ExceptWith(addresses);
 
-    internal void Add(IEnumerable<ExternalAuthenticator> addresses) => _externalAuthenticators.UnionWith(addresses);
+    internal void Add(IEnumerable<ExternalAuthenticatorAddress> addresses) =>
+        _externalAuthenticatorAddresses.UnionWith(addresses);
 
-    internal void Remove(IEnumerable<ExternalAuthenticator> addresses) => _externalAuthenticators.ExceptWith(addresses);
+    internal void Remove(IEnumerable<ExternalAuthenticatorAddress> addresses) =>
+        _externalAuthenticatorAddresses.ExceptWith(addresses);
 
-    internal bool TryAdd(TotpAuthenticatorName totpAuthenticatorName, PlainBytesTotpKey totpKey, PlainTextTotp totp,
-        TimeProvider timeProvider)
+    internal bool TryAdd(
+        TotpDeviceName totpDeviceName, PlainBytesTotpKey totpKey, PlainTextTotp totp, TimeProvider timeProvider)
     {
-        if (_totpAuthenticators.ContainsKey(totpAuthenticatorName))
+        if (_totpDevices.ContainsKey(totpDeviceName))
         {
             return false;
         }
@@ -115,23 +118,21 @@ internal sealed class UserAuthenticators
             return false;
         }
 
-        _totpAuthenticators.Add(
-            totpAuthenticatorName, new TotpAuthenticator(totpAuthenticatorName, totpKey, successfulTimeStep.Value));
-
+        _totpDevices.Add(totpDeviceName, new TotpDevice(totpDeviceName, totpKey, successfulTimeStep.Value));
         return true;
     }
 
-    internal void LoadTotpAuthenticator(TotpAuthenticatorName name, PlainBytesTotpKey key) =>
-        _totpAuthenticators.TryAdd(name, TotpAuthenticator.Load(name, key, 0));
+    internal void LoadTotpDevice(TotpDeviceName name, PlainBytesTotpKey key) =>
+        _totpDevices.TryAdd(name, TotpDevice.Load(name, key, 0));
 
     internal void LoadRecoveryCodes(IEnumerable<PlainTextRecoveryCode> codes) =>
         _recoveryCodes = codes.Select(code => Pbkdf2HashedPassword.From(code.Text)).ToList();
 
-    internal void Remove(IEnumerable<TotpAuthenticatorName> totpAuthenticatorNames)
+    internal void Remove(IEnumerable<TotpDeviceName> totpDeviceNames)
     {
-        foreach (var name in totpAuthenticatorNames)
+        foreach (var name in totpDeviceNames)
         {
-            _ = _totpAuthenticators.Remove(name);
+            _ = _totpDevices.Remove(name);
             _ = _failureStates.Remove(new AuthenticatorKey.Totp(name));
         }
     }
@@ -312,12 +313,12 @@ internal sealed class UserAuthenticators
         return true;
     }
 
-    internal static bool TryAuthenticate(UserAuthenticators? user, TotpAuthenticatorName totpAuthenticatorName, PlainTextTotp totp,
+    internal static bool TryAuthenticate(UserAuthenticators? user, TotpDeviceName totpDeviceName, PlainTextTotp totp,
         TimeProvider timeProvider)
     {
         // time consistency
         var dummyKey = PlainBytesTotpKey.New();
-        if (user is null || !user._totpAuthenticators.TryGetValue(totpAuthenticatorName, out var authenticator))
+        if (user is null || !user._totpDevices.TryGetValue(totpDeviceName, out var authenticator))
         {
             _ = Totp.Internal.Totp.Validate(dummyKey.Bytes, PlainTextTotp.Length, (ulong)timeProvider.GetUtcNow().ToUnixTimeSeconds(),
                 totp.Value, null, out _);
@@ -330,7 +331,7 @@ internal sealed class UserAuthenticators
             return false;
         }
 
-        user._totpAuthenticators[authenticator.Name] =
+        user._totpDevices[authenticator.Name] =
             authenticator with { LastSuccessfulTimeStep = successfulTimeStep.Value };
 
         return true;
@@ -396,8 +397,8 @@ internal sealed class UserAuthenticators
         UserAuthenticatorsId id,
         UserSubjectId subjectId,
         IEnumerable<OtpAddress> otpAddresses,
-        IEnumerable<ExternalAuthenticator> externalAuthenticators,
-        IEnumerable<TotpAuthenticator> totpAuthenticators,
+        IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses,
+        IEnumerable<TotpDevice> totpDevices,
         IEnumerable<Pbkdf2HashedPassword> recoveryCodes,
         HashedPassword? hashedPassword,
         IEnumerable<PasskeyCredential> passkeyCredentials,
@@ -408,8 +409,8 @@ internal sealed class UserAuthenticators
             id,
             subjectId,
             otpAddresses,
-            externalAuthenticators,
-            totpAuthenticators,
+            externalAuthenticatorAddresses,
+            totpDevices,
             recoveryCodes,
             hashedPassword,
             passkeyCredentials,

@@ -10,10 +10,12 @@ public interface IOtpSender
 {
     /// <summary>
     /// Creates an OTP and sends it to the specified address.
-    /// Returns <c>null</c> if the OTP could not be persisted.
+    /// Returns <see cref="SendOtpResult.Sent"/> on success,
+    /// <see cref="SendOtpResult.Blocked"/> when throttled, or
+    /// <see cref="SendOtpResult.SaveFailed"/> on persistence failure (e.g. concurrency conflict).
     /// Throws if no <see cref="IOtpDispatcher"/> is registered for the address.
     /// </summary>
     /// <param name="address">The OTP address to send to.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SendOtpResult?> TrySendOtpAsync(OtpAddress address, Ct ct);
+    Task<SendOtpResult> TrySendOtpAsync(OtpAddress address, Ct ct);
 }

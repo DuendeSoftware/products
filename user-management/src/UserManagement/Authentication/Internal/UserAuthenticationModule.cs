@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.UserManagement.Authentication.External;
+using Duende.UserManagement.Authentication.External.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
 using Duende.UserManagement.Authentication.Otp;
 using Duende.UserManagement.Authentication.Otp.Internal;
@@ -42,12 +44,13 @@ internal sealed class UserAuthenticationModule : IDuendeModule
         services.RegisterDsoType<PasskeyAuthenticationChallengeDso.V1>();
 
         // 2. Register authentication services
+        _ = services.AddTransient<IExternalAuthenticator, ExternalAuthenticator>();
         _ = services.AddTransient<IOtpAuthenticator, OtpAuthenticator>();
         _ = services.AddTransient<IOtpSender, OtpSender>();
         _ = services.AddTransient<OtpVerifier>();
-        _ = services.AddTransient<ITotpAuth, TotpAuth>();
-        _ = services.AddTransient<IRecoveryCodeAuth, RecoveryCodeAuth>();
-        _ = services.AddTransient<IPasswordAuth, PasswordAuth>();
+        _ = services.AddTransient<ITotpAuthenticator, TotpAuthenticator>();
+        _ = services.AddTransient<IRecoveryCodeAuthenticator, RecoveryCodeAuthenticator>();
+        _ = services.AddTransient<IPasswordAuthenticator, PasswordAuthenticator>();
         services.TryAddTransient<IAuthenticationAttemptPolicy, DefaultAuthenticationAttemptPolicy>();
         _ = services.AddSingleton<IPasswordHashAlgorithm, Pbkdf2Sha512PasswordHashAlgorithm>();
         _ = services.AddTransient<PasswordHashAlgorithms>();

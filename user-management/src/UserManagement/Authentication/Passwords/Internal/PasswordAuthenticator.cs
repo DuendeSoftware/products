@@ -14,20 +14,23 @@ using Microsoft.Extensions.Options;
 namespace Duende.UserManagement.Authentication.Passwords.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class PasswordAuth(
+internal sealed class PasswordAuthenticator(
     UserAuthenticatorsRepository authenticatorsRepo,
     UserProfileRepository profileRepo,
     IAuthenticationAttemptPolicy attemptPolicy,
-    ILogger<PasswordAuth> logger,
+    ILogger<PasswordAuthenticator> logger,
     IOptions<UserAuthenticationOptions> options,
     TimeProvider timeProvider,
     PasswordHashAlgorithms algorithms,
-    UserManagementLicenseValidator licenseValidator) : IPasswordAuth
+    UserManagementLicenseValidator licenseValidator) : IPasswordAuthenticator
 {
     public async Task<PasswordAuthenticationResult> TryAuthenticateAsync(
         AttributeCode code, object value, NonValidatedPassword password, Ct ct)
     {
-        licenseValidator.ValidatePassword();
+        if (!licenseValidator.ValidatePassword())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Password feature.");
+        }
         using var attributeScope = logger.BeginAttributeScope(code, value);
         logger.PasswordAuthenticationStarted(LogLevel.Debug, code, value);
 

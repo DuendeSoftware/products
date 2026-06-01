@@ -14,7 +14,7 @@ internal static class TestData
     internal static OtpAddress CreateOtpAddress() =>
         new(OtpChannel.Email, EmailAddress.Create($"a{Count()}@b"));
 
-    internal static ExternalAuthenticator CreateExternalAuthenticator() =>
+    internal static ExternalAuthenticatorAddress CreateExternalAuthenticatorAddress() =>
         new(ExternalAuthenticatorName.Create("test"), OpaqueSubjectId.Create($"sub-{Count()}"));
 
     private static int Count() => Interlocked.Increment(ref _counter);

@@ -16,9 +16,12 @@ internal sealed class OtpSender(
     TimeProvider timeProvider,
     UserManagementLicenseValidator licenseValidator) : IOtpSender
 {
-    public async Task<SendOtpResult?> TrySendOtpAsync(OtpAddress address, Ct ct)
+    public async Task<SendOtpResult> TrySendOtpAsync(OtpAddress address, Ct ct)
     {
-        licenseValidator.ValidateOtp();
+        if (!licenseValidator.ValidateOtp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+        }
         logger.OtpSendStarted(LogLevel.Debug, address);
 
         var record = await workflowRepository.TryReadAsync(address, ct);
@@ -38,7 +41,7 @@ internal sealed class OtpSender(
             if (await workflowRepository.CreateAsync(workflow, ct) is not CreateResult.Success)
             {
                 logger.OtpWorkflowCreateFailed(LogLevel.Warning, address);
-                return null;
+                return SendOtpResult.SaveFailed.Instance;
             }
         }
         else
@@ -46,14 +49,14 @@ internal sealed class OtpSender(
             if (await workflowRepository.UpdateAsync(workflow, record.Value.Version, ct) is not UpdateResult.Success)
             {
                 logger.OtpWorkflowUpdateFailed(LogLevel.Warning, address);
-                return null;
+                return SendOtpResult.SaveFailed.Instance;
             }
         }
 
         if (!created)
         {
             logger.OtpSendingBlocked(LogLevel.Information, address, sendingBlockedFor);
-            return SendOtpResult.CreateNotSent(sendingBlockedFor, sendingBlockedUntilUtc);
+            return new SendOtpResult.Blocked(sendingBlockedFor, sendingBlockedUntilUtc);
         }
 
         if (otpDispatchers.LastOrDefault(d => d.CanDispatch(address)) is not { } dispatcher)
@@ -66,7 +69,7 @@ internal sealed class OtpSender(
 
         logger.OtpSent(LogLevel.Information, address);
 
-        return SendOtpResult.CreateSent(
+        return new SendOtpResult.Sent(
             token!, expiresAfter.Value, expiresAtUtc!.Value, sendingBlockedFor, sendingBlockedUntilUtc);
     }
 }

@@ -5,7 +5,7 @@ using Duende.UserManagement.Authentication.Totp;
 
 namespace Duende.Platform.UserManagement.ValueObjects;
 
-public static class TotpAuthenticatorNames
+public static class TotpDeviceNames
 {
     public static TheoryData<string> InvalidInputs { get; } = ["", " ", new string('x', 256)];
 
@@ -13,7 +13,7 @@ public static class TotpAuthenticatorNames
     [MemberData(nameof(InvalidInputs))]
     public static void CannotParseInvalidInputs(string input)
     {
-        var ex = Record.Exception(() => _ = TotpAuthenticatorName.Create(input));
+        var ex = Record.Exception(() => _ = TotpDeviceName.Create(input));
 
         _ = ex.ShouldBeOfType<FormatException>();
     }
@@ -21,8 +21,8 @@ public static class TotpAuthenticatorNames
     [Fact]
     public static void String_is_input()
     {
-        const string input = $"{nameof(TotpAuthenticatorName)}1";
-        var instance = TotpAuthenticatorName.Create(input);
+        const string input = $"{nameof(TotpDeviceName)}1";
+        var instance = TotpDeviceName.Create(input);
 
         var @string = instance.ToString();
 

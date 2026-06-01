@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Duende.Storage.Sqlite" />
+    <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
   </ItemGroup>
 
   <ItemGroup>

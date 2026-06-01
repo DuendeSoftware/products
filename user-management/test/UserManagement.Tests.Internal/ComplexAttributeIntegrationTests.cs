@@ -65,7 +65,7 @@ public sealed class ComplexAttributeIntegrationTests : IAsyncLifetime
 
         collection.Set(NameAttr, userName);
 
-        _ = (await _selfService.TryRegisterAsync(UserSubjectId.New(), collection.Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _selfService.TryCreateAsync(UserSubjectId.New(), collection.Validate(), _ct)).ShouldNotBeNull();
     }
 
     [Fact]

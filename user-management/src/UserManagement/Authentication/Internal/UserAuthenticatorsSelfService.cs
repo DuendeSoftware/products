@@ -34,7 +34,10 @@ internal sealed class UserAuthenticatorsSelfService(
 {
     public async Task<ValidatedPlainTextPassword> ValidatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
     {
-        licenseValidator.ValidatePassword();
+        if (!licenseValidator.ValidatePassword())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Password feature.");
+        }
         var result = await passwordFactory.CreateAsync(userId, passwordString, ct);
         return result switch
         {
@@ -47,33 +50,23 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public Task<PasswordCreationResult> TryValidatePasswordAsync(UserSubjectId userId, string passwordString, Ct ct)
     {
-        licenseValidator.ValidatePassword();
+        if (!licenseValidator.ValidatePassword())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Password feature.");
+        }
         return passwordFactory.CreateAsync(userId, passwordString, ct);
     }
 
-    public async Task<Authentication.UserAuthenticators?> TryRegisterAsync(UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct)
-    {
-        licenseValidator.ValidateExternalIdpLinking();
-        using var scope = logger.BeginSubjectScope(subjectId);
-        var user = new UserAuthenticators(subjectId, [], [authenticator]);
-        if (await repo.CreateAsync(user, ct) is CreateResult.Success)
-        {
-            licenseValidator.ValidateUserCount();
-            return new Authentication.UserAuthenticators(user);
-        }
-
-        return null;
-    }
 
     public async Task<Authentication.UserAuthenticators?> TryGetAsync(UserSubjectId subjectId, Ct ct) =>
         await repo.TryReadAsync(subjectId, ct) is ({ } user, _) ? new Authentication.UserAuthenticators(user) : null;
 
-    public async Task<Authentication.UserAuthenticators?> TryGetAsync(ExternalAuthenticator authenticator, Ct ct) =>
-        await repo.TryReadAsync(authenticator, ct) is ({ } user, _) ? new Authentication.UserAuthenticators(user) : null;
-
     public async Task<bool> TryAddOtpAddressAsync(UserSubjectId subjectId, PlainTextOtp otp, OtpToken token, Ct ct)
     {
-        licenseValidator.ValidateOtp();
+        if (!licenseValidator.ValidateOtp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
 
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
@@ -102,7 +95,10 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryRemoveOtpAddressAsync(UserSubjectId subjectId, OtpAddress address, Ct ct)
     {
-        licenseValidator.ValidateOtp();
+        if (!licenseValidator.ValidateOtp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the OTP feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -120,10 +116,13 @@ internal sealed class UserAuthenticatorsSelfService(
         return succeeded;
     }
 
-    public async Task<bool> TryAddExternalAuthenticatorAsync(
-        UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct)
+    public async Task<bool> TryAddExternalAuthenticatorAddressAsync(
+        UserSubjectId subjectId, ExternalAuthenticatorAddress address, Ct ct)
     {
-        licenseValidator.ValidateExternalIdpLinking();
+        if (!licenseValidator.ValidateExternalIdpLinking())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the External IdP Linking feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -131,7 +130,7 @@ internal sealed class UserAuthenticatorsSelfService(
             return false;
         }
 
-        record.UserAuthenticators.Add([authenticator]);
+        record.UserAuthenticators.Add([address]);
         var succeeded = await repo.UpdateAsync(record.UserAuthenticators, record.Version, ct) is UpdateResult.Success;
         if (succeeded)
         {
@@ -141,10 +140,13 @@ internal sealed class UserAuthenticatorsSelfService(
         return succeeded;
     }
 
-    public async Task<bool> TryRemoveExternalAuthenticatorAsync(
-        UserSubjectId subjectId, ExternalAuthenticator authenticator, Ct ct)
+    public async Task<bool> TryRemoveExternalAuthenticatorAddressAsync(
+        UserSubjectId subjectId, ExternalAuthenticatorAddress address, Ct ct)
     {
-        licenseValidator.ValidateExternalIdpLinking();
+        if (!licenseValidator.ValidateExternalIdpLinking())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the External IdP Linking feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -152,7 +154,7 @@ internal sealed class UserAuthenticatorsSelfService(
             return false;
         }
 
-        record.UserAuthenticators.Remove([authenticator]);
+        record.UserAuthenticators.Remove([address]);
         var succeeded = await repo.UpdateAsync(record.UserAuthenticators, record.Version, ct) is UpdateResult.Success;
         if (succeeded)
         {
@@ -162,9 +164,12 @@ internal sealed class UserAuthenticatorsSelfService(
         return succeeded;
     }
 
-    public async Task<bool> TryAddTotpAuthenticatorAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, PlainBytesTotpKey key, PlainTextTotp totp, Ct ct)
+    public async Task<bool> TryAddTotpDeviceAsync(UserSubjectId subjectId, TotpDeviceName deviceName, PlainBytesTotpKey key, PlainTextTotp totp, Ct ct)
     {
-        licenseValidator.ValidateTotp();
+        if (!licenseValidator.ValidateTotp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the TOTP feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -172,7 +177,7 @@ internal sealed class UserAuthenticatorsSelfService(
             return false;
         }
 
-        var added = record.UserAuthenticators.TryAdd(authenticatorName, key, totp, timeProvider);
+        var added = record.UserAuthenticators.TryAdd(deviceName, key, totp, timeProvider);
 
         if (!added)
         {
@@ -182,9 +187,12 @@ internal sealed class UserAuthenticatorsSelfService(
         return await repo.UpdateAsync(record.UserAuthenticators, record.Version, ct) is UpdateResult.Success && added;
     }
 
-    public async Task<bool> TryRemoveTotpAuthenticatorAsync(UserSubjectId subjectId, TotpAuthenticatorName authenticatorName, Ct ct)
+    public async Task<bool> TryRemoveTotpDeviceAsync(UserSubjectId subjectId, TotpDeviceName deviceName, Ct ct)
     {
-        licenseValidator.ValidateTotp();
+        if (!licenseValidator.ValidateTotp())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the TOTP feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -192,14 +200,17 @@ internal sealed class UserAuthenticatorsSelfService(
             return false;
         }
 
-        record.UserAuthenticators.Remove([authenticatorName]);
+        record.UserAuthenticators.Remove([deviceName]);
 
         return await repo.UpdateAsync(record.UserAuthenticators, record.Version, ct) is UpdateResult.Success;
     }
 
     public async Task<bool> TryAddPasskeyAsync(UserSubjectId subjectId, PasskeyCredentialData credential, Ct ct)
     {
-        licenseValidator.ValidatePasskey();
+        if (!licenseValidator.ValidatePasskey())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Passkey feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -230,7 +241,10 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryRemovePasskeyAsync(UserSubjectId subjectId, PasskeyCredentialId credentialId, Ct ct)
     {
-        licenseValidator.ValidatePasskey();
+        if (!licenseValidator.ValidatePasskey())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Passkey feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -250,7 +264,10 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<IReadOnlyCollection<PlainTextRecoveryCode>?> TryCreateRecoveryCodesAsync(UserSubjectId subjectId, Ct ct)
     {
-        licenseValidator.ValidateRecoveryCode();
+        if (!licenseValidator.ValidateRecoveryCode())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Recovery Code feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (!options.Value.RecoveryCodes.Enabled)
         {
@@ -280,7 +297,10 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TrySetPasswordAsync(UserSubjectId subjectId, ValidatedPlainTextPassword password, Ct ct)
     {
-        licenseValidator.ValidatePassword();
+        if (!licenseValidator.ValidatePassword())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Password feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -305,7 +325,10 @@ internal sealed class UserAuthenticatorsSelfService(
     public async Task<bool> TryChangePasswordAsync(
         UserSubjectId subjectId, NonValidatedPassword oldPassword, ValidatedPlainTextPassword newPassword, Ct ct)
     {
-        licenseValidator.ValidatePassword();
+        if (!licenseValidator.ValidatePassword())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Password feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {
@@ -380,7 +403,10 @@ internal sealed class UserAuthenticatorsSelfService(
 
     public async Task<bool> TryResetPasswordAsync(UserSubjectId subjectId, ValidatedPlainTextPassword password, Ct ct)
     {
-        licenseValidator.ValidatePassword();
+        if (!licenseValidator.ValidatePassword())
+        {
+            UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Password feature.");
+        }
         using var scope = logger.BeginSubjectScope(subjectId);
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)
         {

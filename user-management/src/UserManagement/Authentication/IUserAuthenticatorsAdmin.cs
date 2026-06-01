@@ -19,12 +19,12 @@ public interface IUserAuthenticatorsAdmin
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
     /// <param name="otpAddresses">The OTP addresses to register.</param>
-    /// <param name="externalAuthenticators">The external authenticators to register.</param>
+    /// <param name="externalAuthenticatorAddresses">The external authenticator addresses to register.</param>
     /// <param name="ct">Cancellation token.</param>
     Task<UserAuthenticators?> TryAddAsync(
         UserSubjectId subjectId,
         IEnumerable<OtpAddress> otpAddresses,
-        IEnumerable<ExternalAuthenticator> externalAuthenticators,
+        IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses,
         Ct ct);
 
     /// <summary>
@@ -54,24 +54,24 @@ public interface IUserAuthenticatorsAdmin
     Task<bool> TryRemoveOtpAddressesAsync(UserSubjectId subjectId, IEnumerable<OtpAddress> addresses, Ct ct);
 
     /// <summary>
-    /// Adds external authenticators to the specified user's authenticator record.
+    /// Adds external authenticator addresses to the specified user's authenticator record.
     /// Returns <c>false</c> if the user record does not exist.
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticators">The external authenticators to add.</param>
+    /// <param name="addresses">The external authenticator addresses to add.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<bool> TryAddExternalAuthenticatorsAsync(
-        UserSubjectId subjectId, IEnumerable<ExternalAuthenticator> authenticators, Ct ct);
+    Task<bool> TryAddExternalAuthenticatorAddressesAsync(
+        UserSubjectId subjectId, IEnumerable<ExternalAuthenticatorAddress> addresses, Ct ct);
 
     /// <summary>
-    /// Removes external authenticators from the specified user's authenticator record.
+    /// Removes external authenticator addresses from the specified user's authenticator record.
     /// Returns <c>false</c> if the user record does not exist.
     /// </summary>
     /// <param name="subjectId">The subject ID of the user.</param>
-    /// <param name="authenticators">The external authenticators to remove.</param>
+    /// <param name="addresses">The external authenticator addresses to remove.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<bool> TryRemoveExternalAuthenticatorsAsync(
-        UserSubjectId subjectId, IEnumerable<ExternalAuthenticator> authenticators, Ct ct);
+    Task<bool> TryRemoveExternalAuthenticatorAddressesAsync(
+        UserSubjectId subjectId, IEnumerable<ExternalAuthenticatorAddress> addresses, Ct ct);
 
     /// <summary>
     /// Queries authenticator records. Filtering and sorting are not supported and cause <see cref="NotSupportedException" />.

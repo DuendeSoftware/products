@@ -34,7 +34,7 @@ internal sealed class ScimCapabilityResolver
 
     /// <summary>Whether the SCIM changePassword capability is supported.</summary>
     public bool ChangePasswordSupported =>
-        _options.ChangePassword ?? _services.GetService<IPasswordAuth>() is not null;
+        _options.ChangePassword ?? _services.GetService<IPasswordAuthenticator>() is not null;
 
     /// <summary>Maximum number of resources returned in a single list response.</summary>
     public int MaxResults => _options.MaxResults;

@@ -39,7 +39,7 @@ public class PasskeySecondFactorEndpointTests(WebServerFixture webServerFixture)
     }
 
     [Fact]
-    public async Task Authenticate_begin_returns_bad_request_when_resolver_returns_no_subject_id()
+    public async Task Authenticate_begin_returns_bad_request_when_externalAuthenticator_returns_no_subject_id()
     {
         ConfigureSecondFactorResolver(() => null);
 

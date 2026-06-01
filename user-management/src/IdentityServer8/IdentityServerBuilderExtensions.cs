@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.UserManagement;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication.Passkeys;
@@ -30,7 +31,18 @@ public static class IdentityServerBuilderExtensions
 
             builder.Services.TryAddScoped<IPasskeySignInHandler, IdentityServerPasskeySignInHandler>();
             _ = builder.Services.AddUserManagementInternal(configure);
-            _ = builder.AddProfileService<UserManagementProfileService>();
+
+            // Replace the default IdentityServer profile service with ours, but preserve
+            // any custom registration the user may have added.
+            var defaultDescriptor = builder.Services.FirstOrDefault(d =>
+                d.ServiceType == typeof(IProfileService) &&
+                d.ImplementationType == typeof(DefaultProfileService));
+            if (defaultDescriptor != null)
+            {
+                _ = builder.Services.Remove(defaultDescriptor);
+            }
+
+            builder.Services.TryAddTransient<IProfileService, UserManagementProfileService>();
 
             return builder;
         }

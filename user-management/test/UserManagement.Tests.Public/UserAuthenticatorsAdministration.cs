@@ -16,7 +16,7 @@ namespace Duende.Platform.UserManagement;
 public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<ExternalAuthenticator> _externalAuthenticators = [.. TestData.SubjectIdTypes.Select(TestData.CreateExternalAuthenticator)];
+    private readonly List<ExternalAuthenticatorAddress> _externalAuthenticatorAddresses = [.. TestData.SubjectIdTypes.Select(TestData.CreateExternalAuthenticatorAddress)];
     private readonly List<OtpAddress> _otpAddresses = [.. TestData.SubjectIdTypes.Select(TestData.CreateOtpAddress)];
     private IUserAuthenticatorsAdmin _authenticatorsAdmin = null!;
     private IUserAdmin _userAdmin = null!;
@@ -27,7 +27,7 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
         _authenticatorsAdmin = _serviceProvider.GetRequiredService<IUserAuthenticatorsAdmin>();
         _userAdmin = _serviceProvider.GetRequiredService<IUserAdmin>();
-        _externalAuthenticators.Count.ShouldBeGreaterThan(1);
+        _externalAuthenticatorAddresses.Count.ShouldBeGreaterThan(1);
         _otpAddresses.Count.ShouldBeGreaterThan(1);
     }
 
@@ -36,11 +36,11 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     [Fact]
     public async Task Can_add_user()
     {
-        var user = await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), _otpAddresses, _externalAuthenticators, _ct);
+        var user = await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), _otpAddresses, _externalAuthenticatorAddresses, _ct);
 
         _ = user.ShouldNotBeNull();
         user.OtpAddresses.ShouldBe(_otpAddresses);
-        user.ExternalAuthenticators.ShouldBe(_externalAuthenticators);
+        user.ExternalAuthenticatorAddresses.ShouldBe(_externalAuthenticatorAddresses);
     }
 
     [Fact]
@@ -54,11 +54,11 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Cannot_add_two_users_with_the_same_ExternalAuthenticators()
+    public async Task Cannot_add_two_users_with_the_same_ExternalAuthenticatorAddresses()
     {
-        _ = await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], _externalAuthenticators, _ct);
+        _ = await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], _externalAuthenticatorAddresses, _ct);
 
-        var subjectId = await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], _externalAuthenticators, _ct);
+        var subjectId = await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], _externalAuthenticatorAddresses, _ct);
 
         subjectId.ShouldBeNull();
     }
@@ -164,21 +164,21 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     [Fact]
     public async Task Can_add_ExternalAuthenticator()
     {
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull().SubjectId;
+        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull().SubjectId;
 
-        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[1]], _ct);
+        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[1]], _ct);
 
         added.ShouldBeTrue();
-        (await _authenticatorsAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().ExternalAuthenticators.ShouldContain(_externalAuthenticators[1]);
+        (await _authenticatorsAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().ExternalAuthenticatorAddresses.ShouldContain(_externalAuthenticatorAddresses[1]);
     }
 
     [Fact]
     public async Task Can_add_ExternalAuthenticator_idempotently()
     {
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull().SubjectId;
-        (await _authenticatorsAdmin.TryAddExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[1]], _ct)).ShouldBeTrue();
+        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull().SubjectId;
+        (await _authenticatorsAdmin.TryAddExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[1]], _ct)).ShouldBeTrue();
 
-        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[1]], _ct);
+        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[1]], _ct);
 
         added.ShouldBeTrue();
     }
@@ -186,10 +186,10 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     [Fact]
     public async Task Cannot_add_the_same_ExternalAuthenticator_to_two_users()
     {
-        _ = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull();
-        var subjectId2 = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[1]], _ct)).ShouldNotBeNull().SubjectId;
+        _ = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull();
+        var subjectId2 = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[1]], _ct)).ShouldNotBeNull().SubjectId;
 
-        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorsAsync(subjectId2, [_externalAuthenticators[0]], _ct);
+        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorAddressesAsync(subjectId2, [_externalAuthenticatorAddresses[0]], _ct);
 
         added.ShouldBeFalse();
     }
@@ -197,10 +197,10 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     [Fact]
     public async Task Cannot_add_ExternalAuthenticator_to_removed_user()
     {
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull().SubjectId;
+        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull().SubjectId;
         (await _userAdmin.TryRemoveAsync(subjectId, _ct)).ShouldBeTrue();
 
-        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[1]], _ct);
+        var added = await _authenticatorsAdmin.TryAddExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[1]], _ct);
 
         added.ShouldBeFalse();
     }
@@ -208,21 +208,21 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     [Fact]
     public async Task Can_remove_ExternalAuthenticator()
     {
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull().SubjectId;
+        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull().SubjectId;
 
-        var removed = await _authenticatorsAdmin.TryRemoveExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[0]], _ct);
+        var removed = await _authenticatorsAdmin.TryRemoveExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[0]], _ct);
 
         removed.ShouldBeTrue();
-        (await _authenticatorsAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().ExternalAuthenticators.ShouldBeEmpty();
+        (await _authenticatorsAdmin.TryGetAsync(subjectId, _ct)).ShouldNotBeNull().ExternalAuthenticatorAddresses.ShouldBeEmpty();
     }
 
     [Fact]
     public async Task Can_remove_ExternalAuthenticator_idempotently()
     {
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull().SubjectId;
-        (await _authenticatorsAdmin.TryRemoveExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[0]], _ct)).ShouldBeTrue();
+        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull().SubjectId;
+        (await _authenticatorsAdmin.TryRemoveExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[0]], _ct)).ShouldBeTrue();
 
-        var removed = await _authenticatorsAdmin.TryRemoveExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[0]], _ct);
+        var removed = await _authenticatorsAdmin.TryRemoveExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[0]], _ct);
 
         removed.ShouldBeTrue();
     }
@@ -230,10 +230,10 @@ public sealed class UserAuthenticatorsAdministration : IAsyncLifetime
     [Fact]
     public async Task Cannot_remove_ExternalAuthenticator_from_removed_user()
     {
-        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticators[0]], _ct)).ShouldNotBeNull().SubjectId;
+        var subjectId = (await _authenticatorsAdmin.TryAddAsync(UserSubjectId.New(), [], [_externalAuthenticatorAddresses[0]], _ct)).ShouldNotBeNull().SubjectId;
         (await _userAdmin.TryRemoveAsync(subjectId, _ct)).ShouldBeTrue();
 
-        var removed = await _authenticatorsAdmin.TryRemoveExternalAuthenticatorsAsync(subjectId, [_externalAuthenticators[0]], _ct);
+        var removed = await _authenticatorsAdmin.TryRemoveExternalAuthenticatorAddressesAsync(subjectId, [_externalAuthenticatorAddresses[0]], _ct);
 
         removed.ShouldBeFalse();
     }

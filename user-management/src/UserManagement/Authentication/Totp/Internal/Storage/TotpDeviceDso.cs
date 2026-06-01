@@ -3,7 +3,7 @@
 
 namespace Duende.UserManagement.Authentication.Totp.Internal.Storage;
 
-internal static class TotpAuthenticatorDso
+internal static class TotpDeviceDso
 {
     internal sealed record V1(string Name, string Key, ulong LastSuccessfulTimeStep);
 }

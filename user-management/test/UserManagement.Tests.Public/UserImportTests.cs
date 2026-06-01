@@ -22,7 +22,7 @@ public sealed class UserImportTests : IAsyncLifetime
     private IGroupAdmin _groupAdmin = null!;
     private IRoleAdmin _roleAdmin = null!;
     private IMembershipAdmin _membershipAdmin = null!;
-    private IPasswordAuth _passwordAuth = null!;
+    private IPasswordAuthenticator _passwordAuthenticator = null!;
     private IPasswordHashAlgorithm _hashAlgorithm = null!;
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
@@ -36,7 +36,7 @@ public sealed class UserImportTests : IAsyncLifetime
         _groupAdmin = _serviceProvider.GetRequiredService<IGroupAdmin>();
         _roleAdmin = _serviceProvider.GetRequiredService<IRoleAdmin>();
         _membershipAdmin = _serviceProvider.GetRequiredService<IMembershipAdmin>();
-        _passwordAuth = _serviceProvider.GetRequiredService<IPasswordAuth>();
+        _passwordAuthenticator = _serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         _hashAlgorithm = _serviceProvider.GetRequiredService<IPasswordHashAlgorithm>();
     }
 
@@ -109,7 +109,7 @@ public sealed class UserImportTests : IAsyncLifetime
 
         batch.Results.ShouldHaveSingleItem().Status.ShouldBe(UserImportStatus.Created);
         var suppliedPassword = NonValidatedPassword.Create(rawPassword);
-        var authenticated = await _passwordAuth.TryAuthenticateAsync(userNameCode, userName, suppliedPassword, _ct);
+        var authenticated = await _passwordAuthenticator.TryAuthenticateAsync(userNameCode, userName, suppliedPassword, _ct);
         authenticated.ShouldBeOfType<PasswordAuthenticationResult.Success>().UserSubjectId.ShouldBe(subjectId);
     }
 
@@ -134,7 +134,7 @@ public sealed class UserImportTests : IAsyncLifetime
     public async Task import_with_external_authenticator_creates_authenticators()
     {
         var subjectId = UserSubjectId.New();
-        var external = new ExternalAuthenticator(
+        var external = new ExternalAuthenticatorAddress(
             ExternalAuthenticatorName.Create("google"),
             EmailAddress.Create($"a{Guid.NewGuid():N}@x.com"[..20] + "@x.com"));
 
@@ -142,7 +142,7 @@ public sealed class UserImportTests : IAsyncLifetime
             [new UserImportRecord
             {
                 SubjectId = subjectId,
-                Authenticators = new AuthenticatorImport { ExternalAuthenticators = [external] }
+                Authenticators = new AuthenticatorImport { ExternalAuthenticatorAddresses = [external] }
             }],
             _ct);
 
@@ -608,7 +608,7 @@ public sealed class UserImportTests : IAsyncLifetime
         // Step 2: Authenticate with pbkdf2 as preferred (fake still registered) should triggers re-hash
         await using (var authProvider = await CreateProviderWithFakeAlgorithm(preferFake: false, dbId: dbId))
         {
-            var auth = authProvider.GetRequiredService<IPasswordAuth>();
+            var auth = authProvider.GetRequiredService<IPasswordAuthenticator>();
 
             var result = await auth.TryAuthenticateAsync(userNameCode, userName, NonValidatedPassword.Create(passwordText), _ct);
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
@@ -617,7 +617,7 @@ public sealed class UserImportTests : IAsyncLifetime
         // Step 3: Authenticate with only pbkdf2: proves re-hash happened
         await using (var verifyProvider = await CreateProviderWithPbkdf2Only(dbId: dbId))
         {
-            var auth = verifyProvider.GetRequiredService<IPasswordAuth>();
+            var auth = verifyProvider.GetRequiredService<IPasswordAuthenticator>();
 
             var result = await auth.TryAuthenticateAsync(userNameCode, userName, NonValidatedPassword.Create(passwordText), _ct);
             _ = result.ShouldBeOfType<PasswordAuthenticationResult.Success>();
