@@ -227,7 +227,7 @@ public class LoginEndpointTests : BffTestBase
     }
 
     // This test proves that split host functionality works.
-    // https://github.com/DuendeSoftware/issues/issues/110
+    // https://github.com/DuendeSoftware/products-private/issues/2730
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task given_list_of_referers_when_receiving_referer_on_silent_callback_then_allowed(BffSetupType setup)
@@ -252,7 +252,7 @@ public class LoginEndpointTests : BffTestBase
     }
 
     // This test guards against missing referer headers
-    // https://github.com/DuendeSoftware/issues/issues/110
+    // https://github.com/DuendeSoftware/products-private/issues/2730
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task given_list_of_referers_without_missing_header_then_returns_bad_request(BffSetupType setup)
@@ -267,7 +267,7 @@ public class LoginEndpointTests : BffTestBase
     }
 
     // This test guards against incorrect referer
-    // https://github.com/DuendeSoftware/issues/issues/110
+    // https://github.com/DuendeSoftware/products-private/issues/2730
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task given_list_of_referers_with_invalid_referer_then_returns_bad_request(BffSetupType setup)

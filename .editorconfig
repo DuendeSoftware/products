@@ -64,32 +64,4 @@ indent_size = 4
 [*.razor]
 indent_size = 4
 
-# ASP.NET Core middleware Invoke methods cannot be renamed (framework constraint)
-[platform/src/Authentication.Web/OpenIdConnect/Hosting/*Middleware.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-[platform/src/Authentication.Web/Hosting/DynamicProviders/DynamicSchemes/*Middleware.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-# xUnit test methods use Should_* naming convention without Async suffix
-[platform/test/**/*.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-[libs/bff/test/**/*.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-# Sample test projects also use xUnit test naming conventions
-[platform/samples/**/test/**/*.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-# gRPC service methods override generated base class methods and cannot be renamed (framework constraint)
-[platform/src/AdminStudio.Server/Services/**/*GrpcService.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-[platform/src/AdminStudio.Web/Services/**/*GrpcService.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
-[platform/src/AdminStudio.Web/Services/*GrpcService.cs]
-dotnet_naming_rule.async_methods_must_end_with_async.severity = none
-
 
