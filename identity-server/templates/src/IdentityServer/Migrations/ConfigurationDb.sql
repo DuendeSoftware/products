@@ -4,7 +4,6 @@
 );
 
 BEGIN TRANSACTION;
-
 CREATE TABLE "ApiResources" (
     "Id" INTEGER NOT NULL CONSTRAINT "PK_ApiResources" PRIMARY KEY AUTOINCREMENT,
     "Enabled" INTEGER NOT NULL,
@@ -115,6 +114,28 @@ CREATE TABLE "IdentityResources" (
     "ShowInDiscoveryDocument" INTEGER NOT NULL,
     "Created" TEXT NOT NULL,
     "Updated" TEXT NULL,
+    "NonEditable" INTEGER NOT NULL
+);
+
+CREATE TABLE "SamlServiceProviders" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlServiceProviders" PRIMARY KEY AUTOINCREMENT,
+    "EntityId" TEXT NOT NULL,
+    "DisplayName" TEXT NULL,
+    "Description" TEXT NULL,
+    "Enabled" INTEGER NOT NULL,
+    "ClockSkewSeconds" REAL NULL,
+    "RequestMaxAgeSeconds" REAL NULL,
+    "AssertionLifetimeSeconds" REAL NULL,
+    "RequireSignedAuthnRequests" INTEGER NULL,
+    "RequireSignedLogoutResponses" INTEGER NULL,
+    "AllowIdpInitiated" INTEGER NOT NULL,
+    "DefaultNameIdFormat" TEXT NULL,
+    "EmailNameIdClaimType" TEXT NULL,
+    "SigningBehavior" INTEGER NULL,
+    "AllowedSignatureAlgorithms" TEXT NULL,
+    "Created" TEXT NOT NULL,
+    "Updated" TEXT NULL,
+    "LastAccessed" TEXT NULL,
     "NonEditable" INTEGER NOT NULL
 );
 
@@ -250,6 +271,62 @@ CREATE TABLE "IdentityResourceProperties" (
     CONSTRAINT "FK_IdentityResourceProperties_IdentityResources_IdentityResourceId" FOREIGN KEY ("IdentityResourceId") REFERENCES "IdentityResources" ("Id") ON DELETE CASCADE
 );
 
+CREATE TABLE "SamlAllowedScopes" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlAllowedScopes" PRIMARY KEY AUTOINCREMENT,
+    "Scope" TEXT NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlAllowedScopes_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "SamlAssertionConsumerServices" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlAssertionConsumerServices" PRIMARY KEY AUTOINCREMENT,
+    "Location" TEXT NOT NULL,
+    "Binding" TEXT NOT NULL,
+    "Index" INTEGER NOT NULL,
+    "IsDefault" INTEGER NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlAssertionConsumerServices_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "SamlAuthnContextMappings" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlAuthnContextMappings" PRIMARY KEY AUTOINCREMENT,
+    "OidcValue" TEXT NOT NULL,
+    "SamlAuthnContextClassRef" TEXT NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlAuthnContextMappings_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "SamlCertificates" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlCertificates" PRIMARY KEY AUTOINCREMENT,
+    "Data" TEXT NOT NULL,
+    "Use" INTEGER NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlCertificates_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "SamlClaimMappings" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlClaimMappings" PRIMARY KEY AUTOINCREMENT,
+    "ClaimType" TEXT NOT NULL,
+    "SamlAttributeName" TEXT NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlClaimMappings_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "SamlRequestedClaimTypes" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlRequestedClaimTypes" PRIMARY KEY AUTOINCREMENT,
+    "ClaimType" TEXT NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlRequestedClaimTypes_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "SamlSingleLogoutServices" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_SamlSingleLogoutServices" PRIMARY KEY AUTOINCREMENT,
+    "Location" TEXT NOT NULL,
+    "Binding" TEXT NOT NULL,
+    "SamlServiceProviderId" INTEGER NOT NULL,
+    CONSTRAINT "FK_SamlSingleLogoutServices_SamlServiceProviders_SamlServiceProviderId" FOREIGN KEY ("SamlServiceProviderId") REFERENCES "SamlServiceProviders" ("Id") ON DELETE CASCADE
+);
+
 CREATE UNIQUE INDEX "IX_ApiResourceClaims_ApiResourceId_Type" ON "ApiResourceClaims" ("ApiResourceId", "Type");
 
 CREATE UNIQUE INDEX "IX_ApiResourceProperties_ApiResourceId_Key" ON "ApiResourceProperties" ("ApiResourceId", "Key");
@@ -294,8 +371,24 @@ CREATE UNIQUE INDEX "IX_IdentityResourceProperties_IdentityResourceId_Key" ON "I
 
 CREATE UNIQUE INDEX "IX_IdentityResources_Name" ON "IdentityResources" ("Name");
 
+CREATE UNIQUE INDEX "IX_SamlAllowedScopes_SamlServiceProviderId_Scope" ON "SamlAllowedScopes" ("SamlServiceProviderId", "Scope");
+
+CREATE UNIQUE INDEX "IX_SamlAssertionConsumerServices_SamlServiceProviderId_Location" ON "SamlAssertionConsumerServices" ("SamlServiceProviderId", "Location");
+
+CREATE UNIQUE INDEX "IX_SamlAuthnContextMappings_SamlServiceProviderId_OidcValue" ON "SamlAuthnContextMappings" ("SamlServiceProviderId", "OidcValue");
+
+CREATE INDEX "IX_SamlCertificates_SamlServiceProviderId" ON "SamlCertificates" ("SamlServiceProviderId");
+
+CREATE UNIQUE INDEX "IX_SamlClaimMappings_SamlServiceProviderId_ClaimType" ON "SamlClaimMappings" ("SamlServiceProviderId", "ClaimType");
+
+CREATE UNIQUE INDEX "IX_SamlRequestedClaimTypes_SamlServiceProviderId_ClaimType" ON "SamlRequestedClaimTypes" ("SamlServiceProviderId", "ClaimType");
+
+CREATE UNIQUE INDEX "IX_SamlServiceProviders_EntityId" ON "SamlServiceProviders" ("EntityId");
+
+CREATE UNIQUE INDEX "IX_SamlSingleLogoutServices_SamlServiceProviderId_Binding" ON "SamlSingleLogoutServices" ("SamlServiceProviderId", "Binding");
+
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-VALUES ('20240123193245_Configuration', '8.0.0');
+VALUES ('20260603060757_Configuration', '10.0.7');
 
 COMMIT;
 

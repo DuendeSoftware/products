@@ -26,26 +26,26 @@
         <div class="row">
             <div class="col-md-6">
                 <form method="post">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label asp-for="@Model.InputModel.ClientId"></label>
                         <input class="form-control" asp-for="@Model.InputModel.ClientId" autofocus />
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label asp-for="@Model.InputModel.Secret"></label>
                         <input class="form-control" asp-for="@Model.InputModel.Secret" />
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label asp-for="@Model.InputModel.Name"></label>
                         <input class="form-control" asp-for="@Model.InputModel.Name" />
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label asp-for="@Model.InputModel.Flow"></label>
                         <select class="form-control" asp-for="@Model.InputModel.Flow">
                             <option value="0">Client Credentials</option>
                             <option value="1">Code Flow (with PKCE)</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <button class="btn btn-primary" type="submit">Save Changes</button>
                         <a class="btn btn-secondary" asp-page="/Admin/Clients/Index">Cancel</a>
                     </div>

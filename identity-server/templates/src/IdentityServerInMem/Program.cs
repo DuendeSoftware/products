@@ -44,7 +44,7 @@ static string Summary(LicenseUsageSummary usage)
 {
     var sb = new StringBuilder();
     _ = sb.AppendLine("IdentityServer Usage Summary:");
-    _ = sb.AppendLine(CultureInfo.InvariantCulture, $"  License: {usage.LicenseEdition}");
+    _ = sb.AppendLine(CultureInfo.InvariantCulture, $"  License: {string.Join(", ", usage.EntitledSkus)}");
     var features = usage.FeaturesUsed.Count > 0 ? string.Join(", ", usage.FeaturesUsed) : "None";
     _ = sb.AppendLine(CultureInfo.InvariantCulture, $"  Business and Enterprise Edition Features Used: {features}");
     _ = sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.ClientsUsed.Count} Client Id(s) Used");

@@ -103,7 +103,7 @@
  * @property {Boolean} hideNativeValidation Hide native validation tooltips
  * @property {Number} suggestionsThreshold Number of chars required to show suggestions
  * @property {Number} maximumItems Maximum number of items to display
- * @property {Boolean} autoselectFirst Always select the first item
+ * @property {Boolean} autoselectFirst Always select the first suggestion
  * @property {Boolean} updateOnSelect Update input value on selection (doesn't play nice with autoselectFirst)
  * @property {Boolean} highlightTyped Highlight matched part of the suggestion
  * @property {String} highlightClass Class applied to the mark element
@@ -125,6 +125,7 @@
  * @property {Boolean} liveServer Should the endpoint be called each time on input
  * @property {Boolean} noCache Prevent caching by appending a timestamp
  * @property {Boolean} allowHtml Allow html in input (can lead to script injection)
+ * @property {Boolean} displayValueInBadge Display the value attribute instead of text in badges. If no title is set, use the text as title.
  * @property {Function} inputFilter Function to filter input
  * @property {Function} sanitizer Alternative function to sanitize content
  * @property {Number} debounceTime Debounce time for live server
@@ -210,6 +211,7 @@ const DEFAULTS = {
 	allowHtml: false,
 	debounceTime: 300,
 	notFoundMessage: "",
+	displayValueInBadge: false,
 	inputFilter: (str) => str,
 	sanitizer: (str) => sanitize(str),
 	onRenderItem: (item, label, inst) => {
@@ -441,7 +443,7 @@ function ce(tagName) {
 }
 
 /**
- *
+ * Split a string using a list of tokens
  * @param {String} str
  * @param {Array} tokens
  * @returns {Array}
@@ -505,6 +507,13 @@ class Tags {
 			this._selectElement,
 		);
 
+		// Rebind handleEvent before configuring elements to ensure listeners
+		// added via addEventListener(this) capture the instance-bound arrow function
+		// instead of the prototype method (which could cause incorrect `this` binding).
+		this.handleEvent = (ev) => {
+			this._handleEvent(ev);
+		};
+
 		// Configure them
 		this._configureHolderElement();
 		this._configureContainerElement();
@@ -513,14 +522,15 @@ class Tags {
 		this._configureDropElement();
 		this.resetState();
 
-		// Rebind handleEvent to make sure the scope will not change
-		this.handleEvent = (ev) => {
-			this._handleEvent(ev);
-		};
-
+		// Add listener if fixed
 		if (this._config.fixed) {
 			document.addEventListener("scroll", this, true); // capture input for all scrollables elements
 			window.addEventListener("resize", this);
+		}
+
+		// Sanitize separator (dont' allow '', null... also prevent using 0 but who does that?)
+		if (Array.isArray(this._config.separator)) {
+			this._config.separator = this._config.separator.filter((n) => n);
 		}
 
 		// Search fields with custom label
@@ -533,13 +543,12 @@ class Tags {
 		}
 
 		// Add listeners (remove then on dispose()). See handleEvent.
-		["focus", "blur", "input", "keydown", "paste"].forEach((type) => {
+		for (const type of ["focus", "blur", "input", "keydown", "paste"]) {
 			this._searchInput.addEventListener(type, this);
-		});
-		["mousemove", "mouseleave"].forEach((type) => {
+		}
+		for (const type of ["mousemove", "mouseleave"]) {
 			this._dropElement.addEventListener(type, this);
-		});
-
+		}
 		this.loadData(true);
 	}
 
@@ -578,12 +587,12 @@ class Tags {
 	}
 
 	dispose() {
-		["focus", "blur", "input", "keydown", "paste"].forEach((type) => {
+		for (const type of ["focus", "blur", "input", "keydown", "paste"]) {
 			this._searchInput.removeEventListener(type, this);
-		});
-		["mousemove", "mouseleave"].forEach((type) => {
+		}
+		for (const type of ["mousemove", "mouseleave"]) {
 			this._dropElement.removeEventListener(type, this);
-		});
+		}
 
 		if (this._config.fixed) {
 			document.removeEventListener("scroll", this, true);
@@ -748,14 +757,15 @@ class Tags {
 		if (this._selectElement.dataset.placeholder) {
 			return this._selectElement.dataset.placeholder;
 		}
-		// Fallback to first option if no value
+		// Fallback to first option if it has no value
 		const firstOption = this._selectElement.querySelector("option");
-		if (!firstOption || !this._config.autoselectFirst) {
+		if (!firstOption || firstOption.value != "") {
 			return "";
 		}
+    // Remove selected attribute if set
 		rmAttr(firstOption, "selected");
 		firstOption.selected = false;
-		return !firstOption.value ? firstOption.textContent : "";
+		return firstOption.textContent;
 	}
 
 	_configureSelectElement() {
@@ -983,16 +993,16 @@ class Tags {
 			);
 			if (splitData.length > 1) {
 				ev.preventDefault();
-				splitData.forEach((value) => {
+				for (const value of splitData) {
 					this._addPastedValue(value);
-				});
+				}
 			}
 		}
 	}
 
 	_addPastedValue(value) {
 		let label = value;
-		let addData = {};
+		const addData = {};
 		if (!this._config.allowNew) {
 			const sel = this.getSelection();
 			if (!sel) {
@@ -1960,7 +1970,7 @@ class Tags {
 			// Remove validation message if we show selectable values
 			this._holderElement.classList.remove(INVALID_CLASS);
 
-			// Autoselect first
+			// Autoselect first suggestion
 			if (firstItem && this._config.autoselectFirst) {
 				this.removeSelection();
 				this._moveSelection(NEXT, firstItem);
@@ -2552,6 +2562,13 @@ class Tags {
 		const v5 = this._getBootstrapVersion() === 5;
 		const disabled = data.disabled && parseBool(data.disabled);
 		const allowClear = this._config.allowClear && !disabled;
+
+		if (this._config.displayValueInBadge) {
+			if (!data.title) {
+			  data.title = text;
+      }
+			text = value;
+		}
 
 		// create span
 		let html = this._config.allowHtml ? text : this._config.sanitizer(text);

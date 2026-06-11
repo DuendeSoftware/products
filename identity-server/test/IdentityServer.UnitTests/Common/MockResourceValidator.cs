@@ -10,7 +10,13 @@ internal class MockResourceValidator : IResourceValidator
 {
     public ResourceValidationResult Result { get; set; } = new ResourceValidationResult();
 
+    public ResourceValidationRequest Request { get; set; }
+
     public Task<IEnumerable<ParsedScopeValue>> ParseRequestedScopesAsync(IEnumerable<string> scopeValues) => Task.FromResult(scopeValues.Select(x => new ParsedScopeValue(x)));
 
-    public Task<ResourceValidationResult> ValidateRequestedResourcesAsync(ResourceValidationRequest request, Ct _) => Task.FromResult(Result);
+    public Task<ResourceValidationResult> ValidateRequestedResourcesAsync(ResourceValidationRequest request, Ct _)
+    {
+        Request = request;
+        return Task.FromResult(Result);
+    }
 }

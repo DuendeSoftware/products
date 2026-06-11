@@ -1,0 +1,708 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Duende × Bootstrap 4.5 — Theme Override
+   ────────────────────────────────────────────────────────────────────────
+   Re-skins stock, unmodified Bootstrap v4.5 to the Duende Design System
+   WITHOUT touching any HTML. Drop this file in AFTER bootstrap.min.css:
+
+       <link rel="stylesheet" href="bootstrap.min.css">
+       <link rel="stylesheet" href="duende-bootstrap-overrides.css">
+
+   Strategy: conservative on layout & spacing (Bootstrap's grid/structure is
+   left intact), bold on color & type. Pills on all buttons, light (Sand)
+   navbar, brand web-fonts loaded below.
+
+   PRIMARY BUTTON — two flavours:
+     • default              → charcoal pill (brand hero CTA), green focus ring
+     • <html class="duende-primary-green"> → green pill, charcoal text
+   Flip the flavour by toggling that single class on <html> (or <body>).
+   ════════════════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@300;400;500;600;700&family=Volkhov:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+/* ── Tokens (self-contained — no dependency on the DS stylesheet) ──────── */
+:root {
+    --duende-charcoal:      #212121;
+    --duende-charcoal-soft: #2A2929;
+    --duende-ink:           #1A1A17;
+    --duende-white:         #FFFFFF;
+    --duende-sand:          #F3F2E9;
+    --duende-sand-soft:     #FAF8F5;
+    --duende-sand-deep:     #E8E4DE;
+
+    --duende-green:         #61FB92;
+    --duende-green-hover:   #6FFE9C;
+    --duende-green-bright:  #81FF8C;
+
+    --duende-blue:          #74ACFB;
+    --duende-blue-soft:     #84B1F1;
+    --duende-blue-pale:     #B7DCFF;
+    --duende-blue-mist:     #ECF6F8;
+
+    --duende-warning:       #F2CF34;
+    --duende-error:         #C5122C;
+    --duende-error-bright:  #EA1E1E;
+
+    --duende-n-50:          #FAFAFA;
+    --duende-n-100:         #F7F7F5;
+    --duende-n-200:         #D9D9D9;
+    --duende-n-400:         #5C5C5C;
+    --duende-n-500:         #5F6063;
+    --duende-n-600:         #6C6A66;
+    --duende-n-700:         #464749;
+
+    --d-fg-1:   var(--duende-charcoal);
+    --d-fg-2:   var(--duende-n-700);
+    --d-fg-3:   var(--duende-n-500);
+    --d-border-subtle:  rgba(36, 32, 32, 0.12);
+    --d-border-default: rgba(36, 32, 32, 0.4);
+    --d-border-on-dark: rgba(255, 255, 255, 0.16);
+
+    --font-display: "Volkhov", Georgia, "Times New Roman", serif;
+    --font-body:    "Funnel Sans", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    --radius-card:     24px;
+    --radius-card-sm:  12px;
+    --radius-input:    8px;
+    --radius-pill:     999px;
+
+    --shadow-card: 0 1px 2px rgba(20,20,20,0.04), 0 12px 32px -16px rgba(20,20,20,0.16);
+    --shadow-pop:  0 4px 12px rgba(20,20,20,0.08), 0 24px 56px -24px rgba(20,20,20,0.24);
+    --shadow-focus: 0 0 0 3px rgba(97, 251, 146, 0.5);
+
+    --ease-standard:   cubic-bezier(0.2, 0.0, 0.2, 1);
+    --ease-emphasized: cubic-bezier(0.2, 0.7, 0.0, 1);
+    --dur-fast: 150ms;
+    --dur-base: 240ms;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   1. BASE & TYPOGRAPHY
+   ════════════════════════════════════════════════════════════════════════ */
+body {
+    font-family: var(--font-body);
+    color: var(--d-fg-1);
+    background-color: var(--duende-sand);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: 600;
+    color: var(--d-fg-1);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+/* h1 keeps the Volkhov display serif; h2–h6 use the Funnel Sans body face */
+h1, .h1 { font-family: var(--font-display); }
+h2, h3, h4, h5, h6,
+.h2, .h3, .h4, .h5, .h6 { font-family: var(--font-body); }
+h4, h5, h6, .h4, .h5, .h6 { letter-spacing: -0.01em; }
+
+.display-1, .display-2, .display-3, .display-4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.lead { font-weight: 400; color: var(--d-fg-2); letter-spacing: -0.01em; }
+
+.text-muted { color: var(--d-fg-3) !important; }
+
+small, .small { color: inherit; }
+
+/* Links — charcoal with a green underline grown on hover (brand link motion) */
+a {
+    color: var(--duende-charcoal);
+    text-decoration: underline;
+    background-image: linear-gradient(var(--duende-green), var(--duende-green));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    transition: background-size var(--dur-base) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+}
+a.navbar-brand {
+    text-decoration: none;
+}
+a:hover, a:focus {
+    color: var(--duende-charcoal);
+    text-decoration: none;
+    background-size: 100% 2px;
+}
+/* Links that sit inside themed surfaces shouldn't get the underline gimmick */
+.btn, .nav-link, .navbar-brand, .page-link, .dropdown-item,
+.list-group-item, .badge, .alert a.alert-link, .breadcrumb-item a,
+.close, .card-header a, .nav-tabs a, .nav-pills a {
+    background-image: none;
+}
+
+mark, .mark {
+    background: var(--duende-green);
+    color: var(--duende-charcoal);
+    padding: 0.05em 0.25em;
+    border-radius: 6px;
+}
+
+hr { border-top-color: var(--d-border-subtle); }
+
+code { color: var(--duende-error); }
+kbd  { background: var(--duende-charcoal); border-radius: var(--radius-input); }
+pre, .pre-scrollable { color: var(--d-fg-1); }
+
+blockquote, .blockquote {
+    border-left: 3px solid var(--duende-green);
+    padding-left: 1rem;
+    color: var(--d-fg-2);
+}
+
+::selection { background: var(--duende-green); color: var(--duende-charcoal); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   2. BUTTONS  — pill everything, brand colour mapping
+   ════════════════════════════════════════════════════════════════════════ */
+.btn {
+    font-family: var(--font-body);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    border-radius: var(--radius-pill);
+    transition: background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+}
+.btn-lg, .btn-group-lg > .btn { border-radius: var(--radius-pill); }
+.btn-sm, .btn-group-sm > .btn { border-radius: var(--radius-pill); }
+.btn:active, .btn.active { transform: scale(0.98); }
+
+/* Universal green focus halo (replaces Bootstrap's blue/grey glows) */
+.btn:focus, .btn.focus,
+.btn-primary:focus, .btn-primary.focus,
+.btn-secondary:focus, .btn-secondary.focus,
+.btn-success:focus, .btn-success.focus,
+.btn-danger:focus, .btn-danger.focus,
+.btn-warning:focus, .btn-warning.focus,
+.btn-info:focus, .btn-info.focus,
+.btn-light:focus, .btn-light.focus,
+.btn-dark:focus, .btn-dark.focus,
+.btn-link:focus, .btn-link.focus,
+.btn-outline-primary:focus, .btn-outline-secondary:focus,
+.btn-outline-success:focus, .btn-outline-danger:focus,
+.btn-outline-warning:focus, .btn-outline-info:focus,
+.btn-outline-light:focus, .btn-outline-dark:focus {
+    box-shadow: var(--shadow-focus);
+}
+
+/* ---- PRIMARY (default flavour: charcoal pill) ---- */
+.btn-primary {
+    background-color: var(--duende-charcoal);
+    border-color: var(--duende-charcoal);
+    color: var(--duende-sand);
+}
+.btn-primary:hover {
+    background-color: var(--duende-charcoal-soft);
+    border-color: var(--duende-charcoal-soft);
+    color: var(--duende-sand);
+}
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: var(--duende-ink);
+    border-color: var(--duende-ink);
+    color: var(--duende-sand);
+}
+.btn-primary.disabled, .btn-primary:disabled {
+    background-color: var(--duende-n-200);
+    border-color: var(--duende-n-200);
+    color: var(--duende-n-400);
+}
+
+/* ---- PRIMARY (alternate flavour: green pill) ---- */
+.duende-primary-green .btn-primary {
+    background-color: var(--duende-green);
+    border-color: var(--duende-green);
+    color: var(--duende-charcoal);
+}
+.duende-primary-green .btn-primary:hover {
+    background-color: var(--duende-green-hover);
+    border-color: var(--duende-green-hover);
+    color: var(--duende-charcoal);
+}
+.duende-primary-green .btn-primary:not(:disabled):not(.disabled):active,
+.duende-primary-green .btn-primary:not(:disabled):not(.disabled).active,
+.duende-primary-green .show > .btn-primary.dropdown-toggle {
+    background-color: var(--duende-green-bright);
+    border-color: var(--duende-green-bright);
+    color: var(--duende-charcoal);
+}
+
+/* ---- SECONDARY → sand/charcoal soft button ---- */
+.btn-secondary {
+    background-color: var(--duende-sand-deep);
+    border-color: var(--duende-sand-deep);
+    color: var(--duende-charcoal);
+}
+.btn-secondary:hover {
+    background-color: #ded9d1;
+    border-color: #ded9d1;
+    color: var(--duende-charcoal);
+}
+.btn-secondary:not(:disabled):not(.disabled):active,
+.btn-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-secondary.dropdown-toggle {
+    background-color: #d4cec4;
+    border-color: #d4cec4;
+    color: var(--duende-charcoal);
+}
+
+/* ---- SUCCESS → Building Green ---- */
+.btn-success {
+    background-color: var(--duende-green);
+    border-color: var(--duende-green);
+    color: var(--duende-charcoal);
+}
+.btn-success:hover {
+    background-color: var(--duende-green-hover);
+    border-color: var(--duende-green-hover);
+    color: var(--duende-charcoal);
+}
+.btn-success:not(:disabled):not(.disabled):active,
+.btn-success:not(:disabled):not(.disabled).active,
+.show > .btn-success.dropdown-toggle {
+    background-color: var(--duende-green-bright);
+    border-color: var(--duende-green-bright);
+    color: var(--duende-charcoal);
+}
+
+/* ---- DANGER ---- */
+.btn-danger {
+    background-color: var(--duende-error);
+    border-color: var(--duende-error);
+    color: #fff;
+}
+.btn-danger:hover {
+    background-color: var(--duende-error-bright);
+    border-color: var(--duende-error-bright);
+    color: #fff;
+}
+
+/* ---- WARNING ---- */
+.btn-warning {
+    background-color: var(--duende-warning);
+    border-color: var(--duende-warning);
+    color: var(--duende-charcoal);
+}
+.btn-warning:hover {
+    background-color: #e6c422;
+    border-color: #e6c422;
+    color: var(--duende-charcoal);
+}
+
+/* ---- INFO → Calming Blue ---- */
+.btn-info {
+    background-color: var(--duende-blue);
+    border-color: var(--duende-blue);
+    color: var(--duende-charcoal);
+}
+.btn-info:hover {
+    background-color: var(--duende-blue-soft);
+    border-color: var(--duende-blue-soft);
+    color: var(--duende-charcoal);
+}
+
+/* ---- LIGHT / DARK ---- */
+.btn-light {
+    background-color: var(--duende-white);
+    border-color: var(--d-border-subtle);
+    color: var(--duende-charcoal);
+}
+.btn-light:hover {
+    background-color: var(--duende-sand);
+    border-color: var(--d-border-default);
+    color: var(--duende-charcoal);
+}
+.btn-dark {
+    background-color: var(--duende-charcoal);
+    border-color: var(--duende-charcoal);
+    color: var(--duende-sand);
+}
+.btn-dark:hover {
+    background-color: var(--duende-charcoal-soft);
+    border-color: var(--duende-charcoal-soft);
+    color: var(--duende-sand);
+}
+
+/* ---- OUTLINE variants ---- */
+.btn-outline-primary {
+    color: var(--duende-charcoal);
+    border-color: var(--duende-charcoal);
+}
+.btn-outline-primary:hover {
+    background-color: var(--duende-charcoal);
+    border-color: var(--duende-charcoal);
+    color: var(--duende-sand);
+}
+.btn-outline-secondary {
+    color: var(--d-fg-2);
+    border-color: var(--d-border-default);
+}
+.btn-outline-secondary:hover {
+    background-color: var(--duende-charcoal);
+    border-color: var(--duende-charcoal);
+    color: var(--duende-sand);
+}
+.btn-outline-success {
+    color: #1b7a45;
+    border-color: var(--duende-green);
+}
+.btn-outline-success:hover {
+    background-color: var(--duende-green);
+    border-color: var(--duende-green);
+    color: var(--duende-charcoal);
+}
+.btn-outline-danger { color: var(--duende-error); border-color: var(--duende-error); }
+.btn-outline-danger:hover { background-color: var(--duende-error); border-color: var(--duende-error); color: #fff; }
+.btn-outline-warning { color: #8a7100; border-color: var(--duende-warning); }
+.btn-outline-warning:hover { background-color: var(--duende-warning); border-color: var(--duende-warning); color: var(--duende-charcoal); }
+.btn-outline-info { color: #2f6bbd; border-color: var(--duende-blue); }
+.btn-outline-info:hover { background-color: var(--duende-blue); border-color: var(--duende-blue); color: var(--duende-charcoal); }
+.btn-outline-dark { color: var(--duende-charcoal); border-color: var(--duende-charcoal); }
+.btn-outline-dark:hover { background-color: var(--duende-charcoal); border-color: var(--duende-charcoal); color: var(--duende-sand); }
+
+/* ---- LINK button → green underline grow ---- */
+.btn-link {
+    color: var(--duende-charcoal);
+    font-weight: 500;
+}
+.btn-link:hover { color: var(--duende-charcoal); text-decoration: underline; text-decoration-color: var(--duende-green); text-decoration-thickness: 2px; }
+
+/* Button groups: square the inner pill edges so segments read as one capsule */
+.btn-group > .btn:not(:first-child),
+.btn-group > .btn-group:not(:first-child) > .btn { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle),
+.btn-group > .btn-group:not(:last-child) > .btn { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   3. FORMS
+   ════════════════════════════════════════════════════════════════════════ */
+.form-control,
+.custom-select,
+.custom-file-label {
+    border-radius: var(--radius-input);
+    border-color: var(--d-border-default);
+    color: var(--d-fg-1);
+    transition: border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+.form-control::placeholder { color: var(--duende-n-600); opacity: 1; }
+.form-control:focus,
+.custom-select:focus,
+.custom-file-input:focus ~ .custom-file-label {
+    border-color: var(--duende-charcoal);
+    box-shadow: var(--shadow-focus);
+}
+.form-control:disabled, .form-control[readonly],
+.custom-select:disabled {
+    background-color: var(--duende-n-100);
+    color: var(--duende-n-600);
+}
+.form-control-plaintext { color: var(--d-fg-1); }
+.col-form-label, .form-group > label, label { font-weight: 500; color: var(--d-fg-1); }
+
+/* input-group add-ons */
+.input-group-text {
+    background-color: var(--duende-sand-deep);
+    border-color: var(--d-border-default);
+    border-radius: var(--radius-input);
+    color: var(--d-fg-2);
+}
+
+/* Custom checkbox / radio → green fill, charcoal mark */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: var(--duende-green);
+    border-color: var(--duende-charcoal);
+}
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M5 12l5 5L20 7'/%3e%3c/svg%3e");
+}
+.custom-radio .custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23212121'/%3e%3c/svg%3e");
+}
+.custom-control-input:focus ~ .custom-control-label::before { box-shadow: var(--shadow-focus); }
+.custom-control-input:focus:not(:checked) ~ .custom-control-label::before { border-color: var(--duende-charcoal); }
+.custom-control-input:checked ~ .custom-control-label::before { color: var(--duende-charcoal); }
+
+/* Custom switch */
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after { background-color: var(--duende-charcoal); }
+
+/* Range slider */
+.custom-range::-webkit-slider-thumb { background-color: var(--duende-charcoal); }
+.custom-range::-moz-range-thumb { background-color: var(--duende-charcoal); }
+.custom-range::-ms-thumb { background-color: var(--duende-charcoal); }
+.custom-range::-webkit-slider-thumb:active { background-color: var(--duende-green); }
+
+/* Validation states */
+.was-validated .form-control:valid, .form-control.is-valid,
+.was-validated .custom-select:valid, .custom-select.is-valid { border-color: var(--duende-green); }
+.was-validated .form-control:valid:focus, .form-control.is-valid:focus { border-color: var(--duende-green); box-shadow: var(--shadow-focus); }
+.valid-feedback { color: #1b7a45; }
+.was-validated .form-control:invalid, .form-control.is-invalid,
+.was-validated .custom-select:invalid, .custom-select.is-invalid { border-color: var(--duende-error); }
+.was-validated .form-control:invalid:focus, .form-control.is-invalid:focus { border-color: var(--duende-error); box-shadow: 0 0 0 3px rgba(197,18,44,0.25); }
+.invalid-feedback { color: var(--duende-error); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   4. NAVBAR  (light = Sand background, charcoal text)
+   ════════════════════════════════════════════════════════════════════════ */
+.navbar { font-family: var(--font-body); }
+.navbar-brand { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+
+.navbar-light { background-color: var(--duende-sand); }
+.navbar-light .navbar-brand { color: var(--duende-charcoal); }
+.navbar-light .navbar-nav .nav-link { color: var(--duende-charcoal); font-weight: 500; }
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link:focus { color: var(--duende-charcoal); }
+.navbar-light .navbar-nav .show > .nav-link,
+.navbar-light .navbar-nav .active > .nav-link,
+.navbar-light .navbar-nav .nav-link.active { color: var(--duende-charcoal); position: relative; }
+.navbar-light .navbar-nav .nav-link.active::after,
+.navbar-light .navbar-nav .active > .nav-link::after {
+    content: ""; position: absolute; left: 0.5rem; right: 0.5rem; bottom: 0.25rem;
+    height: 2px; background: var(--duende-green); border-radius: 2px;
+}
+.navbar-light .navbar-text { color: var(--d-fg-2); }
+.navbar-light .navbar-toggler { border-color: var(--d-border-subtle); }
+
+/* Dark navbar = Charcoal background, sand text (also used by .bg-dark navbars) */
+.navbar-dark { background-color: var(--duende-charcoal); }
+.navbar-dark .navbar-brand { color: var(--duende-sand); }
+.navbar-dark .navbar-nav .nav-link { color: rgba(243,242,233,0.82); font-weight: 500; }
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus { color: var(--duende-sand); }
+.navbar-dark .navbar-nav .active > .nav-link,
+.navbar-dark .navbar-nav .nav-link.active,
+.navbar-dark .navbar-nav .show > .nav-link { color: var(--duende-green); }
+.navbar-dark .navbar-toggler { border-color: var(--d-border-on-dark); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   5. CARDS
+   ════════════════════════════════════════════════════════════════════════ */
+.card {
+    background-color: var(--duende-white);
+    border: 1px solid var(--d-border-subtle);
+    border-radius: var(--radius-card-sm);
+    box-shadow: var(--shadow-card);
+}
+.card-header {
+    background-color: var(--duende-sand-soft);
+    border-bottom-color: var(--d-border-subtle);
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+.card-header:first-child { border-radius: calc(var(--radius-card-sm) - 1px) calc(var(--radius-card-sm) - 1px) 0 0; }
+.card-footer {
+    background-color: var(--duende-sand-soft);
+    border-top-color: var(--d-border-subtle);
+    padding: 1rem 1.25rem;
+}
+/* Keep action buttons off the card-footer edges */
+.card-footer .btn { margin: 0.125rem 0; }
+.card-footer > .btn:not(:last-child) { margin-right: 0.5rem; }
+.card-title { font-family: var(--font-body); font-weight: 600; }
+.card-img, .card-img-top { border-top-left-radius: calc(var(--radius-card-sm) - 1px); border-top-right-radius: calc(var(--radius-card-sm) - 1px); }
+.card-img, .card-img-bottom { border-bottom-left-radius: calc(var(--radius-card-sm) - 1px); border-bottom-right-radius: calc(var(--radius-card-sm) - 1px); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   6. ALERTS  (soft brand tints, 12px radius, hairline border)
+   ════════════════════════════════════════════════════════════════════════ */
+.alert { border-radius: var(--radius-card-sm); border-width: 1px; }
+.alert-primary { background-color: var(--duende-blue-mist); border-color: var(--duende-blue-pale); color: var(--duende-charcoal); }
+.alert-primary .alert-link { color: var(--duende-charcoal); }
+.alert-secondary { background-color: var(--duende-sand-deep); border-color: var(--d-border-subtle); color: var(--d-fg-1); }
+.alert-success { background-color: #e6fff0; border-color: var(--duende-green); color: #145a32; }
+.alert-success .alert-link { color: #0e3f23; }
+.alert-info { background-color: var(--duende-blue-mist); border-color: var(--duende-blue-pale); color: #234b78; }
+.alert-warning { background-color: #fdf6d8; border-color: var(--duende-warning); color: #6b5800; }
+.alert-danger { background-color: #fbe3e6; border-color: var(--duende-error); color: #7d0d1c; }
+.alert-light { background-color: var(--duende-sand-soft); border-color: var(--d-border-subtle); color: var(--d-fg-1); }
+.alert-dark { background-color: var(--duende-charcoal); border-color: var(--duende-charcoal); color: var(--duende-sand); }
+.alert-dark .alert-link { color: var(--duende-green); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   7. TABLES
+   ════════════════════════════════════════════════════════════════════════ */
+.table { color: var(--d-fg-1); }
+.table th { font-weight: 600; letter-spacing: -0.01em; }
+.table thead th { border-bottom: 2px solid var(--d-border-subtle); color: var(--d-fg-1); }
+.table td, .table th { border-top-color: var(--d-border-subtle); }
+.table-bordered, .table-bordered td, .table-bordered th { border-color: var(--d-border-subtle); }
+.thead-light th { background-color: var(--duende-sand-deep); color: var(--d-fg-1); border-color: var(--d-border-subtle); }
+.thead-dark th { background-color: var(--duende-charcoal); color: var(--duende-sand); border-color: var(--duende-charcoal-soft); }
+.table-striped tbody tr:nth-of-type(odd) { background-color: var(--duende-sand-soft); }
+.table-hover tbody tr:hover { background-color: rgba(97,251,146,0.10); color: var(--d-fg-1); }
+.table-active, .table-active > td, .table-active > th { background-color: rgba(97,251,146,0.14); }
+.table-primary, .table-primary > td, .table-primary > th { background-color: var(--duende-blue-pale); }
+.table-success, .table-success > td, .table-success > th { background-color: #d6ffe6; }
+.table-danger, .table-danger > td, .table-danger > th { background-color: #fbe3e6; }
+.table-warning, .table-warning > td, .table-warning > th { background-color: #fdf6d8; }
+.table-info, .table-info > td, .table-info > th { background-color: var(--duende-blue-mist); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   8. BADGES  (pill, brand colours)
+   ════════════════════════════════════════════════════════════════════════ */
+.badge { font-family: var(--font-body); font-weight: 600; letter-spacing: 0; border-radius: var(--radius-pill); }
+.badge-primary { background-color: var(--duende-charcoal); color: var(--duende-sand); }
+.badge-secondary { background-color: var(--duende-sand-deep); color: var(--duende-charcoal); }
+.badge-success { background-color: var(--duende-green); color: var(--duende-charcoal); }
+.badge-danger { background-color: var(--duende-error); color: #fff; }
+.badge-warning { background-color: var(--duende-warning); color: var(--duende-charcoal); }
+.badge-info { background-color: var(--duende-blue); color: var(--duende-charcoal); }
+.badge-light { background-color: var(--duende-sand); color: var(--duende-charcoal); }
+.badge-dark { background-color: var(--duende-charcoal); color: var(--duende-sand); }
+a.badge-primary:hover, a.badge-primary:focus { background-color: var(--duende-charcoal-soft); }
+a.badge-success:hover, a.badge-success:focus { background-color: var(--duende-green-hover); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   9. LIST GROUPS
+   ════════════════════════════════════════════════════════════════════════ */
+.list-group { border-radius: var(--radius-card-sm); }
+.list-group-item { border-color: var(--d-border-subtle); color: var(--d-fg-1); background-color: var(--duende-white); }
+.list-group-item-action:hover, .list-group-item-action:focus { background-color: var(--duende-sand-soft); color: var(--d-fg-1); }
+.list-group-item.active { background-color: var(--duende-charcoal); border-color: var(--duende-charcoal); color: var(--duende-sand); }
+.list-group-item-action:active { background-color: var(--duende-sand-deep); color: var(--d-fg-1); }
+.list-group-flush .list-group-item { border-radius: 0; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   10. PAGINATION & BREADCRUMB
+   ════════════════════════════════════════════════════════════════════════ */
+.page-link {
+    color: var(--duende-charcoal);
+    border-color: var(--d-border-subtle);
+    transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+}
+.page-link:hover { background-color: var(--duende-sand-deep); color: var(--duende-charcoal); border-color: var(--d-border-subtle); }
+.page-link:focus { box-shadow: var(--shadow-focus); z-index: 3; }
+.page-item.active .page-link { background-color: var(--duende-charcoal); border-color: var(--duende-charcoal); color: var(--duende-sand); }
+.page-item.disabled .page-link { color: var(--duende-n-400); background-color: var(--duende-white); border-color: var(--d-border-subtle); }
+.pagination-lg .page-item:first-child .page-link,
+.pagination .page-item:first-child .page-link { border-top-left-radius: var(--radius-pill); border-bottom-left-radius: var(--radius-pill); }
+.pagination-lg .page-item:last-child .page-link,
+.pagination .page-item:last-child .page-link { border-top-right-radius: var(--radius-pill); border-bottom-right-radius: var(--radius-pill); }
+
+.breadcrumb { background-color: var(--duende-sand-deep); border-radius: var(--radius-card-sm); }
+.breadcrumb-item.active { color: var(--d-fg-3); }
+.breadcrumb-item + .breadcrumb-item::before { color: var(--d-fg-3); }
+.breadcrumb-item a { color: var(--duende-charcoal); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   11. MODALS, DROPDOWNS, POPOVERS, TOOLTIPS
+   ════════════════════════════════════════════════════════════════════════ */
+.modal-content {
+    border-radius: var(--radius-card);
+    border: none;
+    box-shadow: var(--shadow-pop);
+    background-color: var(--duende-white);
+}
+.modal-header { border-bottom-color: var(--d-border-subtle); }
+.modal-footer { border-top-color: var(--d-border-subtle); }
+.modal-title { font-family: var(--font-body); font-weight: 600; letter-spacing: -0.02em; }
+.close { color: var(--duende-charcoal); text-shadow: none; opacity: 0.5; transition: opacity var(--dur-fast) var(--ease-standard); }
+.close:hover, .close:focus { color: var(--duende-charcoal); opacity: 1; }
+
+.dropdown-menu {
+    border-radius: var(--radius-card-sm);
+    border: 1px solid var(--d-border-subtle);
+    box-shadow: var(--shadow-pop);
+    background-color: var(--duende-white);
+    padding: 0.5rem;
+}
+.dropdown-item { border-radius: var(--radius-input); color: var(--d-fg-1); font-weight: 500; }
+.dropdown-item:hover, .dropdown-item:focus { background-color: var(--duende-sand-soft); color: var(--d-fg-1); }
+.dropdown-item.active, .dropdown-item:active { background-color: var(--duende-charcoal); color: var(--duende-sand); }
+.dropdown-divider { border-top-color: var(--d-border-subtle); }
+.dropdown-header { font-family: var(--font-body); font-weight: 600; color: var(--d-fg-3); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.75rem; }
+
+.popover { border-radius: var(--radius-card-sm); border-color: var(--d-border-subtle); box-shadow: var(--shadow-pop); }
+.popover-header { background-color: var(--duende-sand-soft); border-bottom-color: var(--d-border-subtle); font-family: var(--font-body); font-weight: 600; }
+.tooltip-inner { background-color: var(--duende-charcoal); color: var(--duende-sand); border-radius: var(--radius-input); }
+.bs-tooltip-top .arrow::before, .bs-tooltip-auto[x-placement^="top"] .arrow::before { border-top-color: var(--duende-charcoal); }
+.bs-tooltip-bottom .arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .arrow::before { border-bottom-color: var(--duende-charcoal); }
+.bs-tooltip-left .arrow::before, .bs-tooltip-auto[x-placement^="left"] .arrow::before { border-left-color: var(--duende-charcoal); }
+.bs-tooltip-right .arrow::before, .bs-tooltip-auto[x-placement^="right"] .arrow::before { border-right-color: var(--duende-charcoal); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   12. NAV TABS / PILLS
+   ════════════════════════════════════════════════════════════════════════ */
+.nav-tabs { border-bottom-color: var(--d-border-subtle); }
+.nav-tabs .nav-link { color: var(--d-fg-2); font-weight: 500; border-radius: var(--radius-input) var(--radius-input) 0 0; }
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus { border-color: transparent transparent var(--duende-green); }
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+    color: var(--duende-charcoal);
+    background-color: var(--duende-white);
+    border-color: var(--d-border-subtle) var(--d-border-subtle) var(--duende-white);
+}
+.nav-pills .nav-link { color: var(--d-fg-2); font-weight: 500; border-radius: var(--radius-pill); }
+.nav-pills .nav-link:hover { color: var(--duende-charcoal); background-color: var(--duende-sand-deep); }
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: var(--duende-charcoal); color: var(--duende-sand); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   13. PROGRESS, SPINNERS, ACCORDION
+   ════════════════════════════════════════════════════════════════════════ */
+.progress { background-color: var(--duende-sand-deep); border-radius: var(--radius-pill); }
+.progress-bar { background-color: var(--duende-green); color: var(--duende-charcoal); }
+.spinner-border, .spinner-grow { color: var(--duende-charcoal); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   14. COLOUR UTILITIES  (remap stock Bootstrap utility classes to brand)
+   ════════════════════════════════════════════════════════════════════════ */
+.bg-primary   { background-color: var(--duende-charcoal) !important; }
+.bg-secondary { background-color: var(--duende-sand-deep) !important; }
+.bg-success   { background-color: var(--duende-green) !important; }
+.bg-info      { background-color: var(--duende-blue) !important; }
+.bg-warning   { background-color: var(--duende-warning) !important; }
+.bg-danger    { background-color: var(--duende-error) !important; }
+.bg-light     { background-color: var(--duende-sand) !important; }
+.bg-dark      { background-color: var(--duende-charcoal) !important; }
+.bg-white     { background-color: var(--duende-white) !important; }
+
+.text-primary   { color: var(--duende-charcoal) !important; }
+.text-secondary { color: var(--d-fg-3) !important; }
+.text-success   { color: #1b7a45 !important; }
+.text-info      { color: #2f6bbd !important; }
+.text-warning   { color: #8a7100 !important; }
+.text-danger    { color: var(--duende-error) !important; }
+.text-light     { color: var(--duende-sand) !important; }
+.text-dark      { color: var(--duende-charcoal) !important; }
+.text-white     { color: var(--duende-white) !important; }
+.text-body      { color: var(--d-fg-1) !important; }
+
+.border         { border-color: var(--d-border-subtle) !important; }
+.border-top, .border-right, .border-bottom, .border-left { border-color: var(--d-border-subtle) !important; }
+.border-primary { border-color: var(--duende-charcoal) !important; }
+.border-success { border-color: var(--duende-green) !important; }
+.border-info    { border-color: var(--duende-blue) !important; }
+.border-warning { border-color: var(--duende-warning) !important; }
+.border-danger  { border-color: var(--duende-error) !important; }
+.border-light   { border-color: var(--d-border-subtle) !important; }
+.border-dark    { border-color: var(--duende-charcoal) !important; }
+
+a.text-primary:hover, a.text-primary:focus { color: var(--duende-charcoal-soft) !important; }
+a.text-success:hover, a.text-success:focus { color: #145a32 !important; }
+
+.rounded { border-radius: var(--radius-input) !important; }
+.rounded-lg { border-radius: var(--radius-card-sm) !important; }
+.rounded-pill { border-radius: var(--radius-pill) !important; }
+
+/* Jumbotron / well-style containers */
+.jumbotron { background-color: var(--duende-sand-deep); border-radius: var(--radius-card); }
+
+/* Toast */
+.toast { border-radius: var(--radius-card-sm); border-color: var(--d-border-subtle); box-shadow: var(--shadow-pop); }
+.toast-header { background-color: var(--duende-sand-soft); color: var(--d-fg-1); border-bottom-color: var(--d-border-subtle); }
+
+/* Focus ring on generic focusable utility (custom-select etc already covered) */
+.custom-file-input:focus ~ .custom-file-label { border-color: var(--duende-charcoal); box-shadow: var(--shadow-focus); }

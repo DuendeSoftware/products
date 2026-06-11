@@ -15,7 +15,7 @@ public class DeleteModel(ClientRepository clientRepository) : PageModel
 
     public void OnGet(string clientId) => ClientId = clientId;
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         await clientRepository.DeleteAsync(ClientId);
         return RedirectToPage("/Admin/Clients/Index");

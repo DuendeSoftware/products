@@ -3,7 +3,6 @@
 
 <div class="welcome-page">
     <h1>
-        <img src="~/duende-logo.svg" class="logo">
         Welcome to Duende IdentityServer
         <small class="text-muted">(version @Model.Version)</small>
     </h1>
@@ -46,7 +45,7 @@
             <dt>Serial Number</dt>
             <dd>@Model.License.SerialNumber</dd>
             <dt>Expiration</dt>
-            <dd>@Model.License.Expiration!.Value.ToString("D")</dd>
+            <dd>@(Model.License.Expiration.HasValue ? Model.License.Expiration.Value.DateTime.ToLongDateString() : "Never")</dd>
         </dl>
     }
 </div>

@@ -18,6 +18,7 @@ public class EditModel(
     [BindProperty]
     public EditClientModel InputModel { get; set; } = default!;
 
+    [TempData]
     public bool Updated { get; set; }
     public List<ApiScopeSummaryModel> ApiScopes { get; set; } = [];
     public List<IdentityScopeSummaryModel> IdentityScopes { get; set; } = [];
@@ -25,7 +26,7 @@ public class EditModel(
     [BindProperty]
     public string? Button { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(string id)
+    public async Task<IActionResult> OnGetAsync(string id, CancellationToken ct)
     {
         var model = await clientRepository.GetByIdAsync(id);
         if (model == null)
@@ -50,7 +51,7 @@ public class EditModel(
         }
     }
 
-    public async Task<IActionResult> OnPostAsync(string id)
+    public async Task<IActionResult> OnPostAsync(string id, CancellationToken ct)
     {
         if (Button == "delete")
         {

@@ -23,7 +23,7 @@ public class NewModel : PageModel
         Secret = Convert.ToBase64String(CryptoRandom.CreateRandomKey(16))
     };
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         if (ModelState.IsValid)
         {

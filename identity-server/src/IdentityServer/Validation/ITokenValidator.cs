@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 namespace Duende.IdentityServer.Validation;
 
@@ -16,7 +17,7 @@ public interface ITokenValidator
     /// <param name="expectedScope">The expected scope.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, Ct ct);
+    Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string? expectedScope, Ct ct);
 
     /// <summary>
     /// Validates an identity token.

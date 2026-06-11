@@ -19,7 +19,7 @@ public class NewModel : PageModel
     {
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         if (ModelState.IsValid)
         {

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,53 +19,29 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Validation;
 
-internal class TokenValidator : ITokenValidator
+internal class TokenValidator(
+    IdentityServerOptions options,
+    IIssuerNameService issuerNameService,
+    IClientStore clients,
+    IProfileService profile,
+    IReferenceTokenStore referenceTokenStore,
+    ICustomTokenValidator customValidator,
+    IKeyMaterialService keys,
+    ISessionCoordinationService sessionCoordinationService,
+    TimeProvider timeProvider,
+    ILogger<TokenValidator> logger)
+    : ITokenValidator
 {
-    private readonly ILogger _logger;
-    private readonly IdentityServerOptions _options;
-    private readonly IIssuerNameService _issuerNameService;
-    private readonly IReferenceTokenStore _referenceTokenStore;
-    private readonly ICustomTokenValidator _customValidator;
-    private readonly IClientStore _clients;
-    private readonly IProfileService _profile;
-    private readonly IKeyMaterialService _keys;
-    private readonly ISessionCoordinationService _sessionCoordinationService;
-    private readonly TimeProvider _timeProvider;
-    private readonly TokenValidationLog _log;
+    private readonly ILogger _logger = logger;
+    private readonly TokenValidationLog _log = new();
 
-    public TokenValidator(
-        IdentityServerOptions options,
-        IIssuerNameService issuerNameService,
-        IClientStore clients,
-        IProfileService profile,
-        IReferenceTokenStore referenceTokenStore,
-        ICustomTokenValidator customValidator,
-        IKeyMaterialService keys,
-        ISessionCoordinationService sessionCoordinationService,
-        TimeProvider timeProvider,
-        ILogger<TokenValidator> logger)
-    {
-        _options = options;
-        _issuerNameService = issuerNameService;
-        _clients = clients;
-        _profile = profile;
-        _referenceTokenStore = referenceTokenStore;
-        _customValidator = customValidator;
-        _keys = keys;
-        _sessionCoordinationService = sessionCoordinationService;
-        _timeProvider = timeProvider;
-        _logger = logger;
-
-        _log = new TokenValidationLog();
-    }
-
-    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, Ct ct)
+    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string? clientId, bool validateLifetime, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateIdentityToken");
 
         _logger.LogDebug("Start identity token validation");
 
-        if (token.Length > _options.InputLengthRestrictions.Jwt)
+        if (token.Length > options.InputLengthRestrictions.Jwt)
         {
             _logger.LogError("JWT too long");
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
@@ -84,7 +61,7 @@ internal class TokenValidator : ITokenValidator
         _log.ClientId = clientId;
         _log.ValidateLifetime = validateLifetime;
 
-        var client = await _clients.FindEnabledClientByIdAsync(clientId, ct);
+        var client = await clients.FindEnabledClientByIdAsync(clientId, ct);
         if (client == null)
         {
             _logger.LogError("Unknown or disabled client: {clientId}.", clientId);
@@ -94,8 +71,8 @@ internal class TokenValidator : ITokenValidator
         _log.ClientName = client.ClientName;
         _logger.LogDebug("Client found: {clientId} / {clientName}", client.ClientId, client.ClientName);
 
-        var keys = await _keys.GetValidationKeysAsync(ct);
-        var result = await ValidateJwtAsync(token, keys, ct, validateLifetime: validateLifetime, audience: clientId);
+        var keys1 = await keys.GetValidationKeysAsync(ct);
+        var result = await ValidateJwtAsync(token, keys1, ct, validateLifetime: validateLifetime, audience: clientId);
 
         result.Client = client;
 
@@ -105,8 +82,8 @@ internal class TokenValidator : ITokenValidator
             return result;
         }
 
-        _logger.LogDebug("Calling into custom token validator: {type}", _customValidator.GetType().FullName);
-        var customResult = await _customValidator.ValidateIdentityTokenAsync(result, ct);
+        _logger.LogDebug("Calling into custom token validator: {type}", customValidator.GetType().FullName);
+        var customResult = await customValidator.ValidateIdentityTokenAsync(result, ct);
 
         if (customResult.IsError)
         {
@@ -114,13 +91,13 @@ internal class TokenValidator : ITokenValidator
             return customResult;
         }
 
-        _log.Claims = customResult.Claims.ToClaimsDictionary();
+        _log.Claims = customResult.Claims?.ToClaimsDictionary() ?? [];
 
         LogSuccess();
         return customResult;
     }
 
-    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, Ct ct)
+    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string? expectedScope, Ct ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateAccessToken");
 
@@ -133,7 +110,7 @@ internal class TokenValidator : ITokenValidator
 
         if (token.Contains('.', StringComparison.InvariantCulture))
         {
-            if (token.Length > _options.InputLengthRestrictions.Jwt)
+            if (token.Length > options.InputLengthRestrictions.Jwt)
             {
                 _logger.LogError("JWT too long");
 
@@ -145,15 +122,15 @@ internal class TokenValidator : ITokenValidator
                 };
             }
 
-            _log.AccessTokenType = AccessTokenType.Jwt.ToString();
+            _log.AccessTokenType = nameof(AccessTokenType.Jwt);
             result = await ValidateJwtAsync(
                 token,
-                await _keys.GetValidationKeysAsync(ct),
+                await keys.GetValidationKeysAsync(ct),
                 ct);
         }
         else
         {
-            if (token.Length > _options.InputLengthRestrictions.TokenHandle)
+            if (token.Length > options.InputLengthRestrictions.TokenHandle)
             {
                 _logger.LogError("token handle too long");
 
@@ -165,11 +142,12 @@ internal class TokenValidator : ITokenValidator
                 };
             }
 
-            _log.AccessTokenType = AccessTokenType.Reference.ToString();
+            _log.AccessTokenType = nameof(AccessTokenType.Reference);
             result = await ValidateReferenceAccessTokenAsync(token, ct);
         }
 
-        _log.Claims = result.Claims.ToClaimsDictionary();
+        var claimsDictionary = result.Claims?.ToClaimsDictionary() ?? [];
+        _log.Claims = claimsDictionary;
 
         if (result.IsError)
         {
@@ -177,10 +155,10 @@ internal class TokenValidator : ITokenValidator
         }
 
         // make sure client is still active (if client_id claim is present)
-        var clientClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.ClientId);
+        var clientClaim = result.Claims?.FirstOrDefault(c => c.Type == JwtClaimTypes.ClientId);
         if (clientClaim != null)
         {
-            var client = await _clients.FindEnabledClientByIdAsync(clientClaim.Value, ct);
+            var client = await clients.FindEnabledClientByIdAsync(clientClaim.Value, ct);
             if (client == null)
             {
                 _logger.LogError("Client deleted or disabled: {clientId}", clientClaim.Value);
@@ -194,10 +172,10 @@ internal class TokenValidator : ITokenValidator
         }
 
         // make sure user is still active (if sub claim is present)
-        var subClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
+        var subClaim = result.Claims?.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
         if (subClaim != null)
         {
-            var principal = Principal.Create("tokenvalidator", result.Claims.ToArray());
+            var principal = Principal.Create("tokenvalidator", result.Claims?.ToArray() ?? []);
 
             if (result.ReferenceTokenId.IsPresent())
             {
@@ -205,9 +183,10 @@ internal class TokenValidator : ITokenValidator
                     .AddClaim(new Claim(JwtClaimTypes.ReferenceTokenId, result.ReferenceTokenId));
             }
 
-            var isActiveCtx = new IsActiveContext(principal, result.Client,
+            var resultClient = result.Client ?? throw new NullReferenceException("result.Client is null");
+            var isActiveCtx = new IsActiveContext(principal, resultClient,
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
-            await _profile.IsActiveAsync(isActiveCtx, ct);
+            await profile.IsActiveAsync(isActiveCtx, ct);
 
             if (isActiveCtx.IsActive == false)
             {
@@ -224,11 +203,11 @@ internal class TokenValidator : ITokenValidator
             var sid = principal.FindFirstValue("sid");
             if (sid != null)
             {
-                var sessionResult = await _sessionCoordinationService.ValidateSessionAsync(new SessionValidationRequest
+                var sessionResult = await sessionCoordinationService.ValidateSessionAsync(new SessionValidationRequest
                 {
                     SubjectId = sub,
                     SessionId = sid,
-                    Client = result.Client,
+                    Client = resultClient,
                     Type = SessionValidationType.AccessToken
                 }, ct);
 
@@ -243,7 +222,7 @@ internal class TokenValidator : ITokenValidator
         // check expected scope(s)
         if (expectedScope.IsPresent())
         {
-            var scope = result.Claims.FirstOrDefault(c =>
+            var scope = result.Claims?.FirstOrDefault(c =>
                 c.Type == JwtClaimTypes.Scope && c.Value == expectedScope);
             if (scope == null)
             {
@@ -252,8 +231,8 @@ internal class TokenValidator : ITokenValidator
             }
         }
 
-        _logger.LogDebug("Calling into custom token validator: {type}", _customValidator.GetType().FullName);
-        var customResult = await _customValidator.ValidateAccessTokenAsync(result, ct);
+        _logger.LogDebug("Calling into custom token validator: {type}", customValidator.GetType().FullName);
+        var customResult = await customValidator.ValidateAccessTokenAsync(result, ct);
 
         if (customResult.IsError)
         {
@@ -269,7 +248,7 @@ internal class TokenValidator : ITokenValidator
     }
 
     private async Task<TokenValidationResult> ValidateJwtAsync(string jwtString,
-        IEnumerable<SecurityKeyInfo> validationKeys, Ct ct, bool validateLifetime = true, string audience = null)
+        IEnumerable<SecurityKeyInfo> validationKeys, Ct ct, bool validateLifetime = true, string? audience = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
 
@@ -277,10 +256,10 @@ internal class TokenValidator : ITokenValidator
 
         var parameters = new TokenValidationParameters
         {
-            ValidIssuer = await _issuerNameService.GetCurrentAsync(ct),
+            ValidIssuer = await issuerNameService.GetCurrentAsync(ct),
             IssuerSigningKeys = validationKeys.Select(k => k.Key),
             ValidateLifetime = validateLifetime,
-            ClockSkew = _options.JwtValidationClockSkew
+            ClockSkew = options.JwtValidationClockSkew
         };
 
         if (audience.IsPresent())
@@ -294,9 +273,9 @@ internal class TokenValidator : ITokenValidator
 #pragma warning restore CA5404
 
             // if no audience is specified, we make at least sure that it is an access token
-            if (_options.AccessTokenJwtType.IsPresent())
+            if (options.AccessTokenJwtType.IsPresent())
             {
-                parameters.ValidTypes = new[] { _options.AccessTokenJwtType };
+                parameters.ValidTypes = new[] { options.AccessTokenJwtType };
             }
         }
 
@@ -327,11 +306,11 @@ internal class TokenValidator : ITokenValidator
         }
 
         // load the client that belongs to the client_id claim
-        Client client = null;
+        Client? client = null;
         var clientId = id.FindFirst(JwtClaimTypes.ClientId);
         if (clientId != null)
         {
-            client = await _clients.FindEnabledClientByIdAsync(clientId.Value, ct);
+            client = await clients.FindEnabledClientByIdAsync(clientId.Value, ct);
             if (client == null)
             {
                 LogError($"Client deleted or disabled: {clientId}");
@@ -371,7 +350,7 @@ internal class TokenValidator : ITokenValidator
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateReferenceAccessToken");
 
         _log.TokenHandle = tokenHandle;
-        var token = await _referenceTokenStore.GetReferenceTokenAsync(tokenHandle, ct);
+        var token = await referenceTokenStore.GetReferenceTokenAsync(tokenHandle, ct);
 
         if (token == null)
         {
@@ -379,19 +358,19 @@ internal class TokenValidator : ITokenValidator
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
-        if (token.CreationTime.HasExceeded(token.Lifetime, _timeProvider.GetUtcNow().UtcDateTime))
+        if (token.CreationTime.HasExceeded(token.Lifetime, timeProvider.GetUtcNow().UtcDateTime))
         {
             LogError("Token expired.");
 
-            await _referenceTokenStore.RemoveReferenceTokenAsync(tokenHandle, ct);
+            await referenceTokenStore.RemoveReferenceTokenAsync(tokenHandle, ct);
             return Invalid(OidcConstants.ProtectedResourceErrors.ExpiredToken);
         }
 
         // load the client that is defined in the token
-        Client client = null;
+        Client? client = null;
         if (token.ClientId != null)
         {
-            client = await _clients.FindEnabledClientByIdAsync(token.ClientId, ct);
+            client = await clients.FindEnabledClientByIdAsync(token.ClientId, ct);
         }
 
         if (client == null)
@@ -444,7 +423,7 @@ internal class TokenValidator : ITokenValidator
         return claims;
     }
 
-    private string GetClientIdFromJwt(string token)
+    private string? GetClientIdFromJwt(string token)
     {
         try
         {

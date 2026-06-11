@@ -10,7 +10,7 @@
             <span class="d-none">See Licenses</span>
         </a>
     </h5>
-    <div class="card-body">
+    <div class="card-body bg-white">
         @if (Model.HasLicense)
         {
             <table class="table table-sm">
@@ -19,24 +19,12 @@
                     <td>@Model.License.CompanyName</td>
                 </tr>
                 <tr>
-                    <th scope="row">Edition</th>
-                    <td>@Model.License.Edition</td>
-                </tr>
-                <tr>
                     <th scope="row">Serial Number</th>
                     <td>@Model.License.SerialNumber</td>
                 </tr>
                 <tr>
                     <th scope="row">Expiration</th>
                     <td>@Model.License.Expiration</td>
-                </tr>
-                <tr>
-                    <th scope="row">Clients</th>
-                    <td>@Model.License.ClientLimit</td>
-                </tr>
-                <tr>
-                    <th scope="row">Issuers</th>
-                    <td>@Model.License.IssuerLimit</td>
                 </tr>
             </table>
         }
@@ -47,7 +35,7 @@
             </p>
             <div class="text-center">
 
-                <a type="button" class="btn btn-brand btn-sm mt-3" href="https://duende.link/p/pricing" target="_blank" rel="noopener noreferrer">
+                <a type="button" class="btn btn-primary btn-sm mt-3" href="https://duende.link/p/pricing" target="_blank" rel="noopener noreferrer">
                     See IdentityServer Product Information
                 </a>
             </div>

@@ -22,9 +22,9 @@ public class Consent(
     [BindProperty]
     public InputModel Input { get; set; } = default!;
 
-    public async Task<IActionResult> OnGet(string? id)
+    public async Task<IActionResult> OnGetAsync(string? id, CancellationToken ct)
     {
-        if (!await SetViewModelAsync(id))
+        if (!await SetViewModelAsync(id, ct))
         {
             return RedirectToPage("/Home/Error/Index");
         }
@@ -37,10 +37,10 @@ public class Consent(
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         // validate return url is still valid
-        var request = await interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)));
+        var request = await interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)), ct);
         if (request == null || request.Subject.GetSubjectId() != User.GetSubjectId())
         {
             logger.InvalidId(Input.Id);
@@ -55,7 +55,7 @@ public class Consent(
             result = new CompleteBackchannelLoginRequest(Input.Id);
 
             // emit event
-            await events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
+            await events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues), ct);
             Telemetry.Metrics.ConsentDenied(request.Client.ClientId, request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName));
         }
         // user clicked 'yes' - validate the data
@@ -77,7 +77,7 @@ public class Consent(
                 };
 
                 // emit event
-                await events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, result.ScopesValuesConsented, false));
+                await events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, result.ScopesValuesConsented, false), ct);
                 Telemetry.Metrics.ConsentGranted(request.Client.ClientId, result.ScopesValuesConsented, false);
                 var denied = request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName).Except(result.ScopesValuesConsented);
                 Telemetry.Metrics.ConsentDenied(request.Client.ClientId, denied);
@@ -95,24 +95,24 @@ public class Consent(
         if (result != null)
         {
             // communicate outcome of consent back to identityserver
-            await interaction.CompleteLoginRequestAsync(result);
+            await interaction.CompleteLoginRequestAsync(result, ct);
 
             return RedirectToPage("/Ciba/All");
         }
 
         // we need to redisplay the consent UI
-        if (!await SetViewModelAsync(Input.Id))
+        if (!await SetViewModelAsync(Input.Id, ct))
         {
             return RedirectToPage("/Home/Error/Index");
         }
         return Page();
     }
 
-    private async Task<bool> SetViewModelAsync(string? id)
+    private async Task<bool> SetViewModelAsync(string? id, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        var request = await interaction.GetLoginRequestByInternalIdAsync(id);
+        var request = await interaction.GetLoginRequestByInternalIdAsync(id, ct);
         if (request != null && request.Subject.GetSubjectId() == User.GetSubjectId())
         {
             View = CreateConsentViewModel(request);

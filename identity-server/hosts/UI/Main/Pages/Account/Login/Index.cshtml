@@ -23,18 +23,18 @@
                         <form asp-page="/Account/Login/Index">
                             <input type="hidden" asp-for="Input.ReturnUrl" />
 
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label asp-for="Input.Username"></label>
                                 <input class="form-control" placeholder="Username" asp-for="Input.Username" autofocus>
                             </div>
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label asp-for="Input.Password"></label>
                                 <input type="password" class="form-control" placeholder="Password" asp-for="Input.Password" autocomplete="off">
                             </div>
 
                             @if (Model.View.AllowRememberLogin)
                             {
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <div class="form-check">
                                         <input class="form-check-input" asp-for="Input.RememberLogin">
                                         <label class="form-check-label" asp-for="Input.RememberLogin">

@@ -17,7 +17,7 @@ public class Index(IIdentityServerInteractionService interaction, IEventService 
     [BindProperty]
     public string? LogoutId { get; set; }
 
-    public async Task<IActionResult> OnGet(string? logoutId)
+    public async Task<IActionResult> OnGetAsync(string? logoutId, CancellationToken ct)
     {
         LogoutId = logoutId;
 
@@ -30,7 +30,7 @@ public class Index(IIdentityServerInteractionService interaction, IEventService 
         }
         else
         {
-            var context = await interaction.GetLogoutContextAsync(LogoutId);
+            var context = await interaction.GetLogoutContextAsync(LogoutId, ct);
             if (context?.ShowSignoutPrompt == false)
             {
                 // it's safe to automatically sign-out
@@ -42,20 +42,20 @@ public class Index(IIdentityServerInteractionService interaction, IEventService 
         {
             // if the request for logout was properly authenticated from IdentityServer, then
             // we don't need to show the prompt and can just log the user out directly.
-            return await OnPost();
+            return await OnPostAsync(ct);
         }
 
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
             // if there's no current logout context, we need to create one
             // this captures necessary info from the current logged in user
             // this can still return null if there is no context needed
-            LogoutId ??= await interaction.CreateLogoutContextAsync();
+            LogoutId ??= await interaction.CreateLogoutContextAsync(ct);
 
             // delete local authentication cookie
             await HttpContext.SignOutAsync();
@@ -64,7 +64,7 @@ public class Index(IIdentityServerInteractionService interaction, IEventService 
             var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
 
             // raise the logout event
-            await events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
+            await events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()), ct);
             Telemetry.Metrics.UserLogout(idp);
 
             // if it's a local login we can ignore this workflow

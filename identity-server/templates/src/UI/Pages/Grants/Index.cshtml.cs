@@ -30,17 +30,17 @@ public class Index : PageModel
 
     public ViewModel View { get; set; } = default!;
 
-    public async Task OnGet()
+    public async Task OnGetAsync(CancellationToken ct)
     {
-        var grants = await _interaction.GetAllUserGrantsAsync();
+        var grants = await _interaction.GetAllUserGrantsAsync(ct);
 
         var list = new List<GrantViewModel>();
         foreach (var grant in grants)
         {
-            var client = await _clients.FindClientByIdAsync(grant.ClientId, HttpContext.RequestAborted);
+            var client = await _clients.FindClientByIdAsync(grant.ClientId, ct);
             if (client != null)
             {
-                var resources = await _resources.FindResourcesByScopeAsync(grant.Scopes);
+                var resources = await _resources.FindResourcesByScopeAsync(grant.Scopes, ct);
 
                 var item = new GrantViewModel()
                 {
@@ -68,10 +68,10 @@ public class Index : PageModel
     [BindProperty]
     public string? ClientId { get; set; }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-        await _interaction.RevokeUserConsentAsync(ClientId);
-        await _events.RaiseAsync(new GrantsRevokedEvent(User.GetSubjectId(), ClientId));
+        await _interaction.RevokeUserConsentAsync(ClientId, ct);
+        await _events.RaiseAsync(new GrantsRevokedEvent(User.GetSubjectId(), ClientId), ct);
         Telemetry.Metrics.GrantsRevoked(ClientId);
 
         return RedirectToPage("/Grants/Index");

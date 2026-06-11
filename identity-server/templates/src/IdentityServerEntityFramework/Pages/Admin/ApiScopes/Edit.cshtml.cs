@@ -17,7 +17,7 @@ public class EditModel : PageModel
     [BindProperty]
     public string Button { get; set; } = default!;
 
-    public async Task<IActionResult> OnGetAsync(string id)
+    public async Task<IActionResult> OnGetAsync(string id, CancellationToken ct)
     {
         var model = await _repository.GetByIdAsync(id);
 
@@ -32,7 +32,7 @@ public class EditModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostAsync(string id)
+    public async Task<IActionResult> OnPostAsync(string id, CancellationToken ct)
     {
         if (Button == "delete")
         {

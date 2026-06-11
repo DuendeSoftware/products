@@ -1,5 +1,20 @@
 :root {
-  --brand-color: #6e45af;
+  --brand-color: var(--duende-charcoal);
+}
+
+.sidebar {
+  background-color: var(--duende-sand-soft) !important;
+}
+
+.sidebar a, .sidebar .link-body-emphasis {
+    text-decoration: none;
+    background-image: none;
+    transition: none;
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--duende-green) !important;
+  color: var(--duende-charcoal) !important;
 }
 
 .text-brand {
@@ -11,13 +26,14 @@
   color: #FFF !important;
 }
 
-.sidebar .nav-link.active {
-  background-color: var(--brand-color) !important;
+.card .table {
+  --bs-table-bg: var(--duende-white);
+  --bs-table-color: var(--duende-charcoal);
+  --bs-table-border-color: rgba(36,32,32,0.12);
 }
 
-.btn-brand {
-  background-color: var(--brand-color) !important;
-  color: #FFF !important;
+.card .list-group-item {
+  background-color: var(--duende-sand-soft) !important;
 }
 
 .welcome-page .logo {
@@ -112,5 +128,3 @@ code.language-csharp {
   padding: 0;
   margin: 0;
 }
-
-/*# sourceMappingURL=site.css.map */

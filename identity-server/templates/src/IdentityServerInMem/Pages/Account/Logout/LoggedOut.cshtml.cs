@@ -10,10 +10,10 @@ public class LoggedOut(IIdentityServerInteractionService interactionService) : P
 {
     public LoggedOutViewModel View { get; set; } = default!;
 
-    public async Task OnGet(string? logoutId)
+    public async Task OnGetAsync(string? logoutId, CancellationToken ct)
     {
         // get context information (client name, post logout redirect URI and iframe for federated signout)
-        var logout = await interactionService.GetLogoutContextAsync(logoutId);
+        var logout = await interactionService.GetLogoutContextAsync(logoutId, ct);
 
         View = new LoggedOutViewModel
         {

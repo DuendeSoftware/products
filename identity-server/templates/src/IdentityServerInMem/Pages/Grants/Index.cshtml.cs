@@ -19,17 +19,17 @@ public class Index(
 {
     public ViewModel View { get; set; } = default!;
 
-    public async Task OnGet()
+    public async Task OnGetAsync(CancellationToken ct)
     {
-        var grants = await interaction.GetAllUserGrantsAsync();
+        var grants = await interaction.GetAllUserGrantsAsync(ct);
 
         var list = new List<GrantViewModel>();
         foreach (var grant in grants)
         {
-            var client = await clients.FindClientByIdAsync(grant.ClientId);
+            var client = await clients.FindClientByIdAsync(grant.ClientId, ct);
             if (client != null)
             {
-                var resources1 = await resources.FindResourcesByScopeAsync(grant.Scopes);
+                var resources1 = await resources.FindResourcesByScopeAsync(grant.Scopes, ct);
 
                 var item = new GrantViewModel()
                 {
@@ -57,10 +57,10 @@ public class Index(
     [BindProperty]
     public string? ClientId { get; set; }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-        await interaction.RevokeUserConsentAsync(ClientId);
-        await events.RaiseAsync(new GrantsRevokedEvent(User.GetSubjectId(), ClientId));
+        await interaction.RevokeUserConsentAsync(ClientId, ct);
+        await events.RaiseAsync(new GrantsRevokedEvent(User.GetSubjectId(), ClientId), ct);
         Telemetry.Metrics.GrantsRevoked(ClientId);
 
         return RedirectToPage("/Grants/Index");

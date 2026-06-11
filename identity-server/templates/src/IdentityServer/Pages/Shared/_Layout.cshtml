@@ -11,8 +11,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/bootstrap-overrides.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
@@ -28,7 +28,7 @@
         <div class="flex-fill d-flex flex-column h-100">
 
             <!-- Scrollable main -->
-            <main class="p-3 flex-grow-1 overflow-auto">
+            <main class="p-4 flex-grow-1 overflow-auto">
                 @RenderBody()
             </main>
 

@@ -12,5 +12,5 @@ public class AllModel(IBackchannelAuthenticationInteractionService backchannelAu
 {
     public IEnumerable<BackchannelUserLoginRequest> Logins { get; set; } = default!;
 
-    public async Task OnGet() => Logins = await backchannelAuthenticationInteractionService.GetPendingLoginRequestsForCurrentUserAsync();
+    public async Task OnGetAsync(CancellationToken ct) => Logins = await backchannelAuthenticationInteractionService.GetPendingLoginRequestsForCurrentUserAsync(ct);
 }

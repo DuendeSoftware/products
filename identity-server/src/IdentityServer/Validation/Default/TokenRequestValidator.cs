@@ -510,6 +510,16 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Resource indicator does not match any resource indicator in the original authorize request.");
         }
 
+        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
+        var resourceIndicators = _validatedRequest.AuthorizationCode.RequestedResourceIndicators;
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators ?? []);
+        if ((resourceIndicators?.Any() == true || !string.IsNullOrWhiteSpace(requestedIndicator)) && !_licenseValidator.ValidateResourceIsolation())
+        {
+            resourceIndicators = null;
+            requestedIndicator = string.Empty;
+            _validatedRequest.RequestedResourceIndicator = null;
+        }
+
         //////////////////////////////////////////////////////////
         // resource and scope validation
         //////////////////////////////////////////////////////////
@@ -517,7 +527,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         {
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.AuthorizationCode.RequestedScopes,
-            ResourceIndicators = _validatedRequest.AuthorizationCode.RequestedResourceIndicators,
+            ResourceIndicators = resourceIndicators,
         }, ct);
 
         if (!validatedResources.Succeeded)
@@ -529,16 +539,6 @@ internal class TokenRequestValidator : ITokenRequestValidator
             if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
-            }
-        }
-
-        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        if (!string.IsNullOrWhiteSpace(requestedIndicator))
-        {
-            if (!_licenseValidator.ValidateResourceIsolation())
-            {
-                requestedIndicator = string.Empty;
             }
         }
 
@@ -865,6 +865,15 @@ internal class TokenRequestValidator : ITokenRequestValidator
             resourceIndicators = new[] { _validatedRequest.RequestedResourceIndicator };
         }
 
+        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators ?? []);
+        if ((resourceIndicators?.Any() == true || !string.IsNullOrWhiteSpace(requestedIndicator)) && !_licenseValidator.ValidateResourceIsolation())
+        {
+            resourceIndicators = null;
+            requestedIndicator = string.Empty;
+            _validatedRequest.RequestedResourceIndicator = null;
+        }
+
         //////////////////////////////////////////////////////////
         // resource and scope validation
         //////////////////////////////////////////////////////////
@@ -884,16 +893,6 @@ internal class TokenRequestValidator : ITokenRequestValidator
             if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
-            }
-        }
-
-        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        if (!string.IsNullOrWhiteSpace(requestedIndicator))
-        {
-            if (!_licenseValidator.ValidateResourceIsolation())
-            {
-                requestedIndicator = string.Empty;
             }
         }
 
@@ -1043,6 +1042,16 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Resource indicator does not match any resource indicator in the original backchannel authentication request.");
         }
 
+        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
+        var resourceIndicators = _validatedRequest.BackChannelAuthenticationRequest.RequestedResourceIndicators;
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators ?? []);
+        if ((resourceIndicators?.Any() == true || !string.IsNullOrWhiteSpace(requestedIndicator)) && !_licenseValidator.ValidateResourceIsolation())
+        {
+            resourceIndicators = null;
+            requestedIndicator = string.Empty;
+            _validatedRequest.RequestedResourceIndicator = null;
+        }
+
         //////////////////////////////////////////////////////////
         // resource and scope validation
         //////////////////////////////////////////////////////////
@@ -1050,7 +1059,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         {
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.BackChannelAuthenticationRequest.AuthorizedScopes,
-            ResourceIndicators = _validatedRequest.BackChannelAuthenticationRequest.RequestedResourceIndicators,
+            ResourceIndicators = resourceIndicators,
         }, ct);
 
         if (!validatedResources.Succeeded)
@@ -1062,16 +1071,6 @@ internal class TokenRequestValidator : ITokenRequestValidator
             if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
-            }
-        }
-
-        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        if (!string.IsNullOrWhiteSpace(requestedIndicator))
-        {
-            if (!_licenseValidator.ValidateResourceIsolation())
-            {
-                requestedIndicator = string.Empty;
             }
         }
 
@@ -1225,6 +1224,15 @@ internal class TokenRequestValidator : ITokenRequestValidator
         var resourceIndicators = _validatedRequest.RequestedResourceIndicator == null ?
             Enumerable.Empty<string>() :
             new[] { _validatedRequest.RequestedResourceIndicator };
+        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
+
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators);
+        if (resourceIndicators.Any() && !_licenseValidator.ValidateResourceIsolation())
+        {
+            resourceIndicators = Enumerable.Empty<string>();
+            requestedIndicator = string.Empty;
+            _validatedRequest.RequestedResourceIndicator = null;
+        }
 
         var resourceValidationResult = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
         {
@@ -1254,16 +1262,6 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         _validatedRequest.RequestedScopes = requestedScopes;
-
-        var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
-        if (!string.IsNullOrWhiteSpace(requestedIndicator))
-        {
-            if (!_licenseValidator.ValidateResourceIsolation())
-            {
-                requestedIndicator = string.Empty;
-            }
-        }
 
         _validatedRequest.ValidatedResources = resourceValidationResult.FilterByResourceIndicator(requestedIndicator);
 

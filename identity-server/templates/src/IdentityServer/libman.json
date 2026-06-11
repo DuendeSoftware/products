@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "twitter-bootstrap@5.3.6",
+      "destination": "wwwroot/lib/bootstrap/dist/",
+      "files": [
+        "js/bootstrap.bundle.min.js",
+        "js/bootstrap.bundle.min.js.map",
+        "js/bootstrap.bundle.js",
+        "js/bootstrap.bundle.js.map",
+        "js/bootstrap.min.js",
+        "js/bootstrap.min.js.map",
+        "js/bootstrap.js",
+        "js/bootstrap.js.map",
+        "js/bootstrap.esm.min.js",
+        "js/bootstrap.esm.min.js.map",
+        "js/bootstrap.esm.js",
+        "js/bootstrap.esm.js.map",
+        "css/bootstrap.min.css",
+        "css/bootstrap.min.css.map",
+        "css/bootstrap.css",
+        "css/bootstrap.css.map",
+        "css/bootstrap-grid.min.css",
+        "css/bootstrap-grid.min.css.map",
+        "css/bootstrap-grid.css",
+        "css/bootstrap-grid.css.map",
+        "css/bootstrap-reboot.min.css",
+        "css/bootstrap-reboot.min.css.map",
+        "css/bootstrap-reboot.css",
+        "css/bootstrap-reboot.css.map",
+        "css/bootstrap-utilities.min.css",
+        "css/bootstrap-utilities.min.css.map",
+        "css/bootstrap-utilities.css",
+        "css/bootstrap-utilities.css.map"
+      ]
+    },
+    {
+      "library": "jquery@3.7.1",
+      "destination": "wwwroot/lib/jquery/dist/",
+      "files": [
+        "jquery.min.js",
+        "jquery.min.map",
+        "jquery.js",
+        "jquery.slim.min.js",
+        "jquery.slim.min.map",
+        "jquery.slim.js"
+      ]
+    },
+    {
+      "library": "bootstrap-icons@1.13.1",
+      "destination": "wwwroot/lib/bootstrap-icons/",
+      "files": [
+        "font/bootstrap-icons.min.css",
+        "font/fonts/bootstrap-icons.woff",
+        "font/fonts/bootstrap-icons.woff2"
+      ]
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "bootstrap5-tags@1.7.17",
+      "destination": "wwwroot/lib/bootstrap5-tags/",
+      "files": [
+        "tags.js",
+        "tags.min.js",
+        "tags.min.js.map"
+      ]
+    }
+  ]
+}

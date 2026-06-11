@@ -24,7 +24,8 @@ public class DefaultSessionClaimsFilterTests
             new Claim(ClaimTypes.Name, "bob")
         };
         var currentPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
-        var newPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("custom", "value"), new Claim(ClaimTypes.Name, "bob")]));
+        Claim[] newClaims = [new Claim("custom", "value"), new Claim(ClaimTypes.Name, "bob")];
+        var newPrincipal = new ClaimsPrincipal(new ClaimsIdentity(newClaims));
         var filter = new DefaultSessionClaimsFilter();
         var context = new SecurityStampRefreshingPrincipalContext() { NewPrincipal = newPrincipal, CurrentPrincipal = currentPrincipal };
 
@@ -37,6 +38,9 @@ public class DefaultSessionClaimsFilterTests
         resultTypes.ShouldContain(JwtClaimTypes.AuthenticationTime);
         resultTypes.ShouldNotContain("custom");
         resultTypes.ShouldNotContain(ClaimTypes.Name);
+
+        currentPrincipal.Claims.Count().ShouldBe(claims.Length);
+        newPrincipal.Claims.Count().ShouldBe(newClaims.Length);
     }
 
     [Fact]
@@ -62,6 +66,8 @@ public class DefaultSessionClaimsFilterTests
             JwtClaimTypes.AuthenticationTime
         ];
         result.ShouldAllBe(c => expectClaimTypes.Contains(c.Type));
+        currentPrincipal.Claims.Count().ShouldBe(claims.Length);
+        newPrincipal.Claims.Count().ShouldBe(0);
     }
 
     [Fact]
@@ -80,6 +86,8 @@ public class DefaultSessionClaimsFilterTests
         var result = await filter.FilterToSessionClaimsAsync(context, _ct);
 
         result.ShouldBeEmpty();
+        currentPrincipal.Claims.Count().ShouldBe(claims.Length);
+        newPrincipal.Claims.Count().ShouldBe(claims.Length);
     }
 
     [Fact]
@@ -93,5 +101,7 @@ public class DefaultSessionClaimsFilterTests
         var result = await filter.FilterToSessionClaimsAsync(context, _ct);
 
         result.ShouldBeEmpty();
+        currentPrincipal.Claims.Count().ShouldBe(0);
+        newPrincipal.Claims.Count().ShouldBe(0);
     }
 }

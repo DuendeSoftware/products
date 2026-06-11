@@ -11,10 +11,10 @@ public class Index(IIdentityServerInteractionService interaction, IWebHostEnviro
 {
     public ViewModel View { get; set; } = new();
 
-    public async Task OnGet(string? errorId)
+    public async Task OnGetAsync(string? errorId, CancellationToken ct)
     {
         // retrieve error details from IdentityServer
-        var message = await interaction.GetErrorContextAsync(errorId);
+        var message = await interaction.GetErrorContextAsync(errorId, ct);
         if (message != null)
         {
             View.Error = message;

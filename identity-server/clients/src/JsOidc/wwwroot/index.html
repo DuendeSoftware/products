@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title></title>
-    <link href="libs/bootstrap.min.css" rel="stylesheet" />
+    <link href="libs/css/bootstrap.min.css" rel="stylesheet" />
     <link href="StyleSheet.css" rel="stylesheet" />
 </head>
 <body>
@@ -14,8 +14,8 @@
         <div class="row">
             <ul class="list-unstyled list-inline">
                 <li><a class="btn btn-primary" href="index.html">Home</a></li>
-                <li><button class="btn btn-default login">Login</button></li>
-                <li><button class="btn btn-default popup">Login with popup</button></li>
+                <li><button class="btn btn-secondary login">Login</button></li>
+                <li><button class="btn btn-secondary popup">Login with popup</button></li>
                 <li><button class="btn btn-primary renew">Renew Token</button></li>
                 <li><button class="btn btn-primary call">Call Service</button></li>
                 <li><button class="btn btn-info revoke">Revoke Access Token</button></li>
@@ -29,9 +29,9 @@
         </div>
 
         <div class="row">
-            <div class="panel panel-default">
-                <div class="panel-heading">Message</div>
-                <div class="panel-body">
+            <div class="card">
+                <div class="card-header">Message</div>
+                <div class="card-body">
                     <pre id="response"></pre>
                 </div>
             </div>
@@ -39,27 +39,27 @@
 
         <div class="row">
             <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Current User</div>
-                    <div class="panel-body">
+                <div class="card">
+                    <div class="card-header">Current User</div>
+                    <div class="card-body">
                         <pre id="id-token"></pre>
                     </div>
                 </div>
             </div>
 
             <!--<div class="col-sm-4">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Access Token</div>
-                    <div class="panel-body">
+                <div class="card">
+                    <div class="card-header">Access Token</div>
+                    <div class="card-body">
                         <pre id="access-token"></pre>
                     </div>
                 </div>
             </div>-->
 
             <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Ajax Result</div>
-                    <div class="panel-body">
+                <div class="card">
+                    <div class="card-header">Ajax Result</div>
+                    <div class="card-body">
                         <pre id="ajax-result"></pre>
                     </div>
                 </div>

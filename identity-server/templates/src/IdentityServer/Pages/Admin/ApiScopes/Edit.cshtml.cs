@@ -14,9 +14,10 @@ public class EditModel(ApiScopeRepository repository) : PageModel
     [BindProperty]
     public string Button { get; set; } = default!;
 
+    [TempData]
     public bool Updated { get; set; } = false;
 
-    public async Task<IActionResult> OnGetAsync(string id)
+    public async Task<IActionResult> OnGetAsync(string id, CancellationToken ct)
     {
         var model = await repository.GetByIdAsync(id);
 
@@ -31,7 +32,7 @@ public class EditModel(ApiScopeRepository repository) : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostAsync(string id)
+    public async Task<IActionResult> OnPostAsync(string id, CancellationToken ct)
     {
         if (Button == "delete")
         {

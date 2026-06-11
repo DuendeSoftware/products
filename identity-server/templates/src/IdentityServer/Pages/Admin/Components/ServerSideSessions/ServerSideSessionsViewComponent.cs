@@ -9,7 +9,7 @@ public class ServerSideSessionsViewComponent(ISessionManagementService sessions)
     public async Task<IViewComponentResult> InvokeAsync()
     {
         var result = await
-            sessions.QuerySessionsAsync(new SessionQuery());
+            sessions.QuerySessionsAsync(new SessionQuery(), HttpContext.RequestAborted);
 
         var vm = new ServerSideSessionsViewModel
         {

@@ -3,6 +3,7 @@
 
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Duende.IdentityServer.Logging;
@@ -37,7 +38,8 @@ internal static class Factory
         IEnumerable<IExtensionGrantValidator> extensionGrantValidators = null,
         ICustomTokenRequestValidator customRequestValidator = null,
         IRefreshTokenService refreshTokenService = null,
-        IResourceValidator resourceValidator = null)
+        IResourceValidator resourceValidator = null,
+        IdentityServerLicenseValidator licenseValidator = null)
     {
         if (options == null)
         {
@@ -137,6 +139,7 @@ internal static class Factory
             new TestEventService(),
             new FakeTimeProvider(DateTimeOffset.UtcNow),
             LicenseUsageTracker.CreateForTests(),
+            licenseValidator ?? IdentityServerLicenseValidator.CreateForTests(),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
             new DefaultMtlsEndpointGenerator(serverUrls, Options.Create(options)),

@@ -17,7 +17,10 @@ public class EditSecretModel(
     [BindProperty]
     public string Button { get; set; } = string.Empty;
 
+    [TempData]
     public bool Updated { get; set; } = false;
+
+    [TempData]
     public bool Cleared { get; set; } = false;
 
     public void OnGet(string clientId) => Input = new InputModel
@@ -26,7 +29,7 @@ public class EditSecretModel(
         Secret = string.Empty
     };
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         if (Button == "clear")
         {

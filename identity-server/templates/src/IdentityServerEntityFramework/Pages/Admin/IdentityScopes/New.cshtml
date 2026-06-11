@@ -13,19 +13,19 @@
     <div class="row">
         <div class="col-md-6">
             <form method="post">
-                <div class="form-group">
+                <div class="mb-3">
                     <label asp-for="@Model.InputModel.Name"></label>
                     <input class="form-control" asp-for="@Model.InputModel.Name" autofocus />
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label asp-for="@Model.InputModel.DisplayName"></label>
                     <input class="form-control" asp-for="@Model.InputModel.DisplayName" />
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label asp-for="@Model.InputModel.UserClaims">User Claims (space delimited)</label>
                     <input class="form-control" asp-for="@Model.InputModel.UserClaims" />
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <button class="btn btn-primary" type="submit">Save Changes</button>
                     <a class="btn btn-secondary" asp-page="/Admin/IdentityScopes/Index">Cancel</a>
                 </div>

@@ -31,7 +31,7 @@
                     <div class="form-group mb-3">
                         <div class="card">
                             <div class="card-header">
-                                <span class="glyphicon glyphicon-user"></span>
+                                <i class="bi bi-person"></i>
                                 Personal Information
                             </div>
                             <ul class="list-group list-group-flush">
@@ -49,7 +49,7 @@
                     <div class="form-group mb-3">
                         <div class="card">
                             <div class="card-header">
-                                <span class="glyphicon glyphicon-tasks"></span>
+                                <i class="bi bi-list-task"></i>
                                 Application Access
                             </div>
                             <ul class="list-group list-group-flush">
@@ -65,10 +65,10 @@
                 <div class="form-group mb-3">
                     <div class="card">
                         <div class="card-header">
-                            <span class="glyphicon glyphicon-pencil"></span>
+                            <i class="bi bi-pencil"></i>
                             Description
                         </div>
-                        <div class="card-body">
+                        <div class="card-body bg-white">
                             <input class="form-control" placeholder="Description or name of device" asp-for="Input.Description" autofocus>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                         @if (Model.View.ClientUrl != null)
                         {
                             <a class="btn btn-outline-info" href="@Model.View.ClientUrl">
-                                <span class="glyphicon glyphicon-info-sign"></span>
+                                <i class="bi bi-info-circle"></i>
                                 <strong>@Model.View.ClientName</strong>
                             </a>
                         }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace IdentityServerEntityFramework.Migrations.PersistedGrantDb
+namespace IdentityServerHost.Migrations.PersistedGrantDb
 {
     [DbContext(typeof(PersistedGrantDbContext))]
     partial class PersistedGrantDbContextModelSnapshot : ModelSnapshot
@@ -15,7 +15,7 @@ namespace IdentityServerEntityFramework.Migrations.PersistedGrantDb
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
                 {
@@ -45,8 +45,7 @@ namespace IdentityServerEntityFramework.Migrations.PersistedGrantDb
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("Expiration")
-                        .IsRequired()
+                    b.Property<DateTime>("Expiration")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SessionId")
@@ -193,6 +192,93 @@ namespace IdentityServerEntityFramework.Migrations.PersistedGrantDb
                     b.ToTable("PushedAuthorizationRequests", (string)null);
                 });
 
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlLogoutSession", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoutId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SerializedSession")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.HasIndex("LogoutId")
+                        .IsUnique();
+
+                    b.ToTable("SamlLogoutSessions", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlLogoutSessionRequestIndex", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RequestId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("SamlLogoutSessionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("SamlLogoutSessionId");
+
+                    b.ToTable("SamlLogoutSessionRequestIndices", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlSigninState", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SerializedState")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ServiceProviderEntityId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StateId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.HasIndex("StateId")
+                        .IsUnique();
+
+                    b.ToTable("SamlSigninStates", (string)null);
+                });
+
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.ServerSideSession", b =>
                 {
                     b.Property<long>("Id")
@@ -249,6 +335,22 @@ namespace IdentityServerEntityFramework.Migrations.PersistedGrantDb
                     b.HasIndex("SubjectId");
 
                     b.ToTable("ServerSideSessions", (string)null);
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlLogoutSessionRequestIndex", b =>
+                {
+                    b.HasOne("Duende.IdentityServer.EntityFramework.Entities.SamlLogoutSession", "SamlLogoutSession")
+                        .WithMany("RequestIndices")
+                        .HasForeignKey("SamlLogoutSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SamlLogoutSession");
+                });
+
+            modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.SamlLogoutSession", b =>
+                {
+                    b.Navigation("RequestIndices");
                 });
 #pragma warning restore 612, 618
         }

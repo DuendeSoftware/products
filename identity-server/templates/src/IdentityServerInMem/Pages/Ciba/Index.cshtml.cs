@@ -15,9 +15,9 @@ public class IndexModel(
 {
     public BackchannelUserLoginRequest LoginRequest { get; set; } = default!;
 
-    public async Task<IActionResult> OnGet(string id)
+    public async Task<IActionResult> OnGetAsync(string id, CancellationToken ct)
     {
-        var result = await backchannelAuthenticationInteractionService.GetLoginRequestByInternalIdAsync(id);
+        var result = await backchannelAuthenticationInteractionService.GetLoginRequestByInternalIdAsync(id, ct);
         if (result == null)
         {
             logger.InvalidBackchannelLoginId(id);

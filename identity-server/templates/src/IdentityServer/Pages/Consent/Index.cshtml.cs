@@ -34,9 +34,9 @@ public class Index : PageModel
     [BindProperty]
     public InputModel Input { get; set; } = default!;
 
-    public async Task<IActionResult> OnGet(string? returnUrl)
+    public async Task<IActionResult> OnGetAsync(string? returnUrl, CancellationToken ct)
     {
-        if (!await SetViewModelAsync(returnUrl))
+        if (!await SetViewModelAsync(returnUrl, ct))
         {
             return RedirectToPage("/Home/Error/Index");
         }
@@ -49,10 +49,10 @@ public class Index : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         // validate return url is still valid
-        var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
+        var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl, ct);
         if (request == null)
         {
             return RedirectToPage("/Home/Error/Index");
@@ -63,10 +63,10 @@ public class Index : PageModel
         // user clicked 'no' - send back the standard 'access_denied' response
         if (Input.Button == "no")
         {
-            grantedConsent = new ConsentResponse { Error = AuthorizationError.AccessDenied };
+            grantedConsent = new ConsentResponse { Error = InteractionError.AccessDenied };
 
             // emit event
-            await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
+            await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues), ct);
             Telemetry.Metrics.ConsentDenied(request.Client.ClientId, request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName));
         }
         // user clicked 'yes' - validate the data
@@ -89,7 +89,7 @@ public class Index : PageModel
                 };
 
                 // emit event
-                await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, grantedConsent.ScopesValuesConsented, grantedConsent.RememberConsent));
+                await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, grantedConsent.ScopesValuesConsented, grantedConsent.RememberConsent), ct);
                 Telemetry.Metrics.ConsentGranted(request.Client.ClientId, grantedConsent.ScopesValuesConsented, grantedConsent.RememberConsent);
                 var denied = request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName).Except(grantedConsent.ScopesValuesConsented);
                 Telemetry.Metrics.ConsentDenied(request.Client.ClientId, denied);
@@ -109,7 +109,7 @@ public class Index : PageModel
             ArgumentNullException.ThrowIfNull(Input.ReturnUrl, nameof(Input.ReturnUrl));
 
             // communicate outcome of consent back to identityserver
-            await _interaction.GrantConsentAsync(request, grantedConsent);
+            await _interaction.GrantConsentAsync(request, grantedConsent, ct);
 
             // redirect back to authorization endpoint
             if (request.IsNativeClient() == true)
@@ -123,18 +123,18 @@ public class Index : PageModel
         }
 
         // we need to redisplay the consent UI
-        if (!await SetViewModelAsync(Input.ReturnUrl))
+        if (!await SetViewModelAsync(Input.ReturnUrl, ct))
         {
             return RedirectToPage("/Home/Error/Index");
         }
         return Page();
     }
 
-    private async Task<bool> SetViewModelAsync(string? returnUrl)
+    private async Task<bool> SetViewModelAsync(string? returnUrl, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(returnUrl);
 
-        var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
+        var request = await _interaction.GetAuthorizationContextAsync(returnUrl, ct);
         if (request != null)
         {
             View = CreateConsentViewModel(request);

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 using Duende.IdentityServer.Validation;
 
@@ -12,7 +13,7 @@ internal class TestTokenValidator : ITokenValidator
 
     public TestTokenValidator(TokenValidationResult result) => _result = result;
 
-    public Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, Ct _) => Task.FromResult(_result);
+    public Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string? expectedScope, Ct _) => Task.FromResult(_result);
 
     public Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, Ct _) => Task.FromResult(_result);
 }

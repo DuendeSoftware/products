@@ -90,11 +90,20 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
 
         foreach (var resource in routes.ServiceNames)
         {
-            await resourceNotificationService.WaitForResourceAsync(
-                    resource,
-                    KnownResourceStates.Running
-                )
-                .WaitAsync(TimeSpan.FromSeconds(30));
+            try
+            {
+
+                await resourceNotificationService.WaitForResourceAsync(
+                        resource,
+                        KnownResourceStates.Running
+                    )
+                    .WaitAsync(TimeSpan.FromSeconds(30));
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to start resource " + resource);
+                throw;
+            }
         }
 
 #else

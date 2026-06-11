@@ -6,7 +6,7 @@
     <RootNamespace>IdentityServerHost</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer.EntityFramework" version="7.4.3" />
+    <PackageReference Include="Duende.IdentityServer.EntityFramework" version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
@@ -14,8 +14,5 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
   </ItemGroup>
 </Project>

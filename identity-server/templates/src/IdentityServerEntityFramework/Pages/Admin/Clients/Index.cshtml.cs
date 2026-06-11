@@ -14,7 +14,7 @@ public class IndexModel : PageModel
     public IEnumerable<ClientSummaryModel> Clients { get; private set; } = default!;
     public string? Filter { get; set; }
 
-    public async Task OnGetAsync(string? filter)
+    public async Task OnGetAsync(string? filter, CancellationToken ct)
     {
         Filter = filter;
         Clients = await _repository.GetAllAsync(filter);

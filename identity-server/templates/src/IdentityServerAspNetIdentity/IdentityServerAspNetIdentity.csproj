@@ -6,7 +6,7 @@
     <RootNamespace>IdentityServerHost</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" version="7.4.3" />
+    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.1" />

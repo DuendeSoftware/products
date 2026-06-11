@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
-using Duende.IdentityServer;
+using Duende.IdentityServer.Licensing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityServerTemplate.ViewComponents;
 
-public class LicenseViewComponent(IdentityServerLicense? license = null) : ViewComponent
+public class LicenseViewComponent(LicenseInformation? license = null) : ViewComponent
 {
     public Task<IViewComponentResult> InvokeAsync()
     {
@@ -19,8 +19,8 @@ public class LicenseViewComponent(IdentityServerLicense? license = null) : ViewC
 
 public class LicenseViewModel
 {
-    public IdentityServerLicense? License { get; init; }
+    public LicenseInformation? License { get; init; }
     [MemberNotNullWhen(true, nameof(License))]
-    public bool HasLicense => License is not null;
-    public string LicenseText => License?.Edition.ToString() ?? "Trial";
+    public bool HasLicense => License is not null && License.IsConfigured;
+    public string LicenseText => License?.IsConfigured == true ? "Licensed" : "Trial";
 }

@@ -32,7 +32,7 @@ public class IndexModel : PageModel
     [BindProperty(SupportsGet = true)]
     public string? Prev { get; set; }
 
-    public async Task<ActionResult> OnGet()
+    public async Task<ActionResult> OnGetAsync(CancellationToken ct)
     {
         //Replace with an authorization policy check
         if (HttpContext.Connection.IsRemote())
@@ -49,7 +49,7 @@ public class IndexModel : PageModel
                 DisplayName = DisplayNameFilter,
                 SessionId = SessionIdFilter,
                 SubjectId = SubjectIdFilter
-            });
+            }, ct);
         }
 
         return Page();
@@ -58,7 +58,7 @@ public class IndexModel : PageModel
     [BindProperty]
     public string? SessionId { get; set; }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         //Replace with an authorization policy check
         if (HttpContext.Connection.IsRemote())
@@ -71,7 +71,7 @@ public class IndexModel : PageModel
         await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
         {
             SessionId = SessionId,
-        });
+        }, ct);
 
         return RedirectToPage("/ServerSideSessions/Index", new { Token, DisplayNameFilter, SessionIdFilter, SubjectIdFilter, Prev });
     }

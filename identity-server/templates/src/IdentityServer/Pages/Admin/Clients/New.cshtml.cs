@@ -12,6 +12,7 @@ public class NewModel(ClientRepository repository) : PageModel
     [BindProperty]
     public CreateClientModel InputModel { get; set; } = default!;
 
+    [TempData]
     public bool Created { get; set; }
 
     public void OnGet(string type) => InputModel = new CreateClientModel
@@ -19,7 +20,7 @@ public class NewModel(ClientRepository repository) : PageModel
         Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce
     };
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         if (!ModelState.IsValid)
         {
