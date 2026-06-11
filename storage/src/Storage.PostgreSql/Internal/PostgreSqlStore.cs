@@ -39,7 +39,18 @@ internal sealed class PostgreSqlStore(
 {
     private const int RequiredSchemaVersion = 1;
     private static readonly ISqlDialect Dialect = new PostgreSqlDialect();
-    private readonly string _schemaName = options.SchemaName;
+
+#pragma warning disable CA1308 // PostgreSQL folds unquoted identifiers to lowercase; we must match migration behavior
+    private readonly string _schemaName = options.SchemaName.ToLowerInvariant();
+    private readonly string _entities = FormatQualifiedTable(options.SchemaName, "entities");
+    private readonly string _entityKeys = FormatQualifiedTable(options.SchemaName, "entity_keys");
+    private readonly string _searchValues = FormatQualifiedTable(options.SchemaName, "search_values");
+    private readonly string _entityLinks = FormatQualifiedTable(options.SchemaName, "entity_links");
+    private readonly string _outboxSubscriberQueue = FormatQualifiedTable(options.SchemaName, "outbox_subscriber_queue");
+
+    private static string FormatQualifiedTable(string schema, string table) =>
+        $"{Dialect.QuoteIdentifier(schema.ToLowerInvariant())}.{Dialect.QuoteIdentifier(table)}";
+#pragma warning restore CA1308
 
     async Task<CheckSchemaVersionResult> IDatabaseSchema.CheckVersionAsync(Ct ct)
     {
@@ -405,7 +416,7 @@ internal sealed class PostgreSqlStore(
         await using var cmd = dataSource.CreateCommand(
             $"""
              SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-             FROM {_schemaName}.entities v
+             FROM {_entities} v
              WHERE v.entity_type_id = $1 AND v.entity_id = $2 AND v.pool_id = $3
              """);
 
@@ -448,8 +459,8 @@ internal sealed class PostgreSqlStore(
         await using var cmd = dataSource.CreateCommand(
             $"""
              SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-             FROM {_schemaName}.entity_keys i
-             INNER JOIN {_schemaName}.entities v ON i.entity_type_id = v.entity_type_id AND i.entity_id = v.entity_id
+             FROM {_entityKeys} i
+             INNER JOIN {_entities} v ON i.entity_type_id = v.entity_type_id AND i.entity_id = v.entity_id
              WHERE i.entity_type_id = @entity_type_id
                  AND i.key_type_id = @key_type_id
                  AND i.key_type_version = @key_type_version
@@ -506,7 +517,7 @@ internal sealed class PostgreSqlStore(
         await using var cmd = dataSource.CreateCommand(
             $"""
              SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-             FROM {_schemaName}.entities v
+             FROM {_entities} v
              WHERE v.entity_type_id = @entityTypeId AND v.entity_id = ANY(@ids) AND v.pool_id = @poolId
              """);
 
@@ -643,7 +654,7 @@ internal sealed class PostgreSqlStore(
         _ = builder.AppendLine(
             CultureInfo.InvariantCulture,
             $"""
-             INSERT INTO {_schemaName}.entity_keys (entity_type_id, key_type_id, key_type_name, key_value, key_json, key_type_version, entity_id, pool_id)
+             INSERT INTO {_entityKeys} (entity_type_id, key_type_id, key_type_name, key_value, key_json, key_type_version, entity_id, pool_id)
              SELECT @entity_type_id, key_type_id, key_type_name, key_value, key_json, key_type_version, @entity_id, @pool_id
              FROM UNNEST(@key_type_ids, @key_type_names, @key_values, @key_jsons, @key_type_versions)
                AS t(key_type_id, key_type_name, key_value, key_json, key_type_version);
@@ -709,7 +720,7 @@ internal sealed class PostgreSqlStore(
         _ = builder.AppendLine(
             CultureInfo.InvariantCulture,
             $"""
-             INSERT INTO {_schemaName}.search_values (entity_type_id, entity_id, field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value, pool_id)
+             INSERT INTO {_searchValues} (entity_type_id, entity_id, field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value, pool_id)
              SELECT @entity_type_id, @entity_id, field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value, @pool_id
              FROM UNNEST(@sf_field_paths, @sf_field_path_texts, @sf_item_indexes, @sf_string_values, @sf_number_values, @sf_datetime_values, @sf_boolean_values, @sf_guid_values)
                AS t(field_path, field_path_text, item_index, string_value, number_value, datetime_value, boolean_value, guid_value);
@@ -799,7 +810,7 @@ internal sealed class PostgreSqlStore(
         var query = $"""
             WITH all_matches AS (
                 {allMatchesSelect}
-                FROM {_schemaName}.entities v
+                FROM {_entities} v
                 {queryClauses.JoinClause}
                 WHERE v.entity_type_id = @entity_type_id
                   AND v.pool_id = @pool_id
@@ -937,7 +948,7 @@ internal sealed class PostgreSqlStore(
         var query = $"""
             WITH all_matches AS (
                 {cteSelect}
-                FROM {_schemaName}.entities v
+                FROM {_entities} v
                 {cteJoin}
                 WHERE v.entity_type_id = @entity_type_id
                   AND v.pool_id = @pool_id
@@ -965,7 +976,7 @@ internal sealed class PostgreSqlStore(
                 fi.value_version
             FROM total t
             LEFT JOIN filtered_ids fi ON TRUE
-            LEFT JOIN {_schemaName}.search_values field_sv
+            LEFT JOIN {_searchValues} field_sv
               ON fi.entity_id = field_sv.entity_id
               AND field_sv.entity_type_id = @entity_type_id
               AND field_sv.pool_id = @pool_id
@@ -1096,7 +1107,7 @@ internal sealed class PostgreSqlStore(
         // We select the sort value to use in the next token
         var query = $"""
             SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at, {queryClauses.SortColumnName}
-            FROM {_schemaName}.entities v
+            FROM {_entities} v
             {queryClauses.JoinClause}
             WHERE v.entity_type_id = @entity_type_id
               AND v.pool_id = @pool_id
@@ -1205,7 +1216,7 @@ internal sealed class PostgreSqlStore(
         var query = $"""
             WITH filtered_ids AS (
                 SELECT v.entity_id, v.created_at, v.last_updated_at, v.value_version, {queryClauses.SortColumnName} AS sort_value, ROW_NUMBER() OVER ({queryClauses.OrderByClause}) AS row_num
-                FROM {_schemaName}.entities v
+                FROM {_entities} v
                 {queryClauses.JoinClause}
                 WHERE v.entity_type_id = @entity_type_id
                   AND v.pool_id = @pool_id
@@ -1227,7 +1238,7 @@ internal sealed class PostgreSqlStore(
                 fi.last_updated_at,
                 fi.value_version
             FROM filtered_ids fi
-            LEFT JOIN {_schemaName}.search_values field_sv
+            LEFT JOIN {_searchValues} field_sv
               ON fi.entity_id = field_sv.entity_id
               AND field_sv.entity_type_id = @entity_type_id
               AND field_sv.pool_id = @pool_id
@@ -1358,7 +1369,7 @@ internal sealed class PostgreSqlStore(
             {
                 // We'll use a LEFT JOIN to get the sort field value
                 joinClause = $"""
-                    LEFT JOIN {_schemaName}.search_values sort_sv
+                    LEFT JOIN {_searchValues} sort_sv
                       ON v.entity_type_id = sort_sv.entity_type_id
                       AND v.entity_id = sort_sv.entity_id
                       AND v.pool_id = sort_sv.pool_id
@@ -1413,7 +1424,7 @@ internal sealed class PostgreSqlStore(
         else
         {
             joinClause = $"""
-                LEFT JOIN {_schemaName}.search_values sort_sv
+                LEFT JOIN {_searchValues} sort_sv
                   ON v.entity_type_id = sort_sv.entity_type_id
                   AND v.entity_id = sort_sv.entity_id
                   AND v.pool_id = sort_sv.pool_id
@@ -1673,7 +1684,7 @@ internal sealed class PostgreSqlStore(
         await using var cmd = cnn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = $"""
-            INSERT INTO {_schemaName}.entity_links (pool_id, link_type_id, left_entity_type_id, left_entity_id, right_entity_type_id, right_entity_id)
+            INSERT INTO {_entityLinks} (pool_id, link_type_id, left_entity_type_id, left_entity_id, right_entity_type_id, right_entity_id)
             VALUES (@pool_id, @link_type_id, @left_entity_type_id, @left_entity_id, @right_entity_type_id, @right_entity_id)
             ON CONFLICT (pool_id, link_type_id, left_entity_id, right_entity_id) DO NOTHING
             """;
@@ -1699,7 +1710,7 @@ internal sealed class PostgreSqlStore(
         await using var cmd = cnn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = $"""
-            DELETE FROM {_schemaName}.entity_links
+            DELETE FROM {_entityLinks}
             WHERE pool_id = @pool_id
               AND link_type_id = @link_type_id
               AND left_entity_id = @left_entity_id
@@ -1757,7 +1768,7 @@ internal sealed class PostgreSqlStore(
         _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
 
         cmd.CommandText = $"""
-            INSERT INTO {_schemaName}.outbox_subscriber_queue
+            INSERT INTO {_outboxSubscriberQueue}
             (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name)
             VALUES
             {string.Join(",\n            ", valueRows)}
@@ -1831,7 +1842,7 @@ internal sealed class PostgreSqlStore(
         await using var cmd = cnn.CreateCommand();
         cmd.CommandText = $"""
             SELECT sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name
-            FROM {_schemaName}.outbox_subscriber_queue
+            FROM {_outboxSubscriberQueue}
             WHERE subscriber_name = @subscriber_name
             ORDER BY sequence_number ASC
             LIMIT @limit
@@ -1887,7 +1898,7 @@ internal sealed class PostgreSqlStore(
 
             await using var cmd = cnn.CreateCommand();
             cmd.CommandText = $"""
-                DELETE FROM {_schemaName}.outbox_subscriber_queue
+                DELETE FROM {_outboxSubscriberQueue}
                 WHERE message_id = ANY(@ids)
                 """;
             var guidIds = chunk.Select(id => id.Value).ToArray();
@@ -1925,7 +1936,7 @@ internal sealed class PostgreSqlStore(
         _ = builder.AppendLine(
             CultureInfo.InvariantCulture,
             $"""
-             INSERT INTO {_schemaName}.entities (entity_type_id, entity_type_name, entity_id, value, dso_type_schema_version, value_version, pool_id, expires_at, created_at, last_updated_at)
+             INSERT INTO {_entities} (entity_type_id, entity_type_name, entity_id, value, dso_type_schema_version, value_version, pool_id, expires_at, created_at, last_updated_at)
              VALUES (@entity_type_id, @entity_type_name, @entity_id, @value, @dso_type_schema_version, 1, @pool_id, @expires_at, @now, @now);
              """);
 
@@ -2010,7 +2021,7 @@ internal sealed class PostgreSqlStore(
 
         // Read the current version of the entity, locking the row
         readVersionCmd.CommandText =
-            $"SELECT value_version FROM {_schemaName}.entities WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id FOR UPDATE";
+            $"SELECT value_version FROM {_entities} WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id FOR UPDATE";
 
         _ = readVersionCmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
         _ = readVersionCmd.Parameters.AddWithValue("@entity_id", op.Id.Value);
@@ -2040,7 +2051,7 @@ internal sealed class PostgreSqlStore(
         _ = builder.AppendLine(
             CultureInfo.InvariantCulture,
             $"""
-             UPDATE {_schemaName}.entities
+             UPDATE {_entities}
              SET
                  entity_type_name = @entity_type_name,
                  value = @value,
@@ -2077,12 +2088,12 @@ internal sealed class PostgreSqlStore(
         // Delete the existing keys
         _ = builder.AppendLine(
             CultureInfo.InvariantCulture,
-            $"DELETE FROM {_schemaName}.entity_keys WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id;");
+            $"DELETE FROM {_entityKeys} WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id;");
 
         // Delete the existing search fields
         _ = builder.AppendLine(
             CultureInfo.InvariantCulture,
-            $"DELETE FROM {_schemaName}.search_values WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id;");
+            $"DELETE FROM {_searchValues} WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id;");
 
         // re-insert the new keys
         _ = AddInserts(builder, updateCmd, op.Keys);
@@ -2127,7 +2138,7 @@ internal sealed class PostgreSqlStore(
         _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
         _ = deleteCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
 
-        deleteCmd.CommandText = $"DELETE FROM {_schemaName}.entities WHERE entity_type_id = @entity_type_id AND pool_id = @pool_id";
+        deleteCmd.CommandText = $"DELETE FROM {_entities} WHERE entity_type_id = @entity_type_id AND pool_id = @pool_id";
 
         // Both entity_keys and search_values have ON DELETE CASCADE, so we only need to delete from entities
         if (op.Id is not null)
@@ -2145,7 +2156,7 @@ internal sealed class PostgreSqlStore(
             _ = deleteCmd.Parameters.AddWithValue("@key_value", key.Value);
             deleteCmd.CommandText += $"""
                   AND entity_id = (
-                    SELECT entity_id FROM {_schemaName}.entity_keys
+                    SELECT entity_id FROM {_entityKeys}
                     WHERE entity_type_id = @entity_type_id
                       AND key_type_id = @key_type_id
                       AND key_type_version = @key_type_version
@@ -2173,7 +2184,7 @@ internal sealed class PostgreSqlStore(
             await using var linkDeleteCmd = cnn.CreateCommand();
             linkDeleteCmd.Transaction = tx;
             linkDeleteCmd.CommandText = $"""
-                DELETE FROM {_schemaName}.entity_links
+                DELETE FROM {_entityLinks}
                 WHERE pool_id = @pool_id
                   AND (left_entity_id = @entity_id OR right_entity_id = @entity_id)
                 """;
@@ -2198,7 +2209,7 @@ internal sealed class PostgreSqlStore(
         await using var checkExistsCmd = cnn.CreateCommand();
         checkExistsCmd.Transaction = tx;
         checkExistsCmd.CommandText =
-            $"SELECT value_version FROM {_schemaName}.entities WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id";
+            $"SELECT value_version FROM {_entities} WHERE entity_type_id = @entity_type_id AND entity_id = @entity_id AND pool_id = @pool_id";
 
         _ = checkExistsCmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
         _ = checkExistsCmd.Parameters.AddWithValue("@entity_id", entityId);
@@ -2253,7 +2264,7 @@ internal sealed class PostgreSqlStore(
             {
                 // First join: links entity table to first link table
                 _ = joinSql.AppendLine(CultureInfo.InvariantCulture,
-                    $"JOIN {_schemaName}.entity_links l0 ON l0.{sourceSide} = e.entity_id AND l0.link_type_id = {linkTypeParam} AND l0.pool_id = @pool_id");
+                    $"JOIN {_entityLinks} l0 ON l0.{sourceSide} = e.entity_id AND l0.link_type_id = {linkTypeParam} AND l0.pool_id = @pool_id");
             }
             else
             {
@@ -2270,7 +2281,7 @@ internal sealed class PostgreSqlStore(
                 }
 
                 _ = joinSql.AppendLine(CultureInfo.InvariantCulture,
-                    $"JOIN {_schemaName}.entity_links l{i} ON l{i}.{sourceSide} = l{i - 1}.{prevFilterSide} AND l{i}.link_type_id = {linkTypeParam} AND l{i}.pool_id = @pool_id");
+                    $"JOIN {_entityLinks} l{i} ON l{i}.{sourceSide} = l{i - 1}.{prevFilterSide} AND l{i}.link_type_id = {linkTypeParam} AND l{i}.pool_id = @pool_id");
             }
 
             if (i == query.Joins.Count - 1)
@@ -2297,7 +2308,7 @@ internal sealed class PostgreSqlStore(
 
         var mainQuery = $"""
             SELECT DISTINCT e.entity_id, e.value, e.dso_type_schema_version, e.value_version, e.created_at, e.last_updated_at
-            FROM {_schemaName}.entities e
+            FROM {_entities} e
             {joinSql}
             WHERE e.entity_type_id = @source_entity_type_id
               AND e.pool_id = @pool_id
@@ -2328,7 +2339,7 @@ internal sealed class PostgreSqlStore(
         // Count query
         var countQuery = $"""
             SELECT COUNT(DISTINCT e.entity_id)
-            FROM {_schemaName}.entities e
+            FROM {_entities} e
             {joinSql}
             WHERE e.entity_type_id = @source_entity_type_id
               AND e.pool_id = @pool_id
@@ -2383,7 +2394,7 @@ internal sealed class PostgreSqlStore(
 
         var query = $"""
             SELECT COUNT(*)
-            FROM {_schemaName}.entities v
+            FROM {_entities} v
             WHERE v.entity_type_id = @entity_type_id
               AND v.pool_id = @pool_id
               AND ({whereClause})
@@ -2421,7 +2432,7 @@ internal sealed class PostgreSqlStore(
             _ = sql.AppendLine(CultureInfo.InvariantCulture, $"""
                 CREATE TEMP TABLE _expired ON COMMIT DROP AS
                 SELECT pool_id, entity_id, entity_type_id, entity_type_name, value, gen_random_uuid() AS event_id
-                FROM {_schemaName}.entities
+                FROM {_entities}
                 WHERE expires_at IS NOT NULL AND expires_at <= @now
                 LIMIT @batchSize
                 FOR UPDATE SKIP LOCKED;
@@ -2447,7 +2458,7 @@ internal sealed class PostgreSqlStore(
                     _ = cmd.Parameters.AddWithValue(subParam, subscriber.SubscriberName.ToString());
 
                     _ = sql.Append(CultureInfo.InvariantCulture, $"""
-                        INSERT INTO {_schemaName}.outbox_subscriber_queue
+                        INSERT INTO {_outboxSubscriberQueue}
                         (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name)
                         SELECT gen_random_uuid(), event_id, @now, @eventName, entity_id, entity_type_id, entity_type_name, pool_id, value, {subParam}
                         FROM _expired
@@ -2470,7 +2481,7 @@ internal sealed class PostgreSqlStore(
 
             // Step 3: Delete entity links
             _ = sql.AppendLine(CultureInfo.InvariantCulture, $"""
-                DELETE FROM {_schemaName}.entity_links el
+                DELETE FROM {_entityLinks} el
                 USING _expired e
                 WHERE el.pool_id = e.pool_id
                   AND (
@@ -2481,7 +2492,7 @@ internal sealed class PostgreSqlStore(
 
             // Step 4: Delete entities — last statement so ExecuteNonQueryAsync returns this count
             _ = sql.Append(CultureInfo.InvariantCulture, $"""
-                DELETE FROM {_schemaName}.entities e
+                DELETE FROM {_entities} e
                 USING _expired
                 WHERE e.pool_id = _expired.pool_id AND e.entity_type_id = _expired.entity_type_id AND e.entity_id = _expired.entity_id
                   AND e.expires_at <= @now;

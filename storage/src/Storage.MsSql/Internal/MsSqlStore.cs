@@ -524,7 +524,7 @@ internal sealed class MsSqlStore(
         cmd.CommandType = CommandType.Text;
         cmd.CommandText = $"""
             SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-            FROM [{_schemaName}].entity_keys i
+            FROM [{_schemaName}].[entity_keys] i
             INNER JOIN [{_schemaName}].[entities] v
                 ON i.entity_type_id = v.entity_type_id
                 AND i.entity_id = v.entity_id
@@ -1313,7 +1313,7 @@ internal sealed class MsSqlStore(
                 fi.value_version
             FROM total t
             LEFT JOIN filtered_ids fi ON 1=1
-            LEFT JOIN [{_schemaName}].search_values field_sv
+            LEFT JOIN [{_schemaName}].[search_values] field_sv
               ON fi.entity_id = field_sv.entity_id
               AND field_sv.entity_type_id = @entity_type_id
               AND field_sv.pool_id = @pool_id
@@ -1490,7 +1490,7 @@ internal sealed class MsSqlStore(
                 fi.last_updated_at,
                 fi.value_version
             FROM filtered_ids fi
-            LEFT JOIN [{_schemaName}].search_values field_sv
+            LEFT JOIN [{_schemaName}].[search_values] field_sv
               ON fi.entity_id = field_sv.entity_id
               AND field_sv.entity_type_id = @entity_type_id
               AND field_sv.pool_id = @pool_id
@@ -1670,7 +1670,7 @@ internal sealed class MsSqlStore(
                 keysCmd.Transaction = transaction;
                 keysCmd.CommandType = CommandType.Text;
                 keysCmd.CommandText = $"""
-                    INSERT INTO [{_schemaName}].entity_keys (
+                    INSERT INTO [{_schemaName}].[entity_keys] (
                         entity_type_id,
                         key_type_id,
                         key_type_name,
@@ -1729,7 +1729,7 @@ internal sealed class MsSqlStore(
                 searchCmd.Transaction = transaction;
                 searchCmd.CommandType = CommandType.Text;
                 searchCmd.CommandText = $"""
-                    INSERT INTO [{_schemaName}].search_values (
+                    INSERT INTO [{_schemaName}].[search_values] (
                         entity_type_id,
                         entity_id,
                         field_path,
@@ -1866,10 +1866,10 @@ internal sealed class MsSqlStore(
                     END
 
                     -- Delete existing keys and search fields
-                    DELETE FROM [{_schemaName}].entity_keys
+                    DELETE FROM [{_schemaName}].[entity_keys]
                     WHERE entity_type_id = @entityTypeId AND entity_id = @entityId AND pool_id = @poolId;
 
-                    DELETE FROM [{_schemaName}].search_values
+                    DELETE FROM [{_schemaName}].[search_values]
                     WHERE entity_type_id = @entityTypeId AND entity_id = @entityId AND pool_id = @poolId;
 
                     -- Update the main values record
@@ -1923,7 +1923,7 @@ internal sealed class MsSqlStore(
                 keysCmd.Transaction = transaction;
                 keysCmd.CommandType = CommandType.Text;
                 keysCmd.CommandText = $"""
-                    INSERT INTO [{_schemaName}].entity_keys (
+                    INSERT INTO [{_schemaName}].[entity_keys] (
                         entity_type_id,
                         key_type_id,
                         key_type_name,
@@ -1982,7 +1982,7 @@ internal sealed class MsSqlStore(
                 searchCmd.Transaction = transaction;
                 searchCmd.CommandType = CommandType.Text;
                 searchCmd.CommandText = $"""
-                    INSERT INTO [{_schemaName}].search_values (
+                    INSERT INTO [{_schemaName}].[search_values] (
                         entity_type_id,
                         entity_id,
                         field_path,
@@ -2098,7 +2098,7 @@ internal sealed class MsSqlStore(
                   AND pool_id = @poolId
                   AND entity_id = (
                     SELECT entity_id
-                    FROM [{_schemaName}].entity_keys
+                    FROM [{_schemaName}].[entity_keys]
                     WHERE entity_type_id = @entityTypeId
                       AND key_type_id = @keyTypeId
                       AND key_type_version = @keyTypeVersion
@@ -2178,7 +2178,7 @@ internal sealed class MsSqlStore(
                 // We'll use a LEFT JOIN to get the sort field value
                 // SQL Server doesn't support NULLS LAST syntax, so we use CASE expression
                 joinClause = $"""
-                    LEFT JOIN [{_schemaName}].search_values sort_sv
+                    LEFT JOIN [{_schemaName}].[search_values] sort_sv
                       ON v.entity_type_id = sort_sv.entity_type_id
                       AND v.entity_id = sort_sv.entity_id
                       AND v.pool_id = sort_sv.pool_id
@@ -2246,7 +2246,7 @@ internal sealed class MsSqlStore(
         else
         {
             joinClause = $"""
-                LEFT JOIN [{_schemaName}].search_values sort_sv
+                LEFT JOIN [{_schemaName}].[search_values] sort_sv
                   ON v.entity_type_id = sort_sv.entity_type_id
                   AND v.entity_id = sort_sv.entity_id
                   AND v.pool_id = sort_sv.pool_id

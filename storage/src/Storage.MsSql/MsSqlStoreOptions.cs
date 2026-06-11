@@ -15,6 +15,7 @@ public sealed class MsSqlStoreOptions
     /// Default is "dbo".
     /// </summary>
     [Required]
+    [StringLength(88, ErrorMessage = "Schema name must not exceed 88 characters to avoid exceeding SQL Server's 128-character identifier length limit.")]
     [RegularExpression(@"^[a-zA-Z0-9_\-\#\@]+$", ErrorMessage = "Schema name must contain only alphanumeric characters, underscores, hyphens, hashes, and at signs.")]
     public string SchemaName { get; set; } = "dbo";
 }

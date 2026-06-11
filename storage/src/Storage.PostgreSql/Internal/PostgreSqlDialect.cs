@@ -34,6 +34,8 @@ internal sealed class PostgreSqlDialect : ISqlDialect
             .Replace("_", "\\_", StringComparison.OrdinalIgnoreCase);
     }
 
+    public string QuoteIdentifier(string identifier) => $"\"{identifier.Replace("\"", "\"\"", StringComparison.Ordinal)}\"";
+
     public void AddParameter(DbCommand command, string name, object value)
     {
         var npgsqlCommand = (NpgsqlCommand)command;

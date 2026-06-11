@@ -55,4 +55,11 @@ internal interface ISqlDialect
     /// PostgreSQL: "FALSE", MSSQL: "1=0"
     /// </summary>
     string FalseLiteral { get; }
+
+    /// <summary>
+    /// Quotes a SQL identifier (schema name or table name) using the dialect's quoting style.
+    /// SQL Server uses square brackets ([identifier]), PostgreSQL uses double quotes ("identifier"),
+    /// and SQLite returns the identifier unchanged.
+    /// </summary>
+    string QuoteIdentifier(string identifier) => identifier;
 }

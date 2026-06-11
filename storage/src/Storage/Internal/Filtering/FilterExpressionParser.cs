@@ -74,8 +74,12 @@ public static class FilterExpressionParser
     private sealed class Parser(List<LexToken> tokens, string input)
     {
         private const int MaxDepth = 100;
+
+        // Each condition adds SQL complexity (subqueries or JOINs); cap here to bound query cost.
+        private const int MaxConditions = 30;
         private int _position;
         private int _depth;
+        private int _conditionCount;
 
         internal bool IsAtEnd => _position >= tokens.Count;
 
@@ -184,6 +188,13 @@ public static class FilterExpressionParser
 
         private FilterExpression ParseAttributeExpression()
         {
+            if (++_conditionCount > MaxConditions)
+            {
+                var position = Peek().Position;
+                throw new FilterParseException(
+                    $"Filter expression exceeds maximum of {MaxConditions} conditions at position {position}");
+            }
+
             var attrPath = ParseAttributePath();
 
             // Complex attribute filter: emails[type eq "work"]

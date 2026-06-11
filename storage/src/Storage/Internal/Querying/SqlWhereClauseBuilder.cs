@@ -16,6 +16,7 @@ namespace Duende.Storage.Internal.Querying;
 /// </summary>
 internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command, ISqlDialect dialect) : IQueryExpressionVisitor<string>
 {
+    private readonly string _qualifiedSearchValues = $"{dialect.QuoteIdentifier(schemaName)}.{dialect.QuoteIdentifier("search_values")}";
     private int _parameterCounter;
     private int _subqueryCounter;
 
@@ -124,7 +125,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -150,7 +151,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -176,7 +177,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -210,7 +211,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -244,7 +245,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -278,7 +279,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -312,7 +313,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -350,7 +351,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -414,7 +415,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -486,7 +487,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -517,7 +518,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             // For multi-valued fields, check that at least one array element exists (item_index >= 0)
             return $"""
                 EXISTS (
-                    SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                    SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                     WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                       AND sv{subqueryId}.pool_id = v.pool_id
                       AND sv{subqueryId}.entity_id = v.entity_id
@@ -532,7 +533,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -557,7 +558,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
 
         return $"""
             EXISTS (
-                SELECT 1 FROM {schemaName}.search_values sv{subqueryId}
+                SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
                 WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
                   AND sv{subqueryId}.pool_id = v.pool_id
                   AND sv{subqueryId}.entity_id = v.entity_id
@@ -616,6 +617,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         int parameterCounter,
         int subqueryCounter)
     {
+        private readonly string _qualifiedSearchValues = $"{dialect.QuoteIdentifier(schemaName)}.{dialect.QuoteIdentifier("search_values")}";
         private int _parameterCounter = parameterCounter;
         private int _subqueryCounter = subqueryCounter;
 
@@ -649,14 +651,14 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             var sb = new StringBuilder();
 
             _ = sb.AppendLine("EXISTS (");
-            _ = sb.Append(CultureInfo.InvariantCulture, $"    SELECT 1 FROM {schemaName}.search_values sv{subqueryId}_0");
+            _ = sb.Append(CultureInfo.InvariantCulture, $"    SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}_0");
 
             // Add JOINs for additional conditions (all correlating on item_index)
             for (var i = 1; i < conditions.Count; i++)
             {
                 _ = sb.Append(CultureInfo.InvariantCulture, $"""
 
-                        INNER JOIN {schemaName}.search_values sv{subqueryId}_{i}
+                        INNER JOIN {_qualifiedSearchValues} sv{subqueryId}_{i}
                           ON sv{subqueryId}_0.entity_type_id = sv{subqueryId}_{i}.entity_type_id
                           AND sv{subqueryId}_0.pool_id = sv{subqueryId}_{i}.pool_id
                           AND sv{subqueryId}_0.entity_id = sv{subqueryId}_{i}.entity_id
@@ -748,14 +750,14 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             var sb = new StringBuilder();
 
             _ = sb.AppendLine("EXISTS (");
-            _ = sb.Append(CultureInfo.InvariantCulture, $"    SELECT 1 FROM {schemaName}.search_values sv{subqueryId}_0");
+            _ = sb.Append(CultureInfo.InvariantCulture, $"    SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}_0");
 
             // Add JOINs for additional conditions in this branch
             for (var i = 1; i < conditions.Count; i++)
             {
                 _ = sb.Append(CultureInfo.InvariantCulture, $"""
 
-                        INNER JOIN {schemaName}.search_values sv{subqueryId}_{i}
+                        INNER JOIN {_qualifiedSearchValues} sv{subqueryId}_{i}
                           ON sv{subqueryId}_0.entity_type_id = sv{subqueryId}_{i}.entity_type_id
                           AND sv{subqueryId}_0.pool_id = sv{subqueryId}_{i}.pool_id
                           AND sv{subqueryId}_0.entity_id = sv{subqueryId}_{i}.entity_id
