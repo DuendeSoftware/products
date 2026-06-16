@@ -30,6 +30,7 @@ public class LicensingFixture : IAsyncLifetime
     public Action<IServiceCollection> ConfigureServices { get; set; } = _ => { };
     public Action<IIdentityServerBuilder> ConfigureIdentityServer { get; set; } = _ => { };
     public Action<IdentityServerOptions> ConfigureIdentityServerOptions { get; set; } = _ => { };
+    public Action<WebAppWrapper> ConfigureWebApp { get; set; } = _ => { };
 
     public List<string> Licenses { get; set; } = [];
 
@@ -69,6 +70,8 @@ public class LicensingFixture : IAsyncLifetime
                 {
                     await c.SignInAsync(new IdentityServerUser("sub"));
                 });
+
+                ConfigureWebApp(webapp);
             });
 
         Client = new KestrelBasedTestServer("client", fixture, new PrefixedTestOutputHelper(TestContext.Current.TestOutputHelper, "client"),

@@ -106,14 +106,6 @@ public static class IdentityServerApplicationBuilderExtensions
                 }
             }
 
-            if (serviceProvider.GetRequiredService<IIdentityProviderStore>() is not NopIdentityProviderStore)
-            {
-                if (!licenseValidator.ValidateDynamicProviders())
-                {
-                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Dynamic Identity Providers feature.");
-                }
-            }
-
             // Try to get the SAML metadata endpoint. If it exists, then we need to validate the license for SAML.
             if (serviceProvider.GetService<MetadataEndpoint>() != null)
             {

@@ -5,6 +5,10 @@ using System.Net;
 using Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Licensing;
@@ -56,8 +60,29 @@ public class LicensingTests(WebServerFixture webApp)
         fixture => { fixture.ConfigureIdentityServer += idsrv => idsrv.AddServerSideSessions(); }, "PLT-021");
 
     [Fact]
-    public async Task Dynamic_providers_requires_entitlement() => await ShouldThrowWithoutEntitlementAsync(fixture =>
+    public async Task AddConfigurationStore_does_not_require_dynamic_providers_entitlement()
     {
+        // Regression test: AddConfigurationStore registers an EF IIdentityProviderStore,
+        // which previously triggered the dynamic providers license check at startup even
+        // when dynamic providers were not actually in use.
+        await using var fixture = new LicensingFixture(webApp);
+        fixture.ConfigureIdentityServer += idsrv => idsrv.AddConfigurationStore(options =>
+            options.ConfigureDbContext = b => b.UseInMemoryDatabase(Guid.NewGuid().ToString()));
+        fixture.Licenses = TestLicense.GetAllSkus()
+            .Except(["PLT-005"])
+            .ToList();
+        await fixture.InitializeAsync();
+
+        var httpClient = fixture.Client.CreateClient(true);
+        var result = await httpClient.GetAsync("/login");
+
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Dynamic_providers_requires_entitlement()
+    {
+        await using var fixture = new LicensingFixture(webApp);
         fixture.ConfigureIdentityServer += idsrv => idsrv.AddInMemoryIdentityProviders(
         [
             new OidcProvider
@@ -67,7 +92,107 @@ public class LicensingTests(WebServerFixture webApp)
                 ClientId = "test"
             }
         ]);
-    }, "PLT-005");
+        fixture.ConfigureWebApp += webapp =>
+        {
+            webapp.MapGet("/challenge-dynamic", async (HttpContext c) =>
+            {
+                await c.ChallengeAsync("test-oidc");
+            });
+        };
+        fixture.Licenses = TestLicense.GetAllSkus()
+            .Except(["PLT-005"])
+            .ToList();
+        await fixture.InitializeAsync();
+
+        var client = fixture.IdentityServer.CreateClient();
+        var result = await client.GetAsync("/challenge-dynamic");
+
+        // Dynamic providers without entitlement throws, which results in a 500
+        result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task Dynamic_providers_succeeds_with_entitlement()
+    {
+        await using var fixture = new LicensingFixture(webApp);
+        fixture.ConfigureIdentityServer += idsrv => idsrv.AddInMemoryIdentityProviders(
+        [
+            new OidcProvider
+            {
+                Scheme = "test-oidc",
+                Authority = "https://example.com",
+                ClientId = "test"
+            }
+        ]);
+        fixture.ConfigureWebApp += webapp =>
+        {
+            webapp.MapGet("/resolve-dynamic-scheme", async (HttpContext c) =>
+            {
+                var schemeProvider = c.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                var scheme = await schemeProvider.GetSchemeAsync("test-oidc");
+                if (scheme != null)
+                {
+                    await c.Response.WriteAsync("found");
+                }
+                else
+                {
+                    c.Response.StatusCode = 404;
+                    await c.Response.WriteAsync("not found");
+                }
+            });
+        };
+        fixture.Licenses = TestLicense.GetAllSkus().ToList();
+        await fixture.InitializeAsync();
+
+        var client = fixture.IdentityServer.CreateClient();
+        var result = await client.GetAsync("/resolve-dynamic-scheme");
+
+        // With all entitlements, the dynamic scheme should resolve successfully
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var content = await result.Content.ReadAsStringAsync();
+        content.ShouldBe("found");
+    }
+
+    [Fact]
+    public async Task Dynamic_providers_succeeds_without_any_license()
+    {
+        await using var fixture = new LicensingFixture(webApp);
+        fixture.ConfigureIdentityServer += idsrv => idsrv.AddInMemoryIdentityProviders(
+        [
+            new OidcProvider
+            {
+                Scheme = "test-oidc",
+                Authority = "https://example.com",
+                ClientId = "test"
+            }
+        ]);
+        fixture.ConfigureWebApp += webapp =>
+        {
+            webapp.MapGet("/resolve-dynamic-scheme", async (HttpContext c) =>
+            {
+                var schemeProvider = c.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                var scheme = await schemeProvider.GetSchemeAsync("test-oidc");
+                if (scheme != null)
+                {
+                    await c.Response.WriteAsync("found");
+                }
+                else
+                {
+                    c.Response.StatusCode = 404;
+                    await c.Response.WriteAsync("not found");
+                }
+            });
+        };
+        await fixture.InitializeAsync();
+
+        var client = fixture.IdentityServer.CreateClient();
+        var result = await client.GetAsync("/resolve-dynamic-scheme");
+
+        // Without any license at all, dynamic providers should work (community/dev mode)
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var content = await result.Content.ReadAsStringAsync();
+        content.ShouldBe("found");
+    }
 
     [Fact]
     public async Task Par_returns_not_found_without_entitlement()
