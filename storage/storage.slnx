@@ -13,6 +13,7 @@
     <Project Path="src/Storage/Storage.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/Storage.CliPlugin.Tests/Storage.CliPlugin.Tests.csproj" />
     <Project Path="test/Storage.MsSql.Tests/Storage.MsSql.Tests.csproj" />
     <Project Path="test/Storage.PostgreSql.Tests/Storage.PostgreSql.Tests.csproj" />
     <Project Path="test/Storage.Sqlite.Tests/Storage.Sqlite.Tests.csproj" />

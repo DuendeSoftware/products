@@ -16,12 +16,12 @@
     <PackageVersion Include="Duende.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageVersion Include="Duende.IdentityModel" Version="8.1.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
-    <PackageVersion Include="Duende.IdentityServer" Version="8.0.0" />
+    <PackageVersion Include="Duende.IdentityServer" Version="8.0.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="2.0.1" />
     <PackageVersion Include="Duende.RazorSlices" Version="1.0.0" />
-    <PackageVersion Include="Duende.Storage" Version="1.0.0" />
-    <PackageVersion Include="Duende.Storage.PostgreSql" Version="1.0.0" />
-    <PackageVersion Include="Duende.Storage.Sqlite" Version="1.0.0" />
+    <PackageVersion Include="Duende.Storage" Version="1.1.0" />
+    <PackageVersion Include="Duende.Storage.PostgreSql" Version="1.1.0" />
+    <PackageVersion Include="Duende.Storage.Sqlite" Version="1.1.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.34.0" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.76.0" />
     <PackageVersion Include="Grpc.AspNetCore.Web" Version="2.76.0" />
@@ -135,5 +135,9 @@
     <PackageVersion Include="xunit.v3.core.mtp-v2" Version="3.2.2" />
     <PackageVersion Include="xunit.v3.extensibility.core" Version="3.2.2" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
+  </ItemGroup>
+  <!-- Pin vulnerable transitive dependency to patched version (CVE-2026-48109) -->
+  <ItemGroup>
+    <GlobalPackageReference Include="MessagePack" Version="2.5.301" PrivateAssets="all" />
   </ItemGroup>
 </Project>

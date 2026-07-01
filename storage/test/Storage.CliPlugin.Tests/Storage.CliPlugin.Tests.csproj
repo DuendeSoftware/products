@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.Storage.CliPlugin.Tests</AssemblyName>
+    <RootNamespace>Duende.Storage.CliPlugin</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Storage.CliPlugin\Storage.CliPlugin.csproj" />
+  </ItemGroup>
+
+</Project>

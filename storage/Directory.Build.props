@@ -43,4 +43,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)shared/Global.cs" Link="Global.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- No patched version of SQLitePCLRaw.lib.e_sqlite3 available yet (transitive via Microsoft.Data.Sqlite) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+
 </Project>

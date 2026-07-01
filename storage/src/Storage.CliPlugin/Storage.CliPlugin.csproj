@@ -18,6 +18,11 @@
   <ItemGroup>
     <PackageReference Include="Duende.Cli.PluginAbstractions" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.Storage.CliPlugin.Tests" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Storage.MsSql\Storage.MsSql.csproj" />
     <ProjectReference Include="..\Storage.PostgreSql\Storage.PostgreSql.csproj" />
