@@ -46,6 +46,17 @@
                             Exclude="$(OutputPath)$(AssemblyName).dll;$(OutputPath)Duende.Cli.PluginAbstractions.dll;$(OutputPath)System.CommandLine.dll;$(OutputPath)Microsoft.Extensions.Logging.Abstractions.dll" />
       <!-- AssemblyDependencyResolver needs the deps.json to resolve transitive assemblies -->
       <BuildOutputInPackage Include="$(OutputPath)$(AssemblyName).deps.json" />
+      <!--
+        RID-specific assets: AssemblyDependencyResolver reads runtimeTargets from the deps.json
+        and expects managed (runtimes/{rid}/lib/) and native (runtimes/{rid}/native/) assemblies
+        at paths relative to the plugin assembly. Without these, packages like
+        Microsoft.Data.SqlClient (managed RID split) and SQLitePCLRaw (native) fail to load.
+        
+        TargetPath must be set per-file to preserve the directory hierarchy inside the package.
+      -->
+      <_RuntimeAssets Include="$(OutputPath)runtimes\**\*" />
+      <BuildOutputInPackage Include="@(_RuntimeAssets)"
+                            TargetPath="runtimes\%(_RuntimeAssets.RecursiveDir)%(_RuntimeAssets.Filename)%(_RuntimeAssets.Extension)" />
     </ItemGroup>
   </Target>
 
