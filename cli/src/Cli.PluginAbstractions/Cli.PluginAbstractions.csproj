@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>Duende.Cli.PluginAbstractions</AssemblyName>
+    <RootNamespace>Duende.Cli.PluginAbstractions</RootNamespace>
+    <PackageId>Duende.Cli.PluginAbstractions</PackageId>
     <MinVerTagPrefix>cli-abs-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
   </PropertyGroup>

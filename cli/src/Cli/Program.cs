@@ -25,7 +25,7 @@ rootCommand.Subcommands.Add(pluginCommand);
 
 // plugin list
 var pluginListCommand = new Command("list", "List known plugins and their resolved versions.");
-pluginListCommand.SetAction(_ => PluginListHandler.Execute());
+pluginListCommand.SetAction((_, ct) => PluginListHandler.ExecuteAsync(ct));
 pluginCommand.Subcommands.Add(pluginListCommand);
 
 // plugin cache

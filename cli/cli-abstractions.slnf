@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "..\\products.slnx",
+    "path": "..\\libs.slnx",
     "projects": [
       "cli\\src\\Cli.PluginAbstractions\\Cli.PluginAbstractions.csproj"
     ]

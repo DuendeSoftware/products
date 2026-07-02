@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.Cli.TestNativePlugin</AssemblyName>
+    <RootNamespace>Duende.Cli.TestNativePlugin</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <ProjectReference Include="..\..\src\Cli.PluginAbstractions\Cli.PluginAbstractions.csproj" />
+  </ItemGroup>
+
+</Project>

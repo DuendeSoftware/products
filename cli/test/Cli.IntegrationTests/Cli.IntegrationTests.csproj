@@ -1,7 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AssemblyName>Duende.Cli.IntegrationTests</AssemblyName>
+    <RootNamespace>Duende.Cli.IntegrationTests</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cli\Cli.csproj" />
+    <ProjectReference Include="..\..\testing\Cli.TestNativePlugin\Cli.TestNativePlugin.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\..\testing\Cli.TestPlugin\Cli.TestPlugin.csproj" />
   </ItemGroup>
 

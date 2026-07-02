@@ -90,8 +90,8 @@ internal static class PluginPreloader
 
     /// <summary>
     /// Eagerly loads the real <see cref="System.CommandLine.Command"/> for the
-    /// named plugin. Resolution chain: <c>--plugin-path</c> → project context
-    /// → deployed assembly → <c>--plugin-version</c> → <c>null</c>.
+    /// named plugin. Resolution chain: <c>--plugin-path</c> → <c>--plugin-version</c>
+    /// → project context → <c>null</c>.
     /// </summary>
     internal static async Task<Command?> LoadPluginCommandAsync(
         string pluginName,
@@ -109,14 +109,16 @@ internal static class PluginPreloader
             }
             else
             {
-                // Try project context + deployed assembly scanning
-                var resolution = ProjectContextScanner.Resolve(pluginName);
+                PluginResolution? resolution = null;
 
-                // Fallback to explicit --plugin-version
-                if (resolution is null && explicitVersion is not null)
+                // --plugin-version takes priority (explicit user intent)
+                if (explicitVersion is not null)
                 {
                     resolution = ProjectContextScanner.ResolveExplicit(pluginName, explicitVersion);
                 }
+
+                // Fallback to project context (NuGet-resolved version)
+                resolution ??= await ProjectContextScanner.ResolveAsync(pluginName, ct: ct);
 
                 if (resolution is null)
                 {

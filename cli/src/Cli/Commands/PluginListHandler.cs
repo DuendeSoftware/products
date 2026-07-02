@@ -11,7 +11,7 @@ namespace Duende.Cli.Commands;
 /// </summary>
 internal static class PluginListHandler
 {
-    internal static void Execute()
+    internal static async Task ExecuteAsync(CancellationToken ct)
     {
         Console.WriteLine("Known plugins:");
         Console.WriteLine();
@@ -20,9 +20,9 @@ internal static class PluginListHandler
 
         foreach (var (name, info) in PluginRegistry.KnownPlugins)
         {
-            var resolution = ProjectContextScanner.Resolve(name);
+            var resolution = await ProjectContextScanner.ResolveAsync(name, ct: ct);
             var version = resolution?.Version ?? "(not detected)";
-            var status = resolution is not null ? "resolved" : "no project context";
+            var status = resolution is not null ? "resolved" : "not resolved";
 
             Console.WriteLine($"  {name,-15} {info.PackageId,-35} {version,-15} {status}");
         }

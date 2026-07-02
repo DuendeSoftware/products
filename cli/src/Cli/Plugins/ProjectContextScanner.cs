@@ -1,29 +1,32 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Xml;
-using System.Xml.Linq;
+using System.Text.Json;
+using SimpleExec;
 
 namespace Duende.Cli.Plugins;
 
 /// <summary>
-/// Scans the current directory and its ancestors for NuGet package references
-/// to determine the version of a plugin's anchor package.
-/// Supports Central Package Management (<c>Directory.Packages.props</c>),
-/// direct <c>.csproj</c> references, and deployed assembly scanning.
+/// Resolves plugin versions by reading NuGet-resolved package versions from the project context.
+/// Delegates project/solution discovery to <c>dotnet list package</c> (which uses the same
+/// discovery logic as <c>dotnet build</c>) and reads the exact resolved version from the JSON output.
 /// </summary>
 internal static class ProjectContextScanner
 {
-    private const string DirectoryPackagesProps = "Directory.Packages.props";
-
     /// <summary>
-    /// Resolves the plugin version using the full fallback chain:
-    /// project context → deployed assembly scanning.
+    /// Resolves the plugin version from the current directory's project context.
+    /// Runs <c>dotnet list package --format json</c> from <paramref name="searchDirectory"/>,
+    /// letting dotnet discover the project or solution file, and extracts the resolved version
+    /// of the anchor package.
     /// </summary>
     /// <param name="pluginName">The plugin name (e.g. "storage").</param>
-    /// <param name="searchDirectory">The directory to start scanning from. Defaults to current directory.</param>
+    /// <param name="searchDirectory">The directory to run from. Defaults to current directory.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A <see cref="PluginResolution"/> if the anchor package is found; otherwise <c>null</c>.</returns>
-    internal static PluginResolution? Resolve(string pluginName, string? searchDirectory = null)
+    internal static async Task<PluginResolution?> ResolveAsync(
+        string pluginName,
+        string? searchDirectory = null,
+        CancellationToken ct = default)
     {
         if (!PluginRegistry.KnownPlugins.TryGetValue(pluginName, out var info))
         {
@@ -32,23 +35,18 @@ internal static class ProjectContextScanner
 
         var directory = searchDirectory ?? Directory.GetCurrentDirectory();
 
-        // Strategy 1: scan project files (Directory.Packages.props, .csproj)
-        var anchorVersion = FindAnchorVersionFromProjectFiles(info.AnchorPackage, directory);
-
-        // Strategy 2: scan for deployed anchor assembly
-        anchorVersion ??= FindAnchorVersionFromDeployedAssembly(info.AnchorPackage, directory);
-
-        if (anchorVersion is null)
+        var resolvedVersion = await GetResolvedVersionAsync(directory, info.AnchorPackage, ct);
+        if (resolvedVersion is null)
         {
             return null;
         }
 
-        var pluginVersion = ToMajorMinorWildcard(anchorVersion);
-        return new PluginResolution(info.PackageId, pluginVersion);
+        return new PluginResolution(info.PackageId, $"[{resolvedVersion}]");
     }
 
     /// <summary>
     /// Creates a <see cref="PluginResolution"/> from an explicit version string (e.g. from <c>--plugin-version</c>).
+    /// Uses exact version matching so that any version (including prereleases) resolves correctly.
     /// </summary>
     internal static PluginResolution? ResolveExplicit(string pluginName, string version)
     {
@@ -57,130 +55,97 @@ internal static class ProjectContextScanner
             return null;
         }
 
-        var pluginVersion = ToMajorMinorWildcard(version);
-        return new PluginResolution(info.PackageId, pluginVersion);
+        return new PluginResolution(info.PackageId, $"[{version}]");
     }
 
-    private static string? FindAnchorVersionFromProjectFiles(string anchorPackage, string startDirectory)
+    /// <summary>
+    /// Runs <c>dotnet list package --format json</c> from the specified directory and extracts
+    /// the resolved version of the anchor package. Delegates project/solution discovery entirely
+    /// to <c>dotnet</c>, which looks for a <c>.csproj</c>, <c>.sln</c>, or <c>.slnx</c>
+    /// in the working directory (same behavior as <c>dotnet build</c> without arguments).
+    /// </summary>
+    internal static async Task<string?> GetResolvedVersionAsync(
+        string workingDirectory,
+        string anchorPackage,
+        CancellationToken ct)
     {
-        var directory = new DirectoryInfo(startDirectory);
-
-        while (directory is not null)
+        try
         {
-            // Check Directory.Packages.props (Central Package Management)
-            var packagesProps = Path.Combine(directory.FullName, DirectoryPackagesProps);
-            if (File.Exists(packagesProps))
+            var (stdout, _) = await Command.ReadAsync(
+                "dotnet",
+                "list package --format json",
+                workingDirectory: workingDirectory,
+                cancellationToken: ct);
+
+            return ParseResolvedVersion(stdout, anchorPackage);
+        }
+        catch (ExitCodeReadException)
+        {
+            // dotnet list package failed (e.g. no project/solution found, restore not run)
+            return null;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            // dotnet not found or failed to start
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Parses the JSON output of <c>dotnet list package --format json</c> to find the resolved version
+    /// of the specified package. Searches across all projects in the output (handles solution-level listings).
+    /// </summary>
+    internal static string? ParseResolvedVersion(string json, string packageId)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+
+            if (!doc.RootElement.TryGetProperty("projects", out var projects))
             {
-                var version = ExtractVersionFromPackagesProps(packagesProps, anchorPackage);
-                if (version is not null)
-                {
-                    return version;
-                }
+                return null;
             }
 
-            // Check .csproj files in this directory
-            try
+            foreach (var project in projects.EnumerateArray())
             {
-                foreach (var csproj in directory.GetFiles("*.csproj"))
+                if (!project.TryGetProperty("frameworks", out var frameworks))
                 {
-                    var version = ExtractVersionFromCsproj(csproj.FullName, anchorPackage);
-                    if (version is not null)
+                    continue;
+                }
+
+                foreach (var framework in frameworks.EnumerateArray())
+                {
+                    if (!framework.TryGetProperty("topLevelPackages", out var packages))
                     {
-                        return version;
+                        continue;
+                    }
+
+                    foreach (var package in packages.EnumerateArray())
+                    {
+                        if (!package.TryGetProperty("id", out var id) ||
+                            !package.TryGetProperty("resolvedVersion", out var version))
+                        {
+                            continue;
+                        }
+
+                        if (string.Equals(id.GetString(), packageId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return version.GetString();
+                        }
                     }
                 }
             }
-            catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException)
-            {
-                // Skip inaccessible directories
-            }
-
-            directory = directory.Parent;
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Scans the directory for a deployed anchor assembly (e.g. <c>Duende.Storage.dll</c>)
-    /// and reads its version information to determine the product version.
-    /// Uses <see cref="System.Diagnostics.FileVersionInfo"/> to avoid loading the assembly.
-    /// </summary>
-    private static string? FindAnchorVersionFromDeployedAssembly(string anchorPackage, string directory)
-    {
-        var assemblyFileName = $"{anchorPackage}.dll";
-        var assemblyPath = Path.Combine(directory, assemblyFileName);
-
-        if (!File.Exists(assemblyPath))
-        {
-            return null;
-        }
-
-        try
-        {
-            // FileVersionInfo reads the PE version resource without loading the assembly
-            var fileInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assemblyPath);
-
-            // ProductVersion corresponds to AssemblyInformationalVersionAttribute
-            if (fileInfo.ProductVersion is { Length: > 0 } productVersion)
-            {
-                // Strip build metadata (e.g. "7.2.1+abc123" → "7.2.1")
-                var plusIndex = productVersion.IndexOf('+', StringComparison.Ordinal);
-                return plusIndex >= 0 ? productVersion[..plusIndex] : productVersion;
-            }
-
-            // Fall back to FileVersion (corresponds to AssemblyFileVersionAttribute)
-            if (fileInfo.FileMajorPart > 0)
-            {
-                return $"{fileInfo.FileMajorPart}.{fileInfo.FileMinorPart}.{fileInfo.FileBuildPart}";
-            }
 
             return null;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException)
         {
             return null;
         }
-    }
-
-    private static string? ExtractVersionFromPackagesProps(string filePath, string packageId)
-    {
-        try
-        {
-            var doc = XDocument.Load(filePath);
-            return doc.Descendants("PackageVersion")
-                .FirstOrDefault(e =>
-                    string.Equals(e.Attribute("Include")?.Value, packageId, StringComparison.OrdinalIgnoreCase))
-                ?.Attribute("Version")?.Value;
-        }
-        catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
-        {
-            return null;
-        }
-    }
-
-    private static string? ExtractVersionFromCsproj(string filePath, string packageId)
-    {
-        try
-        {
-            var doc = XDocument.Load(filePath);
-            return doc.Descendants("PackageReference")
-                .FirstOrDefault(e =>
-                    string.Equals(e.Attribute("Include")?.Value, packageId, StringComparison.OrdinalIgnoreCase))
-                ?.Attribute("Version")?.Value;
-        }
-        catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Converts a version string like "7.2.1" to "7.2.*" for NuGet floating version resolution.
-    /// </summary>
-    internal static string ToMajorMinorWildcard(string version)
-    {
-        var parts = version.Split('.');
-        return parts.Length >= 2 ? $"{parts[0]}.{parts[1]}.*" : $"{version}.*";
     }
 }

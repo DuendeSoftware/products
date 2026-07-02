@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Cli.PluginAbstractions/Cli.PluginAbstractions.csproj" />
+    <Project Path="src/Cli/Cli.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Cli.IntegrationTests/Cli.IntegrationTests.csproj" />
+    <Project Path="test/Cli.Tests/Cli.Tests.csproj" />
+  </Folder>
+  <Folder Name="/testing/">
+    <Project Path="testing/Cli.TestNativePlugin/Cli.TestNativePlugin.csproj" />
+    <Project Path="testing/Cli.TestPlugin/Cli.TestPlugin.csproj" />
+  </Folder>
+</Solution>

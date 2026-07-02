@@ -29,20 +29,24 @@ internal static class PluginOrchestrator
         }
         else
         {
-            // Try project context + deployed assembly scanning
-            var resolution = ProjectContextScanner.Resolve(pluginName);
+            PluginResolution? resolution = null;
 
-            // Fallback to explicit --plugin-version
-            if (resolution is null && explicitVersion is not null)
+            // --plugin-version takes priority (explicit user intent)
+            if (explicitVersion is not null)
             {
                 resolution = ProjectContextScanner.ResolveExplicit(pluginName, explicitVersion);
             }
+
+            // Fallback to project context (NuGet-resolved version)
+            resolution ??= await ProjectContextScanner.ResolveAsync(pluginName, ct: ct);
 
             if (resolution is null)
             {
                 throw new InvalidOperationException(
                     $"Could not determine the version for plugin '{pluginName}'. " +
-                    "No project context (Directory.Packages.props / .csproj) or deployed anchor assembly was found. " +
+                    "This can happen if: no project or solution exists in the current directory, " +
+                    "the project does not reference the anchor package, " +
+                    "or 'dotnet restore' has not been run. " +
                     "Use --plugin-version <version> to specify the plugin version, " +
                     "or --plugin-path <path> to load a plugin directly.");
             }

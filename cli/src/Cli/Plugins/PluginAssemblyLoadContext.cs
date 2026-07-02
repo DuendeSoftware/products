@@ -36,4 +36,10 @@ internal sealed class PluginAssemblyLoadContext(string pluginAssemblyPath) : Ass
         var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
         return assemblyPath is not null ? LoadFromAssemblyPath(assemblyPath) : null;
     }
+
+    protected override nint LoadUnmanagedDll(string unmanagedDllName)
+    {
+        var path = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+        return path is not null ? LoadUnmanagedDllFromPath(path) : IntPtr.Zero;
+    }
 }

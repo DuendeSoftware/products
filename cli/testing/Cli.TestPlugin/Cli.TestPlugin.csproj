@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AssemblyName>Duende.Cli.TestPlugin</AssemblyName>
+    <RootNamespace>Duende.Cli.TestPlugin</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cli.PluginAbstractions\Cli.PluginAbstractions.csproj" />
   </ItemGroup>
