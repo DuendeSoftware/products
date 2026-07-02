@@ -79,9 +79,35 @@ internal static class NuGetPluginResolver
             using var packageReader = new PackageArchiveReader(packageStream);
             var tfmFolder = GetBestTfmFolder(packageReader);
 
+            // Strip the NuGet TFM prefix (e.g. "lib/net10.0/") but preserve the remaining
+            // subdirectory structure. AssemblyDependencyResolver reads runtimeTargets from the
+            // deps.json and expects RID-specific assemblies at relative paths from the plugin
+            // assembly (e.g. "runtimes/win/lib/net9.0/Microsoft.Data.SqlClient.dll").
+            var prefix = tfmFolder.TrimEnd('/') + "/";
+            var tempDirRoot = Path.GetFullPath(tempDir) + Path.DirectorySeparatorChar;
             foreach (var file in packageReader.GetFiles(tfmFolder))
             {
-                var destPath = Path.Combine(tempDir, Path.GetFileName(file));
+                var relativePath = file.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                    ? file[prefix.Length..]
+                    : Path.GetFileName(file);
+
+                var destPath = Path.GetFullPath(Path.Combine(tempDir, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+
+                // Guard against path traversal from malicious package entries.
+                // The trailing separator prevents prefix false-positives
+                // (e.g. "C:\temp\pkg2\..." falsely matching "C:\temp\pkg").
+                if (!destPath.StartsWith(tempDirRoot, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        $"Package contains a file entry that would extract outside the target directory: '{file}'.");
+                }
+
+                var destDir = Path.GetDirectoryName(destPath);
+                if (destDir is not null)
+                {
+                    _ = Directory.CreateDirectory(destDir);
+                }
+
                 using var fileStream = packageReader.GetStream(file);
                 using var dest = File.Create(destPath);
                 await fileStream.CopyToAsync(dest, ct);
