@@ -1,8 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics;
 using System.Text.Json;
-using SimpleExec;
 
 namespace Duende.Cli.Plugins;
 
@@ -15,9 +15,9 @@ internal static class ProjectContextScanner
 {
     /// <summary>
     /// Resolves the plugin version from the current directory's project context.
-    /// Runs <c>dotnet list package --format json</c> from <paramref name="searchDirectory"/>,
+    /// Runs <c>dotnet list package --format json --include-transitive</c> from <paramref name="searchDirectory"/>,
     /// letting dotnet discover the project or solution file, and extracts the resolved version
-    /// of the anchor package.
+    /// of the anchor package from either top-level or transitive packages.
     /// </summary>
     /// <param name="pluginName">The plugin name (e.g. "storage").</param>
     /// <param name="searchDirectory">The directory to run from. Defaults to current directory.</param>
@@ -59,9 +59,9 @@ internal static class ProjectContextScanner
     }
 
     /// <summary>
-    /// Runs <c>dotnet list package --format json</c> from the specified directory and extracts
-    /// the resolved version of the anchor package. Delegates project/solution discovery entirely
-    /// to <c>dotnet</c>, which looks for a <c>.csproj</c>, <c>.sln</c>, or <c>.slnx</c>
+    /// Runs <c>dotnet list package --format json --include-transitive</c> from the specified directory
+    /// and extracts the resolved version of the anchor package. Delegates project/solution discovery
+    /// entirely to <c>dotnet</c>, which looks for a <c>.csproj</c>, <c>.sln</c>, or <c>.slnx</c>
     /// in the working directory (same behavior as <c>dotnet build</c> without arguments).
     /// </summary>
     internal static async Task<string?> GetResolvedVersionAsync(
@@ -71,18 +71,8 @@ internal static class ProjectContextScanner
     {
         try
         {
-            var (stdout, _) = await Command.ReadAsync(
-                "dotnet",
-                "list package --format json",
-                workingDirectory: workingDirectory,
-                cancellationToken: ct);
-
+            var stdout = await RunDotnetListPackageAsync(workingDirectory, ct);
             return ParseResolvedVersion(stdout, anchorPackage);
-        }
-        catch (ExitCodeReadException)
-        {
-            // dotnet list package failed (e.g. no project/solution found, restore not run)
-            return null;
         }
         catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception)
         {
@@ -92,8 +82,50 @@ internal static class ProjectContextScanner
     }
 
     /// <summary>
-    /// Parses the JSON output of <c>dotnet list package --format json</c> to find the resolved version
-    /// of the specified package. Searches across all projects in the output (handles solution-level listings).
+    /// Executes <c>dotnet list package --format json --include-transitive</c> and returns stdout.
+    /// </summary>
+    private static async Task<string> RunDotnetListPackageAsync(
+        string workingDirectory,
+        CancellationToken ct)
+    {
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = "list package --format json --include-transitive",
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        if (!process.Start())
+        {
+            return string.Empty;
+        }
+
+        // Drain both streams concurrently to prevent deadlocks when pipe buffers fill.
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(ct);
+        var stderrTask = process.StandardError.ReadToEndAsync(ct);
+
+        var stdout = await stdoutTask;
+        _ = await stderrTask;
+
+        await process.WaitForExitAsync(ct);
+
+        if (process.ExitCode != 0)
+        {
+            return string.Empty;
+        }
+
+        return stdout;
+    }
+
+    /// <summary>
+    /// Parses the JSON output of <c>dotnet list package --format json --include-transitive</c> to find
+    /// the resolved version of the specified package. Searches both <c>topLevelPackages</c> and
+    /// <c>transitivePackages</c> across all projects in the output (handles solution-level listings).
     /// </summary>
     internal static string? ParseResolvedVersion(string json, string packageId)
     {
@@ -120,23 +152,12 @@ internal static class ProjectContextScanner
 
                 foreach (var framework in frameworks.EnumerateArray())
                 {
-                    if (!framework.TryGetProperty("topLevelPackages", out var packages))
-                    {
-                        continue;
-                    }
+                    var version = FindPackageInArray(framework, "topLevelPackages", packageId)
+                                  ?? FindPackageInArray(framework, "transitivePackages", packageId);
 
-                    foreach (var package in packages.EnumerateArray())
+                    if (version is not null)
                     {
-                        if (!package.TryGetProperty("id", out var id) ||
-                            !package.TryGetProperty("resolvedVersion", out var version))
-                        {
-                            continue;
-                        }
-
-                        if (string.Equals(id.GetString(), packageId, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return version.GetString();
-                        }
+                        return version;
                     }
                 }
             }
@@ -147,5 +168,29 @@ internal static class ProjectContextScanner
         {
             return null;
         }
+    }
+
+    private static string? FindPackageInArray(JsonElement framework, string arrayName, string packageId)
+    {
+        if (!framework.TryGetProperty(arrayName, out var packages))
+        {
+            return null;
+        }
+
+        foreach (var package in packages.EnumerateArray())
+        {
+            if (!package.TryGetProperty("id", out var id) ||
+                !package.TryGetProperty("resolvedVersion", out var version))
+            {
+                continue;
+            }
+
+            if (string.Equals(id.GetString(), packageId, StringComparison.OrdinalIgnoreCase))
+            {
+                return version.GetString();
+            }
+        }
+
+        return null;
     }
 }

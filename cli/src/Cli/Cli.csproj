@@ -16,7 +16,6 @@
     <PackageReference Include="Duende.Cli.PluginAbstractions" />
     <PackageReference Include="NuGet.Packaging" />
     <PackageReference Include="NuGet.Protocol" />
-    <PackageReference Include="SimpleExec" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
