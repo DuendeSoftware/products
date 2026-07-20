@@ -143,4 +143,21 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
         var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
         error?.Error.ShouldBe("invalid_client_metadata");
     }
+
+    [Fact]
+    public async Task negative_absolute_refresh_token_lifetime_should_fail()
+    {
+        var response = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr",
+            new DynamicClientRegistrationRequest
+            {
+                RedirectUris = new[] { new Uri("https://example.com/callback") },
+                GrantTypes = { "authorization_code", "refresh_token" },
+                AbsoluteRefreshTokenLifetime = -1
+            });
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
+        error?.Error.ShouldBe("invalid_client_metadata");
+        error?.ErrorDescription.ShouldContain("absolute refresh token lifetime");
+    }
 }

@@ -1,10 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Duende.IdentityServer.EndToEndTests</RootNamespace>
+    <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <IsTestProject>false</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CS1591;NU1507;nu1903;nu1902;</NoWarn>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG_NCRUNCH</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,20 +26,17 @@
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="Microsoft.Playwright.Xunit" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit.core" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Aspire.Hosting.ApplicationModel" />
-    <Using Include="Aspire.Hosting.Testing" />
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="System.Net" />
+    <Using Include="Shouldly"/>
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\shared\Xunit.Playwright\Duende.Xunit.Playwright.csproj" />
-    <ProjectReference Include="..\..\aspire\AppHosts\All\All.csproj" />
-    <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
+    <Using Include="Aspire.Hosting.ApplicationModel" />
+    <Using Include="Aspire.Hosting.Testing" />
   </ItemGroup>
 
 </Project>
