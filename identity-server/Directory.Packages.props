@@ -1,6 +1,6 @@
 <Project>
   <ItemGroup>
-    <PackageVersion Include="AngleSharp" Version="1.4.0" />
+    <PackageVersion Include="AngleSharp" Version="1.5.2" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.2.4" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.2.4" />
     <PackageVersion Include="Aspire.Hosting.SqlServer" Version="13.2.4" />
@@ -136,8 +136,9 @@
     <PackageVersion Include="xunit.v3.extensibility.core" Version="3.2.2" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
   </ItemGroup>
-  <!-- Pin vulnerable transitive dependency to patched version (CVE-2026-48109) -->
+  <!-- Pin vulnerable transitive dependencies to patched versions -->
   <ItemGroup>
     <GlobalPackageReference Include="MessagePack" Version="2.5.301" PrivateAssets="all" />
+    <GlobalPackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" PrivateAssets="all" />
   </ItemGroup>
 </Project>

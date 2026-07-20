@@ -188,9 +188,10 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
             if (context.Request.AbsoluteRefreshTokenLifetime.HasValue)
             {
                 var lifetime = context.Request.AbsoluteRefreshTokenLifetime.Value;
-                if (lifetime <= 0)
+                // 0 means unlimited lifetime
+                if (lifetime < 0)
                 {
-                    return StepResult.Failure("The absolute refresh token lifetime must be greater than 0 if used");
+                    return StepResult.Failure("The absolute refresh token lifetime must be 0 or greater if used");
                 }
                 context.Client.AbsoluteRefreshTokenLifetime = lifetime;
             }

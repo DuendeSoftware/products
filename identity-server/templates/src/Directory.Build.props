@@ -7,5 +7,6 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <AnalysisMode>None</AnalysisMode>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
 </Project>
