@@ -1,0 +1,4 @@
+[*.cs]
+# These files intentionally use Duende.MultiSpace namespace (not Duende.MultiSpace.Admin)
+# to keep the public API surface flat.
+dotnet_diagnostic.IDE0130.severity = none

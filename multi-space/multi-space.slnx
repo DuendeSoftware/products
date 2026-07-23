@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MultiSpace/MultiSpace.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/MultiSpace.Tests/MultiSpace.Tests.csproj" />
+  </Folder>
+</Solution>

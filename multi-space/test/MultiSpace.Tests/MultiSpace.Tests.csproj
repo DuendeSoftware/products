@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.MultiSpace.Tests</AssemblyName>
+    <RootNamespace>Duende.MultiSpace</RootNamespace>
+    <NoWarn>$(NoWarn);IDE0058;IDE0022</NoWarn> <!-- unused expression value; expression body -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MultiSpace\MultiSpace.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Storage.Sqlite" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Verify.XunitV3" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.MultiSpace</AssemblyName>
+    <RootNamespace>Duende.MultiSpace</RootNamespace>
+    <NoWarn>$(NoWarn);CA1812</NoWarn> <!-- never instantiated internal class-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Storage" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+  </ItemGroup>
+
+</Project>
