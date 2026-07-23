@@ -28,7 +28,7 @@ public sealed class ScimCustomRouteTests(ITestOutputHelper output, WebServerFixt
         await Fixture.InitializeAsync();
 
         _client = Fixture.BuildScimClient(CustomRoute);
-
+        _client.SetBearerToken(ScimFixture.CreateAccessToken("scim"));
     }
 
     [Fact]

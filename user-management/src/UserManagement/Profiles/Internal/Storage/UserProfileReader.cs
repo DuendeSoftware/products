@@ -6,12 +6,12 @@ using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Filtering;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Internal.Storage;
 using QueryBuilder = Duende.Storage.Internal.Querying.Query;
 
 namespace Duende.UserManagement.Profiles.Internal.Storage;
@@ -79,7 +79,7 @@ internal sealed class UserProfileReader(IStoreFactory storeFactory, AttributeSch
         // Note: filtering and sorting only work on attributes that have IsQueryable = true in the schema.
         // Non-indexed attributes are stored only in the entity's JSON payload and cannot be used in
         // filter expressions or sort parameters — attempting to do so throws NotSupportedException.
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
         var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
         var attributeDefinitions = schema?.AttributeDefinitions ??
                                    new Dictionary<AttributeCode, AttributeDefinition>();

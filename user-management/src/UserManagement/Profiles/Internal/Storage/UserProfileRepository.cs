@@ -32,7 +32,7 @@ internal sealed class UserProfileRepository(
 
     internal async Task<CreateResult> CreateAsync(UserProfile profile, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var operations = await BuildCreateOperationsAsync(profile, ct);
         var result = await store.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
@@ -51,7 +51,7 @@ internal sealed class UserProfileRepository(
 
     internal async Task<(UserProfile UserProfile, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found
             ? (ToEntity(result.Dso, (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema), result.Version.Value)
@@ -66,7 +66,7 @@ internal sealed class UserProfileRepository(
     internal async Task<(Dictionary<UserSubjectId, UuidV7> Resolved, List<UserSubjectId> NotFound)>
         ResolveProfileUuidsAsync(IReadOnlyList<UserSubjectId> subjectIds, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var resolved = new Dictionary<UserSubjectId, UuidV7>(subjectIds.Count);
         var notFound = new List<UserSubjectId>();
 
@@ -92,7 +92,7 @@ internal sealed class UserProfileRepository(
 
     internal async Task<(UserProfile UserProfile, int Version)?> TryReadAsync(AttributeCode code, object value, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(AttributeValueDskV1.Create(code, value)), ct);
         return result.Found
             ? (ToEntity(result.Dso, (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema), result.Version.Value)
@@ -108,7 +108,7 @@ internal sealed class UserProfileRepository(
 
     internal async Task<UpdateResult> UpdateAsync(UserProfile profile, int expectedVersion, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var operations = await BuildUpdateOperationsAsync(profile, expectedVersion, ct);
         var result = await store.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
@@ -172,7 +172,7 @@ internal sealed class UserProfileRepository(
     internal async Task<QueryResult<UserProfile>> QueryAsync(
         FilterBy? filter, SortBy? sort, DataRange? range, Ct ct)
     {
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
         var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
         var attributeDefinitions = schema?.AttributeDefinitions ??
                                    new Dictionary<AttributeCode, AttributeDefinition>();

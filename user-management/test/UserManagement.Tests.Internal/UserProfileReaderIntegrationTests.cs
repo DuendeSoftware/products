@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Duende.UserManagement;
-using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -582,7 +582,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
 
         // Resolve the store directly to verify search-index behaviour
         var storeFactory = _serviceProvider.GetRequiredService<IStoreFactory>();
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(_ct);
 
         // Assert 1: filtering by the indexed attribute finds the user
         var searchableField = new StringField("searchable");

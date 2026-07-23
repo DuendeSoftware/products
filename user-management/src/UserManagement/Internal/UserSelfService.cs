@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Internal.Storage;
@@ -65,7 +66,7 @@ internal sealed class UserSelfService(
             return false;
         }
 
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.ExecuteBatchAsync(operations, [], ct);
         return result.Success;
     }

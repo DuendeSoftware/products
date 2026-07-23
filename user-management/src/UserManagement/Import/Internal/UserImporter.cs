@@ -4,6 +4,7 @@
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Authentication.Internal.Storage;
@@ -134,7 +135,7 @@ internal sealed class UserImporter(
                 return new UserImportResult { SubjectId = record.SubjectId, Status = UserImportStatus.Skipped };
             }
 
-            var store = storeFactory.GetStore();
+            var store = await storeFactory.GetStore(ct);
             var result = await store.ExecuteBatchAsync(operations, [], ct);
 
             if (result.Success)
@@ -566,7 +567,7 @@ internal sealed class UserImporter(
     private async Task<string?> MergeMembershipsAsync(UserSubjectId subjectId, MembershipImport import, Ct ct)
     {
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
 
         if (import.Groups is not null)
         {

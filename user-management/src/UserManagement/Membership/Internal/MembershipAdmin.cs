@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
@@ -40,7 +41,7 @@ internal sealed class MembershipAdmin(
         }
 
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, roleResult.Value.Role.StoreId, [], ct);
 
         logger.AssignRoleSucceeded(LogLevel.Information, roleId, subjectId);
@@ -68,7 +69,7 @@ internal sealed class MembershipAdmin(
             return SaveResult.Success(roleId, 0);
         }
 
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         _ = await store.UnlinkAsync(MembershipLinkDefinitions.MembershipRole, existing.Resolved[subjectId], roleResult.Value.Role.StoreId, [], ct);
 
         logger.RemoveRoleSucceeded(LogLevel.Information, roleId, subjectId);
@@ -95,7 +96,7 @@ internal sealed class MembershipAdmin(
             return AdminError.NotFound(nameof(Group), groupId.ToString());
         }
 
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         _ = await store.LinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
 
         logger.AssignRoleToGroupSucceeded(LogLevel.Information, roleId, groupId);
@@ -122,7 +123,7 @@ internal sealed class MembershipAdmin(
             return AdminError.NotFound(nameof(Group), groupId.ToString());
         }
 
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         _ = await store.UnlinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
 
         logger.RemoveRoleFromGroupSucceeded(LogLevel.Information, roleId, groupId);
@@ -144,7 +145,7 @@ internal sealed class MembershipAdmin(
         }
 
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, groupResult.Value.Group.StoreId, [], ct);
 
         logger.AssignGroupSucceeded(LogLevel.Information, groupId, subjectId);
@@ -172,7 +173,7 @@ internal sealed class MembershipAdmin(
             return SaveResult.Success(groupId, 0);
         }
 
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         _ = await store.UnlinkAsync(MembershipLinkDefinitions.MembershipGroup, existing.Resolved[subjectId], groupResult.Value.Group.StoreId, [], ct);
 
         logger.RemoveGroupSucceeded(LogLevel.Information, groupId, subjectId);
@@ -188,7 +189,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         var query = LinkQuery
             .From(RoleDso.EntityType)
@@ -211,7 +212,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         // Multi-hop: Role ← GroupRole ← Group ← MembershipGroup ← User
         var query = LinkQuery
@@ -235,7 +236,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         var query = LinkQuery
             .From(RoleDso.EntityType)
@@ -258,7 +259,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<GroupListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         var query = LinkQuery
             .From(GroupDso.EntityType)
@@ -293,7 +294,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<MembershipRoleMemberListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         var query = LinkQuery
             .From(UserDso.EntityType)
@@ -326,7 +327,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleGroupMemberListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         var query = LinkQuery
             .From(GroupDso.EntityType)
@@ -360,7 +361,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<MembershipGroupMemberListItem>();
         }
 
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
 
         var query = LinkQuery
             .From(UserDso.EntityType)

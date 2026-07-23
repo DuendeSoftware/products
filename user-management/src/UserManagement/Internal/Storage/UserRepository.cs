@@ -17,7 +17,7 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var id = UuidV7.New();
         return await store.CreateAsync(
             id,
@@ -31,13 +31,13 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 
     internal async Task<(UserDso.V1 User, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found ? ((UserDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(UserDso.V1 user, int expectedVersion, Ct ct) =>
-        await storeFactory.GetStore().UpdateAsync(
+        await (await storeFactory.GetStore(ct)).UpdateAsync(
             UuidV7.From(user.Id),
             user,
             expectedVersion,
@@ -72,7 +72,7 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 
     internal async Task<long> GetCountAsync(Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.CountAsync(UserDso.EntityType, null, ct);
     }
 
@@ -87,7 +87,7 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
     internal async Task<(Dictionary<UserSubjectId, UuidV7> Resolved, List<UserSubjectId> NotFound)>
         ResolveUserUuidsAsync(IReadOnlyList<UserSubjectId> subjectIds, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var resolved = new Dictionary<UserSubjectId, UuidV7>(subjectIds.Count);
         var notFound = new List<UserSubjectId>();
 

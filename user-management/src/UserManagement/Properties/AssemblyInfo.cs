@@ -3,6 +3,6 @@
 
 using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Duende.UserManagement.TestInfrastructure")]
 [assembly: InternalsVisibleTo("Duende.UserManagement.Tests.Internal")]
 [assembly: InternalsVisibleTo("UserManagement.Tests.Public")]
-[assembly: InternalsVisibleTo("Duende.UserManagement.TestInfrastructure")]

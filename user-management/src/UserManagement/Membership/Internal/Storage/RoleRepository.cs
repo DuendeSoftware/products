@@ -11,7 +11,6 @@ using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Internal.Storage;
 using SearchFieldsBuilder = Duende.Storage.Internal.Querying.SearchFields.SearchFieldsBuilder;
 using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 
@@ -35,7 +34,7 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Create
     internal async Task<CreateResult> CreateAsync(Role role, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.CreateAsync(
             role.StoreId,
             ToDso(role),
@@ -49,7 +48,7 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Read by RoleId (DSK lookup)
     internal async Task<(Role Role, int Version)?> TryReadAsync(RoleId id, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleIdDskV1.Create(id)),
@@ -62,7 +61,7 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Read by Name
     internal async Task<(Role Role, int Version)?> TryReadAsync(RoleName name, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleNameDskV1.Create(name)),
@@ -75,7 +74,7 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Update
     internal async Task<UpdateResult> UpdateAsync(Role role, int expectedVersion, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.UpdateAsync(
             role.StoreId,
             ToDso(role),
@@ -90,7 +89,7 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Delete by RoleId (DSK-based)
     internal async Task<DeleteResult> DeleteAsync(RoleId id, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.DeleteAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleIdDskV1.Create(id)),
@@ -105,7 +104,7 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
         DataRange? range,
         Ct ct)
     {
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
         var queryFilter = BuildFilter(filter);
         var sortParam = BuildSort(sort);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);

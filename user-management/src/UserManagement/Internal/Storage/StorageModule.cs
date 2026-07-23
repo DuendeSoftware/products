@@ -14,12 +14,12 @@ internal sealed class StorageModule : IDuendeModule
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        // Add a method that throws if no storage is registered. 
+        // Add a method that throws if no storage is registered.
         services.TryAddSingleton<IPooledStore>(_ => throw new InvalidOperationException(
             "No storage provider has been configured. Call a storage registration method such as " +
             "AddPostgreSqlStore(), AddMsSqlStore(), or AddSqliteStore() inside the " +
             "AddUserManagementInternal configuration callback."));
 
-        _ = services.AddSingleton<IStoreFactory, DefaultStoreFactory>();
+        services.TryAddSingleton<IStoreFactory, DefaultPoolStoreFactory>();
     }
 }

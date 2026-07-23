@@ -4,6 +4,7 @@
 using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Internal;
@@ -14,6 +15,7 @@ using Duende.UserManagement.Internal;
 using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Modules;
 using Duende.UserManagement.Internal.Services;
+using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Profiles.Internal;
 using Duende.UserManagement.Profiles.Internal.Storage;
@@ -37,10 +39,15 @@ internal sealed class ScimUserCommandProcessor(
     ILogger<ScimUserCommandProcessor> logger,
     TimeProvider timeProvider,
     UserManagementLicenseValidator licenseValidator,
+    IStoreFactory storeFactory,
+    UserRepository userRepository,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     ValidatedPlainTextPasswordFactory? passwordFactory = null,
     PasswordHashAlgorithms? passwordHashAlgorithms = null)
 {
+    private readonly IStoreFactory _storeFactory = storeFactory;
+    private readonly UserRepository _userRepository = userRepository;
+
     private bool IsAuthenticationEnabled => features.OfType<UserAuthenticationFeature>().Any();
 
     internal async Task<ScimOperationResult> CreateAsync(ScimUserRequest? body, Ct ct)
@@ -85,114 +92,262 @@ internal sealed class ScimUserCommandProcessor(
             newUserId);
     }
 
+    /// <summary>
+    /// SCIM PUT — full replacement of a user resource. Orchestrates three phases:
+    /// validate the request, build the batch of store operations, and execute them atomically.
+    /// </summary>
     internal async Task<ScimOperationResult> ReplaceAsync(string id, ScimUserRequest? body, string? ifMatch, Ct ct)
+    {
+        // 1. Validate: parse id, check body, verify user exists, check ETag, map SCIM → attributes
+        var validated = await ValidateReplaceAsync(id, body, ifMatch, ct);
+        if (validated.Error is not null)
+        {
+            return validated.Error;
+        }
+
+        // 2. Build: create store operations for profile, password (if provided), and UserDso
+        var built = await BuildReplaceOperationsAsync(validated, ct);
+        if (built.Error is not null)
+        {
+            return built.Error;
+        }
+
+        // 3. Execute: run all operations as a single atomic batch
+        return await ExecuteReplaceBatchAsync(id, built.Operations, built.UpdatedProfile, built.NewUserDsoVersion, ct);
+    }
+
+    /// <summary>
+    /// Phase 1: Validates all preconditions for a SCIM PUT request.
+    /// <list type="bullet">
+    ///   <item>Parses the user id (must be a valid GUID)</item>
+    ///   <item>Checks the request body is present and has a userName</item>
+    ///   <item>Loads existing profile and UserDso to confirm the user exists</item>
+    ///   <item>Enforces the If-Match ETag precondition</item>
+    ///   <item>Maps the SCIM request body to internal attribute values</item>
+    ///   <item>Verifies the attribute schema version hasn't drifted</item>
+    /// </list>
+    /// </summary>
+    private async Task<ReplaceValidationResult> ValidateReplaceAsync(
+        string id, ScimUserRequest? body, string? ifMatch, Ct ct)
     {
         if (!Guid.TryParse(id, out var guid))
         {
-            return ScimOperationResult.Error(404, "User not found.");
+            return ReplaceValidationResult.Fail(ScimOperationResult.Error(404, "User not found."));
         }
 
         if (body is null)
         {
-            return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidSyntax, "Request body is required.");
+            return ReplaceValidationResult.Fail(
+                ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidSyntax, "Request body is required."));
         }
 
         var subjectId = UserSubjectId.Create(guid.ToString());
         var profileExistingResult = await profileRepo.TryReadAsync(subjectId, ct);
-        if (profileExistingResult is null)
+        var userExistingResult = await _userRepository.TryReadAsync(subjectId, ct);
+
+        if (profileExistingResult is null && userExistingResult is null)
         {
-            if (IsAuthenticationEnabled)
-            {
-                var authRepo = serviceProvider.GetRequiredService<UserAuthenticatorsRepository>();
-                var authExists = await authRepo.TryReadAsync(subjectId, ct);
-                if (authExists is null)
-                {
-                    logger.ScimReplaceUserNotFound(LogLevel.Information, id);
-                    return ScimOperationResult.Error(404, "User not found.");
-                }
-            }
-            else
-            {
-                logger.ScimReplaceUserNotFound(LogLevel.Information, id);
-                return ScimOperationResult.Error(404, "User not found.");
-            }
+            logger.ScimReplaceUserNotFound(LogLevel.Information, id);
+            return ReplaceValidationResult.Fail(ScimOperationResult.Error(404, "User not found."));
         }
 
-        int? profileCurrentVersion = profileExistingResult is not null ? profileExistingResult.Value.Version : null;
-        var preconditionError = ScimEndpointHelpers.CheckIfMatchResult(ifMatch, profileCurrentVersion);
+        var userDsoVersion = userExistingResult?.Version;
+        var preconditionError = ScimEndpointHelpers.CheckIfMatchResult(ifMatch, userDsoVersion);
         if (preconditionError is not null)
         {
             logger.ScimReplaceUserPreconditionFailed(LogLevel.Information, id);
-            return preconditionError;
+            return ReplaceValidationResult.Fail(preconditionError);
         }
 
         var schemaResult = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct);
-        var schema = schemaResult?.AttributeSchema;
 
         if (string.IsNullOrWhiteSpace(body.UserName))
         {
             logger.ScimReplaceUserValidationFailed(LogLevel.Information, id, "userName is required.");
-            return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, "userName is required.");
+            return ReplaceValidationResult.Fail(
+                ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, "userName is required."));
         }
 
-        var mapping = ScimRequestMapper.Map(body, schema);
+        var mapping = ScimRequestMapper.Map(body, schemaResult?.AttributeSchema);
         if (!mapping.IsSuccess)
         {
             logger.ScimReplaceUserValidationFailed(LogLevel.Information, id, mapping.ErrorDetail ?? string.Empty);
-            return ScimOperationResult.Error(400, mapping.ErrorScimType, mapping.ErrorDetail);
+            return ReplaceValidationResult.Fail(
+                ScimOperationResult.Error(400, mapping.ErrorScimType, mapping.ErrorDetail));
         }
 
-        var currentSchemaForReplace = schemaResult?.AttributeSchema ?? AttributeSchema.Empty;
-        if (!SchemaFreshnessCheck.IsValid(mapping.Attributes!, currentSchemaForReplace, logger))
+        var currentSchema = schemaResult?.AttributeSchema ?? AttributeSchema.Empty;
+        if (!SchemaFreshnessCheck.IsValid(mapping.Attributes!, currentSchema, logger))
         {
-            return ScimOperationResult.Error(409, "Schema version mismatch. Please retry with the current schema.");
+            return ReplaceValidationResult.Fail(
+                ScimOperationResult.Error(409, "Schema version mismatch. Please retry with the current schema."));
         }
 
-        if (profileExistingResult is not null)
+        if (mapping.Password is not null && !IsAuthenticationEnabled)
         {
-            var (existingProfile, version) = profileExistingResult.Value;
-            existingProfile.ReplaceAttributes(mapping.Attributes!);
+            return ReplaceValidationResult.Fail(
+                ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
+                    "password is not supported when user authentication is not enabled."));
+        }
 
-            var profileUpdateResult = await profileRepo.UpdateAsync(existingProfile, version, ct);
-            switch (profileUpdateResult)
-            {
-                case UpdateResult.Success:
-                    break;
-                case UpdateResult.KeyConflict:
-                    return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                        "A user with the same unique attribute value already exists.");
-                default:
-                    logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
-                    return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user profile.");
-            }
+        return new ReplaceValidationResult(subjectId, mapping, profileExistingResult, userExistingResult);
+    }
+
+    /// <summary>
+    /// Phase 2: Builds the ordered list of store operations needed to persist the replacement.
+    /// <list type="bullet">
+    ///   <item>Creates or updates the profile aspect with the new attribute values</item>
+    ///   <item>If a password was provided, creates or updates the authenticators aspect</item>
+    ///   <item>Creates or updates the root UserDso with references to all modified aspects</item>
+    /// </list>
+    /// Operations are ordered: UserDso first, then authenticators, then profile aspect last.
+    /// </summary>
+    private async Task<ReplaceBuildResult> BuildReplaceOperationsAsync(
+        ReplaceValidationResult validated, Ct ct)
+    {
+        // Resolve profile aspect: update existing or create new
+        IStoreOperation profileAspectOp;
+        int newProfileVersion;
+        UserProfile updatedProfile;
+
+        if (validated.ProfileExistingResult is not null)
+        {
+            var (existingProfile, existingVersion) = validated.ProfileExistingResult.Value;
+            existingProfile.ReplaceAttributes(validated.Mapping!.Attributes!);
+            profileAspectOp = await profileRepo.UpdateAspectOnlyBatchOperationAsync(existingProfile, existingVersion, ct);
+            newProfileVersion = existingVersion + 1;
+            updatedProfile = existingProfile;
         }
         else
         {
-            var newProfile = new UserProfile(subjectId, mapping.Attributes!);
+            var newProfile = new UserProfile(validated.SubjectId!, validated.Mapping!.Attributes!);
+            var (createOp, _) = await profileRepo.CreateAspectBatchOperationAsync(newProfile, ct);
+            profileAspectOp = createOp;
+            newProfileVersion = 1;
+            updatedProfile = newProfile;
+        }
 
-            var createResult = await profileRepo.CreateAsync(newProfile, ct);
-            switch (createResult)
+        // Collect aspect references that will be written into the root UserDso.
+        // Each aspect (profile, authenticators) tracks its own version independently.
+        var profileAspectRef = UserProfileRepository.GetAspectRef(updatedProfile, newProfileVersion);
+        List<UserDso.AspectRef> aspectReferences = [profileAspectRef];
+        List<IStoreOperation> operations = [];
+
+        // Optionally handle password: validate, hash, and create/update the authenticators aspect
+        if (IsAuthenticationEnabled && validated.Mapping!.Password != null)
+        {
+            if (authenticatorsRepo is null)
             {
-                case CreateResult.Success:
-                    break;
-                case CreateResult.KeyConflict:
-                    return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                        "A user with the same unique attribute value already exists.");
-                default:
-                    return ScimOperationResult.Error(500, "An unexpected error occurred while creating the user profile.");
+                throw new InvalidOperationException("Authenticators repo is not available but authentication is enabled.");
+            }
+
+            var authExistingResult = await authenticatorsRepo.TryReadAsync(validated.SubjectId!, ct);
+            if (authExistingResult is not null)
+            {
+                var (existingAuth, authVersion) = authExistingResult.Value;
+                var (pwError, updatedAuth) = await TryApplyPasswordAsync(validated.SubjectId!, validated.Mapping!.Password, existingAuth, ct);
+                if (pwError is not null)
+                {
+                    return ReplaceBuildResult.Fail(pwError);
+                }
+
+                operations.Add(authenticatorsRepo.UpdateAspectOnlyBatchOperation(updatedAuth, authVersion));
+                aspectReferences.Add(UserAuthenticatorsRepository.GetAspectRef(updatedAuth, authVersion + 1));
+            }
+            else
+            {
+                var newAuth = new UserAuthenticators(validated.SubjectId!, [], []);
+                var (pwError, updatedAuth) = await TryApplyPasswordAsync(validated.SubjectId!, validated.Mapping!.Password, newAuth, ct);
+                if (pwError is not null)
+                {
+                    return ReplaceBuildResult.Fail(pwError);
+                }
+
+                operations.Add(authenticatorsRepo.CreateAspectBatchOperation(updatedAuth));
+                aspectReferences.Add(UserAuthenticatorsRepository.GetAspectRef(updatedAuth));
             }
         }
 
-        var profileReadResult = await profileRepo.TryReadAsync(subjectId, ct);
-        if (profileReadResult is null)
+        // Build the root UserDso operation — it holds references to all aspect versions.
+        // This ensures the UserDso always points to the correct version of each aspect.
+        IStoreOperation userOp;
+        int newUserDsoVersion;
+        if (validated.UserExistingResult is not null)
         {
-            return ScimOperationResult.Error(500, "Failed to read user after update.");
+            var (existingUserDso, userVersion) = validated.UserExistingResult.Value;
+            var updatedUserDso = existingUserDso;
+            foreach (var aspectRef in aspectReferences)
+            {
+                updatedUserDso = UserRepository.AddOrUpdateAspectRef(updatedUserDso, aspectRef);
+            }
+
+            userOp = UserRepository.UpdateBatchOperation(updatedUserDso, userVersion);
+            newUserDsoVersion = userVersion + 1;
+        }
+        else
+        {
+            userOp = UserRepository.CreateBatchOperation(validated.SubjectId!, aspectReferences);
+            newUserDsoVersion = 1;
         }
 
-        var (updatedProfile, newProfileVersion) = profileReadResult.Value;
-        var resource = ScimUserMapper.MapToResource(updatedProfile, newProfileVersion, serverUrls.BaseUrl, scimOptions.Value.Route);
+        var orderedOperations = new List<IStoreOperation> { userOp };
+        orderedOperations.AddRange(operations);
+        orderedOperations.Add(profileAspectOp);
+
+        return new ReplaceBuildResult(orderedOperations, updatedProfile, newUserDsoVersion);
+    }
+
+    /// <summary>
+    /// Phase 3: Executes all store operations as a single atomic batch and returns
+    /// the SCIM response. The UserDso version is deterministic (previous + 1), so no
+    /// re-read is needed after the batch succeeds.
+    /// </summary>
+    private async Task<ScimOperationResult> ExecuteReplaceBatchAsync(
+        string id,
+        List<IStoreOperation> operations,
+        UserProfile updatedProfile,
+        int newUserDsoVersion,
+        Ct ct)
+    {
+        var batchResult = await (await _storeFactory.GetStore(ct)).ExecuteBatchAsync(operations, [], ct);
+        if (!batchResult.Success)
+        {
+            var mapError = MapBatchError(batchResult);
+            if (mapError.StatusCode == 409)
+            {
+                return mapError;
+            }
+
+            logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
+            return mapError;
+        }
+
+        var resource = ScimUserMapper.MapToResource(updatedProfile, newUserDsoVersion, serverUrls.BaseUrl, scimOptions.Value.Route);
         logger.ScimReplaceUserSucceeded(LogLevel.Information, id);
-        return ScimOperationResult.Ok(resource, ((ScimETag)newProfileVersion).ToHeaderValue(), id);
+        return ScimOperationResult.Ok(resource, ((ScimETag)newUserDsoVersion).ToHeaderValue(), id);
+    }
+
+    private sealed record ReplaceValidationResult(
+        UserSubjectId? SubjectId = default,
+        ScimRequestMapper.MappingResult? Mapping = null,
+        (UserProfile UserProfile, int Version)? ProfileExistingResult = null,
+        (UserDso.V1 User, int Version)? UserExistingResult = null)
+    {
+        internal ScimOperationResult? Error { get; private init; }
+
+        internal static ReplaceValidationResult Fail(ScimOperationResult error) =>
+            new() { Error = error };
+    }
+
+    private sealed record ReplaceBuildResult(
+        List<IStoreOperation> Operations,
+        UserProfile UpdatedProfile,
+        int NewUserDsoVersion)
+    {
+        internal ScimOperationResult? Error { get; private init; }
+
+        internal static ReplaceBuildResult Fail(ScimOperationResult error) =>
+            new([], null!, 0) { Error = error };
     }
 
     internal async Task<ScimOperationResult> DeleteAsync(string id, string? ifMatch, Ct ct)
@@ -204,27 +359,16 @@ internal sealed class ScimUserCommandProcessor(
 
         var subjectId = UserSubjectId.Create(guid.ToString());
         var profileResult = await profileRepo.TryReadAsync(subjectId, ct);
-        if (profileResult is null)
+        var userResult = await _userRepository.TryReadAsync(subjectId, ct);
+
+        if (profileResult is null && userResult is null)
         {
-            if (IsAuthenticationEnabled)
-            {
-                var authRepo = serviceProvider.GetRequiredService<UserAuthenticatorsRepository>();
-                var authExists = await authRepo.TryReadAsync(subjectId, ct);
-                if (authExists is null)
-                {
-                    logger.ScimDeleteUserNotFound(LogLevel.Information, id);
-                    return ScimOperationResult.Error(404, "User not found.");
-                }
-            }
-            else
-            {
-                logger.ScimDeleteUserNotFound(LogLevel.Information, id);
-                return ScimOperationResult.Error(404, "User not found.");
-            }
+            logger.ScimDeleteUserNotFound(LogLevel.Information, id);
+            return ScimOperationResult.Error(404, "User not found.");
         }
 
-        int? currentVersion = profileResult is not null ? profileResult.Value.Version : null;
-        var preconditionError = ScimEndpointHelpers.CheckIfMatchResult(ifMatch, currentVersion);
+        var userDsoVersion = userResult?.Version;
+        var preconditionError = ScimEndpointHelpers.CheckIfMatchResult(ifMatch, userDsoVersion);
         if (preconditionError is not null)
         {
             logger.ScimDeleteUserPreconditionFailed(LogLevel.Information, id);
@@ -269,8 +413,11 @@ internal sealed class ScimUserCommandProcessor(
             return ScimOperationResult.Error(404, "User not found.");
         }
 
-        var profileCurrentVersion = profileExistingResult.Value.Version;
-        var preconditionError = ScimEndpointHelpers.CheckIfMatchResult(ifMatch, profileCurrentVersion);
+        // Read UserDso once for the batch and for the If-Match precondition check
+        var userExistingResult = await _userRepository.TryReadAsync(subjectId, ct);
+
+        var userDsoCurrentVersion = userExistingResult?.Version;
+        var preconditionError = ScimEndpointHelpers.CheckIfMatchResult(ifMatch, userDsoCurrentVersion);
         if (preconditionError is not null)
         {
             logger.ScimPatchUserPreconditionFailed(LogLevel.Information, id);
@@ -281,8 +428,10 @@ internal sealed class ScimUserCommandProcessor(
         var schema = schemaResult?.AttributeSchema;
         var profile = profileExistingResult.Value.UserProfile;
 
+        // Read authenticators if authentication is enabled
         UserAuthenticators? authenticators = null;
         var authCurrentVersion = -1;
+        var authExists = false;
         if (IsAuthenticationEnabled)
         {
             var authRepo = serviceProvider.GetRequiredService<UserAuthenticatorsRepository>();
@@ -290,9 +439,11 @@ internal sealed class ScimUserCommandProcessor(
             if (authExistingResult is not null)
             {
                 (authenticators, authCurrentVersion) = authExistingResult.Value;
+                authExists = true;
             }
         }
 
+        // Dispatch patch operations — intercept password-targeted ops
         var effectiveSchema = schema ?? AttributeSchema.Empty;
         var attributes = new AttributeValueCollection(effectiveSchema);
         foreach (var attr in profile.Attributes.Values)
@@ -302,13 +453,118 @@ internal sealed class ScimUserCommandProcessor(
                 attributes.Set(attr);
             }
         }
+
+        string? passwordToSet = null;
+        var removePassword = false;
+
         foreach (var op in body.Operations)
         {
+            // Intercept password-targeted ops
+            if (op.Path is not null &&
+                op.Path.Equals(ScimConstants.Attributes.Password, StringComparison.OrdinalIgnoreCase))
+            {
+#pragma warning disable CA1308
+                var opLower = op.Op?.ToLowerInvariant();
+#pragma warning restore CA1308
+                if (opLower is ScimConstants.PatchOps.Add or ScimConstants.PatchOps.Replace)
+                {
+                    if (op.Value is { ValueKind: JsonValueKind.String } valElem)
+                    {
+                        passwordToSet = valElem.GetString();
+                        removePassword = false;
+                    }
+                    else
+                    {
+                        return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, "password must be a string value");
+                    }
+                }
+                else if (opLower == ScimConstants.PatchOps.Remove)
+                {
+                    removePassword = true;
+                    passwordToSet = null;
+                }
+                else
+                {
+                    return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
+                        $"Unsupported operation '{op.Op}' for password attribute.");
+                }
+
+                // Skip profile attribute processing for password ops
+                continue;
+            }
+
+            // Intercept no-path ops whose value object contains "password"
+            if (op.Path is null && op.Value is { ValueKind: JsonValueKind.Object } valueObj)
+            {
+#pragma warning disable CA1308
+                var noPathOpLower = op.Op?.ToLowerInvariant();
+#pragma warning restore CA1308
+                var hasPassword = false;
+                string? extractedPassword = null;
+
+                foreach (var prop in valueObj.EnumerateObject())
+                {
+                    if (prop.Name.Equals(ScimConstants.Attributes.Password, StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasPassword = true;
+                        if (prop.Value.ValueKind == JsonValueKind.String)
+                        {
+                            extractedPassword = prop.Value.GetString();
+                        }
+                        else
+                        {
+                            return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, "password must be a string value");
+                        }
+
+                        break;
+                    }
+                }
+
+                if (hasPassword)
+                {
+                    if (noPathOpLower is not (ScimConstants.PatchOps.Add or ScimConstants.PatchOps.Replace))
+                    {
+                        return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
+                            $"Unsupported operation '{op.Op}' for password attribute without a path.");
+                    }
+
+                    passwordToSet = extractedPassword;
+                    removePassword = false;
+
+                    // Rebuild value object without "password" key and apply to profile attributes
+                    var filteredProps = valueObj.EnumerateObject()
+                        .Where(p => !p.Name.Equals(ScimConstants.Attributes.Password, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (filteredProps.Count > 0)
+                    {
+                        // Build a synthetic op without the password key by applying each remaining property
+                        foreach (var prop in filteredProps)
+                        {
+                            var attrResult = ApplyAttributeValue(prop.Name, prop.Value, attributes, schema);
+                            if (!attrResult.Success)
+                            {
+                                return attrResult.Error!;
+                            }
+                        }
+                    }
+
+                    continue;
+                }
+            }
+
             var applyResult = ApplyOperation(op, attributes, schema);
             if (!applyResult.Success)
             {
                 return applyResult.Error!;
             }
+        }
+
+        // Validate password change requires authentication enabled
+        if ((passwordToSet is not null || removePassword) && !IsAuthenticationEnabled)
+        {
+            return ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue,
+                "password is not supported when user authentication is not enabled.");
         }
 
         var validatedAttributes = attributes.Validate();
@@ -320,47 +576,184 @@ internal sealed class ScimUserCommandProcessor(
 
         profile.ReplaceAttributes(validatedAttributes);
 
-        var profileUpdateResult = await profileRepo.UpdateAsync(profile, profileCurrentVersion, ct);
-        switch (profileUpdateResult)
-        {
-            case UpdateResult.Success:
-                break;
-            case UpdateResult.KeyConflict:
-                return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                    "A user with the same unique attribute value already exists.");
-            default:
-                logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
-                return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user profile.");
-        }
+        // Build profile aspect operation
+        var profileCurrentVersion = profileExistingResult.Value.Version;
+        var profileAspectOp = await profileRepo.UpdateAspectOnlyBatchOperationAsync(profile, profileCurrentVersion, ct);
+        var newProfileVersion = profileCurrentVersion + 1;
+        var profileAspectRef = UserProfileRepository.GetAspectRef(profile, newProfileVersion);
 
-        if (IsAuthenticationEnabled && authenticators is not null)
+        // Collect aspect refs starting with profile
+        List<UserDso.AspectRef> aspectReferences = [profileAspectRef];
+        List<IStoreOperation> operations = [];
+
+        // Handle password changes in the same batch
+        if (IsAuthenticationEnabled && (passwordToSet is not null || removePassword))
         {
-            var authRepo = serviceProvider.GetRequiredService<UserAuthenticatorsRepository>();
-            var authUpdateResult = await authRepo.UpdateAsync(authenticators, authCurrentVersion, ct);
-            switch (authUpdateResult)
+            if (authenticatorsRepo is null)
             {
-                case UpdateResult.Success:
-                    break;
-                case UpdateResult.DoesNotExist:
-                    return ScimOperationResult.Error(404, "User not found.");
-                case UpdateResult.UnexpectedVersion:
-                    return ScimOperationResult.Error(412, "Precondition failed: ETag mismatch.");
-                case UpdateResult.KeyConflict:
-                    return ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                        "A user with the same unique attribute value already exists.");
-                default:
-                    logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
-                    return ScimOperationResult.Error(500, "An unexpected error occurred while updating the user.");
+                throw new InvalidOperationException("Authenticators repo is not available but authentication is enabled.");
+            }
+
+            if (removePassword)
+            {
+                if (authExists && authenticators is not null && authenticators.RemovePassword())
+                {
+                    operations.Add(authenticatorsRepo.UpdateAspectOnlyBatchOperation(authenticators, authCurrentVersion));
+                    aspectReferences.Add(UserAuthenticatorsRepository.GetAspectRef(authenticators, authCurrentVersion + 1));
+                }
+                // If no authenticators exist or no password was set, nothing to remove — silently succeed
+            }
+            else if (passwordToSet is not null)
+            {
+                if (authExists && authenticators is not null)
+                {
+                    var (pwError, updatedAuth) = await TryApplyPasswordAsync(subjectId, passwordToSet, authenticators, ct);
+                    if (pwError is not null)
+                    {
+                        return pwError;
+                    }
+
+                    operations.Add(authenticatorsRepo.UpdateAspectOnlyBatchOperation(updatedAuth, authCurrentVersion));
+                    aspectReferences.Add(UserAuthenticatorsRepository.GetAspectRef(updatedAuth, authCurrentVersion + 1));
+                }
+                else
+                {
+                    // Create new authenticators with the password in the same batch
+                    var newAuth = new UserAuthenticators(subjectId, [], []);
+                    var (pwError, updatedAuth) = await TryApplyPasswordAsync(subjectId, passwordToSet, newAuth, ct);
+                    if (pwError is not null)
+                    {
+                        return pwError;
+                    }
+
+                    operations.Add(authenticatorsRepo.CreateAspectBatchOperation(updatedAuth));
+                    aspectReferences.Add(UserAuthenticatorsRepository.GetAspectRef(updatedAuth));
+                }
             }
         }
 
-        var newProfileVersion = profileCurrentVersion + 1;
-        var resource = ScimUserMapper.MapToResource(profile, newProfileVersion, serverUrls.BaseUrl, scimOptions.Value.Route);
+        // Build UserDso update operation incorporating all aspect refs
+        IStoreOperation userOp;
+        int newUserDsoVersion;
+        if (userExistingResult is not null)
+        {
+            var (existingUserDso, userVersion) = userExistingResult.Value;
+            var updatedUserDso = existingUserDso;
+            foreach (var aspectRef in aspectReferences)
+            {
+                updatedUserDso = UserRepository.AddOrUpdateAspectRef(updatedUserDso, aspectRef);
+            }
+
+            userOp = UserRepository.UpdateBatchOperation(updatedUserDso, userVersion);
+            newUserDsoVersion = userVersion + 1;
+        }
+        else
+        {
+            userOp = UserRepository.CreateBatchOperation(subjectId, aspectReferences);
+            newUserDsoVersion = 1;
+        }
+
+        // Final ordered list: userOp first, then auth ops (already in operations), then profile aspect last
+        var orderedOperations = new List<IStoreOperation> { userOp };
+        orderedOperations.AddRange(operations);
+        orderedOperations.Add(profileAspectOp);
+
+        var batchResult = await (await _storeFactory.GetStore(ct)).ExecuteBatchAsync(orderedOperations, [], ct);
+        if (!batchResult.Success)
+        {
+            var mapError = MapBatchError(batchResult);
+            if (mapError.StatusCode == 409)
+            {
+                return mapError;
+            }
+
+            logger.ScimUpdateUserRepositoryFailed(LogLevel.Warning, id);
+            return mapError;
+        }
+
+        // Version is deterministic — no re-read needed
+        var resource = ScimUserMapper.MapToResource(profile, newUserDsoVersion, serverUrls.BaseUrl, scimOptions.Value.Route);
         logger.ScimPatchUserSucceeded(LogLevel.Information, id);
-        return ScimOperationResult.Ok(resource, ((ScimETag)newProfileVersion).ToHeaderValue(), id);
+        return ScimOperationResult.Ok(resource, ((ScimETag)newUserDsoVersion).ToHeaderValue(), id);
     }
 
-    private async Task<Result<UserProfile, ScimOperationResult>> TryCreateUserAsync(ScimUserRequest body, CancellationToken ct)
+    /// <summary>
+    /// Validates and applies a raw password string to the given authenticators,
+    /// using set vs. reset semantics depending on whether a password already exists.
+    /// </summary>
+    private async Task<(ScimOperationResult? error, UserAuthenticators updated)> TryApplyPasswordAsync(
+        UserSubjectId subjectId,
+        string rawPassword,
+        UserAuthenticators authenticators,
+        Ct ct)
+    {
+        if (passwordFactory is null)
+        {
+            throw new InvalidOperationException("PasswordFactory is not available but authentication is enabled.");
+        }
+
+        var passwordResult = await passwordFactory.CreateAsync(subjectId, rawPassword, ct);
+        if (passwordResult is not PasswordCreationResult.Success { Password: var plainTextPassword })
+        {
+            var detail = passwordResult is PasswordCreationResult.Failed { Errors: var errors }
+                ? string.Join(" ", errors)
+                : "The provided password does not meet requirements.";
+            return (ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, detail), authenticators);
+        }
+
+        if (authenticators.HashedPassword is null)
+        {
+            var setSucceeded = authenticators.TrySetPassword(
+                plainTextPassword,
+                passwordHashAlgorithms?.Preferred
+                    ?? throw new InvalidOperationException("PasswordHashAlgorithms is not registered."),
+                timeProvider);
+            if (!setSucceeded)
+            {
+                throw new InvalidOperationException($"TrySetPassword failed unexpectedly for user '{subjectId}'.");
+            }
+        }
+        else
+        {
+            // SCIM acts as an external admin — password history policy does not apply.
+            // Pass historyCount: 0 so the reset always succeeds regardless of policy.
+            var resetSucceeded = authenticators.TryResetPassword(
+                plainTextPassword,
+                passwordHashAlgorithms?.Preferred
+                    ?? throw new InvalidOperationException("PasswordHashAlgorithms is not registered."),
+                passwordHashAlgorithms.All,
+                historyCount: 0,
+                timeProvider);
+            if (!resetSucceeded)
+            {
+                throw new InvalidOperationException("TryResetPassword returned false with historyCount: 0 — this should never happen.");
+            }
+        }
+
+        return (null, authenticators);
+    }
+
+    /// <summary>
+    /// Maps the first failed operation in a <see cref="BatchResult"/> to a <see cref="ScimOperationResult"/>.
+    /// </summary>
+    private static ScimOperationResult MapBatchError(BatchResult result)
+    {
+        var firstFailure = result.Results.FirstOrDefault(r => r.Outcome is not OperationOutcome.Success)?.Outcome;
+        return firstFailure switch
+        {
+            OperationOutcome.KeyConflict or OperationOutcome.AlreadyExists =>
+                ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
+                    "A user with the same unique attribute value already exists."),
+            OperationOutcome.DoesNotExist =>
+                ScimOperationResult.Error(404, "User not found."),
+            OperationOutcome.UnexpectedVersion =>
+                ScimOperationResult.Error(412, "Precondition failed: ETag mismatch."),
+            _ =>
+                ScimOperationResult.Error(500, "An unexpected error occurred while updating the user.")
+        };
+    }
+
+    private async Task<Result<UserProfile, ScimOperationResult>> TryCreateUserAsync(ScimUserRequest body, Ct ct)
     {
         var schemaResult = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct);
         var schema = schemaResult?.AttributeSchema;
@@ -378,79 +771,53 @@ internal sealed class ScimUserCommandProcessor(
             return Result.Create(ScimOperationResult.Error(409, "Schema version mismatch. Please retry with the current schema."));
         }
 
-        var createAuthenticators = IsAuthenticationEnabled && mapping.Password != null;
         var subjectId = UserSubjectId.New();
         var profile = new UserProfile(subjectId, mapping.Attributes!);
 
-        var profileCreateResult = await profileRepo.CreateAsync(profile, ct);
-        switch (profileCreateResult)
-        {
-            case CreateResult.Success:
-                licenseValidator.ValidateUserCount();
-                break;
-            case CreateResult.KeyConflict:
-                return Result.Create(ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                    "A user with the same unique attribute value already exists."));
-            default:
-                logger.ScimCreateUserRepositoryFailed(LogLevel.Warning);
-                return Result.Create(ScimOperationResult.Error(500, "An unexpected error occurred while creating the user profile."));
-        }
+        List<IStoreOperation> operations = [];
+        List<UserDso.AspectRef> aspectReferences = [];
 
-        if (createAuthenticators)
+        var (profileAspectOp, profileAspectRef) = await profileRepo.CreateAspectBatchOperationAsync(profile, ct);
+        aspectReferences.Add(profileAspectRef);
+
+        if (IsAuthenticationEnabled && mapping.Password != null)
         {
-            var authResult = await TryCreateAuthenticatorsAsync(subjectId, mapping, ct);
-            if (!authResult.Success)
+            if (authenticatorsRepo is null)
             {
-                _ = await userAdmin.TryRemoveAsync(subjectId, ct);
-                return Result.Create(authResult.Error);
-            }
-        }
-
-        return profile;
-    }
-
-    private async Task<Result<CreateResult, ScimOperationResult>> TryCreateAuthenticatorsAsync(
-        UserSubjectId subjectId,
-        ScimRequestMapper.MappingResult mapping,
-        Ct ct)
-    {
-        if (authenticatorsRepo == null)
-        {
-            throw new InvalidOperationException("Authenticators repo isn't available but authentication is enabled?");
-        }
-
-        if (passwordFactory == null)
-        {
-            throw new InvalidOperationException("PasswordFactory isn't available but authentication is enabled?");
-        }
-
-        var authenticators = new UserAuthenticators(subjectId, [], []);
-
-        if (mapping.Password is not null)
-        {
-            var passwordResult = await passwordFactory.CreateAsync(subjectId, mapping.Password, ct);
-            if (passwordResult is not PasswordCreationResult.Success { Password: var plainTextPassword })
-            {
-                var detail = passwordResult is PasswordCreationResult.Failed { Errors: var errors }
-                    ? string.Join(" ", errors)
-                    : "The provided password does not meet requirements.";
-                return Result.Create(ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, detail));
+                throw new InvalidOperationException("Authenticators repo is not available but authentication is enabled.");
             }
 
-            _ = authenticators.TrySetPassword(plainTextPassword,
-                passwordHashAlgorithms?.Preferred
-                    ?? throw new InvalidOperationException("PasswordHashAlgorithms is not registered."),
-                timeProvider);
+            var authenticators = new UserAuthenticators(subjectId, [], []);
+            var (pwError, updatedAuth) = await TryApplyPasswordAsync(subjectId, mapping.Password, authenticators, ct);
+            if (pwError is not null)
+            {
+                return Result.Create(pwError);
+            }
+
+            var authAspectOp = authenticatorsRepo.CreateAspectBatchOperation(updatedAuth);
+            aspectReferences.Add(UserAuthenticatorsRepository.GetAspectRef(updatedAuth));
+            operations.Add(authAspectOp);
         }
 
-        var result = await authenticatorsRepo.CreateAsync(authenticators, ct);
-        return result switch
+        // Final ordered list: userOp first, then auth ops (already in operations), then profile aspect last
+        var orderedOps = new List<IStoreOperation> { UserRepository.CreateBatchOperation(subjectId, aspectReferences) };
+        orderedOps.AddRange(operations);
+        orderedOps.Add(profileAspectOp);
+
+        var batchResult = await (await _storeFactory.GetStore(ct)).ExecuteBatchAsync(orderedOps, [], ct);
+        if (batchResult.Success)
         {
-            CreateResult.Success => result,
-            CreateResult.KeyConflict => Result.Create(ScimOperationResult.Error(409, ScimConstants.ErrorTypes.Uniqueness,
-                "A user with the same unique attribute value already exists.")),
-            _ => Result.Create(ScimOperationResult.Error(500, "An unexpected error occurred while creating the user."))
-        };
+            licenseValidator.ValidateUserCount();
+            return profile;
+        }
+
+        var createMapError = MapBatchError(batchResult);
+        if (createMapError.StatusCode != 409)
+        {
+            logger.ScimCreateUserRepositoryFailed(LogLevel.Warning);
+        }
+
+        return Result.Create(createMapError);
     }
 
     private sealed class ApplyResult

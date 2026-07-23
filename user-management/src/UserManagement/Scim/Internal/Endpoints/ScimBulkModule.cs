@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+#pragma warning disable duende_experimental
+
 namespace Duende.UserManagement.Scim.Internal.Endpoints;
 
 internal sealed class ScimBulkModule : IHttpModule
@@ -21,6 +23,9 @@ internal sealed class ScimBulkModule : IHttpModule
     public void MapEndpoints<T>(T app) where T : IEndpointRouteBuilder
     {
         var options = app.ServiceProvider.GetRequiredService<IOptions<ScimEndpointOptions>>().Value;
+        var authOptions = app.ServiceProvider.GetRequiredService<IOptions<ScimOAuthOptions>>().Value;
+        var customPolicy = string.IsNullOrWhiteSpace(authOptions.AuthorizationPolicyName) ? null : authOptions.AuthorizationPolicyName;
+        var writePolicy = customPolicy ?? ScimConstants.WritePolicyName;
 
         var group = app.MapGroup(options.BulkRoute);
         _ = group.AddEndpointFilter<ScimContentTypeFilter>();
@@ -31,6 +36,9 @@ internal sealed class ScimBulkModule : IHttpModule
                 HttpContext ctx,
                 Ct ct) =>
             endpoint.HandleAsync(body, ctx, ct))
-            .WithName("SCIM Bulk");
+            .WithName("SCIM Bulk")
+            .RequireAuthorization(writePolicy);
     }
 }
+
+#pragma warning restore duende_experimental

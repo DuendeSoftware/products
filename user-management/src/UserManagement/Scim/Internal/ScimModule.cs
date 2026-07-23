@@ -7,6 +7,8 @@ using Duende.UserManagement.Scim.Internal.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+#pragma warning disable duende_experimental
+
 namespace Duende.UserManagement.Scim.Internal;
 
 internal sealed class ScimModule : IDuendeModule
@@ -17,8 +19,14 @@ internal sealed class ScimModule : IDuendeModule
         _ = services.AddTransient<IServerUrls, DefaultServerUrls>();
         services.TryAddSingleton<TimeProvider>(_ => TimeProvider.System);
 
+        // Authentication and authorization — always active for SCIM endpoints
+        ScimOAuthModule.Register(services);
+        ScimAuthorizationPolicyProvider.Register(services);
+
         services.RegisterModule<ScimUsersHttpModule>();
         services.RegisterModule<ScimGroupsModule>();
         services.RegisterModule<ScimBulkModule>();
     }
 }
+
+#pragma warning restore duende_experimental

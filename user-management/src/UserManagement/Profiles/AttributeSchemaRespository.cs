@@ -7,7 +7,6 @@ using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
-using Duende.UserManagement.Internal.Storage;
 
 namespace Duende.UserManagement.Profiles;
 
@@ -17,19 +16,19 @@ internal sealed class AttributeSchemaRepository(IStoreFactory storeFactory)
     // Attribute schemas are configuration data.
     internal async Task<CreateResult> CreateAsync(UuidV7 schemaId, AttributeSchema schema, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.CreateAsync(schemaId, ToDso(schema), [], [], Expiration.NoExpiration, [], ct);
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 schemaId, AttributeSchema schema, int expectedVersion, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.UpdateAsync(schemaId, ToDso(schema), expectedVersion, [], [], expiration: Expiration.NoExpiration, [], ct);
     }
 
     internal async Task<(AttributeSchema AttributeSchema, int Version)?> TryReadAsync(UuidV7 schemaId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(AttributeSchemaDso.EntityType, schemaId, ct);
         return result.Found
             ? (ToEntity(result.Dso, schemaId, result.Version.Value), result.Version.Value)

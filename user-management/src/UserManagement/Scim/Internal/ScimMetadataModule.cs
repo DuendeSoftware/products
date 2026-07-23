@@ -38,6 +38,7 @@ internal sealed class ScimMetadataModule : IHttpModule
         var options = app.ServiceProvider.GetRequiredService<IOptions<ScimEndpointOptions>>().Value;
 
         var group = app.MapGroup(options.MetadataRoute);
+        _ = group.AllowAnonymous();
 
         // GET /scim/ServiceProviderConfig
         _ = group.MapGet("ServiceProviderConfig", (

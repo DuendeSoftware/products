@@ -210,6 +210,20 @@ internal sealed class UserAuthenticators
         return true;
     }
 
+    // Intentionally does not record the removed password in _passwordHistory.
+    // SCIM password removal is a hard-reset that bypasses history reuse policies by design.
+    internal bool RemovePassword()
+    {
+        if (HashedPassword is null)
+        {
+            return false;
+        }
+
+        HashedPassword = null;
+        PasswordSetAtUtc = null;
+        return true;
+    }
+
     internal bool MatchesPasswordHistory(string password, int historyCount, IReadOnlyList<IPasswordHashAlgorithm> allAlgorithms)
     {
         if (historyCount <= 0)

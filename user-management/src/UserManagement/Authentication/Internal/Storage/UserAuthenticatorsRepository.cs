@@ -42,7 +42,7 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<CreateResult> CreateAsync(UserAuthenticators authenticators, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var operations = await BuildCreateOperationsAsync(authenticators, ct);
         var result = await store.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
@@ -81,14 +81,14 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(OtpAddress otpAddress, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(OtpAddressDskV1.Create(otpAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
@@ -97,7 +97,7 @@ internal sealed class UserAuthenticatorsRepository(
         ExternalAuthenticatorAddress externalAuthenticatorAddress,
         Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
@@ -105,7 +105,7 @@ internal sealed class UserAuthenticatorsRepository(
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(
         PasskeyCredentialId credentialId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(credentialId)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
@@ -119,7 +119,7 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<UpdateResult> UpdateAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var operations = await BuildUpdateOperationsAsync(authenticators, expectedVersion, ct);
         var result = await store.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
@@ -157,7 +157,7 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<QueryResult<UserAuthenticators>> QueryAsync(DataRange? range, Ct ct)
     {
-        var queryStore = storeFactory.GetStore();
+        var queryStore = await storeFactory.GetStore(ct);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
         if (dataRange.TokenValue is not null)
         {

@@ -3,7 +3,6 @@
 
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
-using Duende.UserManagement.Internal.Storage;
 using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication.Passkeys.Internal.Storage;
@@ -15,7 +14,7 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
 {
     public async Task<CreateResult> CreateAsync(PasskeyAuthenticationChallenge challenge, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var expiration = Expiration.InRelative(options.Value.Passkeys.ChallengeTimeout);
 
         return await store.CreateAsync(
@@ -31,7 +30,7 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
     public async Task<PasskeyAuthenticationChallenge?> TryReadAsync(
         PasskeyAuthenticationChallengeId challengeId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(
             PasskeyAuthenticationChallengeDso.EntityType,
             challengeId.Uuid.Value,
@@ -49,7 +48,7 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
 
     public async Task<DeleteResult> DeleteAsync(PasskeyAuthenticationChallengeId challengeId, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.DeleteAsync(
             PasskeyAuthenticationChallengeDso.EntityType,
             challengeId.Uuid.Value,

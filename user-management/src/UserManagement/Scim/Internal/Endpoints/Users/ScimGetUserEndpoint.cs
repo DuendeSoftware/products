@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.UserManagement.Internal.Services;
+using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ namespace Duende.UserManagement.Scim.Internal.Endpoints.Users;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class ScimGetUserEndpoint(
     UserProfileRepository profileRepo,
+    UserRepository userRepository,
     IServerUrls serverUrls,
     IOptions<ScimEndpointOptions> scimOptions,
     ILogger<ScimGetUserEndpoint> logger)
@@ -40,17 +42,22 @@ internal sealed class ScimGetUserEndpoint(
             return ScimResults.Error(404, detail: "User not found.");
         }
 
-        var (profile, version) = profileResult.Value;
+        var (profile, _) = profileResult.Value;
+
+        // Use UserDso version for ETag — UserDso always exists for every user
+        var userDsoResult = await userRepository.TryReadAsync(subjectId, ct);
+        var etagVersion = userDsoResult?.Version
+            ?? throw new InvalidOperationException($"UserDso record is missing for user '{id}'. This indicates a data integrity bug.");
 
         // Check If-None-Match header for 304
-        var notModified = ScimEndpointHelpers.CheckIfNoneMatch(context, version);
+        var notModified = ScimEndpointHelpers.CheckIfNoneMatch(context, etagVersion);
         if (notModified is not null)
         {
             return notModified;
         }
 
         var baseUrl = serverUrls.BaseUrl;
-        var resource = ScimUserMapper.MapToResource(profile, version, baseUrl, scimOptions.Value.Route);
+        var resource = ScimUserMapper.MapToResource(profile, etagVersion, baseUrl, scimOptions.Value.Route);
 
         // Apply attribute projection
         var attributeSet = ScimEndpointHelpers.ParseAttributeSet(attributes);
@@ -58,7 +65,7 @@ internal sealed class ScimGetUserEndpoint(
         resource = ScimAttributeProjection.Apply(resource, attributeSet, excludedAttributeSet);
 
         // Set ETag header
-        context.Response.Headers.ETag = ((ScimETag)version).ToHeaderValue();
+        context.Response.Headers.ETag = ((ScimETag)etagVersion).ToHeaderValue();
 
         return ScimResults.Ok(resource);
     }

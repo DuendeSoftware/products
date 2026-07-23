@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+#pragma warning disable duende_experimental
+
 namespace Duende.UserManagement.Scim.Internal.Endpoints;
 
 internal sealed class ScimGroupsModule : IHttpModule
@@ -31,6 +33,10 @@ internal sealed class ScimGroupsModule : IHttpModule
     public void MapEndpoints<T>(T app) where T : IEndpointRouteBuilder
     {
         var options = app.ServiceProvider.GetRequiredService<IOptions<ScimEndpointOptions>>().Value;
+        var authOptions = app.ServiceProvider.GetRequiredService<IOptions<ScimOAuthOptions>>().Value;
+        var customPolicy = string.IsNullOrWhiteSpace(authOptions.AuthorizationPolicyName) ? null : authOptions.AuthorizationPolicyName;
+        var readPolicy = customPolicy ?? ScimConstants.ReadPolicyName;
+        var writePolicy = customPolicy ?? ScimConstants.WritePolicyName;
 
         var group = app.MapGroup(options.GroupsRoute);
         _ = group.AddEndpointFilter<ScimContentTypeFilter>();
@@ -48,7 +54,8 @@ internal sealed class ScimGroupsModule : IHttpModule
                 [FromQuery] string? excludedAttributes,
                 Ct ct) =>
             endpoint.HandleAsync(ctx, filter, startIndex, count, sortBy, sortOrder, attributes, excludedAttributes, ct))
-            .WithName("SCIM List Groups");
+            .WithName("SCIM List Groups")
+            .RequireAuthorization(readPolicy);
 
         // POST /scim/Groups — Create
         _ = group.MapPost("", (
@@ -57,7 +64,8 @@ internal sealed class ScimGroupsModule : IHttpModule
                 HttpContext ctx,
                 Ct ct) =>
             endpoint.HandleAsync(body, ctx, ct))
-            .WithName("SCIM Create Group");
+            .WithName("SCIM Create Group")
+            .RequireAuthorization(writePolicy);
 
         // POST /scim/Groups/.search — Search
         _ = group.MapPost(".search", (
@@ -66,7 +74,8 @@ internal sealed class ScimGroupsModule : IHttpModule
                 HttpContext ctx,
                 Ct ct) =>
             endpoint.HandleAsync(body, ctx, ct))
-            .WithName("SCIM Search Groups");
+            .WithName("SCIM Search Groups")
+            .RequireAuthorization(readPolicy);
 
         // GET /scim/Groups/{id} — Get single
         _ = group.MapGet("{id}", (
@@ -77,7 +86,8 @@ internal sealed class ScimGroupsModule : IHttpModule
                 [FromQuery] string? excludedAttributes,
                 Ct ct) =>
             endpoint.HandleAsync(id, ctx, attributes, excludedAttributes, ct))
-            .WithName("SCIM Get Group");
+            .WithName("SCIM Get Group")
+            .RequireAuthorization(readPolicy);
 
         // PUT /scim/Groups/{id} — Replace
         _ = group.MapPut("{id}", (
@@ -87,7 +97,8 @@ internal sealed class ScimGroupsModule : IHttpModule
                 HttpContext ctx,
                 Ct ct) =>
             endpoint.HandleAsync(id, body, ctx, ct))
-            .WithName("SCIM Replace Group");
+            .WithName("SCIM Replace Group")
+            .RequireAuthorization(writePolicy);
 
         // PATCH /scim/Groups/{id} — Patch
         _ = group.MapPatch("{id}", (
@@ -97,7 +108,8 @@ internal sealed class ScimGroupsModule : IHttpModule
                 HttpContext ctx,
                 Ct ct) =>
             endpoint.HandleAsync(id, body, ctx, ct))
-            .WithName("SCIM Patch Group");
+            .WithName("SCIM Patch Group")
+            .RequireAuthorization(writePolicy);
 
         // DELETE /scim/Groups/{id} — Delete
         _ = group.MapDelete("{id}", (
@@ -106,6 +118,9 @@ internal sealed class ScimGroupsModule : IHttpModule
                 HttpContext ctx,
                 Ct ct) =>
             endpoint.HandleAsync(id, ctx, ct))
-            .WithName("SCIM Delete Group");
+            .WithName("SCIM Delete Group")
+            .RequireAuthorization(writePolicy);
     }
 }
+
+#pragma warning restore duende_experimental

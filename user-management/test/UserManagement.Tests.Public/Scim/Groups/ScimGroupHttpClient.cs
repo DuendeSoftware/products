@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -29,6 +30,18 @@ public sealed class ScimGroupHttpClient : HttpClient
         BaseAddress = baseAddress;
         Route = route;
     }
+
+    /// <summary>
+    /// Sets the Authorization header to a Bearer token for all subsequent requests.
+    /// </summary>
+    public void SetBearerToken(string token) =>
+        DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+    /// <summary>
+    /// Clears the Authorization header so subsequent requests are unauthenticated.
+    /// </summary>
+    public void ClearBearerToken() =>
+        DefaultRequestHeaders.Authorization = null;
 
     public static StringContent ScimJsonContent(object payload)
     {

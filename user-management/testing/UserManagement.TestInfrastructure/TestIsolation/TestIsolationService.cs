@@ -3,6 +3,8 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Net.Sockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -221,16 +223,40 @@ public sealed class TestIsolationService : IDisposable
     }
 
     /// <summary>
-    /// Creates a plain <see cref="HttpClientHandler"/> suitable for use in tests.
+    /// Creates a <see cref="SocketsHttpHandler"/> suitable for use in tests.
     /// Each call creates a fresh handler to avoid cross-test cookie contamination.
+    /// Connects directly to the loopback address, bypassing DNS resolution of
+    /// <c>*.dev.localhost</c> hostnames. This prevents "No such host is known" failures
+    /// when test runners (e.g. NCrunch) run many tests in parallel.
     /// The caller owns the returned handler and must dispose it.
     /// </summary>
-    public static HttpClientHandler CreateHandler(bool allowAutoRedirect = false) =>
-        new HttpClientHandler
+    public static SocketsHttpHandler CreateHandler(bool allowAutoRedirect = false) =>
+        new SocketsHttpHandler
         {
             AllowAutoRedirect = allowAutoRedirect,
-            ServerCertificateCustomValidationCallback =
-                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+            {
+#pragma warning disable CA5359 // Certificate validation intentionally disabled for test infrastructure
+                RemoteCertificateValidationCallback = (_, _, _, _) => true
+#pragma warning restore CA5359
+            },
+            ConnectCallback = async (context, cancellationToken) =>
+            {
+                // Bypass DNS: connect directly to loopback since all test servers
+                // bind to 127.0.0.1. The Host header still carries the original
+                // hostname for routing purposes.
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    await socket.ConnectAsync(IPAddress.Loopback, context.DnsEndPoint.Port, cancellationToken);
+                    return new NetworkStream(socket, ownsSocket: true);
+                }
+                catch
+                {
+                    socket.Dispose();
+                    throw;
+                }
+            }
         };
 
     public void Dispose()

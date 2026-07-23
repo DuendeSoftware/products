@@ -35,6 +35,12 @@ public static class UserManagementEndpointBuilderExtensions
         [Experimental(diagnosticId: "duende_experimental", Message = "SCIM support is experimental and may change in future releases.")]
         public T MapScim()
         {
+            if (builder.ServiceProvider.GetService<ScimEnabledMarker>() is null)
+            {
+                throw new InvalidOperationException(
+                    "SCIM has not been enabled. Call EnableScim() on the IUserManagementBuilder before calling MapScim().");
+            }
+
             var licenseValidator = builder.ServiceProvider.GetRequiredService<UserManagementLicenseValidator>();
             if (!licenseValidator.ValidateInboundScim())
             {

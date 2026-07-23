@@ -6,8 +6,10 @@ using Duende.IdentityServer.UserManagement;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Scim;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer;
 
@@ -43,6 +45,11 @@ public static class IdentityServerBuilderExtensions
             }
 
             builder.Services.TryAddTransient<IProfileService, UserManagementProfileService>();
+
+            // Register SCIM authority auto-resolution from IdentityServerOptions.IssuerUri
+#pragma warning disable duende_experimental
+            builder.Services.TryAddSingleton<IPostConfigureOptions<ScimOAuthOptions>, ScimAuthorityPostConfigureOptions>();
+#pragma warning restore duende_experimental
 
             return builder;
         }

@@ -4,7 +4,6 @@
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal.Storage;
-using Duende.UserManagement.Internal.Storage;
 
 namespace Duende.UserManagement.Authentication.Otp.Internal.Storage;
 
@@ -19,7 +18,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(OtpWorkflow workflow, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.CreateAsync(
             workflow.Id.Uuid,
             ToDso(workflow),
@@ -35,7 +34,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<UpdateResult> UpdateAsync(OtpWorkflow workflow, int expectedVersion, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         return await store.UpdateAsync(
             workflow.Id.Uuid,
             ToDso(workflow),
@@ -52,7 +51,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<(OtpWorkflow OtpWorkflow, int Version)?> TryReadAsync(OtpAddress address, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(address)), ct);
         return result.Found
             ? (ToEntity(result.Dso), result.Version.Value)
@@ -61,7 +60,7 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<(OtpWorkflow OtpWorkflow, int Version)?> TryReadAsync(OtpToken token, Ct ct)
     {
-        var store = storeFactory.GetStore();
+        var store = await storeFactory.GetStore(ct);
         var result = await store.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(token)), ct);
         return result.Found
             ? (ToEntity(result.Dso), result.Version.Value)

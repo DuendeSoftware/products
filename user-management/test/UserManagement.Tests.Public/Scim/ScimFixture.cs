@@ -1,22 +1,36 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Duende.Platform.UserManagement.Scim.Groups;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement;
+using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Membership;
 using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Scim;
 using Duende.UserManagement.TestIsolation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.Platform.UserManagement.Scim;
 
 public sealed class ScimFixture : IAsyncDisposable
 {
+    private const string TestIssuer = "https://test-issuer";
+    private const string TestAudience = "urn:duende:scim";
+
+    private static readonly byte[] SigningKeyBytes = Encoding.UTF8.GetBytes("ThisIsATestSigningKeyWith32Bytes");
+    private static readonly SymmetricSecurityKey SigningKey = new(SigningKeyBytes);
+
     private readonly ITestOutputHelper _output;
     private readonly WebServerFixture _serverFixture;
     private KestrelBasedTestServer? _server;
@@ -27,11 +41,16 @@ public sealed class ScimFixture : IAsyncDisposable
     public IUserProfileSchemaAdmin UserSchemaAdmin { get; private set; } = null!;
     public IGroupAdmin GroupAdmin { get; private set; } = null!;
     public IMembershipAdmin MembershipAdmin { get; private set; } = null!;
+    public IUserAuthenticatorsAdmin AuthenticatorsAdmin { get; private set; } = null!;
 
     public Action<IServiceCollection> ConfigureServices { get; set; } = s => { };
     public Action<IUserManagementBuilder> ConfigurePlatform { get; set; } = s => { };
     public Action<ScimEndpointOptions> ConfigureScimOptions { get; set; } = s => { };
     public Action<ScimOptions> ConfigureScimCapabilities { get; set; } = s => { };
+
+#pragma warning disable duende_experimental
+    public Action<ScimOAuthOptions> ConfigureScimAuthOptions { get; set; } = s => { };
+#pragma warning restore duende_experimental
 
     public ScimFixture(
         ITestOutputHelper output,
@@ -58,12 +77,21 @@ public sealed class ScimFixture : IAsyncDisposable
                     // modules registered unconditionally by AddUserManagementInternal
 
 #pragma warning disable duende_experimental
-                    _ = users.Scim(x => ConfigureScimCapabilities(x), x => ConfigureScimOptions(x));
+                    _ = users.EnableScim(x => ConfigureScimCapabilities(x), x => ConfigureScimOptions(x));
+                    _ = users.ConfigureScimOAuth(x =>
+                    {
+                        x.Authority = TestIssuer;
+                        x.RequireHttpsMetadata = false;
+                        ConfigureScimAuthOptions(x);
+                    });
 #pragma warning restore duende_experimental
 
                     ConfigurePlatform(users);
                     _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
                 });
+
+                // Post-configure the JWT bearer handler to use a symmetric key (no OIDC discovery)
+                _ = services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, TestJwtBearerPostConfigureOptions>();
             },
             configurePipeline: app =>
             {
@@ -80,6 +108,8 @@ public sealed class ScimFixture : IAsyncDisposable
                     }
                 });
 
+                _ = app.UseAuthorization();
+
 #pragma warning disable duende_experimental
                 _ = app.MapScim();
 #pragma warning restore duende_experimental
@@ -94,9 +124,12 @@ public sealed class ScimFixture : IAsyncDisposable
         UserSchemaAdmin = _server.Services.GetRequiredService<IUserProfileSchemaAdmin>();
         GroupAdmin = _server.Services.GetRequiredService<IGroupAdmin>();
         MembershipAdmin = _server.Services.GetRequiredService<IMembershipAdmin>();
+        AuthenticatorsAdmin = _server.Services.GetRequiredService<IUserAuthenticatorsAdmin>();
 
         Client = BuildScimClient(null);
+        Client.SetBearerToken(CreateAccessToken("scim"));
         GroupClient = BuildScimGroupClient(null);
+        GroupClient.SetBearerToken(CreateAccessToken("scim"));
 
         // userName is always stored as a profile attribute; register with uniqueness
         await RegisterAttributeDefinitionAsync("username", ScalarDataType.String, "User login name", isUnique: true);
@@ -132,6 +165,100 @@ public sealed class ScimFixture : IAsyncDisposable
         var (response, body) = await Client.CreateUserAsync(userName);
         _ = response.EnsureSuccessStatusCode();
         return ScimHttpClient.GetUserId(body);
+    }
+
+    /// <summary>
+    /// Mints a signed JWT access token for testing SCIM endpoint authentication.
+    /// </summary>
+    public static string CreateAccessToken(params string[] scopes) =>
+        CreateAccessToken(TestIssuer, TestAudience, SigningKey, TimeSpan.FromHours(1), scopes);
+
+    /// <summary>
+    /// Mints a signed JWT access token with explicit parameters for negative-path tests.
+    /// </summary>
+    public static string CreateAccessToken(
+        string issuer,
+        string audience,
+        SecurityKey signingKey,
+        TimeSpan lifetime,
+        params string[] scopes)
+    {
+        var claims = new List<Claim>();
+        foreach (var scope in scopes)
+        {
+            claims.Add(new Claim("scope", scope));
+        }
+
+        var now = DateTime.UtcNow;
+        var expires = now + lifetime;
+        var notBefore = lifetime < TimeSpan.Zero ? expires.AddHours(-1) : now;
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            notBefore: notBefore,
+            expires: expires,
+            signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256));
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    /// <summary>
+    /// Creates a token signed with a different key (for invalid-signature tests).
+    /// </summary>
+    public static string CreateTokenWithWrongSignature(params string[] scopes)
+    {
+        var wrongKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ADifferentKeyThatIsAlso32Bytes!!"));
+        return CreateAccessToken(TestIssuer, TestAudience, wrongKey, TimeSpan.FromHours(1), scopes);
+    }
+
+    /// <summary>
+    /// Creates an expired token (for expired-token tests).
+    /// </summary>
+    public static string CreateExpiredToken(params string[] scopes) =>
+        CreateAccessToken(TestIssuer, TestAudience, SigningKey, TimeSpan.FromHours(-1), scopes);
+
+    /// <summary>
+    /// Creates a token with the wrong audience (for audience-validation tests).
+    /// </summary>
+    public static string CreateTokenWithWrongAudience(params string[] scopes) =>
+        CreateAccessToken(TestIssuer, "wrong-audience", SigningKey, TimeSpan.FromHours(1), scopes);
+
+    /// <summary>
+    /// Creates a token with arbitrary claims (for custom-policy tests).
+    /// </summary>
+    public static string CreateTokenWithCustomClaims(params Claim[] claims)
+    {
+        var now = DateTime.UtcNow;
+        var token = new JwtSecurityToken(
+            issuer: TestIssuer,
+            audience: TestAudience,
+            claims: claims,
+            notBefore: now,
+            expires: now + TimeSpan.FromHours(1),
+            signingCredentials: new SigningCredentials(SigningKey, SecurityAlgorithms.HmacSha256));
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    /// <summary>
+    /// Creates a token with a space-delimited scope claim (single claim, multiple scopes).
+    /// </summary>
+    public static string CreateTokenWithSpaceDelimitedScopes(params string[] scopes)
+    {
+        var scopeValue = string.Join(' ', scopes);
+        var claims = new List<Claim> { new("scope", scopeValue) };
+
+        var now = DateTime.UtcNow;
+        var token = new JwtSecurityToken(
+            issuer: TestIssuer,
+            audience: TestAudience,
+            claims: claims,
+            notBefore: now,
+            expires: now + TimeSpan.FromHours(1),
+            signingCredentials: new SigningCredentials(SigningKey, SecurityAlgorithms.HmacSha256));
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     /// <summary>
@@ -259,5 +386,29 @@ public sealed class ScimFixture : IAsyncDisposable
             await _server.DisposeAsync();
         }
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Post-configures <see cref="JwtBearerOptions"/> for the SCIM authentication scheme
+    /// to use a symmetric signing key and disable OIDC discovery in tests.
+    /// </summary>
+    private sealed class TestJwtBearerPostConfigureOptions : IPostConfigureOptions<JwtBearerOptions>
+    {
+        public void PostConfigure(string? name, JwtBearerOptions options)
+        {
+            if (name != Duende.UserManagement.Scim.Internal.ScimConstants.AuthenticationScheme)
+            {
+                return;
+            }
+
+            // Disable metadata discovery — use manual configuration
+            options.Configuration = new OpenIdConnectConfiguration();
+            options.TokenValidationParameters.IssuerSigningKey = SigningKey;
+            options.TokenValidationParameters.ValidIssuer = TestIssuer;
+            options.TokenValidationParameters.ValidateAudience = true;
+            options.TokenValidationParameters.ValidAudiences = [TestAudience];
+            options.TokenValidationParameters.ValidateLifetime = true;
+            options.TokenValidationParameters.ValidateIssuerSigningKey = true;
+        }
     }
 }

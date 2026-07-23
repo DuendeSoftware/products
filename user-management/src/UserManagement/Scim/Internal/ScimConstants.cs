@@ -3,8 +3,19 @@
 
 namespace Duende.UserManagement.Scim.Internal;
 
+/// <summary>
+/// Marker service indicating that SCIM has been enabled via <c>EnableScim()</c>.
+/// Used by <c>MapScim()</c> to guard against misconfiguration.
+/// </summary>
+internal sealed class ScimEnabledMarker;
+
 internal static class ScimConstants
 {
+    // Authentication and authorization
+    internal const string AuthenticationScheme = "DuendeScimBearer";
+    internal const string WritePolicyName = "DuendeScimWrite";
+    internal const string ReadPolicyName = "DuendeScimRead";
+
     // Schema URNs — core resources
     internal const string UserSchemaUrn = "urn:ietf:params:scim:schemas:core:2.0:User";
     internal const string GroupSchemaUrn = "urn:ietf:params:scim:schemas:core:2.0:Group";
