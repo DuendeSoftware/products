@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="Duende.Extensions.Caching.Memory" />
+    <PackageReference Include="Duende.Storage.Sqlite" />
     <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />

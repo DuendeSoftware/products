@@ -1,0 +1,27 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Error.Index
+
+<div class="space-y-4">
+    <h1 class="text-2xl font-bold text-gray-900">Error</h1>
+
+    <div class="bg-red-50 border border-red-300 rounded-card p-6">
+        <p class="text-red-700">
+            Sorry, there was an error
+
+            @if (Model.View.Error != null)
+            {
+                <strong class="italic">: @Model.View.Error.Error</strong>
+
+                if (Model.View.Error.ErrorDescription != null)
+                {
+                    <span class="block mt-2 text-sm text-red-600">@Model.View.Error.ErrorDescription</span>
+                }
+            }
+        </p>
+    </div>
+
+    @if (Model?.View?.Error?.RequestId != null)
+    {
+        <p class="text-xs text-gray-400">Request Id: @Model.View.Error.RequestId</p>
+    }
+</div>

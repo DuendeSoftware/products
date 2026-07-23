@@ -1,0 +1,27 @@
+@page
+@model Duende.IdentityServer.UI.DevPortal.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Dev Portal";
+}
+
+<div class="content">
+    <div class="rendered-html">
+        @Html.Raw(Model.RenderedHtml)
+    </div>
+
+    @if (Model.Links.Count > 0)
+    {
+        <nav class="links">
+            <h2>Scenarios</h2>
+            <ul>
+                @foreach (var link in Model.Links)
+                {
+                    <li>
+                        <a href="@link.Url" target="_blank">@link.Label</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

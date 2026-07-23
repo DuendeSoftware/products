@@ -1,0 +1,13 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Redirect.IndexModel
+@{
+}
+
+<div class="text-center py-12">
+    <div class="animate-spin inline-flex items-center justify-center w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full mb-4"></div>
+    <h1 class="text-xl font-semibold text-gray-900">You are now being returned to the application</h1>
+    <p class="mt-2 text-gray-500">Once complete, you may close this tab.</p>
+</div>
+
+<meta http-equiv="refresh" content="0;url=@Model.RedirectUri" data-url="@Model.RedirectUri">
+<script src="~/js/signin-redirect.js"></script>

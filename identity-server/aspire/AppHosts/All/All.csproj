@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+<Project Sdk="Aspire.AppHost.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,37 +12,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\APIs\MtlsApi\MtlsApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\APIs\ResourceBasedApi\ResourceBasedApi.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\APIs\SimpleApi\SimpleApi.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleCibaClient\ConsoleCibaClient.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleClientCredentialsFlow\ConsoleClientCredentialsFlow.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleClientCredentialsFlowCallingIdentityServerApi\ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleClientCredentialsFlowDPoP\ConsoleClientCredentialsFlowDPoP.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleClientCredentialsFlowPostBody\ConsoleClientCredentialsFlowPostBody.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleCode\ConsoleCode.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleDcrClient\ConsoleDcrClient.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleDeviceFlow\ConsoleDeviceFlow.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleEphemeralMtlsClient\ConsoleEphemeralMtlsClient.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleCustomGrant\ConsoleExtensionGrant.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleIntrospectionClient\ConsoleIntrospectionClient.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleMTLSClient\ConsoleMTLSClient.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleParameterizedScopeClient\ConsoleParameterizedScopeClient.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsolePrivateKeyJwtClient\ConsolePrivateKeyJwtClient.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleResourceIndicators\ConsoleResourceIndicators.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlow\ConsoleResourceOwnerFlow.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowPublic\ConsoleResourceOwnerFlowPublic.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowReference\ConsoleResourceOwnerFlowReference.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowRefreshToken\ConsoleResourceOwnerFlowRefreshToken.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowUserInfo\ConsoleResourceOwnerFlowUserInfo.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleScopesResources\ConsoleScopesResources.csproj" />
     <ProjectReference Include="..\..\..\clients\src\JsOidc\JsOidc.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcAutomaticTokenManagement\MvcAutomaticTokenManagement.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcCode\MvcCode.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcDPoP\MvcDPoP.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcHybridBackChannel\MvcHybridBackChannel.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcJarJwt\MvcJarJwt.csproj" />
     <ProjectReference Include="..\..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
     <ProjectReference Include="..\..\..\clients\src\MvcSaml\MvcSaml.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />

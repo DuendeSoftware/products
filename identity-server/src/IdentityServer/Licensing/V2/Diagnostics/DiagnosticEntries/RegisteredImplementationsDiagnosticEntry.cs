@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
@@ -128,7 +129,11 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
         },
         {
             "Stores", [
+                new (typeof(IApiResourceAdmin), []),
+                new (typeof(IApiScopeAdmin), []),
                 new(typeof(IAuthenticationContext), []),
+                new(typeof(IClientAdmin), []),
+                new(typeof(IIdentityProviderAdmin), []),
                 new(typeof(IConnectedApplication), []),
                 new(typeof(IConnectedApplicationStore), [typeof(ConnectedApplicationStore)]),
                 new(typeof(IAuthorizationCodeStore), [typeof(DefaultAuthorizationCodeStore)]),
@@ -138,6 +143,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IDeviceFlowStore), []),
                 new(typeof(IIdentityProviderFactory), [typeof(DynamicIdentityProviderFactory)]),
                 new(typeof(IIdentityProviderStore), [typeof(NopIdentityProviderStore)]),
+                new(typeof(IIdentityResourceAdmin), []),
                 new(typeof(IMessageStore<>), [typeof(ProtectedDataMessageStore<>)]),
                 new(typeof(IPersistentGrantSerializer), [typeof(PersistentGrantSerializer)]),
                 new(typeof(IPersistedGrantStore), [typeof(InMemoryPersistedGrantStore)]),
@@ -145,6 +151,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IReferenceTokenStore), [typeof(DefaultReferenceTokenStore)]),
                 new(typeof(IRefreshTokenStore), [typeof(DefaultRefreshTokenStore)]),
                 new(typeof(IResourceStore), [typeof(EmptyResourceStore)]),
+                new(typeof(ISamlServiceProviderAdmin), []),
                 new(typeof(ISamlServiceProviderStore), [typeof(EmptySamlServiceProviderStore)]),
                 new(typeof(IServerSideSessionsMarker), []),
                 new(typeof(IServerSideSessionStore),[]),

@@ -15,16 +15,19 @@ public class DataProtectionKeyProtector : ISigningKeyProtector
 {
     private readonly KeyManagementOptions _options;
     private readonly IDataProtector _dataProtectionProvider;
+    private readonly TimeProvider _timeProvider;
 
     /// <summary>
     /// Constructor for DataProtectionKeyProtector.
     /// </summary>
     /// <param name="options"></param>
     /// <param name="dataProtectionProvider"></param>
-    public DataProtectionKeyProtector(KeyManagementOptions options, IDataProtectionProvider dataProtectionProvider)
+    /// <param name="timeProvider"></param>
+    public DataProtectionKeyProtector(KeyManagementOptions options, IDataProtectionProvider dataProtectionProvider, TimeProvider timeProvider)
     {
         _options = options;
         _dataProtectionProvider = dataProtectionProvider.CreateProtector(nameof(DataProtectionKeyProtector));
+        _timeProvider = timeProvider;
     }
 
     /// <inheritdoc/>
@@ -40,7 +43,7 @@ public class DataProtectionKeyProtector : ISigningKeyProtector
         return new SerializedKey
         {
             Version = 1,
-            Created = DateTime.UtcNow,
+            Created = _timeProvider.GetUtcNow().UtcDateTime,
             Id = key.Id,
             Algorithm = key.Algorithm,
             IsX509Certificate = key.HasX509Certificate,

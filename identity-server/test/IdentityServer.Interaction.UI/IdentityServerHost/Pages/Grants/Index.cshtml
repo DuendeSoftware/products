@@ -1,0 +1,86 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Grants.Index
+@{
+}
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Client Application Permissions</h1>
+        <p class="mt-1 text-gray-500">Below is the list of applications you have given permission to and the resources they have access to.</p>
+    </div>
+
+    @if (!Model.View.Grants.Any())
+    {
+        <div class="bg-blue-50 border border-blue-200 rounded-card p-4">
+            <p class="text-blue-700">You have not given access to any applications</p>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var grant in Model.View.Grants)
+            {
+                <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            @if (grant.ClientLogoUrl != null)
+                            {
+                                <img src="@grant.ClientLogoUrl" class="w-10 h-10 rounded">
+                            }
+                            <strong class="text-gray-900">@grant.ClientName</strong>
+                        </div>
+                        <form asp-page="/Grants/Index">
+                            <input type="hidden" name="clientId" value="@grant.ClientId">
+                            <button class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Revoke Access</button>
+                        </form>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        @if (grant.Description != null)
+                        {
+                            <div class="px-4 py-2 flex gap-2">
+                                <span class="text-xs font-medium text-gray-500">Description:</span>
+                                <span class="text-xs text-gray-700">@grant.Description</span>
+                            </div>
+                        }
+                        <div class="px-4 py-2 flex gap-2">
+                            <span class="text-xs font-medium text-gray-500">Created:</span>
+                            <span class="text-xs text-gray-700">@grant.Created.ToString("yyyy-MM-dd")</span>
+                        </div>
+                        @if (grant.Expires.HasValue)
+                        {
+                            <div class="px-4 py-2 flex gap-2">
+                                <span class="text-xs font-medium text-gray-500">Expires:</span>
+                                <span class="text-xs text-gray-700">@grant.Expires.Value.ToString("yyyy-MM-dd")</span>
+                            </div>
+                        }
+                        @if (grant.IdentityGrantNames.Any())
+                        {
+                            <div class="px-4 py-2">
+                                <span class="text-xs font-medium text-gray-500">Identity Grants</span>
+                                <ul class="mt-1 space-y-0.5 pl-4">
+                                    @foreach (var name in grant.IdentityGrantNames)
+                                    {
+                                        <li class="text-xs text-gray-600">@name</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                        @if (grant.ApiGrantNames.Any())
+                        {
+                            <div class="px-4 py-2">
+                                <span class="text-xs font-medium text-gray-500">API Grants</span>
+                                <ul class="mt-1 space-y-0.5 pl-4">
+                                    @foreach (var name in grant.ApiGrantNames)
+                                    {
+                                        <li class="text-xs text-gray-600">@name</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

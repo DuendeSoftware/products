@@ -1,0 +1,57 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Home.Index
+
+<div class="space-y-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+            Welcome to Duende IdentityServer
+            <span class="text-lg font-normal text-gray-400 ml-2">(version @Model.Version)</span>
+        </h1>
+    </div>
+
+    <div class="bg-white rounded-card shadow-sm border border-gray-200 p-6">
+        <ul class="space-y-3 text-gray-700">
+            <li>
+                IdentityServer publishes a
+                <a href="~/.well-known/openid-configuration" class="text-primary-600 hover:text-primary-700 underline transition-colors">discovery document</a>
+                where you can find metadata and links to all the endpoints, key material, etc.
+            </li>
+            <li>
+                Click <a href="~/diagnostics" class="text-primary-600 hover:text-primary-700 underline transition-colors">here</a> to see the claims for your current session.
+            </li>
+            <li>
+                Click <a href="~/grants" class="text-primary-600 hover:text-primary-700 underline transition-colors">here</a> to manage your stored grants.
+            </li>
+            <li>
+                Click <a href="~/serversidesessions" class="text-primary-600 hover:text-primary-700 underline transition-colors">here</a> to view the server side sessions.
+            </li>
+            <li>
+                Click <a href="~/ciba/all" class="text-primary-600 hover:text-primary-700 underline transition-colors">here</a> to view your pending CIBA login requests.
+            </li>
+            <li>
+                Click <a href="~/admin" class="text-primary-600 hover:text-primary-700 underline transition-colors">here</a> to view the simple admin page.
+            </li>
+            <li>
+                Click <a href="~/portal" class="text-primary-600 hover:text-primary-700 underline transition-colors">here</a> to view the client application portal.
+            </li>
+            <li>
+                Here are links to the
+                <a href="https://github.com/duendesoftware/IdentityServer" class="text-primary-600 hover:text-primary-700 underline transition-colors">source code repository</a>,
+                and <a href="https://github.com/duendesoftware/samples" class="text-primary-600 hover:text-primary-700 underline transition-colors">ready to use samples</a>.
+            </li>
+        </ul>
+    </div>
+
+    @if(Model.License.IsConfigured)
+    {
+        <div class="bg-white rounded-card shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">License</h2>
+            <dl class="grid grid-cols-3 gap-4">
+                <dt class="text-sm font-medium text-gray-500">Serial Number</dt>
+                <dd class="text-sm text-gray-900 col-span-2">@Model.License.SerialNumber</dd>
+                <dt class="text-sm font-medium text-gray-500">Expiration</dt>
+                <dd class="text-sm text-gray-900 col-span-2">@(Model.License.Expiration.HasValue ? Model.License.Expiration.Value.DateTime.ToLongDateString() : "Never")</dd>
+            </dl>
+        </div>
+    }
+</div>

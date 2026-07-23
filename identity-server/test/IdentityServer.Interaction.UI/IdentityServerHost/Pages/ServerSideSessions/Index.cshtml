@@ -1,0 +1,142 @@
+@page
+@model Duende.IdentityServer.UI.Pages.ServerSideSessions.IndexModel
+
+<div class="space-y-6">
+    <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <h2 class="text-lg font-semibold text-gray-800">User Sessions</h2>
+        </div>
+
+        <div class="p-4">
+
+        @if (Model.UserSessions != null)
+        {
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    @if (Model.UserSessions.HasPrevResults)
+                    {
+                        <a class="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 transition-colors" asp-page="/ServerSideSessions/Index"
+                             asp-route-prev="true"
+                             asp-route-token="@Model.UserSessions.ResultsToken"
+                             asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
+                             asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
+                             asp-route-SessionIdFilter="@Model.SessionIdFilter"
+                        >Prev</a>
+                    }
+                </div>
+                <div class="flex-1">
+                    <form class="space-y-3">
+                        <div class="grid grid-cols-4 gap-2 items-center">
+                            <label asp-for="@Model.DisplayNameFilter" class="text-xs font-medium text-gray-600 text-right">Name:</label>
+                            <input type="search" asp-for="@Model.DisplayNameFilter" class="col-span-3 px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" autofocus />
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 items-center">
+                            <label asp-for="@Model.SessionIdFilter" class="text-xs font-medium text-gray-600 text-right">Session Id:</label>
+                            <input type="search" asp-for="@Model.SessionIdFilter" class="col-span-3 px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 items-center">
+                            <label asp-for="@Model.SubjectIdFilter" class="text-xs font-medium text-gray-600 text-right">Subject Id:</label>
+                            <input type="search" asp-for="@Model.SubjectIdFilter" class="col-span-3 px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-4 py-1.5 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors">Filter</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="flex-shrink-0">
+                    @if (Model.UserSessions.HasNextResults)
+                    {
+                        <a class="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 transition-colors" asp-page="/ServerSideSessions/Index"
+                             asp-route-token="@Model.UserSessions.ResultsToken"
+                             asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
+                             asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
+                             asp-route-SessionIdFilter="@Model.SessionIdFilter"
+                        >Next</a>
+                    }
+                </div>
+            </div>
+
+            @if (Model.UserSessions.TotalCount.HasValue)
+            {
+                <p class="text-center text-xs text-gray-500 mt-4">
+                    @if (Model.UserSessions.CurrentPage.HasValue && Model.UserSessions.TotalPages.HasValue)
+                    {
+                        <text>
+                            Total Results: @Model.UserSessions.TotalCount,
+                            Page @Model.UserSessions.CurrentPage of @Model.UserSessions.TotalPages
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            Total Results: @Model.UserSessions.TotalCount
+                        </text>
+                    }
+                </p>
+            }
+
+            @if (Model.UserSessions.Results.Any())
+            {
+                <div class="mt-4 overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 text-left">
+                                <th class="px-3 py-2 font-medium text-gray-700">Subject Id</th>
+                                <th class="px-3 py-2 font-medium text-gray-700">Session Id</th>
+                                <th class="px-3 py-2 font-medium text-gray-700">Display Name</th>
+                                <th class="px-3 py-2 font-medium text-gray-700">Created</th>
+                                <th class="px-3 py-2 font-medium text-gray-700">Expires</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach (var session in Model.UserSessions.Results)
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 text-gray-600">@session.SubjectId</td>
+                                    <td class="px-3 py-2 text-gray-600">@session.SessionId</td>
+                                    <td class="px-3 py-2 text-gray-600">@session.DisplayName</td>
+                                    <td class="px-3 py-2 text-gray-600">@session.Created</td>
+                                    <td class="px-3 py-2 text-gray-600">@session.Expires</td>
+                                    <td class="px-3 py-2">
+                                        <form method="post">
+                                            <input type="hidden" name="SessionId" value="@session.SessionId" />
+                                            <button type="submit" class="px-3 py-1 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr class="bg-gray-50"><td colspan="6" class="px-3 py-1.5 text-xs text-gray-500">
+                                    <strong class="text-gray-600">Clients:</strong>
+                                    @if (session.ClientIds?.Any() == true)
+                                    {
+                                        @(session.ClientIds.Aggregate((x, y) => $"{x}, {y}"))
+                                    }
+                                    else
+                                    {
+                                        @("None")
+                                    }
+                                </td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-center text-gray-500 mt-4">No User Sessions</p>
+            }
+        }
+        else
+        {
+            <div class="bg-yellow-50 border border-yellow-200 rounded-card p-4">
+                <p class="text-sm text-yellow-700">
+                    You do not have server-side sessions enabled.
+                    To do so, use <em>AddServerSideSessions</em> on your IdentityServer configuration.
+                    See the <a href="https://duende.link/p/server-side-sessions" class="text-primary-600 hover:text-primary-700 underline">documentation</a> for more information.
+                </p>
+            </div>
+        }
+        </div>
+    </div>
+</div>
+

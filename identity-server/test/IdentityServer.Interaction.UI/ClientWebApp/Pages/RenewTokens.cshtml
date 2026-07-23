@@ -1,0 +1,11 @@
+@page
+@model Duende.IdentityServer.UI.ClientWebApp.Pages.RenewTokensModel
+
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="bg-red-50 border border-red-300 rounded-card p-6 space-y-2">
+    <h1 class="text-xl font-semibold text-red-700">Error renewing tokens.</h1>
+    <p class="text-sm text-red-600">@Model.Error</p>
+</div>

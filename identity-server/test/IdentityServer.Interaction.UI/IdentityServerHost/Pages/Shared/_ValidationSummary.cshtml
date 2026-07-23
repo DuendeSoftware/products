@@ -1,0 +1,7 @@
+﻿@if (ViewContext.ModelState.IsValid == false)
+{
+    <div class="bg-red-50 border border-red-300 rounded-card p-4 mb-4">
+        <p class="font-semibold text-red-700">Error</p>
+        <div asp-validation-summary="All" class="text-sm text-red-600 mt-1"></div>
+    </div>
+}

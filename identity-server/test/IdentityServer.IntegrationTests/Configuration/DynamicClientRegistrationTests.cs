@@ -64,4 +64,24 @@ public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
         response.RequireClientSecret.ShouldNotBeNull();
         response.RequireClientSecret.Value.ShouldBeFalse();
     }
+
+    [Fact]
+    public async Task zero_absolute_refresh_token_lifetime_allows_unlimited_lifetime()
+    {
+        // A value of 0 for AbsoluteRefreshTokenLifetime means unlimited lifetime
+        // See: https://docs.duendesoftware.com/identityserver/reference/v8/models/client/#refresh-token
+        var request = new DynamicClientRegistrationRequest
+        {
+            RedirectUris = new[] { new Uri("https://example.com/callback") },
+            GrantTypes = new[] { "authorization_code", "refresh_token" },
+            AbsoluteRefreshTokenLifetime = 0
+        };
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
+        response.ShouldNotBeNull();
+        var newClient = await IdentityServerHost.GetClientAsync(response!.ClientId, _ct);
+        newClient.ShouldNotBeNull();
+        newClient.AbsoluteRefreshTokenLifetime.ShouldBe(0);
+    }
 }

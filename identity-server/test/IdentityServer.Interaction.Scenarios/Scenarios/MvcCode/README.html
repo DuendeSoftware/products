@@ -1,0 +1,134 @@
+<h1>WebClientCodeFlow &#8212; MVC Authorization Code Flow + PKCE</h1>
+
+<p>Demonstrates an MVC web application authenticating users through Duende IdentityServer using the OAuth 2.0 Authorization Code flow with PKCE, then calling a protected API using the resulting access token.</p>
+
+<h2>Services</h2>
+
+<p>Three in-process hosts start when this scenario runs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Service</th>
+      <th>Name</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Duende IdentityServer</td>
+      <td><code>identity-server</code></td>
+      <td>Issues tokens, manages sessions</td>
+    </tr>
+    <tr>
+      <td>MVC web application</td>
+      <td><code>webapp</code></td>
+      <td>Client &#8212; triggers login and calls the API</td>
+    </tr>
+    <tr>
+      <td>Protected API</td>
+      <td><code>api</code></td>
+      <td>Resource server &#8212; requires a valid bearer token</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Links to all three services appear in the DevPortal once the scenario is running.</p>
+
+<h2>Test credentials</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Password</th>
+      <th>Display name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>alice</code></td>
+      <td><code>alice</code></td>
+      <td>Alice Smith</td>
+    </tr>
+    <tr>
+      <td><code>bob</code></td>
+      <td><code>bob</code></td>
+      <td>Bob Smith</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Expected user journey</h2>
+
+<ol>
+  <li>Navigate to the <strong>webapp</strong> link in the DevPortal.</li>
+  <li>The app requires authentication &#8212; you are redirected to IdentityServer&#8217;s login page.</li>
+  <li>Sign in with <code>alice</code> / <code>alice</code> (or <code>bob</code> / <code>bob</code>).</li>
+  <li>IdentityServer issues an authorization code and redirects back to the webapp. PKCE ensures the code cannot be exchanged by a third party.</li>
+  <li>The webapp exchanges the code for an ID token, access token, and refresh token.</li>
+  <li>The webapp displays your profile claims (name, email, address, website) fetched from the UserInfo endpoint.</li>
+  <li>The webapp uses the access token as a bearer token to call the <strong>api</strong> and displays the response.</li>
+  <li>You can sign out from the webapp, which triggers a front-channel logout notification back to IdentityServer.</li>
+</ol>
+
+<p>Consent is disabled for this client &#8212; you go directly from login to the app.</p>
+
+<h2>Scopes requested</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scope</th>
+      <th>Type</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>openid</code></td>
+      <td>Identity</td>
+      <td>Required for OIDC &#8212; includes the subject identifier</td>
+    </tr>
+    <tr>
+      <td><code>profile</code></td>
+      <td>Identity</td>
+      <td>Name, given name, family name, website</td>
+    </tr>
+    <tr>
+      <td><code>email</code></td>
+      <td>Identity</td>
+      <td>Email address and verification status</td>
+    </tr>
+    <tr>
+      <td><code>custom.profile</code></td>
+      <td>Identity</td>
+      <td>Name, email, location, and address claim</td>
+    </tr>
+    <tr>
+      <td><code>resource1.scope1</code></td>
+      <td>API</td>
+      <td>Access to Resource 1</td>
+    </tr>
+    <tr>
+      <td><code>resource2.scope1</code></td>
+      <td>API</td>
+      <td>Access to Resource 2 (also includes name and email claims in the access token)</td>
+    </tr>
+    <tr>
+      <td><code>offline_access</code></td>
+      <td>Special</td>
+      <td>Refresh token &#8212; allows token renewal without re-authentication</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Key implementation details</h2>
+
+<ul>
+  <li><strong>Response type:</strong> <code>code</code> (Authorization Code flow &#8212; no tokens in the browser URL)</li>
+  <li><strong>PKCE:</strong> enabled &#8212; a code verifier/challenge pair is generated per request</li>
+  <li><strong>Client secret:</strong> <code>secret</code> (shared secret between the webapp and IdentityServer)</li>
+  <li><strong>Token storage:</strong> tokens are saved to the authentication cookie so the webapp can use them for API calls</li>
+  <li><strong>UserInfo endpoint:</strong> claims are fetched from the UserInfo endpoint after token exchange</li>
+</ul>

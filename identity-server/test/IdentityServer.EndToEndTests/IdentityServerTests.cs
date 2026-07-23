@@ -12,23 +12,9 @@ namespace Duende.IdentityServer.EndToEndTests;
 public class IdentityServerTests(IdentityServerHostTestFixture fixture)
     : PlaywrightTestBase<All>(fixture)
 {
-    [Theory]
-    [InlineData(AppHostServices.MvcAutomaticTokenManagement)]
-    [InlineData(AppHostServices.MvcCode)]
-    // [InlineData(AppHostServices.MvcDPoP)]
-    [InlineData(AppHostServices.MvcHybridBackChannel)]
-    [InlineData(AppHostServices.MvcJarJwt)]
-    // [InlineData(AppHostServices.MvcJarUriJwt)] // Fails in CI: JAR URI fetch not reachable in GitHub Actions environment
-    // [InlineData(AppHostServices.Web)]
-    public async Task clients_can_login_use_tokens_and_logout(string clientName)
-    {
-        await Page.GotoAsync(Fixture.GetUrlTo(clientName).ToString());
-        await Page.Login();
-        await Page.CallApi();
-        await Page.RenewTokens();
-        await Page.CallApi();
-        await Page.Logout();
-    }
+    // Client login E2E tests have been moved to the interactive scenario test harness
+    // (IdentityServer.Interaction.Scenarios / IdentityServer.Interaction.Tests).
+    // The remaining clients (MvcJarUriJwt, Web) are not yet migrated.
 
     [Theory]
     [InlineData(AppHostServices.TemplateIs)]

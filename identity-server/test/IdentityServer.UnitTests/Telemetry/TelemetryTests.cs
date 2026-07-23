@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
 
 namespace IdentityServer.UnitTests.Telemetry;
@@ -30,9 +31,9 @@ public class TelemetryTests
 
         Duende.IdentityServer.Telemetry.Metrics.Failure("oops");
 
-        results.Count.ShouldBe(1);
-        results[0].Name.ShouldBe(OperationCounterName);
-        results[0].Value.ShouldBe(1);
+        var result = results.First(x => x.Name == OperationCounterName
+            && x.Tags.Any(t => t.Key == Duende.IdentityServer.Telemetry.Metrics.Tags.Error && t.Value?.ToString() == "oops"));
+        result.Value.ShouldBe(1);
     }
 
     [Fact]
@@ -44,21 +45,23 @@ public class TelemetryTests
 
         results.ShouldNotBeEmpty();
 
-        var result = results.First(x => x.Name == "tokenservice.operation" && x.Tags.Any(t => t.Value?.ToString() == "test.client"));
+        var result = results.First(x => x.Name == OperationCounterName
+            && x.Tags.Any(t => t.Key == Duende.IdentityServer.Telemetry.Metrics.Tags.Client && t.Value?.ToString() == "test.client"));
 
-        result.Tags[0].Value.ShouldBe("test.client");
+        result.Tags.First(t => t.Key == Duende.IdentityServer.Telemetry.Metrics.Tags.Client).Value.ShouldBe("test.client");
         result.Value.ShouldBeGreaterThan(0, "sometimes the test runs in parallel and reports multiple measurements");
     }
 
     private static MeterListener StartListeningForMeasurements(
-        out List<(string Name, long Value, KeyValuePair<string, object?>[] Tags)> results)
+        out ConcurrentBag<(string Name, long Value, KeyValuePair<string, object?>[] Tags)> results)
     {
         var listener = new MeterListener();
-        List<(string Name, long Value, KeyValuePair<string, object?>[] Tags)> measurements = new();
+        var measurements = new ConcurrentBag<(string Name, long Value, KeyValuePair<string, object?>[] Tags)>();
 
         listener.SetMeasurementEventCallback<long>((instrument, measurement, tags, _) =>
         {
-            measurements.Add((instrument.Name, measurement, tags.ToArray()));
+            var entry = (instrument.Name, measurement, tags.ToArray());
+            measurements.Add(entry);
         });
 
         listener.InstrumentPublished = (instrument, meterListener) =>

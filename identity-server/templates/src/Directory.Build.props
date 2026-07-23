@@ -8,4 +8,9 @@
     <AnalysisMode>None</AnalysisMode>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <!-- Pin vulnerable transitive dependency (templates opt out of CPM so GlobalPackageReference doesn't apply) -->
+  <ItemGroup>
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

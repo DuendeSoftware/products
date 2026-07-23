@@ -1,0 +1,15 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Account.Logout.Index
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Logout</h1>
+        <p class="mt-1 text-gray-500">Would you like to logout of IdentityServer?</p>
+    </div>
+
+    <form asp-page="/Account/Logout/Index">
+        <input type="hidden" name="logoutId" value="@Model.LogoutId" />
+
+        <button class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md shadow-sm hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">Yes</button>
+    </form>
+</div>

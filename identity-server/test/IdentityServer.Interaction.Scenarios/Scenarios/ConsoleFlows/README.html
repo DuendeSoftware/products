@@ -1,0 +1,97 @@
+<h1>ConsoleClientCredentials &#8212; OAuth 2.0 Client Credentials Flow</h1>
+
+<p>Demonstrates a machine-to-machine client obtaining an access token from Duende IdentityServer using the OAuth 2.0 Client Credentials grant, then calling a protected API with that token. No user login or browser redirect is involved.</p>
+
+<h2>Services</h2>
+
+<p>Two in-process hosts start when this scenario runs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Service</th>
+      <th>Name</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Duende IdentityServer</td>
+      <td><code>identity-server</code></td>
+      <td>Issues access tokens</td>
+    </tr>
+    <tr>
+      <td>Protected API</td>
+      <td><code>api</code></td>
+      <td>Resource server &#8212; requires a valid bearer token</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Client configuration</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>client_id</code></td>
+      <td><code>client</code></td>
+    </tr>
+    <tr>
+      <td><code>client_secret</code></td>
+      <td><code>secret</code></td>
+    </tr>
+    <tr>
+      <td>Grant type</td>
+      <td><code>client_credentials</code></td>
+    </tr>
+    <tr>
+      <td>Allowed scopes</td>
+      <td><code>resource1.scope1</code>, <code>resource1.scope2</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>No user context is associated with the token &#8212; the client authenticates as itself.</p>
+
+<h2>Flow</h2>
+
+<ol>
+  <li>Fetch the OpenID Connect discovery document from IdentityServer to locate the token endpoint.</li>
+  <li>POST to the token endpoint with <code>client_id</code>, <code>client_secret</code>, and <code>grant_type=client_credentials</code>.</li>
+  <li>IdentityServer returns an access token (JWT).</li>
+  <li>Send a <code>GET /identity</code> request to the API with the token in an <code>Authorization: Bearer</code> header.</li>
+  <li>The API returns the claims from the access token as a JSON array.</li>
+</ol>
+
+<h2>API endpoint</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Endpoint</th>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>/identity</code></td>
+      <td><code>GET</code></td>
+      <td>Returns the claims present in the bearer token</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Key implementation details</h2>
+
+<ul>
+  <li><strong>No interactive login</strong> &#8212; the client authenticates directly with its credentials; there is no authorization code exchange or redirect</li>
+  <li><strong>Token audience</strong> &#8212; the access token is scoped to <code>resource1.scope1</code> and/or <code>resource1.scope2</code>; request only the scopes needed</li>
+  <li><strong>TLS</strong> &#8212; the test hosts use self-signed certificates; certificate validation is bypassed in the scenario client</li>
+</ul>

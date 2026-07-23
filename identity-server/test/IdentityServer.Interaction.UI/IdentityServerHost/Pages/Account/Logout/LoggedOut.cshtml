@@ -1,0 +1,32 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Account.Logout.LoggedOut
+
+<div class="logged-out-page space-y-4">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Logout</h1>
+        <p class="mt-1 text-gray-500">You are now logged out</p>
+    </div>
+
+    @if (Model.View.PostLogoutRedirectUri != null)
+    {
+        <div class="bg-white rounded-card shadow-sm border border-gray-200 p-4">
+            <p class="text-gray-700">
+                Click <a class="PostLogoutRedirectUri text-primary-600 hover:text-primary-700 underline transition-colors" href="@Model.View.PostLogoutRedirectUri">here</a> to return to the
+                <span class="font-medium">@Model.View.ClientName</span> application.
+            </p>
+        </div>
+    }
+
+    @if (Model.View.SignOutIframeUrl != null)
+    {
+        <iframe width="0" height="0" class="signout" src="@Model.View.SignOutIframeUrl"></iframe>
+    }
+</div>
+
+@section scripts
+{
+    @if (Model.View.AutomaticRedirectAfterSignOut)
+    {
+        <script src="~/js/signout-redirect.js"></script>
+    }
+}

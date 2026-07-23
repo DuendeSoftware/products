@@ -1,0 +1,26 @@
+@using Duende.IdentityServer.Extensions
+@{
+    #nullable enable
+    string? name = null;
+    if (!true.Equals(ViewData["signed-out"]))
+    {
+        name = Context.User?.GetDisplayName();
+    }
+}
+
+<header class="bg-gray-900 shadow-md">
+    <nav class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="~/" class="flex items-center gap-2 text-white font-semibold text-lg hover:text-primary-300 transition-colors">
+            <img src="~/duende-logo.svg" class="h-8 w-8">
+            Duende IdentityServer
+        </a>
+
+        @if (!string.IsNullOrWhiteSpace(name))
+        {
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-300">@name</span>
+                <a asp-page="/Account/Logout/Index" class="text-sm text-gray-400 hover:text-white transition-colors">Logout</a>
+            </div>
+        }
+    </nav>
+</header>

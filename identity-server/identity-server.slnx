@@ -6,26 +6,17 @@
     <Project Path="aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/clients/">
-    <Project Path="clients/src/APIs/DPoPApi/DPoPApi.csproj" />
     <Project Path="clients/src/APIs/MtlsApi/MtlsApi.csproj" />
     <Project Path="clients/src/APIs/ResourceBasedApi/ResourceBasedApi.csproj" />
-    <Project Path="clients/src/APIs/SimpleApi/SimpleApi.csproj" />
-    <Project Path="clients/src/ConsoleCibaClient/ConsoleCibaClient.csproj" />
-    <Project Path="clients/src/ConsoleClientCredentialsFlow/ConsoleClientCredentialsFlow.csproj" />
     <Project Path="clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi/ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />
-    <Project Path="clients/src/ConsoleClientCredentialsFlowDPoP/ConsoleClientCredentialsFlowDPoP.csproj" />
     <Project Path="clients/src/ConsoleClientCredentialsFlowPostBody/ConsoleClientCredentialsFlowPostBody.csproj" />
     <Project Path="clients/src/ConsoleCode/ConsoleCode.csproj" />
     <Project Path="clients/src/ConsoleCustomGrant/ConsoleExtensionGrant.csproj" />
     <Project Path="clients/src/ConsoleDcrClient/ConsoleDcrClient.csproj" />
-    <Project Path="clients/src/ConsoleDeviceFlow/ConsoleDeviceFlow.csproj" />
     <Project Path="clients/src/ConsoleEphemeralMtlsClient/ConsoleEphemeralMtlsClient.csproj" />
-    <Project Path="clients/src/ConsoleIntrospectionClient/ConsoleIntrospectionClient.csproj" />
     <Project Path="clients/src/ConsoleMTLSClient/ConsoleMTLSClient.csproj" />
     <Project Path="clients/src/ConsoleParameterizedScopeClient/ConsoleParameterizedScopeClient.csproj" />
-    <Project Path="clients/src/ConsolePrivateKeyJwtClient/ConsolePrivateKeyJwtClient.csproj" />
     <Project Path="clients/src/ConsoleResourceIndicators/ConsoleResourceIndicators.csproj" />
-    <Project Path="clients/src/ConsoleResourceOwnerFlow/ConsoleResourceOwnerFlow.csproj" />
     <Project Path="clients/src/ConsoleResourceOwnerFlowPublic/ConsoleResourceOwnerFlowPublic.csproj" />
     <Project Path="clients/src/ConsoleResourceOwnerFlowReference/ConsoleResourceOwnerFlowReference.csproj" />
     <Project Path="clients/src/ConsoleResourceOwnerFlowRefreshToken/ConsoleResourceOwnerFlowRefreshToken.csproj" />
@@ -33,11 +24,6 @@
     <Project Path="clients/src/ConsoleScopesResources/ConsoleScopesResources.csproj" />
     <Project Path="clients/src/Constants/Constants.csproj" />
     <Project Path="clients/src/JsOidc/JsOidc.csproj" />
-    <Project Path="clients/src/MvcAutomaticTokenManagement/MvcAutomaticTokenManagement.csproj" />
-    <Project Path="clients/src/MvcCode/MvcCode.csproj" />
-    <Project Path="clients/src/MvcDPoP/MvcDPoP.csproj" />
-    <Project Path="clients/src/MvcHybridBackChannel/MvcHybridBackChannel.csproj" />
-    <Project Path="clients/src/MvcJarJwt/MvcJarJwt.csproj" />
     <Project Path="clients/src/MvcJarUriJwt/MvcJarUriJwt.csproj" />
     <Project Path="clients/src/MvcSaml/MvcSaml.csproj" />
     <Project Path="clients/src/Web/Web.csproj" />
@@ -85,6 +71,9 @@
   <Folder Name="/test/">
     <Project Path="test/IdentityServer.EndToEndTests/IdentityServer.EndToEndTests.csproj" />
     <Project Path="test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
+    <Project Path="test/IdentityServer.Interaction.Scenarios/IdentityServer.Interaction.Scenarios.csproj" />
+    <Project Path="test/IdentityServer.Interaction.Tests/IdentityServer.Interaction.Tests.csproj" />
+    <Project Path="test/IdentityServer.Interaction.UI/IdentityServer.Interaction.UI.csproj" />
     <Project Path="test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
   </Folder>
 </Solution>

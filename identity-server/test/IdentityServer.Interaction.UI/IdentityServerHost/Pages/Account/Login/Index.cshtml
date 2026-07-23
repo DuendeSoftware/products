@@ -1,0 +1,83 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Account.Login.Index
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Login</h1>
+        <p class="mt-1 text-gray-500">Choose how to login</p>
+    </div>
+
+    <partial name="_ValidationSummary" />
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        @if (Model.View.EnableLocalLogin)
+        {
+            <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-800">Local Account</h2>
+                </div>
+
+                <div class="p-6">
+                    <form asp-page="/Account/Login/Index" class="space-y-4">
+                        <input type="hidden" asp-for="Input.ReturnUrl" />
+
+                        <div>
+                            <label asp-for="Input.Username" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                            <input class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Username" asp-for="Input.Username" autofocus>
+                        </div>
+                        <div>
+                            <label asp-for="Input.Password" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                            <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Password" asp-for="Input.Password" autocomplete="off">
+                        </div>
+
+                        @if (Model.View.AllowRememberLogin)
+                        {
+                            <div class="flex items-center gap-2">
+                                <input class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" asp-for="Input.RememberLogin">
+                                <label class="text-sm text-gray-700" asp-for="Input.RememberLogin">
+                                    Remember My Login
+                                </label>
+                            </div>
+                        }
+
+                        <div class="flex gap-3 pt-2">
+                            <button class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md shadow-sm hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500" name="Input.Button" value="login">Login</button>
+                            <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500" name="Input.Button" value="cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (Model.View.VisibleExternalProviders.Any())
+        {
+            <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-800">External Account</h2>
+                </div>
+                <div class="p-6">
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var provider in Model.View.VisibleExternalProviders)
+                        {
+                            <a class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+                               asp-page="/ExternalLogin/Challenge"
+                               asp-route-scheme="@provider.AuthenticationScheme"
+                               asp-route-returnUrl="@Model.Input.ReturnUrl">
+                                @provider.DisplayName
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!Model.View.EnableLocalLogin && !Model.View.VisibleExternalProviders.Any())
+        {
+            <div class="bg-yellow-50 border border-yellow-300 rounded-card p-4 col-span-full">
+                <p class="font-semibold text-yellow-700">Invalid login request</p>
+                <p class="text-sm text-yellow-600 mt-1">There are no login schemes configured for this request.</p>
+            </div>
+        }
+    </div>
+</div>

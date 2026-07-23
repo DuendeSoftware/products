@@ -92,9 +92,7 @@ public sealed class TestScope : IDisposable
 #pragma warning disable CA2000 // Ownership transferred to HttpClient via disposeHandler: true
         var handler = TestIsolationService.CreateHandler(allowAutoRedirect);
 #pragma warning restore CA2000
-#pragma warning disable CA5400 // CRL check intentionally disabled for test infrastructure
         return new HttpClient(handler, disposeHandler: true)
-#pragma warning restore CA5400
         {
             BaseAddress = BaseAddress
         };

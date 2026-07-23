@@ -4,9 +4,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>IdentityServerHost</RootNamespace>
+
+    <NoWarn>$(NoWarn);IDE0130</NoWarn><!-- Namespace does not match folder structure -->
+    <NoWarn>$(NoWarn);CA2007</NoWarn><!-- Do not directly await a Task -->
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" version="8.0.0" />
+    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.1" />

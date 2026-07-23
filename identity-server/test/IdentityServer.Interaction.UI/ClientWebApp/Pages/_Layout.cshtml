@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MvcCode</title>
+    <link rel="stylesheet" href="~/site.css" />
+</head>
+<body class="bg-surface-light text-gray-900 min-h-screen flex flex-col">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-6">
+            <a asp-page="/Index" class="text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">Home</a>
+            <a asp-page="/Secure" class="text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">Secure</a>
+            @if (Context.User?.Identity?.IsAuthenticated == true)
+            {
+                <a asp-page="/CallApi" class="text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">Call API</a>
+                <a asp-page="/Logout" class="text-sm font-medium text-red-600 hover:text-red-700 transition-colors ml-auto">Logout</a>
+            }
+        </nav>
+    </header>
+    <div class="flex-1">
+        <main role="main" class="max-w-5xl mx-auto px-4 py-8">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="border-t border-gray-200 py-4">
+        <p class="text-center text-xs text-gray-400">MvcCode Test Client</p>
+    </footer>
+</body>
+</html>

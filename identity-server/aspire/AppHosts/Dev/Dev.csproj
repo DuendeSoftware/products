@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+<Project Sdk="Aspire.AppHost.Sdk">
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\..\hosts\Main10\Host.Main10.csproj" />
   </ItemGroup>

@@ -1,0 +1,36 @@
+@page
+@using Microsoft.AspNetCore.Authentication
+@model Duende.IdentityServer.UI.ClientWebApp.Pages.SecureModel
+
+<div class="space-y-8">
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-semibold text-gray-900">Claims</h2>
+    <a class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md shadow-sm hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500" asp-page="/RenewTokens">Renew Tokens</a>
+  </div>
+
+  <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+    <dl class="divide-y divide-gray-200">
+      @foreach (var claim in User.Claims)
+      {
+        <div class="px-4 py-3 grid grid-cols-3 gap-4">
+          <dt class="text-sm font-medium text-gray-500">@claim.Type</dt>
+          <dd class="text-sm text-gray-900 col-span-2 break-all">@claim.Value</dd>
+        </div>
+      }
+    </dl>
+  </div>
+
+  <h2 class="text-2xl font-semibold text-gray-900">Properties</h2>
+
+  <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+    <dl class="divide-y divide-gray-200">
+      @foreach (var prop in (await HttpContext.AuthenticateAsync()).Properties?.Items ?? Enumerable.Empty<KeyValuePair<string, string?>>())
+      {
+        <div class="px-4 py-3 grid grid-cols-3 gap-4">
+          <dt class="text-sm font-medium text-gray-500">@prop.Key</dt>
+          <dd class="text-sm text-gray-900 col-span-2 break-all">@prop.Value</dd>
+        </div>
+      }
+    </dl>
+  </div>
+</div>

@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Storage\IdentityServer.Storage.csproj" />
+    <ProjectReference Include="..\..\..\storage\src\Storage\Storage.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +44,10 @@
     <EmbeddedResource Include="Endpoints\Results\iframe-completion.js" />
     <None Remove="Hosting\FederatedSignOut\federated-signout.js" />
     <EmbeddedResource Include="Hosting\FederatedSignOut\federated-signout.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Stores\Storage\Internal\" />
   </ItemGroup>
 
 </Project>

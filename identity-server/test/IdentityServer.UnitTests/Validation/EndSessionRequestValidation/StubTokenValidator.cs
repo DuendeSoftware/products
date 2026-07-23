@@ -14,5 +14,5 @@ public class StubTokenValidator : ITokenValidator
 
     public Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string? expectedScope, Ct _) => Task.FromResult(AccessTokenValidationResult);
 
-    public Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, Ct _) => Task.FromResult(IdentityTokenValidationResult);
+    public Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string? clientId, bool validateLifetime, Ct _) => Task.FromResult(IdentityTokenValidationResult);
 }

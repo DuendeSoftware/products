@@ -1,0 +1,46 @@
+@page
+@model Duende.IdentityServer.UI.Pages.Ciba.AllModel
+@{
+}
+
+<div class="space-y-6">
+    <div class="bg-white rounded-card shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <h2 class="text-lg font-semibold text-gray-800">Pending Backchannel Login Requests</h2>
+        </div>
+        <div class="p-4">
+            @if (Model.Logins.Any())
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 text-left">
+                                <th class="px-3 py-2 font-medium text-gray-700">Id</th>
+                                <th class="px-3 py-2 font-medium text-gray-700">Client Id</th>
+                                <th class="px-3 py-2 font-medium text-gray-700">Binding Message</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach (var login in Model.Logins)
+                            {
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 text-gray-600">@login.InternalId</td>
+                                    <td class="px-3 py-2 text-gray-600">@login.Client.ClientId</td>
+                                    <td class="px-3 py-2 text-gray-600">@login.BindingMessage</td>
+                                    <td class="px-3 py-2">
+                                        <a asp-page="Consent" asp-route-id="@login.InternalId" class="px-3 py-1 text-xs font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 transition-colors">Process</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-gray-500 text-center py-4">No Pending Login Requests</p>
+            }
+        </div>
+    </div>
+</div>

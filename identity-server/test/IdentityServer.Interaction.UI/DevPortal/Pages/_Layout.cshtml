@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Dev Portal</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem; color: #111; }
+        h1, h2, h3 { color: #1a1a1a; }
+        a { color: #0066cc; }
+        a:hover { color: #004499; }
+        .links ul { list-style: none; padding: 0; }
+        .links li { margin: 0.5rem 0; }
+        .links a { font-size: 1rem; font-weight: 500; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { background: #f4f4f4; padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+        pre code { background: none; padding: 0; }
+        footer { margin-top: 3rem; border-top: 1px solid #ddd; padding-top: 1rem; font-size: 0.8rem; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <main>
+        @RenderBody()
+    </main>
+    <footer>
+        <p>Dev Portal</p>
+    </footer>
+</body>
+</html>

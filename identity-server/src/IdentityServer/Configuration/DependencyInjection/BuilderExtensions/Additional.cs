@@ -479,6 +479,22 @@ public static class IdentityServerBuilderExtensionsAdditional
     }
 
     /// <summary>
+    /// Registers a custom <see cref="ISamlServiceProviderConfigurationValidator"/> implementation that
+    /// validates SAML service provider configuration when SPs are loaded from the store or saved
+    /// through the admin API. Uses <c>AddTransient</c> to override the default validator.
+    /// </summary>
+    /// <typeparam name="T">The <see cref="ISamlServiceProviderConfigurationValidator"/> implementation to register.</typeparam>
+    /// <param name="builder">The <see cref="IIdentityServerBuilder"/> to add the validator to.</param>
+    /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+    public static IIdentityServerBuilder AddSamlServiceProviderConfigurationValidator<T>(this IIdentityServerBuilder builder)
+        where T : class, ISamlServiceProviderConfigurationValidator
+    {
+        builder.Services.AddTransient<ISamlServiceProviderConfigurationValidator, T>();
+
+        return builder;
+    }
+
+    /// <summary>
     /// Adds the X.509 secret parsers and validators required for mutual TLS (mTLS) client authentication.
     /// Registers <c>MutualTlsSecretParser</c>, <c>X509ThumbprintSecretValidator</c>, and
     /// <c>X509NameSecretValidator</c> so that clients can authenticate using their TLS client certificate.

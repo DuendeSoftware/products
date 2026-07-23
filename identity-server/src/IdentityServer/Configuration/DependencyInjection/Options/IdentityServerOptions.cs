@@ -242,6 +242,12 @@ public class IdentityServerOptions
     public ServerSideSessionOptions ServerSideSessions { get; set; } = new ServerSideSessionOptions();
 
     /// <summary>
+    /// Gets or sets the settings for the background job that periodically purges expired
+    /// entities from the storage layer.
+    /// </summary>
+    public StoragePurgeOptions StoragePurge { get; set; } = new StoragePurgeOptions();
+
+    /// <summary>
     /// Gets or sets the Pushed Authorization Request (PAR) settings, including whether PAR is globally required.
     /// </summary>
     public PushedAuthorizationOptions PushedAuthorization { get; set; } = new PushedAuthorizationOptions();

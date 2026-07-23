@@ -6,16 +6,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 var identityServerHost = builder.AddProject<Projects.Host_Main10>(name: "is-host")
     .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
 
-var api = builder.AddProject<Projects.DPoPApi>("dpop-api")
-    .WithEnvironment(
-        name: "is-host",
-        endpointReference: identityServerHost.GetEndpoint(name: "https")
-    );
-
 var webClient = builder.AddProject<Projects.Web>("web")
     .WithReference(identityServerHost)
-    .WithEnvironment(name: "is-host", endpointReference: identityServerHost.GetEndpoint(name: "https"))
-    .WithReference(api)
-    .WithEnvironment(name: "dpop-api", endpointReference: api.GetEndpoint(name: "https"));
+    .WithEnvironment(name: "is-host", endpointReference: identityServerHost.GetEndpoint(name: "https"));
 
 builder.Build().Run();

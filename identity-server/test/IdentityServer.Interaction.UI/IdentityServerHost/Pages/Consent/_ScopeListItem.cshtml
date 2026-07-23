@@ -1,0 +1,47 @@
+@using Duende.IdentityServer.UI.Pages.Consent
+@model ScopeViewModel
+
+<li class="px-4 py-3">
+    <label class="flex items-center gap-2">
+        <input class="consent-scopecheck h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+               type="checkbox"
+               name="Input.ScopesConsented"
+               id="scopes_@Model.Value"
+               value="@Model.Value"
+               checked="@Model.Checked"
+               disabled="@Model.Required" />
+        @if (Model.Required)
+        {
+            <input type="hidden"
+                   name="Input.ScopesConsented"
+                   value="@Model.Value" />
+        }
+        <strong class="text-sm text-gray-800">@Model.DisplayName</strong>
+        @if (Model.Emphasize)
+        {
+            <span class="text-yellow-500">&#9888;</span>
+        }
+    </label>
+    @if (Model.Required)
+    {
+        <span class="ml-6 text-xs text-gray-400 italic">(required)</span>
+    }
+    @if (Model.Description != null)
+    {
+        <div class="consent-description">
+            <label for="scopes_@Model.Value">@Model.Description</label>
+        </div>
+    }
+    @if (Model.Resources?.Any() == true)
+    {
+        <div class="consent-description">
+            <label>Will be available to these resource servers:</label>
+            <ul>
+            @foreach (var resource in Model.Resources)
+            {
+                <li>@resource.DisplayName</li>
+            }
+            </ul>
+        </div>
+    }
+</li>

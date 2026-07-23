@@ -1,0 +1,48 @@
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsAspireHost>true</IsAspireHost>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>false</UseMicrosoftTestingPlatformRunner>
+    <RootNamespace>Duende.IdentityServer.Interaction</RootNamespace>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CA1848;CS7022;CS0618;CS8602</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
+    <PackageReference Include="Duende.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
+    <PackageReference Include="Microsoft.Playwright.Xunit.v3" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+
+  <!-- Remove global usings and assembly attributes injected by test.props -->
+  <ItemGroup>
+    <Using Remove="Microsoft.Extensions.Time.Testing" />
+    <Using Remove="Shouldly" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\IdentityServer.Interaction.UI\IdentityServer.Interaction.UI.csproj" IsAspireProjectResource="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scenarios\**\README.html" />
+  </ItemGroup>
+
+</Project>
