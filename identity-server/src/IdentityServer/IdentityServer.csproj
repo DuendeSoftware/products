@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Storage\IdentityServer.Storage.csproj" />
-    <ProjectReference Include="..\..\..\storage\src\Storage\Storage.csproj" />
+    <PackageReference Include="Duende.Storage" />
   </ItemGroup>
 
   <ItemGroup>
