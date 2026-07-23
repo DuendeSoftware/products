@@ -10,4 +10,8 @@ namespace Duende.Storage.Internal;
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
 [ValueOf<int>]
-public partial record PoolId;
+public partial record PoolId
+{
+    /// <summary>The default pool identifier (pool 0), used for single-space deployments.</summary>
+    public static readonly PoolId Default = 0;
+}

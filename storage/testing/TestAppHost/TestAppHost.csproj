@@ -7,10 +7,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn);CA1848;CA1873</NoWarn><!-- Use the LoggerMessage delegates -->
+    <NoWarn>$(NoWarn);CA1848;CA1873;NU1903</NoWarn><!-- CA1848/CA1873: LoggerMessage delegates; NU1903: transitive vulnerability in Aspire host packages -->
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Oracle" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
     <PackageReference Include="Aspire.Hosting.SqlServer" />
   </ItemGroup>

@@ -54,6 +54,12 @@ public partial class PurgeExpiredTests(AspireFixture fixture)
 }
 
 [Collection("PostgreSqlIntegration")]
+public partial class PurgePoolTests(AspireFixture fixture)
+{
+    private IStoreFixtureFactory FixtureFactory { get; } = new PostgreSqlStoreFixtureFactory(fixture);
+}
+
+[Collection("PostgreSqlIntegration")]
 public partial class FilterTranslatorIntegrationTests(AspireFixture fixture)
 {
     private IStoreFixtureFactory FixtureFactory { get; } = new PostgreSqlStoreFixtureFactory(fixture);
@@ -79,6 +85,12 @@ public partial class QueryStoreCountTests(AspireFixture fixture)
 
 [Collection("PostgreSqlIntegration")]
 public partial class QueryStoreCursorPagingTests(AspireFixture fixture)
+{
+    private IStoreFixtureFactory FixtureFactory { get; } = new PostgreSqlStoreFixtureFactory(fixture);
+}
+
+[Collection("PostgreSqlIntegration")]
+public partial class QueryStoreCursorBidirectionalPagingTests(AspireFixture fixture)
 {
     private IStoreFixtureFactory FixtureFactory { get; } = new PostgreSqlStoreFixtureFactory(fixture);
 }

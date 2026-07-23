@@ -45,6 +45,11 @@ public partial class PurgeExpiredTests
     private IStoreFixtureFactory FixtureFactory { get; } = new SqliteStoreFixtureFactory();
 }
 
+public partial class PurgePoolTests
+{
+    private IStoreFixtureFactory FixtureFactory { get; } = new SqliteStoreFixtureFactory();
+}
+
 public partial class FilterTranslatorIntegrationTests
 {
     private IStoreFixtureFactory FixtureFactory { get; } = new SqliteStoreFixtureFactory();
@@ -66,6 +71,11 @@ public partial class QueryStoreCountTests
 }
 
 public partial class QueryStoreCursorPagingTests
+{
+    private IStoreFixtureFactory FixtureFactory { get; } = new SqliteStoreFixtureFactory();
+}
+
+public partial class QueryStoreCursorBidirectionalPagingTests
 {
     private IStoreFixtureFactory FixtureFactory { get; } = new SqliteStoreFixtureFactory();
 }

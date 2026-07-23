@@ -284,6 +284,7 @@ public partial class PurgeExpiredTests
             evt.EventName.ShouldBe(OutboxEventName.EntityExpired);
             evt.EntityTypeId.ShouldBe((int)entityType.Id);
             evt.Payload.ShouldNotBeNullOrEmpty();
+            (evt.Dso is TestDso).ShouldBeTrue();
 
             // Entity should be deleted
             (await store.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();

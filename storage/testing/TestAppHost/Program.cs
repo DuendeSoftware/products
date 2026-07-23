@@ -59,6 +59,14 @@ if (startAll || resources.Contains("postgresql"))
         .WithContainerName("duende-storage-postgresql");
 }
 
+if (startAll || resources.Contains("oracle"))
+{
+    var oraclePassword = builder.AddParameter("oracle-password", "DuendeTests1");
+    _ = builder.AddOracle("oracle", oraclePassword, port: 37835)
+        .WithLifetime(ContainerLifetime.Persistent)
+        .WithContainerName("duende-storage-oracle");
+}
+
 var app = builder.Build();
 
 if (isWarmup)
@@ -76,6 +84,11 @@ if (isWarmup)
     if (startAll || resources.Contains("postgresql"))
     {
         await WaitForHealthyAsync("postgresql");
+    }
+
+    if (startAll || resources.Contains("oracle"))
+    {
+        await WaitForHealthyAsync("oracle");
     }
 
     await app.StopAsync();

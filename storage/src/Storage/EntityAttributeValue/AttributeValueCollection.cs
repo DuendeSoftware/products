@@ -16,6 +16,14 @@ public sealed class AttributeValueCollection : IEnumerable<AttributeValue>
     private readonly IReadOnlyAttributeSchema? _schema;
 
     /// <summary>
+    ///     Creates an empty schema-less collection. Attribute values may be set freely;
+    ///     validation is deferred to the admin store boundary (e.g., <c>CreateAsync</c> / <c>UpdateAsync</c>).
+    /// </summary>
+    public AttributeValueCollection()
+    {
+    }
+
+    /// <summary>
     ///     Creates an empty collection backed by the specified schema.
     /// </summary>
     /// <param name="schema">The attribute schema used for validation.</param>
@@ -119,6 +127,43 @@ public sealed class AttributeValueCollection : IEnumerable<AttributeValue>
     /// <param name="value">The date-time value.</param>
     public void Set(AttributeCode code, DateTimeOffset value) =>
         SetTyped(code, value, ScalarDataType.DateTime);
+
+    /// <summary>
+    ///     Sets a typed attribute value using a <see cref="TypedAttributeDefinition{T}"/>,
+    ///     providing compile-time type safety.
+    /// </summary>
+    /// <typeparam name="T">The CLR type of the value.</typeparam>
+    /// <param name="definition">The typed attribute definition.</param>
+    /// <param name="value">The value to set.</param>
+    /// <exception cref="ArgumentException">Thrown when <typeparamref name="T"/> does not map to a supported scalar type.</exception>
+    public void Set<T>(TypedAttributeDefinition<T> definition, T value)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        switch (value)
+        {
+            case bool b:
+                SetTyped(definition.Code, b, ScalarDataType.Boolean);
+                break;
+            case int i:
+                SetTyped(definition.Code, i, ScalarDataType.Integer);
+                break;
+            case decimal d:
+                SetTyped(definition.Code, d, ScalarDataType.Decimal);
+                break;
+            case string s:
+                SetTyped(definition.Code, s, ScalarDataType.String);
+                break;
+            case DateOnly date:
+                SetTyped(definition.Code, date, ScalarDataType.Date);
+                break;
+            case DateTimeOffset dt:
+                SetTyped(definition.Code, dt, ScalarDataType.DateTime);
+                break;
+            default:
+                throw new ArgumentException(
+                    $"Type '{typeof(T).Name}' is not a supported scalar type for typed attribute definitions.");
+        }
+    }
 
     /// <summary>Sets a complex (dictionary) attribute value.</summary>
     /// <param name="code">The attribute code.</param>
@@ -236,6 +281,55 @@ public sealed class AttributeValueCollection : IEnumerable<AttributeValue>
         }
 
         _dict[code] = new AttributeValue<IReadOnlyList<object>>(code, value);
+        errors = null;
+        return true;
+    }
+
+    /// <summary>
+    ///     Validates the collection against an externally-provided schema and returns errors.
+    ///     Use this when the collection was created without a schema (schema-less creation path)
+    ///     and the schema is resolved at a later stage, e.g. at the admin store boundary.
+    /// </summary>
+    /// <param name="schema">The schema to validate against.</param>
+    /// <param name="errors">Validation errors if the operation fails; otherwise <see langword="null"/>.</param>
+    /// <returns><c>true</c> if all attributes are valid against the schema; otherwise, <c>false</c>.</returns>
+    public bool TryValidateAgainst(IReadOnlyAttributeSchema schema, [NotNullWhen(false)] out IReadOnlyList<string>? errors)
+    {
+        ArgumentNullException.ThrowIfNull(schema);
+
+        var errorList = new List<string>();
+
+        // Check: all attributes in collection are defined in schema with correct types
+        foreach (var attribute in _dict.Values)
+        {
+            if (!schema.AttributeDefinitions.TryGetValue(attribute.Code, out var definition))
+            {
+                errorList.Add($"Attribute '{attribute.Code}' is not defined in the schema.");
+                continue;
+            }
+
+            if (!AttributeTypeMatchesValue(definition, attribute))
+            {
+                var expected = definition.AttributeType is ScalarAttributeType s ? s.DataType.ToString() : definition.AttributeType.GetType().Name;
+                errorList.Add($"Attribute '{attribute.Code}' type mismatch: expected '{expected}'.");
+            }
+        }
+
+        // Check: all required attributes are present
+        foreach (var definition in schema.AttributeDefinitions.Values.Where(d => d.IsRequired))
+        {
+            if (!_dict.ContainsKey(definition.Code))
+            {
+                errorList.Add($"Required attribute '{definition.Code}' is missing.");
+            }
+        }
+
+        if (errorList.Count > 0)
+        {
+            errors = errorList;
+            return false;
+        }
+
         errors = null;
         return true;
     }

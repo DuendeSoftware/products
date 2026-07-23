@@ -44,11 +44,11 @@ public class SqliteStoreTests
         var schemaVersionResult = await databaseSchema.CheckVersionAsync(_ct);
         schemaVersionResult.CurrentVersion.ShouldBe(0u);
         schemaVersionResult.IsCompatible.ShouldBeFalse();
-        schemaVersionResult.RequiredVersion.ShouldBe(1u);
+        schemaVersionResult.RequiredVersion.ShouldBe(2u);
 
         await databaseSchema.MigrateAsync(_ct);
         schemaVersionResult = await databaseSchema.CheckVersionAsync(_ct);
-        schemaVersionResult.CurrentVersion.ShouldBe(1u);
+        schemaVersionResult.CurrentVersion.ShouldBe(2u);
     }
 
     [Fact]

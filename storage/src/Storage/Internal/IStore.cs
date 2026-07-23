@@ -189,6 +189,26 @@ public interface IStore
     Task<int> PurgeExpiredAsync(int batchSize, Ct ct);
 
     /// <summary>
+    /// Purges all data for the current pool: entities (which cascades to keys and search_values),
+    /// entity_links, and outbox_subscriber_queue rows. This is a destructive, irreversible operation.
+    /// Deletes are performed in batches to avoid transaction log exhaustion and lock escalation.
+    /// Uses a default batch size of 10,000.
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A summary of purged row counts per table.</returns>
+    Task<PurgeResult> PurgePoolAsync(Ct ct);
+
+    /// <summary>
+    /// Purges all data for the current pool: entities (which cascades to keys and search_values),
+    /// entity_links, and outbox_subscriber_queue rows. This is a destructive, irreversible operation.
+    /// Deletes are performed in batches to avoid transaction log exhaustion and lock escalation.
+    /// </summary>
+    /// <param name="batchSize">Maximum number of rows to delete per table per batch iteration.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A summary of purged row counts per table.</returns>
+    Task<PurgeResult> PurgePoolAsync(int batchSize, Ct ct);
+
+    /// <summary>
     /// Executes multiple operations atomically in a single transaction, writing outbox events atomically.
     /// Operations are executed in order until completion or first failure.
     /// If any operation fails, execution stops immediately and all operations are rolled back.

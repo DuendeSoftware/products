@@ -306,6 +306,33 @@ internal sealed class InstrumentedStore(IStore inner, StorageMetrics metrics, st
         }
     }
 
+    public Task<PurgeResult> PurgePoolAsync(Ct ct) => PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+
+    public async Task<PurgeResult> PurgePoolAsync(int batchSize, Ct ct)
+    {
+        using var activity = StartActivity("Store.PurgePool", null, StorageTelemetryConstants.Operations.PurgePool);
+        var start = Stopwatch.GetTimestamp();
+        var succeeded = false;
+        try
+        {
+            var result = await inner.PurgePoolAsync(batchSize, ct);
+            metrics.RecordSuccess(StorageTelemetryConstants.Operations.PurgePool, dbSystem, null);
+            succeeded = true;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            RecordException(activity, ex);
+            metrics.RecordError(StorageTelemetryConstants.Operations.PurgePool, dbSystem, ex, null);
+            throw;
+        }
+        finally
+        {
+            var result = succeeded ? StorageTelemetryConstants.TagValues.Success : StorageTelemetryConstants.TagValues.Error;
+            metrics.RecordDuration(StorageTelemetryConstants.Operations.PurgePool, Elapsed(start), dbSystem, result, null);
+        }
+    }
+
     public async Task<BatchResult> ExecuteBatchAsync(IReadOnlyList<IStoreOperation> operations, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         using var activity = StartActivity("Store.ExecuteBatch", null, StorageTelemetryConstants.Operations.Batch);

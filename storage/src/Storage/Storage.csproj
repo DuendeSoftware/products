@@ -16,17 +16,20 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.Storage.MsSql" />
+    <InternalsVisibleTo Include="Duende.Storage.Oracle" />
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql" />
     <InternalsVisibleTo Include="Duende.Storage.Sqlite" />
     <InternalsVisibleTo Include="Duende.Storage.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.Sqlite.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.MsSql.Tests" />
+    <InternalsVisibleTo Include="Duende.Storage.Oracle.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.Benchmarks" />
     <InternalsVisibleTo Include="Duende.Platform" />
     <InternalsVisibleTo Include="Storage" />
     <InternalsVisibleTo Include="Authentication.Tests.Internal" />
     <InternalsVisibleTo Include="Duende.Storage.Samples.EavSchema" />
+    <InternalsVisibleTo Include="Duende.MultiSpace" />
     <InternalsVisibleTo Include="Duende.UserManagement" />
     <InternalsVisibleTo Include="Duende.UserManagement.Tests.Internal" />
     <InternalsVisibleTo Include="Duende.UserManagement.Tests.Public" />

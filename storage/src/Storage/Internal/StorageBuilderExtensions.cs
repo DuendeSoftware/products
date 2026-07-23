@@ -3,6 +3,7 @@
 
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Duende.Storage.Internal;
 
@@ -23,6 +24,7 @@ public static class StorageBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(configure);
             var builder = new StorageBuilder(services);
+            services.TryAddSingleton<IStoreFactory, DefaultPoolStoreFactory>();
             configure(builder);
             return services;
         }

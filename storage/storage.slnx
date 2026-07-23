@@ -8,6 +8,7 @@
   <Folder Name="/src/">
     <Project Path="src/Storage.CliPlugin/Storage.CliPlugin.csproj" />
     <Project Path="src/Storage.MsSql/Storage.MsSql.csproj" />
+    <Project Path="src/Storage.Oracle/Storage.Oracle.csproj" />
     <Project Path="src/Storage.PostgreSql/Storage.PostgreSql.csproj" />
     <Project Path="src/Storage.Sqlite/Storage.Sqlite.csproj" />
     <Project Path="src/Storage/Storage.csproj" />
@@ -15,6 +16,7 @@
   <Folder Name="/test/">
     <Project Path="test/Storage.CliPlugin.Tests/Storage.CliPlugin.Tests.csproj" />
     <Project Path="test/Storage.MsSql.Tests/Storage.MsSql.Tests.csproj" />
+    <Project Path="test/Storage.Oracle.Tests/Storage.Oracle.Tests.csproj" />
     <Project Path="test/Storage.PostgreSql.Tests/Storage.PostgreSql.Tests.csproj" />
     <Project Path="test/Storage.Sqlite.Tests/Storage.Sqlite.Tests.csproj" />
     <Project Path="test/Storage.Tests/Storage.Tests.csproj" />

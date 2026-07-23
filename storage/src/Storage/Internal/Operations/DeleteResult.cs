@@ -14,5 +14,10 @@ public enum DeleteResult
     /// <summary>
     /// The entity was deleted successfully.
     /// </summary>
-    Success
+    Success,
+
+    /// <summary>
+    /// A concurrency conflict occurred during deletion.
+    /// </summary>
+    ConcurrencyConflict
 }

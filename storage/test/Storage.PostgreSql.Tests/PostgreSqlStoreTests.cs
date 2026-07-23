@@ -42,10 +42,10 @@ public class PostgreSqlStoreTests(AspireFixture fixture) : IClassFixture<AspireF
         var schemaVersionResult = await pooledStore.CheckVersionAsync(_ct);
         schemaVersionResult.CurrentVersion.ShouldBe(0u);
         schemaVersionResult.IsCompatible.ShouldBeFalse();
-        schemaVersionResult.RequiredVersion.ShouldBe(1u);
+        schemaVersionResult.RequiredVersion.ShouldBe(2u);
 
         await pooledStore.MigrateAsync(_ct);
         schemaVersionResult = await pooledStore.CheckVersionAsync(_ct);
-        schemaVersionResult.CurrentVersion.ShouldBe(1u);
+        schemaVersionResult.CurrentVersion.ShouldBe(2u);
     }
 }

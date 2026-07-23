@@ -20,4 +20,13 @@ internal sealed class DataStorageTypeRegistry
         !_dsoRegistrations.TryGetValue(dsoVersion, out var registeredType)
             ? throw new InvalidOperationException($"DsoType {dsoVersion.EntityType.Name} with version {dsoVersion.SchemaVersion} is not registered.")
             : registeredType;
+
+    /// <summary>
+    /// Tries to get the registered type for the specified DSO version.
+    /// </summary>
+    /// <param name="dsoVersion">The DSO version to look up.</param>
+    /// <param name="registeredType">The registered type, if found.</param>
+    /// <returns><c>true</c> if the type was found; otherwise <c>false</c>.</returns>
+    public bool TryGet(DataStorageObjectVersion dsoVersion, out Type registeredType) =>
+        _dsoRegistrations.TryGetValue(dsoVersion, out registeredType!);
 }

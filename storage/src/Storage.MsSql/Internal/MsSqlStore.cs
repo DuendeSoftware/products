@@ -36,7 +36,7 @@ internal sealed class MsSqlStore(
     OutboxSubscribers outboxSubscribers,
     ILogger<MsSqlStore> logger) : StoreBase, IStore, IDatabaseSchema
 {
-    private const int RequiredSchemaVersion = 1;
+    private const int RequiredSchemaVersion = 2;
     private readonly string _schemaName = options.SchemaName;
 
     private SqlConnection OpenConnection() => createConnection();
@@ -85,48 +85,39 @@ internal sealed class MsSqlStore(
         foreach (var (_, sql) in scripts)
         {
             await using var transaction = await connection.BeginTransactionAsync(ct);
-            try
+            // Acquire application lock for safe concurrent migration
+            await using (var lockCmd = connection.CreateCommand())
             {
-                // Acquire application lock for safe concurrent migration
-                await using (var lockCmd = connection.CreateCommand())
-                {
-                    lockCmd.Transaction = (SqlTransaction)transaction;
-                    lockCmd.CommandType = CommandType.Text;
-                    lockCmd.CommandText = """
-                        DECLARE @result INT;
-                        EXEC @result = sp_getapplock
-                           @Resource = N'__schema_migration__',
-                           @LockMode = N'Exclusive',
-                           @LockOwner = N'Transaction',
-                           @LockTimeout = 60000;
+                lockCmd.Transaction = (SqlTransaction)transaction;
+                lockCmd.CommandType = CommandType.Text;
+                lockCmd.CommandText = """
+                    DECLARE @result INT;
+                    EXEC @result = sp_getapplock
+                       @Resource = N'__schema_migration__',
+                       @LockMode = N'Exclusive',
+                       @LockOwner = N'Transaction',
+                       @LockTimeout = 60000;
 
-                        IF @result < 0
-                        BEGIN
-                          THROW 50000, 'Failed to acquire application lock for migration', 1;
-                        END
-                        """;
-                    Log.ExecutingSql(logger, lockCmd.CommandText);
-                    _ = await lockCmd.ExecuteNonQueryAsync(ct);
-                }
-
-                // Execute the migration script (version gate and version bump are inside the SQL)
-                await using (var stepCmd = connection.CreateCommand())
-                {
-                    stepCmd.Transaction = (SqlTransaction)transaction;
-                    stepCmd.CommandType = CommandType.Text;
-                    stepCmd.CommandText = sql;
-                    Log.ExecutingSql(logger, stepCmd.CommandText);
-                    _ = await stepCmd.ExecuteNonQueryAsync(ct);
-                }
-
-                await transaction.CommitAsync(ct);
+                    IF @result < 0
+                    BEGIN
+                      THROW 50000, 'Failed to acquire application lock for migration', 1;
+                    END
+                    """;
+                Log.ExecutingSql(logger, lockCmd.CommandText);
+                _ = await lockCmd.ExecuteNonQueryAsync(ct);
             }
-            catch (SqlException e)
+
+            // Execute the migration script (version gate and version bump are inside the SQL)
+            await using (var stepCmd = connection.CreateCommand())
             {
-                Log.ErrorWhileCreatingSchema(logger, e);
-                await transaction.RollbackAsync(ct);
-                throw;
+                stepCmd.Transaction = (SqlTransaction)transaction;
+                stepCmd.CommandType = CommandType.Text;
+                stepCmd.CommandText = sql;
+                Log.ExecutingSql(logger, stepCmd.CommandText);
+                _ = await stepCmd.ExecuteNonQueryAsync(ct);
             }
+
+            await transaction.CommitAsync(ct);
         }
 
         var verifyResult = await ((IDatabaseSchema)this).VerifySchemaAsync(ct);
@@ -212,6 +203,7 @@ internal sealed class MsSqlStore(
                 ["pool_id"] = "int",
                 ["payload"] = "nvarchar",
                 ["subscriber_name"] = "nvarchar",
+                ["dso_type_schema_version"] = "int",
             },
         };
 
@@ -302,6 +294,7 @@ internal sealed class MsSqlStore(
             ("entity_links", $"IX_{_schemaName}_entity_links_left_cascade"),
             ("entity_links", $"IX_{_schemaName}_entity_links_right_cascade"),
             ("outbox_subscriber_queue", $"IX_{_schemaName}_outbox_subscriber_queue_subscriber"),
+            ("outbox_subscriber_queue", $"IX_{_schemaName}_outbox_subscriber_queue_pool_id"),
         };
 
         await using (var cmd = connection.CreateCommand())
@@ -429,7 +422,7 @@ internal sealed class MsSqlStore(
     string IDatabaseSchema.BuildMigrationScript(DatabaseSchemaVersion fromVersion)
     {
         var scripts = MigrationScriptLoader.GetScripts(typeof(MsSqlStore).Assembly, fromVersion, _schemaName);
-        return string.Concat(scripts.Select(s => s.Sql + Environment.NewLine));
+        return string.Join(Environment.NewLine + "GO" + Environment.NewLine, scripts.Select(s => s.Sql));
     }
 
     async Task<CreateResult> IStore.CreateAsync<TDso>(
@@ -708,24 +701,16 @@ internal sealed class MsSqlStore(
         await using var connection = OpenConnection();
         await connection.OpenAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
-        try
+        var outcome = await ExecuteLinkCoreAsync(connection, (SqlTransaction)transaction, LinkOperation.For(definition, leftEntityId, rightEntityId), ct);
+        if (outcome == OperationOutcome.Success)
         {
-            var outcome = await ExecuteLinkCoreAsync(connection, (SqlTransaction)transaction, LinkOperation.For(definition, leftEntityId, rightEntityId), ct);
-            if (outcome == OperationOutcome.Success)
+            if (outboxEvents is { Count: > 0 })
             {
-                if (outboxEvents is { Count: > 0 })
-                {
-                    await ExecuteOutboxInsertBatchCoreAsync(connection, (SqlTransaction)transaction, outboxEvents, ct);
-                }
-                await transaction.CommitAsync(ct);
+                await ExecuteOutboxInsertBatchCoreAsync(connection, (SqlTransaction)transaction, outboxEvents, ct);
             }
-            return outcome == OperationOutcome.AlreadyLinked ? LinkResult.AlreadyLinked : LinkResult.Success;
+            await transaction.CommitAsync(ct);
         }
-        catch
-        {
-            await transaction.RollbackAsync(ct);
-            throw;
-        }
+        return outcome == OperationOutcome.AlreadyLinked ? LinkResult.AlreadyLinked : LinkResult.Success;
     }
 
     /// <inheritdoc/>
@@ -734,21 +719,13 @@ internal sealed class MsSqlStore(
         await using var connection = OpenConnection();
         await connection.OpenAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
-        try
+        _ = await ExecuteUnlinkCoreAsync(connection, (SqlTransaction)transaction, UnlinkOperation.For(definition, leftEntityId, rightEntityId), ct);
+        if (outboxEvents is { Count: > 0 })
         {
-            _ = await ExecuteUnlinkCoreAsync(connection, (SqlTransaction)transaction, UnlinkOperation.For(definition, leftEntityId, rightEntityId), ct);
-            if (outboxEvents is { Count: > 0 })
-            {
-                await ExecuteOutboxInsertBatchCoreAsync(connection, (SqlTransaction)transaction, outboxEvents, ct);
-            }
-            await transaction.CommitAsync(ct);
-            return UnlinkResult.Success;
+            await ExecuteOutboxInsertBatchCoreAsync(connection, (SqlTransaction)transaction, outboxEvents, ct);
         }
-        catch
-        {
-            await transaction.RollbackAsync(ct);
-            throw;
-        }
+        await transaction.CommitAsync(ct);
+        return UnlinkResult.Success;
     }
 
     private async Task<OperationOutcome> ExecuteLinkCoreAsync(
@@ -838,7 +815,7 @@ internal sealed class MsSqlStore(
         for (var i = 0; i < rows.Count; i++)
         {
             var (evt, subscriber) = rows[i];
-            valueRows.Add($"(@messageId{i}, @eventId{i}, @timestamp{i}, @eventName{i}, @subjectId{i}, @entityTypeId{i}, @entityTypeName{i}, @poolId, @payload{i}, @subscriberName{i})");
+            valueRows.Add($"(@messageId{i}, @eventId{i}, @timestamp{i}, @eventName{i}, @subjectId{i}, @entityTypeId{i}, @entityTypeName{i}, @poolId, @payload{i}, @subscriberName{i}, @dsoTypeSchemaVersion{i})");
             _ = cmd.Parameters.AddWithValue($"@messageId{i}", Guid.CreateVersion7());
             _ = cmd.Parameters.AddWithValue($"@eventId{i}", evt.Id.Value);
             _ = cmd.Parameters.AddWithValue($"@timestamp{i}", evt.Timestamp);
@@ -848,12 +825,13 @@ internal sealed class MsSqlStore(
             _ = cmd.Parameters.AddWithValue($"@entityTypeName{i}", evt.EntityTypeName);
             _ = cmd.Parameters.AddWithValue($"@payload{i}", evt.Payload);
             _ = cmd.Parameters.AddWithValue($"@subscriberName{i}", subscriber.SubscriberName.ToString());
+            _ = cmd.Parameters.AddWithValue($"@dsoTypeSchemaVersion{i}", evt.DsoTypeSchemaVersion.HasValue ? evt.DsoTypeSchemaVersion.Value : DBNull.Value);
         }
         _ = cmd.Parameters.AddWithValue("@poolId", PoolId.Value);
 
         cmd.CommandText = $"""
             INSERT INTO [{_schemaName}].[outbox_subscriber_queue]
-            (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name)
+            (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version)
             VALUES
             {string.Join(",\n            ", valueRows)}
             """;
@@ -878,44 +856,36 @@ internal sealed class MsSqlStore(
 
         var results = new List<OperationResult>();
 
-        try
+        for (var i = 0; i < operations.Count; i++)
         {
-            for (var i = 0; i < operations.Count; i++)
+            var outcome = operations[i] switch
             {
-                var outcome = operations[i] switch
-                {
-                    CreateOperation create => await ExecuteCreateCoreAsync(connection, (SqlTransaction)transaction, create, ct),
-                    UpdateOperation update => await ExecuteUpdateCoreAsync(connection, (SqlTransaction)transaction, update, ct),
-                    DeleteOperation delete => (await ExecuteDeleteCoreAsync(connection, (SqlTransaction)transaction, delete, ct)).Outcome,
-                    LinkOperation link => await ExecuteLinkCoreAsync(connection, (SqlTransaction)transaction, link, ct),
-                    UnlinkOperation unlink => await ExecuteUnlinkCoreAsync(connection, (SqlTransaction)transaction, unlink, ct),
-                    _ => throw new InvalidOperationException($"Unknown operation type: {operations[i].GetType().Name}")
-                };
+                CreateOperation create => await ExecuteCreateCoreAsync(connection, (SqlTransaction)transaction, create, ct),
+                UpdateOperation update => await ExecuteUpdateCoreAsync(connection, (SqlTransaction)transaction, update, ct),
+                DeleteOperation delete => (await ExecuteDeleteCoreAsync(connection, (SqlTransaction)transaction, delete, ct)).Outcome,
+                LinkOperation link => await ExecuteLinkCoreAsync(connection, (SqlTransaction)transaction, link, ct),
+                UnlinkOperation unlink => await ExecuteUnlinkCoreAsync(connection, (SqlTransaction)transaction, unlink, ct),
+                _ => throw new InvalidOperationException($"Unknown operation type: {operations[i].GetType().Name}")
+            };
 
-                results.Add(new OperationResult(i, outcome));
+            results.Add(new OperationResult(i, outcome));
 
-                if (outcome is not OperationOutcome.Success and not OperationOutcome.AlreadyLinked)
-                {
-                    // Fail-fast: stop processing on first failure
-                    // Transaction is rolled back automatically on dispose
-                    return new BatchResult(false, results);
-                }
-            }
-
-            // All operations succeeded — INSERT outbox events before committing
-            if (outboxEvents is { Count: > 0 })
+            if (outcome is not OperationOutcome.Success and not OperationOutcome.AlreadyLinked)
             {
-                await ExecuteOutboxInsertBatchCoreAsync(connection, (SqlTransaction)transaction, outboxEvents, ct);
+                // Fail-fast: stop processing on first failure
+                // Transaction is rolled back automatically on dispose
+                return new BatchResult(false, results);
             }
-
-            await transaction.CommitAsync(ct);
-            return new BatchResult(true, results);
         }
-        catch
+
+        // All operations succeeded — INSERT outbox events before committing
+        if (outboxEvents is { Count: > 0 })
         {
-            await transaction.RollbackAsync(ct);
-            throw;
+            await ExecuteOutboxInsertBatchCoreAsync(connection, (SqlTransaction)transaction, outboxEvents, ct);
         }
+
+        await transaction.CommitAsync(ct);
+        return new BatchResult(true, results);
     }
 
     async Task<OutboxEventsPage> IStore.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
@@ -926,7 +896,7 @@ internal sealed class MsSqlStore(
         await using var cmd = connection.CreateCommand();
         cmd.CommandType = CommandType.Text;
         cmd.CommandText = $"""
-            SELECT TOP (@count) sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name
+            SELECT TOP (@count) sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version
             FROM [{_schemaName}].[outbox_subscriber_queue]
             WHERE subscriber_name = @subscriber_name
             ORDER BY sequence_number ASC
@@ -941,6 +911,30 @@ internal sealed class MsSqlStore(
         var events = new List<PersistedOutboxEvent>();
         while (await reader.ReadAsync(ct))
         {
+            var dsoTypeSchemaVersion = await reader.IsDBNullAsync(11, ct) ? null : (int?)reader.GetInt32(11);
+            var entityTypeId = reader.GetInt32(6);
+            var entityTypeName = reader.GetString(7);
+            var payload = reader.GetString(9);
+
+            IDataStorageObject? dso = null;
+            if (dsoTypeSchemaVersion.HasValue)
+            {
+                var entityType = new EntityType((uint)entityTypeId, entityTypeName);
+                var dsoVersion = new DataStorageObjectVersion(entityType, (uint)dsoTypeSchemaVersion.Value);
+                if (dataStorageTypeRegistry.TryGet(dsoVersion, out var dsoType))
+                {
+                    try
+                    {
+                        dso = (IDataStorageObject?)JsonSerializer.Deserialize(payload, dsoType);
+                    }
+                    catch (JsonException)
+                    {
+                        // Malformed payload — leave Dso null so the handler can
+                        // fall back to raw Payload or drop the event.
+                    }
+                }
+            }
+
             events.Add(new PersistedOutboxEvent
             {
                 SequenceNumber = reader.GetInt64(0),
@@ -949,11 +943,12 @@ internal sealed class MsSqlStore(
                 Timestamp = reader.GetDateTimeOffset(3),
                 EventName = OutboxEventName.Create(reader.GetString(4)),
                 SubjectId = Storage.UuidV7.From(SqlServerGuidConverter.ToUuidV7(reader.GetGuid(5))),
-                EntityTypeId = reader.GetInt32(6),
-                EntityTypeName = reader.GetString(7),
+                EntityTypeId = entityTypeId,
+                EntityTypeName = entityTypeName,
                 PoolId = PoolId.Load(reader.GetInt32(8)),
-                Payload = reader.GetString(9),
+                Payload = payload,
                 SubscriberName = SubscriberName.Create(reader.GetString(10)),
+                Dso = dso,
             });
         }
 
@@ -1205,11 +1200,20 @@ internal sealed class MsSqlStore(
             nextToken = (ContinuationToken)token.Encode();
         }
 
+        ContinuationToken? previousToken = null;
+        if (pageItems.Count > 0)
+        {
+            var firstItem = pageItems[0];
+            var token = CreateCursorToken(firstItem.Id, firstItem.SortValue);
+            previousToken = (ContinuationToken)token.Encode();
+        }
+
         var resultItems = pageItems.Select(x => new MetadataEnvelope<TDso>(x.Item, x.Id, x.Version, x.Created, x.LastUpdated)).ToList();
         return new QueryResult<MetadataEnvelope<TDso>>
         {
             Items = resultItems,
             NextToken = nextToken,
+            PreviousToken = previousToken,
             HasMoreData = hasMore
         };
     }
@@ -1578,6 +1582,14 @@ internal sealed class MsSqlStore(
             nextToken = (ContinuationToken)token.Encode();
         }
 
+        ContinuationToken? previousToken = null;
+        if (pageItems.Count > 0)
+        {
+            var firstItem = pageItems[0];
+            var token = CreateCursorToken(firstItem.Id, firstItem.Item2.SortValue);
+            previousToken = (ContinuationToken)token.Encode();
+        }
+
         var items = pageItems
             .Select(item => new ProjectedResult(item.Id, item.Item2.FieldValues))
             .ToList();
@@ -1586,6 +1598,7 @@ internal sealed class MsSqlStore(
         {
             Items = items,
             NextToken = nextToken,
+            PreviousToken = previousToken,
             HasMoreData = hasMore
         };
     }
@@ -2233,6 +2246,7 @@ internal sealed class MsSqlStore(
         var whereClause = whereBuilder.BuildWhereClause(filter);
 
         var sortFieldPath = sort.Field!.Path;
+        var sortDirection = sort.Direction == SortDirection.Ascending ? "ASC" : "DESC";
 
         // Determine which column to sort on based on field type
         var sortColumn = GetSortColumnName(sort.Field!);
@@ -2258,29 +2272,17 @@ internal sealed class MsSqlStore(
         }
 
         // Build ORDER BY clause with NULLS LAST behavior (using CASE expression)
-        string orderByClause;
-        if (sort.Direction == SortDirection.Ascending)
-        {
-            orderByClause = $"""
-                ORDER BY
-                  CASE WHEN {sortColumn} IS NULL THEN 1 ELSE 0 END,
-                  {sortColumn} ASC,
-                  v.entity_id ASC
-                """;
-        }
-        else
-        {
-            orderByClause = $"""
-                ORDER BY
-                  CASE WHEN {sortColumn} IS NULL THEN 1 ELSE 0 END,
-                  {sortColumn} DESC,
-                  v.entity_id ASC
-                """;
-        }
+        var tokenValue = tokenRange.Start.Value;
+
+        var orderByClause = $"""
+            ORDER BY
+              CASE WHEN {sortColumn} IS NULL THEN 1 ELSE 0 END,
+              {sortColumn} {sortDirection},
+              v.entity_id ASC
+            """;
 
         // Build seek clause for cursor position (WHERE clause addition)
         var seekClause = "";
-        var tokenValue = tokenRange.Start.Value;
         if (tokenValue != ContinuationToken.Beginning)
         {
             var decodedToken = CursorToken.Decode(tokenValue);
@@ -2320,9 +2322,6 @@ internal sealed class MsSqlStore(
                 _ = cmd.Parameters.AddWithValue(lastIdParam, SqlServerGuidConverter.ToSqlServer(decodedToken.Id));
 
                 // Build the seek condition based on sort direction
-                // For ascending: seek rows where (sort_value > last_sort) OR (sort_value = last_sort AND id > last_id)
-                // For descending: seek rows where (sort_value < last_sort) OR (sort_value = last_sort AND id > last_id)
-                // Handle NULL values according to NULLS LAST behavior
                 if (sort.Direction == SortDirection.Ascending)
                 {
                     // With NULLS LAST in ascending: non-NULL values first, then NULLs
@@ -2682,90 +2681,152 @@ internal sealed class MsSqlStore(
         await connection.OpenAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
 
-        try
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = (SqlTransaction)transaction;
+        cmd.CommandType = CommandType.Text;
+
+        var sql = new StringBuilder();
+
+        // Step 1: Lock expired rows into a temp table
+        _ = sql.AppendLine(CultureInfo.InvariantCulture, $"""
+            SELECT TOP (@batchSize) pool_id, entity_id, entity_type_id, entity_type_name, value, dso_type_schema_version, NEWID() AS event_id
+            INTO #_expired
+            FROM [{_schemaName}].[entities] WITH (UPDLOCK, ROWLOCK, READPAST)
+            WHERE expires_at IS NOT NULL AND expires_at <= @now;
+            """);
+        _ = cmd.Parameters.AddWithValue("@now", now);
+        _ = cmd.Parameters.AddWithValue("@batchSize", batchSize);
+
+        // Step 2: Insert outbox events per matching subscriber
+        if (!outboxSubscribers.IsEmpty)
         {
-            await using var cmd = connection.CreateCommand();
-            cmd.Transaction = (SqlTransaction)transaction;
-            cmd.CommandType = CommandType.Text;
+            var eventName = OutboxEventName.EntityExpired;
+            _ = cmd.Parameters.AddWithValue("@eventName", eventName.ToString());
 
-            var sql = new StringBuilder();
-
-            // Step 1: Lock expired rows into a temp table
-            _ = sql.AppendLine(CultureInfo.InvariantCulture, $"""
-                SELECT TOP (@batchSize) pool_id, entity_id, entity_type_id, entity_type_name, value, NEWID() AS event_id
-                INTO #_expired
-                FROM [{_schemaName}].[entities] WITH (UPDLOCK, ROWLOCK, READPAST)
-                WHERE expires_at IS NOT NULL AND expires_at <= @now;
-                """);
-            _ = cmd.Parameters.AddWithValue("@now", now);
-            _ = cmd.Parameters.AddWithValue("@batchSize", batchSize);
-
-            // Step 2: Insert outbox events per matching subscriber
-            if (!outboxSubscribers.IsEmpty)
+            var subscriberIndex = 0;
+            foreach (var subscriber in outboxSubscribers.Subscribers)
             {
-                var eventName = OutboxEventName.EntityExpired;
-                _ = cmd.Parameters.AddWithValue("@eventName", eventName.ToString());
-
-                var subscriberIndex = 0;
-                foreach (var subscriber in outboxSubscribers.Subscribers)
+                if (subscriber.EventNames.Count > 0 && !subscriber.EventNames.Contains(eventName))
                 {
-                    if (subscriber.EventNames.Count > 0 && !subscriber.EventNames.Contains(eventName))
-                    {
-                        continue;
-                    }
-
-                    var subParam = $"@sub{subscriberIndex}";
-                    _ = cmd.Parameters.AddWithValue(subParam, subscriber.SubscriberName.ToString());
-
-                    _ = sql.Append(CultureInfo.InvariantCulture, $"""
-                        INSERT INTO [{_schemaName}].[outbox_subscriber_queue]
-                        (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name)
-                        SELECT NEWID(), event_id, @now, @eventName, entity_id, entity_type_id, entity_type_name, pool_id, value, {subParam}
-                        FROM #_expired
-                        """);
-
-                    if (subscriber.EntityTypeIds.Count > 0)
-                    {
-                        var typeIds = string.Join(", ", subscriber.EntityTypeIds.Select(id => id.ToString(CultureInfo.InvariantCulture)));
-                        _ = sql.Append(CultureInfo.InvariantCulture, $" WHERE entity_type_id IN ({typeIds})");
-                    }
-
-                    _ = sql.AppendLine(";");
-                    subscriberIndex++;
+                    continue;
                 }
+
+                var subParam = $"@sub{subscriberIndex}";
+                _ = cmd.Parameters.AddWithValue(subParam, subscriber.SubscriberName.ToString());
+
+                _ = sql.Append(CultureInfo.InvariantCulture, $"""
+                    INSERT INTO [{_schemaName}].[outbox_subscriber_queue]
+                    (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version)
+                    SELECT NEWID(), event_id, @now, @eventName, entity_id, entity_type_id, entity_type_name, pool_id, value, {subParam}, dso_type_schema_version
+                    FROM #_expired
+                    """);
+
+                if (subscriber.EntityTypeIds.Count > 0)
+                {
+                    var typeIds = string.Join(", ", subscriber.EntityTypeIds.Select(id => id.ToString(CultureInfo.InvariantCulture)));
+                    _ = sql.Append(CultureInfo.InvariantCulture, $" WHERE entity_type_id IN ({typeIds})");
+                }
+
+                _ = sql.AppendLine(";");
+                subscriberIndex++;
             }
+        }
 
-            // Step 3: Delete entity links
-            _ = sql.AppendLine(CultureInfo.InvariantCulture, $"""
-                DELETE el FROM [{_schemaName}].[entity_links] el
-                INNER JOIN #_expired e ON el.pool_id = e.pool_id
-                    AND (
-                        (el.left_entity_id = e.entity_id AND el.left_entity_type_id = e.entity_type_id)
-                        OR
-                        (el.right_entity_id = e.entity_id AND el.right_entity_type_id = e.entity_type_id)
-                    );
-                """);
+        // Step 3: Delete entity links
+        _ = sql.AppendLine(CultureInfo.InvariantCulture, $"""
+            DELETE el FROM [{_schemaName}].[entity_links] el
+            INNER JOIN #_expired e ON el.pool_id = e.pool_id
+                AND (
+                    (el.left_entity_id = e.entity_id AND el.left_entity_type_id = e.entity_type_id)
+                    OR
+                    (el.right_entity_id = e.entity_id AND el.right_entity_type_id = e.entity_type_id)
+                );
+            """);
 
-            // Step 4: Delete entities, then return the count from the temp table
-            _ = sql.Append(CultureInfo.InvariantCulture, $"""
-                DELETE e FROM [{_schemaName}].[entities] e
-                INNER JOIN #_expired ek ON e.pool_id = ek.pool_id AND e.entity_type_id = ek.entity_type_id AND e.entity_id = ek.entity_id
-                WHERE e.expires_at <= @now;
-                SELECT COUNT(*) FROM #_expired;
-                """);
+        // Step 4: Delete entities, then return the count from the temp table
+        _ = sql.Append(CultureInfo.InvariantCulture, $"""
+            DELETE e FROM [{_schemaName}].[entities] e
+            INNER JOIN #_expired ek ON e.pool_id = ek.pool_id AND e.entity_type_id = ek.entity_type_id AND e.entity_id = ek.entity_id
+            WHERE e.expires_at <= @now;
+            SELECT COUNT(*) FROM #_expired;
+            """);
 
-            cmd.CommandText = sql.ToString();
-            Log.ExecutingSql(logger, cmd.CommandText);
-            var deleted = (int)(await cmd.ExecuteScalarAsync(ct))!;
+        cmd.CommandText = sql.ToString();
+        Log.ExecutingSql(logger, cmd.CommandText);
+        var deleted = (int)(await cmd.ExecuteScalarAsync(ct))!;
+
+        await transaction.CommitAsync(ct);
+        return deleted;
+    }
+
+    Task<PurgeResult> IStore.PurgePoolAsync(Ct ct) => ((IStore)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+
+    async Task<PurgeResult> IStore.PurgePoolAsync(int batchSize, Ct ct)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
+
+        var totalOutboxDeleted = 0;
+        var totalLinksDeleted = 0;
+        var totalEntitiesDeleted = 0;
+
+        await using var connection = OpenConnection();
+        await connection.OpenAsync(ct);
+
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            await using var transaction = await connection.BeginTransactionAsync(ct);
+
+            await using var outboxCmd = connection.CreateCommand();
+            outboxCmd.Transaction = (SqlTransaction)transaction;
+            outboxCmd.CommandType = CommandType.Text;
+            outboxCmd.CommandText = $"""
+                DELETE TOP (@batchSize) FROM [{_schemaName}].[outbox_subscriber_queue]
+                WHERE pool_id = @pool_id;
+                """;
+            _ = outboxCmd.Parameters.AddWithValue("@batchSize", batchSize);
+            _ = outboxCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            Log.ExecutingSql(logger, outboxCmd.CommandText);
+            var batchOutbox = await outboxCmd.ExecuteNonQueryAsync(ct);
+
+            await using var linksCmd = connection.CreateCommand();
+            linksCmd.Transaction = (SqlTransaction)transaction;
+            linksCmd.CommandType = CommandType.Text;
+            linksCmd.CommandText = $"""
+                DELETE TOP (@batchSize) FROM [{_schemaName}].[entity_links]
+                WHERE pool_id = @pool_id;
+                """;
+            _ = linksCmd.Parameters.AddWithValue("@batchSize", batchSize);
+            _ = linksCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            Log.ExecutingSql(logger, linksCmd.CommandText);
+            var batchLinks = await linksCmd.ExecuteNonQueryAsync(ct);
+
+            await using var entitiesCmd = connection.CreateCommand();
+            entitiesCmd.Transaction = (SqlTransaction)transaction;
+            entitiesCmd.CommandType = CommandType.Text;
+            entitiesCmd.CommandText = $"""
+                DELETE TOP (@batchSize) FROM [{_schemaName}].[entities]
+                WHERE pool_id = @pool_id;
+                """;
+            _ = entitiesCmd.Parameters.AddWithValue("@batchSize", batchSize);
+            _ = entitiesCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            Log.ExecutingSql(logger, entitiesCmd.CommandText);
+            var batchEntities = await entitiesCmd.ExecuteNonQueryAsync(ct);
 
             await transaction.CommitAsync(ct);
-            return deleted;
+
+            totalOutboxDeleted += batchOutbox;
+            totalLinksDeleted += batchLinks;
+            totalEntitiesDeleted += batchEntities;
+
+            if (batchOutbox + batchLinks + batchEntities == 0)
+            {
+                break;
+            }
         }
-        catch
-        {
-            await transaction.RollbackAsync(ct);
-            throw;
-        }
+
+        return new PurgeResult(totalEntitiesDeleted, totalLinksDeleted, totalOutboxDeleted);
     }
 
     private sealed record QueryClauses(string WhereClause, string JoinClause, string OrderByClause, int Offset);

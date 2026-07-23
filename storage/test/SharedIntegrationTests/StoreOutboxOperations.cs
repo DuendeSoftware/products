@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Text.Json;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
@@ -40,6 +41,26 @@ public partial class StoreOutboxOperations
 
         var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
+        var persistedEvt = page.Events.Single(e => e.EventId == evt.Id);
+        (persistedEvt.Dso is not null).ShouldBeTrue();
+        (persistedEvt.Dso is TestDso).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task OutboxEventWithoutDsoTypeSchemaVersionHasNullDso()
+    {
+        await using var fixture = await CreateProviderAsync();
+        var store = fixture.Store;
+
+        var id = UuidV7.New();
+        var evt = MakeEvent() with { DsoTypeSchemaVersion = null };
+
+        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        result.ShouldBe(CreateResult.Success);
+
+        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var persistedEvt = page.Events.Single(e => e.EventId == evt.Id);
+        (persistedEvt.Dso is null).ShouldBeTrue();
     }
 
     [Fact]
@@ -412,7 +433,8 @@ public partial class StoreOutboxOperations
         SubjectId = UuidV7.New(),
         EntityTypeName = nameof(TestDso),
         EntityTypeId = (int)TestDso.DsoVersion.EntityType.Id,
-        Payload = "{}",
+        Payload = JsonSerializer.Serialize(new TestDso("outbox-test")),
+        DsoTypeSchemaVersion = (int)TestDso.DsoVersion.SchemaVersion,
     };
 
     private async Task<IStoreFixture> CreateProviderAsync()

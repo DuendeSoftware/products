@@ -44,4 +44,7 @@ public sealed record PersistedOutboxEvent
 
     /// <summary>The name of the subscriber this event was addressed to at write time.</summary>
     public required SubscriberName SubscriberName { get; init; }
+
+    /// <summary>The deserialized data storage object when the payload represents a versioned DSO. Null for domain events or when the DSO type is not registered.</summary>
+    public IDataStorageObject? Dso { get; init; }
 }

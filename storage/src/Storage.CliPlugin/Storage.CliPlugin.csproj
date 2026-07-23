@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Storage.MsSql\Storage.MsSql.csproj" />
+    <ProjectReference Include="..\Storage.Oracle\Storage.Oracle.csproj" />
     <ProjectReference Include="..\Storage.PostgreSql\Storage.PostgreSql.csproj" />
     <ProjectReference Include="..\Storage.Sqlite\Storage.Sqlite.csproj" />
   </ItemGroup>

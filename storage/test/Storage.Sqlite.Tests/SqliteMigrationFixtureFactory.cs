@@ -38,9 +38,29 @@ internal sealed class SqliteMigrationFixture(
     {
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync(ct);
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = sql;
-        _ = await cmd.ExecuteNonQueryAsync(ct);
+
+        // Split into individual statements so that ALTER TABLE ADD COLUMN
+        // errors (duplicate column) can be swallowed when running scripts
+        // idempotently, matching the same behaviour as IF NOT EXISTS guards
+        // in PostgreSQL/MsSql migrations.
+        var statements = sql
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => !string.IsNullOrWhiteSpace(s));
+
+        foreach (var statement in statements)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = statement;
+            try
+            {
+                _ = await cmd.ExecuteNonQueryAsync(ct);
+            }
+            catch (SqliteException ex) when (ex.Message.Contains("duplicate column name", StringComparison.OrdinalIgnoreCase))
+            {
+                // Column already exists — idempotent ADD COLUMN is not natively
+                // supported in SQLite, so we swallow this specific error.
+            }
+        }
     }
 
     public async ValueTask DisposeAsync() => await provider.DisposeAsync();

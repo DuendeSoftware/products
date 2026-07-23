@@ -101,6 +101,9 @@ public static class StorageTelemetryConstants
         /// <summary>Purge expired entities operation.</summary>
         public const string PurgeExpired = "purge_expired";
 
+        /// <summary>Purge pool operation.</summary>
+        public const string PurgePool = "purge_pool";
+
         /// <summary>Batch operation.</summary>
         public const string Batch = "batch";
 

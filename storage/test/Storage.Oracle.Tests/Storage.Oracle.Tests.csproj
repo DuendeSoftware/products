@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.Storage.Oracle.Tests</AssemblyName>
+    <RootNamespace>Duende.Storage.Oracle</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <ProjectReference Include="..\..\src\Storage.Oracle\Storage.Oracle.csproj" />
+    <ProjectReference Include="..\..\testing\TestAppHost\TestAppHost.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SharedIntegrationTests\**\*.cs" Link="SharedIntegrationTests\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

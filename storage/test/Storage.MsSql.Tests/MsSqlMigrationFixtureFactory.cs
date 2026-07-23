@@ -40,9 +40,23 @@ internal sealed class MsSqlMigrationFixture(
     {
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(ct);
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = sql;
-        _ = await cmd.ExecuteNonQueryAsync(ct);
+
+        // Split on GO batch separators so each migration script runs in its
+        // own batch (required because scripts declare local variables that
+        // would conflict if concatenated into a single batch).
+        var batches = sql.Split(["\nGO\n", "\r\nGO\r\n"], StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var batch in batches)
+        {
+            if (string.IsNullOrWhiteSpace(batch))
+            {
+                continue;
+            }
+
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = batch;
+            _ = await cmd.ExecuteNonQueryAsync(ct);
+        }
     }
 
     public async ValueTask DisposeAsync()

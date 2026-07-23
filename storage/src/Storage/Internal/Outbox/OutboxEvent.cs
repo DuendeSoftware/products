@@ -33,4 +33,7 @@ public sealed record OutboxEvent
 
     /// <summary>The serialized event payload. Must be valid JSON.</summary>
     public required string Payload { get; init; }
+
+    /// <summary>The schema version of the DSO type serialized in <see cref="Payload"/>. Null for domain events whose payload is not a DSO.</summary>
+    public int? DsoTypeSchemaVersion { get; init; }
 }

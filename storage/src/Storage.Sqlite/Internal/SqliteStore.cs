@@ -33,7 +33,7 @@ internal sealed class SqliteStore(
     OutboxSubscribers outboxSubscribers,
     ILogger<SqliteStore> logger) : StoreBase, IStore, IDatabaseSchema
 {
-    private const int RequiredSchemaVersion = 1;
+    private const int RequiredSchemaVersion = 2;
     private static readonly SqliteDialect Dialect = new();
 
     // SQLite's default schema is "main", used for SqlWhereClauseBuilder schema-qualified table names
@@ -105,21 +105,13 @@ internal sealed class SqliteStore(
         foreach (var (_, sql) in MigrationScriptLoader.GetScripts(typeof(SqliteStore).Assembly, currentVersion))
         {
             await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(ct);
-            try
-            {
-                await using var cmd = connection.CreateCommand();
-                cmd.Transaction = transaction;
-                cmd.CommandText = sql;
-                Log.ExecutingSql(logger, cmd.CommandText);
-                _ = await cmd.ExecuteNonQueryAsync(ct);
+            await using var cmd = connection.CreateCommand();
+            cmd.Transaction = transaction;
+            cmd.CommandText = sql;
+            Log.ExecutingSql(logger, cmd.CommandText);
+            _ = await cmd.ExecuteNonQueryAsync(ct);
 
-                await transaction.CommitAsync(ct);
-            }
-            catch
-            {
-                await transaction.RollbackAsync(ct);
-                throw;
-            }
+            await transaction.CommitAsync(ct);
         }
 
         var verifyResult = await ((IDatabaseSchema)this).VerifySchemaAsync(ct);
@@ -207,7 +199,8 @@ internal sealed class SqliteStore(
                 ("entity_type_name", "TEXT"),
                 ("pool_id", "INTEGER"),
                 ("payload", "TEXT"),
-                ("subscriber_name", "TEXT")
+                ("subscriber_name", "TEXT"),
+                ("dso_type_schema_version", "INTEGER")
             ]
         };
 
@@ -273,6 +266,7 @@ internal sealed class SqliteStore(
             ("entity_links", "entity_links_left_cascade_index"),
             ("entity_links", "entity_links_right_cascade_index"),
             ("outbox_subscriber_queue", "outbox_subscriber_queue_subscriber_index"),
+            ("outbox_subscriber_queue", "outbox_subscriber_queue_pool_id_index"),
         };
 
         {
@@ -1081,11 +1075,20 @@ internal sealed class SqliteStore(
             nextToken = (ContinuationToken)token.Encode();
         }
 
+        ContinuationToken? previousToken = null;
+        if (pageItems.Count > 0)
+        {
+            var firstItem = pageItems[0];
+            var token = CreateCursorToken(firstItem.Id, firstItem.SortValue);
+            previousToken = (ContinuationToken)token.Encode();
+        }
+
         var resultItems = pageItems.Select(x => new MetadataEnvelope<TDso>(x.Item, x.Id, x.Version, x.Created, x.LastUpdated)).ToList();
         return new QueryResult<MetadataEnvelope<TDso>>
         {
             Items = resultItems,
             NextToken = nextToken,
+            PreviousToken = previousToken,
             HasMoreData = hasMore
         };
     }
@@ -1241,6 +1244,14 @@ internal sealed class SqliteStore(
             nextToken = (ContinuationToken)token.Encode();
         }
 
+        ContinuationToken? previousToken = null;
+        if (pageItems.Count > 0)
+        {
+            var firstItem = pageItems[0];
+            var token = CreateCursorToken(firstItem.Id, firstItem.Item2.SortValue);
+            previousToken = (ContinuationToken)token.Encode();
+        }
+
         var items = pageItems
             .Select(item => new ProjectedResult(item.Id, item.Item2.FieldValues))
             .ToList();
@@ -1249,6 +1260,7 @@ internal sealed class SqliteStore(
         {
             Items = items,
             NextToken = nextToken,
+            PreviousToken = previousToken,
             HasMoreData = hasMore
         };
     }
@@ -1342,6 +1354,8 @@ internal sealed class SqliteStore(
             _ = cmd.Parameters.AddWithValue("@sort_field_path", DeterministicGuidGenerator.Create(sortFieldPath.ToUpperInvariant()).ToByteArray());
         }
 
+        var tokenValue = tokenRange.Start.Value;
+
         var orderByClause = $"""
             ORDER BY
               CASE WHEN {sortColumn} IS NULL THEN 1 ELSE 0 END,
@@ -1351,7 +1365,6 @@ internal sealed class SqliteStore(
 
         // Build seek clause for cursor position
         var seekClause = "";
-        var tokenValue = tokenRange.Start.Value;
         if (tokenValue != ContinuationToken.Beginning)
         {
             var decodedToken = CursorToken.Decode(tokenValue);
@@ -1645,7 +1658,7 @@ internal sealed class SqliteStore(
         for (var i = 0; i < rows.Count; i++)
         {
             var (evt, subscriber) = rows[i];
-            valueRows.Add($"(@message_id{i}, @event_id{i}, @timestamp{i}, @event_name{i}, @subject_id{i}, @entity_type_id{i}, @entity_type_name{i}, @pool_id, @payload{i}, @subscriber_name{i})");
+            valueRows.Add($"(@message_id{i}, @event_id{i}, @timestamp{i}, @event_name{i}, @subject_id{i}, @entity_type_id{i}, @entity_type_name{i}, @pool_id, @payload{i}, @subscriber_name{i}, @dso_type_schema_version{i})");
             _ = cmd.Parameters.AddWithValue($"@message_id{i}", Guid.CreateVersion7().ToString());
             _ = cmd.Parameters.AddWithValue($"@event_id{i}", evt.Id.Value.ToString());
             _ = cmd.Parameters.AddWithValue($"@timestamp{i}", evt.Timestamp.UtcDateTime.ToString("O"));
@@ -1655,12 +1668,13 @@ internal sealed class SqliteStore(
             _ = cmd.Parameters.AddWithValue($"@entity_type_name{i}", evt.EntityTypeName);
             _ = cmd.Parameters.AddWithValue($"@payload{i}", evt.Payload);
             _ = cmd.Parameters.AddWithValue($"@subscriber_name{i}", subscriber.SubscriberName.ToString());
+            _ = cmd.Parameters.AddWithValue($"@dso_type_schema_version{i}", evt.DsoTypeSchemaVersion.HasValue ? evt.DsoTypeSchemaVersion.Value : DBNull.Value);
         }
         _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
 
         cmd.CommandText = $"""
             INSERT INTO main.outbox_subscriber_queue
-            (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name)
+            (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version)
             VALUES
             {string.Join(",\n            ", valueRows)}
             """;
@@ -1687,41 +1701,33 @@ internal sealed class SqliteStore(
 
         var results = new List<OperationResult>();
 
-        try
+        for (var i = 0; i < operations.Count; i++)
         {
-            for (var i = 0; i < operations.Count; i++)
+            var outcome = operations[i] switch
             {
-                var outcome = operations[i] switch
-                {
-                    CreateOperation create => await ExecuteCreateCoreAsync(connection, transaction, create, ct),
-                    UpdateOperation update => await ExecuteUpdateCoreAsync(connection, transaction, update, ct),
-                    DeleteOperation delete => (await ExecuteDeleteCoreAsync(connection, transaction, delete, ct)).Outcome,
-                    LinkOperation link => await ExecuteLinkCoreAsync(connection, transaction, link, ct),
-                    UnlinkOperation unlink => await ExecuteUnlinkCoreAsync(connection, transaction, unlink, ct),
-                    _ => throw new InvalidOperationException($"Unknown operation type: {operations[i].GetType().Name}")
-                };
+                CreateOperation create => await ExecuteCreateCoreAsync(connection, transaction, create, ct),
+                UpdateOperation update => await ExecuteUpdateCoreAsync(connection, transaction, update, ct),
+                DeleteOperation delete => (await ExecuteDeleteCoreAsync(connection, transaction, delete, ct)).Outcome,
+                LinkOperation link => await ExecuteLinkCoreAsync(connection, transaction, link, ct),
+                UnlinkOperation unlink => await ExecuteUnlinkCoreAsync(connection, transaction, unlink, ct),
+                _ => throw new InvalidOperationException($"Unknown operation type: {operations[i].GetType().Name}")
+            };
 
-                results.Add(new OperationResult(i, outcome));
+            results.Add(new OperationResult(i, outcome));
 
-                if (outcome is not OperationOutcome.Success and not OperationOutcome.AlreadyLinked)
-                {
-                    return new BatchResult(false, results);
-                }
-            }
-
-            if (outboxEvents is { Count: > 0 })
+            if (outcome is not OperationOutcome.Success and not OperationOutcome.AlreadyLinked)
             {
-                await ExecuteOutboxInsertBatchCoreAsync(connection, transaction, outboxEvents, ct);
+                return new BatchResult(false, results);
             }
-
-            await transaction.CommitAsync(ct);
-            return new BatchResult(true, results);
         }
-        catch
+
+        if (outboxEvents is { Count: > 0 })
         {
-            await transaction.RollbackAsync(ct);
-            throw;
+            await ExecuteOutboxInsertBatchCoreAsync(connection, transaction, outboxEvents, ct);
         }
+
+        await transaction.CommitAsync(ct);
+        return new BatchResult(true, results);
     }
 
     async Task<OutboxEventsPage> IStore.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
@@ -1730,7 +1736,7 @@ internal sealed class SqliteStore(
 
         await using var cmd = cnn.CreateCommand();
         cmd.CommandText = """
-            SELECT sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name
+            SELECT sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version
             FROM main.outbox_subscriber_queue
             WHERE subscriber_name = @subscriber_name
             ORDER BY sequence_number ASC
@@ -1746,6 +1752,30 @@ internal sealed class SqliteStore(
         while (await reader.ReadAsync(ct))
         {
             var timestamp = DateTimeOffset.Parse(reader.GetString(3), CultureInfo.InvariantCulture);
+            var dsoTypeSchemaVersion = await reader.IsDBNullAsync(11, ct) ? null : (int?)reader.GetInt32(11);
+            var entityTypeId = reader.GetInt32(6);
+            var entityTypeName = reader.GetString(7);
+            var payload = reader.GetString(9);
+
+            IDataStorageObject? dso = null;
+            if (dsoTypeSchemaVersion.HasValue)
+            {
+                var entityType = new EntityType((uint)entityTypeId, entityTypeName);
+                var dsoVersion = new DataStorageObjectVersion(entityType, (uint)dsoTypeSchemaVersion.Value);
+                if (dataStorageTypeRegistry.TryGet(dsoVersion, out var dsoType))
+                {
+                    try
+                    {
+                        dso = (IDataStorageObject?)JsonSerializer.Deserialize(payload, dsoType);
+                    }
+                    catch (JsonException)
+                    {
+                        // Malformed payload — leave Dso null so the handler can
+                        // fall back to raw Payload or drop the event.
+                    }
+                }
+            }
+
             events.Add(new PersistedOutboxEvent
             {
                 SequenceNumber = reader.GetInt64(0),
@@ -1754,11 +1784,12 @@ internal sealed class SqliteStore(
                 Timestamp = timestamp,
                 EventName = OutboxEventName.Create(reader.GetString(4)),
                 SubjectId = Storage.UuidV7.From(Guid.Parse(reader.GetString(5))),
-                EntityTypeId = reader.GetInt32(6),
-                EntityTypeName = reader.GetString(7),
+                EntityTypeId = entityTypeId,
+                EntityTypeName = entityTypeName,
                 PoolId = PoolId.Load(reader.GetInt32(8)),
-                Payload = reader.GetString(9),
+                Payload = payload,
                 SubscriberName = SubscriberName.Create(reader.GetString(10)),
+                Dso = dso,
             });
         }
 
@@ -2275,129 +2306,202 @@ internal sealed class SqliteStore(
         await using var cnn = await OpenConnectionAsync(ct);
         await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
 
-        try
+        // Step 1: Select expired rows (SQLite doesn't have FOR UPDATE SKIP LOCKED, but
+        // the transaction provides database-level locking)
+        var expired = new List<(string PoolId, int EntityTypeId, string EntityId, string EntityTypeName, string Value, int? DsoTypeSchemaVersion, string EventId)>();
+        await using (var selectCmd = cnn.CreateCommand())
         {
-            // Step 1: Select expired rows (SQLite doesn't have FOR UPDATE SKIP LOCKED, but
-            // the transaction provides database-level locking)
-            var expired = new List<(string PoolId, int EntityTypeId, string EntityId, string EntityTypeName, string Value, string EventId)>();
-            await using (var selectCmd = cnn.CreateCommand())
+            selectCmd.Transaction = tx;
+            selectCmd.CommandText = """
+                SELECT pool_id, entity_type_id, entity_id, entity_type_name, value, dso_type_schema_version
+                FROM main.entities
+                WHERE expires_at IS NOT NULL AND expires_at <= @now
+                LIMIT @batchSize
+                """;
+            _ = selectCmd.Parameters.AddWithValue("@now", now);
+            _ = selectCmd.Parameters.AddWithValue("@batchSize", batchSize);
+            Log.ExecutingSql(logger, selectCmd.CommandText);
+            await using var reader = await selectCmd.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
             {
-                selectCmd.Transaction = tx;
-                selectCmd.CommandText = """
-                    SELECT pool_id, entity_type_id, entity_id, entity_type_name, value
-                    FROM main.entities
-                    WHERE expires_at IS NOT NULL AND expires_at <= @now
-                    LIMIT @batchSize
-                    """;
-                _ = selectCmd.Parameters.AddWithValue("@now", now);
-                _ = selectCmd.Parameters.AddWithValue("@batchSize", batchSize);
-                Log.ExecutingSql(logger, selectCmd.CommandText);
-                await using var reader = await selectCmd.ExecuteReaderAsync(ct);
-                while (await reader.ReadAsync(ct))
+                var dsoTypeSchemaVersion = await reader.IsDBNullAsync(5, ct) ? null : (int?)reader.GetInt32(5);
+                expired.Add((
+                    reader.GetString(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4),
+                    dsoTypeSchemaVersion,
+                    Guid.CreateVersion7().ToString()));
+            }
+        }
+
+        if (expired.Count == 0)
+        {
+            return 0;
+        }
+
+        // Step 2: Insert outbox events per matching subscriber
+        if (!outboxSubscribers.IsEmpty)
+        {
+            var eventName = OutboxEventName.EntityExpired;
+            foreach (var subscriber in outboxSubscribers.Subscribers)
+            {
+                if (subscriber.EventNames.Count > 0 && !subscriber.EventNames.Contains(eventName))
                 {
-                    expired.Add((
-                        reader.GetString(0),
-                        reader.GetInt32(1),
-                        reader.GetString(2),
-                        reader.GetString(3),
-                        reader.GetString(4),
-                        Guid.CreateVersion7().ToString()));
+                    continue;
+                }
+
+                var matchingExpired = subscriber.EntityTypeIds.Count > 0
+                    ? expired.Where(e => subscriber.EntityTypeIds.Contains(e.EntityTypeId))
+                    : expired;
+
+                foreach (var (poolId, entityTypeId, entityId, entityTypeName, value, dsoTypeSchemaVersion, eventId) in matchingExpired)
+                {
+                    await using var outboxCmd = cnn.CreateCommand();
+                    outboxCmd.Transaction = tx;
+                    outboxCmd.CommandText = """
+                        INSERT INTO main.outbox_subscriber_queue
+                        (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version)
+                        VALUES (@message_id, @event_id, @timestamp, @event_name, @subject_id, @entity_type_id, @entity_type_name, @pool_id, @payload, @subscriber_name, @dso_type_schema_version)
+                        """;
+                    _ = outboxCmd.Parameters.AddWithValue("@message_id", Guid.CreateVersion7().ToString());
+                    _ = outboxCmd.Parameters.AddWithValue("@event_id", eventId);
+                    _ = outboxCmd.Parameters.AddWithValue("@timestamp", now);
+                    _ = outboxCmd.Parameters.AddWithValue("@event_name", eventName.ToString());
+                    _ = outboxCmd.Parameters.AddWithValue("@subject_id", entityId);
+                    _ = outboxCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+                    _ = outboxCmd.Parameters.AddWithValue("@entity_type_name", entityTypeName);
+                    _ = outboxCmd.Parameters.AddWithValue("@pool_id", poolId);
+                    _ = outboxCmd.Parameters.AddWithValue("@payload", value);
+                    _ = outboxCmd.Parameters.AddWithValue("@subscriber_name", subscriber.SubscriberName.ToString());
+                    _ = outboxCmd.Parameters.AddWithValue("@dso_type_schema_version", dsoTypeSchemaVersion.HasValue ? dsoTypeSchemaVersion.Value : DBNull.Value);
+                    Log.ExecutingSql(logger, outboxCmd.CommandText);
+                    _ = await outboxCmd.ExecuteNonQueryAsync(ct);
                 }
             }
+        }
 
-            if (expired.Count == 0)
+        // Step 3: Delete entity links for expired entities
+        foreach (var (poolId, entityTypeId, entityId, _, _, _, _) in expired)
+        {
+            await using var linkCmd = cnn.CreateCommand();
+            linkCmd.Transaction = tx;
+            linkCmd.CommandText = """
+                DELETE FROM main.entity_links
+                WHERE pool_id = @pool_id
+                  AND (
+                        (left_entity_id = @entity_id AND left_entity_type_id = @entity_type_id)
+                     OR (right_entity_id = @entity_id AND right_entity_type_id = @entity_type_id)
+                  )
+                """;
+            _ = linkCmd.Parameters.AddWithValue("@pool_id", poolId);
+            _ = linkCmd.Parameters.AddWithValue("@entity_id", entityId);
+            _ = linkCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+            Log.ExecutingSql(logger, linkCmd.CommandText);
+            _ = await linkCmd.ExecuteNonQueryAsync(ct);
+        }
+
+        // Step 4: Delete entities (entity_keys and search_values cascade)
+        var deleted = 0;
+        foreach (var (poolId, entityTypeId, entityId, _, _, _, _) in expired)
+        {
+            await using var deleteCmd = cnn.CreateCommand();
+            deleteCmd.Transaction = tx;
+            deleteCmd.CommandText = """
+                DELETE FROM main.entities
+                WHERE pool_id = @pool_id AND entity_type_id = @entity_type_id AND entity_id = @entity_id
+                  AND expires_at <= @now
+                """;
+            _ = deleteCmd.Parameters.AddWithValue("@pool_id", poolId);
+            _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+            _ = deleteCmd.Parameters.AddWithValue("@entity_id", entityId);
+            _ = deleteCmd.Parameters.AddWithValue("@now", now);
+            Log.ExecutingSql(logger, deleteCmd.CommandText);
+            deleted += await deleteCmd.ExecuteNonQueryAsync(ct);
+        }
+
+        await tx.CommitAsync(ct);
+        return deleted;
+    }
+
+    Task<PurgeResult> IStore.PurgePoolAsync(Ct ct) => ((IStore)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+
+    async Task<PurgeResult> IStore.PurgePoolAsync(int batchSize, Ct ct)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
+
+        var totalOutboxDeleted = 0;
+        var totalLinksDeleted = 0;
+        var totalEntitiesDeleted = 0;
+
+        await using var cnn = await OpenConnectionAsync(ct);
+
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+            int batchOutbox;
+            int batchLinks;
+            int batchEntities;
+
+            await using (var outboxCmd = cnn.CreateCommand())
             {
-                await tx.RollbackAsync(ct);
-                return 0;
-            }
-
-            // Step 2: Insert outbox events per matching subscriber
-            if (!outboxSubscribers.IsEmpty)
-            {
-                var eventName = OutboxEventName.EntityExpired;
-                foreach (var subscriber in outboxSubscribers.Subscribers)
-                {
-                    if (subscriber.EventNames.Count > 0 && !subscriber.EventNames.Contains(eventName))
-                    {
-                        continue;
-                    }
-
-                    var matchingExpired = subscriber.EntityTypeIds.Count > 0
-                        ? expired.Where(e => subscriber.EntityTypeIds.Contains(e.EntityTypeId))
-                        : expired;
-
-                    foreach (var (poolId, entityTypeId, entityId, entityTypeName, value, eventId) in matchingExpired)
-                    {
-                        await using var outboxCmd = cnn.CreateCommand();
-                        outboxCmd.Transaction = tx;
-                        outboxCmd.CommandText = """
-                            INSERT INTO main.outbox_subscriber_queue
-                            (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name)
-                            VALUES (@message_id, @event_id, @timestamp, @event_name, @subject_id, @entity_type_id, @entity_type_name, @pool_id, @payload, @subscriber_name)
-                            """;
-                        _ = outboxCmd.Parameters.AddWithValue("@message_id", Guid.CreateVersion7().ToString());
-                        _ = outboxCmd.Parameters.AddWithValue("@event_id", eventId);
-                        _ = outboxCmd.Parameters.AddWithValue("@timestamp", now);
-                        _ = outboxCmd.Parameters.AddWithValue("@event_name", eventName.ToString());
-                        _ = outboxCmd.Parameters.AddWithValue("@subject_id", entityId);
-                        _ = outboxCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-                        _ = outboxCmd.Parameters.AddWithValue("@entity_type_name", entityTypeName);
-                        _ = outboxCmd.Parameters.AddWithValue("@pool_id", poolId);
-                        _ = outboxCmd.Parameters.AddWithValue("@payload", value);
-                        _ = outboxCmd.Parameters.AddWithValue("@subscriber_name", subscriber.SubscriberName.ToString());
-                        Log.ExecutingSql(logger, outboxCmd.CommandText);
-                        _ = await outboxCmd.ExecuteNonQueryAsync(ct);
-                    }
-                }
-            }
-
-            // Step 3: Delete entity links for expired entities
-            foreach (var (poolId, entityTypeId, entityId, _, _, _) in expired)
-            {
-                await using var linkCmd = cnn.CreateCommand();
-                linkCmd.Transaction = tx;
-                linkCmd.CommandText = """
-                    DELETE FROM main.entity_links
-                    WHERE pool_id = @pool_id
-                      AND (
-                            (left_entity_id = @entity_id AND left_entity_type_id = @entity_type_id)
-                         OR (right_entity_id = @entity_id AND right_entity_type_id = @entity_type_id)
-                      )
+                outboxCmd.Transaction = tx;
+                outboxCmd.CommandText = """
+                    DELETE FROM main.outbox_subscriber_queue WHERE rowid IN (
+                        SELECT rowid FROM main.outbox_subscriber_queue WHERE pool_id = @pool_id LIMIT @batch_size
+                    )
                     """;
-                _ = linkCmd.Parameters.AddWithValue("@pool_id", poolId);
-                _ = linkCmd.Parameters.AddWithValue("@entity_id", entityId);
-                _ = linkCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-                Log.ExecutingSql(logger, linkCmd.CommandText);
-                _ = await linkCmd.ExecuteNonQueryAsync(ct);
+                _ = outboxCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+                _ = outboxCmd.Parameters.AddWithValue("@batch_size", batchSize);
+                Log.ExecutingSql(logger, outboxCmd.CommandText);
+                batchOutbox = await outboxCmd.ExecuteNonQueryAsync(ct);
             }
 
-            // Step 4: Delete entities (entity_keys and search_values cascade)
-            var deleted = 0;
-            foreach (var (poolId, entityTypeId, entityId, _, _, _) in expired)
+            await using (var linksCmd = cnn.CreateCommand())
             {
-                await using var deleteCmd = cnn.CreateCommand();
-                deleteCmd.Transaction = tx;
-                deleteCmd.CommandText = """
-                    DELETE FROM main.entities
-                    WHERE pool_id = @pool_id AND entity_type_id = @entity_type_id AND entity_id = @entity_id
-                      AND expires_at <= @now
+                linksCmd.Transaction = tx;
+                linksCmd.CommandText = """
+                    DELETE FROM main.entity_links WHERE rowid IN (
+                        SELECT rowid FROM main.entity_links WHERE pool_id = @pool_id LIMIT @batch_size
+                    )
                     """;
-                _ = deleteCmd.Parameters.AddWithValue("@pool_id", poolId);
-                _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-                _ = deleteCmd.Parameters.AddWithValue("@entity_id", entityId);
-                _ = deleteCmd.Parameters.AddWithValue("@now", now);
-                Log.ExecutingSql(logger, deleteCmd.CommandText);
-                deleted += await deleteCmd.ExecuteNonQueryAsync(ct);
+                _ = linksCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+                _ = linksCmd.Parameters.AddWithValue("@batch_size", batchSize);
+                Log.ExecutingSql(logger, linksCmd.CommandText);
+                batchLinks = await linksCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            await using (var entitiesCmd = cnn.CreateCommand())
+            {
+                entitiesCmd.Transaction = tx;
+                entitiesCmd.CommandText = """
+                    DELETE FROM main.entities WHERE rowid IN (
+                        SELECT rowid FROM main.entities WHERE pool_id = @pool_id LIMIT @batch_size
+                    )
+                    """;
+                _ = entitiesCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+                _ = entitiesCmd.Parameters.AddWithValue("@batch_size", batchSize);
+                Log.ExecutingSql(logger, entitiesCmd.CommandText);
+                batchEntities = await entitiesCmd.ExecuteNonQueryAsync(ct);
             }
 
             await tx.CommitAsync(ct);
-            return deleted;
+
+            totalOutboxDeleted += batchOutbox;
+            totalLinksDeleted += batchLinks;
+            totalEntitiesDeleted += batchEntities;
+
+            if (batchOutbox + batchLinks + batchEntities == 0)
+            {
+                break;
+            }
         }
-        catch
-        {
-            await tx.RollbackAsync(ct);
-            throw;
-        }
+
+        return new PurgeResult(totalEntitiesDeleted, totalLinksDeleted, totalOutboxDeleted);
     }
 
     private sealed record QueryClauses(string WhereClause, string JoinClause, string OrderByClause);
