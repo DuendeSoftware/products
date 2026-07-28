@@ -29,6 +29,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         private IDataProtector dataProtector;
         private readonly IOptionsFactory<Saml2Options> optionsFactory;
         bool emitSameSiteNone;
+        private string _schemeName;
 
         /// <summary>
         /// Ctor
@@ -63,6 +64,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             this.context = context ?? throw new ArgumentNullException(nameof(context));
+            _schemeName = scheme.Name;
 
             options = optionsCache.GetOrAdd(scheme.Name, () => optionsFactory.Create(scheme.Name));
 
@@ -134,11 +136,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
                 var commandName = context.Request.Path.Value.Substring(
                     options.SPOptions.ModulePath.Length).TrimStart('/');
 
-                var commandResult = CommandFactory.GetCommand(commandName).Run(
-                    context.ToHttpRequestData(options.CookieManager, dataProtector.Unprotect), options, _timeProvider);
+                var requestData = context.ToHttpRequestData(options.CookieManager, dataProtector.Unprotect);
+                var commandResult = CommandFactory.GetCommand(commandName).Run(requestData, options, _timeProvider);
 
                 await commandResult.Apply(
-                    context, dataProtector, options.CookieManager, options.SignInScheme, options.SignOutScheme, emitSameSiteNone);
+                    context, dataProtector, options.CookieManager, options.SignInScheme, options.SignOutScheme, emitSameSiteNone, _schemeName, requestData.RelayState, options.SPOptions.MaxRelayStateLength);
 
                 return true;
             }

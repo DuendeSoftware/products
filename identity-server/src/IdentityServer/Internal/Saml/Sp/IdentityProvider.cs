@@ -195,12 +195,6 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
         /// </summary>
         public bool AllowUnsolicitedAuthnResponse { get; set; }
 
-        /// <summary>
-        /// Does the RelayState contains the return url?, 
-        /// This setting is used only when the AllowUnsolicitedAuthnResponse setting is enabled.
-        /// </summary>
-        public bool RelayStateUsedAsReturnUrl { get; set; }
-
         private string metadataLocation;
 
         /// <summary>

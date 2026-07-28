@@ -140,7 +140,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
         /// </summary>
         /// <param name="xml">Xml data</param>
         /// <param name="relayState">RelayState associateed with the message.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Enum.TryParse<Sustainsys.Saml2.Saml2P.NameIdFormat>(System.String,System.Boolean,Sustainsys.Saml2.Saml2P.NameIdFormat@)")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Enum.TryParse<Duende.IdentityServer.Internal.Saml.Sp.Protocol.NameIdFormat>(System.String,System.Boolean,Duende.IdentityServer.Internal.Saml.Sp.Protocol.NameIdFormat@)")]
         public Saml2AuthenticationRequest(XmlElement xml, string relayState)
         {
             ReadBaseProperties(xml);

@@ -14,7 +14,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
     internal static class HttpRequestExtensions
     {
         /// <summary>
-        /// Create a Sustainsys.Saml2 internal HttpRequestData from the Asp.Net Core
+        /// Create an internal HttpRequestData from the Asp.Net Core
         /// HttpRequest
         /// </summary>
         /// <param name="httpContext">HttpContext</param>

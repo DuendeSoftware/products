@@ -12,6 +12,7 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -166,6 +167,21 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
 
                 app.MapGet("/account/logout", () => Results.Ok());
                 app.MapGet("/consent", () => Results.Ok());
+
+                // IDP-initiated SSO endpoint: triggers unsolicited response to a SP
+                app.MapGet("/idp-initiated-sso", async (HttpContext ctx, IIdpInitiatedSsoService ssoService) =>
+                {
+                    var spEntityId = ctx.Request.Query["sp"].FirstOrDefault() ?? "";
+                    var relayState = ctx.Request.Query["relayState"].FirstOrDefault();
+                    var result = await ssoService.CreateResponseAsync(ctx, spEntityId, relayState, ctx.RequestAborted);
+                    if (result.IsError)
+                    {
+                        ctx.Response.StatusCode = 400;
+                        await ctx.Response.WriteAsync(result.Error ?? "Unknown error", _ct);
+                        return;
+                    }
+                    await result.Response!.ExecuteAsync(ctx);
+                });
             },
             _ct);
 
@@ -234,6 +250,42 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
 
                 app.MapGet("/account/logout", () => Results.Ok());
                 app.MapGet("/consent", () => Results.Ok());
+
+                // External login callback for IDP-initiated SSO
+                app.MapGet("/external-callback", async (HttpContext ctx) =>
+                {
+                    var result = await ctx.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+                    if (result.Succeeded != true)
+                    {
+                        ctx.Response.StatusCode = 401;
+                        await ctx.Response.WriteAsync("External auth failed", _ct);
+                        return;
+                    }
+
+                    var externalUser = result.Principal!;
+                    var userIdClaim = externalUser.FindFirst(ClaimTypes.NameIdentifier);
+                    var schemeName = result.Properties!.Items["scheme"];
+                    result.Properties.Items.TryGetValue("relayState", out var relayState);
+
+                    // Sign in as local user
+                    var localUser = new ClaimsPrincipal(new ClaimsIdentity(
+                    [
+                        new Claim(JwtClaimTypes.Subject, userIdClaim?.Value ?? "unknown"),
+                        new Claim(JwtClaimTypes.Name, externalUser.FindFirst(ClaimTypes.Name)?.Value ?? ""),
+                        new Claim(JwtClaimTypes.IdentityProvider, schemeName ?? "unknown"),
+                        new Claim(JwtClaimTypes.AuthenticationMethod, "external")
+                    ], "external", JwtClaimTypes.Name, JwtClaimTypes.Role));
+
+                    await ctx.SignInAsync(localUser, new AuthenticationProperties());
+                    await ctx.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+
+                    await ctx.Response.WriteAsJsonAsync(new
+                    {
+                        sub = userIdClaim?.Value,
+                        provider = schemeName,
+                        relayState
+                    }, _ct);
+                });
             },
             _ct);
 
@@ -258,7 +310,9 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
             SingleSignOnServiceUrl = $"{idpUri}/Saml2/SSO",
             SigningCertificateBase64 = idpPublicCertBase64,
             BindingType = "redirect",
-            WantAssertionsSigned = false
+            WantAssertionsSigned = false,
+            AllowUnsolicitedAuthnResponse = true,
+            IdpInitiatedCallbackUrl = "/external-callback"
         }.ToEntity());
 
         db.IdentityResources.Add(new IdentityResources.OpenId().ToEntity());
@@ -277,6 +331,7 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
             EntityId = spUri,
             DisplayName = "IdentityServer SP (Webapp 2)",
             Enabled = true,
+            AllowIdpInitiated = true,
             AllowedScopes = new HashSet<string> { "openid", "profile" },
             AssertionConsumerServiceUrls =
             [

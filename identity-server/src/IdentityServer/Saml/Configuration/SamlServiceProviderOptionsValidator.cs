@@ -81,6 +81,40 @@ internal sealed class SamlServiceProviderOptionsValidator : IValidateOptions<Sam
                 $"SamlServiceProviderOptions.BindingType has an invalid value '{options.BindingType}' for scheme '{_scheme}'.");
         }
 
+        if (!string.IsNullOrWhiteSpace(options.IdpInitiatedCallbackUrl))
+        {
+            // Reject scheme-relative URLs (e.g., "//evil.example.com") which browsers
+            // treat as external redirects.
+            if (options.IdpInitiatedCallbackUrl.StartsWith("//", StringComparison.Ordinal))
+            {
+                return ValidateOptionsResult.Fail(
+                    $"SamlServiceProviderOptions.IdpInitiatedCallbackUrl must not be a scheme-relative URL for scheme '{_scheme}'.");
+            }
+
+            // On Unix, paths starting with '/' are parsed as file:// URIs by Uri.TryCreate
+            // with UriKind.Absolute. Treat leading-slash values as relative paths (web context).
+            if (!options.IdpInitiatedCallbackUrl.StartsWith('/') &&
+                Uri.TryCreate(options.IdpInitiatedCallbackUrl, UriKind.Absolute, out var absoluteUri))
+            {
+                if (absoluteUri.Scheme != "http" && absoluteUri.Scheme != "https")
+                {
+                    return ValidateOptionsResult.Fail(
+                        $"SamlServiceProviderOptions.IdpInitiatedCallbackUrl must use http or https scheme for scheme '{_scheme}'.");
+                }
+            }
+            else if (!Uri.TryCreate(options.IdpInitiatedCallbackUrl, UriKind.Relative, out _))
+            {
+                return ValidateOptionsResult.Fail(
+                    $"SamlServiceProviderOptions.IdpInitiatedCallbackUrl must be a valid absolute or relative URL for scheme '{_scheme}'.");
+            }
+        }
+
+        if (options.MaxRelayStateLength < 0)
+        {
+            return ValidateOptionsResult.Fail(
+                $"SamlServiceProviderOptions.MaxRelayStateLength must be non-negative for scheme '{_scheme}'.");
+        }
+
         return ValidateOptionsResult.Success;
     }
 }

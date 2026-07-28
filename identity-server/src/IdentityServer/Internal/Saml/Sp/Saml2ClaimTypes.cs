@@ -7,7 +7,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class Saml2ClaimTypes
     {
-        internal const string ClaimTypeNamespace = "http://Sustainsys.se/Saml2";
+        internal const string ClaimTypeNamespace = "https://duendesoftware.com/Saml2";
 
         /// <summary>
         /// Session index is set by the idp and is used to correlate sessions

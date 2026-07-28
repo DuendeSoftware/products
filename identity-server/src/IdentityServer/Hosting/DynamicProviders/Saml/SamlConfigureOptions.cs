@@ -77,6 +77,39 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         options.SPOptions.WantAssertionsSigned = publicOptions?.WantAssertionsSigned
             ?? provider.WantAssertionsSigned;
 
+        // IdpInitiatedCallbackUrl: customer override > provider config
+        var idpInitiatedCallbackUrl = publicOptions?.IdpInitiatedCallbackUrl
+            ?? provider.IdpInitiatedCallbackUrl;
+        if (!string.IsNullOrWhiteSpace(idpInitiatedCallbackUrl))
+        {
+            // Reject scheme-relative URLs (e.g., "//evil.example.com") which browsers
+            // treat as external redirects.
+            if (idpInitiatedCallbackUrl.StartsWith("//", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    $"IdpInitiatedCallbackUrl must not be a scheme-relative URL for provider '{provider.Scheme}'.");
+            }
+
+            var returnUri = new Uri(idpInitiatedCallbackUrl, UriKind.RelativeOrAbsolute);
+            if (returnUri.IsAbsoluteUri && returnUri.Scheme != "http" && returnUri.Scheme != "https")
+            {
+                throw new InvalidOperationException(
+                    $"IdpInitiatedCallbackUrl must use http or https scheme, but got '{returnUri.Scheme}' for provider '{provider.Scheme}'.");
+            }
+
+            options.SPOptions.IdpInitiatedCallbackUrl = returnUri;
+        }
+
+        // MaxRelayStateLength: customer override > provider config
+        var maxRelayStateLength = publicOptions?.MaxRelayStateLength
+            ?? provider.MaxRelayStateLength;
+        if (maxRelayStateLength < 0)
+        {
+            throw new InvalidOperationException(
+                $"MaxRelayStateLength must be non-negative for provider '{provider.Scheme}'.");
+        }
+        options.SPOptions.MaxRelayStateLength = maxRelayStateLength;
+
         // Wire up the LogoutResponseCreated notification so the AuthenticationRequestHandlerWrapper
         // can intercept IdP-initiated logout and trigger federated sign-out for downstream clients.
         var httpContextAccessor = _httpContextAccessor;
@@ -118,7 +151,8 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         if (!string.IsNullOrWhiteSpace(provider.IdpEntityId))
         {
             _licenseValidator.ValidateSamlIdp(provider.IdpEntityId);
-            var idp = BuildIdentityProvider(provider, options.SPOptions, _timeProvider, outboundSigningAlgorithm);
+            var allowUnsolicited = publicOptions?.AllowUnsolicitedAuthnResponse ?? provider.AllowUnsolicitedAuthnResponse;
+            var idp = BuildIdentityProvider(provider, options.SPOptions, _timeProvider, outboundSigningAlgorithm, allowUnsolicited);
             options.IdentityProviders.Add(idp);
         }
     }
@@ -136,11 +170,11 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         return optionsFactory?.Create(scheme);
     }
 
-    private static SpIdentityProvider BuildIdentityProvider(SamlProvider provider, SPOptions spOptions, TimeProvider timeProvider, string? outboundSigningAlgorithm)
+    private static SpIdentityProvider BuildIdentityProvider(SamlProvider provider, SPOptions spOptions, TimeProvider timeProvider, string? outboundSigningAlgorithm, bool allowUnsolicited)
     {
         var idp = new SpIdentityProvider(new EntityId(provider.IdpEntityId!), spOptions, timeProvider)
         {
-            AllowUnsolicitedAuthnResponse = provider.AllowUnsolicitedAuthnResponse,
+            AllowUnsolicitedAuthnResponse = allowUnsolicited,
             WantAuthnRequestsSigned = false,
             DisableOutboundLogoutRequests = string.IsNullOrWhiteSpace(provider.SingleLogoutServiceUrl),
             OutboundSigningAlgorithm = outboundSigningAlgorithm,

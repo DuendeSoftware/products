@@ -107,7 +107,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
 you must press the Continue button once to proceed.
 </p>
 </noscript>
-<form action=""{0}"" method=""post"" name=""sustainsysSamlPostBindingSubmit"">
+<form action=""{0}"" method=""post"" name=""samlPostBindingSubmit"">
 <div>{1}
 <input type=""hidden"" name=""{2}""
 value=""{3}""/>
@@ -119,7 +119,7 @@ value=""{3}""/>
 </noscript>
 </form>
 <script type=""text/javascript"">
-document.forms.sustainsysSamlPostBindingSubmit.submit();
+document.forms.samlPostBindingSubmit.submit();
 </script>
 </body>
 </html>";

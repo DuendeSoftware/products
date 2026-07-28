@@ -4,6 +4,8 @@
 
 #nullable enable
 
+using System.Globalization;
+
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -110,6 +112,27 @@ public record SamlProvider : IdentityProvider
     {
         get => "true".Equals(this["AllowUnsolicitedAuthnResponse"], StringComparison.Ordinal);
         set => this["AllowUnsolicitedAuthnResponse"] = value ? "true" : "false";
+    }
+
+    /// <summary>
+    /// The URL to redirect to after processing an unsolicited (IdP-initiated)
+    /// authentication response.
+    /// </summary>
+    public string? IdpInitiatedCallbackUrl
+    {
+        get => this["IdpInitiatedCallbackUrl"];
+        set => this["IdpInitiatedCallbackUrl"] = value;
+    }
+
+    /// <summary>
+    /// Maximum length (in bytes) of SAML RelayState that will be persisted
+    /// in authentication properties. Values exceeding this limit are silently
+    /// discarded. Defaults to 1024.
+    /// </summary>
+    public int MaxRelayStateLength
+    {
+        get => int.TryParse(this["MaxRelayStateLength"], out var v) ? v : 1024;
+        set => this["MaxRelayStateLength"] = value.ToString(CultureInfo.InvariantCulture);
     }
 
     /// <summary>
