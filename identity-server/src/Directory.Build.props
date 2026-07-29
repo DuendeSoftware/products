@@ -25,9 +25,12 @@
     <NoWarn>$(NoWarn);CA1002;CA1008;CA1031;CA1034;CA1040;CA1051;CA1054;CA1055;CA1056;CA1062;CA1716;CA1724;CA1725;CA1727;CA1819;CA1848;CA1851;CA2201;CA2007;CA2208;CA2227;CA2234</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <!-- Package 'Microsoft.Bcl.Memory' 10.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-73j8-2gch-69rq
+    This reference is net8.0-only: .NET 9+ includes this functionality in the BCL, so consumers on newer runtimes
+    get the fix via runtime updates. It is a direct (non-private) reference so it flows to consumers as a runtime
+    dependency (see #3211).
   -->
-    <PackageReference Include="Microsoft.Bcl.Memory"  PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Bcl.Memory" />
   </ItemGroup>
 </Project>
