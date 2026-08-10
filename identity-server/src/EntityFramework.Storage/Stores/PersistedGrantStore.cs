@@ -163,6 +163,13 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
         catch (DbUpdateConcurrencyException ex)
         {
             Logger.LogInformation("removing {persistedGrantCount} persisted grants from database for subject {@filter}: {error}", persistedGrants.Length, filter, ex.Message);
+
+            // Detach failed entries so they do not leak into subsequent SaveChanges calls.
+            // Without this, these entries remain in the change tracker and can cause unexpected behaviors.
+            foreach (var entry in ex.Entries)
+            {
+                entry.State = EntityState.Detached;
+            }
         }
     }
 
