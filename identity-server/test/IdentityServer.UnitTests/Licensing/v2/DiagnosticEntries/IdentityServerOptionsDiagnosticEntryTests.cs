@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Linq.Expressions;
+using System.Reflection;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 using Microsoft.Extensions.Options;
@@ -21,6 +23,36 @@ public class IdentityServerOptionsDiagnosticEntryTests
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
 
         result.RootElement.GetProperty("IdentityServerOptions").TryGetProperty("LicenseKey", out _).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task WriteAsync_ShouldExcludePathMatchingCallback()
+    {
+        var options = new IdentityServerOptions();
+        options.DynamicProviders.PathMatchingCallback = _ => Task.FromResult((string)null!);
+        var subject = new IdentityServerOptionsDiagnosticEntry(Options.Create(options));
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        var dynamicProviders = result.RootElement.GetProperty("IdentityServerOptions").GetProperty("DynamicProviders");
+        dynamicProviders.TryGetProperty("PathMatchingCallback", out _).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task WriteAsync_ShouldExcludeSamlErrorInspectors()
+    {
+        var options = new IdentityServerOptions();
+        options.Saml.AuthnRequestErrorInspector = _ => { };
+        options.Saml.LogoutRequestErrorInspector = _ => { };
+        options.Saml.LogoutResponseErrorInspector = _ => { };
+        var subject = new IdentityServerOptionsDiagnosticEntry(Options.Create(options));
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        var saml = result.RootElement.GetProperty("IdentityServerOptions").GetProperty("Saml");
+        saml.TryGetProperty("AuthnRequestErrorInspector", out _).ShouldBeFalse();
+        saml.TryGetProperty("LogoutRequestErrorInspector", out _).ShouldBeFalse();
+        saml.TryGetProperty("LogoutResponseErrorInspector", out _).ShouldBeFalse();
     }
 
     [Fact]
@@ -80,5 +112,91 @@ public class IdentityServerOptionsDiagnosticEntryTests
         identityServerOptions.TryGetProperty("Diagnostics", out _).ShouldBeTrue();
 
         identityServerOptions.GetProperty("JwtValidationClockSkew").GetString().ShouldBe(TimeSpan.FromMinutes(1).ToString());
+    }
+
+    [Fact]
+    public async Task WriteAsync_ShouldSucceedWhenAllDelegatePropertiesAreSet()
+    {
+        var options = new IdentityServerOptions();
+        SetAllDelegateProperties(options);
+        var subject = new IdentityServerOptionsDiagnosticEntry(Options.Create(options));
+
+        // If a new delegate property is added to IdentityServerOptions (or any nested
+        // options type) without also excluding it from diagnostic serialization, this
+        // call will throw NotSupportedException.
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        result.RootElement.TryGetProperty("IdentityServerOptions", out _).ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// Walks the object graph rooted at <paramref name="root"/> and assigns a no-op
+    /// delegate to every public read/write property whose type derives from
+    /// <see cref="Delegate"/>. This ensures the serialization guard test covers any
+    /// delegate properties added in the future.
+    /// </summary>
+    private static void SetAllDelegateProperties(object root)
+    {
+        var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+        SetAllDelegatePropertiesRecursive(root, visited);
+    }
+
+    private static void SetAllDelegatePropertiesRecursive(object obj, HashSet<object> visited)
+    {
+        if (!visited.Add(obj))
+        {
+            return;
+        }
+
+        var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        foreach (var prop in properties)
+        {
+            if (!prop.CanRead)
+            {
+                continue;
+            }
+
+            if (typeof(Delegate).IsAssignableFrom(prop.PropertyType) && prop.CanWrite)
+            {
+                prop.SetValue(obj, CreateNoOpDelegate(prop.PropertyType));
+                continue;
+            }
+
+            if (prop.PropertyType.IsClass
+                && prop.PropertyType != typeof(string)
+                && !prop.PropertyType.IsArray
+                && prop.GetIndexParameters().Length == 0)
+            {
+                var value = prop.GetValue(obj);
+                if (value != null)
+                {
+                    SetAllDelegatePropertiesRecursive(value, visited);
+                }
+            }
+        }
+    }
+
+    private static Delegate CreateNoOpDelegate(Type delegateType)
+    {
+        var invoke = delegateType.GetMethod("Invoke")!;
+        var returnType = invoke.ReturnType;
+
+        // Build a lambda that returns default for the delegate's return type
+        var parameters = invoke.GetParameters()
+            .Select(p => Expression.Parameter(p.ParameterType, p.Name))
+            .ToArray();
+
+        Expression body;
+        if (returnType == typeof(void))
+        {
+            body = Expression.Empty();
+        }
+        else
+        {
+            body = Expression.Default(returnType);
+        }
+
+        var lambda = Expression.Lambda(delegateType, body, parameters);
+        return lambda.Compile();
     }
 }
