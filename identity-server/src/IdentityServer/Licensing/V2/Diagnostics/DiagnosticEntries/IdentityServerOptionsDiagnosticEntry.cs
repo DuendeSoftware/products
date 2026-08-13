@@ -14,11 +14,18 @@ internal class IdentityServerOptionsDiagnosticEntry(IOptions<IdentityServerOptio
     private static readonly RemovePropertyModifier<IdentityServerOptions> RemoveLicenseKeyModifier = new([
         nameof(IdentityServerOptions.LicenseKey)
     ]);
+    private static readonly RemovePropertyModifier<DynamicProviderOptions> RemovePathMatchingCallbackModifier = new([
+        nameof(DynamicProviderOptions.PathMatchingCallback)
+    ]);
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
-            Modifiers = { RemoveLicenseKeyModifier.ModifyTypeInfo }
+            Modifiers =
+            {
+                RemoveLicenseKeyModifier.ModifyTypeInfo,
+                RemovePathMatchingCallbackModifier.ModifyTypeInfo
+            }
         },
         WriteIndented = false
     };
