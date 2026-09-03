@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 using System.Globalization;
+using System.Net;
 using System.Text;
 using System.Xml.Linq;
 using Duende.IdentityServer.Internal.Saml.Sp.Commands;
@@ -8,8 +9,11 @@ using Duende.IdentityServer.Internal.Saml.Sp.Configuration;
 using Duende.IdentityServer.Internal.Saml.Sp.Protocol;
 namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
 {
-    class Saml2PostBinding : Saml2Binding
+    internal sealed class Saml2PostBinding : Saml2Binding
     {
+        // This must match the SHA-256 hash of the exact inline script in PostHtmlFormatString.
+        private const string SamlSpAutoPostScriptHash = "sha256-IQKtK10TFgRroV/L1+sRadhw5yAEkHE3GlbgJgxr7K4=";
+
         protected internal override bool CanUnbind(HttpRequestData request)
         {
             if (request == null)
@@ -73,7 +77,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
             var encodedXml = Convert.ToBase64String(Encoding.UTF8.GetBytes(xml));
 
             var relayStateHtml = string.IsNullOrEmpty(message.RelayState) ? null
-                : string.Format(CultureInfo.InvariantCulture, PostHtmlRelayStateFormatString, message.RelayState);
+                : string.Format(CultureInfo.InvariantCulture, PostHtmlRelayStateFormatString, WebUtility.HtmlEncode(message.RelayState));
 
             var cr = new CommandResult()
             {
@@ -81,11 +85,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
                 Content = string.Format(
                     CultureInfo.InvariantCulture,
                     PostHtmlFormatString,
-                    message.DestinationUrl,
+                    WebUtility.HtmlEncode(message.DestinationUrl.OriginalString),
                     relayStateHtml,
-                    message.MessageName,
+                    WebUtility.HtmlEncode(message.MessageName),
                     encodedXml)
             };
+            cr.Headers["Content-Security-Policy"] = $"script-src '{SamlSpAutoPostScriptHash}'";
 
             return cr;
         }
@@ -97,9 +102,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
 <!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.1//EN""
 ""http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"">
 <html xmlns=""http://www.w3.org/1999/xhtml"" xml:lang=""en"">
-<head>
-<meta http-equiv=""Content-Security-Policy"" content=""script-src 'sha256-H3SVZBYrbqBt3ncrT/nNmOb6nwCjC12cPQzh5jnW4Y0='"">
-</head>
+<head/>
 <body>
 <noscript>
 <p>

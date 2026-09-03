@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Saml.Bindings;
@@ -69,6 +71,19 @@ public sealed class HttpPostBindingHtmlTests
     }
 
     [Fact]
+    public async Task emitted_script_hash_matches_emitted_CSP_hash()
+    {
+        var (html, contentSecurityPolicy) = await BindAndExtractResultAsync(CreateMessage());
+        var script = Regex.Match(
+            html,
+            "<script type=\"text/javascript\">(?<script>.*?)</script>",
+            RegexOptions.Singleline).Groups["script"].Value;
+        var scriptHash = "sha256-" + Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(script)));
+
+        contentSecurityPolicy.ShouldBe($"script-src '{scriptHash}'");
+    }
+
+    [Fact]
     public async Task HtmlEncodesRelayStateToPreventXss()
     {
         var maliciousRelayState = "\"/><script>alert(1)</script><input value=\"";
@@ -119,6 +134,10 @@ public sealed class HttpPostBindingHtmlTests
     }
 
     private static async Task<string> BindAndExtractHtmlAsync(OutboundSaml2Message message)
+        => (await BindAndExtractResultAsync(message)).Html;
+
+    private static async Task<(string Html, string ContentSecurityPolicy)> BindAndExtractResultAsync(
+        OutboundSaml2Message message)
     {
         var binding = new HttpPostBinding(Options.Create(new IdentityServerOptions()));
         var ctx = new DefaultHttpContext();
@@ -127,7 +146,8 @@ public sealed class HttpPostBindingHtmlTests
         await binding.BindAsync(ctx.Response, message);
 
         ctx.Response.Body.Seek(0, SeekOrigin.Begin);
-        return await new StreamReader(ctx.Response.Body).ReadToEndAsync();
+        var html = await new StreamReader(ctx.Response.Body).ReadToEndAsync();
+        return (html, ctx.Response.Headers.ContentSecurityPolicy.ToString());
     }
 
     private static OutboundSaml2Message CreateMessage(

@@ -54,7 +54,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
 
             foreach (var h in commandResult.Headers)
             {
-                httpContext.Response.Headers.Add(h.Key, h.Value);
+                httpContext.Response.Headers[h.Key] = h.Value;
             }
 
             if (!string.IsNullOrEmpty(commandResult.ClearCookieName))
