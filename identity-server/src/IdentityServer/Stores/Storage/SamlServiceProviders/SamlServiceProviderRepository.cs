@@ -19,7 +19,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.SamlServiceProviders;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class SamlServiceProviderRepository(IStoreFactory storeFactory)
+internal sealed class SamlServiceProviderRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -35,8 +35,8 @@ internal sealed class SamlServiceProviderRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, SamlServiceProviderDso.V1 dso, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(SamlServiceProviderEntityIdDskV1.Create(dso.EntityId))],
@@ -48,15 +48,15 @@ internal sealed class SamlServiceProviderRepository(IStoreFactory storeFactory)
 
     internal async Task<(SamlServiceProviderDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(SamlServiceProviderDso.EntityType, UuidV7.From(id), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(SamlServiceProviderDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((SamlServiceProviderDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(SamlServiceProviderDso.V1 Dso, int Version)?> TryReadByEntityIdAsync(string entityId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             SamlServiceProviderDso.EntityType,
             DataStorageKey.Create(SamlServiceProviderEntityIdDskV1.Create(entityId)),
             ct);
@@ -64,7 +64,7 @@ internal sealed class SamlServiceProviderRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, SamlServiceProviderDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -75,18 +75,18 @@ internal sealed class SamlServiceProviderRepository(IStoreFactory storeFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(SamlServiceProviderDso.EntityType, UuidV7.From(id), [], ct);
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(SamlServiceProviderDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<QueryResult<SamlServiceProviderDso.V1>> QueryAsync(
         QueryRequest<SamlServiceProviderFilter, SamlServiceProviderSortField> request,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await store.QueryAsync<SamlServiceProviderDso.V1>(
+        var result = await storage.QueryAsync<SamlServiceProviderDso.V1>(
             SamlServiceProviderDso.EntityType,
             filter,
             sort,

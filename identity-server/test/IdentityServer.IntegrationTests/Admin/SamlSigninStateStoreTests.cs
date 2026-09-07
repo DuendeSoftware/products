@@ -9,7 +9,7 @@ using Duende.IdentityServer.Saml;
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
 /// <summary>
-/// Integration tests for the IStore-backed ISamlSigninStateStore implementation.
+/// Integration tests for the IStorage-backed ISamlSigninStateStore implementation.
 /// Tests cover all 4 interface methods against a real SQLite database.
 /// </summary>
 public sealed class SamlSigninStateStoreTests : IAsyncLifetime

@@ -2,12 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-
-// TODO: Upgrade this client to remove dependancy on IWebHost & WebHostBuilder
-#pragma warning disable ASPDEPR008 // IWebHost is deprecated in net10.0
-#pragma warning disable ASPDEPR004 // WebHostBuilder is deprecated in net10.0
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ConsoleResourceIndicators;
 
@@ -15,7 +12,7 @@ public class LoopbackHttpListener : IDisposable
 {
     private const int DefaultTimeout = 60 * 5; // 5 mins (in seconds)
 
-    private IWebHost _host;
+    private WebApplication _host;
     private TaskCompletionSource<string> _source = new TaskCompletionSource<string>();
     private string _url;
 
@@ -31,18 +28,18 @@ public class LoopbackHttpListener : IDisposable
 
         _url = $"http://127.0.0.1:{port}/{path}";
 
-        _host = new WebHostBuilder()
-            .UseKestrel()
-            .UseUrls(_url)
-            .Configure(Configure)
-            .Build();
+        var builder = WebApplication.CreateBuilder();
+        _ = builder.Logging.ClearProviders();
+        _host = builder.Build();
+        _host.Urls.Add(_url);
+        Configure(_host);
         _host.Start();
     }
 
     public void Dispose() => _ = Task.Run(async () =>
     {
         await Task.Delay(500);
-        _host.Dispose();
+        await _host.DisposeAsync();
     });
 
     private void Configure(IApplicationBuilder app) => app.Run(async ctx =>

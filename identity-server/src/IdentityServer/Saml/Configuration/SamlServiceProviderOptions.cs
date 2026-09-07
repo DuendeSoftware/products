@@ -86,6 +86,20 @@ public sealed class SamlServiceProviderOptions
     public bool AllowUnsolicitedAuthnResponse { get; set; }
 
     /// <summary>
+    /// The URL to redirect to after processing an unsolicited (IdP-initiated)
+    /// authentication response. Must be a valid relative URL or an absolute URL
+    /// with an http or https scheme.
+    /// </summary>
+    public string? IdpInitiatedCallbackUrl { get; set; }
+
+    /// <summary>
+    /// Maximum length (in bytes) of SAML RelayState that will be persisted
+    /// in authentication properties. Values exceeding this limit are silently
+    /// discarded to prevent cookie bloat. Defaults to 1024.
+    /// </summary>
+    public int MaxRelayStateLength { get; set; } = 1024;
+
+    /// <summary>
     /// Base64-encoded X.509 certificate (with private key, PKCS#12) used by the SP to sign
     /// outbound SAML messages (AuthnRequests, LogoutResponses). Required when the remote
     /// IdP expects signed requests or when single logout is used.

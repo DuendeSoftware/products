@@ -12,43 +12,49 @@ namespace Duende.IdentityServer.Extensions;
 
 public static class IReadableStringCollectionExtensions
 {
-    [DebuggerStepThrough]
-    public static NameValueCollection AsNameValueCollection(this IEnumerable<KeyValuePair<string, StringValues>> collection)
+    extension(IEnumerable<KeyValuePair<string, StringValues>> collection)
     {
-        var nv = new NameValueCollection();
-
-        foreach (var field in collection)
+        [DebuggerStepThrough]
+        public NameValueCollection AsNameValueCollection()
         {
-            foreach (var val in field.Value)
+            var nv = new NameValueCollection();
+
+            foreach (var field in collection)
             {
-                // special check for some Azure product: https://github.com/DuendeSoftware/Support/issues/48
-                if (!string.IsNullOrWhiteSpace(val))
+                foreach (var val in field.Value)
                 {
-                    nv.Add(field.Key, val);
+                    // special check for some Azure product: https://github.com/DuendeSoftware/Support/issues/48
+                    if (!string.IsNullOrWhiteSpace(val))
+                    {
+                        nv.Add(field.Key, val);
+                    }
                 }
             }
-        }
 
-        return nv;
+            return nv;
+        }
     }
 
-    [DebuggerStepThrough]
-    public static NameValueCollection AsNameValueCollection(this IDictionary<string, StringValues> collection)
+    extension(IDictionary<string, StringValues> collection)
     {
-        var nv = new NameValueCollection();
-
-        foreach (var field in collection)
+        [DebuggerStepThrough]
+        public NameValueCollection AsNameValueCollection()
         {
-            foreach (var item in field.Value)
+            var nv = new NameValueCollection();
+
+            foreach (var field in collection)
             {
-                // special check for some Azure product: https://github.com/DuendeSoftware/Support/issues/48
-                if (!string.IsNullOrWhiteSpace(item))
+                foreach (var item in field.Value)
                 {
-                    nv.Add(field.Key, item);
+                    // special check for some Azure product: https://github.com/DuendeSoftware/Support/issues/48
+                    if (!string.IsNullOrWhiteSpace(item))
+                    {
+                        nv.Add(field.Key, item);
+                    }
                 }
             }
-        }
 
-        return nv;
+            return nv;
+        }
     }
 }

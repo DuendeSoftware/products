@@ -1,0 +1,71 @@
+{
+  "alias": "duende-is-fapi2",
+  "description": "Duende IdentityServer FAPI 2.0 Security Profile Conformance Test",
+  "planName": "fapi2-security-profile-id2-test-plan",
+  "variant": {
+    "fapi_profile": "plain_fapi",
+    "authorization_request_type": "pushed",
+    "openid": "openid_connect",
+    "client_auth_type": "private_key_jwt",
+    "sender_constrain": "dpop"
+  },
+  "configuration": {
+    "alias": "duende-is-fapi2",
+    "description": "Duende IdentityServer FAPI 2.0 Security Profile Conformance Test",
+    "server": {
+      "discoveryUrl": "https://nginx:8444/.well-known/openid-configuration"
+    },
+    "client": {
+      "client_name": "OIDF Conformance Suite",
+      "redirect_uri": "https://localhost:8443/test/a/duende-is-fapi2/callback",
+      "client_id": "fapi2-conformance-client",
+      "scope": "openid profile",
+      "jwks": {
+        "keys": [
+          {
+            "kty": "RSA",
+            "use": "sig",
+            "alg": "PS256",
+            "kid": "fapi2-client1-key",
+            "n": "3gBOBxGMLk3nE0gmusi1yzl0zrP4__EnpREBPHlr-YWbH9HVkbJpuJkyF2JLvuYhDM-G_KC7836JuB2Sax5Q41t4l5f3p9R5CoopdwCoHXb470NXHj7Ks1LGYrI6fk1lvzh_y97zqSefYWaahp4JCt3shaCo60NEu0lHFcR_mcmZ3gL4a1dLqu7boA2fbGLobD_aEmbvrNmcjZvSgBSvivpLD--P8q2GNPzJEpY4_TCKsNMeynixIOa4YgSkRFDr_B1pzIrYFjbX3LzEMjRP55JmyHQwGb1tU1dOf-10eJJKs4Qz0mGFqNgMjVVNl00uF3YsslGCWnIMmDND-RiOJQ",
+            "e": "AQAB",
+            "d": "WqDwObWBr0ORUo9RdE5M3O6TT3EsdTv7Tck_4nLFUCOpfNd6YxTdUQWFbANuXbvwAR1Vg5uQrypYyaeU5xMEvZRRij15VnQIh_N4UwMbHpA7tt2cWpYSxRtFLvSIqZgqMeK8VTuq6ELrL2WmLs-kbGHF1ZWNcCHRlM2o7et-lgZy1bPTh4gsw1NyGc1kMX3k5bHOp-V7dYWCVzkMHrPYIAO8NJMMy8MXcnKgVNsyu9eUhbdCVs5MTPA2ls--AJxyrzrZSy0Dx7sPh8tFaRL5fQuo9_RnhwOBqRtVojRf_pWxNFQclFrWXOsDdEOI3ls5gJjXteUl4yTRiig4RRbNfw",
+            "p": "-1fffR8GIe3YTEF5tQJW51E4_e5xv92zCa1Gwd90UIFJ5qmdXAkO-gZeNaURjxljXL38SgIQ6RZjN-RbyvQbZcc0_PfsfSmlkMNyonmj1oKdECIykWyVFJtDU758_PdM7Ks-10hoBqWtff_lRO-gZDZBOn7sbLCKCdLskFuu4N8",
+            "q": "4h1C_kNoJgQ33l6Hr-xYSkUnpdPqg7XcifYGbYj3_dLKi6f98G2IEbgwilouFk4fm8XXN9qy801-MO73ZMBfDuZ7-wDtYbciQcQIEG1qIfeJWmxQynP3aWLila7wRqOcR6WKUVDBf9GGsC7c424JziAC1AY2veOiwdWWhJBO3Xs",
+            "dp": "GhsTbHSHd4izuZ_nW0Sl8BrAl6dniy0kxnGH8uUZuK7lFR8y5_dM5e05ZcsCWuGhL2XQSYOTbBJWNdzzJ85Y9iZNu6SonItx1epnArctrD8evyk-JVqo1V4XDSCw7Llm9QIIYeX0YBRfQ8ILdzCIcUAtYD0Eo3lmrQSKa6gKLvM",
+            "dq": "oTWlnuxmI7ycLIGPEgFajVEyzEsDh3Ywz3fF63BdBu2zlNBn_3PIMIH2sZ1MAIEgjgoGwH6_WTIlxzOI1J9G5rOzLyjhFerglKzz5uprYd4_YmWZUE5P1iY3T-rSyjo54OcIb6M44i17br9qowfAG-K8wXfQrZ_PWY0zbD4KzGM",
+            "qi": "M7eu_KpC0khCfioTxoME0__JTxtvnEn3LAKHwiJZs6e4JG8CE-xC8hIS60PHFB0K82uoY0VrdCLFYtvRhNDut180FzKoWwJFv7nMrcFJhU2Awym_TruIWUWIkesfgMAJvD970iuV9YBygDSWF4I5mJIkjgw5apwaeEzI1ixD2RQ"
+          }
+        ]
+      }
+    },
+    "client2": {
+      "client_name": "OIDF Conformance Suite 2",
+      "redirect_uri": "https://localhost:8443/test/a/duende-is-fapi2/callback",
+      "client_id": "fapi2-conformance-client-2",
+      "scope": "openid profile",
+      "jwks": {
+        "keys": [
+          {
+            "kty": "RSA",
+            "use": "sig",
+            "alg": "PS256",
+            "kid": "fapi2-client2-key",
+            "n": "0TnW9FMwavgc6Vsnm3AZ4lA9xj4THuIGK9HNOw1IR1YyGU80YfxvtlJiP2FeiGq4byahn2-AjrbJxxHFuRdyh5jn6EdBNRtaCQIpYKEAc_93dnHy_QdpDMrpemCNCdhGG_PbB1EbDiwO7z6F8ODGtn-aW8zJnafnurEdOE2DCqmVwKtQUUie8XMlrqyrnys5mG90Bj_CbrV8nLY84BkCf_s-U6iAYsTyqA1WahOh_gtK65pE7wT26XNbdmkYLoO2UBo_z2nEv5Lj1zBVdurh6Vqqnv7SxUlk6eBMt4DFs_XH0Sp7A897L19Pnn7yyFsXOHN0N77Id1Fo74kAzt20Pw",
+            "e": "AQAB",
+            "d": "A4B-Z8YRieVh86SFlkLyAa3KScM6XNguWvnVpDJRN3WYYO3tGHTDRjIqqmIyeYHpfabG81P_OxH-3nQwxRmKAyKTsNTzV8__vkptnUw23F6_WDT2w_9KHMPqsBRTfJPpV-0k5Lk-cnh-K8kanmNMwCkXB_XkUJQmX9pc6qBnybwVT2R1qEGRIhoRQ-Q1YwQr1vMWk-lIPRWG-NnuZn81loKtPxHdexIkAL3kTOP3dbvyLTd8OGE55hnDWA4Qftg-GZdSsCzLX6LxRwsvZMqvD97LY0OhrwmjiucnUjzjKN85jRzuO3lfARVxD3UjFJdv6eA1euKBFq5TRqu_sfHYXQ",
+            "p": "6-PyxkmpynlsdLOBgDsqK3N_7bB24feuHwuhV_4bSzy5lsG1D5_agp2wM_irjUEzvOBvYJMeyhbgnVJrIBj4utVkC5CJeLLo0bUV7OyIBqqmtSegm7rkgPKih6JCa4rv5imn6ppNjs8aCOURvSGXpCBHfVQpiMiASR_T0pE6D0M",
+            "q": "4w_3yjmtir-X4lEogQnKJRIQwhjOMWDt2O-Sl94qK-Jb7uBj5pDk8-TH8hFTVBpqYz9OfzzFr-N42cFPksCSHQIOX3AW_xV5w8mtjTyJQ8T2cekE4FnRU4cfpR5ljOje6I9o2F124FFMBvxCoC-As7ekFpLFWQLjASO8Kct1IVU",
+            "dp": "aGcVNmm3-mNPez9Pm7-T5HNUNZEarNyAdkEhgd53mg8gXPcS-f1YKuM772SqGPS4v2neIbI7uFnzw-2MeEJVI-v6QZwRHBijLt2k_J2bfsfczOTjEsnfBKtfAATyvMJbd1UMeqsclI5ZCYLJHRpXEU8wFOpBD8cd8D9j8xhPyB0",
+            "dq": "WidL5jIycmWSA5zfrSRa648ZskcxDzACH-E3Xi8qpVPx1o2nfLNJBIFw1e8FG96FITTQkPprL2Ps5uC3HHhzSys207PonY1EVHVuACbqBUtd4mp3sjBXSYfcC65e-ay4XLQcF9Q8T-JXgmqEdZ-GxVSDxSavTqEzyo8Ktbl_nyU",
+            "qi": "TM_Eks0iePTEgaH7p1i21vLIb5xLkQTw_fHLGXRIsYrcXbCe0R9pdGs-OvoYqcOpGyDxSKeyh0XvGQ00I3Kpr7_OoW9P1fniqfph8Ln-sjNTVbwbu5ePaUd4TqQy-62ocOUQQwfWeQmgosX0uWxq_HbWmP6Lh77OZ_zRQkK9mC4"
+          }
+        ]
+      }
+    },
+    "resource": {
+      "resourceUrl": "https://nginx:8444/fapi2/resource"
+    },
+    "waitTimeoutSeconds": 30
+  }
+}

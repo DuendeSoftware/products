@@ -11,113 +11,125 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class NameValueCollectionExtensions
 {
-    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source) => source.AllKeys.ToDictionary(k => k, k => source.GetValues(k));
-
-    public static NameValueCollection FromFullDictionary(this IDictionary<string, string[]> source)
+    extension(NameValueCollection source)
     {
-        var nvc = new NameValueCollection();
-
-        foreach ((var key, var strings) in source)
-        {
-            foreach (var value in strings)
-            {
-                nvc.Add(key, value);
-            }
-        }
-
-        return nvc;
+        public IDictionary<string, string[]> ToFullDictionary() => source.AllKeys.ToDictionary(k => k, k => source.GetValues(k));
     }
 
-    public static string ToQueryString(this NameValueCollection collection)
+    extension(IDictionary<string, string[]> source)
     {
-        if (collection.Count == 0)
+        public NameValueCollection FromFullDictionary()
         {
-            return string.Empty;
-        }
+            var nvc = new NameValueCollection();
 
-        var builder = new StringBuilder(128);
-        var first = true;
-        foreach (string name in collection)
-        {
-            var values = collection.GetValues(name);
-            if (values == null || values.Length == 0)
+            foreach ((var key, var strings) in source)
             {
-                first = AppendNameValuePair(builder, first, true, name, string.Empty);
-            }
-            else
-            {
-                foreach (var value in values)
+                foreach (var value in strings)
                 {
-                    first = AppendNameValuePair(builder, first, true, name, value);
+                    nvc.Add(key, value);
                 }
             }
-        }
 
-        return builder.ToString();
+            return nvc;
+        }
     }
 
-    public static string ToFormPost(this NameValueCollection collection)
+    extension(NameValueCollection collection)
     {
-        var builder = new StringBuilder(128);
-        const string inputFieldFormat = "<input type='hidden' name='{0}' value='{1}' />\n";
-
-        foreach (string name in collection)
+        public string ToQueryString()
         {
-            var values = collection.GetValues(name);
-            var value = values.First();
-            value = HtmlEncoder.Default.Encode(value);
-            builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
-        }
-
-        return builder.ToString();
-    }
-
-    public static NameValueCollection ToNameValueCollection(this Dictionary<string, string> data)
-    {
-        var result = new NameValueCollection();
-
-        if (data == null || data.Count == 0)
-        {
-            return result;
-        }
-
-        foreach (var name in data.Keys)
-        {
-            var value = data[name];
-            if (value != null)
+            if (collection.Count == 0)
             {
-                result.Add(name, value);
+                return string.Empty;
             }
+
+            var builder = new StringBuilder(128);
+            var first = true;
+            foreach (string name in collection)
+            {
+                var values = collection.GetValues(name);
+                if (values == null || values.Length == 0)
+                {
+                    first = AppendNameValuePair(builder, first, true, name, string.Empty);
+                }
+                else
+                {
+                    foreach (var value in values)
+                    {
+                        first = AppendNameValuePair(builder, first, true, name, value);
+                    }
+                }
+            }
+
+            return builder.ToString();
         }
 
-        return result;
-    }
-
-    public static Dictionary<string, string> ToDictionary(this NameValueCollection collection) => collection.ToScrubbedDictionary();
-
-    public static Dictionary<string, string> ToScrubbedDictionary(this NameValueCollection collection, params string[] nameFilter)
-    {
-        var dict = new Dictionary<string, string>();
-
-        if (collection == null || collection.Count == 0)
+        public string ToFormPost()
         {
+            var builder = new StringBuilder(128);
+            const string inputFieldFormat = "<input type='hidden' name='{0}' value='{1}' />\n";
+
+            foreach (string name in collection)
+            {
+                var values = collection.GetValues(name);
+                var value = values.First();
+                value = HtmlEncoder.Default.Encode(value);
+                builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
+            }
+
+            return builder.ToString();
+        }
+
+        public Dictionary<string, string> ToDictionary() => collection.ToScrubbedDictionary();
+
+        public Dictionary<string, string> ToScrubbedDictionary(params string[] nameFilter)
+        {
+            var dict = new Dictionary<string, string>();
+
+            if (collection == null || collection.Count == 0)
+            {
+                return dict;
+            }
+
+            foreach (string name in collection)
+            {
+                var value = collection.Get(name);
+                if (value != null)
+                {
+                    if (nameFilter.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        value = "***REDACTED***";
+                    }
+                    dict.Add(name, value);
+                }
+            }
+
             return dict;
         }
+    }
 
-        foreach (string name in collection)
+    extension(Dictionary<string, string> data)
+    {
+        public NameValueCollection ToNameValueCollection()
         {
-            var value = collection.Get(name);
-            if (value != null)
-            {
-                if (nameFilter.Contains(name, StringComparer.OrdinalIgnoreCase))
-                {
-                    value = "***REDACTED***";
-                }
-                dict.Add(name, value);
-            }
-        }
+            var result = new NameValueCollection();
 
-        return dict;
+            if (data == null || data.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (var name in data.Keys)
+            {
+                var value = data[name];
+                if (value != null)
+                {
+                    result.Add(name, value);
+                }
+            }
+
+            return result;
+        }
     }
 
     internal static string ConvertFormUrlEncodedSpacesToUrlEncodedSpaces(string str)

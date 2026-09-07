@@ -18,7 +18,7 @@ using IdentityServerModels = Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Stores.Storage.ServerSideSessions;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, TimeProvider timeProvider)
+internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory, TimeProvider timeProvider)
 {
     internal enum Keys
     {
@@ -35,10 +35,10 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
 
     internal async Task<CreateResult> CreateAsync(IdentityServerModels.ServerSideSession session, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var id = UuidV7.New();
         var dso = ModelToDso(session);
-        return await store.CreateAsync(
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(SessionKeyDskV1.Create(session.Key))],
@@ -50,8 +50,8 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
 
     internal async Task<(Guid Id, int Version, ServerSideSessionDso.V1 Dso)?> TryReadByKeyAsync(string key, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             ServerSideSessionDso.EntityType,
             DataStorageKey.Create(SessionKeyDskV1.Create(key)),
             ct);
@@ -59,7 +59,7 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
     }
 
     internal async Task<UpdateResult> UpdateAsync(Guid id, int version, IdentityServerModels.ServerSideSession session, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             UuidV7.From(id),
             ModelToDso(session),
             version,
@@ -70,7 +70,7 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
             ct);
 
     internal async Task<DeleteResult> DeleteByKeyAsync(string key, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(
             ServerSideSessionDso.EntityType,
             DataStorageKey.Create(SessionKeyDskV1.Create(key)),
             [],
@@ -86,14 +86,14 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
         SessionFilter filter,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filterExpr = BuildSessionFilterExpression(filter);
         var results = new List<(Guid, int, ServerSideSessionDso.V1)>();
         var page = 1;
 
         while (true)
         {
-            var result = await store.QueryAsync<ServerSideSessionDso.V1>(
+            var result = await storage.QueryAsync<ServerSideSessionDso.V1>(
                 ServerSideSessionDso.EntityType,
                 filterExpr,
                 SortParameter.Empty,
@@ -120,12 +120,12 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
             return;
         }
 
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var operations = ids
-            .Select(id => (IStoreOperation)DeleteOperation.ById(ServerSideSessionDso.EntityType, UuidV7.From(id)))
+            .Select(id => (IStorageOperation)DeleteOperation.ById(ServerSideSessionDso.EntityType, UuidV7.From(id)))
             .ToArray();
 
-        await store.ExecuteBatchAsync(operations, [], ct);
+        await storage.ExecuteBatchAsync(operations, [], ct);
     }
 
     internal async Task<IReadOnlyList<(Guid Id, ServerSideSessionDso.V1 Dso)>> QueryExpiredAsync(int count, Ct ct)
@@ -135,9 +135,9 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
             return [];
         }
 
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var size = Math.Min(count, DataRangeSize.MaxValue);
-        var result = await store.QueryAsync<ServerSideSessionDso.V1>(
+        var result = await storage.QueryAsync<ServerSideSessionDso.V1>(
             ServerSideSessionDso.EntityType,
             Fields.Expires.LessThan(timeProvider.GetUtcNow()),
             new SortParameter(SystemFields.CreatedAtField),
@@ -162,7 +162,7 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
         var countRequested = filter.CountRequested > 0 ? filter.CountRequested : 25;
         var pageSize = Math.Min(countRequested, DataRangeSize.MaxValue);
 
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filterExpr = BuildSessionQueryExpression(filter);
 
         // Decode the ResultsToken: format is "nextToken|previousToken"
@@ -186,7 +186,7 @@ internal sealed class ServerSideSessionRepository(IStoreFactory storeFactory, Ti
             ? new SortParameter(SystemFields.CreatedAtField, SortDirection.Descending)
             : new SortParameter(SystemFields.CreatedAtField);
 
-        var result = await store.QueryAsync<ServerSideSessionDso.V1>(
+        var result = await storage.QueryAsync<ServerSideSessionDso.V1>(
             ServerSideSessionDso.EntityType,
             filterExpr,
             sort,

@@ -1,0 +1,8 @@
+<h1>SAML SP HTTP-POST binding</h1>
+<p>This scenario starts an OIDC client, a middle IdentityServer acting as a SAML service provider, and an upstream IdentityServer acting as the SAML identity provider.</p>
+<ol>
+    <li>Open DevTools and select the Console tab.</li>
+    <li>Open <strong>Start SAML POST sign-in</strong>.</li>
+    <li>On current main, observe the blank SAML POST relay page and its CSP script violation.</li>
+    <li>After the CSP fix, sign in to the upstream IdP with <code>alice</code> / <code>alice</code> and confirm the client shows claims.</li>
+</ol>

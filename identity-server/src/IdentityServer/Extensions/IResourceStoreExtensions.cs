@@ -11,27 +11,65 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public static class IResourceStoreExtensions
 {
-    /// <summary>
-    /// Finds the resources by scope.
-    /// </summary>
-    /// <param name="store">The store.</param>
-    /// <param name="scopeNames">The scope names.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
-    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct)
+    extension(IResourceStore store)
     {
-        var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct);
-        var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames, ct);
-        var scopes = await store.FindApiScopesByNameAsync(scopeNames, ct);
-
-        ValidateNameUniqueness(identity, apiResources, scopes);
-
-        var resources = new Resources(identity, apiResources, scopes)
+        /// <summary>
+        /// Finds the resources by scope.
+        /// </summary>
+        /// <param name="scopeNames">The scope names.</param>
+        /// <param name="ct">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<Resources> FindResourcesByScopeAsync(IEnumerable<string> scopeNames, Ct ct)
         {
-            OfflineAccess = scopeNames.Contains(IdentityServerConstants.StandardScopes.OfflineAccess)
-        };
+            var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct);
+            var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames, ct);
+            var scopes = await store.FindApiScopesByNameAsync(scopeNames, ct);
 
-        return resources;
+            ValidateNameUniqueness(identity, apiResources, scopes);
+
+            var resources = new Resources(identity, apiResources, scopes)
+            {
+                OfflineAccess = scopeNames.Contains(IdentityServerConstants.StandardScopes.OfflineAccess)
+            };
+
+            return resources;
+        }
+
+        /// <summary>
+        /// Finds the enabled resources by scope.
+        /// </summary>
+        /// <param name="scopeNames">The scope names.</param>
+        /// <param name="ct">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<Resources> FindEnabledResourcesByScopeAsync(IEnumerable<string> scopeNames, Ct ct) => (await store.FindResourcesByScopeAsync(scopeNames, ct)).FilterEnabled();
+
+        /// <summary>
+        /// Gets all enabled resources.
+        /// </summary>
+        /// <param name="ct">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<Resources> GetAllEnabledResourcesAsync(Ct ct)
+        {
+            var resources = await store.GetAllResourcesAsync(ct);
+            ValidateNameUniqueness(resources.IdentityResources, resources.ApiResources, resources.ApiScopes);
+
+            return resources.FilterEnabled();
+        }
+
+        /// <summary>
+        /// Finds the enabled identity resources by scope.
+        /// </summary>
+        /// <param name="scopeNames">The scope names.</param>
+        /// <param name="ct">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<IReadOnlyCollection<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(IEnumerable<string> scopeNames, Ct ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
+
+        /// <summary>
+        /// Finds the enabled API resources by name.
+        /// </summary>
+        /// <param name="resourceNames">The resource names.</param>
+        /// <param name="ct">The cancellation token.</param>
+        public async Task<IReadOnlyCollection<ApiResource>> FindEnabledApiResourcesByNameAsync(IEnumerable<string> resourceNames, Ct ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
     }
 
     private static void ValidateNameUniqueness(IEnumerable<IdentityResource> identity, IEnumerable<ApiResource> apiResources, IEnumerable<ApiScope> apiScopes)
@@ -83,44 +121,4 @@ public static class IResourceStoreExtensions
             .ToArray();
         return duplicates.ToArray();
     }
-
-    /// <summary>
-    /// Finds the enabled resources by scope.
-    /// </summary>
-    /// <param name="store">The store.</param>
-    /// <param name="scopeNames">The scope names.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
-    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct) => (await store.FindResourcesByScopeAsync(scopeNames, ct)).FilterEnabled();
-
-    /// <summary>
-    /// Gets all enabled resources.
-    /// </summary>
-    /// <param name="store">The store.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
-    public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store, Ct ct)
-    {
-        var resources = await store.GetAllResourcesAsync(ct);
-        ValidateNameUniqueness(resources.IdentityResources, resources.ApiResources, resources.ApiScopes);
-
-        return resources.FilterEnabled();
-    }
-
-    /// <summary>
-    /// Finds the enabled identity resources by scope.
-    /// </summary>
-    /// <param name="store">The store.</param>
-    /// <param name="scopeNames">The scope names.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
-    public static async Task<IReadOnlyCollection<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, Ct ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
-
-    /// <summary>
-    /// Finds the enabled API resources by name.
-    /// </summary>
-    /// <param name="store">The store.</param>
-    /// <param name="resourceNames">The resource names.</param>
-    /// <param name="ct">The cancellation token.</param>
-    public static async Task<IReadOnlyCollection<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, Ct ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
 }

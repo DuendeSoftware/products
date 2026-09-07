@@ -1,0 +1,22 @@
+{
+  "alias": "duende-is-session-mgmt",
+  "description": "Duende IdentityServer Session Management Conformance Test",
+  "planName": "oidcc-session-management-certification-test-plan",
+  "variant": {
+    "response_type": "code",
+    "client_registration": "dynamic_client"
+  },
+  "configuration": {
+    "alias": "duende-is-session-mgmt",
+    "description": "Duende IdentityServer Session Management Conformance Test",
+    "server": {
+      "discoveryUrl": "https://nginx:8444/.well-known/openid-configuration"
+    },
+    "client": {
+      "client_name": "OIDF Conformance Suite",
+      "redirect_uri": "https://localhost:8443/test/a/duende-is-session-mgmt/callback",
+      "post_logout_redirect_uri": "https://localhost:8443/test/a/duende-is-session-mgmt/post_logout_redirect"
+    },
+    "waitTimeoutSeconds": 30
+  }
+}

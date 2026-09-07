@@ -7,13 +7,14 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.IntegrationTests.Admin.ApiResources;
 using Duende.IdentityServer.IntegrationTests.Admin.ApiScopes;
 using Duende.IdentityServer.IntegrationTests.Admin.Clients;
+using Duende.IdentityServer.IntegrationTests.Admin.IdentityProviders;
 using Duende.IdentityServer.IntegrationTests.Admin.IdentityResources;
+using Duende.IdentityServer.IntegrationTests.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage.SigningKeys;
 using Duende.IdentityServer.Validation;
-using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,17 +63,14 @@ public sealed class StorageTestFixture : IAsyncLifetime
         // Unique in-memory DB per fixture instance for isolation
         var dbName = $"integration_{Guid.NewGuid():N}";
 
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
         services.AddIdentityServer()
-            .AddConfigurationStorage()
-            .AddOperationalStorage()
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
             .AddClientConfigurationValidator<NopClientConfigurationValidator>()
             .AddIdentityProviderConfigurationValidator<NopIdentityProviderConfigurationValidator>()
             .AddSamlServiceProviderConfigurationValidator<NopSamlServiceProviderConfigurationValidator>()
-            .AddInMemoryDataExtensionSchemas([TestClientAttributes.Schema, TestApiResourceAttributes.Schema, TestApiScopeAttributes.Schema, TestIdentityResourceAttributes.Schema]);
+            .AddInMemoryDataExtensionSchemas([TestClientAttributes.Schema, TestApiResourceAttributes.Schema, TestApiScopeAttributes.Schema, TestIdentityResourceAttributes.Schema, TestIdentityProviderAttributes.Schema, TestSamlServiceProviderAttributes.Schema]);
 
         // Register the server-side sessions marker manually (without AddServerSideSessions()
         // which would register ServerSideSessionCleanupHost, an IHostedService not needed in tests)

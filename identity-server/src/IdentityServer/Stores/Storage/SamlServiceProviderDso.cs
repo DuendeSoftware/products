@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 
 namespace Duende.IdentityServer.Stores.Storage;
@@ -56,6 +57,9 @@ internal static class SamlServiceProviderDso
         // Signing
         public int? SigningBehavior { get; init; }
         public required IReadOnlyList<string> AllowedSignatureAlgorithms { get; init; }
+
+        // Extended properties
+        public IReadOnlyList<AttributeValueDso.V1>? ExtendedAttributeValues { get; init; }
     }
 
     internal sealed record IndexedEndpointDso(string Location, int Binding, int Index, bool IsDefault);

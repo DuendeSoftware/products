@@ -13,50 +13,53 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
     /// </summary>
     internal static class HttpRequestExtensions
     {
-        /// <summary>
-        /// Create a Sustainsys.Saml2 internal HttpRequestData from the Asp.Net Core
-        /// HttpRequest
-        /// </summary>
-        /// <param name="httpContext">HttpContext</param>
-        /// <param name="cookieManager">Cookie manager to use to read cookies</param>
-        /// <param name="cookieDecryptor">Decryptor for encrypted cookie data</param>
-        /// <returns></returns>
-        public static HttpRequestData ToHttpRequestData(
-            this HttpContext httpContext,
-            ICookieManager cookieManager,
-            Func<byte[], byte[]> cookieDecryptor)
+        extension(HttpContext httpContext)
         {
-            var request = httpContext.Request;
-
-            var uri = new Uri(UriHelper.GetEncodedUrl(request));
-
-            var pathBase = httpContext.Request.PathBase.Value;
-            pathBase = string.IsNullOrEmpty(pathBase) ? "/" : pathBase;
-            IEnumerable<KeyValuePair<string, IEnumerable<string>>> formData = null;
-            if (httpContext.Request.Method == "POST" && httpContext.Request.HasFormContentType)
+            /// <summary>
+            /// Create an internal HttpRequestData from the Asp.Net Core
+            /// HttpRequest
+            /// </summary>
+            /// <param name="cookieManager">Cookie manager to use to read cookies</param>
+            /// <param name="cookieDecryptor">Decryptor for encrypted cookie data</param>
+            /// <returns></returns>
+            public HttpRequestData ToHttpRequestData(
+                ICookieManager cookieManager,
+                Func<byte[], byte[]> cookieDecryptor)
             {
-                formData = request.Form.Select(
-                    f => new KeyValuePair<string, IEnumerable<string>>(f.Key, f.Value));
-            }
+                var request = httpContext.Request;
 
-            return new HttpRequestData(
-                httpContext.Request.Method,
-                uri,
-                pathBase,
-                formData,
-                cookieName => cookieManager.GetRequestCookie(httpContext, cookieName),
-                cookieDecryptor,
-                httpContext.User);
+                var uri = new Uri(UriHelper.GetEncodedUrl(request));
+
+                var pathBase = httpContext.Request.PathBase.Value;
+                pathBase = string.IsNullOrEmpty(pathBase) ? "/" : pathBase;
+                IEnumerable<KeyValuePair<string, IEnumerable<string>>> formData = null;
+                if (httpContext.Request.Method == "POST" && httpContext.Request.HasFormContentType)
+                {
+                    formData = request.Form.Select(
+                        f => new KeyValuePair<string, IEnumerable<string>>(f.Key, f.Value));
+                }
+
+                return new HttpRequestData(
+                    httpContext.Request.Method,
+                    uri,
+                    pathBase,
+                    formData,
+                    cookieName => cookieManager.GetRequestCookie(httpContext, cookieName),
+                    cookieDecryptor,
+                    httpContext.User);
+            }
         }
 
-        /// <summary>
-        /// Get the user agent.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public static string GetUserAgent(this HttpRequest request)
+        extension(HttpRequest request)
         {
-            return request.Headers["user-agent"].FirstOrDefault() ?? "";
+            /// <summary>
+            /// Get the user agent.
+            /// </summary>
+            /// <returns></returns>
+            public string GetUserAgent()
+            {
+                return request.Headers["user-agent"].FirstOrDefault() ?? "";
+            }
         }
     }
 }

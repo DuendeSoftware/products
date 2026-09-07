@@ -37,51 +37,54 @@ public class IdentityServerConfigurationBuilder
 /// </summary>
 public static class ConfigurationServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds IdentityServer.Configuration services with configuration options
-    /// specified by a lambda.
-    /// </summary>
-    public static IdentityServerConfigurationBuilder AddIdentityServerConfiguration(this IServiceCollection services, Action<IdentityServerConfigurationOptions> setupAction)
+    extension(IServiceCollection services)
     {
-        services.Configure(setupAction);
-        return AddIdentityServerConfiguration(services);
-    }
-
-    /// <summary>
-    /// Adds IdentityServer.Configuration services with configuration options
-    /// specified by an <see cref="IConfiguration" />.
-    /// </summary>
-    public static IdentityServerConfigurationBuilder AddIdentityServerConfiguration(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<IdentityServerConfigurationOptions>(configuration);
-        return services.AddIdentityServerConfiguration();
-    }
-
-    private static IdentityServerConfigurationBuilder AddIdentityServerConfiguration(this IServiceCollection services)
-    {
-        var builder = new IdentityServerConfigurationBuilder(services);
-
-        builder.Services.AddTransient<DynamicClientRegistrationEndpoint>();
-        builder.Services.AddTransient(
-            resolver => resolver.GetRequiredService<IOptionsMonitor<IdentityServerConfigurationOptions>>().CurrentValue);
-
-        builder.Services.TryAddSingleton(TimeProvider.System);
-        builder.Services.TryAddTransient<IDynamicClientRegistrationValidator, DynamicClientRegistrationValidator>();
-        builder.Services.TryAddTransient<IDynamicClientRegistrationRequestProcessor, DynamicClientRegistrationRequestProcessor>();
-        builder.Services.TryAddTransient<IDynamicClientRegistrationResponseGenerator, DynamicClientRegistrationResponseGenerator>();
-        builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerConfigurationOptions>>(
-            sp => new PostConfigureLicenseKey(sp.GetService<IConfiguration>() ?? new ConfigurationBuilder().Build()));
-
-        builder.Services.TryAddSingleton(sp =>
+        /// <summary>
+        /// Adds IdentityServer.Configuration services with configuration options
+        /// specified by a lambda.
+        /// </summary>
+        public IdentityServerConfigurationBuilder AddIdentityServerConfiguration(Action<IdentityServerConfigurationOptions> setupAction)
         {
-            var logger = sp.GetRequiredService<ILogger<V2LicenseAccessor>>();
-            var options = sp.GetRequiredService<IOptions<IdentityServerConfigurationOptions>>().Value;
-            var accessor = new V2LicenseAccessor(() => options.LicenseKey, logger);
-            return accessor.Current;
-        });
-        builder.Services.TryAddSingleton<LicenseValidator>();
-        builder.Services.TryAddSingleton<IdentityServerConfigurationLicenseValidator>();
+            services.Configure(setupAction);
+            return services.AddIdentityServerConfiguration();
+        }
 
-        return builder;
+        /// <summary>
+        /// Adds IdentityServer.Configuration services with configuration options
+        /// specified by an <see cref="IConfiguration" />.
+        /// </summary>
+        public IdentityServerConfigurationBuilder AddIdentityServerConfiguration(IConfiguration configuration)
+        {
+            services.Configure<IdentityServerConfigurationOptions>(configuration);
+            return services.AddIdentityServerConfiguration();
+        }
+
+        private IdentityServerConfigurationBuilder AddIdentityServerConfiguration()
+        {
+            var builder = new IdentityServerConfigurationBuilder(services);
+
+            builder.Services.AddTransient<DynamicClientRegistrationEndpoint>();
+            builder.Services.AddTransient(
+                resolver => resolver.GetRequiredService<IOptionsMonitor<IdentityServerConfigurationOptions>>().CurrentValue);
+
+            builder.Services.TryAddSingleton(TimeProvider.System);
+            builder.Services.TryAddTransient<IDynamicClientRegistrationValidator, DynamicClientRegistrationValidator>();
+            builder.Services.TryAddTransient<IDynamicClientRegistrationRequestProcessor, DynamicClientRegistrationRequestProcessor>();
+            builder.Services.TryAddTransient<IDynamicClientRegistrationResponseGenerator, DynamicClientRegistrationResponseGenerator>();
+            builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerConfigurationOptions>>(
+                sp => new PostConfigureLicenseKey(sp.GetService<IConfiguration>() ?? new ConfigurationBuilder().Build()));
+
+            builder.Services.TryAddSingleton(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<V2LicenseAccessor>>();
+                var options = sp.GetRequiredService<IOptions<IdentityServerConfigurationOptions>>().Value;
+                var accessor = new V2LicenseAccessor(() => options.LicenseKey, logger);
+                return accessor.Current;
+            });
+            builder.Services.TryAddSingleton<LicenseValidator>();
+            builder.Services.TryAddSingleton<IdentityServerConfigurationLicenseValidator>();
+
+            return builder;
+        }
     }
 }

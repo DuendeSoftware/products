@@ -15,6 +15,9 @@ public class NewModel(ClientRepository repository) : PageModel
     [TempData]
     public bool Created { get; set; }
 
+    [TempData]
+    public string? CreatedClientId { get; set; }
+
     public void OnGet(string type) => InputModel = new CreateClientModel
     {
         Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce
@@ -58,6 +61,9 @@ public class NewModel(ClientRepository repository) : PageModel
         {
             await repository.CreateAsync(InputModel);
             Created = true;
+            CreatedClientId = InputModel.ClientId;
+
+            return RedirectToPage();
         }
         catch (ValidationException ex)
         {

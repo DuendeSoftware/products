@@ -11,7 +11,7 @@ using Duende.Storage.Internal.Querying.SearchFields;
 namespace Duende.IdentityServer.Stores.Storage.PushedAuthorization;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class PushedAuthorizationRepository(IStoreFactory storeFactory)
+internal sealed class PushedAuthorizationRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -24,8 +24,8 @@ internal sealed class PushedAuthorizationRepository(IStoreFactory storeFactory)
         Expiration expiration,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(ReferenceValueHashDskV1.Create(dso.ReferenceValueHash))],
@@ -37,8 +37,8 @@ internal sealed class PushedAuthorizationRepository(IStoreFactory storeFactory)
 
     internal async Task<PushedAuthorizationDso.V1?> TryReadByHashAsync(string referenceValueHash, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             PushedAuthorizationDso.EntityType,
             DataStorageKey.Create(ReferenceValueHashDskV1.Create(referenceValueHash)),
             ct);
@@ -46,7 +46,7 @@ internal sealed class PushedAuthorizationRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<DeleteResult> DeleteByHashAsync(string referenceValueHash, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(
             PushedAuthorizationDso.EntityType,
             DataStorageKey.Create(ReferenceValueHashDskV1.Create(referenceValueHash)),
             [],

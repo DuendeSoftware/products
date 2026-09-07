@@ -8,17 +8,18 @@ This document provides an overview of the template and how to customize it for y
 
 Here are some key features of this template:
 
-### .NET 9+
+### .NET 10+
 
-This template targets .NET 9. You can get the latest SDK from [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download)
+This template targets .NET 10. You can get the latest SDK from [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download)
 
-### EntityFramework Core 9 with SQLite
+### EntityFramework Core with SQLite
 
 This template uses our [EntityFramework Store](https://docs.duendesoftware.com/identityserver/data/ef) to persist configuration and operational data.
 
 For simplicity, it's pre-configured with SQLite. This is great for development and testing, but *it is not recommended for production*. We strongly advise switching to a more robust relational database like SQL Server, PostgreSQL, or MySQL for production environments.
 
 ### In-Memory Test Users
+
 For demonstration purposes, we've included an in-memory user store in TestUsers.cs. This approach is *for development only and should not be used in production.*
 
 For a production environment, you should replace this with your own user database or integrate with [ASP.NET Identity](https://docs.duendesoftware.com/identityserver/aspnet-identity/). To do that, you'll need to

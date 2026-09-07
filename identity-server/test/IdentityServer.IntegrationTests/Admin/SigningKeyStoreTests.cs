@@ -10,7 +10,7 @@ using Duende.Storage;
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
 /// <summary>
-/// Integration tests for the IStore-backed ISigningKeyStore implementation.
+/// Integration tests for the IStorage-backed ISigningKeyStore implementation.
 /// Tests cover all 3 interface methods against a real SQLite database.
 /// </summary>
 public sealed class SigningKeyStoreTests : IAsyncLifetime

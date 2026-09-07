@@ -16,7 +16,7 @@ using Duende.Storage.Pagination;
 namespace Duende.IdentityServer.Stores.Storage.PersistedGrants;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
+internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -35,11 +35,11 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
 
     internal async Task StoreAsync(PersistedGrantDso.V1 dso, int? existingVersion, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
 
         if (existingVersion.HasValue)
         {
-            await store.UpdateAsync(
+            await storage.UpdateAsync(
                 UuidV7.From(dso.Id),
                 dso,
                 existingVersion.Value,
@@ -51,7 +51,7 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
         }
         else
         {
-            var createResult = await store.CreateAsync(
+            var createResult = await storage.CreateAsync(
                 UuidV7.From(dso.Id),
                 dso,
                 [DataStorageKey.Create(PersistedGrantKeyDskV1.Create(dso.Key))],
@@ -73,8 +73,8 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
 
     internal async Task<(PersistedGrantDso.V1 Dso, int Version)?> TryReadByKeyAsync(string key, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             PersistedGrantDso.EntityType,
             DataStorageKey.Create(PersistedGrantKeyDskV1.Create(key)),
             ct);
@@ -84,7 +84,7 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
     // === DELETE ===
 
     internal async Task RemoveByKeyAsync(string key, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(
             PersistedGrantDso.EntityType,
             DataStorageKey.Create(PersistedGrantKeyDskV1.Create(key)),
             [],
@@ -95,7 +95,7 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
     internal async Task<IReadOnlyList<PersistedGrantDso.V1>> QueryByFilterAsync(
         PersistedGrantFilter filter, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filterExpr = BuildFilter(filter);
         var results = new List<PersistedGrantDso.V1>();
         var pageNumber = 1;
@@ -103,7 +103,7 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
         while (true)
         {
             var range = DataRange.FromPage(pageNumber, 200);
-            var result = await store.QueryAsync<PersistedGrantDso.V1>(
+            var result = await storage.QueryAsync<PersistedGrantDso.V1>(
                 PersistedGrantDso.EntityType, filterExpr, SortParameter.Empty, range, ct);
 
             results.AddRange(result.Items.Select(e => e.Value));
@@ -122,11 +122,11 @@ internal sealed class PersistedGrantRepository(IStoreFactory storeFactory)
     internal async Task RemoveByFilterAsync(PersistedGrantFilter filter, Ct ct)
     {
         var grants = await QueryByFilterAsync(filter, ct);
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
 
         foreach (var grant in grants)
         {
-            await store.DeleteAsync(
+            await storage.DeleteAsync(
                 PersistedGrantDso.EntityType,
                 UuidV7.From(grant.Id),
                 [],

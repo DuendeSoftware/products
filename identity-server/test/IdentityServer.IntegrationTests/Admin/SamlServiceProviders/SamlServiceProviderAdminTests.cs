@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
+using Duende.Storage;
 using Duende.Storage.Querying;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,7 +27,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         return scope.ServiceProvider.GetRequiredService<ISamlServiceProviderAdmin>();
     }
 
-    private static SamlServiceProviderConfiguration CreateMinimalConfig(string? entityId = null) =>
+    private static CreateSamlServiceProvider CreateMinimalConfig(string? entityId = null) =>
         new()
         {
             EntityId = entityId ?? $"https://sp-{Guid.NewGuid():N}.example.com",
@@ -54,7 +55,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
         var certBase64 = GenerateSelfSignedCertBase64();
 
-        var config = new SamlServiceProviderConfiguration
+        var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
             Enabled = true,
@@ -92,7 +93,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
             RequireSignedLogoutResponses = false,
             Certificates =
             [
-                new SamlCertificateConfiguration
+                new SamlCertificateInput
                 {
                     Base64Data = certBase64,
                     Use = KeyUse.Signing
@@ -179,7 +180,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     public async Task create_with_empty_entity_id_returns_required()
     {
         var admin = NewAdmin();
-        var config = new SamlServiceProviderConfiguration { EntityId = "" };
+        var config = new CreateSamlServiceProvider { EntityId = "" };
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
@@ -190,7 +191,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     public async Task create_with_duplicate_acs_index_returns_error()
     {
         var admin = NewAdmin();
-        var config = new SamlServiceProviderConfiguration
+        var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
             AssertionConsumerServiceUrls =
@@ -221,7 +222,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     public async Task create_with_invalid_acs_url_returns_error()
     {
         var admin = NewAdmin();
-        var config = new SamlServiceProviderConfiguration
+        var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
             AssertionConsumerServiceUrls =
@@ -245,7 +246,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     public async Task create_with_null_acs_entry_returns_error()
     {
         var admin = NewAdmin();
-        var config = new SamlServiceProviderConfiguration
+        var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
             AssertionConsumerServiceUrls = [null!]
@@ -294,7 +295,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item.ToUpdate();
         loaded.DisplayName = "Updated Name";
         loaded.AllowIdpInitiated = true;
 
@@ -317,7 +318,8 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         createResult.IsSuccess.ShouldBeTrue();
 
         var getResult = await admin.GetAsync(createResult.Id, _ct);
-        var loaded = getResult.Item;
+        getResult.Found.ShouldBeTrue();
+        var loaded = getResult.Item.ToUpdate();
         loaded.ShouldNotBeNull();
         loaded.DisplayName = "V1";
 
@@ -331,7 +333,21 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     public async Task update_nonexistent_returns_not_found()
     {
         var admin = NewAdmin();
-        var config = CreateMinimalConfig();
+        var config = new UpdateSamlServiceProvider
+        {
+            EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
+            AssertionConsumerServiceUrls =
+            [
+                new SamlIndexedEndpointConfiguration
+                {
+                    Location = "https://sp.example.com/acs",
+                    Binding = SamlBinding.HttpPost,
+                    Index = 0,
+                    IsDefault = true
+                }
+            ],
+            AllowedScopes = ["openid"]
+        };
 
         var result = await admin.UpdateAsync(Guid.CreateVersion7(), config, (DataVersion)1, _ct);
         result.IsSuccess.ShouldBeFalse();
@@ -389,7 +405,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var config = CreateMinimalConfig();
         config.Certificates =
         [
-            new SamlCertificateConfiguration { Base64Data = certBase64, Use = KeyUse.Signing }
+            new SamlCertificateInput { Base64Data = certBase64, Use = KeyUse.Signing }
         ];
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -421,7 +437,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var config = CreateMinimalConfig();
         config.Certificates =
         [
-            new SamlCertificateConfiguration { Base64Data = certOnlyBase64, Use = KeyUse.Signing }
+            new SamlCertificateInput { Base64Data = certOnlyBase64, Use = KeyUse.Signing }
         ];
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -447,7 +463,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var config = CreateMinimalConfig();
         config.Certificates =
         [
-            new SamlCertificateConfiguration { Base64Data = cert1, Use = KeyUse.Signing }
+            new SamlCertificateInput { Base64Data = cert1, Use = KeyUse.Signing }
         ];
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -455,12 +471,12 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Item.ShouldNotBeNull();
-        var loaded = getResult.Item;
+        var loaded = getResult.Item.ToUpdate();
 
         // Replace with a different cert
         loaded.Certificates =
         [
-            new SamlCertificateConfiguration { Base64Data = cert2, Use = KeyUse.Encryption }
+            new SamlCertificateInput { Base64Data = cert2, Use = KeyUse.Encryption }
         ];
 
         var updateResult = await admin.UpdateAsync(createResult.Id, loaded, getResult.Version!, _ct);
@@ -487,7 +503,8 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         // Try to update SP2's entity ID to match SP1's
         var getResult = await admin.GetAsync(result2.Id, _ct);
-        var loaded = getResult.Item;
+        getResult.Found.ShouldBeTrue();
+        var loaded = getResult.Item.ToUpdate();
         loaded.ShouldNotBeNull();
         loaded.EntityId = config1.EntityId;
 
@@ -519,13 +536,13 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var config1 = CreateMinimalConfig();
         config1.Certificates =
         [
-            new SamlCertificateConfiguration { Base64Data = certBase64, Use = KeyUse.Signing }
+            new SamlCertificateInput { Base64Data = certBase64, Use = KeyUse.Signing }
         ];
 
         var config2 = CreateMinimalConfig();
         config2.Certificates =
         [
-            new SamlCertificateConfiguration { Base64Data = certBase64, Use = KeyUse.Signing }
+            new SamlCertificateInput { Base64Data = certBase64, Use = KeyUse.Signing }
         ];
 
         var result1 = await admin.CreateAsync(config1, _ct);

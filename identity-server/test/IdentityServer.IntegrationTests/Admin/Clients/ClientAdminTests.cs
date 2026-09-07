@@ -13,7 +13,6 @@ using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Internal;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Duende.Storage.Schema;
@@ -43,7 +42,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         return scope.ServiceProvider.GetRequiredService<IClientStore>();
     }
 
-    private async Task<Guid> CreateClientAsync(IClientAdmin admin, Ct ct)
+    private async Task<ClientId> CreateClientAsync(IClientAdmin admin, Ct ct)
     {
         var result = await admin.CreateAsync(
             new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" },
@@ -169,7 +168,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         var result = await admin.CreateAsync(client, _ct);
 
         result.IsSuccess.ShouldBeTrue($"Create failed: {result}");
-        result.Id.ShouldNotBe(Guid.Empty);
+        result.Id.Value.ShouldNotBe(Guid.Empty);
         result.Version.ShouldNotBeNull();
         result.Version.Value.ShouldBe(1);
     }
@@ -265,7 +264,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     public async Task update_nonexistent_client_returns_not_found()
     {
         var admin = NewAdmin();
-        var nonExistentId = Guid.CreateVersion7();
+        var nonExistentId = ClientId.New();
         var client = new UpdateClient { ClientId = $"client_{Guid.NewGuid():N}" };
 
         var result = await admin.UpdateAsync(nonExistentId, client, (DataVersion)1, _ct);
@@ -273,6 +272,160 @@ public sealed class ClientAdminTests : IAsyncLifetime
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
         result.Errors.ShouldContain(e => e.Code == "not_found");
+    }
+
+    [Fact]
+    public void json_deserialization_can_set_list_properties_to_null()
+    {
+        // Proves that System.Text.Json CAN set list properties to null even when
+        // the class declares defaults like `List<string> Foo { get; set; } = []`.
+        // This validates the need for null coalescing operators in the mapping code.
+        var json = """
+            {
+                "ClientId": "test",
+                "AllowedGrantTypes": null,
+                "AllowedScopes": null,
+                "RedirectUris": null,
+                "PostLogoutRedirectUris": null,
+                "AllowedIdentityTokenSigningAlgorithms": null,
+                "IdentityProviderRestrictions": null,
+                "AllowedCorsOrigins": null,
+                "Claims": null
+            }
+            """;
+
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<UpdateClient>(json)!;
+
+        deserialized.AllowedGrantTypes.ShouldBeNull();
+        deserialized.AllowedScopes.ShouldBeNull();
+        deserialized.RedirectUris.ShouldBeNull();
+        deserialized.PostLogoutRedirectUris.ShouldBeNull();
+        deserialized.AllowedIdentityTokenSigningAlgorithms.ShouldBeNull();
+        deserialized.IdentityProviderRestrictions.ShouldBeNull();
+        deserialized.AllowedCorsOrigins.ShouldBeNull();
+        deserialized.Claims.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task update_with_json_deserialized_null_list_properties_succeeds()
+    {
+        // Consumers building admin UIs will likely deserialize UpdateClient from HTTP
+        // request bodies. If the JSON contains explicit nulls for list properties,
+        // System.Text.Json overwrites the C# default initializers with null.
+        // The mapping code must handle this gracefully via null coalescing.
+        var admin = NewAdmin();
+        var clientId = $"client_{Guid.NewGuid():N}";
+        var createResult = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = clientId,
+                AllowedGrantTypes = [GrantType.ClientCredentials],
+                AllowedScopes = ["api1"]
+            }, _ct);
+        createResult.IsSuccess.ShouldBeTrue();
+
+        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        // Deserialize an UpdateClient from JSON with explicit null list properties,
+        // exactly as an admin API endpoint would receive from a client.
+        var json = $$"""
+            {
+                "ClientId": "{{clientId}}",
+                "AllowedGrantTypes": null,
+                "AllowedScopes": null,
+                "RedirectUris": null,
+                "PostLogoutRedirectUris": null,
+                "AllowedIdentityTokenSigningAlgorithms": null,
+                "IdentityProviderRestrictions": null,
+                "AllowedCorsOrigins": null,
+                "Claims": null
+            }
+            """;
+        var toUpdate = System.Text.Json.JsonSerializer.Deserialize<UpdateClient>(json)!;
+
+        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
+
+        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        afterUpdate.Found.ShouldBeTrue();
+        afterUpdate.Item.AllowedGrantTypes.ShouldBeEmpty();
+        afterUpdate.Item.AllowedScopes.ShouldBeEmpty();
+        afterUpdate.Item.RedirectUris.ShouldBeEmpty();
+        afterUpdate.Item.PostLogoutRedirectUris.ShouldBeEmpty();
+        afterUpdate.Item.AllowedIdentityTokenSigningAlgorithms.ShouldBeEmpty();
+        afterUpdate.Item.IdentityProviderRestrictions.ShouldBeEmpty();
+        afterUpdate.Item.AllowedCorsOrigins.ShouldBeEmpty();
+        afterUpdate.Item.Claims.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void json_deserialization_of_create_client_can_set_list_properties_to_null()
+    {
+        var json = """
+            {
+                "ClientId": "test",
+                "AllowedGrantTypes": null,
+                "AllowedScopes": null,
+                "RedirectUris": null,
+                "PostLogoutRedirectUris": null,
+                "AllowedIdentityTokenSigningAlgorithms": null,
+                "IdentityProviderRestrictions": null,
+                "AllowedCorsOrigins": null,
+                "Claims": null,
+                "ClientSecrets": null
+            }
+            """;
+
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<CreateClient>(json)!;
+
+        deserialized.AllowedGrantTypes.ShouldBeNull();
+        deserialized.AllowedScopes.ShouldBeNull();
+        deserialized.RedirectUris.ShouldBeNull();
+        deserialized.PostLogoutRedirectUris.ShouldBeNull();
+        deserialized.AllowedIdentityTokenSigningAlgorithms.ShouldBeNull();
+        deserialized.IdentityProviderRestrictions.ShouldBeNull();
+        deserialized.AllowedCorsOrigins.ShouldBeNull();
+        deserialized.Claims.ShouldBeNull();
+        deserialized.ClientSecrets.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task create_with_json_deserialized_null_list_properties_succeeds()
+    {
+        // Same scenario as the update test: a CreateClient deserialized from JSON
+        // with explicit null list properties should be handled gracefully.
+        var admin = NewAdmin();
+        var clientId = $"client_{Guid.NewGuid():N}";
+        var json = $$"""
+            {
+                "ClientId": "{{clientId}}",
+                "AllowedGrantTypes": null,
+                "AllowedScopes": null,
+                "RedirectUris": null,
+                "PostLogoutRedirectUris": null,
+                "AllowedIdentityTokenSigningAlgorithms": null,
+                "IdentityProviderRestrictions": null,
+                "AllowedCorsOrigins": null,
+                "Claims": null,
+                "ClientSecrets": null
+            }
+            """;
+        var client = System.Text.Json.JsonSerializer.Deserialize<CreateClient>(json)!;
+
+        var createResult = await admin.CreateAsync(client, _ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+        getResult.Item.AllowedGrantTypes.ShouldBeEmpty();
+        getResult.Item.AllowedScopes.ShouldBeEmpty();
+        getResult.Item.RedirectUris.ShouldBeEmpty();
+        getResult.Item.PostLogoutRedirectUris.ShouldBeEmpty();
+        getResult.Item.AllowedIdentityTokenSigningAlgorithms.ShouldBeEmpty();
+        getResult.Item.IdentityProviderRestrictions.ShouldBeEmpty();
+        getResult.Item.AllowedCorsOrigins.ShouldBeEmpty();
+        getResult.Item.Claims.ShouldBeEmpty();
     }
 
     [Fact]
@@ -295,7 +448,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     public async Task delete_nonexistent_client_is_idempotent()
     {
         var admin = NewAdmin();
-        var nonExistentId = Guid.CreateVersion7();
+        var nonExistentId = ClientId.New();
 
         var result = await admin.DeleteAsync(nonExistentId, _ct);
 
@@ -435,12 +588,11 @@ public sealed class ClientAdminTests : IAsyncLifetime
         services.AddLogging();
 
         var dbName = $"test_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddIdentityServer()
-            .AddConfigurationStorage()
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
             .AddInMemoryDataExtensionSchemas([])
             .AddClientConfigurationValidator<RejectAllClientsValidator>();
 
@@ -508,7 +660,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
             _ct);
 
         secretResult.IsSuccess.ShouldBeTrue($"CreateSecret (SHA512) failed: {secretResult}");
-        secretResult.Id.ShouldNotBe(Guid.Empty);
+        secretResult.Id.Value.ShouldNotBe(Guid.Empty);
 
         var expectedHash = Convert.ToBase64String(SHA512.HashData(Encoding.UTF8.GetBytes(plaintext)));
 
@@ -546,7 +698,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         secrets.ShouldNotBeEmpty();
 
         var secret = secrets[0];
-        secret.Id.ShouldNotBe(Guid.Empty);
+        secret.Id.Value.ShouldNotBe(Guid.Empty);
         secret.Type.ShouldNotBeNullOrWhiteSpace();
     }
 
@@ -615,7 +767,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         var admin = NewAdmin();
         var clientId = await CreateClientAsync(admin, _ct);
 
-        var result = await admin.DeleteSecretAsync(clientId, Guid.NewGuid(), _ct);
+        var result = await admin.DeleteSecretAsync(clientId, SecretId.New(), _ct);
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
@@ -759,7 +911,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         page1Ids.Intersect(page2Ids).ShouldBeEmpty();
     }
 
-    private async Task<Guid> CreateQueryClient(
+    private async Task<ClientId> CreateQueryClient(
         IClientAdmin admin,
         string clientId,
         bool enabled = true,
@@ -770,14 +922,14 @@ public sealed class ClientAdminTests : IAsyncLifetime
         {
             ClientId = clientId,
             Enabled = enabled,
-            AllowedGrantTypes = grantTypes,
-            AllowedScopes = scopes,
+            AllowedGrantTypes = grantTypes ?? [],
+            AllowedScopes = scopes ?? [],
             RedirectUris = grantTypes?.Contains(GrantType.AuthorizationCode) == true
                 ? [$"https://{clientId}.example.com/callback"]
-                : null,
+                : [],
             ClientSecrets = grantTypes?.Any(x => !string.Equals(x, GrantType.Implicit, StringComparison.Ordinal)) == true
                 ? [new CreateClientSecret { PlaintextValue = "secret" }]
-                : null
+                : []
         }, _ct);
         result.IsSuccess.ShouldBeTrue($"Seed failed: {result}");
         return result.Id;

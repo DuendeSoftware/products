@@ -6,7 +6,6 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -153,12 +152,10 @@ public sealed class ClientExtendedPropertiesTests : IAsyncLifetime
         services.AddLogging();
 
         var dbName = $"test_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
         services.AddIdentityServer()
-            .AddConfigurationStorage();
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddSingleton<ISchemaStore>(
             new InMemorySchemaStore([]));

@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 #nullable enable
 
 using Duende.IdentityServer.Hosting.DynamicProviders;
@@ -17,33 +16,33 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class IdentityServerBuilderSamlDynamicProviderExtensions
 {
-    /// <summary>
-    /// Adds the SAML 2.0 dynamic provider feature.
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static IIdentityServerBuilder AddSamlDynamicProvider(this IIdentityServerBuilder builder)
+    extension(IIdentityServerBuilder builder)
     {
-        builder.AddDynamicProvider<Saml2Handler, Saml2Options, SamlProvider, SamlConfigureOptions>("saml");
+        /// <summary>
+        /// Adds the SAML 2.0 dynamic provider feature.
+        /// </summary>
+        /// <returns></returns>
+        public IIdentityServerBuilder AddSamlDynamicProvider()
+        {
+            builder.AddDynamicProvider<Saml2Handler, Saml2Options, SamlProvider, SamlConfigureOptions>("saml");
 
-        // Register the public options pipeline so customers can use
-        // ConfigureAuthenticationOptions<SamlAuthenticationOptions, SamlProvider>
-        builder.Services.ConfigureOptions<SamlAuthenticationConfigureOptions>();
+            // Register the public options pipeline so customers can use
+            // ConfigureAuthenticationOptions<SamlAuthenticationOptions, SamlProvider>
+            builder.Services.ConfigureOptions<SamlAuthenticationConfigureOptions>();
 
-        // Register post-configure to set defaults (logger, cookie manager)
-        builder.Services.TryAddEnumerable(
-            ServiceDescriptor.Singleton<IPostConfigureOptions<Saml2Options>, PostConfigureSaml2OptionsForDynamic>());
+            // Register post-configure to set defaults (logger, cookie manager)
+            builder.Services.TryAddEnumerable(
+                ServiceDescriptor.Singleton<IPostConfigureOptions<Saml2Options>, PostConfigureSaml2OptionsForDynamic>());
 
-        return builder;
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds the in-memory SAML provider store.
+        /// </summary>
+        /// <param name="providers">The SAML providers to register.</param>
+        /// <returns></returns>
+        public IIdentityServerBuilder AddInMemorySamlProviders(IEnumerable<SamlProvider> providers) =>
+            builder.AddInMemoryIdentityProviders(providers.Cast<IdentityProvider>().ToList());
     }
-
-    /// <summary>
-    /// Adds the in-memory SAML provider store.
-    /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="providers">The SAML providers to register.</param>
-    /// <returns></returns>
-    public static IIdentityServerBuilder AddInMemorySamlProviders(
-        this IIdentityServerBuilder builder, IEnumerable<SamlProvider> providers) =>
-        builder.AddInMemoryIdentityProviders(providers.Cast<IdentityProvider>().ToList());
 }

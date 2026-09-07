@@ -4,6 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin.ApiResources;
+using Duende.Storage;
 using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Admin;
@@ -19,14 +20,14 @@ public interface IApiResourceAdmin
     /// <param name="resource">The API resource definition.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The storage ID and version on success, or validation/conflict errors.</returns>
-    Task<SaveResult<Guid>> CreateAsync(ApiResourceConfiguration resource, Ct ct);
+    Task<SaveResult<ApiResourceId>> CreateAsync(CreateApiResource resource, Ct ct);
 
     /// <summary>
     /// Gets an API resource by its storage identifier.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<GetResult<ApiResourceConfiguration>> GetAsync(Guid id, Ct ct);
+    Task<GetResult<ApiResourceConfiguration>> GetAsync(ApiResourceId id, Ct ct);
 
     /// <summary>
     /// Gets an API resource by its unique name.
@@ -36,20 +37,21 @@ public interface IApiResourceAdmin
     Task<GetResult<ApiResourceConfiguration>> GetByNameAsync(string name, Ct ct);
 
     /// <summary>
-    /// Updates an existing API resource.
+    /// Updates an existing API resource. Secret metadata cannot be updated.
+    /// To add or change secret values, use <see cref="CreateSecretAsync"/> and <see cref="DeleteSecretAsync"/>.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="resource">The updated API resource definition.</param>
     /// <param name="expectedVersion">Expected version for optimistic concurrency.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> UpdateAsync(Guid id, ApiResourceConfiguration resource, DataVersion expectedVersion, Ct ct);
+    Task<SaveResult<ApiResourceId>> UpdateAsync(ApiResourceId id, UpdateApiResource resource, DataVersion expectedVersion, Ct ct);
 
     /// <summary>
     /// Deletes an API resource.
     /// </summary>
     /// <param name="id">The storage identifier of the API resource to delete.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct);
+    Task<SaveResult<ApiResourceId>> DeleteAsync(ApiResourceId id, Ct ct);
 
     /// <summary>
     /// Queries API resources with optional filtering, sorting, and pagination.
@@ -68,9 +70,9 @@ public interface IApiResourceAdmin
     /// <param name="expiration">Optional expiration date.</param>
     /// <param name="type">Secret type (defaults to <c>"SharedSecret"</c>).</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The new secret's storage <see cref="Guid"/> on success, or errors on failure.</returns>
-    Task<SaveResult<Guid>> CreateSecretAsync(
-        Guid apiResourceId,
+    /// <returns>The new secret's storage <see cref="ApiResourceSecretId"/> on success, or errors on failure.</returns>
+    Task<SaveResult<ApiResourceSecretId>> CreateSecretAsync(
+        ApiResourceId apiResourceId,
         string plaintextValue,
         SecretHashAlgorithm? hashAlgorithm,
         string? description,
@@ -84,5 +86,5 @@ public interface IApiResourceAdmin
     /// <param name="apiResourceId">The storage ID of the API resource.</param>
     /// <param name="secretId">The storage ID of the secret to delete.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> DeleteSecretAsync(Guid apiResourceId, Guid secretId, Ct ct);
+    Task<SaveResult<ApiResourceSecretId>> DeleteSecretAsync(ApiResourceId apiResourceId, ApiResourceSecretId secretId, Ct ct);
 }

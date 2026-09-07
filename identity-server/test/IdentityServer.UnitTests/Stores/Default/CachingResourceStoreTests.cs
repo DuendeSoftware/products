@@ -3,6 +3,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.Common;
@@ -27,7 +28,8 @@ public class CachingResourceStoreTests : IDisposable
         _spy = new SpyResourceStore(_identityResources, _apiResources, _apiScopes);
         _serviceProvider = TestHybridCacheHelper.BuildServiceProvider(_fakeTimeProvider);
         var cache = TestHybridCacheHelper.GetCache(_serviceProvider);
-        _subject = new CachingResourceStore<SpyResourceStore>(_options, _spy, cache);
+        var policy = new CachePolicy<Resources>(null);
+        _subject = new CachingResourceStore<SpyResourceStore>(policy, _options, _spy, cache);
     }
 
     public void Dispose() => _serviceProvider.Dispose();

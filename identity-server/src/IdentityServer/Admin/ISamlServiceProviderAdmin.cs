@@ -4,6 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin.SamlServiceProviders;
+using Duende.Storage;
 using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Admin;
@@ -19,14 +20,14 @@ public interface ISamlServiceProviderAdmin
     /// <param name="serviceProvider">The Service Provider definition.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The storage ID and version on success, or validation/conflict errors.</returns>
-    Task<SaveResult<Guid>> CreateAsync(SamlServiceProviderConfiguration serviceProvider, Ct ct);
+    Task<SaveResult<SamlServiceProviderId>> CreateAsync(CreateSamlServiceProvider serviceProvider, Ct ct);
 
     /// <summary>
     /// Gets a SAML Service Provider by its storage identifier.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<GetResult<SamlServiceProviderConfiguration>> GetAsync(Guid id, Ct ct);
+    Task<GetResult<SamlServiceProviderConfiguration>> GetAsync(SamlServiceProviderId id, Ct ct);
 
     /// <summary>
     /// Gets a SAML Service Provider by its SAML entity ID.
@@ -36,21 +37,21 @@ public interface ISamlServiceProviderAdmin
     Task<GetResult<SamlServiceProviderConfiguration>> GetByEntityIdAsync(string entityId, Ct ct);
 
     /// <summary>
-    /// Updates an existing SAML Service Provider. The model is mutable — callers can Get, modify, and Update.
-    /// Certificates are managed inline — the full list is replaced on update.
+    /// Updates an existing SAML Service Provider.
+    /// Certificates are managed inline -- the full list is replaced on update.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="serviceProvider">The updated Service Provider definition.</param>
     /// <param name="expectedVersion">Expected version for optimistic concurrency.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> UpdateAsync(Guid id, SamlServiceProviderConfiguration serviceProvider, DataVersion expectedVersion, Ct ct);
+    Task<SaveResult<SamlServiceProviderId>> UpdateAsync(SamlServiceProviderId id, UpdateSamlServiceProvider serviceProvider, DataVersion expectedVersion, Ct ct);
 
     /// <summary>
     /// Deletes a SAML Service Provider.
     /// </summary>
     /// <param name="id">The storage identifier of the Service Provider to delete.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct);
+    Task<SaveResult<SamlServiceProviderId>> DeleteAsync(SamlServiceProviderId id, Ct ct);
 
     /// <summary>
     /// Queries SAML Service Providers with optional filtering, sorting, and pagination.

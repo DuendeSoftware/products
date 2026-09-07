@@ -11,7 +11,7 @@ using Duende.IdentityServer.Saml.Common;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-internal class SamlDataBuilder(SamlData data)
+public class SamlDataBuilder(SamlData data)
 {
     public SamlServiceProvider SamlServiceProvider(
         System.Security.Cryptography.X509Certificates.X509Certificate2? signingCertificate = null,

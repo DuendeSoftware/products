@@ -13,19 +13,22 @@ namespace Duende.IdentityServer.Configuration;
 /// </summary>
 public static class ConfigurationEndpointExtensions
 {
-    /// <summary>
-    /// Maps the dynamic client registration endpoint.
-    /// </summary>
-    public static IEndpointConventionBuilder MapDynamicClientRegistration(this IEndpointRouteBuilder endpoints, string path = "/connect/dcr")
+    extension(IEndpointRouteBuilder endpoints)
     {
-        endpoints.CheckLicense();
+        /// <summary>
+        /// Maps the dynamic client registration endpoint.
+        /// </summary>
+        public IEndpointConventionBuilder MapDynamicClientRegistration(string path = "/connect/dcr")
+        {
+            endpoints.CheckLicense();
 
-        return endpoints.MapPost(path, (DynamicClientRegistrationEndpoint endpoint, HttpContext context) => endpoint.Process(context));
-    }
+            return endpoints.MapPost(path, (DynamicClientRegistrationEndpoint endpoint, HttpContext context) => endpoint.Process(context));
+        }
 
-    internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
-    {
-        var licenseValidator = endpoints.ServiceProvider.GetRequiredService<IdentityServerConfigurationLicenseValidator>();
-        licenseValidator.ValidateDynamicClientRegistration();
+        internal void CheckLicense()
+        {
+            var licenseValidator = endpoints.ServiceProvider.GetRequiredService<IdentityServerConfigurationLicenseValidator>();
+            licenseValidator.ValidateDynamicClientRegistration();
+        }
     }
 }

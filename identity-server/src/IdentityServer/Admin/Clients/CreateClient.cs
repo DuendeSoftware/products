@@ -59,18 +59,18 @@ public sealed class CreateClient
     public int DeviceCodeLifetime { get; set; } = 300;
     public int? CibaLifetime { get; set; }
     public int? PollingInterval { get; set; }
-    public List<string>? AllowedGrantTypes { get; set; }
-    public List<string>? AllowedScopes { get; set; }
-    public List<string>? RedirectUris { get; set; }
-    public List<string>? PostLogoutRedirectUris { get; set; }
-    public List<string>? AllowedIdentityTokenSigningAlgorithms { get; set; }
-    public List<string>? IdentityProviderRestrictions { get; set; }
-    public List<string>? AllowedCorsOrigins { get; set; }
-    public List<ClientClaimConfiguration>? Claims { get; set; }
-    public AttributeValueCollection ExtendedProperties { get; init; } = new();
+    public List<string> AllowedGrantTypes { get; set; } = [];
+    public List<string> AllowedScopes { get; set; } = [];
+    public List<string> RedirectUris { get; set; } = [];
+    public List<string> PostLogoutRedirectUris { get; set; } = [];
+    public List<string> AllowedIdentityTokenSigningAlgorithms { get; set; } = [];
+    public List<string> IdentityProviderRestrictions { get; set; } = [];
+    public List<string> AllowedCorsOrigins { get; set; } = [];
+    public List<ClientClaimConfiguration> Claims { get; set; } = [];
+    public AttributeValueCollection ExtendedProperties { get; set; } = new();
 
     /// <summary>
     /// Client secrets to create with the client. Plaintext values are hashed before storage.
     /// </summary>
-    public List<CreateClientSecret>? ClientSecrets { get; set; }
+    public List<CreateClientSecret> ClientSecrets { get; set; } = [];
 }

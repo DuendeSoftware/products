@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Admin.ApiScopes;
 public sealed record ApiScopeListItem
 {
     /// <summary>Storage identifier.</summary>
-    public required Guid Id { get; init; }
+    public required ApiScopeId Id { get; init; }
 
     /// <summary>The unique name of the API scope.</summary>
     public required string Name { get; init; }

@@ -47,15 +47,353 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class XmlHelpers
     {
-        /// <summary>
-        /// Sign an xml document with the supplied cert.
-        /// </summary>
-        /// <param name="xmlDocument">XmlDocument to be signed. The signature is
-        /// added as a node in the document, right after the Issuer node.</param>
-        /// <param name="cert">Certificate to use when signing.</param>
-        public static void Sign(this XmlDocument xmlDocument, X509Certificate2 cert)
+        extension(XmlDocument xmlDocument)
         {
-            Sign(xmlDocument, cert, false);
+            /// <summary>
+            /// Sign an xml document with the supplied cert.
+            /// </summary>
+            /// <param name="cert">Certificate to use when signing.</param>
+            public void Sign(X509Certificate2 cert)
+            {
+                xmlDocument.Sign(cert, false);
+            }
+
+            /// <summary>
+            /// Sign an xml document with the supplied cert.
+            /// </summary>
+            /// <param name="cert">Certificate to use when signing.</param>
+            /// <param name="includeKeyInfo">Include public key in signed output.</param>
+            public void Sign(X509Certificate2 cert, bool includeKeyInfo)
+            {
+                if (xmlDocument == null)
+                {
+                    throw new ArgumentNullException(nameof(xmlDocument));
+                }
+
+                xmlDocument.DocumentElement.Sign(cert, includeKeyInfo);
+            }
+
+            /// <summary>
+            /// Sign an xml document with the supplied cert.
+            /// </summary>
+            /// <param name="cert">Certificate to use when signing.</param>
+            /// <param name="includeKeyInfo">Include public key in signed output.</param>
+            /// <param name="signingAlgorithm">Uri of signing algorithm to use.</param>
+            public void Sign(
+                X509Certificate2 cert,
+                bool includeKeyInfo,
+                string signingAlgorithm)
+            {
+                if (xmlDocument == null)
+                {
+                    throw new ArgumentNullException(nameof(xmlDocument));
+                }
+
+                xmlDocument.DocumentElement.Sign(cert, includeKeyInfo, signingAlgorithm);
+            }
+        }
+
+        extension(XmlAttributeCollection attributes)
+        {
+            /// <summary>
+            /// Remove the attribute with the given name from the collection.
+            /// </summary>
+            /// <param name="attributeName">Name of attribute to remove.</param>
+            public void Remove(string attributeName)
+            {
+                if (attributes == null)
+                {
+                    throw new ArgumentNullException(nameof(attributes));
+                }
+
+                if (attributeName == null)
+                {
+                    throw new ArgumentNullException(nameof(attributeName));
+                }
+
+                var attribute = attributes[attributeName];
+
+                attributes.Remove(attribute);
+            }
+        }
+
+        extension(XmlElement xmlElement)
+        {
+            /// <summary>
+            /// Remove the child xml element with the specified name.
+            /// </summary>
+            /// <param name="name">Name of child</param>
+            /// <param name="ns">Namespace of child</param>
+            public void RemoveChild(string name, string ns)
+            {
+                if (xmlElement == null)
+                {
+                    throw new ArgumentNullException(nameof(xmlElement));
+                }
+
+                if (name == null)
+                {
+                    throw new ArgumentNullException(nameof(name));
+                }
+
+                if (ns == null)
+                {
+                    throw new ArgumentNullException(nameof(ns));
+                }
+
+                var toRemove = xmlElement[name, ns];
+                xmlElement.RemoveChild(toRemove);
+            }
+
+            /// <summary>
+            /// Sign an xml element with the supplied cert.
+            /// </summary>
+            /// <param name="cert">Certificate to use when signing.</param>
+            /// <param name="includeKeyInfo">Include public key in signed output.</param>
+            public void Sign(X509Certificate2 cert, bool includeKeyInfo)
+            {
+                xmlElement.Sign(cert, includeKeyInfo, GetDefaultSigningAlgorithmName());
+            }
+
+            /// <summary>
+            /// Sign an xml element with the supplied cert.
+            /// </summary>
+            /// <param name="cert">Certificate to use when signing.</param>
+            /// <param name="includeKeyInfo">Include public key in signed output.</param>
+            /// <param name="signingAlgorithm">The signing algorithm to use.</param>
+            public void Sign(
+                X509Certificate2 cert,
+                bool includeKeyInfo,
+                string signingAlgorithm)
+            {
+                if (xmlElement == null)
+                {
+                    throw new ArgumentNullException(nameof(xmlElement));
+                }
+
+                if (cert == null)
+                {
+                    throw new ArgumentNullException(nameof(cert));
+                }
+
+                var signedXml = new SignedXmlWithIdFix(xmlElement.OwnerDocument);
+
+                // The transform XmlDsigExcC14NTransform and canonicalization method XmlDsigExcC14NTransformUrl is important for partially signed XML files
+                // see: http://msdn.microsoft.com/en-us/library/system.security.cryptography.xml.signedxml.xmldsigexcc14ntransformurl(v=vs.110).aspx
+                // The reference URI has to be set correctly to avoid assertion injections
+                // For both, the ID/Reference and the Transform/Canonicalization see as well:
+                // https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf section 5.4.2 and 5.4.3
+
+                signedXml.SigningKey = cert.GetSha256EnabledAsymmetricAlgorithm();
+                signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
+                signedXml.SignedInfo.SignatureMethod = signingAlgorithm;
+
+                // We need a document unique ID on the element to sign it -- make one up if it's missing
+                string id = xmlElement.GetAttribute("ID");
+                if (string.IsNullOrEmpty(id))
+                {
+                    id = "_" + Guid.NewGuid().ToString("N");
+                    xmlElement.SetAttribute("ID", id);
+                }
+                var reference = new Reference
+                {
+                    Uri = "#" + id,
+                    DigestMethod = GetCorrespondingDigestAlgorithm(signingAlgorithm)
+                };
+                reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+                reference.AddTransform(new XmlDsigExcC14NTransform());
+
+                signedXml.AddReference(reference);
+                signedXml.ComputeSignature();
+
+                if (includeKeyInfo)
+                {
+                    var keyInfo = new KeyInfo();
+                    keyInfo.AddClause(new KeyInfoX509Data(cert));
+                    signedXml.KeyInfo = keyInfo;
+                }
+
+                xmlElement.InsertAfter(
+                    xmlElement.OwnerDocument.ImportNode(signedXml.GetXml(), true),
+                    xmlElement["Issuer", Saml2Namespaces.Saml2Name]);
+            }
+
+            /// <summary>
+            /// Checks if an xml element is signed by the given certificate, through
+            /// a contained enveloped signature.
+            /// </summary>
+            /// <param name="signingKeys">Signing keys to test, one should validate.</param>
+            /// <param name="validateCertificate">Should the certificate be validated too?</param>
+            /// <param name="minimumSigningAlgorithm">The mininum signing algorithm
+            /// strength allowed.</param>
+            /// <returns>True on correct signature, false on missing signature</returns>
+            /// <exception cref="InvalidSignatureException">If the data has
+            /// been tampered with or is not valid according to the SAML spec.</exception>
+            public bool IsSignedByAny(
+                IEnumerable<SecurityKeyIdentifierClause> signingKeys,
+                bool validateCertificate,
+                string minimumSigningAlgorithm)
+            {
+                if (xmlElement == null)
+                {
+                    throw new ArgumentNullException(nameof(xmlElement));
+                }
+
+                var signedXml = new SignedXmlWithIdFix(xmlElement);
+
+                var signatureElement = xmlElement["Signature", SignedXml.XmlDsigNamespaceUrl];
+
+                if (signatureElement == null)
+                {
+                    return false;
+                }
+
+                signedXml.LoadXml(signatureElement);
+                ValidateSignedInfo(signedXml, xmlElement, minimumSigningAlgorithm);
+                VerifySignature(signingKeys, signedXml, signatureElement, validateCertificate);
+
+                return true;
+            }
+
+            internal string GetTrimmedTextIfNotNull()
+            {
+                if (xmlElement == null)
+                {
+                    return null;
+                }
+
+                return xmlElement.InnerText.Trim();
+            }
+
+            internal string GetRequiredAttributeValue(string attributeName)
+            {
+                var foundAttribute = xmlElement.Attributes[attributeName];
+                if (string.IsNullOrWhiteSpace(foundAttribute?.Value))
+                {
+                    throw new BadFormatSamlResponseException($"Attribute '{attributeName}' (case-sensitive) was not found or its value is empty");
+                }
+
+                return foundAttribute.Value;
+            }
+
+            internal XmlElement GetRequiredElement(string name, string namespaceValue)
+            {
+                var foundElement = xmlElement[name, namespaceValue];
+                if (foundElement == null)
+                {
+                    throw new BadFormatSamlResponseException($"Element '{name}' (case-sensitive, namespace '{namespaceValue}') was not found");
+                }
+
+                return foundElement;
+            }
+
+            internal XmlElement AddAttribute(string name, string value)
+            {
+                xmlElement.SetAttribute(name, value);
+
+                return xmlElement;
+            }
+
+            internal XmlElement AddAttributeIfNotNull(string name, object value)
+            {
+                if (value != null)
+                {
+                    xmlElement.SetAttribute(name, value.ToString());
+                }
+                return xmlElement;
+            }
+
+            internal XmlElement If(bool condition, Action<XmlElement> action)
+            {
+                if (condition)
+                {
+                    action(xmlElement);
+                }
+
+                return xmlElement;
+            }
+
+            internal XmlElement AddElement(string name, Uri namespaceUri, string content)
+            {
+                xmlElement.StartElement(name, namespaceUri)
+                    .SetInnerText(content);
+
+                return xmlElement;
+            }
+
+            internal XmlElement SetInnerText(string content)
+            {
+                xmlElement.InnerText = content;
+                return xmlElement;
+            }
+
+            /// <summary>
+            /// Pretty an xml element.
+            /// </summary>
+            /// <returns>Nicely indented and readable data.</returns>
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "I don't care, the StringWriter contains no references to unmanaged resources")]
+            public string PrettyPrint()
+            {
+                if (xmlElement == null)
+                {
+                    throw new ArgumentNullException(nameof(xmlElement));
+                }
+
+                // Based on http://stackoverflow.com/a/1123731/280222
+                var strWriter = new StringWriter(CultureInfo.InvariantCulture);
+                using (var xmlWriter = new XmlTextWriter(strWriter))
+                {
+                    xmlWriter.Formatting = Formatting.Indented;
+                    xmlElement.ParentNode.WriteContentTo(xmlWriter);
+                    xmlWriter.Flush();
+                    return strWriter.ToString();
+                }
+            }
+        }
+
+        extension(XElement xElement)
+        {
+            internal XElement AddAttributeIfNotNullOrEmpty(XName attribute, object value)
+            {
+                if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                {
+                    xElement.Add(new XAttribute(attribute, value));
+                }
+                return xElement;
+            }
+        }
+
+        extension(XmlAttribute xmlAttribute)
+        {
+            internal string GetValueIfNotNull()
+            {
+                if (xmlAttribute == null)
+                {
+                    return null;
+                }
+                return xmlAttribute.Value;
+            }
+        }
+
+        extension(XmlNode parent)
+        {
+            internal XmlElement StartElement(string name, Uri namespaceUri)
+            {
+                var xmlElement = parent.GetOwnerDoc().CreateElement(name, namespaceUri.OriginalString);
+                parent.AppendChild(xmlElement);
+                return xmlElement;
+            }
+
+            private XmlDocument GetOwnerDoc()
+            {
+                var doc = parent as XmlDocument;
+                if (doc != null)
+                {
+                    return doc;
+                }
+
+                return parent.OwnerDocument;
+            }
         }
 
         /// <summary>
@@ -86,211 +424,6 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
                 XmlResolver = null,
                 PreserveWhitespace = true
             };
-        }
-
-        /// <summary>
-        /// Remove the attribute with the given name from the collection.
-        /// </summary>
-        /// <param name="attributes">Attribute collection.</param>
-        /// <param name="attributeName">Name of attribute to remove.</param>
-        public static void Remove(this XmlAttributeCollection attributes, string attributeName)
-        {
-            if (attributes == null)
-            {
-                throw new ArgumentNullException(nameof(attributes));
-            }
-
-            if (attributeName == null)
-            {
-                throw new ArgumentNullException(nameof(attributeName));
-            }
-
-            var attribute = attributes[attributeName];
-
-            attributes.Remove(attribute);
-        }
-
-        /// <summary>
-        /// Remove the child xml element with the specified name.
-        /// </summary>
-        /// <param name="xmlElement">Parent</param>
-        /// <param name="name">Name of child</param>
-        /// <param name="ns">Namespace of child</param>
-        public static void RemoveChild(this XmlElement xmlElement, string name, string ns)
-        {
-            if (xmlElement == null)
-            {
-                throw new ArgumentNullException(nameof(xmlElement));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (ns == null)
-            {
-                throw new ArgumentNullException(nameof(ns));
-            }
-
-            var toRemove = xmlElement[name, ns];
-            xmlElement.RemoveChild(toRemove);
-        }
-
-        /// <summary>
-        /// Sign an xml document with the supplied cert.
-        /// </summary>
-        /// <param name="xmlDocument">XmlDocument to be signed. The signature is
-        /// added as a node in the document, right after the Issuer node.</param>
-        /// <param name="cert">Certificate to use when signing.</param>
-        /// <param name="includeKeyInfo">Include public key in signed output.</param>
-        public static void Sign(this XmlDocument xmlDocument, X509Certificate2 cert, bool includeKeyInfo)
-        {
-            if (xmlDocument == null)
-            {
-                throw new ArgumentNullException(nameof(xmlDocument));
-            }
-
-            xmlDocument.DocumentElement.Sign(cert, includeKeyInfo);
-        }
-
-        /// <summary>
-        /// Sign an xml document with the supplied cert.
-        /// </summary>
-        /// <param name="xmlDocument">XmlDocument to be signed. The signature is
-        /// added as a node in the document, right after the Issuer node.</param>
-        /// <param name="cert">Certificate to use when signing.</param>
-        /// <param name="includeKeyInfo">Include public key in signed output.</param>
-        /// <param name="signingAlgorithm">Uri of signing algorithm to use.</param>
-        public static void Sign(
-            this XmlDocument xmlDocument,
-            X509Certificate2 cert,
-            bool includeKeyInfo,
-            string signingAlgorithm)
-        {
-            if (xmlDocument == null)
-            {
-                throw new ArgumentNullException(nameof(xmlDocument));
-            }
-
-            xmlDocument.DocumentElement.Sign(cert, includeKeyInfo, signingAlgorithm);
-        }
-
-        /// <summary>
-        /// Sign an xml element with the supplied cert.
-        /// </summary>
-        /// <param name="xmlElement">xmlElement to be signed. The signature is
-        /// added as a node in the document, right after the Issuer node.</param>
-        /// <param name="cert">Certificate to use when signing.</param>
-        /// <param name="includeKeyInfo">Include public key in signed output.</param>
-        public static void Sign(this XmlElement xmlElement, X509Certificate2 cert, bool includeKeyInfo)
-        {
-            xmlElement.Sign(cert, includeKeyInfo, GetDefaultSigningAlgorithmName());
-        }
-
-        /// <summary>
-        /// Sign an xml element with the supplied cert.
-        /// </summary>
-        /// <param name="xmlElement">xmlElement to be signed. The signature is
-        /// added as a node in the document, right after the Issuer node.</param>
-        /// <param name="cert">Certificate to use when signing.</param>
-        /// <param name="includeKeyInfo">Include public key in signed output.</param>
-        /// <param name="signingAlgorithm">The signing algorithm to use.</param>
-        public static void Sign(
-            this XmlElement xmlElement,
-            X509Certificate2 cert,
-            bool includeKeyInfo,
-            string signingAlgorithm)
-        {
-            if (xmlElement == null)
-            {
-                throw new ArgumentNullException(nameof(xmlElement));
-            }
-
-            if (cert == null)
-            {
-                throw new ArgumentNullException(nameof(cert));
-            }
-
-            var signedXml = new SignedXmlWithIdFix(xmlElement.OwnerDocument);
-
-            // The transform XmlDsigExcC14NTransform and canonicalization method XmlDsigExcC14NTransformUrl is important for partially signed XML files
-            // see: http://msdn.microsoft.com/en-us/library/system.security.cryptography.xml.signedxml.xmldsigexcc14ntransformurl(v=vs.110).aspx
-            // The reference URI has to be set correctly to avoid assertion injections
-            // For both, the ID/Reference and the Transform/Canonicalization see as well: 
-            // https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf section 5.4.2 and 5.4.3
-
-            signedXml.SigningKey = cert.GetSha256EnabledAsymmetricAlgorithm();
-            signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
-            signedXml.SignedInfo.SignatureMethod = signingAlgorithm;
-
-            // We need a document unique ID on the element to sign it -- make one up if it's missing
-            string id = xmlElement.GetAttribute("ID");
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "_" + Guid.NewGuid().ToString("N");
-                xmlElement.SetAttribute("ID", id);
-            }
-            var reference = new Reference
-            {
-                Uri = "#" + id,
-                DigestMethod = GetCorrespondingDigestAlgorithm(signingAlgorithm)
-            };
-            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
-            reference.AddTransform(new XmlDsigExcC14NTransform());
-
-            signedXml.AddReference(reference);
-            signedXml.ComputeSignature();
-
-            if (includeKeyInfo)
-            {
-                var keyInfo = new KeyInfo();
-                keyInfo.AddClause(new KeyInfoX509Data(cert));
-                signedXml.KeyInfo = keyInfo;
-            }
-
-            xmlElement.InsertAfter(
-                xmlElement.OwnerDocument.ImportNode(signedXml.GetXml(), true),
-                xmlElement["Issuer", Saml2Namespaces.Saml2Name]);
-        }
-
-        /// <summary>
-        /// Checks if an xml element is signed by the given certificate, through
-        /// a contained enveloped signature.
-        /// </summary>
-        /// <param name="xmlElement">Xml Element that should be signed</param>
-        /// <param name="signingKeys">Signing keys to test, one should validate.</param>
-        /// <param name="validateCertificate">Should the certificate be validated too?</param>
-        /// <param name="minimumSigningAlgorithm">The mininum signing algorithm
-        /// strength allowed.</param>
-        /// <returns>True on correct signature, false on missing signature</returns>
-        /// <exception cref="InvalidSignatureException">If the data has
-        /// been tampered with or is not valid according to the SAML spec.</exception>
-        public static bool IsSignedByAny(
-            this XmlElement xmlElement,
-            IEnumerable<SecurityKeyIdentifierClause> signingKeys,
-            bool validateCertificate,
-            string minimumSigningAlgorithm)
-        {
-            if (xmlElement == null)
-            {
-                throw new ArgumentNullException(nameof(xmlElement));
-            }
-
-            var signedXml = new SignedXmlWithIdFix(xmlElement);
-
-            var signatureElement = xmlElement["Signature", SignedXml.XmlDsigNamespaceUrl];
-
-            if (signatureElement == null)
-            {
-                return false;
-            }
-
-            signedXml.LoadXml(signatureElement);
-            ValidateSignedInfo(signedXml, xmlElement, minimumSigningAlgorithm);
-            VerifySignature(signingKeys, signedXml, signatureElement, validateCertificate);
-
-            return true;
         }
 
         private static void VerifySignature(
@@ -474,138 +607,6 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
             {
                 throw new InvalidSignatureException("The digest method " + reference.DigestMethod
                     + " is weaker than the minimum accepted " + mininumDigestAlgorithm + ".");
-            }
-        }
-
-        internal static XElement AddAttributeIfNotNullOrEmpty(this XElement xElement, XName attribute, object value)
-        {
-            if (value != null && !string.IsNullOrEmpty(value.ToString()))
-            {
-                xElement.Add(new XAttribute(attribute, value));
-            }
-            return xElement;
-        }
-
-        internal static string GetValueIfNotNull(this XmlAttribute xmlAttribute)
-        {
-            if (xmlAttribute == null)
-            {
-                return null;
-            }
-            return xmlAttribute.Value;
-        }
-
-        internal static string GetTrimmedTextIfNotNull(this XmlElement xmlElement)
-        {
-            if (xmlElement == null)
-            {
-                return null;
-            }
-
-            return xmlElement.InnerText.Trim();
-        }
-
-        internal static string GetRequiredAttributeValue(this XmlElement node, string attributeName)
-        {
-            var foundAttribute = node.Attributes[attributeName];
-            if (string.IsNullOrWhiteSpace(foundAttribute?.Value))
-            {
-                throw new BadFormatSamlResponseException($"Attribute '{attributeName}' (case-sensitive) was not found or its value is empty");
-            }
-
-            return foundAttribute.Value;
-        }
-
-        internal static XmlElement GetRequiredElement(this XmlElement node, string name, string namespaceValue)
-        {
-            var foundElement = node[name, namespaceValue];
-            if (foundElement == null)
-            {
-                throw new BadFormatSamlResponseException($"Element '{name}' (case-sensitive, namespace '{namespaceValue}') was not found");
-            }
-
-            return foundElement;
-        }
-
-        internal static XmlElement StartElement(this XmlNode parent, string name, Uri namespaceUri)
-        {
-            var xmlElement = parent.GetOwnerDoc().CreateElement(name, namespaceUri.OriginalString);
-            parent.AppendChild(xmlElement);
-            return xmlElement;
-        }
-
-        private static XmlDocument GetOwnerDoc(this XmlNode node)
-        {
-            var doc = node as XmlDocument;
-            if (doc != null)
-            {
-                return doc;
-            }
-
-            return node.OwnerDocument;
-        }
-
-        internal static XmlElement AddAttribute(this XmlElement parent, string name, string value)
-        {
-            parent.SetAttribute(name, value);
-
-            return parent;
-        }
-
-        internal static XmlElement AddAttributeIfNotNull(this XmlElement parent, string name, object value)
-        {
-            if (value != null)
-            {
-                parent.SetAttribute(name, value.ToString());
-            }
-            return parent;
-        }
-
-        internal static XmlElement If(this XmlElement parent, bool condition, Action<XmlElement> action)
-        {
-            if (condition)
-            {
-                action(parent);
-            }
-
-            return parent;
-        }
-
-        internal static XmlElement AddElement(this XmlElement parent, string name, Uri namespaceUri, string content)
-        {
-            parent.StartElement(name, namespaceUri)
-                .SetInnerText(content);
-
-            return parent;
-        }
-
-        internal static XmlElement SetInnerText(this XmlElement parent, string content)
-        {
-            parent.InnerText = content;
-            return parent;
-        }
-
-        /// <summary>
-        /// Pretty an xml element.
-        /// </summary>
-        /// <param name="xml">Xml to pretty print.</param>
-        /// <returns>Nicely indented and readable data.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "I don't care, the StringWriter contains no references to unmanaged resources")]
-        public static string PrettyPrint(this XmlElement xml)
-        {
-            if (xml == null)
-            {
-                throw new ArgumentNullException(nameof(xml));
-            }
-
-            // Based on http://stackoverflow.com/a/1123731/280222
-            var strWriter = new StringWriter(CultureInfo.InvariantCulture);
-            using (var xmlWriter = new XmlTextWriter(strWriter))
-            {
-                xmlWriter.Formatting = Formatting.Indented;
-                xml.ParentNode.WriteContentTo(xmlWriter);
-                xmlWriter.Flush();
-                return strWriter.ToString();
             }
         }
 

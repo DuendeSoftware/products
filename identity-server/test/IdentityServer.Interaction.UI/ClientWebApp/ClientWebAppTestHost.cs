@@ -17,7 +17,7 @@ namespace Duende.IdentityServer.Interaction.SharedHosts.MvcClient;
 public class ClientWebAppTestHost(
     IScenarioConfigurator configurator,
     IdentityServerTestHost identityServer,
-    ApiHost apiHost,
+    ApiHost? apiHost,
     string name = "webapp",
     Action<OpenIdConnectOptions>? configureOpenIdConnect = null,
     Action<CookieAuthenticationOptions>? configureCookie = null,
@@ -82,10 +82,13 @@ public class ClientWebAppTestHost(
         configureOpenIdConnect?.Invoke(options);
     });
 
-        services.AddHttpClient("api", client =>
+        if (apiHost != null)
         {
-            client.BaseAddress = apiHost.BuildUri();
-        });
+            services.AddHttpClient("api", client =>
+            {
+                client.BaseAddress = apiHost.BuildUri();
+            });
+        }
 
         var app = builder.Build();
 
@@ -93,9 +96,6 @@ public class ClientWebAppTestHost(
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
-
-
-
         app.MapRazorPages()
             .RequireAuthorization();
 

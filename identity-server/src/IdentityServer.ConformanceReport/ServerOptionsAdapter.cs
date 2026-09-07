@@ -11,8 +11,9 @@ namespace Duende.IdentityServer.ConformanceReport;
 /// </summary>
 internal static class ServerOptionsAdapter
 {
-    public static ConformanceReportServerOptions ToConformanceReportServerOptions(
-        this IdentityServerOptions options) => new()
+    extension(IdentityServerOptions options)
+    {
+        public ConformanceReportServerOptions ToConformanceReportServerOptions() => new()
         {
             PushedAuthorizationEndpointEnabled = options.Endpoints.EnablePushedAuthorizationEndpoint,
             PushedAuthorizationRequired = options.PushedAuthorization.Required,
@@ -23,4 +24,5 @@ internal static class ServerOptionsAdapter
             EmitIssuerIdentificationResponseParameter = options.EmitIssuerIdentificationResponseParameter,
             UseHttp303Redirects = true, // IdentityServer always uses HTTP 303 for redirects
         };
+    }
 }

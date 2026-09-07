@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Diagnostics;
 using Duende.IdentityServer.Models;
 
@@ -12,24 +11,27 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 internal static class ServerSideSessionExtensions
 {
-    /// <summary>
-    /// Clones the instance
-    /// </summary>
-    [DebuggerStepThrough]
-    internal static ServerSideSession Clone(this ServerSideSession other)
+    extension(ServerSideSession other)
     {
-        var item = new ServerSideSession()
+        /// <summary>
+        /// Clones the instance
+        /// </summary>
+        [DebuggerStepThrough]
+        internal ServerSideSession Clone()
         {
-            Key = other.Key,
-            Scheme = other.Scheme,
-            SubjectId = other.SubjectId,
-            SessionId = other.SessionId,
-            DisplayName = other.DisplayName,
-            Created = other.Created,
-            Renewed = other.Renewed,
-            Expires = other.Expires,
-            Ticket = other.Ticket,
-        };
-        return item;
+            var item = new ServerSideSession()
+            {
+                Key = other.Key,
+                Scheme = other.Scheme,
+                SubjectId = other.SubjectId,
+                SessionId = other.SessionId,
+                DisplayName = other.DisplayName,
+                Created = other.Created,
+                Renewed = other.Renewed,
+                Expires = other.Expires,
+                Ticket = other.Ticket,
+            };
+            return item;
+        }
     }
 }

@@ -49,7 +49,7 @@ public sealed class ConnectedApplicationStoreTests : IAsyncLifetime
     public async Task find_by_identifier_returns_saml_sp_created_via_admin()
     {
         var entityId = $"https://sp-{Guid.NewGuid():N}.example.com";
-        var config = new SamlServiceProviderConfiguration
+        var config = new CreateSamlServiceProvider
         {
             EntityId = entityId,
             DisplayName = "Connected App Test SP",
@@ -103,7 +103,7 @@ public sealed class ConnectedApplicationStoreTests : IAsyncLifetime
             ClientSecrets = [new CreateClientSecret { PlaintextValue = "secret" }]
         };
 
-        var samlConfig = new SamlServiceProviderConfiguration
+        var samlConfig = new CreateSamlServiceProvider
         {
             EntityId = sharedId,
             DisplayName = "SAML Loser",
@@ -147,7 +147,7 @@ public sealed class ConnectedApplicationStoreTests : IAsyncLifetime
             ClientSecrets = [new CreateClientSecret { PlaintextValue = "secret" }]
         };
 
-        var samlConfig = new SamlServiceProviderConfiguration
+        var samlConfig = new CreateSamlServiceProvider
         {
             EntityId = entityId,
             DisplayName = "GetAll SP",
@@ -194,7 +194,7 @@ public sealed class ConnectedApplicationStoreTests : IAsyncLifetime
             ClientSecrets = [new CreateClientSecret { PlaintextValue = "secret" }]
         };
 
-        var samlConfig = new SamlServiceProviderConfiguration
+        var samlConfig = new CreateSamlServiceProvider
         {
             EntityId = entityId,
             DisplayName = "Order SP",
@@ -211,7 +211,7 @@ public sealed class ConnectedApplicationStoreTests : IAsyncLifetime
             AllowedScopes = ["openid"]
         };
 
-        // Create SAML first, client second — order in storage shouldn't matter
+        // Create SAML first, client second; order in storage shouldn't matter
         (await _fixture.SamlServiceProviderAdmin.CreateAsync(samlConfig, _ct)).IsSuccess.ShouldBeTrue();
         (await _fixture.ClientAdmin.CreateAsync(clientConfig, _ct)).IsSuccess.ShouldBeTrue();
 

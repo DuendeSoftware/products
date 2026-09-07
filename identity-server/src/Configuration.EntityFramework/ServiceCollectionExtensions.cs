@@ -15,13 +15,16 @@ namespace Duende.IdentityServer.Configuration.EntityFramework;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds the entity framework based client configuration store
-    /// implementation to DI.
-    /// </summary>
-    public static IServiceCollection AddClientConfigurationStore(this IdentityServerConfigurationBuilder builder)
+    extension(IdentityServerConfigurationBuilder builder)
     {
-        builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        return builder.Services.AddTransient<IClientConfigurationStore, ClientConfigurationStore>();
+        /// <summary>
+        /// Adds the entity framework based client configuration store
+        /// implementation to DI.
+        /// </summary>
+        public IServiceCollection AddClientConfigurationStore()
+        {
+            builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            return builder.Services.AddTransient<IClientConfigurationStore, ClientConfigurationStore>();
+        }
     }
 }

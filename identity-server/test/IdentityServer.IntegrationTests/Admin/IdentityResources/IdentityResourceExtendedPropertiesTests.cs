@@ -6,7 +6,6 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityResources;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +24,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task create_with_unknown_attribute_returns_validation_error()
     {
         var admin = _fixture.IdentityResourceAdmin;
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
         resource.ExtendedProperties.Set(AttributeCode.Create("unknown_attr"), "value");
 
         var result = await admin.CreateAsync(resource, _ct);
@@ -39,7 +38,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task extended_properties_round_trip_after_create()
     {
         var admin = _fixture.IdentityResourceAdmin;
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
         resource.ExtendedProperties.Set(TestIdentityResourceAttributes.Owner, "platform-team");
         resource.ExtendedProperties.Set(TestIdentityResourceAttributes.Version, 2);
 
@@ -63,7 +62,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task update_with_extended_properties_succeeds()
     {
         var admin = _fixture.IdentityResourceAdmin;
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -71,7 +70,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestIdentityResourceAttributes.Owner, "security-team");
 
         var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
@@ -87,7 +86,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task update_with_unknown_attribute_returns_validation_error()
     {
         var admin = _fixture.IdentityResourceAdmin;
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -95,7 +94,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("bad_attr"), "value");
 
         var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
@@ -111,7 +110,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         var admin = _fixture.IdentityResourceAdmin;
         var resourceStore = _fixture.ResourceStore;
         var name = $"identity_{Guid.NewGuid():N}";
-        var resource = new IdentityResourceConfiguration { Name = name };
+        var resource = new CreateIdentityResource { Name = name };
         resource.ExtendedProperties.Set(TestIdentityResourceAttributes.Owner, "platform-team");
 
         var createResult = await admin.CreateAsync(resource, _ct);
@@ -131,12 +130,10 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         services.AddLogging();
 
         var dbName = $"test_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
         services.AddIdentityServer()
-            .AddConfigurationStorage();
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddSingleton<ISchemaStore>(
             new InMemorySchemaStore([]));
@@ -148,7 +145,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         using var scope = provider.CreateScope();
         var admin = scope.ServiceProvider.GetRequiredService<IIdentityResourceAdmin>();
 
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
         resource.ExtendedProperties.Set(TestIdentityResourceAttributes.Owner, "team");
 
         var result = await admin.CreateAsync(resource, _ct);
@@ -165,12 +162,10 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         services.AddLogging();
 
         var dbName = $"test_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
         services.AddIdentityServer()
-            .AddConfigurationStorage();
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddSingleton<ISchemaStore>(
             new InMemorySchemaStore([]));
@@ -183,7 +178,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         var admin = scope.ServiceProvider.GetRequiredService<IIdentityResourceAdmin>();
 
         // Create a resource without extended properties (succeeds)
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
@@ -191,7 +186,7 @@ public sealed class IdentityResourceExtendedPropertiesTests : IAsyncLifetime
         getResult.Found.ShouldBeTrue();
 
         // Now update with extended properties (should fail)
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestIdentityResourceAttributes.Owner, "team");
 
         var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);

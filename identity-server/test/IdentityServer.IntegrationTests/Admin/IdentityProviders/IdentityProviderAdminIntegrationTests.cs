@@ -10,7 +10,7 @@ using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Duende.Storage.Internal;
+using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.AspNetCore.Authentication;
@@ -41,7 +41,7 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
     {
         var output = TestContext.Current.TestOutputHelper!;
 
-        // 2. Main IdentityServer — storage-backed configuration with dynamic providers
+        // 2. Main IdentityServer: storage-backed configuration with dynamic providers
         // (constructed first so we can reference its base address in the upstream IdP's client config)
         var dbName = $"federation_{Guid.NewGuid():N}";
         _identityServer = new KestrelBasedTestServer(
@@ -52,16 +52,13 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
             {
                 services.AddRouting();
 
-                services.AddStorageInternal(storage =>
-                    storage.AddSqliteStore(opt =>
-                        opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
                 services.AddIdentityServer(options =>
                     {
                         options.EmitStaticAudienceClaim = true;
                     })
-                    .AddConfigurationStorage()
-                    .AddOperationalStorage()
+                    .AddStorage(storage =>
+                        storage.AddSqliteStore(opt =>
+                            opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
                     .AddInMemoryApiScopes([new ApiScope("scope1")])
                     .AddInMemoryIdentityResources([new Models.IdentityResources.OpenId()]);
             },
@@ -78,7 +75,7 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
                 });
             });
 
-        // 1. Upstream IdP — a minimal IdentityServer that serves OIDC discovery
+        // 1. Upstream IdP: a minimal IdentityServer that serves OIDC discovery
         // The federation redirect URI uses the identity server's base address
         var federationRedirectUri = _identityServer.BuildUrl($"/federation/{FederationScheme}/signin").ToString();
         _upstreamIdp = new KestrelBasedTestServer(
@@ -122,22 +119,18 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
     public async Task challenge_against_admin_created_provider_redirects_to_upstream_idp()
     {
         // Arrange: create a dynamic OIDC provider via the admin API pointing to the upstream IdP
-        var createResult = await Admin.CreateAsync(
-            new IdentityProviderConfiguration
-            {
-                Scheme = FederationScheme,
-                Type = "oidc",
-                Enabled = true,
-                DisplayName = "Upstream IdP",
-                Properties = new Dictionary<string, string>
-                {
-                    ["Authority"] = _upstreamIdp.BaseAddress.ToString().TrimEnd('/'),
-                    ["ClientId"] = "federation-client",
-                    ["ClientSecret"] = "federation-secret",
-                    ["ResponseType"] = "code"
-                }
-            },
-            _ct);
+        var config = new CreateIdentityProvider
+        {
+            Scheme = FederationScheme,
+            Type = "oidc",
+            Enabled = true,
+            DisplayName = "Upstream IdP"
+        };
+        config.ExtendedProperties.Set(AttributeCode.Create("Authority"), _upstreamIdp.BaseAddress.ToString().TrimEnd('/'));
+        config.ExtendedProperties.Set(AttributeCode.Create("ClientId"), "federation-client");
+        config.ExtendedProperties.Set(AttributeCode.Create("ClientSecret"), "federation-secret");
+        config.ExtendedProperties.Set(AttributeCode.Create("ResponseType"), "code");
+        var createResult = await Admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue($"CreateAsync failed: {createResult}");
 
         // Act: challenge against the dynamically created scheme
@@ -166,20 +159,16 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
     public async Task get_all_scheme_names_includes_admin_created_provider()
     {
         var scheme = $"list_{Guid.NewGuid():N}";
-        var createResult = await Admin.CreateAsync(
-            new IdentityProviderConfiguration
-            {
-                Scheme = scheme,
-                Type = "oidc",
-                Enabled = true,
-                DisplayName = "Listed Provider",
-                Properties = new Dictionary<string, string>
-                {
-                    ["Authority"] = _upstreamIdp.BaseAddress.ToString().TrimEnd('/'),
-                    ["ClientId"] = "federation-client"
-                }
-            },
-            _ct);
+        var config = new CreateIdentityProvider
+        {
+            Scheme = scheme,
+            Type = "oidc",
+            Enabled = true,
+            DisplayName = "Listed Provider"
+        };
+        config.ExtendedProperties.Set(AttributeCode.Create("Authority"), _upstreamIdp.BaseAddress.ToString().TrimEnd('/'));
+        config.ExtendedProperties.Set(AttributeCode.Create("ClientId"), "federation-client");
+        var createResult = await Admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue($"CreateAsync failed: {createResult}");
 
         // Resolve IIdentityProviderStore from a fresh scope

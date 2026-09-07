@@ -4,14 +4,17 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
 {
     static class DictionaryExtensions
     {
-        public static string GetValueOrEmpty<T>(this IDictionary<T, string> dictionary, T key)
+        extension<T>(IDictionary<T, string> dictionary)
         {
-            string value;
-            if (dictionary.TryGetValue(key, out value))
+            public string GetValueOrEmpty(T key)
             {
-                return value;
+                string value;
+                if (dictionary.TryGetValue(key, out value))
+                {
+                    return value;
+                }
+                return "";
             }
-            return "";
         }
     }
 }

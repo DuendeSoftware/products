@@ -19,7 +19,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class IdentityProviderRepository(IStoreFactory storeFactory)
+internal sealed class IdentityProviderRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -36,8 +36,8 @@ internal sealed class IdentityProviderRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, IdentityProviderDso.V1 dso, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(IdentityProviderSchemeDskV1.Create(dso.Scheme))],
@@ -49,15 +49,15 @@ internal sealed class IdentityProviderRepository(IStoreFactory storeFactory)
 
     internal async Task<(IdentityProviderDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(IdentityProviderDso.EntityType, UuidV7.From(id), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(IdentityProviderDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((IdentityProviderDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(IdentityProviderDso.V1 Dso, int Version)?> TryReadBySchemeAsync(string scheme, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             IdentityProviderDso.EntityType,
             DataStorageKey.Create(IdentityProviderSchemeDskV1.Create(scheme)),
             ct);
@@ -65,7 +65,7 @@ internal sealed class IdentityProviderRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, IdentityProviderDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -76,18 +76,18 @@ internal sealed class IdentityProviderRepository(IStoreFactory storeFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(IdentityProviderDso.EntityType, UuidV7.From(id), [], ct);
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(IdentityProviderDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<QueryResult<IdentityProviderDso.V1>> QueryAsync(
         QueryRequest<IdentityProviderFilter, IdentityProviderSortField> request,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await store.QueryAsync<IdentityProviderDso.V1>(
+        var result = await storage.QueryAsync<IdentityProviderDso.V1>(
             IdentityProviderDso.EntityType,
             filter,
             sort,

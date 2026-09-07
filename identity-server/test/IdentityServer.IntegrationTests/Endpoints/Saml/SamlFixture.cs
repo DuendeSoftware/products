@@ -19,7 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-internal class SamlFixture : IAsyncLifetime
+public class SamlFixture : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
@@ -34,6 +34,8 @@ internal class SamlFixture : IAsyncLifetime
     public Action<SamlOptions> ConfigureSamlOptions = _ => { };
 
     public Action<IServiceCollection> ConfigureServices = _ => { };
+
+    public Func<IdentityServerPipeline, Task>? OnPostInitialize;
 
     private List<SamlServiceProvider> _serviceProviders = [];
     private bool _isInitialized = false;
@@ -250,9 +252,6 @@ internal class SamlFixture : IAsyncLifetime
 
         _pipeline.Initialize(enableLogging: true);
 
-        // Mark as initialized after seeding
-        _isInitialized = true;
-
         // Create two BrowserClient instances with different redirect behaviors
         Client = _pipeline.BrowserClient;
         Client.BaseAddress = new Uri(IdentityServerPipeline.BaseUrl);
@@ -261,6 +260,14 @@ internal class SamlFixture : IAsyncLifetime
         {
             BaseAddress = new Uri(IdentityServerPipeline.BaseUrl)
         };
+
+        if (OnPostInitialize != null)
+        {
+            await OnPostInitialize(_pipeline);
+        }
+
+        // Mark as initialized after all setup (including post-init hooks) completes
+        _isInitialized = true;
     }
 
     public async ValueTask DisposeAsync() =>

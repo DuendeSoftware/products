@@ -14,7 +14,7 @@ public class IdentityServerTests(IdentityServerHostTestFixture fixture)
 {
     // Client login E2E tests have been moved to the interactive scenario test harness
     // (IdentityServer.Interaction.Scenarios / IdentityServer.Interaction.Tests).
-    // The remaining clients (MvcJarUriJwt, Web) are not yet migrated.
+    // The remaining client (Web) is not yet migrated.
 
     [Theory]
     [InlineData(AppHostServices.TemplateIs)]

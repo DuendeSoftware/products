@@ -4,13 +4,20 @@
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
 public class SamlMetadataEndpointTests
 {
     private const string Category = "SAML Metadata Endpoint";
+
+    private static readonly XNamespace Md = XNamespace.Get("urn:oasis:names:tc:SAML:2.0:metadata");
+    private static readonly XNamespace Ds = XNamespace.Get("http://www.w3.org/2000/09/xmldsig#");
 
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
@@ -292,6 +299,111 @@ public class SamlMetadataEndpointTests
             slo.Attribute("Location").ShouldNotBeNull();
             slo.Attribute("Location")!.Value.ShouldContain("/Saml2/SLO");
         }
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_include_multiple_key_descriptors_when_multiple_signing_credentials_are_registered()
+    {
+        var secondCert = SamlTestHelpers.CreateTestSigningCertificate(TimeProvider.System, "CN=second-signing-key");
+
+        Fixture.ConfigureServices = services =>
+        {
+            var key = new X509SecurityKey(secondCert);
+            var credential = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
+            services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
+        };
+
+        await Fixture.InitializeAsync();
+
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+
+        var keyDescriptors = doc.Descendants(Md + "KeyDescriptor").ToList();
+        keyDescriptors.Count.ShouldBe(2, "Expected one KeyDescriptor per registered ISigningCredentialStore (1 primary + 1 additional)");
+
+        foreach (var kd in keyDescriptors)
+        {
+            kd.Attribute("use").ShouldNotBeNull().Value.ShouldBe("signing");
+        }
+
+        var certValues = keyDescriptors
+            .Select(kd => kd.Descendants(Ds + "X509Certificate").Single().Value)
+            .ToList();
+        certValues[0].ShouldNotBe(certValues[1]);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_include_key_descriptors_for_all_signing_credential_stores()
+    {
+        // Simulate three signing keys (e.g., active + announced + previous)
+        var secondCert = SamlTestHelpers.CreateTestSigningCertificate(TimeProvider.System, "CN=announced-key");
+        var thirdCert = SamlTestHelpers.CreateTestSigningCertificate(TimeProvider.System, "CN=previous-key");
+
+        Fixture.ConfigureServices = services =>
+        {
+            foreach (var cert in new[] { secondCert, thirdCert })
+            {
+                var key = new X509SecurityKey(cert);
+                var credential = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
+                services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
+            }
+        };
+
+        await Fixture.InitializeAsync();
+
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+
+        var keyDescriptors = doc.Descendants(Md + "KeyDescriptor").ToList();
+        keyDescriptors.Count.ShouldBe(3, "Expected one KeyDescriptor per registered ISigningCredentialStore (1 primary + 2 additional)");
+
+        var certValues = keyDescriptors
+            .Select(kd => kd.Descendants(Ds + "X509Certificate").Single().Value)
+            .ToList();
+        certValues.Distinct().Count().ShouldBe(3);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task metadata_should_not_include_validation_only_keys()
+    {
+        // Validation keys (e.g., retired keys kept for token validation) should NOT appear
+        // in SAML metadata since it only publishes signing credentials
+        var validationOnlyCert = SamlTestHelpers.CreateTestSigningCertificate(TimeProvider.System, "CN=validation-only");
+
+        Fixture.ConfigureServices = services =>
+        {
+            var keyInfo = new SecurityKeyInfo
+            {
+                Key = new X509SecurityKey(validationOnlyCert),
+                SigningAlgorithm = SecurityAlgorithms.RsaSha256
+            };
+            services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore([keyInfo]));
+        };
+
+        await Fixture.InitializeAsync();
+
+        var result = await Fixture.Client.GetAsync("/saml2", _ct);
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var content = await result.Content.ReadAsStringAsync(_ct);
+        var doc = XDocument.Parse(content);
+
+        var keyDescriptors = doc.Descendants(Md + "KeyDescriptor").ToList();
+        keyDescriptors.Count.ShouldBe(1, "Only signing credentials should appear; validation-only keys should be excluded");
+
+        // Verify the published key is the primary signing cert, not the validation-only cert
+        var publishedCertValue = keyDescriptors.Single().Descendants(Ds + "X509Certificate").Single().Value;
+        var validationOnlyCertBase64 = Convert.ToBase64String(validationOnlyCert.RawData);
+        publishedCertValue.ShouldNotBe(validationOnlyCertBase64);
     }
 
     private static List<string> GetServiceLocationUrls(string xmlContent, params string[] serviceElementNames)

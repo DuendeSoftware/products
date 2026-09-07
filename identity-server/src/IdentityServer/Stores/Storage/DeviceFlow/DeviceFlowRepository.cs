@@ -11,7 +11,7 @@ using Duende.Storage.Internal.Querying.SearchFields;
 namespace Duende.IdentityServer.Stores.Storage.DeviceFlow;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class DeviceFlowRepository(IStoreFactory storeFactory)
+internal sealed class DeviceFlowRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -25,8 +25,8 @@ internal sealed class DeviceFlowRepository(IStoreFactory storeFactory)
         Expiration expiration,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [
@@ -42,8 +42,8 @@ internal sealed class DeviceFlowRepository(IStoreFactory storeFactory)
     internal async Task<(DeviceFlowDso.V1 Dso, UuidV7 Id, int Version)?>
         TryReadByDeviceCodeAsync(string deviceCode, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             DeviceFlowDso.EntityType,
             DataStorageKey.Create(DeviceCodeDskV1.Create(deviceCode)),
             ct);
@@ -55,8 +55,8 @@ internal sealed class DeviceFlowRepository(IStoreFactory storeFactory)
     internal async Task<(DeviceFlowDso.V1 Dso, UuidV7 Id, int Version)?>
         TryReadByUserCodeAsync(string userCode, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             DeviceFlowDso.EntityType,
             DataStorageKey.Create(UserCodeDskV1.Create(userCode)),
             ct);
@@ -70,7 +70,7 @@ internal sealed class DeviceFlowRepository(IStoreFactory storeFactory)
         DeviceFlowDso.V1 dso,
         int expectedVersion,
         Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -84,7 +84,7 @@ internal sealed class DeviceFlowRepository(IStoreFactory storeFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteByDeviceCodeAsync(string deviceCode, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(
             DeviceFlowDso.EntityType,
             DataStorageKey.Create(DeviceCodeDskV1.Create(deviceCode)),
             [],

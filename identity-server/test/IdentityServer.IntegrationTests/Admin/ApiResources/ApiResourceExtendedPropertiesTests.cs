@@ -6,7 +6,6 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiResources;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +24,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task create_with_unknown_attribute_returns_validation_error()
     {
         var admin = _fixture.ApiResourceAdmin;
-        var resource = new ApiResourceConfiguration { Name = $"api_{Guid.NewGuid():N}" };
+        var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
         resource.ExtendedProperties.Set(AttributeCode.Create("unknown_attr"), "value");
 
         var result = await admin.CreateAsync(resource, _ct);
@@ -39,7 +38,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task extended_properties_round_trip_after_create()
     {
         var admin = _fixture.ApiResourceAdmin;
-        var resource = new ApiResourceConfiguration { Name = $"api_{Guid.NewGuid():N}" };
+        var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
         resource.ExtendedProperties.Set(TestApiResourceAttributes.Owner, "platform-team");
         resource.ExtendedProperties.Set(TestApiResourceAttributes.Version, 2);
 
@@ -63,7 +62,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task update_with_extended_properties_succeeds()
     {
         var admin = _fixture.ApiResourceAdmin;
-        var resource = new ApiResourceConfiguration { Name = $"api_{Guid.NewGuid():N}" };
+        var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -71,7 +70,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestApiResourceAttributes.Owner, "security-team");
 
         var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
@@ -87,7 +86,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
     public async Task update_with_unknown_attribute_returns_validation_error()
     {
         var admin = _fixture.ApiResourceAdmin;
-        var resource = new ApiResourceConfiguration { Name = $"api_{Guid.NewGuid():N}" };
+        var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -95,7 +94,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("bad_attr"), "value");
 
         var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
@@ -111,7 +110,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
         var admin = _fixture.ApiResourceAdmin;
         var resourceStore = _fixture.ResourceStore;
         var name = $"api_{Guid.NewGuid():N}";
-        var resource = new ApiResourceConfiguration { Name = name };
+        var resource = new CreateApiResource { Name = name };
         resource.ExtendedProperties.Set(TestApiResourceAttributes.Owner, "platform-team");
 
         var createResult = await admin.CreateAsync(resource, _ct);
@@ -131,12 +130,10 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
         services.AddLogging();
 
         var dbName = $"test_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
         services.AddIdentityServer()
-            .AddConfigurationStorage();
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddSingleton<ISchemaStore>(
             new InMemorySchemaStore([]));
@@ -148,7 +145,7 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
         using var scope = provider.CreateScope();
         var admin = scope.ServiceProvider.GetRequiredService<IApiResourceAdmin>();
 
-        var resource = new ApiResourceConfiguration { Name = $"api_{Guid.NewGuid():N}" };
+        var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
         resource.ExtendedProperties.Set(TestApiResourceAttributes.Owner, "team");
 
         var result = await admin.CreateAsync(resource, _ct);

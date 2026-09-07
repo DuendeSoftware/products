@@ -4,6 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin.ApiScopes;
+using Duende.Storage;
 using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Admin;
@@ -19,14 +20,14 @@ public interface IApiScopeAdmin
     /// <param name="scope">The API scope definition.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The storage ID and version on success, or validation/conflict errors.</returns>
-    Task<SaveResult<Guid>> CreateAsync(ApiScopeConfiguration scope, Ct ct);
+    Task<SaveResult<ApiScopeId>> CreateAsync(CreateApiScope scope, Ct ct);
 
     /// <summary>
     /// Gets an API scope by its storage identifier.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<GetResult<ApiScopeConfiguration>> GetAsync(Guid id, Ct ct);
+    Task<GetResult<ApiScopeConfiguration>> GetAsync(ApiScopeId id, Ct ct);
 
     /// <summary>
     /// Gets an API scope by its unique name.
@@ -42,14 +43,14 @@ public interface IApiScopeAdmin
     /// <param name="scope">The updated API scope definition.</param>
     /// <param name="expectedVersion">Expected version for optimistic concurrency.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> UpdateAsync(Guid id, ApiScopeConfiguration scope, DataVersion expectedVersion, Ct ct);
+    Task<SaveResult<ApiScopeId>> UpdateAsync(ApiScopeId id, UpdateApiScope scope, DataVersion expectedVersion, Ct ct);
 
     /// <summary>
     /// Deletes an API scope.
     /// </summary>
     /// <param name="id">The storage identifier of the API scope to delete.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct);
+    Task<SaveResult<ApiScopeId>> DeleteAsync(ApiScopeId id, Ct ct);
 
     /// <summary>
     /// Queries API scopes with optional filtering, sorting, and pagination.

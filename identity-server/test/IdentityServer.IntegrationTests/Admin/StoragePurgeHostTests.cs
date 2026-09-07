@@ -108,9 +108,9 @@ public sealed class StoragePurgeHostTests : IAsyncLifetime
 
     private static StoragePurgeHost CreatePurgeHost(IServiceScope scope)
     {
-        var storeFactory = scope.ServiceProvider.GetRequiredService<IStoreFactory>();
+        var storageFactory = scope.ServiceProvider.GetRequiredService<IStorageFactory>();
         var options = scope.ServiceProvider.GetRequiredService<IdentityServerOptions>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<StoragePurgeHost>>();
-        return new StoragePurgeHost(storeFactory, options, logger);
+        return new StoragePurgeHost(storageFactory, options, logger);
     }
 }

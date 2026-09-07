@@ -1,27 +1,42 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore;
+using Duende.IdentityServer.UI.AspNetIdentity.Models;
+using IdentityServerHost.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetIdentityDb;
-
-// TODO: Upgrade this client to remove dependancy on IWebHost & WebHostBuilder
-#pragma warning disable ASPDEPR008 // IWebHost is deprecated in net10.0
 
 internal class Program
 {
     public static void Main(string[] args)
     {
-        var host = BuildWebHost(args);
-        SeedData.EnsureSeedData(host.Services);
+        var builder = WebApplication.CreateBuilder(args);
+
+        var cn = builder.Configuration.GetConnectionString("DefaultConnection");
+        _ = builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            _ = options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Program).Assembly.FullName));
+        });
+
+        _ = builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+            {
+                opt.Password.RequireDigit = false;
+                opt.Password.RequireLowercase = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequiredLength = 3; // Too short for production, but allows bob/bob
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
+        var app = builder.Build();
+
+        SeedData.EnsureSeedData(app.Services);
 
         // Exit the application
         Console.WriteLine("Exiting application...");
         Environment.Exit(0);
     }
-
-    public static IWebHost BuildWebHost(string[] args) =>
-        WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .Build();
 }

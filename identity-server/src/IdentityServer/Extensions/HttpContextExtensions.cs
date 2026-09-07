@@ -15,153 +15,155 @@ namespace Duende.IdentityServer.Extensions;
 
 public static class HttpContextExtensions
 {
-    internal static void SetSignOutCalled(this HttpContext context)
+    extension(HttpContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        context.Items[Constants.EnvironmentKeys.SignOutCalled] = "true";
-    }
-
-    internal static bool GetSignOutCalled(this HttpContext context) => context.Items.ContainsKey(Constants.EnvironmentKeys.SignOutCalled);
-
-    internal static void SetBackChannelLogoutTriggered(this HttpContext context)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        context.Items[Constants.EnvironmentKeys.BackChannelLogoutTriggered] = "true";
-    }
-
-    internal static bool GetBackChannelLogoutTriggered(this HttpContext context) => context.Items.ContainsKey(Constants.EnvironmentKeys.BackChannelLogoutTriggered);
-
-    internal static void SetExpiredUserSession(this HttpContext context, UserSession userSession)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        context.Items[Constants.EnvironmentKeys.DetectedExpiredUserSession] = userSession;
-    }
-
-    internal static bool TryGetExpiredUserSession(this HttpContext context, out UserSession expiredUserSession)
-    {
-        expiredUserSession = null;
-        if (context.Items.TryGetValue(Constants.EnvironmentKeys.DetectedExpiredUserSession, out var userSession))
+        internal void SetSignOutCalled()
         {
-            expiredUserSession = userSession as UserSession;
+            ArgumentNullException.ThrowIfNull(context);
+            context.Items[Constants.EnvironmentKeys.SignOutCalled] = "true";
         }
 
-        return expiredUserSession != null;
-    }
+        internal bool GetSignOutCalled() => context.Items.ContainsKey(Constants.EnvironmentKeys.SignOutCalled);
 
-    /// <summary>
-    /// Builds the signout iframe callback URL that triggers front-channel logout
-    /// notifications to clients and SAML SPs.
-    /// </summary>
-    /// <param name="context">The current HTTP context.</param>
-    /// <param name="logoutMessage">The logout message, if one exists.</param>
-    /// <param name="logoutId">An identifier used to correlate SAML logout session tracking.
-    /// When present and downstream SAML SPs exist, this is stored in
-    /// <see cref="LogoutNotificationContext.SamlLogoutId"/> so that the
-    /// <c>EndSessionRequestValidator</c> can create a <c>SamlLogoutSession</c> to
-    /// track SP logout responses.</param>
-    internal static async Task<string> GetIdentityServerSignoutFrameCallbackUrlAsync(this HttpContext context, LogoutMessage logoutMessage = null, string logoutId = null)
-    {
-        var userSession = context.RequestServices.GetRequiredService<IUserSession>();
-        var user = await userSession.GetUserAsync(context.RequestAborted);
-        var currentSubId = user?.GetSubjectId();
-
-        LogoutNotificationContext endSessionMsg = null;
-
-        // if we have a logout message, then that take precedence over the current user
-        if (logoutMessage?.ClientIds?.Count > 0 || logoutMessage?.SamlSessions?.Count > 0)
+        internal void SetBackChannelLogoutTriggered()
         {
-            var clientIds = logoutMessage.ClientIds ?? [];
-            var samlSessions = logoutMessage.SamlSessions?.ToList() ?? [];
+            ArgumentNullException.ThrowIfNull(context);
+            context.Items[Constants.EnvironmentKeys.BackChannelLogoutTriggered] = "true";
+        }
 
-            // check if current user is same, since we might have new clients (albeit unlikely)
-            if (currentSubId == logoutMessage.SubjectId)
+        internal bool GetBackChannelLogoutTriggered() => context.Items.ContainsKey(Constants.EnvironmentKeys.BackChannelLogoutTriggered);
+
+        internal void SetExpiredUserSession(UserSession userSession)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            context.Items[Constants.EnvironmentKeys.DetectedExpiredUserSession] = userSession;
+        }
+
+        internal bool TryGetExpiredUserSession(out UserSession expiredUserSession)
+        {
+            expiredUserSession = null;
+            if (context.Items.TryGetValue(Constants.EnvironmentKeys.DetectedExpiredUserSession, out var userSession))
             {
-                clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted)).ToArray();
-                var currentSamlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
-                samlSessions = samlSessions.Union(currentSamlSessions).ToList();
+                expiredUserSession = userSession as UserSession;
             }
 
-            var samlEntityIds = samlSessions.Select(s => s.EntityId);
-            if (await AnyClientHasFrontChannelLogout(clientIds) || await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted))
+            return expiredUserSession != null;
+        }
+
+        /// <summary>
+        /// Builds the signout iframe callback URL that triggers front-channel logout
+        /// notifications to clients and SAML SPs.
+        /// </summary>
+        /// <param name="logoutMessage">The logout message, if one exists.</param>
+        /// <param name="logoutId">An identifier used to correlate SAML logout session tracking.
+        /// When present and downstream SAML SPs exist, this is stored in
+        /// <see cref="LogoutNotificationContext.SamlLogoutId"/> so that the
+        /// <c>EndSessionRequestValidator</c> can create a <c>SamlLogoutSession</c> to
+        /// track SP logout responses.</param>
+        internal async Task<string> GetIdentityServerSignoutFrameCallbackUrlAsync(LogoutMessage logoutMessage = null, string logoutId = null)
+        {
+            var userSession = context.RequestServices.GetRequiredService<IUserSession>();
+            var user = await userSession.GetUserAsync(context.RequestAborted);
+            var currentSubId = user?.GetSubjectId();
+
+            LogoutNotificationContext endSessionMsg = null;
+
+            // if we have a logout message, then that take precedence over the current user
+            if (logoutMessage?.ClientIds?.Count > 0 || logoutMessage?.SamlSessions?.Count > 0)
             {
-                endSessionMsg = new LogoutNotificationContext
+                var clientIds = logoutMessage.ClientIds ?? [];
+                var samlSessions = logoutMessage.SamlSessions?.ToList() ?? [];
+
+                // check if current user is same, since we might have new clients (albeit unlikely)
+                if (currentSubId == logoutMessage.SubjectId)
                 {
-                    SubjectId = logoutMessage.SubjectId,
-                    SessionId = logoutMessage.SessionId,
-                    ClientIds = clientIds,
-                    SamlSessions = samlSessions,
-                    SamlInitiatingServiceProviderEntityId = logoutMessage.SamlServiceProviderEntityId,
-                    SamlLogoutId = samlSessions.Count > 0 ? logoutId : null
-                };
+                    clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted)).ToArray();
+                    var currentSamlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
+                    samlSessions = samlSessions.Union(currentSamlSessions).ToList();
+                }
+
+                var samlEntityIds = samlSessions.Select(s => s.EntityId);
+                if (await AnyClientHasFrontChannelLogout(clientIds) || await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted))
+                {
+                    endSessionMsg = new LogoutNotificationContext
+                    {
+                        SubjectId = logoutMessage.SubjectId,
+                        SessionId = logoutMessage.SessionId,
+                        ClientIds = clientIds,
+                        SamlSessions = samlSessions,
+                        SamlInitiatingServiceProviderEntityId = logoutMessage.SamlServiceProviderEntityId,
+                        SamlLogoutId = samlSessions.Count > 0 ? logoutId : null
+                    };
+                }
             }
-        }
-        else if (currentSubId != null)
-        {
-            // see if current user has any clients they need to signout of
-            var clientIds = await userSession.GetClientListAsync(context.RequestAborted);
-            var samlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
-            var samlEntityIds = samlSessions.Select(s => s.EntityId);
-
-            if ((clientIds.Count > 0 && await AnyClientHasFrontChannelLogout(clientIds)) ||
-                (samlSessions.Count > 0 && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted)))
+            else if (currentSubId != null)
             {
-                endSessionMsg = new LogoutNotificationContext
+                // see if current user has any clients they need to signout of
+                var clientIds = await userSession.GetClientListAsync(context.RequestAborted);
+                var samlSessions = await userSession.GetSamlSessionListAsync(context.RequestAborted);
+                var samlEntityIds = samlSessions.Select(s => s.EntityId);
+
+                if ((clientIds.Count > 0 && await AnyClientHasFrontChannelLogout(clientIds)) ||
+                    (samlSessions.Count > 0 && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds, context.RequestAborted)))
                 {
-                    SubjectId = currentSubId,
-                    SessionId = await userSession.GetSessionIdAsync(context.RequestAborted),
-                    ClientIds = clientIds,
-                    SamlSessions = samlSessions,
-                    SamlLogoutId = samlSessions.Count > 0 ? logoutId : null
-                };
-            }
-        }
-
-        if (endSessionMsg != null)
-        {
-            var timeProvider = context.RequestServices.GetRequiredService<TimeProvider>();
-            var msg = new Message<LogoutNotificationContext>(endSessionMsg, timeProvider.GetUtcNow().UtcDateTime);
-
-            var endSessionMessageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>();
-            var id = await endSessionMessageStore.WriteAsync(msg, context.RequestAborted);
-
-            var urls = context.RequestServices.GetRequiredService<IServerUrls>();
-            var signoutIframeUrl = urls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.EndSessionCallback;
-            signoutIframeUrl = signoutIframeUrl.AddQueryString(Constants.UIConstants.DefaultRoutePathParams.EndSessionCallback, id);
-
-            return signoutIframeUrl;
-        }
-
-        // no sessions, so nothing to cleanup
-        return null;
-
-        async Task<bool> AnyClientHasFrontChannelLogout(IEnumerable<string> clientIds)
-        {
-            var clientStore = context.RequestServices.GetRequiredService<IClientStore>();
-            foreach (var clientId in clientIds)
-            {
-                var client = await clientStore.FindEnabledClientByIdAsync(clientId, context.RequestAborted);
-                if (client?.FrontChannelLogoutUri.IsPresent() == true)
-                {
-                    return true;
+                    endSessionMsg = new LogoutNotificationContext
+                    {
+                        SubjectId = currentSubId,
+                        SessionId = await userSession.GetSessionIdAsync(context.RequestAborted),
+                        ClientIds = clientIds,
+                        SamlSessions = samlSessions,
+                        SamlLogoutId = samlSessions.Count > 0 ? logoutId : null
+                    };
                 }
             }
 
-            return false;
-        }
-
-        async Task<bool> AnySamlServiceProviderHasFrontChannelLogout(IEnumerable<string> entityIds, Ct ct)
-        {
-            var serviceProviderStore = context.RequestServices.GetRequiredService<ISamlServiceProviderStore>();
-            foreach (var entityId in entityIds)
+            if (endSessionMsg != null)
             {
-                var sp = await serviceProviderStore.FindByEntityIdAsync(entityId, ct);
-                if (sp?.Enabled == true && sp.GetSingleLogoutServiceEndpoint(SamlBinding.HttpRedirect) != null)
-                {
-                    return true;
-                }
+                var timeProvider = context.RequestServices.GetRequiredService<TimeProvider>();
+                var msg = new Message<LogoutNotificationContext>(endSessionMsg, timeProvider.GetUtcNow().UtcDateTime);
+
+                var endSessionMessageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>();
+                var id = await endSessionMessageStore.WriteAsync(msg, context.RequestAborted);
+
+                var urls = context.RequestServices.GetRequiredService<IServerUrls>();
+                var signoutIframeUrl = urls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.EndSessionCallback;
+                signoutIframeUrl = signoutIframeUrl.AddQueryString(Constants.UIConstants.DefaultRoutePathParams.EndSessionCallback, id);
+
+                return signoutIframeUrl;
             }
 
-            return false;
+            // no sessions, so nothing to cleanup
+            return null;
+
+            async Task<bool> AnyClientHasFrontChannelLogout(IEnumerable<string> clientIds)
+            {
+                var clientStore = context.RequestServices.GetRequiredService<IClientStore>();
+                foreach (var clientId in clientIds)
+                {
+                    var client = await clientStore.FindEnabledClientByIdAsync(clientId, context.RequestAborted);
+                    if (client?.FrontChannelLogoutUri.IsPresent() == true)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            async Task<bool> AnySamlServiceProviderHasFrontChannelLogout(IEnumerable<string> entityIds, Ct ct)
+            {
+                var serviceProviderStore = context.RequestServices.GetRequiredService<ISamlServiceProviderStore>();
+                foreach (var entityId in entityIds)
+                {
+                    var sp = await serviceProviderStore.FindByEntityIdAsync(entityId, ct);
+                    if (sp?.Enabled == true && sp.GetSingleLogoutServiceEndpoint(SamlBinding.HttpRedirect) != null)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     }
 }

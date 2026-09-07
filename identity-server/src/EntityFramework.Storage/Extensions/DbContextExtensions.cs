@@ -15,42 +15,45 @@ namespace Duende.IdentityServer.EntityFramework.Extensions;
 /// </summary>
 public static class DbContextExtensions
 {
-    /// <summary>
-    /// Saves changes and handles concurrency exceptions.
-    /// </summary>
-    public static async Task<ICollection<T>> SaveChangesWithConcurrencyCheckAsync<T>(this IPersistedGrantDbContext context, ILogger logger, Ct ct)
-        where T : class
+    extension(IPersistedGrantDbContext context)
     {
-        var list = new List<T>();
-
-        var count = 3;
-
-        while (count > 0)
+        /// <summary>
+        /// Saves changes and handles concurrency exceptions.
+        /// </summary>
+        public async Task<ICollection<T>> SaveChangesWithConcurrencyCheckAsync<T>(ILogger logger, Ct ct)
+            where T : class
         {
-            try
-            {
-                await context.SaveChangesAsync(ct);
-                return list;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                count--;
+            var list = new List<T>();
 
-                // we get this if/when someone else already deleted the records
-                // we want to essentially ignore this, and keep working
-                logger.LogDebug("Concurrency exception removing records: {exception}", ex.Message);
+            var count = 3;
 
-                foreach (var entry in ex.Entries)
+            while (count > 0)
+            {
+                try
                 {
-                    // mark this entry as not attached anymore so we don't try to re-delete
-                    entry.State = EntityState.Detached;
-                    list.Add((T)entry.Entity);
+                    await context.SaveChangesAsync(ct);
+                    return list;
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    count--;
+
+                    // we get this if/when someone else already deleted the records
+                    // we want to essentially ignore this, and keep working
+                    logger.LogDebug("Concurrency exception removing records: {exception}", ex.Message);
+
+                    foreach (var entry in ex.Entries)
+                    {
+                        // mark this entry as not attached anymore so we don't try to re-delete
+                        entry.State = EntityState.Detached;
+                        list.Add((T)entry.Entity);
+                    }
                 }
             }
+
+            logger.LogDebug("Too many concurrency exceptions. Exiting.");
+
+            return list;
         }
-
-        logger.LogDebug("Too many concurrency exceptions. Exiting.");
-
-        return list;
     }
 }

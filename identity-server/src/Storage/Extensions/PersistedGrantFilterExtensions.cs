@@ -11,22 +11,24 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 public static class PersistedGrantFilterExtensions
 {
-    /// <summary>
-    /// Validates the PersistedGrantFilter and throws if invalid.
-    /// </summary>
-    /// <param name="filter"></param>
-    public static void Validate(this PersistedGrantFilter filter)
+    extension(PersistedGrantFilter filter)
     {
-        ArgumentNullException.ThrowIfNull(filter);
-
-        if (string.IsNullOrWhiteSpace(filter.ClientId) &&
-            filter.ClientIds.Count == 0 &&
-            string.IsNullOrWhiteSpace(filter.SessionId) &&
-            string.IsNullOrWhiteSpace(filter.SubjectId) &&
-            string.IsNullOrWhiteSpace(filter.Type) &&
-            filter.Types.Count == 0)
+        /// <summary>
+        /// Validates the PersistedGrantFilter and throws if invalid.
+        /// </summary>
+        public void Validate()
         {
-            throw new ArgumentException("No filter values set.", nameof(filter));
+            ArgumentNullException.ThrowIfNull(filter);
+
+            if (string.IsNullOrWhiteSpace(filter.ClientId) &&
+                filter.ClientIds.Count == 0 &&
+                string.IsNullOrWhiteSpace(filter.SessionId) &&
+                string.IsNullOrWhiteSpace(filter.SubjectId) &&
+                string.IsNullOrWhiteSpace(filter.Type) &&
+                filter.Types.Count == 0)
+            {
+                throw new ArgumentException("No filter values set.", nameof(filter));
+            }
         }
     }
 }

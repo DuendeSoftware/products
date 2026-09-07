@@ -21,15 +21,16 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
                 { NameIdFormat.Persistent, new Uri("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent") },
                 { NameIdFormat.Transient, new Uri("urn:oasis:names:tc:SAML:2.0:nameid-format:transient") }
             };
-
-        /// <summary>
-        /// Get the full Uri for a NameIdFormat.
-        /// </summary>
-        /// <param name="nameIdFormat">NameIdFormat to get Uri for</param>
-        /// <returns>Uri</returns>
-        public static Uri GetUri(this NameIdFormat nameIdFormat)
+        extension(NameIdFormat nameIdFormat)
         {
-            return enumToUri[nameIdFormat];
+            /// <summary>
+            /// Get the full Uri for a NameIdFormat.
+            /// </summary>
+            /// <returns>Uri</returns>
+            public Uri GetUri()
+            {
+                return enumToUri[nameIdFormat];
+            }
         }
     }
 }

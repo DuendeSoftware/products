@@ -1,23 +1,23 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 
 namespace Duende.IdentityServer.Stores.Storage.Clients;
 
 internal class ClientExtensionPointValidator(IClientConfigurationValidator validator) : IConfigurationValidator<ClientConfiguration>
 {
-    public async Task<IReadOnlyList<AdminError>> ValidateAsync(ClientConfiguration configuration, Ct ct)
+    public async Task<IReadOnlyList<StorageError>> ValidateAsync(ClientConfiguration configuration, Ct ct)
     {
         var isClient = MapToIsClient(configuration);
         var context = new ClientConfigurationValidationContext(isClient);
         await validator.ValidateAsync(context, ct);
 
-        return context.IsValid ? [] : [AdminError.ValidationFailed(context.ErrorMessage!)];
+        return context.IsValid ? [] : [StorageError.ValidationFailed(context.ErrorMessage!)];
     }
 
     private static Client MapToIsClient(ClientConfiguration configuration) =>

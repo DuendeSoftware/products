@@ -44,4 +44,23 @@ public class SamlAuthenticationOptions : AuthenticationSchemeOptions
     /// When set, overrides the value from <see cref="Configuration.DynamicProviderOptions.SignOutScheme"/>.
     /// </summary>
     public string? SignOutScheme { get; set; }
+
+    /// <summary>
+    /// Whether to allow unsolicited (IdP-initiated) authentication responses.
+    /// Null means use the value from <see cref="Models.SamlProvider"/>.
+    /// </summary>
+    public bool? AllowUnsolicitedAuthnResponse { get; set; }
+
+    /// <summary>
+    /// The URL to redirect to after processing an unsolicited (IdP-initiated)
+    /// authentication response.
+    /// When set, overrides the value from <see cref="Models.SamlProvider.IdpInitiatedCallbackUrl"/>.
+    /// </summary>
+    public string? IdpInitiatedCallbackUrl { get; set; }
+
+    /// <summary>
+    /// Maximum length (in bytes) of SAML RelayState that will be persisted
+    /// in authentication properties. Null means use the value from <see cref="Models.SamlProvider"/>.
+    /// </summary>
+    public int? MaxRelayStateLength { get; set; }
 }

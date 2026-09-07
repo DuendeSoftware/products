@@ -334,14 +334,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
             return StepResult.Failure("Missing jwks parameter - the private_key_jwt token_endpoint_auth_method requires the jwks parameter");
 
         }
-        if (context.Request.Jwks is not null)
-        {
-            context.Request.TokenEndpointAuthenticationMethod ??= OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt;
-            if (context.Request.TokenEndpointAuthenticationMethod != OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt)
-            {
-                return StepResult.Failure("Invalid authentication method - the jwks parameter requires the private_key_jwt token_endpoint_auth_method");
-            }
-        }
+        context.Request.TokenEndpointAuthenticationMethod ??= OidcConstants.EndpointAuthenticationMethods.BasicAuthentication;
 
         if (context.Request.Jwks?.Keys is null && context.Request.RequireSignedRequestObject == true)
         {
@@ -388,7 +381,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
 
                 context.Client.ClientSecrets.Add(new Secret
                 {
-                    Type = "JWK",
+                    Type = Constants.SecretTypes.Jwk,
                     Value = jwk
                 });
             }

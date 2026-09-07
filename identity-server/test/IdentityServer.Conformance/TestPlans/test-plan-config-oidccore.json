@@ -1,0 +1,34 @@
+{
+  "alias": "duende-is-oidc-core",
+  "description": "Duende IdentityServer OIDC Core Conformance Test",
+  "planName": "oidcc-basic-certification-test-plan",
+  "variant": {
+    "server_metadata": "discovery",
+    "client_registration": "static_client"
+  },
+  "configuration": {
+    "alias": "duende-is-oidc-core",
+    "description": "Duende IdentityServer OIDC Core Conformance Test",
+    "server": {
+      "discoveryUrl": "https://nginx:8444/.well-known/openid-configuration"
+    },
+    "client": {
+      "client_id": "conformance-suite",
+      "client_secret": "conformance-secret",
+      "redirect_uri": "https://localhost:8443/test/a/duende-is-oidc-core/callback"
+    },
+    "client2": {
+      "client_id": "conformance-suite-post",
+      "client_secret": "conformance-secret-post",
+      "redirect_uri": "https://localhost:8443/test/a/duende-is-oidc-core/callback",
+      "token_endpoint_auth_method": "client_secret_post"
+    },
+    "client_secret_post": {
+      "client_id": "conformance-suite-post",
+      "client_secret": "conformance-secret-post",
+      "redirect_uri": "https://localhost:8443/test/a/duende-is-oidc-core/callback",
+      "token_endpoint_auth_method": "client_secret_post"
+    },
+    "waitTimeoutSeconds": 30
+  }
+}

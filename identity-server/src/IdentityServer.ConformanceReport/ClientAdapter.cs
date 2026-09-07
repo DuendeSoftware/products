@@ -11,29 +11,32 @@ namespace Duende.IdentityServer.ConformanceReport;
 /// </summary>
 internal static class ClientAdapter
 {
-    public static ConformanceReportClient ToConformanceReportClient(this Client client) =>
-        new()
-        {
-            ClientId = client.ClientId,
-            ClientName = client.ClientName,
-            AllowedGrantTypes = client.AllowedGrantTypes.ToList(),
-            RequirePkce = client.RequirePkce,
-            AllowPlainTextPkce = client.AllowPlainTextPkce,
-            RedirectUris = client.RedirectUris.ToList(),
-            RequireClientSecret = client.RequireClientSecret,
-            ClientSecretTypes = client.ClientSecrets
-                .Select(s => s.Type)
-                .Distinct()
-                .ToList(),
-            RequirePushedAuthorization = client.RequirePushedAuthorization,
-            RequireDPoP = client.RequireDPoP,
-            DPoPValidationMode = MapDPoPMode(client.DPoPValidationMode),
-            AuthorizationCodeLifetime = client.AuthorizationCodeLifetime,
-            AllowOfflineAccess = client.AllowOfflineAccess,
-            RefreshTokenUsage = MapTokenUsage(client.RefreshTokenUsage),
-            AllowAccessTokensViaBrowser = client.AllowAccessTokensViaBrowser,
-            RequireRequestObject = client.RequireRequestObject
-        };
+    extension(Client client)
+    {
+        public ConformanceReportClient ToConformanceReportClient() =>
+            new()
+            {
+                ClientId = client.ClientId,
+                ClientName = client.ClientName,
+                AllowedGrantTypes = client.AllowedGrantTypes.ToList(),
+                RequirePkce = client.RequirePkce,
+                AllowPlainTextPkce = client.AllowPlainTextPkce,
+                RedirectUris = client.RedirectUris.ToList(),
+                RequireClientSecret = client.RequireClientSecret,
+                ClientSecretTypes = client.ClientSecrets
+                    .Select(s => s.Type)
+                    .Distinct()
+                    .ToList(),
+                RequirePushedAuthorization = client.RequirePushedAuthorization,
+                RequireDPoP = client.RequireDPoP,
+                DPoPValidationMode = MapDPoPMode(client.DPoPValidationMode),
+                AuthorizationCodeLifetime = client.AuthorizationCodeLifetime,
+                AllowOfflineAccess = client.AllowOfflineAccess,
+                RefreshTokenUsage = MapTokenUsage(client.RefreshTokenUsage),
+                AllowAccessTokensViaBrowser = client.AllowAccessTokensViaBrowser,
+                RequireRequestObject = client.RequireRequestObject
+            };
+    }
 
     private static ConformanceReportTokenUsage MapTokenUsage(TokenUsage usage) => usage switch
     {

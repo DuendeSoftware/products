@@ -3,6 +3,7 @@
 
 
 using System.Text;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,16 @@ public class FileSystemKeyStore : ISigningKeyStore
 
     private readonly DirectoryInfo _directory;
     private readonly ILogger<FileSystemKeyStore> _logger;
+
+    /// <summary>
+    /// Constructor for FileSystemKeyStore.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="logger"></param>
+    public FileSystemKeyStore(IdentityServerOptions options, ILogger<FileSystemKeyStore> logger)
+        : this(new DirectoryInfo(options.KeyManagement.KeyPath), logger)
+    {
+    }
 
     /// <summary>
     /// Constructor for FileSystemKeyStore.

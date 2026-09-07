@@ -13,103 +13,106 @@ namespace Duende.IdentityServer.Extensions;
 
 public static class HttpResponseExtensions
 {
-    public static async Task WriteJsonAsync(this HttpResponse response, object o, string contentType = null)
+    extension(HttpResponse response)
     {
-        using var activity = Tracing.BasicActivitySource.StartActivity("WriteJson");
-
-        var json = ObjectSerializer.ToString(o);
-        await response.WriteJsonAsync(json, contentType);
-    }
-
-    public static async Task WriteJsonAsync(this HttpResponse response, string json, string contentType = null)
-    {
-        response.ContentType = contentType ?? "application/json; charset=UTF-8";
-        await response.WriteAsync(json);
-        await response.Body.FlushAsync();
-    }
-
-    public static void SetCache(this HttpResponse response, int maxAge, params string[] varyBy)
-    {
-        if (maxAge == 0)
+        public async Task WriteJsonAsync(object o, string contentType = null)
         {
-            SetNoCache(response);
+            using var activity = Tracing.BasicActivitySource.StartActivity("WriteJson");
+
+            var json = ObjectSerializer.ToString(o);
+            await response.WriteJsonAsync(json, contentType);
         }
-        else if (maxAge > 0)
+
+        public async Task WriteJsonAsync(string json, string contentType = null)
+        {
+            response.ContentType = contentType ?? "application/json; charset=UTF-8";
+            await response.WriteAsync(json);
+            await response.Body.FlushAsync();
+        }
+
+        public void SetCache(int maxAge, params string[] varyBy)
+        {
+            if (maxAge == 0)
+            {
+                response.SetNoCache();
+            }
+            else if (maxAge > 0)
+            {
+                if (!response.Headers.ContainsKey("Cache-Control"))
+                {
+                    response.Headers.Append("Cache-Control", $"max-age={maxAge}");
+                }
+
+                if (varyBy?.Length > 0)
+                {
+                    var vary = varyBy.Aggregate((x, y) => x + ',' + y);
+                    if (response.Headers.ContainsKey("Vary"))
+                    {
+                        vary = response.Headers.Vary + ',' + vary;
+                    }
+                    response.Headers.Vary = vary;
+                }
+            }
+        }
+
+        public void SetNoCache()
         {
             if (!response.Headers.ContainsKey("Cache-Control"))
             {
-                response.Headers.Append("Cache-Control", $"max-age={maxAge}");
+                response.Headers.Append("Cache-Control", "no-store, no-cache, max-age=0");
             }
-
-            if (varyBy?.Length > 0)
+            else
             {
-                var vary = varyBy.Aggregate((x, y) => x + ',' + y);
-                if (response.Headers.ContainsKey("Vary"))
-                {
-                    vary = response.Headers.Vary + ',' + vary;
-                }
-                response.Headers.Vary = vary;
+                response.Headers.CacheControl = "no-store, no-cache, max-age=0";
+            }
+
+            if (!response.Headers.ContainsKey("Pragma"))
+            {
+                response.Headers.Append("Pragma", "no-cache");
             }
         }
-    }
 
-    public static void SetNoCache(this HttpResponse response)
-    {
-        if (!response.Headers.ContainsKey("Cache-Control"))
+        public async Task WriteHtmlAsync(string html)
         {
-            response.Headers.Append("Cache-Control", "no-store, no-cache, max-age=0");
-        }
-        else
-        {
-            response.Headers.CacheControl = "no-store, no-cache, max-age=0";
+            response.ContentType = "text/html; charset=UTF-8";
+            await response.WriteAsync(html, Encoding.UTF8);
+            await response.Body.FlushAsync();
         }
 
-        if (!response.Headers.ContainsKey("Pragma"))
+        public void AddScriptCspHeaders(CspOptions options, string hash)
         {
-            response.Headers.Append("Pragma", "no-cache");
-        }
-    }
+            var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
+            var cspHeader = $"default-src 'none'; script-src {csp1part}'{hash}'";
 
-    public static async Task WriteHtmlAsync(this HttpResponse response, string html)
-    {
-        response.ContentType = "text/html; charset=UTF-8";
-        await response.WriteAsync(html, Encoding.UTF8);
-        await response.Body.FlushAsync();
-    }
-
-    public static void AddScriptCspHeaders(this HttpResponse response, CspOptions options, string hash)
-    {
-        var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
-        var cspHeader = $"default-src 'none'; script-src {csp1part}'{hash}'";
-
-        AddCspHeaders(response.Headers, options, cspHeader);
-    }
-
-    public static void AddStyleCspHeaders(this HttpResponse response, CspOptions options, string hash, string frameSources)
-    {
-        var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
-        var cspHeader = $"default-src 'none'; style-src {csp1part}'{hash}'";
-
-        if (!string.IsNullOrEmpty(frameSources))
-        {
-            cspHeader += $"; frame-src {frameSources}";
+            AddCspHeaders(response.Headers, options, cspHeader);
         }
 
-        AddCspHeaders(response.Headers, options, cspHeader);
-    }
-
-    public static void AddStyleAndScriptCspHeaders(this HttpResponse response, CspOptions options, string styleHash, string scriptHash, string frameSources)
-    {
-        var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
-
-        var cspHeader = $"default-src 'none'; style-src {csp1part}'{styleHash}'; script-src {csp1part}'{scriptHash}'";
-
-        if (!string.IsNullOrEmpty(frameSources))
+        public void AddStyleCspHeaders(CspOptions options, string hash, string frameSources)
         {
-            cspHeader += $"; frame-src {frameSources}";
+            var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
+            var cspHeader = $"default-src 'none'; style-src {csp1part}'{hash}'";
+
+            if (!string.IsNullOrEmpty(frameSources))
+            {
+                cspHeader += $"; frame-src {frameSources}";
+            }
+
+            AddCspHeaders(response.Headers, options, cspHeader);
         }
 
-        AddCspHeaders(response.Headers, options, cspHeader);
+        public void AddStyleAndScriptCspHeaders(CspOptions options, string styleHash, string scriptHash, string frameSources)
+        {
+            var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
+
+            var cspHeader = $"default-src 'none'; style-src {csp1part}'{styleHash}'; script-src {csp1part}'{scriptHash}'";
+
+            if (!string.IsNullOrEmpty(frameSources))
+            {
+                cspHeader += $"; frame-src {frameSources}";
+            }
+
+            AddCspHeaders(response.Headers, options, cspHeader);
+        }
     }
 
     public static void AddCspHeaders(IHeaderDictionary headers, CspOptions options, string cspHeader)

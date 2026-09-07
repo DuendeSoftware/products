@@ -5,7 +5,6 @@
 
 using System.Text.Json;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
 
@@ -119,10 +118,10 @@ public class CachedTypeSerializationTests
     [Fact]
     public void CorsCacheEntry_round_trips_through_json()
     {
-        var original = new CachingCorsPolicyService<ICorsPolicyService>.CorsCacheEntry(true);
+        var original = new CorsCacheEntry(true);
 
         var json = JsonSerializer.Serialize(original, JsonOptions);
-        var deserialized = JsonSerializer.Deserialize<CachingCorsPolicyService<ICorsPolicyService>.CorsCacheEntry>(json, JsonOptions);
+        var deserialized = JsonSerializer.Deserialize<CorsCacheEntry>(json, JsonOptions);
 
         deserialized.ShouldNotBeNull();
         deserialized.Allowed.ShouldBe(true);
@@ -131,10 +130,10 @@ public class CachedTypeSerializationTests
     [Fact]
     public void CorsCacheEntry_round_trips_when_false()
     {
-        var original = new CachingCorsPolicyService<ICorsPolicyService>.CorsCacheEntry(false);
+        var original = new CorsCacheEntry(false);
 
         var json = JsonSerializer.Serialize(original, JsonOptions);
-        var deserialized = JsonSerializer.Deserialize<CachingCorsPolicyService<ICorsPolicyService>.CorsCacheEntry>(json, JsonOptions);
+        var deserialized = JsonSerializer.Deserialize<CorsCacheEntry>(json, JsonOptions);
 
         deserialized.ShouldNotBeNull();
         deserialized.Allowed.ShouldBe(false);

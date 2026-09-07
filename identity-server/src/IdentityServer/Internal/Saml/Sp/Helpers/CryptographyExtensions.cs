@@ -12,160 +12,172 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
 {
     internal static class CryptographyExtensions
     {
-        internal static void Encrypt(this XmlElement elementToEncrypt, EncryptingCredentials encryptingCredentials)
+        extension(XmlElement elementToEncrypt)
         {
-            if (elementToEncrypt == null)
+            internal void Encrypt(EncryptingCredentials encryptingCredentials)
             {
-                throw new ArgumentNullException(nameof(elementToEncrypt));
-            }
-            if (encryptingCredentials == null)
-            {
-                throw new ArgumentNullException(nameof(encryptingCredentials));
-            }
-
-            string enc;
-            int keySize;
-            switch (encryptingCredentials.Enc)
-            {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
-                    enc = EncryptedXml.XmlEncAES128Url;
-                    keySize = 128;
-                    break;
-                case SecurityAlgorithms.Aes192CbcHmacSha384:
-                    enc = EncryptedXml.XmlEncAES192Url;
-                    keySize = 192;
-                    break;
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
-                    enc = EncryptedXml.XmlEncAES256Url;
-                    keySize = 256;
-                    break;
-                default:
-                    throw new CryptographicException(
-                        $"Unsupported cryptographic algorithm {encryptingCredentials.Enc}");
-            }
-
-            var encryptedData = new EncryptedData
-            {
-                Type = EncryptedXml.XmlEncElementUrl,
-                EncryptionMethod = new EncryptionMethod(enc)
-            };
-
-            string alg;
-            switch (encryptingCredentials.Alg)
-            {
-                case SecurityAlgorithms.RsaOAEP:
-                    alg = EncryptedXml.XmlEncRSAOAEPUrl;
-                    break;
-                case SecurityAlgorithms.RsaPKCS1:
-                    alg = EncryptedXml.XmlEncRSA15Url;
-                    break;
-                default:
-                    throw new CryptographicException(
-                        $"Unsupported cryptographic algorithm {encryptingCredentials.Alg}");
-            }
-            var encryptedKey = new EncryptedKey
-            {
-                EncryptionMethod = new EncryptionMethod(alg),
-            };
-
-            var encryptedXml = new EncryptedXml();
-            byte[] encryptedElement;
-            using (var symmetricAlgorithm = new RijndaelManaged())
-            {
-                X509SecurityKey x509SecurityKey = encryptingCredentials.Key as X509SecurityKey;
-                if (x509SecurityKey == null)
+                if (elementToEncrypt == null)
                 {
-                    throw new CryptographicException(
-                        "The encrypting credentials have an unknown key of type {encryptingCredentials.Key.GetType()}");
+                    throw new ArgumentNullException(nameof(elementToEncrypt));
+                }
+                if (encryptingCredentials == null)
+                {
+                    throw new ArgumentNullException(nameof(encryptingCredentials));
                 }
 
-                symmetricAlgorithm.KeySize = keySize;
-                encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key,
-                    (RSA)x509SecurityKey.PublicKey, alg == EncryptedXml.XmlEncRSAOAEPUrl));
-                encryptedElement = encryptedXml.EncryptData(elementToEncrypt, symmetricAlgorithm, false);
-            }
-            encryptedData.CipherData.CipherValue = encryptedElement;
+                string enc;
+                int keySize;
+                switch (encryptingCredentials.Enc)
+                {
+                    case SecurityAlgorithms.Aes128CbcHmacSha256:
+                        enc = EncryptedXml.XmlEncAES128Url;
+                        keySize = 128;
+                        break;
+                    case SecurityAlgorithms.Aes192CbcHmacSha384:
+                        enc = EncryptedXml.XmlEncAES192Url;
+                        keySize = 192;
+                        break;
+                    case SecurityAlgorithms.Aes256CbcHmacSha512:
+                        enc = EncryptedXml.XmlEncAES256Url;
+                        keySize = 256;
+                        break;
+                    default:
+                        throw new CryptographicException(
+                            $"Unsupported cryptographic algorithm {encryptingCredentials.Enc}");
+                }
 
-            encryptedData.KeyInfo = new KeyInfo();
-            encryptedData.KeyInfo.AddClause(new KeyInfoEncryptedKey(encryptedKey));
-            EncryptedXml.ReplaceElement(elementToEncrypt, encryptedData, false);
-        }
+                var encryptedData = new EncryptedData
+                {
+                    Type = EncryptedXml.XmlEncElementUrl,
+                    EncryptionMethod = new EncryptionMethod(enc)
+                };
 
-        internal static void Encrypt(this XmlElement elementToEncrypt, bool useOaep, X509Certificate2 certificate)
-        {
-            if (certificate == null) throw new ArgumentNullException(nameof(certificate));
+                string alg;
+                switch (encryptingCredentials.Alg)
+                {
+                    case SecurityAlgorithms.RsaOAEP:
+                        alg = EncryptedXml.XmlEncRSAOAEPUrl;
+                        break;
+                    case SecurityAlgorithms.RsaPKCS1:
+                        alg = EncryptedXml.XmlEncRSA15Url;
+                        break;
+                    default:
+                        throw new CryptographicException(
+                            $"Unsupported cryptographic algorithm {encryptingCredentials.Alg}");
+                }
+                var encryptedKey = new EncryptedKey
+                {
+                    EncryptionMethod = new EncryptionMethod(alg),
+                };
 
-            var encryptedData = new EncryptedData
-            {
-                Type = EncryptedXml.XmlEncElementUrl,
-                EncryptionMethod = new EncryptionMethod(EncryptedXml.XmlEncAES256Url)
-            };
+                var encryptedXml = new EncryptedXml();
+                byte[] encryptedElement;
+                using (var symmetricAlgorithm = new RijndaelManaged())
+                {
+                    X509SecurityKey x509SecurityKey = encryptingCredentials.Key as X509SecurityKey;
+                    if (x509SecurityKey == null)
+                    {
+                        throw new CryptographicException(
+                            "The encrypting credentials have an unknown key of type {encryptingCredentials.Key.GetType()}");
+                    }
 
-            var algorithm = useOaep ? EncryptedXml.XmlEncRSAOAEPUrl : EncryptedXml.XmlEncRSA15Url;
-            var encryptedKey = new EncryptedKey
-            {
-                EncryptionMethod = new EncryptionMethod(algorithm),
-            };
+                    symmetricAlgorithm.KeySize = keySize;
+                    encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key,
+                        (RSA)x509SecurityKey.PublicKey, alg == EncryptedXml.XmlEncRSAOAEPUrl));
+                    encryptedElement = encryptedXml.EncryptData(elementToEncrypt, symmetricAlgorithm, false);
+                }
+                encryptedData.CipherData.CipherValue = encryptedElement;
 
-            var encryptedXml = new EncryptedXml();
-            byte[] encryptedElement;
-            using (var symmetricAlgorithm =
-                CryptoConfig.AllowOnlyFipsAlgorithms
-                ? (SymmetricAlgorithm)new AesCryptoServiceProvider()
-                : (SymmetricAlgorithm)new RijndaelManaged())
-            {
-                symmetricAlgorithm.KeySize = 256;
-                encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key, (RSA)certificate.PublicKey.Key, useOaep));
-                encryptedElement = encryptedXml.EncryptData(elementToEncrypt, symmetricAlgorithm, false);
-            }
-            encryptedData.CipherData.CipherValue = encryptedElement;
-
-            encryptedData.KeyInfo = new KeyInfo();
-            encryptedData.KeyInfo.AddClause(new KeyInfoEncryptedKey(encryptedKey));
-            EncryptedXml.ReplaceElement(elementToEncrypt, encryptedData, false);
-        }
-
-        internal static IEnumerable<XmlElement> Decrypt(this IEnumerable<XmlElement> elements, AsymmetricAlgorithm key)
-        {
-            foreach (var element in elements)
-            {
-                yield return element.Decrypt(key);
-            }
-        }
-
-        internal static XmlElement Decrypt(this XmlElement element, AsymmetricAlgorithm key)
-        {
-            var xmlDoc = XmlHelpers.XmlDocumentFromString(element.OuterXml);
-
-            var exml = new RSAEncryptedXml(xmlDoc, (RSA)key);
-
-            exml.DecryptDocument();
-
-            return xmlDoc.DocumentElement;
-        }
-
-        internal static AsymmetricAlgorithm GetSha256EnabledAsymmetricAlgorithm(this X509Certificate2 x509Certificate2)
-        {
-            var ecDsa = x509Certificate2.GetECDsaPrivateKey();
-
-            if (ecDsa != null)
-            {
-                return ecDsa;
+                encryptedData.KeyInfo = new KeyInfo();
+                encryptedData.KeyInfo.AddClause(new KeyInfoEncryptedKey(encryptedKey));
+                EncryptedXml.ReplaceElement(elementToEncrypt, encryptedData, false);
             }
 
-            var rsa = x509Certificate2.GetRSAPrivateKey();
-
-            if (rsa != null)
+            internal void Encrypt(bool useOaep, X509Certificate2 certificate)
             {
-                return rsa.GetSha256EnabledRSACryptoServiceProvider();
+                if (certificate == null) throw new ArgumentNullException(nameof(certificate));
+
+                var encryptedData = new EncryptedData
+                {
+                    Type = EncryptedXml.XmlEncElementUrl,
+                    EncryptionMethod = new EncryptionMethod(EncryptedXml.XmlEncAES256Url)
+                };
+
+                var algorithm = useOaep ? EncryptedXml.XmlEncRSAOAEPUrl : EncryptedXml.XmlEncRSA15Url;
+                var encryptedKey = new EncryptedKey
+                {
+                    EncryptionMethod = new EncryptionMethod(algorithm),
+                };
+
+                var encryptedXml = new EncryptedXml();
+                byte[] encryptedElement;
+                using (var symmetricAlgorithm =
+                    CryptoConfig.AllowOnlyFipsAlgorithms
+                    ? (SymmetricAlgorithm)new AesCryptoServiceProvider()
+                    : (SymmetricAlgorithm)new RijndaelManaged())
+                {
+                    symmetricAlgorithm.KeySize = 256;
+                    encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key, (RSA)certificate.PublicKey.Key, useOaep));
+                    encryptedElement = encryptedXml.EncryptData(elementToEncrypt, symmetricAlgorithm, false);
+                }
+                encryptedData.CipherData.CipherValue = encryptedElement;
+
+                encryptedData.KeyInfo = new KeyInfo();
+                encryptedData.KeyInfo.AddClause(new KeyInfoEncryptedKey(encryptedKey));
+                EncryptedXml.ReplaceElement(elementToEncrypt, encryptedData, false);
             }
 
-            throw new NotImplementedException();
+            internal XmlElement Decrypt(AsymmetricAlgorithm key)
+            {
+                var xmlDoc = XmlHelpers.XmlDocumentFromString(elementToEncrypt.OuterXml);
+
+                var exml = new RSAEncryptedXml(xmlDoc, (RSA)key);
+
+                exml.DecryptDocument();
+
+                return xmlDoc.DocumentElement;
+            }
         }
 
-        internal static RSA GetSha256EnabledRSACryptoServiceProvider(this RSA rsa)
+        extension(IEnumerable<XmlElement> elements)
         {
-            return rsa;
+            internal IEnumerable<XmlElement> Decrypt(AsymmetricAlgorithm key)
+            {
+                foreach (var element in elements)
+                {
+                    yield return element.Decrypt(key);
+                }
+            }
+        }
+
+        extension(X509Certificate2 x509Certificate2)
+        {
+            internal AsymmetricAlgorithm GetSha256EnabledAsymmetricAlgorithm()
+            {
+                var ecDsa = x509Certificate2.GetECDsaPrivateKey();
+
+                if (ecDsa != null)
+                {
+                    return ecDsa;
+                }
+
+                var rsa = x509Certificate2.GetRSAPrivateKey();
+
+                if (rsa != null)
+                {
+                    return rsa.GetSha256EnabledRSACryptoServiceProvider();
+                }
+
+                throw new NotImplementedException();
+            }
+        }
+
+        extension(RSA rsa)
+        {
+            internal RSA GetSha256EnabledRSACryptoServiceProvider()
+            {
+                return rsa;
+            }
         }
 
         public static object CreateAlgorithmFromName(string name, params object[] args)

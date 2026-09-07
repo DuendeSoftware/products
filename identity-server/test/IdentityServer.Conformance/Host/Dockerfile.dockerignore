@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.git/
+**/.vs/
+**/.idea/
+**/TestResults/
+**/conformance-reports/
+

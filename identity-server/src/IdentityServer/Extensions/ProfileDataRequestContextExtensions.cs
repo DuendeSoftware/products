@@ -13,48 +13,47 @@ namespace Duende.IdentityServer.Models;
 /// </summary>
 public static class ProfileDataRequestContextExtensions
 {
-    /// <summary>
-    /// Filters the claims based on requested claim types.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="claims">The claims.</param>
-    /// <returns></returns>
-    public static List<Claim> FilterClaims(this ProfileDataRequestContext context, IEnumerable<Claim> claims)
+    extension(ProfileDataRequestContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(claims);
-
-        return claims.Where(x => context.RequestedClaimTypes.Contains(x.Type)).ToList();
-    }
-
-    /// <summary>
-    /// Filters the claims based on the requested claim types and then adds them to the IssuedClaims collection.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="claims">The claims.</param>
-    public static void AddRequestedClaims(this ProfileDataRequestContext context, IEnumerable<Claim> claims)
-    {
-        if (context.RequestedClaimTypes.Any())
+        /// <summary>
+        /// Filters the claims based on requested claim types.
+        /// </summary>
+        /// <param name="claims">The claims.</param>
+        /// <returns></returns>
+        public List<Claim> FilterClaims(IEnumerable<Claim> claims)
         {
-            context.IssuedClaims.AddRange(context.FilterClaims(claims));
+            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(claims);
+
+            return claims.Where(x => context.RequestedClaimTypes.Contains(x.Type)).ToList();
         }
+
+        /// <summary>
+        /// Filters the claims based on the requested claim types and then adds them to the IssuedClaims collection.
+        /// </summary>
+        /// <param name="claims">The claims.</param>
+        public void AddRequestedClaims(IEnumerable<Claim> claims)
+        {
+            if (context.RequestedClaimTypes.Any())
+            {
+                context.IssuedClaims.AddRange(context.FilterClaims(claims));
+            }
+        }
+
+        /// <summary>
+        /// Logs the profile request.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        public void LogProfileRequest(ILogger logger) => logger.LogDebug("Get profile called for subject {subject} from application {application} with claim types {claimTypes} via {caller}",
+                context.Subject.GetSubjectId(),
+                context.Application?.DisplayName ?? context.Application?.Identifier,
+                context.RequestedClaimTypes,
+                context.Caller);
+
+        /// <summary>
+        /// Logs the issued claims.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        public void LogIssuedClaims(ILogger logger) => logger.LogDebug("Issued claims: {claims}", context.IssuedClaims.Select(c => c.Type));
     }
-
-    /// <summary>
-    /// Logs the profile request.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="logger">The logger.</param>
-    public static void LogProfileRequest(this ProfileDataRequestContext context, ILogger logger) => logger.LogDebug("Get profile called for subject {subject} from application {application} with claim types {claimTypes} via {caller}",
-            context.Subject.GetSubjectId(),
-            context.Application?.DisplayName ?? context.Application?.Identifier,
-            context.RequestedClaimTypes,
-            context.Caller);
-
-    /// <summary>
-    /// Logs the issued claims.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="logger">The logger.</param>
-    public static void LogIssuedClaims(this ProfileDataRequestContext context, ILogger logger) => logger.LogDebug("Issued claims: {claims}", context.IssuedClaims.Select(c => c.Type));
 }

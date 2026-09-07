@@ -11,31 +11,44 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class ClaimsExtensions
     {
-        /// <summary>
-        /// Create a Saml2NameIdentifier from a claim.
-        /// </summary>
-        /// <param name="claim">Name identifier or Saml2 logout info claim.</param>
-        /// <returns>Saml2NameIdentifier</returns>
-        /// <remarks>The field order is:NameQualifier,SPNameQualifier,Format,SPProvidedID,Value</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "logout")]
-        public static Saml2NameIdentifier ToSaml2NameIdentifier(this Claim claim)
+        extension(Claim claim)
         {
-            if (claim == null)
+            /// <summary>
+            /// Create a Saml2NameIdentifier from a claim.
+            /// </summary>
+            /// <returns>Saml2NameIdentifier</returns>
+            /// <remarks>The field order is:NameQualifier,SPNameQualifier,Format,SPProvidedID,Value</remarks>
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "logout")]
+            public Saml2NameIdentifier ToSaml2NameIdentifier()
             {
-                throw new ArgumentNullException(nameof(claim));
+                if (claim == null)
+                {
+                    throw new ArgumentNullException(nameof(claim));
+                }
+
+                if (claim.Type == Saml2ClaimTypes.LogoutNameIdentifier)
+                {
+                    return ProcessLogoutNameIdentifier(claim);
+                }
+
+                if (claim.Type == ClaimTypes.NameIdentifier)
+                {
+                    return ProcessNameIdentifier(claim);
+                }
+
+                throw new ArgumentException("ToSaml2NameIdentifier can only process an Saml2 logout name identifier claim.", nameof(claim));
             }
 
-            if (claim.Type == Saml2ClaimTypes.LogoutNameIdentifier)
+            private void ExtractProperty(
+                string propertyKey,
+                Action<string> propertySetter)
             {
-                return ProcessLogoutNameIdentifier(claim);
+                string value;
+                if (claim.Properties.TryGetValue(propertyKey, out value))
+                {
+                    propertySetter(value);
+                }
             }
-
-            if (claim.Type == ClaimTypes.NameIdentifier)
-            {
-                return ProcessNameIdentifier(claim);
-            }
-
-            throw new ArgumentException("ToSaml2NameIdentifier can only process an Saml2 logout name identifier claim.", nameof(claim));
         }
 
         private static Saml2NameIdentifier ProcessLogoutNameIdentifier(Claim claim)
@@ -78,18 +91,6 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
                 value => saml2NameIdentifier.SPProvidedId = value);
 
             return saml2NameIdentifier;
-        }
-
-        private static void ExtractProperty(
-            this Claim claim,
-            string propertyKey,
-            Action<string> propertySetter)
-        {
-            string value;
-            if (claim.Properties.TryGetValue(propertyKey, out value))
-            {
-                propertySetter(value);
-            }
         }
     }
 }

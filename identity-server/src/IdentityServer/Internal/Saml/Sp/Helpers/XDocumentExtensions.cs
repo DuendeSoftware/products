@@ -6,14 +6,17 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
 {
     static class XDocumentExtensions
     {
-        public static string ToStringWithXmlDeclaration(this XDocument xDocument)
+        extension(XDocument xDocument)
         {
-            if (xDocument.Declaration != null)
+            public string ToStringWithXmlDeclaration()
             {
-                return xDocument.Declaration?.ToString() + "\r\n" + xDocument.ToString();
-            }
+                if (xDocument.Declaration != null)
+                {
+                    return xDocument.Declaration?.ToString() + "\r\n" + xDocument.ToString();
+                }
 
-            return xDocument.ToString();
+                return xDocument.ToString();
+            }
         }
     }
 }

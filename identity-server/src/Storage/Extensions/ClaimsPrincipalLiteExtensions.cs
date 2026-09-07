@@ -13,36 +13,42 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 public static class ClaimsPrincipalLiteExtensions
 {
-    /// <summary>
-    /// Converts a ClaimsPrincipalLite to ClaimsPrincipal
-    /// </summary>
-    public static ClaimsPrincipal ToClaimsPrincipal(this ClaimsPrincipalLite principal)
+    extension(ClaimsPrincipalLite principal)
     {
-        var claims = principal.Claims.Select(x => new Claim(x.Type, x.Value, x.ValueType ?? ClaimValueTypes.String, x.Issuer ?? ClaimsIdentity.DefaultIssuer)).ToArray();
-        var id = new ClaimsIdentity(claims, principal.AuthenticationType, JwtClaimTypes.Name, JwtClaimTypes.Role);
+        /// <summary>
+        /// Converts a ClaimsPrincipalLite to ClaimsPrincipal
+        /// </summary>
+        public ClaimsPrincipal ToClaimsPrincipal()
+        {
+            var claims = principal.Claims.Select(x => new Claim(x.Type, x.Value, x.ValueType ?? ClaimValueTypes.String, x.Issuer ?? ClaimsIdentity.DefaultIssuer)).ToArray();
+            var id = new ClaimsIdentity(claims, principal.AuthenticationType, JwtClaimTypes.Name, JwtClaimTypes.Role);
 
-        return new ClaimsPrincipal(id);
+            return new ClaimsPrincipal(id);
+        }
     }
 
-    /// <summary>
-    /// Converts a ClaimsPrincipal to ClaimsPrincipalLite
-    /// </summary>
-    public static ClaimsPrincipalLite ToClaimsPrincipalLite(this ClaimsPrincipal principal)
+    extension(ClaimsPrincipal principal)
     {
-        var claims = principal.Claims.Select(
-                x => new ClaimLite
-                {
-                    Type = x.Type,
-                    Value = x.Value,
-                    // Leave out default values, to avoid bloat
-                    ValueType = x.ValueType == ClaimValueTypes.String ? null : x.ValueType,
-                    Issuer = x.Issuer == ClaimsIdentity.DefaultIssuer ? null : x.Issuer
-                }).ToArray();
-
-        return new ClaimsPrincipalLite
+        /// <summary>
+        /// Converts a ClaimsPrincipal to ClaimsPrincipalLite
+        /// </summary>
+        public ClaimsPrincipalLite ToClaimsPrincipalLite()
         {
-            AuthenticationType = principal.Identity!.AuthenticationType!,
-            Claims = claims
-        };
+            var claims = principal.Claims.Select(
+                    x => new ClaimLite
+                    {
+                        Type = x.Type,
+                        Value = x.Value,
+                        // Leave out default values, to avoid bloat
+                        ValueType = x.ValueType == ClaimValueTypes.String ? null : x.ValueType,
+                        Issuer = x.Issuer == ClaimsIdentity.DefaultIssuer ? null : x.Issuer
+                    }).ToArray();
+
+            return new ClaimsPrincipalLite
+            {
+                AuthenticationType = principal.Identity!.AuthenticationType!,
+                Claims = claims
+            };
+        }
     }
 }

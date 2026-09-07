@@ -21,15 +21,17 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
     <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="IdentityModel.AspNetCore.OAuth2Introspection" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
+    <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
+    <!-- Override vulnerable transitive dep: Sustainsys.Saml2 -> System.Security.Cryptography.Xml
+         -> System.Security.Permissions -> System.Windows.Extensions -> System.Drawing.Common 4.7.0 -->
+    <PackageReference Include="System.Drawing.Common" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
   </ItemGroup>
 
   <!-- Workaround for https://github.com/dotnet/aspnetcore/issues/63719 -->

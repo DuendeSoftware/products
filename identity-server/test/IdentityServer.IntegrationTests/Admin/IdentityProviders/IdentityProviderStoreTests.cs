@@ -7,6 +7,7 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
+using Duende.Storage.EntityAttributeValue;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin.IdentityProviders;
@@ -40,7 +41,7 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
         var store = NewStore();
 
         var scheme = $"scheme_{Guid.NewGuid():N}";
-        var config = new IdentityProviderConfiguration
+        var config = new CreateIdentityProvider
         {
             Scheme = scheme,
             DisplayName = "Test OIDC",
@@ -67,16 +68,13 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
         var store = NewStore();
 
         var scheme = $"oidc_{Guid.NewGuid():N}";
-        var config = new IdentityProviderConfiguration
+        var config = new CreateIdentityProvider
         {
             Scheme = scheme,
-            Type = "oidc",
-            Properties = new Dictionary<string, string>
-            {
-                ["Authority"] = "https://idp.example.com",
-                ["ClientId"] = "my-client"
-            }
+            Type = "oidc"
         };
+        config.ExtendedProperties.Set(AttributeCode.Create("Authority"), "https://idp.example.com");
+        config.ExtendedProperties.Set(AttributeCode.Create("ClientId"), "my-client");
 
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
@@ -99,7 +97,7 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
 
         var scheme = $"scheme_{Guid.NewGuid():N}";
         await admin.CreateAsync(
-            new IdentityProviderConfiguration
+            new CreateIdentityProvider
             {
                 Scheme = scheme,
                 DisplayName = "All Schemes Test",
@@ -124,7 +122,7 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
 
         var scheme = $"disabled_{Guid.NewGuid():N}";
         await admin.CreateAsync(
-            new IdentityProviderConfiguration
+            new CreateIdentityProvider
             {
                 Scheme = scheme,
                 Enabled = false,

@@ -8,32 +8,38 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class DateTimeExtensions
 {
-    [DebuggerStepThrough]
-    public static bool HasExceeded(this DateTime creationTime, int seconds, DateTime now) => (now > creationTime.AddSeconds(seconds));
-
-    [DebuggerStepThrough]
-    public static int GetLifetimeInSeconds(this DateTime creationTime, DateTime now) => ((int)(now - creationTime).TotalSeconds);
-
-    [DebuggerStepThrough]
-    public static bool HasExpired(this DateTime? expirationTime, DateTime now)
+    extension(DateTime creationTime)
     {
-        if (expirationTime.HasValue &&
-            expirationTime.Value.HasExpired(now))
-        {
-            return true;
-        }
+        [DebuggerStepThrough]
+        public bool HasExceeded(int seconds, DateTime now) => (now > creationTime.AddSeconds(seconds));
 
-        return false;
+        [DebuggerStepThrough]
+        public int GetLifetimeInSeconds(DateTime now) => ((int)(now - creationTime).TotalSeconds);
+
+        [DebuggerStepThrough]
+        public bool HasExpired(DateTime now)
+        {
+            if (now > creationTime)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 
-    [DebuggerStepThrough]
-    public static bool HasExpired(this DateTime expirationTime, DateTime now)
+    extension(DateTime? expirationTime)
     {
-        if (now > expirationTime)
+        [DebuggerStepThrough]
+        public bool HasExpired(DateTime now)
         {
-            return true;
-        }
+            if (expirationTime.HasValue &&
+                expirationTime.Value.HasExpired(now))
+            {
+                return true;
+            }
 
-        return false;
+            return false;
+        }
     }
 }

@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
@@ -18,113 +17,127 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 public static class TokenExtensions
 {
-    /// <summary>
-    /// Creates the default JWT payload dictionary
-    /// </summary>
-    /// <param name="token"></param>
-    /// <param name="options"></param>
-    /// <param name="timeProvider"></param>
-    /// <param name="logger"></param>
-    /// <returns></returns>
-    public static Dictionary<string, object> CreateJwtPayloadDictionary(this Token token,
-        IdentityServerOptions options, TimeProvider timeProvider, ILogger logger)
+    extension(Token token)
     {
-        try
+        /// <summary>
+        /// Creates the default JWT payload dictionary
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="timeProvider"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> CreateJwtPayloadDictionary(
+            IdentityServerOptions options, TimeProvider timeProvider, ILogger logger)
         {
-            var payload = new Dictionary<string, object>
+            try
             {
-                { JwtClaimTypes.Issuer, token.Issuer }
-            };
-
-            // set times (nbf, exp, iat)
-            var now = timeProvider.GetUtcNow().ToUnixTimeSeconds();
-            var exp = now + token.Lifetime;
-
-            payload.Add(JwtClaimTypes.NotBefore, now);
-            payload.Add(JwtClaimTypes.IssuedAt, now);
-            payload.Add(JwtClaimTypes.Expiration, exp);
-
-            // add audience claim(s)
-            if (token.Audiences.Count > 0)
-            {
-                if (token.Audiences.Count == 1)
+                var payload = new Dictionary<string, object>
                 {
-                    payload.Add(JwtClaimTypes.Audience, token.Audiences.First());
-                }
-                else
+                    { JwtClaimTypes.Issuer, token.Issuer }
+                };
+
+                // set times (nbf, exp, iat)
+                var now = timeProvider.GetUtcNow().ToUnixTimeSeconds();
+                var exp = now + token.Lifetime;
+
+                payload.Add(JwtClaimTypes.NotBefore, now);
+                payload.Add(JwtClaimTypes.IssuedAt, now);
+                payload.Add(JwtClaimTypes.Expiration, exp);
+
+                // add audience claim(s)
+                if (token.Audiences.Count > 0)
                 {
-                    payload.Add(JwtClaimTypes.Audience, token.Audiences);
-                }
-            }
-
-            // add confirmation claim (if present)
-            if (token.Confirmation.IsPresent())
-            {
-                payload.Add(JwtClaimTypes.Confirmation,
-                    JsonSerializer.Deserialize<JsonElement>(token.Confirmation));
-            }
-
-            // scope claims
-            var scopeClaims = token.Claims.Where(x => x.Type == JwtClaimTypes.Scope).ToArray();
-            if (!scopeClaims.IsNullOrEmpty())
-            {
-                var scopeValues = scopeClaims.Select(x => x.Value).ToArray();
-
-                if (options.EmitScopesAsSpaceDelimitedStringInJwt)
-                {
-                    payload.Add(JwtClaimTypes.Scope, string.Join(' ', scopeValues));
-                }
-                else
-                {
-                    payload.Add(JwtClaimTypes.Scope, scopeValues);
-                }
-            }
-
-            // amr claims
-            var amrClaims = token.Claims.Where(x => x.Type == JwtClaimTypes.AuthenticationMethod).ToArray();
-            if (!amrClaims.IsNullOrEmpty())
-            {
-                var amrValues = amrClaims.Select(x => x.Value).Distinct().ToArray();
-                payload.Add(JwtClaimTypes.AuthenticationMethod, amrValues);
-            }
-
-            var simpleClaimTypes = token.Claims.Where(c =>
-                    c.Type != JwtClaimTypes.AuthenticationMethod && c.Type != JwtClaimTypes.Scope)
-                .Select(c => c.Type)
-                .Distinct();
-
-            // other claims
-            foreach (var claimType in simpleClaimTypes)
-            {
-                // we ignore claims that are added by the above code for token verification
-                if (!payload.ContainsKey(claimType))
-                {
-                    var claims = token.Claims.Where(c => c.Type == claimType).ToArray();
-
-                    if (claims.Length > 1)
+                    if (token.Audiences.Count == 1)
                     {
-                        payload.Add(claimType, AddObjects(claims));
+                        payload.Add(JwtClaimTypes.Audience, token.Audiences.First());
                     }
                     else
                     {
-                        payload.Add(claimType, AddObject(claims.First()));
+                        payload.Add(JwtClaimTypes.Audience, token.Audiences);
                     }
                 }
-            }
 
-            if (token.Type == JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
+                // add confirmation claim (if present)
+                if (token.Confirmation.IsPresent())
+                {
+                    payload.Add(JwtClaimTypes.Confirmation,
+                        JsonSerializer.Deserialize<JsonElement>(token.Confirmation));
+                }
+
+                // scope claims
+                var scopeClaims = token.Claims.Where(x => x.Type == JwtClaimTypes.Scope).ToArray();
+                if (!scopeClaims.IsNullOrEmpty())
+                {
+                    var scopeValues = scopeClaims.Select(x => x.Value).ToArray();
+
+                    if (options.EmitScopesAsSpaceDelimitedStringInJwt)
+                    {
+                        payload.Add(JwtClaimTypes.Scope, string.Join(' ', scopeValues));
+                    }
+                    else
+                    {
+                        payload.Add(JwtClaimTypes.Scope, scopeValues);
+                    }
+                }
+
+                // amr claims
+                var amrClaims = token.Claims.Where(x => x.Type == JwtClaimTypes.AuthenticationMethod).ToArray();
+                if (!amrClaims.IsNullOrEmpty())
+                {
+                    var amrValues = amrClaims.Select(x => x.Value).Distinct().ToArray();
+                    payload.Add(JwtClaimTypes.AuthenticationMethod, amrValues);
+                }
+
+                var simpleClaimTypes = token.Claims.Where(c =>
+                        c.Type != JwtClaimTypes.AuthenticationMethod && c.Type != JwtClaimTypes.Scope)
+                    .Select(c => c.Type)
+                    .Distinct();
+
+                // other claims
+                foreach (var claimType in simpleClaimTypes)
+                {
+                    // we ignore claims that are added by the above code for token verification
+                    if (!payload.ContainsKey(claimType))
+                    {
+                        var claims = token.Claims.Where(c => c.Type == claimType).ToArray();
+
+                        if (claims.Length > 1)
+                        {
+                            payload.Add(claimType, AddObjects(claims));
+                        }
+                        else
+                        {
+                            payload.Add(claimType, AddObject(claims.First()));
+                        }
+                    }
+                }
+
+                if (token.Type == JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
+                {
+                    payload.Remove(JwtClaimTypes.Expiration);
+                    payload.Remove(JwtClaimTypes.NotBefore);
+                    payload.Remove(JwtClaimTypes.Subject);
+                }
+
+                return payload;
+            }
+            catch (Exception ex)
             {
-                payload.Remove(JwtClaimTypes.Expiration);
-                payload.Remove(JwtClaimTypes.NotBefore);
-                payload.Remove(JwtClaimTypes.Subject);
+                logger.LogCritical(ex, "Error creating the JWT payload");
+                throw;
             }
-
-            return payload;
         }
-        catch (Exception ex)
+    }
+
+    extension(RefreshToken refresh)
+    {
+        internal bool ContainsCnfValues() => refresh.AccessTokens?.Any(x => x.Value.Confirmation.IsPresent()) == true;
+
+        internal ProofKeyThumbprint[] GetProofKeyThumbprints()
         {
-            logger.LogCritical(ex, "Error creating the JWT payload");
-            throw;
+            // get distinct list of conf values first to avoid parsing same cnf multiple times
+            var cnfs = refresh.AccessTokens.Select(x => x.Value.Confirmation).Distinct();
+            return cnfs.Select(x => GetProofKeyThumbprint(x)).ToArray();
         }
     }
 
@@ -165,15 +178,6 @@ public static class TokenExtensions
         }
 
         return claim.Value;
-    }
-
-    internal static bool ContainsCnfValues(this RefreshToken refresh) => refresh.AccessTokens?.Any(x => x.Value.Confirmation.IsPresent()) == true;
-
-    internal static ProofKeyThumbprint[] GetProofKeyThumbprints(this RefreshToken refresh)
-    {
-        // get distinct list of conf values first to avoid parsing same cnf multiple times
-        var cnfs = refresh.AccessTokens.Select(x => x.Value.Confirmation).Distinct();
-        return cnfs.Select(x => GetProofKeyThumbprint(x)).ToArray();
     }
 
     private static ProofKeyThumbprint GetProofKeyThumbprint(string cnf)

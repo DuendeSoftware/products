@@ -7,21 +7,22 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
 {
     static class Saml2MessageExtensions
     {
-        /// <summary>
-        /// Serializes the message into wellformed XML.
-        /// </summary>
-        /// <param name="message">Saml2 message to transform to XML</param>
-        /// <param name="xmlCreatedNotification">Notification allowing modification of XML tree before serialization.</param>
-        /// <returns>string containing the Xml data.</returns>
-        public static string ToXml<TMessage>(
-            this TMessage message, Action<XDocument> xmlCreatedNotification)
+        extension<TMessage>(TMessage message)
             where TMessage : ISaml2Message
         {
-            var xDocument = new XDocument(message.ToXElement());
+            /// <summary>
+            /// Serializes the message into wellformed XML.
+            /// </summary>
+            /// <param name="xmlCreatedNotification">Notification allowing modification of XML tree before serialization.</param>
+            /// <returns>string containing the Xml data.</returns>
+            public string ToXml(Action<XDocument> xmlCreatedNotification)
+            {
+                var xDocument = new XDocument(message.ToXElement());
 
-            xmlCreatedNotification(xDocument);
+                xmlCreatedNotification(xDocument);
 
-            return xDocument.ToStringWithXmlDeclaration();
+                return xDocument.ToStringWithXmlDeclaration();
+            }
         }
     }
 }

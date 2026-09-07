@@ -13,7 +13,7 @@ public sealed record IdentityProviderListItem
     /// <summary>
     /// The storage identifier.
     /// </summary>
-    public required Guid Id { get; init; }
+    public required IdentityProviderId Id { get; init; }
 
     /// <summary>
     /// The authentication scheme name.

@@ -9,16 +9,17 @@ namespace Duende.IdentityServer.Admin.SamlServiceProviders;
 
 /// <summary>
 /// Represents a SAML endpoint with location and binding for admin operations.
+/// Immutable value type -- always fully replaced, never mutated in place.
 /// </summary>
-public class SamlEndpointConfiguration
+public sealed class SamlEndpointConfiguration
 {
     /// <summary>
     /// The URL of the endpoint.
     /// </summary>
-    public required string Location { get; set; }
+    public required string Location { get; init; }
 
     /// <summary>
     /// The SAML binding used by the endpoint.
     /// </summary>
-    public SamlBinding Binding { get; set; }
+    public SamlBinding Binding { get; init; }
 }

@@ -18,6 +18,7 @@ namespace Duende.IdentityServer.Stores;
 public class CachingSamlServiceProviderStore<T> : ISamlServiceProviderStore
     where T : ISamlServiceProviderStore
 {
+    private readonly CachePolicy<SamlServiceProvider> _policy;
     private readonly IdentityServerOptions _options;
     private readonly HybridCache _cache;
     private readonly ISamlServiceProviderStore _inner;
@@ -25,14 +26,17 @@ public class CachingSamlServiceProviderStore<T> : ISamlServiceProviderStore
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingSamlServiceProviderStore{T}"/> class.
     /// </summary>
+    /// <param name="policy">The cache policy.</param>
     /// <param name="options">The options.</param>
     /// <param name="inner">The inner store.</param>
     /// <param name="cache">The cache.</param>
     public CachingSamlServiceProviderStore(
+        CachePolicy<SamlServiceProvider> policy,
         IdentityServerOptions options,
         T inner,
         [FromKeyedServices(ServiceProviderKeys.ConfigurationStoreCache)] HybridCache cache)
     {
+        _policy = policy;
         _options = options;
         _inner = inner;
         _cache = cache;
@@ -48,8 +52,8 @@ public class CachingSamlServiceProviderStore<T> : ISamlServiceProviderStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingSamlServiceProviderStore.FindByEntityId");
 
-        var cacheKey = CacheKey.For<SamlServiceProvider>(entityId);
-        var cacheOptions = CacheKey.WriteOptions(_options.Caching.SamlServiceProviderStoreExpiration);
+        var cacheKey = _policy.BuildKey(entityId);
+        var cacheOptions = _policy.WriteOptions(_options.Caching.SamlServiceProviderStoreExpiration);
 
         try
         {
@@ -62,6 +66,7 @@ public class CachingSamlServiceProviderStore<T> : ISamlServiceProviderStore
                     return sp ?? throw new NotCachedException();
                 },
                 cacheOptions,
+                tags: _policy.Tags,
                 cancellationToken: ct);
         }
         catch (NotCachedException)

@@ -3,9 +3,12 @@
 
 
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text.Json;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.IntegrationTests.TestHosts;
 using Duende.IdentityServer.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Configuration;
 
@@ -83,5 +86,116 @@ public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
         var newClient = await IdentityServerHost.GetClientAsync(response!.ClientId, _ct);
         newClient.ShouldNotBeNull();
         newClient.AbsoluteRefreshTokenLifetime.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task jwks_with_client_secret_basic_creates_both_jwk_and_shared_secrets()
+    {
+        using var rsaKey = RSA.Create();
+        var securityKey = new RsaSecurityKey(rsaKey);
+        var publicJwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(securityKey);
+        publicJwk.Alg = SecurityAlgorithms.RsaSha256;
+        var jwkJson = JsonSerializer.Serialize(publicJwk);
+        var jwkElement = JsonSerializer.Deserialize<JsonElement>(jwkJson);
+
+        var request = new DynamicClientRegistrationRequest
+        {
+            RedirectUris = new[] { new Uri("https://example.com/callback") },
+            GrantTypes = new[] { "authorization_code" },
+            TokenEndpointAuthenticationMethod = "client_secret_basic",
+            Jwks = new KeySet(new object[] { jwkElement })
+        };
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
+        response.ShouldNotBeNull();
+        response!.ClientSecret.ShouldNotBeNull();
+
+        var newClient = await IdentityServerHost.GetClientAsync(response.ClientId, _ct);
+        newClient.ShouldNotBeNull();
+
+        // Should have both a JWK secret and a shared secret
+        newClient!.ClientSecrets.Count.ShouldBe(2);
+        newClient.ClientSecrets.ShouldContain(s => s.Type == "JWK");
+        newClient.ClientSecrets.ShouldContain(s => s.Type == "SharedSecret");
+    }
+
+    [Fact]
+    public async Task jwks_with_private_key_jwt_does_not_create_shared_secret()
+    {
+        var rsaKey = RSA.Create();
+        var securityKey = new RsaSecurityKey(rsaKey);
+        var publicJwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(securityKey);
+        publicJwk.Alg = SecurityAlgorithms.RsaSha256;
+        var jwkJson = JsonSerializer.Serialize(publicJwk);
+        var jwkElement = JsonSerializer.Deserialize<JsonElement>(jwkJson);
+
+        var request = new DynamicClientRegistrationRequest
+        {
+            RedirectUris = new[] { new Uri("https://example.com/callback") },
+            GrantTypes = new[] { "authorization_code" },
+            TokenEndpointAuthenticationMethod = "private_key_jwt",
+            Jwks = new KeySet(new object[] { jwkElement })
+        };
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
+        response.ShouldNotBeNull();
+        response!.ClientSecret.ShouldBeNull();
+
+        var newClient = await IdentityServerHost.GetClientAsync(response.ClientId, _ct);
+        newClient.ShouldNotBeNull();
+
+        // Should only have JWK secret, no shared secret
+        newClient!.ClientSecrets.Count.ShouldBe(1);
+        newClient.ClientSecrets.Single().Type.ShouldBe("JWK");
+    }
+
+    [Fact]
+    public async Task jwks_without_explicit_auth_method_defaults_to_client_secret_basic()
+    {
+        using var rsaKey = RSA.Create();
+        var securityKey = new RsaSecurityKey(rsaKey);
+        var publicJwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(securityKey);
+        publicJwk.Alg = SecurityAlgorithms.RsaSha256;
+        var jwkJson = JsonSerializer.Serialize(publicJwk);
+        var jwkElement = JsonSerializer.Deserialize<JsonElement>(jwkJson);
+
+        var request = new DynamicClientRegistrationRequest
+        {
+            RedirectUris = new[] { new Uri("https://example.com/callback") },
+            GrantTypes = new[] { "authorization_code" },
+            Jwks = new KeySet(new object[] { jwkElement })
+        };
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
+        response.ShouldNotBeNull();
+        response!.ClientSecret.ShouldNotBeNull();
+        response.TokenEndpointAuthenticationMethod.ShouldBe("client_secret_basic");
+
+        var newClient = await IdentityServerHost.GetClientAsync(response.ClientId, _ct);
+        newClient.ShouldNotBeNull();
+
+        // Should have both a JWK secret and a shared secret since auth method is client_secret_basic
+        newClient!.ClientSecrets.Count.ShouldBe(2);
+        newClient.ClientSecrets.ShouldContain(s => s.Type == "JWK");
+        newClient.ClientSecrets.ShouldContain(s => s.Type == "SharedSecret");
+    }
+
+    [Fact]
+    public async Task no_jwks_without_explicit_auth_method_defaults_to_client_secret_basic()
+    {
+        var request = new DynamicClientRegistrationRequest
+        {
+            RedirectUris = new[] { new Uri("https://example.com/callback") },
+            GrantTypes = new[] { "authorization_code" }
+        };
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
+        response.ShouldNotBeNull();
+        response!.ClientSecret.ShouldNotBeNull();
+        response.TokenEndpointAuthenticationMethod.ShouldBe("client_secret_basic");
     }
 }

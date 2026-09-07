@@ -79,7 +79,7 @@ public class UserInteractionOptions
     /// <summary>
     /// Gets or sets the URL of the error page. Local URLs must begin with a leading slash.
     /// </summary>
-    /// <remarks>Defaults to <c>"/error"</c>.</remarks>
+    /// <remarks>Defaults to <c>"/home/error"</c>.</remarks>
     public string ErrorUrl { get; set; } = Constants.UIConstants.DefaultRoutePaths.Error.EnsureLeadingSlash();
 
     /// <summary>

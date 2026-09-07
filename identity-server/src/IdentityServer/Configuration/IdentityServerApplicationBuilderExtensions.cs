@@ -27,107 +27,109 @@ namespace Microsoft.AspNetCore.Builder;
 /// </summary>
 public static class IdentityServerApplicationBuilderExtensions
 {
-    /// <summary>
-    /// Adds IdentityServer to the ASP.NET Core request pipeline. This registers the middleware components
-    /// required to handle all IdentityServer protocol endpoints (authorize, token, discovery, userinfo, etc.),
-    /// validates the IdentityServer configuration and license at startup, and sets up CORS, mutual TLS,
-    /// and dynamic external provider authentication.
-    /// </summary>
-    /// <param name="app">The <see cref="IApplicationBuilder"/> to add IdentityServer middleware to.</param>
-    /// <param name="options">Optional <see cref="IdentityServerMiddlewareOptions"/> to customize how the
-    /// ASP.NET Core authentication middleware is inserted into the pipeline. If not provided, the default
-    /// behavior calls <c>UseAuthentication()</c> automatically.</param>
-    /// <returns>The <see cref="IApplicationBuilder"/> so that additional middleware can be chained.</returns>
-    public static IApplicationBuilder UseIdentityServer(this IApplicationBuilder app, IdentityServerMiddlewareOptions? options = null)
+    extension(IApplicationBuilder app)
     {
-        app.Validate();
-
-        app.UseMiddleware<BaseUrlMiddleware>();
-
-        app.ConfigureCors();
-
-        app.UseMiddleware<DynamicSchemeAuthenticationMiddleware>();
-
-        // it seems ok if we have UseAuthentication more than once in the pipeline --
-        // this will just re-run the various callback handlers and the default authN
-        // handler, which just re-assigns the user on the context. claims transformation
-        // will run twice, since that's not cached (whereas the authN handler result is)
-        // related: https://github.com/aspnet/Security/issues/1399
-        if (options == null)
+        /// <summary>
+        /// Adds IdentityServer to the ASP.NET Core request pipeline. This registers the middleware components
+        /// required to handle all IdentityServer protocol endpoints (authorize, token, discovery, userinfo, etc.),
+        /// validates the IdentityServer configuration and license at startup, and sets up CORS, mutual TLS,
+        /// and dynamic external provider authentication.
+        /// </summary>
+        /// <param name="options">Optional <see cref="IdentityServerMiddlewareOptions"/> to customize how the
+        /// ASP.NET Core authentication middleware is inserted into the pipeline. If not provided, the default
+        /// behavior calls <c>UseAuthentication()</c> automatically.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/> so that additional middleware can be chained.</returns>
+        public IApplicationBuilder UseIdentityServer(IdentityServerMiddlewareOptions? options = null)
         {
-            options = new IdentityServerMiddlewareOptions();
+            app.Validate();
+
+            app.UseMiddleware<BaseUrlMiddleware>();
+
+            app.ConfigureCors();
+
+            app.UseMiddleware<DynamicSchemeAuthenticationMiddleware>();
+
+            // it seems ok if we have UseAuthentication more than once in the pipeline --
+            // this will just re-run the various callback handlers and the default authN
+            // handler, which just re-assigns the user on the context. claims transformation
+            // will run twice, since that's not cached (whereas the authN handler result is)
+            // related: https://github.com/aspnet/Security/issues/1399
+            if (options == null)
+            {
+                options = new IdentityServerMiddlewareOptions();
+            }
+
+            options.AuthenticationMiddleware(app);
+
+            app.UseMiddleware<MutualTlsEndpointMiddleware>();
+            app.UseMiddleware<IdentityServerMiddleware>();
+
+            return app;
         }
 
-        options.AuthenticationMiddleware(app);
-
-        app.UseMiddleware<MutualTlsEndpointMiddleware>();
-        app.UseMiddleware<IdentityServerMiddleware>();
-
-        return app;
-    }
-
-    internal static void Validate(this IApplicationBuilder app)
-    {
-        var loggerFactory = app.ApplicationServices.GetService<ILoggerFactory>();
-        ArgumentNullException.ThrowIfNull(loggerFactory);
-
-        var logger = loggerFactory.CreateLogger("Duende.IdentityServer.Startup");
-        logger.LogInformation("Starting Duende IdentityServer version {version} ({netversion})",
-            typeof(IdentityServerMiddleware).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion,
-            RuntimeInformation.FrameworkDescription);
-
-        var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
-
-        using (var scope = scopeFactory.CreateScope())
+        internal void Validate()
         {
-            var serviceProvider = scope.ServiceProvider;
+            var loggerFactory = app.ApplicationServices.GetService<ILoggerFactory>();
+            ArgumentNullException.ThrowIfNull(loggerFactory);
 
-            var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
+            var logger = loggerFactory.CreateLogger("Duende.IdentityServer.Startup");
+            logger.LogInformation("Starting Duende IdentityServer version {version} ({netversion})",
+                typeof(IdentityServerMiddleware).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion,
+                RuntimeInformation.FrameworkDescription);
 
-            var licenseValidator = serviceProvider.GetRequiredService<IdentityServerLicenseValidator>();
-            licenseValidator.ValidateLicense();
+            var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
 
-            if (options.KeyManagement.Enabled)
+            using (var scope = scopeFactory.CreateScope())
             {
-                var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
-                licenseUsage.KeyManagementUsed();
+                var serviceProvider = scope.ServiceProvider;
 
-                if (!licenseValidator.ValidateKeyManagement())
+                var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
+
+                var licenseValidator = serviceProvider.GetRequiredService<IdentityServerLicenseValidator>();
+                licenseValidator.ValidateLicense();
+
+                if (options.KeyManagement.Enabled)
                 {
-                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Key Management feature.");
-                }
-            }
+                    var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
+                    licenseUsage.KeyManagementUsed();
 
-            if (serviceProvider.GetService<IServerSideSessionsMarker>() != null)
-            {
-                if (!licenseValidator.ValidateServerSideSessions())
+                    if (!licenseValidator.ValidateKeyManagement())
+                    {
+                        IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Key Management feature.");
+                    }
+                }
+
+                if (serviceProvider.GetService<IServerSideSessionsMarker>() != null)
                 {
-                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Server-Side Sessions feature.");
+                    if (!licenseValidator.ValidateServerSideSessions())
+                    {
+                        IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Server-Side Sessions feature.");
+                    }
                 }
-            }
 
-            // Try to get the SAML metadata endpoint. If it exists, then we need to validate the license for SAML.
-            if (serviceProvider.GetService<MetadataEndpoint>() != null)
-            {
-                if (!licenseValidator.ValidateSamlIdp())
+                // Try to get the SAML metadata endpoint. If it exists, then we need to validate the license for SAML.
+                if (serviceProvider.GetService<MetadataEndpoint>() != null)
                 {
-                    IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the SAML 2.0 Identity Provider feature.");
+                    if (!licenseValidator.ValidateSamlIdp())
+                    {
+                        IdentityServerLicenseValidator.ThrowInvalidLicenseException("Your license does not include the SAML 2.0 Identity Provider feature.");
+                    }
                 }
+
+                TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");
+                TestService(serviceProvider, typeof(IClientStore), logger, "No storage mechanism for clients specified. Use the 'AddInMemoryClients' extension method to register a development version.");
+                TestService(serviceProvider, typeof(IResourceStore), logger, "No storage mechanism for resources specified. Use the 'AddInMemoryIdentityResources' or 'AddInMemoryApiResources' extension method to register a development version.");
+
+                var persistedGrants = serviceProvider.GetRequiredService(typeof(IPersistedGrantStore));
+                if (persistedGrants.GetType().FullName == typeof(InMemoryPersistedGrantStore).FullName)
+                {
+                    logger.LogInformation("You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.");
+                }
+
+                ValidateOptions(options, logger);
+
+                ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
             }
-
-            TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");
-            TestService(serviceProvider, typeof(IClientStore), logger, "No storage mechanism for clients specified. Use the 'AddInMemoryClients' extension method to register a development version.");
-            TestService(serviceProvider, typeof(IResourceStore), logger, "No storage mechanism for resources specified. Use the 'AddInMemoryIdentityResources' or 'AddInMemoryApiResources' extension method to register a development version.");
-
-            var persistedGrants = serviceProvider.GetRequiredService(typeof(IPersistedGrantStore));
-            if (persistedGrants.GetType().FullName == typeof(InMemoryPersistedGrantStore).FullName)
-            {
-                logger.LogInformation("You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.");
-            }
-
-            ValidateOptions(options, logger);
-
-            ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
         }
     }
 
@@ -135,7 +137,6 @@ public static class IdentityServerApplicationBuilderExtensions
     {
         var options = services.GetRequiredService<IdentityServerOptions>();
         var schemes = services.GetRequiredService<IAuthenticationSchemeProvider>();
-
 
         if (await schemes.GetDefaultAuthenticateSchemeAsync() == null && options.Authentication.CookieAuthenticationScheme == null)
         {

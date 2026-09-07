@@ -11,12 +11,12 @@ using Duende.Storage.Internal.Querying.SearchFields;
 namespace Duende.IdentityServer.Stores.Storage.SamlSigninState;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class SamlSigninStateRepository(IStoreFactory storeFactory)
+internal sealed class SamlSigninStateRepository(IStorageFactory storageFactory)
 {
     internal async Task<CreateResult> CreateAsync(UuidV7 id, SamlSigninStateDso.V1 dso, Expiration expiration, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [],
@@ -33,8 +33,8 @@ internal sealed class SamlSigninStateRepository(IStoreFactory storeFactory)
             return null;
         }
 
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(SamlSigninStateDso.EntityType, UuidV7.From(id), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(SamlSigninStateDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((SamlSigninStateDso.V1)result.Dso, result.Version.Value) : null;
     }
 
@@ -44,7 +44,7 @@ internal sealed class SamlSigninStateRepository(IStoreFactory storeFactory)
         int expectedVersion,
         Expiration expiration,
         Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -61,7 +61,7 @@ internal sealed class SamlSigninStateRepository(IStoreFactory storeFactory)
             return;
         }
 
-        await (await storeFactory.GetStore(ct)).DeleteAsync(
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(
             SamlSigninStateDso.EntityType,
             UuidV7.From(id),
             [],

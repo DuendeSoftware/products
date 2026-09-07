@@ -9,15 +9,17 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class DateTimeExtensions
     {
-        /// <summary>
-        /// Format a datetime for inclusion in SAML messages.
-        /// </summary>
-        /// <param name="dateTime">Datetime to format.</param>
-        /// <returns>Formatted value.</returns>
-        public static string ToSaml2DateTimeString(this DateTime dateTime)
+        extension(DateTime dateTime)
         {
-            return XmlConvert.ToString(dateTime.AddTicks(-(dateTime.Ticks % TimeSpan.TicksPerSecond)),
-                XmlDateTimeSerializationMode.Utc);
+            /// <summary>
+            /// Format a datetime for inclusion in SAML messages.
+            /// </summary>
+            /// <returns>Formatted value.</returns>
+            public string ToSaml2DateTimeString()
+            {
+                return XmlConvert.ToString(dateTime.AddTicks(-(dateTime.Ticks % TimeSpan.TicksPerSecond)),
+                    XmlDateTimeSerializationMode.Utc);
+            }
         }
     }
 }

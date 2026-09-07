@@ -52,7 +52,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         var admin = NewIdentityResourceAdmin();
         var name = $"identity_{Guid.NewGuid():N}";
 
-        var createResult = await admin.CreateAsync(new IdentityResourceConfiguration
+        var createResult = await admin.CreateAsync(new CreateIdentityResource
         {
             Name = name,
             UserClaims = ["sub"]
@@ -88,7 +88,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         var admin = NewApiScopeAdmin();
         var name = $"scope_{Guid.NewGuid():N}";
 
-        var createResult = await admin.CreateAsync(new ApiScopeConfiguration
+        var createResult = await admin.CreateAsync(new CreateApiScope
         {
             Name = name,
             UserClaims = ["email"]
@@ -123,12 +123,12 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     {
         var scopeAdmin = NewApiScopeAdmin();
         var scopeName = $"scope_{Guid.NewGuid():N}";
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = scopeName }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct)).IsSuccess.ShouldBeTrue();
 
         var admin = NewApiResourceAdmin();
         var name = $"api_{Guid.NewGuid():N}";
 
-        var createResult = await admin.CreateAsync(new ApiResourceConfiguration
+        var createResult = await admin.CreateAsync(new CreateApiResource
         {
             Name = name,
             Scopes = [scopeName]
@@ -164,13 +164,13 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         var scopeAdmin = NewApiScopeAdmin();
         var uniqueScope = $"scope_{Guid.NewGuid():N}";
         var otherScope = $"scope_other_{Guid.NewGuid():N}";
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = uniqueScope }, _ct)).IsSuccess.ShouldBeTrue();
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = otherScope }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = uniqueScope }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = otherScope }, _ct)).IsSuccess.ShouldBeTrue();
 
         var admin = NewApiResourceAdmin();
         var resourceName = $"api_{Guid.NewGuid():N}";
 
-        var createResult = await admin.CreateAsync(new ApiResourceConfiguration
+        var createResult = await admin.CreateAsync(new CreateApiResource
         {
             Name = resourceName,
             Scopes = [uniqueScope, otherScope]
@@ -189,20 +189,20 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         var scopeAdmin = NewApiScopeAdmin();
         var uniqueScope = $"scope_{Guid.NewGuid():N}";
         var differentScope = $"scope_diff_{Guid.NewGuid():N}";
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = uniqueScope }, _ct)).IsSuccess.ShouldBeTrue();
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = differentScope }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = uniqueScope }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = differentScope }, _ct)).IsSuccess.ShouldBeTrue();
 
         var admin = NewApiResourceAdmin();
         var matchingName = $"api_match_{Guid.NewGuid():N}";
         var nonMatchingName = $"api_nomatch_{Guid.NewGuid():N}";
 
-        await admin.CreateAsync(new ApiResourceConfiguration
+        await admin.CreateAsync(new CreateApiResource
         {
             Name = matchingName,
             Scopes = [uniqueScope]
         }, _ct);
 
-        await admin.CreateAsync(new ApiResourceConfiguration
+        await admin.CreateAsync(new CreateApiResource
         {
             Name = nonMatchingName,
             Scopes = [differentScope]
@@ -235,10 +235,10 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         var apiScopeForResource = $"scope_for_resource_{Guid.NewGuid():N}";
         var identityResourceName = $"identity_{Guid.NewGuid():N}";
 
-        (await apiScopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = apiScopeForResource }, _ct)).IsSuccess.ShouldBeTrue();
-        await apiResourceAdmin.CreateAsync(new ApiResourceConfiguration { Name = apiResourceName, Scopes = [apiScopeForResource] }, _ct);
-        await apiScopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = apiScopeName }, _ct);
-        await identityResourceAdmin.CreateAsync(new IdentityResourceConfiguration { Name = identityResourceName }, _ct);
+        (await apiScopeAdmin.CreateAsync(new CreateApiScope { Name = apiScopeForResource }, _ct)).IsSuccess.ShouldBeTrue();
+        await apiResourceAdmin.CreateAsync(new CreateApiResource { Name = apiResourceName, Scopes = [apiScopeForResource] }, _ct);
+        await apiScopeAdmin.CreateAsync(new CreateApiScope { Name = apiScopeName }, _ct);
+        await identityResourceAdmin.CreateAsync(new CreateIdentityResource { Name = identityResourceName }, _ct);
 
         var store = NewResourceStore();
         var resources = await store.GetAllResourcesAsync(_ct);
@@ -253,12 +253,12 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     {
         var scopeAdmin = NewApiScopeAdmin();
         var someScope = $"scope_{Guid.NewGuid():N}";
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = someScope }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = someScope }, _ct)).IsSuccess.ShouldBeTrue();
 
         var admin = NewApiResourceAdmin();
         var disabledName = $"api_disabled_{Guid.NewGuid():N}";
 
-        await admin.CreateAsync(new ApiResourceConfiguration
+        await admin.CreateAsync(new CreateApiResource
         {
             Name = disabledName,
             Enabled = false,
@@ -279,20 +279,20 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         var scopeAdmin = NewApiScopeAdmin();
         var scope1 = $"scope1_{Guid.NewGuid():N}";
         var scope2 = $"scope2_{Guid.NewGuid():N}";
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = scope1 }, _ct)).IsSuccess.ShouldBeTrue();
-        (await scopeAdmin.CreateAsync(new ApiScopeConfiguration { Name = scope2 }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = scope1 }, _ct)).IsSuccess.ShouldBeTrue();
+        (await scopeAdmin.CreateAsync(new CreateApiScope { Name = scope2 }, _ct)).IsSuccess.ShouldBeTrue();
 
         var admin = NewApiResourceAdmin();
         var resource1Name = $"api1_{Guid.NewGuid():N}";
         var resource2Name = $"api2_{Guid.NewGuid():N}";
 
-        await admin.CreateAsync(new ApiResourceConfiguration
+        await admin.CreateAsync(new CreateApiResource
         {
             Name = resource1Name,
             Scopes = [scope1]
         }, _ct);
 
-        await admin.CreateAsync(new ApiResourceConfiguration
+        await admin.CreateAsync(new CreateApiResource
         {
             Name = resource2Name,
             Scopes = [scope2]

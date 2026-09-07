@@ -4,6 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin.IdentityProviders;
+using Duende.Storage;
 using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Admin;
@@ -19,14 +20,14 @@ public interface IIdentityProviderAdmin
     /// <param name="provider">The identity provider definition.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The storage ID and version on success, or validation/conflict errors.</returns>
-    Task<SaveResult<Guid>> CreateAsync(IdentityProviderConfiguration provider, Ct ct);
+    Task<SaveResult<IdentityProviderId>> CreateAsync(CreateIdentityProvider provider, Ct ct);
 
     /// <summary>
     /// Gets an identity provider by its storage identifier.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<GetResult<IdentityProviderConfiguration>> GetAsync(Guid id, Ct ct);
+    Task<GetResult<IdentityProviderConfiguration>> GetAsync(IdentityProviderId id, Ct ct);
 
     /// <summary>
     /// Gets an identity provider by its authentication scheme name.
@@ -36,20 +37,20 @@ public interface IIdentityProviderAdmin
     Task<GetResult<IdentityProviderConfiguration>> GetBySchemeAsync(string scheme, Ct ct);
 
     /// <summary>
-    /// Updates an existing identity provider. The model is mutable — callers can Get, modify, and Update.
+    /// Updates an existing identity provider.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="provider">The updated identity provider definition.</param>
     /// <param name="expectedVersion">Expected version for optimistic concurrency.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> UpdateAsync(Guid id, IdentityProviderConfiguration provider, DataVersion expectedVersion, Ct ct);
+    Task<SaveResult<IdentityProviderId>> UpdateAsync(IdentityProviderId id, UpdateIdentityProvider provider, DataVersion expectedVersion, Ct ct);
 
     /// <summary>
     /// Deletes an identity provider.
     /// </summary>
     /// <param name="id">The storage identifier of the identity provider to delete.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct);
+    Task<SaveResult<IdentityProviderId>> DeleteAsync(IdentityProviderId id, Ct ct);
 
     /// <summary>
     /// Queries identity providers with optional filtering, sorting, and pagination.

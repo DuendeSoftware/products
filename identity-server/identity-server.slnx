@@ -2,31 +2,19 @@
 <Solution>
   <Folder Name="/aspire/">
     <Project Path="aspire/AppHosts/All/All.csproj" />
-    <Project Path="aspire/AppHosts/Dev/Dev.csproj" />
     <Project Path="aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/clients/">
     <Project Path="clients/src/APIs/MtlsApi/MtlsApi.csproj" />
     <Project Path="clients/src/APIs/ResourceBasedApi/ResourceBasedApi.csproj" />
-    <Project Path="clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi/ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />
-    <Project Path="clients/src/ConsoleClientCredentialsFlowPostBody/ConsoleClientCredentialsFlowPostBody.csproj" />
     <Project Path="clients/src/ConsoleCode/ConsoleCode.csproj" />
-    <Project Path="clients/src/ConsoleCustomGrant/ConsoleExtensionGrant.csproj" />
     <Project Path="clients/src/ConsoleDcrClient/ConsoleDcrClient.csproj" />
     <Project Path="clients/src/ConsoleEphemeralMtlsClient/ConsoleEphemeralMtlsClient.csproj" />
     <Project Path="clients/src/ConsoleMTLSClient/ConsoleMTLSClient.csproj" />
-    <Project Path="clients/src/ConsoleParameterizedScopeClient/ConsoleParameterizedScopeClient.csproj" />
     <Project Path="clients/src/ConsoleResourceIndicators/ConsoleResourceIndicators.csproj" />
-    <Project Path="clients/src/ConsoleResourceOwnerFlowPublic/ConsoleResourceOwnerFlowPublic.csproj" />
-    <Project Path="clients/src/ConsoleResourceOwnerFlowReference/ConsoleResourceOwnerFlowReference.csproj" />
-    <Project Path="clients/src/ConsoleResourceOwnerFlowRefreshToken/ConsoleResourceOwnerFlowRefreshToken.csproj" />
-    <Project Path="clients/src/ConsoleResourceOwnerFlowUserInfo/ConsoleResourceOwnerFlowUserInfo.csproj" />
     <Project Path="clients/src/ConsoleScopesResources/ConsoleScopesResources.csproj" />
     <Project Path="clients/src/Constants/Constants.csproj" />
     <Project Path="clients/src/JsOidc/JsOidc.csproj" />
-    <Project Path="clients/src/MvcJarUriJwt/MvcJarUriJwt.csproj" />
-    <Project Path="clients/src/MvcSaml/MvcSaml.csproj" />
-    <Project Path="clients/src/Web/Web.csproj" />
     <Project Path="clients/src/WindowsConsoleSystemBrowser/WindowsConsoleSystemBrowser.csproj" />
   </Folder>
   <Folder Name="/hosts/">
@@ -69,6 +57,8 @@
     <Project Path="templates/src/WebApp/TemplateWebApp.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/IdentityServer.Conformance/Host/Host.IdentityServer.Conformance.csproj" />
+    <Project Path="test/IdentityServer.Conformance/IdentityServer.Conformance.csproj" />
     <Project Path="test/IdentityServer.EndToEndTests/IdentityServer.EndToEndTests.csproj" />
     <Project Path="test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="test/IdentityServer.Interaction.Scenarios/IdentityServer.Interaction.Scenarios.csproj" />

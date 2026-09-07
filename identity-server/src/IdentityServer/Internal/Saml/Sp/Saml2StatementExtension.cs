@@ -10,31 +10,33 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class Saml2StatementExtension
     {
-        /// <summary>
-        /// Writes out the statement as an XElement.
-        /// </summary>
-        /// <param name="statement">Statement to create xml for.</param>
-        /// <returns>XElement</returns>
-        public static XElement ToXElement(this Saml2Statement statement)
+        extension(Saml2Statement statement)
         {
-            if (statement == null)
+            /// <summary>
+            /// Writes out the statement as an XElement.
+            /// </summary>
+            /// <returns>XElement</returns>
+            public XElement ToXElement()
             {
-                throw new ArgumentNullException(nameof(statement));
-            }
+                if (statement == null)
+                {
+                    throw new ArgumentNullException(nameof(statement));
+                }
 
-            var attributeStatement = statement as Saml2AttributeStatement;
-            if (attributeStatement != null)
-            {
-                return ToXElement(attributeStatement);
-            }
+                var attributeStatement = statement as Saml2AttributeStatement;
+                if (attributeStatement != null)
+                {
+                    return ToXElement(attributeStatement);
+                }
 
-            var authnStatement = statement as Saml2AuthenticationStatement;
-            if (authnStatement != null)
-            {
-                return ToXElement(authnStatement);
-            }
+                var authnStatement = statement as Saml2AuthenticationStatement;
+                if (authnStatement != null)
+                {
+                    return ToXElement(authnStatement);
+                }
 
-            throw new NotImplementedException("Statement of type " + statement.GetType().Name + " is not supported.");
+                throw new NotImplementedException("Statement of type " + statement.GetType().Name + " is not supported.");
+            }
         }
 
         private static XElement ToXElement(Saml2AuthenticationStatement authnStatement)

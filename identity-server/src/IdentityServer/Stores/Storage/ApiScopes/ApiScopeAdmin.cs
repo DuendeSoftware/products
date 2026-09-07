@@ -7,6 +7,8 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiScopes;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 
@@ -15,44 +17,45 @@ namespace Duende.IdentityServer.Stores.Storage.ApiScopes;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore schemaStore) : IApiScopeAdmin
 {
-    public async Task<SaveResult<Guid>> CreateAsync(ApiScopeConfiguration scope, Ct ct)
+    public async Task<SaveResult<ApiScopeId>> CreateAsync(CreateApiScope scope, Ct ct)
     {
-        var structuralError = ValidateStructure(scope);
+        var structuralError = ValidateStructure(scope.Name, scope.UserClaims);
         if (structuralError is not null)
         {
-            return structuralError;
+            return SaveResult.Failure<ApiScopeId>(structuralError);
         }
 
-        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(scope, ct);
+        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(scope.ExtendedProperties, ct);
         if (extendedPropertiesError is not null)
         {
-            return extendedPropertiesError;
+            return SaveResult.Failure<ApiScopeId>(extendedPropertiesError);
         }
 
         var id = UuidV7.New();
-        var dso = MapToDso(id.Value, scope);
+        var dso = MapToDso(id.Value, scope.Name, scope.Enabled, scope.DisplayName, scope.Description, scope.ShowInDiscoveryDocument, scope.Required, scope.Emphasize, scope.UserClaims, scope.ExtendedProperties);
 
         var result = await repository.CreateAsync(id, dso, ct);
 
         return result switch
         {
-            CreateResult.Success => SaveResult.Success(id.Value, (DataVersion)1),
+            CreateResult.Success => SaveResult.Success<ApiScopeId>(id.Value, (DataVersion)1),
             CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                AdminError.AlreadyExists("api_scope", scope.Name),
+                SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("api_scope", scope.Name)),
             _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
         };
     }
 
-    public async Task<GetResult<ApiScopeConfiguration>> GetAsync(Guid id, Ct ct)
+    public async Task<GetResult<ApiScopeConfiguration>> GetAsync(ApiScopeId id, Ct ct)
     {
-        var result = await repository.TryReadByIdAsync(id, ct);
+        var result = await repository.TryReadByIdAsync(id.Value, ct);
         if (result is null)
         {
             return GetResult.NotFound<ApiScopeConfiguration>();
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.ApiScope, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
     public async Task<GetResult<ApiScopeConfiguration>> GetByNameAsync(string name, Ct ct)
@@ -64,97 +67,94 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.ApiScope, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
-    public async Task<SaveResult<Guid>> UpdateAsync(Guid id, ApiScopeConfiguration scope, DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<ApiScopeId>> UpdateAsync(ApiScopeId id, UpdateApiScope scope, DataVersion expectedVersion, Ct ct)
     {
-        var structuralError = ValidateStructure(scope);
+        var structuralError = ValidateStructure(scope.Name, scope.UserClaims);
         if (structuralError is not null)
         {
-            return structuralError;
+            return SaveResult.Failure<ApiScopeId>(structuralError);
         }
 
-        var existing = await repository.TryReadByIdAsync(id, ct);
+        var idValue = id.Value;
+        var existing = await repository.TryReadByIdAsync(idValue, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("api_scope", id.ToString());
+            return SaveResult.Failure<ApiScopeId>(StorageError.NotFound("api_scope", idValue.ToString()));
         }
 
-        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(scope, ct);
+        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(scope.ExtendedProperties, ct);
         if (extendedPropertiesError is not null)
         {
-            return extendedPropertiesError;
+            return SaveResult.Failure<ApiScopeId>(extendedPropertiesError);
         }
 
-        var dso = MapToDso(id, scope);
+        var dso = MapToDso(idValue, scope.Name, scope.Enabled, scope.DisplayName, scope.Description, scope.ShowInDiscoveryDocument, scope.Required, scope.Emphasize, scope.UserClaims, scope.ExtendedProperties);
 
-        var result = await repository.UpdateAsync(UuidV7.From(id), dso, expectedVersion.Value, ct);
+        var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
 
         return result switch
         {
-            UpdateResult.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("api_scope", id.ToString()),
-            UpdateResult.KeyConflict => AdminError.AlreadyExists("api_scope", scope.Name),
+            UpdateResult.Success => SaveResult.Success<ApiScopeId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiScopeId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<ApiScopeId>(StorageError.NotFound("api_scope", idValue.ToString())),
+            UpdateResult.KeyConflict => SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("api_scope", scope.Name)),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
-    public async Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct)
+    public async Task<SaveResult<ApiScopeId>> DeleteAsync(ApiScopeId id, Ct ct)
     {
-        var result = await repository.DeleteAsync(id, ct);
+        var idValue = id.Value;
+        var result = await repository.DeleteAsync(idValue, ct);
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success(id, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success<ApiScopeId>(idValue, (DataVersion)0),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
-    public async Task<Duende.Storage.Querying.QueryResult<ApiScopeListItem>> QueryAsync(QueryRequest<ApiScopeFilter, ApiScopeSortField> request, Ct ct)
+    public async Task<QueryResult<ApiScopeListItem>> QueryAsync(QueryRequest<ApiScopeFilter, ApiScopeSortField> request, Ct ct)
     {
         var result = await repository.QueryAsync(request, ct);
         return result.ConvertTo(MapToListItem);
     }
 
-    private async Task<AdminError?> ValidateExtendedPropertiesAsync(ApiScopeConfiguration scope, Ct ct)
+    private async Task<StorageError?> ValidateExtendedPropertiesAsync(AttributeValueCollection extendedProperties, Ct ct)
     {
-        if (scope.ExtendedProperties.Count == 0)
+        if (extendedProperties.Count == 0)
         {
             return null;
         }
 
         var schema = await schemaStore.GetAsync(SchemaId.ApiScope, ct);
-        if (schema is null)
-        {
-            return AdminError.ValidationFailed(
-                "ExtendedProperties cannot be used: no API scope schema is configured. " +
-                "Register a schema via ISchemaStore to enable extended properties.");
-        }
 
-        if (!scope.ExtendedProperties.TryValidateAgainst(schema, out var errors))
+        if (!extendedProperties.TryValidateAgainst(schema, out var errors))
         {
-            return AdminError.ValidationFailed(string.Join("; ", errors));
+            return StorageError.ValidationFailed(string.Join("; ", errors));
         }
 
         return null;
     }
 
-    private static AdminError? ValidateStructure(ApiScopeConfiguration scope)
+    private static StorageError? ValidateStructure(string name, List<string>? userClaims)
     {
-        if (string.IsNullOrWhiteSpace(scope.Name))
+        if (string.IsNullOrWhiteSpace(name))
         {
-            return AdminError.Required("Name");
+            return StorageError.Required("Name");
         }
 
-        if (scope.UserClaims is not null)
+        if (userClaims is not null)
         {
-            foreach (var claim in scope.UserClaims)
+            foreach (var claim in userClaims)
             {
                 if (string.IsNullOrWhiteSpace(claim))
                 {
-                    return AdminError.InvalidValue("UserClaims", "Claim type must not be null or whitespace.");
+                    return StorageError.InvalidValue("UserClaims", "Claim type must not be null or whitespace.");
                 }
             }
         }
@@ -162,22 +162,32 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
         return null;
     }
 
-    private static ApiScopeDso.V1 MapToDso(Guid id, ApiScopeConfiguration scope) =>
+    private static ApiScopeDso.V1 MapToDso(
+        Guid id,
+        string name,
+        bool enabled,
+        string? displayName,
+        string? description,
+        bool showInDiscoveryDocument,
+        bool required,
+        bool emphasize,
+        List<string>? userClaims,
+        AttributeValueCollection extendedProperties) =>
         new()
         {
             Id = id,
-            Name = scope.Name,
-            Enabled = scope.Enabled,
-            DisplayName = scope.DisplayName,
-            Description = scope.Description,
-            ShowInDiscoveryDocument = scope.ShowInDiscoveryDocument,
-            Required = scope.Required,
-            Emphasize = scope.Emphasize,
-            UserClaims = scope.UserClaims?.AsReadOnly() ?? [],
-            ExtendedAttributeValues = EavPropertyMapper.SerializeFromCollection(scope.ExtendedProperties)
+            Name = name,
+            Enabled = enabled,
+            DisplayName = displayName,
+            Description = description,
+            ShowInDiscoveryDocument = showInDiscoveryDocument,
+            Required = required,
+            Emphasize = emphasize,
+            UserClaims = userClaims?.AsReadOnly() ?? [],
+            ExtendedAttributeValues = EavMapper.ToDsoList(extendedProperties)
         };
 
-    private static ApiScopeConfiguration MapToConfiguration(ApiScopeDso.V1 dso) =>
+    private static ApiScopeConfiguration MapToConfiguration(ApiScopeDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             Name = dso.Name,
@@ -188,7 +198,7 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
             Required = dso.Required,
             Emphasize = dso.Emphasize,
             UserClaims = new List<string>(dso.UserClaims),
-            ExtendedProperties = EavPropertyMapper.DeserializeToCollection(dso.ExtendedAttributeValues)
+            ExtendedProperties = EavMapper.ToAttributeValues(dso.ExtendedAttributeValues ?? [], schema).ToList()
         };
 
     private static ApiScopeListItem MapToListItem(ApiScopeDso.V1 dso) =>

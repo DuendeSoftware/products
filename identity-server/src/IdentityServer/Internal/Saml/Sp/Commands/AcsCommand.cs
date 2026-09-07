@@ -1,5 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
+
 using System.Net;
 using System.Security.Claims;
 using System.Xml;
@@ -9,6 +10,7 @@ using Duende.IdentityServer.Internal.Saml.Sp.Exceptions;
 using Duende.IdentityServer.Internal.Saml.Sp.Helpers;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
 using Duende.IdentityServer.Internal.Saml.Sp.Protocol;
+
 namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
 {
     /// <summary>
@@ -105,31 +107,16 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
             return identityProvider;
         }
 
-        private static Uri GetLocation(StoredRequestState storedRequestState, IdentityProvider identityProvider, string relayState, IOptions options)
+        private static Uri GetLocation(StoredRequestState storedRequestState, IOptions options)
         {
             // When SP-Initiated
             if (storedRequestState != null)
             {
-                return storedRequestState.ReturnUrl ?? options.SPOptions.ReturnUrl;
-
-            }
-            else
-            { //When IDP-Initiated
-
-                if (identityProvider.RelayStateUsedAsReturnUrl && !string.IsNullOrWhiteSpace(relayState))
-                {
-                    if (!PathHelper.IsLocalWebUrl(relayState))
-                    {
-                        if (!options.Notifications.ValidateAbsoluteReturnUrl(relayState))
-                        {
-                            throw new InvalidOperationException("Return Url must be a relative Url.");
-                        }
-                    }
-                    return new Uri(relayState, UriKind.RelativeOrAbsolute);
-                }
+                return storedRequestState.ReturnUrl ?? options.SPOptions.IdpInitiatedCallbackUrl;
             }
 
-            return options.SPOptions.ReturnUrl;
+            // When IDP-Initiated, always use the configured IdpInitiatedCallbackUrl
+            return options.SPOptions.IdpInitiatedCallbackUrl;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AuthenticationProperty")]
@@ -148,7 +135,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
 
             var principal = new ClaimsPrincipal(samlResponse.GetClaims(options, storedRequestState?.RelayData));
 
-            if (options.SPOptions.ReturnUrl == null && !identityProvider.RelayStateUsedAsReturnUrl)
+            if (options.SPOptions.IdpInitiatedCallbackUrl == null)
             {
                 if (storedRequestState == null)
                 {
@@ -167,7 +154,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
             return new CommandResult()
             {
                 HttpStatusCode = HttpStatusCode.SeeOther,
-                Location = GetLocation(storedRequestState, identityProvider, relayState, options),
+                Location = GetLocation(storedRequestState, options),
                 Principal = principal,
                 RelayData = storedRequestState?.RelayData,
                 SessionNotOnOrAfter = samlResponse.SessionNotOnOrAfter
@@ -184,28 +171,22 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
         }
 
         internal const string UnsolicitedMissingReturnUrlMessage =
-@"Unsolicited SAML response received, but no ReturnUrl is configured.
+@"Unsolicited SAML response received, but no IdpInitiatedCallbackUrl is configured.
 
 When receiving unsolicited SAML responses (i.e. IDP initiated login),
-Saml2 will redirect the client to the configured ReturnUrl after
-successful authentication, but it is not configured.
+the SP handler will redirect the client to the configured IdpInitiatedCallbackUrl
+after successful authentication, but it is not configured.
 
-In code-based config, add a ReturnUrl by setting the
-options.SpOptions.ReturnUrl property. In the config file, set the returnUrl
-attribute of the <sustainsys.saml2> element.";
+Configure an IdpInitiatedCallbackUrl on SamlServiceProviderOptions (for standalone SP)
+or on SamlProvider (for dynamic providers).";
 
         internal const string SpInitiatedMissingReturnUrl =
 @"Successfully received and validated response from Idp, but don't know
 where to redirect now. There was no return url specified when initiating
-the request and there is no default return url configured.
+the request and there is no IdpInitiatedCallbackUrl configured.
 
-When initiating a request, pass a ReturnUrl query parameter (case matters) or 
-use the RedirectUri AuthenticationProperty for owin. Or add a default ReturnUrl
+When initiating a request, pass a ReturnUrl query parameter (case matters) or
+use the RedirectUri AuthenticationProperty. Or add an IdpInitiatedCallbackUrl
 in the configuration.";
-
-        internal const string RelayStateMissing =
-@"Relay state data missing from the response.
-the application is expecting a return url as part of the RelayState response from the IDP.
-This is expected because the setting 'relayStateUsedAsReturnUrl' has been set to true.";
     }
 }

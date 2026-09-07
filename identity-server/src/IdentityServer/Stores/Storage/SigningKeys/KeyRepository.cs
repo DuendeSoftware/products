@@ -15,7 +15,7 @@ using Duende.Storage.Pagination;
 namespace Duende.IdentityServer.Stores.Storage.SigningKeys;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class KeyRepository(IStoreFactory storeFactory)
+internal sealed class KeyRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -29,13 +29,13 @@ internal sealed class KeyRepository(IStoreFactory storeFactory)
 
     internal async Task<IReadOnlyCollection<SerializedKey>> LoadByUseAsync(string use, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var results = new List<SerializedKey>();
         var page = 1;
 
         while (true)
         {
-            var result = await store.QueryAsync<KeyDso.V1>(
+            var result = await storage.QueryAsync<KeyDso.V1>(
                 KeyDso.EntityType,
                 Fields.Use.Equals(use),
                 SortParameter.Empty,
@@ -57,9 +57,9 @@ internal sealed class KeyRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, SerializedKey key, string use, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var dso = ModelToDso(key, use);
-        return await store.CreateAsync(
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(KeyIdDskV1.Create(key.Id))],
@@ -70,7 +70,7 @@ internal sealed class KeyRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<DeleteResult> DeleteByIdAsync(string keyId, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(
             KeyDso.EntityType,
             DataStorageKey.Create(KeyIdDskV1.Create(keyId)),
             [],

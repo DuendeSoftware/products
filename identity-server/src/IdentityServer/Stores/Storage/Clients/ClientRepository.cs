@@ -19,7 +19,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.Clients;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ClientRepository(IStoreFactory storeFactory)
+internal sealed class ClientRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -38,8 +38,8 @@ internal sealed class ClientRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, ClientDso.V1 dso, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(ClientIdDskV1.Create(dso.ClientId))],
@@ -51,15 +51,15 @@ internal sealed class ClientRepository(IStoreFactory storeFactory)
 
     internal async Task<(ClientDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(ClientDso.EntityType, UuidV7.From(id), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(ClientDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((ClientDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(ClientDso.V1 Dso, int Version)?> TryReadByClientIdAsync(string clientId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             ClientDso.EntityType,
             DataStorageKey.Create(ClientIdDskV1.Create(clientId)),
             ct);
@@ -67,7 +67,7 @@ internal sealed class ClientRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, ClientDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -78,13 +78,13 @@ internal sealed class ClientRepository(IStoreFactory storeFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(ClientDso.EntityType, UuidV7.From(id), [], ct);
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(ClientDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<bool> HasClientWithCorsOriginAsync(string origin, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = Fields.AllowedCorsOrigin.Contains(origin);
-        var count = await store.CountAsync(ClientDso.EntityType, filter, ct);
+        var count = await storage.CountAsync(ClientDso.EntityType, filter, ct);
         return count > 0;
     }
 
@@ -92,12 +92,12 @@ internal sealed class ClientRepository(IStoreFactory storeFactory)
         QueryRequest<ClientFilter, ClientSortField> request,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await store.QueryAsync<ClientDso.V1>(
+        var result = await storage.QueryAsync<ClientDso.V1>(
             ClientDso.EntityType,
             filter,
             sort,

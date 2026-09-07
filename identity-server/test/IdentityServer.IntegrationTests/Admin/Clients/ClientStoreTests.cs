@@ -360,7 +360,7 @@ public sealed class ClientStoreTests : IAsyncLifetime
         secret.Value.ShouldNotBeNullOrWhiteSpace();
     }
 
-    private async Task<Guid> CreateClientAsync(IClientAdmin admin, string clientId)
+    private async Task<ClientId> CreateClientAsync(IClientAdmin admin, string clientId)
     {
         var result = await admin.CreateAsync(
             new CreateClient

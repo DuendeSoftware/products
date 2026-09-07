@@ -14,24 +14,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\clients\src\APIs\MtlsApi\MtlsApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\APIs\ResourceBasedApi\ResourceBasedApi.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleClientCredentialsFlowCallingIdentityServerApi\ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleClientCredentialsFlowPostBody\ConsoleClientCredentialsFlowPostBody.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleCode\ConsoleCode.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleDcrClient\ConsoleDcrClient.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleEphemeralMtlsClient\ConsoleEphemeralMtlsClient.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleCustomGrant\ConsoleExtensionGrant.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleMTLSClient\ConsoleMTLSClient.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleParameterizedScopeClient\ConsoleParameterizedScopeClient.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleResourceIndicators\ConsoleResourceIndicators.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowPublic\ConsoleResourceOwnerFlowPublic.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowReference\ConsoleResourceOwnerFlowReference.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowRefreshToken\ConsoleResourceOwnerFlowRefreshToken.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\ConsoleResourceOwnerFlowUserInfo\ConsoleResourceOwnerFlowUserInfo.csproj" />
     <ProjectReference Include="..\..\..\clients\src\ConsoleScopesResources\ConsoleScopesResources.csproj" />
     <ProjectReference Include="..\..\..\clients\src\JsOidc\JsOidc.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\MvcSaml\MvcSaml.csproj" />
-    <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
     <ProjectReference Include="..\..\..\hosts\AspNetIdentity10\Host.AspNetIdentity10.csproj" />
     <ProjectReference Include="..\..\..\hosts\EntityFramework10\Host.EntityFramework10.csproj" />

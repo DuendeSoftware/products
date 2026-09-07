@@ -110,9 +110,6 @@ void ConfigureClients()
 void ConfigureWebClients()
 {
     _ = RegisterClientIfEnabled<Projects.JsOidc>("js-oidc");
-    _ = RegisterClientIfEnabled<Projects.MvcJarUriJwt>("mvc-jar-uri-jwt");
-    _ = RegisterClientIfEnabled<Projects.MvcSaml>("mvc-saml");
-    _ = RegisterClientIfEnabled<Projects.Web>("web");
     _ = RegisterTemplateIfEnabled<Projects.IdentityServerTemplate>("template-is", 7001);
     _ = RegisterTemplateIfEnabled<Projects.IdentityServerEmpty>("template-is-empty", 7002);
     _ = RegisterTemplateIfEnabled<Projects.IdentityServerInMem>("template-is-inmem", 7003);
@@ -122,17 +119,9 @@ void ConfigureWebClients()
 
 void ConfigureConsoleClients()
 {
-    _ = RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi>("console-client-credentials-flow-callingidentityserverapi", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleClientCredentialsFlowPostBody>("console-client-credentials-flow-postbody", explicitStart: true);
     _ = RegisterClientIfEnabled<Projects.ConsoleDcrClient>("console-dcr-client", explicitStart: true);
     _ = RegisterClientIfEnabled<Projects.ConsoleEphemeralMtlsClient>("console-ephemeral-mtls-client", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleExtensionGrant>("console-extension-grant", explicitStart: true);
     _ = RegisterClientIfEnabled<Projects.ConsoleMTLSClient>("console-mtls-client", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleParameterizedScopeClient>("console-parameterized-scope-client", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowPublic>("console-resource-owner-flow-public", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowReference>("console-resource-owner-flow-reference", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowRefreshToken>("console-resource-owner-flow-refresh-token", explicitStart: true);
-    _ = RegisterClientIfEnabled<Projects.ConsoleResourceOwnerFlowUserInfo>("console-resource-owner-flow-userinfo", explicitStart: true);
     _ = RegisterClientIfEnabled<Projects.WindowsConsoleSystemBrowser>("console-system-browser", explicitStart: true);
     _ = RegisterClientIfEnabled<Projects.ConsoleScopesResources>("console-scopes-resources", explicitStart: true);
     _ = RegisterClientIfEnabled<Projects.ConsoleCode>("console-code", explicitStart: true);

@@ -17,6 +17,7 @@ namespace Duende.IdentityServer.Stores;
 public class CachingClientStore<T> : IClientStore
     where T : IClientStore
 {
+    private readonly CachePolicy<Client> _policy;
     private readonly IdentityServerOptions _options;
     private readonly HybridCache _cache;
     private readonly IClientStore _inner;
@@ -24,14 +25,17 @@ public class CachingClientStore<T> : IClientStore
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingClientStore{T}"/> class.
     /// </summary>
+    /// <param name="policy">The cache policy.</param>
     /// <param name="options">The options.</param>
     /// <param name="inner">The inner.</param>
     /// <param name="cache">The cache.</param>
     public CachingClientStore(
+        CachePolicy<Client> policy,
         IdentityServerOptions options,
         T inner,
         [FromKeyedServices(ServiceProviderKeys.ConfigurationStoreCache)] HybridCache cache)
     {
+        _policy = policy;
         _options = options;
         _inner = inner;
         _cache = cache;
@@ -50,8 +54,8 @@ public class CachingClientStore<T> : IClientStore
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
 
-        var cacheKey = CacheKey.For<Client>(clientId);
-        var cacheOptions = CacheKey.WriteOptions(_options.Caching.ClientStoreExpiration);
+        var cacheKey = _policy.BuildKey(clientId);
+        var cacheOptions = _policy.WriteOptions(_options.Caching.ClientStoreExpiration);
 
         try
         {
@@ -64,6 +68,7 @@ public class CachingClientStore<T> : IClientStore
                     return client ?? throw new NotCachedException();
                 },
                 cacheOptions,
+                tags: _policy.Tags,
                 cancellationToken: ct);
         }
         catch (NotCachedException)

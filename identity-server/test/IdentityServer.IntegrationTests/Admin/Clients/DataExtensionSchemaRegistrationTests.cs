@@ -8,7 +8,7 @@ using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Internal;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +17,7 @@ namespace Duende.IdentityServer.IntegrationTests.Admin.Clients;
 
 /// <summary>
 /// Integration tests verifying the <c>AddInMemoryDataExtensionSchemas</c> and
-/// <c>AddStorageDataExtensionSchemas</c> extension methods for configuring
+/// <c>AddDynamicSchemas</c> extension methods for configuring
 /// data extension schema services.
 /// </summary>
 public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp) : IAsyncLifetime
@@ -57,15 +57,13 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
         await using var server = await CreateServer(builder =>
             builder.AddInMemoryDataExtensionSchemas([TestClientAttributes.Schema]));
 
-        var schemaAdmin = server.Services.GetService<ISchemaAdmin>();
-        schemaAdmin.ShouldBeNull();
+        Should.Throw<NotSupportedException>(server.Services.GetService<ISchemaAdmin>);
     }
 
     [Fact]
     public async Task storage_schemas_allow_extended_properties_round_trip()
     {
-        await using var server = await CreateServer(builder =>
-            builder.AddStorageDataExtensionSchemas());
+        await using var server = await CreateServer(_ => { _.Services.AddDynamicSchemaStorage(); });
 
         var schemaAdmin = server.GetRequiredService<ISchemaAdmin>();
         var createSchemaResult = await schemaAdmin.CreateAsync(TestClientAttributes.Schema, _ct);
@@ -95,8 +93,7 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
     [Fact]
     public async Task storage_schemas_registers_schema_admin()
     {
-        await using var server = await CreateServer(builder =>
-            builder.AddStorageDataExtensionSchemas());
+        await using var server = await CreateServer(sp => { sp.AddDynamicSchemas(); });
 
         var schemaAdmin = server.Services.GetService<ISchemaAdmin>();
         _ = schemaAdmin.ShouldNotBeNull();
@@ -119,12 +116,10 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
             {
                 services.AddRouting();
 
-                services.AddStorageInternal(storage =>
-                    storage.AddSqliteStore(opt =>
-                        opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
-
                 var isBuilder = services.AddIdentityServer()
-                    .AddConfigurationStorage()
+                    .AddStorage(storage =>
+                        storage.AddSqliteStore(opt =>
+                            opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
                     .AddClientConfigurationValidator<Validation.NopClientConfigurationValidator>();
 
                 configureSchemas(isBuilder);

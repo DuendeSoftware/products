@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 
 namespace Duende.IdentityServer.Stores.Storage;
@@ -98,7 +99,7 @@ internal static class ClientDso
         /// <summary>
         ///     Extended attribute values for the client.
         /// </summary>
-        public IReadOnlyList<AttributeValueEntryDso>? ExtendedAttributeValues { get; init; }
+        public IReadOnlyList<AttributeValueDso.V1>? ExtendedAttributeValues { get; init; }
     }
 
     internal sealed record SecretDso(

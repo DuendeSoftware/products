@@ -69,6 +69,13 @@ internal sealed class ConfigureSaml2OptionsFromServiceProvider : IConfigureNamed
 
         options.SPOptions.WantAssertionsSigned = spOptions.WantAssertionsSigned;
 
+        if (!string.IsNullOrWhiteSpace(spOptions.IdpInitiatedCallbackUrl))
+        {
+            options.SPOptions.IdpInitiatedCallbackUrl = new Uri(spOptions.IdpInitiatedCallbackUrl, UriKind.RelativeOrAbsolute);
+        }
+
+        options.SPOptions.MaxRelayStateLength = spOptions.MaxRelayStateLength;
+
         // Add SP signing certificate if configured
         if (!string.IsNullOrWhiteSpace(spOptions.SpSigningCertificateBase64))
         {

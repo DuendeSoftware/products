@@ -4,9 +4,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
 {
     static class UriExtensions
     {
-        public static bool IsHttps(this Uri uri)
+        extension(Uri uri)
         {
-            return string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase);
+            public bool IsHttps()
+            {
+                return string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase);
+            }
         }
     }
 }

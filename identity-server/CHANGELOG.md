@@ -1,5 +1,13 @@
 # IdentityServer Changelog
 
+# 8.1.0
+
+## Enhancements
+- Added `AddStorage()` extension method
+  - Registers the complete set of Duende.Storage-backed configuration and operational stores, admin services, schema services, and supporting infrastructure (DSOs, repositories, pooled storage factory, outbox subscriber/processor, background purge hosted services) in a single call.
+  - A concrete database provider (for example `AddSqliteStore()`, `AddPostgreSqlStore()`, or `AddMsSqlStore()`) is selected via the `configure` delegate passed to `AddStorage()`.
+  - Explicit store selector methods (such as `AddInMemoryClients()`) called after `AddStorage()` replace the corresponding registration made by it.
+
 # 8.0.0
 
 ## Breaking Changes

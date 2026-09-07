@@ -21,8 +21,16 @@ public sealed class ConsoleFlowTests
     private static readonly Type[] ConsoleScenarioTypes =
     [
         typeof(ConsoleClientCredentials),
+        typeof(ConsoleClientCredentialsPostBody),
+        typeof(ConsoleClientCredentialsCallingIdentityServerApi),
         typeof(ClientCredentialsDPoP),
+        typeof(ConsoleResourceOwnerFlowRefreshToken),
         typeof(ResourceOwnerFlow),
+        typeof(ResourceOwnerFlowPublic),
+        typeof(ResourceOwnerFlowReference),
+        typeof(ResourceOwnerFlowUserInfo),
+        typeof(ParameterizedScope),
+        typeof(CustomGrant),
         typeof(PrivateKeyJwt),
         typeof(TokenIntrospection)
     ];

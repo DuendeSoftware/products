@@ -10,6 +10,9 @@ using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 using Duende.Storage;
+using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 
@@ -18,48 +21,58 @@ namespace Duende.IdentityServer.Stores.Storage.SamlServiceProviders;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class SamlServiceProviderAdmin(
     SamlServiceProviderRepository repository,
-    ISamlServiceProviderConfigurationValidator validator) : ISamlServiceProviderAdmin
+    ISamlServiceProviderConfigurationValidator validator,
+    ISchemaStore schemaStore) : ISamlServiceProviderAdmin
 {
     // === CRUD ===
 
-    public async Task<SaveResult<Guid>> CreateAsync(SamlServiceProviderConfiguration serviceProvider, Ct ct)
+    public async Task<SaveResult<SamlServiceProviderId>> CreateAsync(CreateSamlServiceProvider serviceProvider, Ct ct)
     {
-        var structuralError = ValidateStructure(serviceProvider);
+        var input = SamlSpInput.From(serviceProvider);
+
+        var structuralError = ValidateStructure(input);
         if (structuralError is not null)
         {
-            return structuralError;
+            return SaveResult.Failure<SamlServiceProviderId>(structuralError);
         }
 
-        var validationError = await RunValidatorAsync(serviceProvider, ct);
+        var validationError = await RunValidatorAsync(input, ct);
         if (validationError is not null)
         {
-            return validationError;
+            return SaveResult.Failure<SamlServiceProviderId>(validationError);
+        }
+
+        var extError = await ValidateExtendedPropertiesAsync(input, ct);
+        if (extError is not null)
+        {
+            return SaveResult.Failure<SamlServiceProviderId>(extError);
         }
 
         var id = UuidV7.New();
-        var dso = MapToDso(id.Value, serviceProvider, forceNewCertIds: true);
+        var dso = MapToDso(id.Value, input, forceNewCertIds: true);
 
         var result = await repository.CreateAsync(id, dso, ct);
 
         return result switch
         {
-            CreateResult.Success => SaveResult.Success(id.Value, (DataVersion)1),
+            CreateResult.Success => SaveResult.Success<SamlServiceProviderId>(id.Value, (DataVersion)1),
             CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                AdminError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId),
+                SaveResult.Failure<SamlServiceProviderId>(StorageError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId)),
             _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
         };
     }
 
-    public async Task<GetResult<SamlServiceProviderConfiguration>> GetAsync(Guid id, Ct ct)
+    public async Task<GetResult<SamlServiceProviderConfiguration>> GetAsync(SamlServiceProviderId id, Ct ct)
     {
-        var result = await repository.TryReadByIdAsync(id, ct);
+        var result = await repository.TryReadByIdAsync(id.Value, ct);
         if (result is null)
         {
             return GetResult.NotFound<SamlServiceProviderConfiguration>();
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.SamlServiceProvider, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
     public async Task<GetResult<SamlServiceProviderConfiguration>> GetByEntityIdAsync(string entityId, Ct ct)
@@ -71,50 +84,61 @@ internal sealed class SamlServiceProviderAdmin(
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.SamlServiceProvider, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
-    public async Task<SaveResult<Guid>> UpdateAsync(Guid id, SamlServiceProviderConfiguration serviceProvider, DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<SamlServiceProviderId>> UpdateAsync(SamlServiceProviderId id, UpdateSamlServiceProvider serviceProvider, DataVersion expectedVersion, Ct ct)
     {
-        var structuralError = ValidateStructure(serviceProvider);
+        var input = SamlSpInput.From(serviceProvider);
+
+        var structuralError = ValidateStructure(input);
         if (structuralError is not null)
         {
-            return structuralError;
+            return SaveResult.Failure<SamlServiceProviderId>(structuralError);
         }
 
-        var existing = await repository.TryReadByIdAsync(id, ct);
+        var idValue = id.Value;
+        var existing = await repository.TryReadByIdAsync(idValue, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("samlServiceProvider", id.ToString());
+            return SaveResult.Failure<SamlServiceProviderId>(StorageError.NotFound("samlServiceProvider", idValue.ToString()));
         }
 
-        var validationError = await RunValidatorAsync(serviceProvider, ct);
+        var validationError = await RunValidatorAsync(input, ct);
         if (validationError is not null)
         {
-            return validationError;
+            return SaveResult.Failure<SamlServiceProviderId>(validationError);
         }
 
-        var dso = MapToDso(id, serviceProvider);
+        var extError = await ValidateExtendedPropertiesAsync(input, ct);
+        if (extError is not null)
+        {
+            return SaveResult.Failure<SamlServiceProviderId>(extError);
+        }
 
-        var result = await repository.UpdateAsync(UuidV7.From(id), dso, expectedVersion.Value, ct);
+        var dso = MapToDso(idValue, input);
+
+        var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
 
         return result switch
         {
-            UpdateResult.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("samlServiceProvider", id.ToString()),
-            UpdateResult.KeyConflict => AdminError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId),
+            UpdateResult.Success => SaveResult.Success<SamlServiceProviderId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<SamlServiceProviderId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<SamlServiceProviderId>(StorageError.NotFound("samlServiceProvider", idValue.ToString())),
+            UpdateResult.KeyConflict => SaveResult.Failure<SamlServiceProviderId>(StorageError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId)),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
-    public async Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct)
+    public async Task<SaveResult<SamlServiceProviderId>> DeleteAsync(SamlServiceProviderId id, Ct ct)
     {
-        var result = await repository.DeleteAsync(id, ct);
+        var idValue = id.Value;
+        var result = await repository.DeleteAsync(idValue, ct);
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success(id, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success<SamlServiceProviderId>(idValue, (DataVersion)0),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
@@ -125,18 +149,98 @@ internal sealed class SamlServiceProviderAdmin(
         return result.ConvertTo(MapToListItem);
     }
 
+    // === Common input shape shared by Create/Update ===
+
+    private sealed record SamlSpInput
+    {
+        public required string EntityId { get; init; }
+        public bool Enabled { get; init; } = true;
+        public string? DisplayName { get; init; }
+        public string? Description { get; init; }
+        public TimeSpan? ClockSkew { get; init; }
+        public TimeSpan? RequestMaxAge { get; init; }
+        public TimeSpan? AssertionLifetime { get; init; }
+        public List<SamlIndexedEndpointConfiguration> AssertionConsumerServiceUrls { get; init; } = [];
+        public List<SamlEndpointConfiguration> SingleLogoutServiceUrls { get; init; } = [];
+        public bool? RequireSignedAuthnRequests { get; init; }
+        public bool? RequireSignedLogoutResponses { get; init; }
+        public List<SamlCertificateInput> Certificates { get; init; } = [];
+        public bool AllowIdpInitiated { get; init; }
+        public List<string> AllowedScopes { get; init; } = [];
+        public Dictionary<string, string> ClaimMappings { get; init; } = [];
+        public Dictionary<string, string> AuthnContextMappings { get; init; } = [];
+        public List<string> RequestedClaimTypes { get; init; } = [];
+        public string? DefaultNameIdFormat { get; init; }
+        public string? EmailNameIdClaimType { get; init; }
+        public SamlSigningBehavior? SigningBehavior { get; init; }
+        public List<string> AllowedSignatureAlgorithms { get; init; } = [];
+        public AttributeValueCollection ExtendedProperties { get; init; } = new();
+
+        public static SamlSpInput From(CreateSamlServiceProvider sp) => new()
+        {
+            EntityId = sp.EntityId,
+            Enabled = sp.Enabled,
+            DisplayName = sp.DisplayName,
+            Description = sp.Description,
+            ClockSkew = sp.ClockSkew,
+            RequestMaxAge = sp.RequestMaxAge,
+            AssertionLifetime = sp.AssertionLifetime,
+            AssertionConsumerServiceUrls = sp.AssertionConsumerServiceUrls,
+            SingleLogoutServiceUrls = sp.SingleLogoutServiceUrls,
+            RequireSignedAuthnRequests = sp.RequireSignedAuthnRequests,
+            RequireSignedLogoutResponses = sp.RequireSignedLogoutResponses,
+            Certificates = sp.Certificates,
+            AllowIdpInitiated = sp.AllowIdpInitiated,
+            AllowedScopes = sp.AllowedScopes,
+            ClaimMappings = sp.ClaimMappings,
+            AuthnContextMappings = sp.AuthnContextMappings,
+            RequestedClaimTypes = sp.RequestedClaimTypes,
+            DefaultNameIdFormat = sp.DefaultNameIdFormat,
+            EmailNameIdClaimType = sp.EmailNameIdClaimType,
+            SigningBehavior = sp.SigningBehavior,
+            AllowedSignatureAlgorithms = sp.AllowedSignatureAlgorithms,
+            ExtendedProperties = sp.ExtendedProperties
+        };
+
+        public static SamlSpInput From(UpdateSamlServiceProvider sp) => new()
+        {
+            EntityId = sp.EntityId,
+            Enabled = sp.Enabled,
+            DisplayName = sp.DisplayName,
+            Description = sp.Description,
+            ClockSkew = sp.ClockSkew,
+            RequestMaxAge = sp.RequestMaxAge,
+            AssertionLifetime = sp.AssertionLifetime,
+            AssertionConsumerServiceUrls = sp.AssertionConsumerServiceUrls,
+            SingleLogoutServiceUrls = sp.SingleLogoutServiceUrls,
+            RequireSignedAuthnRequests = sp.RequireSignedAuthnRequests,
+            RequireSignedLogoutResponses = sp.RequireSignedLogoutResponses,
+            Certificates = sp.Certificates,
+            AllowIdpInitiated = sp.AllowIdpInitiated,
+            AllowedScopes = sp.AllowedScopes,
+            ClaimMappings = sp.ClaimMappings,
+            AuthnContextMappings = sp.AuthnContextMappings,
+            RequestedClaimTypes = sp.RequestedClaimTypes,
+            DefaultNameIdFormat = sp.DefaultNameIdFormat,
+            EmailNameIdClaimType = sp.EmailNameIdClaimType,
+            SigningBehavior = sp.SigningBehavior,
+            AllowedSignatureAlgorithms = sp.AllowedSignatureAlgorithms,
+            ExtendedProperties = sp.ExtendedProperties
+        };
+    }
+
     // === Structural Validation ===
 
-    private static AdminError? ValidateStructure(SamlServiceProviderConfiguration sp)
+    private static StorageError? ValidateStructure(SamlSpInput sp)
     {
         if (string.IsNullOrWhiteSpace(sp.EntityId))
         {
-            return AdminError.Required("EntityId");
+            return StorageError.Required("EntityId");
         }
 
         if (sp.DisplayName is not null && string.IsNullOrWhiteSpace(sp.DisplayName))
         {
-            return AdminError.InvalidValue("DisplayName", "Display name must not be empty or whitespace.");
+            return StorageError.InvalidValue("DisplayName", "Display name must not be empty or whitespace.");
         }
 
         // Validate ACS URLs
@@ -146,17 +250,17 @@ internal sealed class SamlServiceProviderAdmin(
             {
                 if (acs is null)
                 {
-                    return AdminError.InvalidValue("AssertionConsumerServiceUrls", "ACS endpoint list must not contain null entries.");
+                    return StorageError.InvalidValue("AssertionConsumerServiceUrls", "ACS endpoint list must not contain null entries.");
                 }
 
                 if (string.IsNullOrWhiteSpace(acs.Location))
                 {
-                    return AdminError.InvalidValue("AssertionConsumerServiceUrls", "ACS endpoint location must not be empty.");
+                    return StorageError.InvalidValue("AssertionConsumerServiceUrls", "ACS endpoint location must not be empty.");
                 }
 
                 if (!Uri.TryCreate(acs.Location, UriKind.Absolute, out _))
                 {
-                    return AdminError.InvalidValue("AssertionConsumerServiceUrls", $"ACS endpoint location '{acs.Location}' is not a valid absolute URI.");
+                    return StorageError.InvalidValue("AssertionConsumerServiceUrls", $"ACS endpoint location '{acs.Location}' is not a valid absolute URI.");
                 }
             }
 
@@ -164,7 +268,7 @@ internal sealed class SamlServiceProviderAdmin(
             var indices = sp.AssertionConsumerServiceUrls.Select(a => a.Index).ToList();
             if (indices.Count != indices.Distinct().Count())
             {
-                return AdminError.InvalidValue("AssertionConsumerServiceUrls", "ACS endpoint list contains duplicate Index values.");
+                return StorageError.InvalidValue("AssertionConsumerServiceUrls", "ACS endpoint list contains duplicate Index values.");
             }
         }
 
@@ -175,17 +279,17 @@ internal sealed class SamlServiceProviderAdmin(
             {
                 if (slo is null)
                 {
-                    return AdminError.InvalidValue("SingleLogoutServiceUrls", "SLO endpoint list must not contain null entries.");
+                    return StorageError.InvalidValue("SingleLogoutServiceUrls", "SLO endpoint list must not contain null entries.");
                 }
 
                 if (string.IsNullOrWhiteSpace(slo.Location))
                 {
-                    return AdminError.InvalidValue("SingleLogoutServiceUrls", "SLO endpoint location must not be empty.");
+                    return StorageError.InvalidValue("SingleLogoutServiceUrls", "SLO endpoint location must not be empty.");
                 }
 
                 if (!Uri.TryCreate(slo.Location, UriKind.Absolute, out _))
                 {
-                    return AdminError.InvalidValue("SingleLogoutServiceUrls", $"SLO endpoint location '{slo.Location}' is not a valid absolute URI.");
+                    return StorageError.InvalidValue("SingleLogoutServiceUrls", $"SLO endpoint location '{slo.Location}' is not a valid absolute URI.");
                 }
             }
         }
@@ -197,12 +301,12 @@ internal sealed class SamlServiceProviderAdmin(
             {
                 if (cert is null)
                 {
-                    return AdminError.InvalidValue("Certificates", "Certificate list must not contain null entries.");
+                    return StorageError.InvalidValue("Certificates", "Certificate list must not contain null entries.");
                 }
 
                 if (string.IsNullOrWhiteSpace(cert.Base64Data))
                 {
-                    return AdminError.InvalidValue("Certificates", "Certificate Base64Data must not be empty.");
+                    return StorageError.InvalidValue("Certificates", "Certificate Base64Data must not be empty.");
                 }
 
                 try
@@ -212,11 +316,11 @@ internal sealed class SamlServiceProviderAdmin(
                 }
                 catch (FormatException)
                 {
-                    return AdminError.InvalidValue("Certificates", "Certificate Base64Data is not valid base64.");
+                    return StorageError.InvalidValue("Certificates", "Certificate Base64Data is not valid base64.");
                 }
                 catch (CryptographicException)
                 {
-                    return AdminError.InvalidValue("Certificates", "Certificate Base64Data does not contain a valid X.509 certificate.");
+                    return StorageError.InvalidValue("Certificates", "Certificate Base64Data does not contain a valid X.509 certificate.");
                 }
             }
 
@@ -224,7 +328,7 @@ internal sealed class SamlServiceProviderAdmin(
             var certIds = sp.Certificates.Where(c => c.Id != Guid.Empty).Select(c => c.Id).ToList();
             if (certIds.Count != certIds.Distinct().Count())
             {
-                return AdminError.InvalidValue("Certificates", "Certificate list contains duplicate IDs.");
+                return StorageError.InvalidValue("Certificates", "Certificate list contains duplicate IDs.");
             }
         }
 
@@ -235,7 +339,7 @@ internal sealed class SamlServiceProviderAdmin(
             {
                 if (string.IsNullOrWhiteSpace(scope))
                 {
-                    return AdminError.InvalidValue("AllowedScopes", "Scope must not be null or whitespace.");
+                    return StorageError.InvalidValue("AllowedScopes", "Scope must not be null or whitespace.");
                 }
             }
         }
@@ -245,7 +349,25 @@ internal sealed class SamlServiceProviderAdmin(
 
     // === Validator Pipeline ===
 
-    private async Task<AdminError?> RunValidatorAsync(SamlServiceProviderConfiguration sp, Ct ct)
+    private async Task<StorageError?> ValidateExtendedPropertiesAsync(SamlSpInput sp, Ct ct)
+    {
+        if (sp.ExtendedProperties.Count == 0)
+        {
+            return null;
+        }
+
+        var schemaId = SchemaId.SamlServiceProvider;
+        var schema = await schemaStore.GetAsync(schemaId, ct);
+
+        if (!sp.ExtendedProperties.TryValidateAgainst(schema, out var errors))
+        {
+            return StorageError.ValidationFailed(string.Join("; ", errors));
+        }
+
+        return null;
+    }
+
+    private async Task<StorageError?> RunValidatorAsync(SamlSpInput sp, Ct ct)
     {
         var model = MapToModel(sp);
         try
@@ -253,7 +375,7 @@ internal sealed class SamlServiceProviderAdmin(
             var context = new SamlServiceProviderConfigurationValidationContext(model);
             await validator.ValidateAsync(context, ct);
 
-            return context.IsValid ? null : AdminError.ValidationFailed(context.ErrorMessage!);
+            return context.IsValid ? null : StorageError.ValidationFailed(context.ErrorMessage!);
         }
         finally
         {
@@ -268,9 +390,9 @@ internal sealed class SamlServiceProviderAdmin(
         }
     }
 
-    // === Mapping: Configuration → Domain Model (for validator) ===
+    // === Mapping: Input → Domain Model (for validator) ===
 
-    private static SamlServiceProvider MapToModel(SamlServiceProviderConfiguration sp) =>
+    private static SamlServiceProvider MapToModel(SamlSpInput sp) =>
         new()
         {
             EntityId = sp.EntityId,
@@ -325,9 +447,9 @@ internal sealed class SamlServiceProviderAdmin(
                 .ToList()
         };
 
-    // === Mapping: Configuration → DSO ===
+    // === Mapping: Input → DSO ===
 
-    private static SamlServiceProviderDso.V1 MapToDso(Guid id, SamlServiceProviderConfiguration sp, bool forceNewCertIds = false) =>
+    private static SamlServiceProviderDso.V1 MapToDso(Guid id, SamlSpInput sp, bool forceNewCertIds = false) =>
         new()
         {
             Id = id,
@@ -378,11 +500,14 @@ internal sealed class SamlServiceProviderAdmin(
 
             // Signing
             SigningBehavior = sp.SigningBehavior.HasValue ? (int)sp.SigningBehavior.Value : null,
-            AllowedSignatureAlgorithms = sp.AllowedSignatureAlgorithms?.AsReadOnly() ?? []
+            AllowedSignatureAlgorithms = sp.AllowedSignatureAlgorithms?.AsReadOnly() ?? [],
+
+            // Extended properties
+            ExtendedAttributeValues = EavMapper.ToDsoList(sp.ExtendedProperties)
         };
 
     private static List<SamlServiceProviderDso.CertificateDso> NormalizeCertificates(
-        List<SamlCertificateConfiguration>? certificates, bool forceNewIds = false)
+        List<SamlCertificateInput>? certificates, bool forceNewIds = false)
     {
         if (certificates is null || certificates.Count == 0)
         {
@@ -406,7 +531,7 @@ internal sealed class SamlServiceProviderAdmin(
 
     // === Mapping: DSO → Configuration ===
 
-    private static SamlServiceProviderConfiguration MapToConfiguration(SamlServiceProviderDso.V1 dso) =>
+    private static SamlServiceProviderConfiguration MapToConfiguration(SamlServiceProviderDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             EntityId = dso.EntityId,
@@ -478,9 +603,10 @@ internal sealed class SamlServiceProviderAdmin(
 
             // Signing
             SigningBehavior = dso.SigningBehavior.HasValue ? (SamlSigningBehavior)dso.SigningBehavior.Value : null,
-            AllowedSignatureAlgorithms = dso.AllowedSignatureAlgorithms.Count > 0
-                ? [.. dso.AllowedSignatureAlgorithms]
-                : null
+            AllowedSignatureAlgorithms = [.. dso.AllowedSignatureAlgorithms],
+
+            // Extended properties
+            ExtendedProperties = EavMapper.ToAttributeValues(dso.ExtendedAttributeValues ?? [], schema).ToList()
         };
 
     private static SamlServiceProviderListItem MapToListItem(SamlServiceProviderDso.V1 dso) =>

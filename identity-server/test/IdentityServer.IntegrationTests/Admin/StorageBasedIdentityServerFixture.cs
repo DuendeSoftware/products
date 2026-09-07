@@ -8,7 +8,6 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Models;
-using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.AspNetCore.Builder;
@@ -62,20 +61,21 @@ public sealed class StorageBasedIdentityServerFixture : IAsyncLifetime
                 services.AddRouting();
 
                 // Todo: this should be made available differently 
-                services.AddStorageInternal(storage =>
-                    storage.AddSqliteStore(opt =>
-                        opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
                 var identityServer = services.AddIdentityServer(options =>
                     {
                         options.EmitStaticAudienceClaim = true;
                         ConfigureIdentityServerOptions(options);
                     })
-                    .AddConfigurationStorage()
-                    .AddOperationalStorage()
+                    .AddStorage(storage =>
+                        storage.AddSqliteStore(opt =>
+                            opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"))
                     .AddInMemoryDataExtensionSchemas([])
 
-                    // Todo: this should not be possible when storage is enabled
+                    // Overriding the storage-backed IResourceStore with an in-memory one is an
+                    // intentional, whole-store replacement (not a partial category mix): both
+                    // required resource collections (API scopes and identity resources) are
+                    // supplied together so the in-memory IResourceStore has everything this
+                    // fixture's tests need.
                     .AddInMemoryApiScopes([new ApiScope("scope1", "Scope 1")])
                     .AddInMemoryIdentityResources([new Models.IdentityResources.OpenId()]);
 

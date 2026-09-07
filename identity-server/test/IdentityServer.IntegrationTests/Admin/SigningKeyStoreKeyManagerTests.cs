@@ -279,9 +279,9 @@ public sealed class SigningKeyStoreKeyManagerTests_FileSystem : SigningKeyStoreK
 }
 
 /// <summary>
-/// Runs KeyManager tests with the IStore-backed SigningKeyStore backend.
+/// Runs KeyManager tests with the IStorage-backed SigningKeyStore backend.
 /// </summary>
-public sealed class SigningKeyStoreKeyManagerTests_IStore : SigningKeyStoreKeyManagerTestsBase
+public sealed class SigningKeyStoreKeyManagerTests_IStorage : SigningKeyStoreKeyManagerTestsBase
 {
     private readonly string _dbName = $"keymgr_{Guid.NewGuid():N}";
 
@@ -292,7 +292,8 @@ public sealed class SigningKeyStoreKeyManagerTests_IStore : SigningKeyStoreKeyMa
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<KeyDso.V1>();
-        services.AddSingleton<IStoreFactory, DefaultStoreFactory>();
+        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
+        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<KeyRepository>();
         services.AddIdentityServerBuilder().AddSigningKeyStore<SigningKeyStore>();
     }

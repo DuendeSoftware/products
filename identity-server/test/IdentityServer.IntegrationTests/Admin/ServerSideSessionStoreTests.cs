@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
 /// <summary>
-/// Integration tests for the IStore-backed IServerSideSessionStore implementation.
+/// Integration tests for the IStorage-backed IServerSideSessionStore implementation.
 /// Tests cover all 8 interface methods against a real SQLite database.
 /// </summary>
 public sealed class ServerSideSessionStoreTests : IAsyncLifetime
@@ -47,7 +47,7 @@ public sealed class ServerSideSessionStoreTests : IAsyncLifetime
 
     /// <summary>
     /// Creates a session that is considered expired for cleanup queries.
-    /// IStore's CreateAsync silently skips entities whose entity-level TTL is already past,
+    /// IStorage's CreateAsync silently skips entities whose entity-level TTL is already past,
     /// so we create with a future expiry then update with a past expiry.
     /// The entity remains visible on reads (TTL is best-effort) with a past Expires search field.
     /// </summary>
@@ -396,7 +396,7 @@ public sealed class ServerSideSessionStoreTests : IAsyncLifetime
     public async Task UpdateSessionAsync_ClearingExpiration_IsNotFoundByExpirationQuery()
     {
         var store = BuildStore();
-        // Create with future expiry (so IStore actually persists it), then update to past expiry
+        // Create with future expiry (so IStorage actually persists it), then update to past expiry
         var expired = await CreateExpiredSessionAsync(store);
 
         // Now clear the expiration (set to null)

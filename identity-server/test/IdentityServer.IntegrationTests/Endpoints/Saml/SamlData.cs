@@ -5,7 +5,7 @@
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-internal class SamlData
+public class SamlData
 {
     public DateTimeOffset Now => FakeTimeProvider.GetUtcNow();
 

@@ -11,21 +11,23 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public static class IClientStoreExtensions
 {
-    /// <summary>
-    /// Finds the enabled client by identifier.
-    /// </summary>
-    /// <param name="store">The store.</param>
-    /// <param name="clientId">The client identifier.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
-    public static async Task<Client> FindEnabledClientByIdAsync(this IClientStore store, string clientId, Ct ct)
+    extension(IClientStore store)
     {
-        var client = await store.FindClientByIdAsync(clientId, ct);
-        if (client != null && client.Enabled)
+        /// <summary>
+        /// Finds the enabled client by identifier.
+        /// </summary>
+        /// <param name="clientId">The client identifier.</param>
+        /// <param name="ct">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<Client> FindEnabledClientByIdAsync(string clientId, Ct ct)
         {
-            return client;
-        }
+            var client = await store.FindClientByIdAsync(clientId, ct);
+            if (client != null && client.Enabled)
+            {
+                return client;
+            }
 
-        return null;
+            return null;
+        }
     }
 }

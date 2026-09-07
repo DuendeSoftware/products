@@ -11,138 +11,135 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class ClaimsIdentityExtensions
     {
-        /// <summary>
-        /// Creates a Saml2Assertion from a ClaimsIdentity.
-        /// </summary>
-        /// <param name="identity">Claims to include in Assertion.</param>
-        /// <param name="issuer">Issuer to include in assertion.</param>
-        /// <returns>Saml2Assertion</returns>
-        public static Saml2Assertion ToSaml2Assertion(this ClaimsIdentity identity, EntityId issuer)
+        extension(ClaimsIdentity identity)
         {
-            return ToSaml2Assertion(identity, issuer, null);
-        }
-
-        /// <summary>
-        /// Creates a Saml2Assertion from a ClaimsIdentity.
-        /// </summary>
-        /// <param name="identity">Claims to include in Assertion.</param>
-        /// <param name="issuer">Issuer to include in assertion.</param>
-        /// <param name="audience">Audience to set as audience restriction.</param>
-        /// <returns>Saml2Assertion</returns>
-        public static Saml2Assertion ToSaml2Assertion(
-            this ClaimsIdentity identity,
-            EntityId issuer,
-            Uri audience)
-        {
-            return ToSaml2Assertion(identity, issuer, audience, null, null);
-        }
-
-        /// <summary>
-        /// Creates a Saml2Assertion from a ClaimsIdentity.
-        /// </summary>
-        /// <param name="identity">Claims to include in Assertion.</param>
-        /// <param name="issuer">Issuer to include in assertion.</param>
-        /// <param name="audience">Audience to set as audience restriction.</param>
-        /// <param name="inResponseTo">In response to id</param>
-        /// <param name="destinationUri">The destination Uri for the message</param>
-        /// <returns>Saml2Assertion</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public static Saml2Assertion ToSaml2Assertion(
-            this ClaimsIdentity identity,
-            EntityId issuer,
-            Uri audience,
-            Saml2Id inResponseTo,
-            Uri destinationUri)
-        {
-            if (identity == null)
+            /// <summary>
+            /// Creates a Saml2Assertion from a ClaimsIdentity.
+            /// </summary>
+            /// <param name="issuer">Issuer to include in assertion.</param>
+            /// <returns>Saml2Assertion</returns>
+            public Saml2Assertion ToSaml2Assertion(EntityId issuer)
             {
-                throw new ArgumentNullException(nameof(identity));
+                return identity.ToSaml2Assertion(issuer, null);
             }
 
-            if (issuer == null)
+            /// <summary>
+            /// Creates a Saml2Assertion from a ClaimsIdentity.
+            /// </summary>
+            /// <param name="issuer">Issuer to include in assertion.</param>
+            /// <param name="audience">Audience to set as audience restriction.</param>
+            /// <returns>Saml2Assertion</returns>
+            public Saml2Assertion ToSaml2Assertion(
+                EntityId issuer,
+                Uri audience)
             {
-                throw new ArgumentNullException(nameof(issuer));
+                return identity.ToSaml2Assertion(issuer, audience, null, null);
             }
 
-            var assertion = new Saml2Assertion(new Saml2NameIdentifier(issuer.Id));
-
-            assertion.Statements.Add(
-                new Saml2AuthenticationStatement(
-                    new Saml2AuthenticationContext(
-                        new Uri("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified")))
+            /// <summary>
+            /// Creates a Saml2Assertion from a ClaimsIdentity.
+            /// </summary>
+            /// <param name="issuer">Issuer to include in assertion.</param>
+            /// <param name="audience">Audience to set as audience restriction.</param>
+            /// <param name="inResponseTo">In response to id</param>
+            /// <param name="destinationUri">The destination Uri for the message</param>
+            /// <returns>Saml2Assertion</returns>
+            /// <exception cref="ArgumentNullException"></exception>
+            public Saml2Assertion ToSaml2Assertion(
+                EntityId issuer,
+                Uri audience,
+                Saml2Id inResponseTo,
+                Uri destinationUri)
+            {
+                if (identity == null)
                 {
-                    SessionIndex = identity.Claims.SingleOrDefault(
-                        c => c.Type == Saml2ClaimTypes.SessionIndex)?.Value
-                });
+                    throw new ArgumentNullException(nameof(identity));
+                }
 
-            var attributeClaims = identity.Claims.Where(
-                c => c.Type != ClaimTypes.NameIdentifier
-                && c.Type != Saml2ClaimTypes.SessionIndex).GroupBy(c => c.Type)
-                .ToArray();
+                if (issuer == null)
+                {
+                    throw new ArgumentNullException(nameof(issuer));
+                }
 
-            if (attributeClaims.Any())
-            {
+                var assertion = new Saml2Assertion(new Saml2NameIdentifier(issuer.Id));
+
                 assertion.Statements.Add(
-                    new Saml2AttributeStatement(
-                        attributeClaims.Select(
-                            ac => new Saml2Attribute(ac.Key, ac.Select(c => c.Value)))));
-            }
+                    new Saml2AuthenticationStatement(
+                        new Saml2AuthenticationContext(
+                            new Uri("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified")))
+                    {
+                        SessionIndex = identity.Claims.SingleOrDefault(
+                            c => c.Type == Saml2ClaimTypes.SessionIndex)?.Value
+                    });
 
-            var notOnOrAfter = DateTime.UtcNow.AddMinutes(2);
+                var attributeClaims = identity.Claims.Where(
+                    c => c.Type != ClaimTypes.NameIdentifier
+                    && c.Type != Saml2ClaimTypes.SessionIndex).GroupBy(c => c.Type)
+                    .ToArray();
 
-            Saml2SubjectConfirmationData confirmationData =
-                new Saml2SubjectConfirmationData
+                if (attributeClaims.Any())
                 {
-                    NotOnOrAfter = notOnOrAfter,
-                    InResponseTo = inResponseTo
+                    assertion.Statements.Add(
+                        new Saml2AttributeStatement(
+                            attributeClaims.Select(
+                                ac => new Saml2Attribute(ac.Key, ac.Select(c => c.Value)))));
+                }
+
+                var notOnOrAfter = DateTime.UtcNow.AddMinutes(2);
+
+                Saml2SubjectConfirmationData confirmationData =
+                    new Saml2SubjectConfirmationData
+                    {
+                        NotOnOrAfter = notOnOrAfter,
+                        InResponseTo = inResponseTo
+                    };
+
+                // Work around a bug in Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmationData
+                // where the setter for Recipient throws an ArgumentNullException.  Recipient is optional
+                // as per [Saml2Core, 2.4.1.2]
+                if (destinationUri != null)
+                {
+                    confirmationData.Recipient = destinationUri;
+                }
+
+                assertion.Subject = new Saml2Subject(identity.ToSaml2NameIdentifier())
+                {
+                    SubjectConfirmations =
+                    {
+                        new Saml2SubjectConfirmation(
+                            new Uri("urn:oasis:names:tc:SAML:2.0:cm:bearer"),
+                            confirmationData)
+                    }
                 };
 
-            // Work around a bug in Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmationData
-            // where the setter for Recipient throws an ArgumentNullException.  Recipient is optional
-            // as per [Saml2Core, 2.4.1.2]
-            if (destinationUri != null)
-            {
-                confirmationData.Recipient = destinationUri;
-            }
-
-            assertion.Subject = new Saml2Subject(identity.ToSaml2NameIdentifier())
-            {
-                SubjectConfirmations =
+                assertion.Conditions = new Saml2Conditions()
                 {
-                    new Saml2SubjectConfirmation(
-                        new Uri("urn:oasis:names:tc:SAML:2.0:cm:bearer"),
-                        confirmationData)
+                    NotOnOrAfter = notOnOrAfter
+                };
+
+                if (audience != null)
+                {
+                    assertion.Conditions.AudienceRestrictions.Add(
+                        new Saml2AudienceRestriction(audience.ToString()));
                 }
-            };
 
-            assertion.Conditions = new Saml2Conditions()
-            {
-                NotOnOrAfter = notOnOrAfter
-            };
-
-            if (audience != null)
-            {
-                assertion.Conditions.AudienceRestrictions.Add(
-                    new Saml2AudienceRestriction(audience.ToString()));
+                return assertion;
             }
 
-            return assertion;
-        }
-
-        /// <summary>
-        /// Create a Saml2NameIdentifier from the identity.
-        /// </summary>
-        /// <param name="identity">Identity to get NameIdentifier claim from.</param>
-        /// <returns>Saml2NameIdentifier</returns>
-        public static Saml2NameIdentifier ToSaml2NameIdentifier(this ClaimsIdentity identity)
-        {
-            if (identity == null)
+            /// <summary>
+            /// Create a Saml2NameIdentifier from the identity.
+            /// </summary>
+            /// <returns>Saml2NameIdentifier</returns>
+            public Saml2NameIdentifier ToSaml2NameIdentifier()
             {
-                throw new ArgumentNullException(nameof(identity));
-            }
+                if (identity == null)
+                {
+                    throw new ArgumentNullException(nameof(identity));
+                }
 
-            return identity.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier)
-                .ToSaml2NameIdentifier();
+                return identity.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier)
+                    .ToSaml2NameIdentifier();
+            }
         }
     }
 }

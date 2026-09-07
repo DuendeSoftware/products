@@ -6,26 +6,90 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Duende.IdentityServer.Interaction.SharedHosts.Api;
 
-public class ApiHost(
-    IScenarioConfigurator configurator,
-    string name,
-    string authority,
-    Action<IServiceCollection>? configureServices = null) : TestHost(configurator, name)
+public sealed class ApiHost : TestHost
 {
+    private readonly string _authority;
+    private readonly string? _audience;
+    private readonly Action<IServiceCollection>? _configureServices;
+    private readonly string? _introspectionClientId;
+    private readonly string? _introspectionClientSecret;
+
+    public ApiHost(
+        IScenarioConfigurator configurator,
+        string name,
+        string authority) : this(configurator, name, authority, null, null, null, null)
+    {
+    }
+
+    public ApiHost(
+        IScenarioConfigurator configurator,
+        string name,
+        string authority,
+        Action<IServiceCollection> configureServices) :
+        this(configurator, name, authority, configureServices, null, null, null)
+    {
+    }
+
+    public ApiHost(
+        IScenarioConfigurator configurator,
+        string name,
+        string authority,
+        string audience,
+        string introspectionClientId,
+        string introspectionClientSecret) :
+        this(configurator, name, authority, null, audience, introspectionClientId, introspectionClientSecret)
+    {
+    }
+
+    private ApiHost(
+        IScenarioConfigurator configurator,
+        string name,
+        string authority,
+        Action<IServiceCollection>? configureServices,
+        string? audience,
+        string? introspectionClientId,
+        string? introspectionClientSecret) : base(configurator, name)
+    {
+        _authority = authority;
+        _configureServices = configureServices;
+        _audience = audience;
+        _introspectionClientId = introspectionClientId;
+        _introspectionClientSecret = introspectionClientSecret;
+    }
+
     protected override WebApplication CreateApp(WebApplicationBuilder builder)
     {
-        configureServices?.Invoke(builder.Services);
+        _configureServices?.Invoke(builder.Services);
 
         builder.Services.AddControllers();
 
         builder.Services.AddAuthentication("token")
             .AddJwtBearer("token", options =>
             {
-                options.Authority = authority;
-                options.TokenValidationParameters.ValidateAudience = false;
+                options.Authority = _authority;
+                if (_audience == null)
+                {
+                    options.TokenValidationParameters.ValidateAudience = false;
+                }
+                else
+                {
+                    options.Audience = _audience;
+                    options.ForwardDefaultSelector = ForwardReferenceToken;
+                }
                 options.MapInboundClaims = false;
                 options.TokenValidationParameters.ValidTypes = ["at+jwt"];
             });
+
+        if (_introspectionClientId != null && _introspectionClientSecret != null)
+        {
+            builder.Services.AddAuthentication()
+                .AddOAuth2Introspection("introspection", options =>
+                {
+                    options.Authority = _authority;
+                    options.ClientId = _introspectionClientId;
+                    options.ClientSecret = _introspectionClientSecret;
+                });
+        }
 
         builder.Services.AddAuthorization();
 
@@ -41,5 +105,16 @@ public class ApiHost(
         }).RequireAuthorization();
 
         return app;
+    }
+
+    private static string? ForwardReferenceToken(HttpContext context)
+    {
+        var authorization = context.Request.Headers.Authorization.ToString();
+        const string bearerPrefix = "Bearer ";
+
+        return authorization.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase) &&
+            !authorization.AsSpan(bearerPrefix.Length).Contains('.')
+                ? "introspection"
+                : null;
     }
 }

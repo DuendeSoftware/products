@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Admin.ApiResources;
 public sealed record ApiResourceListItem
 {
     /// <summary>Storage identifier.</summary>
-    public required Guid Id { get; init; }
+    public required ApiResourceId Id { get; init; }
 
     /// <summary>The unique name of the API resource.</summary>
     public required string Name { get; init; }

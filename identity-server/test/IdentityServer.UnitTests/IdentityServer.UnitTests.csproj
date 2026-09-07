@@ -6,6 +6,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AngleSharp" />
     <PackageReference Include="Duende.Extensions.Caching.Memory" />
     <PackageReference Include="Duende.Storage.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />

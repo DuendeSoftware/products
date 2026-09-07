@@ -69,7 +69,7 @@ public class StoragePurgeHostTests
     {
         _options.StoragePurge.EnablePurge = true;
 
-        var factory = new ThrowingStoreFactory();
+        var factory = new ThrowingStorageFactory();
         var host = new StoragePurgeHost(factory, _options, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
@@ -133,7 +133,7 @@ public class StoragePurgeHostTests
         exception.ShouldBeNull();
     }
 
-    private static IStoreFactory CreateStoreFactory()
+    private static IStorageFactory CreateStoreFactory()
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -146,16 +146,16 @@ public class StoragePurgeHostTests
         var pooledStore = sp.GetRequiredService<IPooledStore>();
         ((Duende.Storage.Schema.IDatabaseSchema)pooledStore).MigrateAsync(CancellationToken.None).GetAwaiter().GetResult();
 
-        return new SimpleStoreFactory(pooledStore.OpenPool(0));
+        return new SimpleStorageFactory(pooledStore.OpenPool(0));
     }
 
-    private sealed class SimpleStoreFactory(IStore store) : IStoreFactory
+    private sealed class SimpleStorageFactory(IStorage storage) : IStorageFactory
     {
-        public Task<IStore> GetStore(CancellationToken _) => Task.FromResult(store);
+        public Task<IStorage> GetStorage(CancellationToken _) => Task.FromResult(storage);
     }
 
-    private sealed class ThrowingStoreFactory : IStoreFactory
+    private sealed class ThrowingStorageFactory : IStorageFactory
     {
-        public Task<IStore> GetStore(CancellationToken _) => throw new InvalidOperationException("Simulated factory failure");
+        public Task<IStorage> GetStorage(CancellationToken _) => throw new InvalidOperationException("Simulated factory failure");
     }
 }

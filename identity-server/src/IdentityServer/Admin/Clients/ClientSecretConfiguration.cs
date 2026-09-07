@@ -15,7 +15,7 @@ public sealed class ClientSecretConfiguration
     /// <summary>
     /// The unique storage identifier for this secret.
     /// </summary>
-    public required Guid Id { get; init; }
+    public required SecretId Id { get; init; }
 
     /// <summary>
     /// An optional description for this secret.

@@ -12,72 +12,75 @@ namespace Duende.IdentityServer.Models;
 
 internal static class AuthorizeResponseExtensions
 {
-    public static NameValueCollection ToNameValueCollection(this AuthorizeResponse response, IdentityServerOptions options)
+    extension(AuthorizeResponse response)
     {
-        var collection = new NameValueCollection();
-
-        if (response.IsError)
+        public NameValueCollection ToNameValueCollection(IdentityServerOptions options)
         {
-            if (response.Error.IsPresent())
-            {
-                collection.Add("error", response.Error);
-            }
-            if (response.ErrorDescription.IsPresent())
-            {
-                collection.Add("error_description", response.ErrorDescription);
-            }
-        }
-        else
-        {
-            if (response.Code.IsPresent())
-            {
-                collection.Add("code", response.Code);
-            }
+            var collection = new NameValueCollection();
 
-            if (response.IdentityToken.IsPresent())
+            if (response.IsError)
             {
-                collection.Add("id_token", response.IdentityToken);
-            }
-
-            if (response.AccessToken.IsPresent())
-            {
-                collection.Add("access_token", response.AccessToken);
-                collection.Add("token_type", "Bearer");
-                collection.Add("expires_in", response.AccessTokenLifetime.ToString(CultureInfo.InvariantCulture));
-
-                if (response.Scope.IsPresent())
+                if (response.Error.IsPresent())
                 {
-                    collection.Add("scope", response.Scope);
+                    collection.Add("error", response.Error);
+                }
+                if (response.ErrorDescription.IsPresent())
+                {
+                    collection.Add("error_description", response.ErrorDescription);
                 }
             }
-        }
-
-        if (response.State.IsPresent())
-        {
-            collection.Add("state", response.State);
-        }
-
-        if (response.SessionState.IsPresent())
-        {
-            collection.Add("session_state", response.SessionState);
-        }
-
-        if (response.Issuer.IsPresent())
-        {
-            if (options.EmitIssuerIdentificationResponseParameter)
+            else
             {
-                collection.Add("iss", response.Issuer);
-            }
-        }
+                if (response.Code.IsPresent())
+                {
+                    collection.Add("code", response.Code);
+                }
 
-        if (response.CustomParameters != null)
-        {
-            foreach (var entry in response.CustomParameters)
+                if (response.IdentityToken.IsPresent())
+                {
+                    collection.Add("id_token", response.IdentityToken);
+                }
+
+                if (response.AccessToken.IsPresent())
+                {
+                    collection.Add("access_token", response.AccessToken);
+                    collection.Add("token_type", "Bearer");
+                    collection.Add("expires_in", response.AccessTokenLifetime.ToString(CultureInfo.InvariantCulture));
+
+                    if (response.Scope.IsPresent())
+                    {
+                        collection.Add("scope", response.Scope);
+                    }
+                }
+            }
+
+            if (response.State.IsPresent())
             {
-                collection.Add(entry.Key, entry.Value);
+                collection.Add("state", response.State);
             }
-        }
 
-        return collection;
+            if (response.SessionState.IsPresent())
+            {
+                collection.Add("session_state", response.SessionState);
+            }
+
+            if (response.Issuer.IsPresent())
+            {
+                if (options.EmitIssuerIdentificationResponseParameter)
+                {
+                    collection.Add("iss", response.Issuer);
+                }
+            }
+
+            if (response.CustomParameters != null)
+            {
+                foreach (var entry in response.CustomParameters)
+                {
+                    collection.Add(entry.Key, entry.Value);
+                }
+            }
+
+            return collection;
+        }
     }
 }

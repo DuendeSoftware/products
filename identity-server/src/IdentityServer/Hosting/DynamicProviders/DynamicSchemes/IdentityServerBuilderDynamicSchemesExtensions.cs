@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Models;
 
@@ -13,18 +14,20 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class IdentityServerBuilderDynamicSchemesExtensions
 {
-    /// <summary>
-    /// Adds the in memory identity provider store.
-    /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="providers"></param>
-    /// <returns></returns>
-    public static IIdentityServerBuilder AddInMemoryIdentityProviders(
-        this IIdentityServerBuilder builder, IEnumerable<IdentityProvider> providers)
+    extension(IIdentityServerBuilder builder)
     {
-        builder.Services.AddSingleton(providers);
-        builder.AddIdentityProviderStore<InMemoryIdentityProviderStore>();
+        /// <summary>
+        /// Adds the in memory identity provider store.
+        /// </summary>
+        /// <param name="providers"></param>
+        /// <returns></returns>
+        public IIdentityServerBuilder AddInMemoryIdentityProviders(IEnumerable<IdentityProvider> providers)
+        {
+            builder.Services.AddSingleton(providers);
+            builder.AddIdentityProviderStore<InMemoryIdentityProviderStore>();
+            builder.Services.DisableAdmin<IIdentityProviderAdmin>("in-memory stores");
 
-        return builder;
+            return builder;
+        }
     }
 }

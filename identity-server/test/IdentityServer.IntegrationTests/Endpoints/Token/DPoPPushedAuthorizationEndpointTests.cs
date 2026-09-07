@@ -17,6 +17,8 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 /// </summary>
 public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
 {
+    public DPoPPushedAuthorizationEndpointTests() => InitializePipeline();
+
     protected const string Category = "DPoP PAR endpoint";
 
     private PushedAuthorizationRequest CreatePushedAuthorizationRequest(

@@ -11,6 +11,8 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 using SecretHashAlgorithm = Duende.IdentityServer.Admin.SecretHashAlgorithm;
@@ -30,19 +32,19 @@ internal sealed class ClientAdmin(
         new ClientExtensionPropertyValidator(schemaStore),
     ];
 
-    public async Task<SaveResult<Guid>> CreateAsync(CreateClient client, Ct ct)
+    public async Task<SaveResult<ClientId>> CreateAsync(CreateClient client, Ct ct)
     {
         var secretError = ValidateCreateSecrets(client);
         if (secretError is not null)
         {
-            return secretError;
+            return SaveResult.Failure<ClientId>(secretError);
         }
 
         var configuration = MapToClientConfiguration(client);
         var validationErrors = await RunValidationPipelineAsync(configuration, ct);
         if (validationErrors is not null)
         {
-            return validationErrors;
+            return SaveResult.Failure<ClientId>(validationErrors);
         }
 
         var id = UuidV7.New();
@@ -52,23 +54,24 @@ internal sealed class ClientAdmin(
 
         return result switch
         {
-            CreateResult.Success => SaveResult.Success(id.Value, (DataVersion)1),
+            CreateResult.Success => SaveResult.Success((ClientId)id.Value, (DataVersion)1),
             CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                AdminError.AlreadyExists("client", client.ClientId),
+                SaveResult.Failure<ClientId>(StorageError.AlreadyExists("client", client.ClientId)),
             _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
         };
     }
 
-    public async Task<GetResult<ClientConfiguration>> GetAsync(Guid id, Ct ct)
+    public async Task<GetResult<ClientConfiguration>> GetAsync(ClientId id, Ct ct)
     {
-        var result = await repository.TryReadByIdAsync(id, ct);
+        var result = await repository.TryReadByIdAsync(id.Value, ct);
         if (result is null)
         {
             return GetResult.NotFound<ClientConfiguration>();
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.Client, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
     public async Task<GetResult<ClientConfiguration>> GetByClientIdAsync(string clientId, Ct ct)
@@ -80,16 +83,17 @@ internal sealed class ClientAdmin(
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.Client, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
-    public async Task<SaveResult<Guid>> UpdateAsync(Guid id, UpdateClient client, DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<ClientId>> UpdateAsync(ClientId id, UpdateClient client, DataVersion expectedVersion, Ct ct)
     {
         // Load existing DSO to preserve secrets
-        var existing = await repository.TryReadByIdAsync(id, ct);
+        var existing = await repository.TryReadByIdAsync(id.Value, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("client", id.ToString());
+            return SaveResult.Failure<ClientId>(StorageError.NotFound("client", id.ToString()));
         }
 
         var (existingDso, _) = existing.Value;
@@ -98,26 +102,26 @@ internal sealed class ClientAdmin(
         var validationErrors = await RunValidationPipelineAsync(configuration, ct);
         if (validationErrors is not null)
         {
-            return validationErrors;
+            return SaveResult.Failure<ClientId>(validationErrors);
         }
 
-        var dso = MapToDso(id, client, existingDso.ClientSecrets);
+        var dso = MapToDso(id.Value, client, existingDso.ClientSecrets);
 
-        var result = await repository.UpdateAsync(UuidV7.From(id), dso, expectedVersion.Value, ct);
+        var result = await repository.UpdateAsync(UuidV7.From(id.Value), dso, expectedVersion.Value, ct);
 
         return result switch
         {
             UpdateResult.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("client", id.ToString()),
-            UpdateResult.KeyConflict => AdminError.AlreadyExists("client", client.ClientId),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<ClientId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<ClientId>(StorageError.NotFound("client", id.ToString())),
+            UpdateResult.KeyConflict => SaveResult.Failure<ClientId>(StorageError.AlreadyExists("client", client.ClientId)),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
-    public async Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct)
+    public async Task<SaveResult<ClientId>> DeleteAsync(ClientId id, Ct ct)
     {
-        var result = await repository.DeleteAsync(id, ct);
+        var result = await repository.DeleteAsync(id.Value, ct);
 
         return result switch
         {
@@ -134,22 +138,22 @@ internal sealed class ClientAdmin(
 
     // === Secret Management ===
 
-    public async Task<SaveResult<Guid>> CreateSecretAsync(Guid clientId, CreateClientSecret secret, Ct ct)
+    public async Task<SaveResult<SecretId>> CreateSecretAsync(ClientId clientId, CreateClientSecret secret, Ct ct)
     {
         if (string.IsNullOrWhiteSpace(secret.PlaintextValue))
         {
-            return AdminError.Required("PlaintextValue");
+            return SaveResult.Failure<SecretId>(StorageError.Required("PlaintextValue"));
         }
 
         if (secret.Type is not null && string.IsNullOrWhiteSpace(secret.Type))
         {
-            return AdminError.InvalidValue("Type", "Secret type must not be empty or whitespace.");
+            return SaveResult.Failure<SecretId>(StorageError.InvalidValue("Type", "Secret type must not be empty or whitespace."));
         }
 
-        var existing = await repository.TryReadByIdAsync(clientId, ct);
+        var existing = await repository.TryReadByIdAsync(clientId.Value, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("client", clientId.ToString());
+            return SaveResult.Failure<SecretId>(StorageError.NotFound("client", clientId.ToString()));
         }
 
         var (dso, version) = existing.Value;
@@ -170,64 +174,61 @@ internal sealed class ClientAdmin(
         var updatedSecrets = dso.ClientSecrets.Append(newSecret).ToList();
         var updatedDso = dso with { ClientSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(clientId), updatedDso, version, ct);
+        var result = await repository.UpdateAsync(UuidV7.From(clientId.Value), updatedDso, version, ct);
 
         return result switch
         {
-            UpdateResult.Success => SaveResult.Success(secretId, (DataVersion)(version + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("client", clientId.ToString()),
+            UpdateResult.Success => SaveResult.Success((SecretId)secretId, (DataVersion)(version + 1)),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<SecretId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<SecretId>(StorageError.NotFound("client", clientId.ToString())),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
-    public async Task<SaveResult<Guid>> DeleteSecretAsync(Guid clientId, Guid secretId, Ct ct)
+    public async Task<SaveResult<SecretId>> DeleteSecretAsync(ClientId clientId, SecretId secretId, Ct ct)
     {
-        var existing = await repository.TryReadByIdAsync(clientId, ct);
+        var existing = await repository.TryReadByIdAsync(clientId.Value, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("client", clientId.ToString());
+            return SaveResult.Failure<SecretId>(StorageError.NotFound("client", clientId.ToString()));
         }
 
         var (dso, version) = existing.Value;
 
-        var secretToDelete = dso.ClientSecrets.FirstOrDefault(s => s.Id == secretId);
+        var secretToDelete = dso.ClientSecrets.FirstOrDefault(s => s.Id == secretId.Value);
         if (secretToDelete is null)
         {
-            return AdminError.NotFound("secret", secretId.ToString());
+            return SaveResult.Failure<SecretId>(StorageError.NotFound("secret", secretId.ToString()));
         }
 
-        var updatedSecrets = dso.ClientSecrets.Where(s => s.Id != secretId).ToList();
+        var updatedSecrets = dso.ClientSecrets.Where(s => s.Id != secretId.Value).ToList();
         var updatedDso = dso with { ClientSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(clientId), updatedDso, version, ct);
+        var result = await repository.UpdateAsync(UuidV7.From(clientId.Value), updatedDso, version, ct);
 
         return result switch
         {
             UpdateResult.Success => SaveResult.Success(secretId, (DataVersion)(version + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("client", clientId.ToString()),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<SecretId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<SecretId>(StorageError.NotFound("client", clientId.ToString())),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
     // === Structural Validation ===
 
-    private static AdminError? ValidateCreateSecrets(CreateClient client)
+    private static StorageError? ValidateCreateSecrets(CreateClient client)
     {
-        if (client.ClientSecrets is not null)
+        foreach (var secret in client.ClientSecrets ?? [])
         {
-            foreach (var secret in client.ClientSecrets)
+            if (string.IsNullOrWhiteSpace(secret.PlaintextValue))
             {
-                if (string.IsNullOrWhiteSpace(secret.PlaintextValue))
-                {
-                    return AdminError.Required("ClientSecrets.PlaintextValue");
-                }
+                return StorageError.Required("ClientSecrets.PlaintextValue");
+            }
 
-                if (secret.Type is not null && string.IsNullOrWhiteSpace(secret.Type))
-                {
-                    return AdminError.InvalidValue("ClientSecrets.Type", "Secret type must not be empty or whitespace.");
-                }
+            if (secret.Type is not null && string.IsNullOrWhiteSpace(secret.Type))
+            {
+                return StorageError.InvalidValue("ClientSecrets.Type", "Secret type must not be empty or whitespace.");
             }
         }
 
@@ -236,7 +237,7 @@ internal sealed class ClientAdmin(
 
     // === Validation Pipeline ===
 
-    private async Task<AdminError?> RunValidationPipelineAsync(ClientConfiguration configuration, Ct ct)
+    private async Task<StorageError?> RunValidationPipelineAsync(ClientConfiguration configuration, Ct ct)
     {
         foreach (var validator in validators)
         {
@@ -299,14 +300,14 @@ internal sealed class ClientAdmin(
             DeviceCodeLifetime = client.DeviceCodeLifetime,
             CibaLifetime = client.CibaLifetime,
             PollingInterval = client.PollingInterval,
-            AllowedGrantTypes = client.AllowedGrantTypes?.AsReadOnly(),
-            AllowedScopes = client.AllowedScopes?.AsReadOnly(),
-            RedirectUris = client.RedirectUris?.AsReadOnly(),
-            PostLogoutRedirectUris = client.PostLogoutRedirectUris?.AsReadOnly(),
-            AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms?.AsReadOnly(),
-            IdentityProviderRestrictions = client.IdentityProviderRestrictions?.AsReadOnly(),
-            AllowedCorsOrigins = client.AllowedCorsOrigins?.AsReadOnly(),
-            Claims = client.Claims?.Select(c => new ClientClaimConfiguration
+            AllowedGrantTypes = (client.AllowedGrantTypes ?? []).AsReadOnly(),
+            AllowedScopes = (client.AllowedScopes ?? []).AsReadOnly(),
+            RedirectUris = (client.RedirectUris ?? []).AsReadOnly(),
+            PostLogoutRedirectUris = (client.PostLogoutRedirectUris ?? []).AsReadOnly(),
+            AllowedIdentityTokenSigningAlgorithms = (client.AllowedIdentityTokenSigningAlgorithms ?? []).AsReadOnly(),
+            IdentityProviderRestrictions = (client.IdentityProviderRestrictions ?? []).AsReadOnly(),
+            AllowedCorsOrigins = (client.AllowedCorsOrigins ?? []).AsReadOnly(),
+            Claims = (client.Claims ?? []).Select(c => new ClientClaimConfiguration
             {
                 Type = c.Type,
                 Value = c.Value,
@@ -319,7 +320,7 @@ internal sealed class ClientAdmin(
                 Description = s.Description,
                 Expiration = s.Expiration
             }).ToArray(),
-            ExtendedProperties = client.ExtendedProperties.ToList().AsReadOnly()
+            ExtendedProperties = EavMapper.ToMutableCollection([.. client.ExtendedProperties])
         };
 
     private static ClientConfiguration MapToClientConfiguration(CreateClient client) =>
@@ -371,28 +372,28 @@ internal sealed class ClientAdmin(
             DeviceCodeLifetime = client.DeviceCodeLifetime,
             CibaLifetime = client.CibaLifetime,
             PollingInterval = client.PollingInterval,
-            AllowedGrantTypes = client.AllowedGrantTypes?.AsReadOnly(),
-            AllowedScopes = client.AllowedScopes?.AsReadOnly(),
-            RedirectUris = client.RedirectUris?.AsReadOnly(),
-            PostLogoutRedirectUris = client.PostLogoutRedirectUris?.AsReadOnly(),
-            AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms?.AsReadOnly(),
-            IdentityProviderRestrictions = client.IdentityProviderRestrictions?.AsReadOnly(),
-            AllowedCorsOrigins = client.AllowedCorsOrigins?.AsReadOnly(),
-            Claims = client.Claims?.Select(c => new ClientClaimConfiguration
+            AllowedGrantTypes = (client.AllowedGrantTypes ?? []).AsReadOnly(),
+            AllowedScopes = (client.AllowedScopes ?? []).AsReadOnly(),
+            RedirectUris = (client.RedirectUris ?? []).AsReadOnly(),
+            PostLogoutRedirectUris = (client.PostLogoutRedirectUris ?? []).AsReadOnly(),
+            AllowedIdentityTokenSigningAlgorithms = (client.AllowedIdentityTokenSigningAlgorithms ?? []).AsReadOnly(),
+            IdentityProviderRestrictions = (client.IdentityProviderRestrictions ?? []).AsReadOnly(),
+            AllowedCorsOrigins = (client.AllowedCorsOrigins ?? []).AsReadOnly(),
+            Claims = (client.Claims ?? []).Select(c => new ClientClaimConfiguration
             {
                 Type = c.Type,
                 Value = c.Value,
                 ValueType = c.ValueType
             }).ToList().AsReadOnly(),
-            ClientSecrets = client.ClientSecrets?.Select(x => new ClientSecretConfiguration()
+            ClientSecrets = (client.ClientSecrets ?? []).Select(x => new ClientSecretConfiguration()
             {
-                Id = Guid.NewGuid(),
+                Id = (SecretId)UuidV7.New().Value,
                 Type = x.Type ?? IdentityServerConstants.SecretTypes.SharedSecret,
                 Description = x.Description,
                 Expiration = x.Expiration
-            }).ToArray() ?? [],
+            }).ToArray(),
 
-            ExtendedProperties = client.ExtendedProperties.ToList().AsReadOnly()
+            ExtendedProperties = EavMapper.ToMutableCollection([.. client.ExtendedProperties])
         };
 
     // === Mapping ===
@@ -410,8 +411,7 @@ internal sealed class ClientAdmin(
 
     private static ClientDso.V1 MapToDso(Guid id, CreateClient client)
     {
-        var secrets = client.ClientSecrets?.Select(MapToSecretDso).ToList()
-                     ?? [];
+        var secrets = (client.ClientSecrets ?? []).Select(MapToSecretDso).ToList();
 
         return new ClientDso.V1
         {
@@ -486,21 +486,21 @@ internal sealed class ClientAdmin(
             PollingInterval = client.PollingInterval,
 
             // Collections
-            AllowedGrantTypes = client.AllowedGrantTypes?.AsReadOnly() ?? [],
-            AllowedScopes = client.AllowedScopes?.AsReadOnly() ?? [],
-            RedirectUris = client.RedirectUris?.AsReadOnly() ?? [],
-            PostLogoutRedirectUris = client.PostLogoutRedirectUris?.AsReadOnly() ?? [],
-            AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms?.AsReadOnly() ?? [],
-            IdentityProviderRestrictions = client.IdentityProviderRestrictions?.AsReadOnly() ?? [],
-            AllowedCorsOrigins = client.AllowedCorsOrigins?.AsReadOnly() ?? [],
+            AllowedGrantTypes = (client.AllowedGrantTypes ?? []).AsReadOnly(),
+            AllowedScopes = (client.AllowedScopes ?? []).AsReadOnly(),
+            RedirectUris = (client.RedirectUris ?? []).AsReadOnly(),
+            PostLogoutRedirectUris = (client.PostLogoutRedirectUris ?? []).AsReadOnly(),
+            AllowedIdentityTokenSigningAlgorithms = (client.AllowedIdentityTokenSigningAlgorithms ?? []).AsReadOnly(),
+            IdentityProviderRestrictions = (client.IdentityProviderRestrictions ?? []).AsReadOnly(),
+            AllowedCorsOrigins = (client.AllowedCorsOrigins ?? []).AsReadOnly(),
 
             ClientSecrets = secrets,
 
-            Claims = client.Claims?
+            Claims = (client.Claims ?? [])
                 .Select(c => new ClientDso.ClaimDso(c.Type, c.Value, c.ValueType))
-                .ToList() ?? [],
+                .ToList(),
 
-            ExtendedAttributeValues = EavPropertyMapper.SerializeFromCollection(client.ExtendedProperties)
+            ExtendedAttributeValues = EavMapper.ToDsoList(client.ExtendedProperties)
         };
     }
 
@@ -581,21 +581,21 @@ internal sealed class ClientAdmin(
             PollingInterval = client.PollingInterval,
 
             // Collections
-            AllowedGrantTypes = client.AllowedGrantTypes?.AsReadOnly() ?? [],
-            AllowedScopes = client.AllowedScopes?.AsReadOnly() ?? [],
-            RedirectUris = client.RedirectUris?.AsReadOnly() ?? [],
-            PostLogoutRedirectUris = client.PostLogoutRedirectUris?.AsReadOnly() ?? [],
-            AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms?.AsReadOnly() ?? [],
-            IdentityProviderRestrictions = client.IdentityProviderRestrictions?.AsReadOnly() ?? [],
-            AllowedCorsOrigins = client.AllowedCorsOrigins?.AsReadOnly() ?? [],
+            AllowedGrantTypes = (client.AllowedGrantTypes ?? []).AsReadOnly(),
+            AllowedScopes = (client.AllowedScopes ?? []).AsReadOnly(),
+            RedirectUris = (client.RedirectUris ?? []).AsReadOnly(),
+            PostLogoutRedirectUris = (client.PostLogoutRedirectUris ?? []).AsReadOnly(),
+            AllowedIdentityTokenSigningAlgorithms = (client.AllowedIdentityTokenSigningAlgorithms ?? []).AsReadOnly(),
+            IdentityProviderRestrictions = (client.IdentityProviderRestrictions ?? []).AsReadOnly(),
+            AllowedCorsOrigins = (client.AllowedCorsOrigins ?? []).AsReadOnly(),
 
             ClientSecrets = existingSecrets,
 
-            Claims = client.Claims?
+            Claims = (client.Claims ?? [])
                 .Select(c => new ClientDso.ClaimDso(c.Type, c.Value, c.ValueType))
-                .ToList() ?? [],
+                .ToList(),
 
-            ExtendedAttributeValues = EavPropertyMapper.SerializeFromCollection(client.ExtendedProperties)
+            ExtendedAttributeValues = EavMapper.ToDsoList(client.ExtendedProperties)
         };
 
     internal static Secret MapToIsSecret(CreateClientSecret secret)
@@ -627,7 +627,7 @@ internal sealed class ClientAdmin(
             HashAlgorithm: algorithmName);
     }
 
-    private static ClientConfiguration MapToConfiguration(ClientDso.V1 dso) =>
+    private static ClientConfiguration MapToConfiguration(ClientDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             ClientId = dso.ClientId,
@@ -706,9 +706,9 @@ internal sealed class ClientAdmin(
             IdentityProviderRestrictions = dso.IdentityProviderRestrictions.ToList().AsReadOnly(),
             AllowedCorsOrigins = dso.AllowedCorsOrigins.ToList().AsReadOnly(),
 
-            ExtendedProperties = EavPropertyMapper.DeserializeToCollection(dso.ExtendedAttributeValues).ToList().AsReadOnly(),
+            ExtendedProperties = EavMapper.ToMutableCollection(EavMapper.ToAttributeValues(dso.ExtendedAttributeValues ?? [], schema).ToList()),
 
-            // Secrets — metadata only, no Value exposed
+            // Secrets (metadata only, no Value exposed)
             ClientSecrets = dso.ClientSecrets
                 .Select(s => new ClientSecretConfiguration
                 {
@@ -734,7 +734,7 @@ internal sealed class ClientAdmin(
     private static ClientListItem MapToListItem(ClientDso.V1 dso) =>
         new()
         {
-            Id = dso.Id,
+            Id = (ClientId)dso.Id,
             ClientId = dso.ClientId,
             ClientName = dso.ClientName,
             Enabled = dso.Enabled,

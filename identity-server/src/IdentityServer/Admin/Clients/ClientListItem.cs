@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Admin.Clients;
 public sealed record ClientListItem
 {
     /// <summary>Storage identifier.</summary>
-    public required Guid Id { get; init; }
+    public required ClientId Id { get; init; }
 
     /// <summary>OAuth client_id.</summary>
     public required string ClientId { get; init; }

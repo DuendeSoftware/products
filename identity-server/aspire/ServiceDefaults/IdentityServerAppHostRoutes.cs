@@ -9,8 +9,6 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
 {
     public string[] ServiceNames => [
         AppHostServices.IdentityServer,
-        AppHostServices.MvcJarUriJwt,
-        AppHostServices.Web,
         AppHostServices.TemplateIs,
         AppHostServices.TemplateIsEmpty,
         AppHostServices.TemplateIsInMem,
@@ -23,8 +21,6 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
         var url = clientName switch
         {
             AppHostServices.IdentityServer => "https://localhost:5001",
-            AppHostServices.MvcJarUriJwt => "https://localhost:44305",
-            AppHostServices.Web => "https://localhost:44306",
             AppHostServices.TemplateIs => "https://localhost:7001",
             AppHostServices.TemplateIsEmpty => "https://localhost:7002",
             AppHostServices.TemplateIsInMem => "https://localhost:7003",
@@ -39,8 +35,6 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
 public class AppHostServices
 {
     public const string IdentityServer = "is-host";
-    public const string MvcJarUriJwt = "mvc-jar-uri-jwt";
-    public const string Web = "web";
     public const string TemplateIs = "template-is";
     public const string TemplateIsEmpty = "template-is-empty";
     public const string TemplateIsInMem = "template-is-inmem";

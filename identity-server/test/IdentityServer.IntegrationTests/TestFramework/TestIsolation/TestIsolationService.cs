@@ -175,7 +175,7 @@ public sealed class TestIsolationService : IDisposable
     /// <summary>
     /// Registers a hostname alias that maps to an existing server registration.
     /// Requests arriving with this hostname (without port) will be dispatched to
-    /// the target server's pipeline. This enables multi-space scenarios where
+    /// the target server's pipeline. This enables Spaces scenarios where
     /// space origins (e.g. <c>space1.dev.localhost</c>) must route to a shared gateway.
     /// </summary>
     public void RegisterHostAlias(string hostname, int testId, string serverName)

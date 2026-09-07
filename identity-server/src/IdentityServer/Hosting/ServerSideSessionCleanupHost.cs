@@ -3,6 +3,7 @@
 
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Hosting.OutboxProcessor;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Hosting;
@@ -79,6 +80,14 @@ public class ServerSideSessionCleanupHost(
         try
         {
             await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+
+            // When the storage layer handles session expiration via the outbox processor,
+            // skip synchronous cleanup to avoid race conditions with StoragePurgeHost.
+            if (serviceScope.ServiceProvider.GetService<IStorageBackedSessionsMarker>() is not null)
+            {
+                return;
+            }
+
             var scopedLogger = serviceScope.ServiceProvider.GetRequiredService<ILogger<ServerSideSessionCleanupHost>>();
             var scopedOptions = serviceScope.ServiceProvider.GetRequiredService<IdentityServerOptions>();
             var serverSideTicketStore = serviceScope.ServiceProvider.GetRequiredService<IServerSideTicketStore>();

@@ -8,17 +8,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Duende.IdentityModel.OidcClient.Browser;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 // TODO: remove pragma?
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace ConsoleResourceIndicators;
 #pragma warning restore IDE0130
-
-// TODO: Upgrade this client to remove dependancy on IWebHost & WebHostBuilder
-#pragma warning disable ASPDEPR008 // IWebHost is deprecated in net10.0
-#pragma warning disable ASPDEPR004 // WebHostBuilder is deprecated in net10.0
 
 public class SystemBrowser : IBrowser
 {
@@ -109,7 +106,7 @@ public class LoopbackHttpListener : IDisposable
 {
     private const int DefaultTimeout = 60 * 5; // 5 mins (in seconds)
 
-    private IWebHost _host;
+    private WebApplication _host;
     private TaskCompletionSource<string> _source = new TaskCompletionSource<string>();
     private string _url;
 
@@ -125,18 +122,18 @@ public class LoopbackHttpListener : IDisposable
 
         _url = $"http://127.0.0.1:{port}/{path}";
 
-        _host = new WebHostBuilder()
-            .UseKestrel()
-            .UseUrls(_url)
-            .Configure(Configure)
-            .Build();
+        var builder = WebApplication.CreateBuilder();
+        _ = builder.Logging.ClearProviders();
+        _host = builder.Build();
+        _host.Urls.Add(_url);
+        Configure(_host);
         _host.Start();
     }
 
     public void Dispose() => _ = Task.Run(async () =>
     {
         await Task.Delay(500);
-        _host.Dispose();
+        await _host.DisposeAsync();
     });
 
     private void Configure(IApplicationBuilder app) => app.Run(async ctx =>

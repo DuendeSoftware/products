@@ -18,39 +18,43 @@ public static class SamlLogoutSessionMappers
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    /// <summary>
-    /// Maps a <see cref="SamlLogoutSession"/> model to a <see cref="Entities.SamlLogoutSession"/> entity.
-    /// </summary>
-    /// <param name="model">The model.</param>
-    /// <param name="expiresAtUtc">The expiration time for the entity.</param>
-    /// <returns>The entity.</returns>
-    public static Entities.SamlLogoutSession ToEntity(this SamlLogoutSession model, DateTime expiresAtUtc) =>
-        new()
-        {
-            LogoutId = model.LogoutId,
-            SerializedSession = JsonSerializer.Serialize(model, JsonOptions),
-            ExpiresAtUtc = expiresAtUtc,
-        };
-
-    /// <summary>
-    /// Maps a <see cref="Entities.SamlLogoutSession"/> entity to a <see cref="SamlLogoutSession"/> model.
-    /// </summary>
-    /// <param name="entity">The entity.</param>
-    /// <returns>The model, or <see langword="null"/> if the entity is null or deserialization fails.</returns>
-    public static SamlLogoutSession? ToModel(this Entities.SamlLogoutSession? entity)
+    extension(SamlLogoutSession model)
     {
-        if (entity is null)
-        {
-            return null;
-        }
+        /// <summary>
+        /// Maps a <see cref="SamlLogoutSession"/> model to a <see cref="Entities.SamlLogoutSession"/> entity.
+        /// </summary>
+        /// <param name="expiresAtUtc">The expiration time for the entity.</param>
+        /// <returns>The entity.</returns>
+        public Entities.SamlLogoutSession ToEntity(DateTime expiresAtUtc) =>
+            new()
+            {
+                LogoutId = model.LogoutId,
+                SerializedSession = JsonSerializer.Serialize(model, JsonOptions),
+                ExpiresAtUtc = expiresAtUtc,
+            };
+    }
 
-        try
+    extension(Entities.SamlLogoutSession? entity)
+    {
+        /// <summary>
+        /// Maps a <see cref="Entities.SamlLogoutSession"/> entity to a <see cref="SamlLogoutSession"/> model.
+        /// </summary>
+        /// <returns>The model, or <see langword="null"/> if the entity is null or deserialization fails.</returns>
+        public SamlLogoutSession? ToModel()
         {
-            return JsonSerializer.Deserialize<SamlLogoutSession>(entity.SerializedSession, JsonOptions);
-        }
-        catch (JsonException)
-        {
-            return null;
+            if (entity is null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<SamlLogoutSession>(entity.SerializedSession, JsonOptions);
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
         }
     }
 }

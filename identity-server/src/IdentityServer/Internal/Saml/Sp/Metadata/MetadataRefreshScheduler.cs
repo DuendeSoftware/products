@@ -29,11 +29,14 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Metadata
 
         public static readonly XsdDuration DefaultMetadataCacheDuration = new XsdDuration(hours: 1);
 
-        internal static DateTime CalculateMetadataValidUntil(this ICachedMetadata metadata, TimeProvider timeProvider)
+        extension(ICachedMetadata metadata)
         {
-            return metadata.ValidUntil ??
-                   timeProvider.GetUtcNow().UtcDateTime.Add((metadata.CacheDuration ?? DefaultMetadataCacheDuration)
-                    .ToTimeSpan());
+            internal DateTime CalculateMetadataValidUntil(TimeProvider timeProvider)
+            {
+                return metadata.ValidUntil ??
+                       timeProvider.GetUtcNow().UtcDateTime.Add((metadata.CacheDuration ?? DefaultMetadataCacheDuration)
+                        .ToTimeSpan());
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+﻿<Project Sdk="Aspire.AppHost.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -18,6 +18,8 @@
     <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
     <PackageReference Include="Duende.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="Duende.Spaces" />
+    <PackageReference Include="Duende.Storage.Sqlite" />
     <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
     <PackageReference Include="Microsoft.Playwright.Xunit.v3" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />

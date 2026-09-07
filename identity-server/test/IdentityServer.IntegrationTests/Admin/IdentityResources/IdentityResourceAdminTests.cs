@@ -31,7 +31,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task create_and_get_by_id_round_trips_all_fields()
     {
         var admin = NewAdmin();
-        var resource = new IdentityResourceConfiguration
+        var resource = new CreateIdentityResource
         {
             Name = $"identity_{Guid.NewGuid():N}",
             DisplayName = "Test Identity Resource",
@@ -70,7 +70,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     {
         var admin = NewAdmin();
         var name = $"identity_{Guid.NewGuid():N}";
-        var resource = new IdentityResourceConfiguration
+        var resource = new CreateIdentityResource
         {
             Name = name,
             DisplayName = "ByName Test"
@@ -89,12 +89,12 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task create_returns_storage_id_and_version()
     {
         var admin = NewAdmin();
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
 
         var result = await admin.CreateAsync(resource, _ct);
 
         result.IsSuccess.ShouldBeTrue($"Create failed: {result}");
-        result.Id.ShouldNotBe(Guid.Empty);
+        result.Id.Value.ShouldNotBe(Guid.Empty);
         result.Version.ShouldNotBeNull();
         result.Version.Value.ShouldBe(1);
     }
@@ -105,10 +105,10 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var admin = NewAdmin();
         var name = $"identity_{Guid.NewGuid():N}";
 
-        var first = await admin.CreateAsync(new IdentityResourceConfiguration { Name = name }, _ct);
+        var first = await admin.CreateAsync(new CreateIdentityResource { Name = name }, _ct);
         first.IsSuccess.ShouldBeTrue();
 
-        var second = await admin.CreateAsync(new IdentityResourceConfiguration { Name = name }, _ct);
+        var second = await admin.CreateAsync(new CreateIdentityResource { Name = name }, _ct);
         second.IsSuccess.ShouldBeFalse();
         second.Errors.ShouldNotBeNull();
         second.Errors.ShouldContain(e => e.Code == "already_exists");
@@ -118,7 +118,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task update_changes_applied_on_read()
     {
         var admin = NewAdmin();
-        var resource = new IdentityResourceConfiguration
+        var resource = new CreateIdentityResource
         {
             Name = $"identity_{Guid.NewGuid():N}",
             DisplayName = "Original",
@@ -131,7 +131,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.DisplayName = "Updated";
         toUpdate.Description = "Updated description";
         toUpdate.Enabled = false;
@@ -150,7 +150,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task update_with_wrong_version_returns_version_conflict()
     {
         var admin = NewAdmin();
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -159,7 +159,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         getResult.Found.ShouldBeTrue();
 
         var wrongVersion = (DataVersion)999;
-        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item, wrongVersion, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item.ToUpdate(), wrongVersion, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
@@ -170,8 +170,8 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task update_nonexistent_returns_not_found()
     {
         var admin = NewAdmin();
-        var nonExistentId = UuidV7.New().Value;
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        IdentityResourceId nonExistentId = UuidV7.New().Value;
+        var resource = new UpdateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
 
         var result = await admin.UpdateAsync(nonExistentId, resource, (DataVersion)1, _ct);
 
@@ -187,13 +187,13 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var nameA = $"identity_{Guid.NewGuid():N}";
         var nameB = $"identity_{Guid.NewGuid():N}";
 
-        (await admin.CreateAsync(new IdentityResourceConfiguration { Name = nameA }, _ct)).IsSuccess.ShouldBeTrue();
-        var createB = await admin.CreateAsync(new IdentityResourceConfiguration { Name = nameB }, _ct);
+        (await admin.CreateAsync(new CreateIdentityResource { Name = nameA }, _ct)).IsSuccess.ShouldBeTrue();
+        var createB = await admin.CreateAsync(new CreateIdentityResource { Name = nameB }, _ct);
         createB.IsSuccess.ShouldBeTrue();
 
         var getB = await admin.GetAsync(createB.Id, _ct);
         getB.Found.ShouldBeTrue();
-        var configB = getB.Item;
+        var configB = getB.Item.ToUpdate();
         configB.Name = nameA; // rename B to A's name
 
         var updateResult = await admin.UpdateAsync(createB.Id, configB, getB.Version!, _ct);
@@ -205,7 +205,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task delete_then_get_returns_not_found()
     {
         var admin = NewAdmin();
-        var resource = new IdentityResourceConfiguration { Name = $"identity_{Guid.NewGuid():N}" };
+        var resource = new CreateIdentityResource { Name = $"identity_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -221,7 +221,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
     public async Task create_with_empty_name_returns_required_error()
     {
         var admin = NewAdmin();
-        var resource = new IdentityResourceConfiguration { Name = "" };
+        var resource = new CreateIdentityResource { Name = "" };
 
         var result = await admin.CreateAsync(resource, _ct);
 
@@ -236,9 +236,9 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var uniquePart = $"q_{Guid.NewGuid():N}";
         var admin = NewAdmin();
 
-        await admin.CreateAsync(new IdentityResourceConfiguration { Name = uniquePart + "_match1" }, _ct);
-        await admin.CreateAsync(new IdentityResourceConfiguration { Name = uniquePart + "_match2" }, _ct);
-        await admin.CreateAsync(new IdentityResourceConfiguration { Name = $"other_{Guid.NewGuid():N}" }, _ct);
+        await admin.CreateAsync(new CreateIdentityResource { Name = uniquePart + "_match1" }, _ct);
+        await admin.CreateAsync(new CreateIdentityResource { Name = uniquePart + "_match2" }, _ct);
+        await admin.CreateAsync(new CreateIdentityResource { Name = $"other_{Guid.NewGuid():N}" }, _ct);
 
         var result = await admin.QueryAsync(
             QueryRequest.Create<IdentityResourceFilter, IdentityResourceSortField>(
@@ -256,8 +256,8 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var enabledName = $"q_enabled_{Guid.NewGuid():N}";
         var disabledName = $"q_disabled_{Guid.NewGuid():N}";
 
-        await admin.CreateAsync(new IdentityResourceConfiguration { Name = enabledName, Enabled = true }, _ct);
-        await admin.CreateAsync(new IdentityResourceConfiguration { Name = disabledName, Enabled = false }, _ct);
+        await admin.CreateAsync(new CreateIdentityResource { Name = enabledName, Enabled = true }, _ct);
+        await admin.CreateAsync(new CreateIdentityResource { Name = disabledName, Enabled = false }, _ct);
 
         var enabledResult = await admin.QueryAsync(
             QueryRequest.Create<IdentityResourceFilter, IdentityResourceSortField>(
@@ -276,7 +276,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
 
         for (var i = 0; i < 5; i++)
         {
-            await admin.CreateAsync(new IdentityResourceConfiguration { Name = prefix + i }, _ct);
+            await admin.CreateAsync(new CreateIdentityResource { Name = prefix + i }, _ct);
         }
 
         var page1 = await admin.QueryAsync(

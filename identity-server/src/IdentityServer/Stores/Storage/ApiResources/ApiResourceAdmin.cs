@@ -10,6 +10,8 @@ using Duende.IdentityServer.Admin.ApiResources;
 using Duende.IdentityServer.Stores.Storage.ApiScopes;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 using SecretHashAlgorithm = Duende.IdentityServer.Admin.SecretHashAlgorithm;
@@ -19,38 +21,38 @@ namespace Duende.IdentityServer.Stores.Storage.ApiResources;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScopeRepository scopeRepository, ISchemaStore schemaStore) : IApiResourceAdmin
 {
-    public async Task<SaveResult<Guid>> CreateAsync(ApiResourceConfiguration resource, Ct ct)
+    public async Task<SaveResult<ApiResourceId>> CreateAsync(CreateApiResource resource, Ct ct)
     {
-        var structuralError = ValidateStructure(resource);
+        var structuralError = ValidateStructure(resource.Name, resource.UserClaims, resource.Scopes, resource.AllowedAccessTokenSigningAlgorithms);
         if (structuralError is not null)
         {
-            return structuralError;
+            return SaveResult.Failure<ApiResourceId>(structuralError);
         }
 
-        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(resource, ct);
+        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(resource.ExtendedProperties, ct);
         if (extendedPropertiesError is not null)
         {
-            return extendedPropertiesError;
+            return SaveResult.Failure<ApiResourceId>(extendedPropertiesError);
         }
 
         var scopeRefsResult = await ResolveScopeRefsAsync(resource.Scopes, ct);
         if (scopeRefsResult.Error is not null)
         {
-            return scopeRefsResult.Error;
+            return SaveResult.Failure<ApiResourceId>(scopeRefsResult.Error);
         }
 
         var scopeRefs = scopeRefsResult.ScopeRefs;
         var id = UuidV7.New();
-        var dso = MapToDso(id.Value, resource, scopeRefs, existingSecrets: null);
+        var dso = MapToDso(id.Value, resource.Name, resource.Enabled, resource.DisplayName, resource.Description, resource.ShowInDiscoveryDocument, resource.RequireResourceIndicator, resource.UserClaims, resource.AllowedAccessTokenSigningAlgorithms, resource.ExtendedProperties, scopeRefs, existingSecrets: null);
 
         if (scopeRefs.Count > 0)
         {
             var result = await repository.CreateWithScopesAsync(id, dso, scopeRefs, ct);
             return result switch
             {
-                CreateResult.Success => SaveResult.Success(id.Value, (DataVersion)1),
+                CreateResult.Success => SaveResult.Success<ApiResourceId>(id.Value, (DataVersion)1),
                 CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                    AdminError.AlreadyExists("api_resource", resource.Name),
+                    SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
                 _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
             };
         }
@@ -59,24 +61,25 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             var result = await repository.CreateAsync(id, dso, ct);
             return result switch
             {
-                CreateResult.Success => SaveResult.Success(id.Value, (DataVersion)1),
+                CreateResult.Success => SaveResult.Success<ApiResourceId>(id.Value, (DataVersion)1),
                 CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                    AdminError.AlreadyExists("api_resource", resource.Name),
+                    SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
                 _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
             };
         }
     }
 
-    public async Task<GetResult<ApiResourceConfiguration>> GetAsync(Guid id, Ct ct)
+    public async Task<GetResult<ApiResourceConfiguration>> GetAsync(ApiResourceId id, Ct ct)
     {
-        var result = await repository.TryReadByIdAsync(id, ct);
+        var result = await repository.TryReadByIdAsync(id.Value, ct);
         if (result is null)
         {
             return GetResult.NotFound<ApiResourceConfiguration>();
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.ApiResource, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
     public async Task<GetResult<ApiResourceConfiguration>> GetByNameAsync(string name, Ct ct)
@@ -88,57 +91,41 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         }
 
         var (dso, version) = result.Value;
-        return GetResult.Found(MapToConfiguration(dso), (DataVersion)version);
+        var schema = await schemaStore.GetAsync(SchemaId.ApiResource, ct);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
-    public async Task<SaveResult<Guid>> UpdateAsync(Guid id, ApiResourceConfiguration resource, DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<ApiResourceId>> UpdateAsync(ApiResourceId id, UpdateApiResource resource, DataVersion expectedVersion, Ct ct)
     {
-        var structuralError = ValidateStructure(resource);
+        var structuralError = ValidateStructure(resource.Name, resource.UserClaims, resource.Scopes, resource.AllowedAccessTokenSigningAlgorithms);
         if (structuralError is not null)
         {
-            return structuralError;
+            return SaveResult.Failure<ApiResourceId>(structuralError);
         }
 
-        var existing = await repository.TryReadByIdAsync(id, ct);
+        var idValue = id.Value;
+        var existing = await repository.TryReadByIdAsync(idValue, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("api_resource", id.ToString());
+            return SaveResult.Failure<ApiResourceId>(StorageError.NotFound("api_resource", idValue.ToString()));
         }
 
         var (existingDso, _) = existing.Value;
 
-        // Validate: all ApiResourceSecretConfiguration IDs must exist in the current DSO
-        if (resource.ApiSecrets is not null)
-        {
-            if (resource.ApiSecrets.Select(s => s.Id).Distinct().Count() != resource.ApiSecrets.Count)
-            {
-                return AdminError.InvalidValue("ApiSecrets", "Secret list contains duplicate IDs.");
-            }
-
-            var existingSecretIds = existingDso.ApiSecrets.Select(s => s.Id).ToHashSet();
-            foreach (var secret in resource.ApiSecrets)
-            {
-                if (!existingSecretIds.Contains(secret.Id))
-                {
-                    return AdminError.InvalidValue("ApiSecrets", $"Secret with id '{secret.Id}' does not exist.");
-                }
-            }
-        }
-
-        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(resource, ct);
+        var extendedPropertiesError = await ValidateExtendedPropertiesAsync(resource.ExtendedProperties, ct);
         if (extendedPropertiesError is not null)
         {
-            return extendedPropertiesError;
+            return SaveResult.Failure<ApiResourceId>(extendedPropertiesError);
         }
 
         var scopeRefsResult = await ResolveScopeRefsAsync(resource.Scopes, ct);
         if (scopeRefsResult.Error is not null)
         {
-            return scopeRefsResult.Error;
+            return SaveResult.Failure<ApiResourceId>(scopeRefsResult.Error);
         }
 
         var newScopeRefs = scopeRefsResult.ScopeRefs;
-        var dso = MapToDso(id, resource, newScopeRefs, existingSecrets: existingDso.ApiSecrets);
+        var dso = MapToDso(idValue, resource.Name, resource.Enabled, resource.DisplayName, resource.Description, resource.ShowInDiscoveryDocument, resource.RequireResourceIndicator, resource.UserClaims, resource.AllowedAccessTokenSigningAlgorithms, resource.ExtendedProperties, newScopeRefs, existingSecrets: existingDso.ApiSecrets);
 
         // Diff scopes. On rename, treat all existing scopes as removed and all new scopes as added
         // so that back-references on ApiScope are updated with the new resource name.
@@ -166,38 +153,39 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         if (addedScopeRefs.Count > 0 || removedScopeIds.Count > 0)
         {
             var result = await repository.UpdateWithScopeChangesAsync(
-                UuidV7.From(id), dso, expectedVersion.Value, addedScopeRefs, removedScopeIds, ct);
+                UuidV7.From(idValue), dso, expectedVersion.Value, addedScopeRefs, removedScopeIds, ct);
 
             return result switch
             {
-                UpdateResult.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
-                UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-                UpdateResult.DoesNotExist => AdminError.NotFound("api_resource", id.ToString()),
-                UpdateResult.KeyConflict => AdminError.AlreadyExists("api_resource", resource.Name),
+                UpdateResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+                UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiResourceId>(StorageError.VersionConflict()),
+                UpdateResult.DoesNotExist => SaveResult.Failure<ApiResourceId>(StorageError.NotFound("api_resource", idValue.ToString())),
+                UpdateResult.KeyConflict => SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
                 _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
             };
         }
         else
         {
-            var result = await repository.UpdateAsync(UuidV7.From(id), dso, expectedVersion.Value, ct);
+            var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
 
             return result switch
             {
-                UpdateResult.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
-                UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-                UpdateResult.DoesNotExist => AdminError.NotFound("api_resource", id.ToString()),
-                UpdateResult.KeyConflict => AdminError.AlreadyExists("api_resource", resource.Name),
+                UpdateResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+                UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiResourceId>(StorageError.VersionConflict()),
+                UpdateResult.DoesNotExist => SaveResult.Failure<ApiResourceId>(StorageError.NotFound("api_resource", idValue.ToString())),
+                UpdateResult.KeyConflict => SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
                 _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
             };
         }
     }
 
-    public async Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct)
+    public async Task<SaveResult<ApiResourceId>> DeleteAsync(ApiResourceId id, Ct ct)
     {
-        var existing = await repository.TryReadByIdAsync(id, ct);
+        var idValue = id.Value;
+        var existing = await repository.TryReadByIdAsync(idValue, ct);
         if (existing is null)
         {
-            return SaveResult.Success(id, (DataVersion)0); // idempotent — already gone
+            return SaveResult.Success<ApiResourceId>(idValue, (DataVersion)0); // idempotent: already gone
         }
 
         var (dso, _) = existing.Value;
@@ -205,28 +193,28 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         DeleteResult result;
         if (dso.Scopes.Count > 0)
         {
-            result = await repository.DeleteWithScopeCleanupAsync(id, dso.Scopes, ct);
+            result = await repository.DeleteWithScopeCleanupAsync(idValue, dso.Scopes, ct);
         }
         else
         {
-            result = await repository.DeleteAsync(id, ct);
+            result = await repository.DeleteAsync(idValue, ct);
         }
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success(id, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)0),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
-    public async Task<Duende.Storage.Querying.QueryResult<ApiResourceListItem>> QueryAsync(QueryRequest<ApiResourceFilter, ApiResourceSortField> request, Ct ct)
+    public async Task<QueryResult<ApiResourceListItem>> QueryAsync(QueryRequest<ApiResourceFilter, ApiResourceSortField> request, Ct ct)
     {
         var result = await repository.QueryAsync(request, ct);
         return result.ConvertTo(MapToListItem);
     }
 
-    public async Task<SaveResult<Guid>> CreateSecretAsync(
-        Guid apiResourceId,
+    public async Task<SaveResult<ApiResourceSecretId>> CreateSecretAsync(
+        ApiResourceId apiResourceId,
         string plaintextValue,
         SecretHashAlgorithm? hashAlgorithm,
         string? description,
@@ -236,13 +224,14 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
     {
         if (string.IsNullOrWhiteSpace(plaintextValue))
         {
-            return AdminError.Required("plaintextValue");
+            return SaveResult.Failure<ApiResourceSecretId>(StorageError.Required("plaintextValue"));
         }
 
-        var existing = await repository.TryReadByIdAsync(apiResourceId, ct);
+        var apiResourceIdValue = apiResourceId.Value;
+        var existing = await repository.TryReadByIdAsync(apiResourceIdValue, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("api_resource", apiResourceId.ToString());
+            return SaveResult.Failure<ApiResourceSecretId>(StorageError.NotFound("api_resource", apiResourceIdValue.ToString()));
         }
 
         var (dso, version) = existing.Value;
@@ -263,111 +252,107 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         var updatedSecrets = dso.ApiSecrets.Append(newSecret).ToList();
         var updatedDso = dso with { ApiSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(apiResourceId), updatedDso, version, ct);
+        var result = await repository.UpdateAsync(UuidV7.From(apiResourceIdValue), updatedDso, version, ct);
 
         return result switch
         {
-            UpdateResult.Success => SaveResult.Success(secretId, (DataVersion)(version + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("api_resource", apiResourceId.ToString()),
+            UpdateResult.Success => SaveResult.Success<ApiResourceSecretId>(secretId, (DataVersion)(version + 1)),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiResourceSecretId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<ApiResourceSecretId>(StorageError.NotFound("api_resource", apiResourceIdValue.ToString())),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
-    public async Task<SaveResult<Guid>> DeleteSecretAsync(Guid apiResourceId, Guid secretId, Ct ct)
+    public async Task<SaveResult<ApiResourceSecretId>> DeleteSecretAsync(ApiResourceId apiResourceId, ApiResourceSecretId secretId, Ct ct)
     {
-        var existing = await repository.TryReadByIdAsync(apiResourceId, ct);
+        var apiResourceIdValue = apiResourceId.Value;
+        var secretIdValue = secretId.Value;
+        var existing = await repository.TryReadByIdAsync(apiResourceIdValue, ct);
         if (existing is null)
         {
-            return AdminError.NotFound("api_resource", apiResourceId.ToString());
+            return SaveResult.Failure<ApiResourceSecretId>(StorageError.NotFound("api_resource", apiResourceIdValue.ToString()));
         }
 
         var (dso, version) = existing.Value;
 
-        var secretToDelete = dso.ApiSecrets.FirstOrDefault(s => s.Id == secretId);
+        var secretToDelete = dso.ApiSecrets.FirstOrDefault(s => s.Id == secretIdValue);
         if (secretToDelete is null)
         {
-            return AdminError.NotFound("secret", secretId.ToString());
+            return SaveResult.Failure<ApiResourceSecretId>(StorageError.NotFound("secret", secretIdValue.ToString()));
         }
 
-        var updatedSecrets = dso.ApiSecrets.Where(s => s.Id != secretId).ToList();
+        var updatedSecrets = dso.ApiSecrets.Where(s => s.Id != secretIdValue).ToList();
         var updatedDso = dso with { ApiSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(apiResourceId), updatedDso, version, ct);
+        var result = await repository.UpdateAsync(UuidV7.From(apiResourceIdValue), updatedDso, version, ct);
 
         return result switch
         {
-            UpdateResult.Success => SaveResult.Success(secretId, (DataVersion)(version + 1)),
-            UpdateResult.UnexpectedVersion => AdminError.VersionConflict(),
-            UpdateResult.DoesNotExist => AdminError.NotFound("api_resource", apiResourceId.ToString()),
+            UpdateResult.Success => SaveResult.Success<ApiResourceSecretId>(secretIdValue, (DataVersion)(version + 1)),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiResourceSecretId>(StorageError.VersionConflict()),
+            UpdateResult.DoesNotExist => SaveResult.Failure<ApiResourceSecretId>(StorageError.NotFound("api_resource", apiResourceIdValue.ToString())),
             _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
         };
     }
 
-    private async Task<AdminError?> ValidateExtendedPropertiesAsync(ApiResourceConfiguration resource, Ct ct)
+    private async Task<StorageError?> ValidateExtendedPropertiesAsync(AttributeValueCollection extendedProperties, Ct ct)
     {
-        if (resource.ExtendedProperties.Count == 0)
+        if (extendedProperties.Count == 0)
         {
             return null;
         }
 
         var schema = await schemaStore.GetAsync(SchemaId.ApiResource, ct);
-        if (schema is null)
-        {
-            return AdminError.ValidationFailed(
-                "ExtendedProperties cannot be used: no API resource schema is configured. " +
-                "Register a schema via ISchemaStore to enable extended properties.");
-        }
 
-        if (!resource.ExtendedProperties.TryValidateAgainst(schema, out var errors))
+        if (!extendedProperties.TryValidateAgainst(schema, out var errors))
         {
-            return AdminError.ValidationFailed(string.Join("; ", errors));
+            return StorageError.ValidationFailed(string.Join("; ", errors));
         }
 
         return null;
     }
 
-    private static AdminError? ValidateStructure(ApiResourceConfiguration resource)
+    private static StorageError? ValidateStructure(string name, List<string>? userClaims, List<string>? scopes, List<string>? allowedAccessTokenSigningAlgorithms)
     {
-        if (string.IsNullOrWhiteSpace(resource.Name))
+        if (string.IsNullOrWhiteSpace(name))
         {
-            return AdminError.Required("Name");
+            return StorageError.Required("Name");
         }
 
-        if (resource.UserClaims is not null)
+        if (userClaims is not null)
         {
-            foreach (var claim in resource.UserClaims)
+            foreach (var claim in userClaims)
             {
                 if (string.IsNullOrWhiteSpace(claim))
                 {
-                    return AdminError.InvalidValue("UserClaims", "Claim type must not be null or whitespace.");
+                    return StorageError.InvalidValue("UserClaims", "Claim type must not be null or whitespace.");
                 }
             }
         }
 
-        if (resource.Scopes is not null)
+        if (scopes is not null)
         {
-            foreach (var scope in resource.Scopes)
+            foreach (var scope in scopes)
             {
                 if (string.IsNullOrWhiteSpace(scope))
                 {
-                    return AdminError.InvalidValue("Scopes", "Scope name must not be null or whitespace.");
+                    return StorageError.InvalidValue("Scopes", "Scope name must not be null or whitespace.");
                 }
             }
 
-            if (resource.Scopes.Distinct(StringComparer.Ordinal).Count() != resource.Scopes.Count)
+            if (scopes.Distinct(StringComparer.Ordinal).Count() != scopes.Count)
             {
-                return AdminError.InvalidValue("Scopes", "Scope list contains duplicate names.");
+                return StorageError.InvalidValue("Scopes", "Scope list contains duplicate names.");
             }
         }
 
-        if (resource.AllowedAccessTokenSigningAlgorithms is not null)
+        if (allowedAccessTokenSigningAlgorithms is not null)
         {
-            foreach (var alg in resource.AllowedAccessTokenSigningAlgorithms)
+            foreach (var alg in allowedAccessTokenSigningAlgorithms)
             {
                 if (string.IsNullOrWhiteSpace(alg))
                 {
-                    return AdminError.InvalidValue("AllowedAccessTokenSigningAlgorithms", "Algorithm must not be null or whitespace.");
+                    return StorageError.InvalidValue("AllowedAccessTokenSigningAlgorithms", "Algorithm must not be null or whitespace.");
                 }
             }
         }
@@ -375,10 +360,10 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         return null;
     }
 
-    private sealed record ScopeRefsResult(IReadOnlyList<ApiScopeReferenceDso.V1> ScopeRefs, AdminError? Error)
+    private sealed record ScopeRefsResult(IReadOnlyList<ApiScopeReferenceDso.V1> ScopeRefs, StorageError? Error)
     {
         internal static ScopeRefsResult Success(IReadOnlyList<ApiScopeReferenceDso.V1> refs) => new(refs, null);
-        internal static ScopeRefsResult Failure(AdminError error) => new([], error);
+        internal static ScopeRefsResult Failure(StorageError error) => new([], error);
     }
 
     private async Task<ScopeRefsResult> ResolveScopeRefsAsync(List<string>? scopeNames, Ct ct)
@@ -398,7 +383,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             if (!foundByName.ContainsKey(name))
             {
                 return ScopeRefsResult.Failure(
-                    AdminError.InvalidValue("Scopes", $"Scope '{name}' does not exist."));
+                    StorageError.InvalidValue("Scopes", $"Scope '{name}' does not exist."));
             }
         }
 
@@ -409,62 +394,40 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         return ScopeRefsResult.Success(refs);
     }
 
-    private static ApiResourceDso.V1 MapToDso(Guid id, ApiResourceConfiguration resource, IReadOnlyList<ApiScopeReferenceDso.V1> scopeRefs, IReadOnlyList<ApiResourceDso.SecretDso>? existingSecrets)
+    private static ApiResourceDso.V1 MapToDso(
+        Guid id,
+        string name,
+        bool enabled,
+        string? displayName,
+        string? description,
+        bool showInDiscoveryDocument,
+        bool requireResourceIndicator,
+        List<string>? userClaims,
+        List<string>? allowedAccessTokenSigningAlgorithms,
+        AttributeValueCollection extendedProperties,
+        IReadOnlyList<ApiScopeReferenceDso.V1> scopeRefs,
+        IReadOnlyList<ApiResourceDso.SecretDso>? existingSecrets)
     {
-        var secrets = BuildSecrets(resource.ApiSecrets, existingSecrets);
+        var secrets = existingSecrets ?? [];
 
         return new ApiResourceDso.V1
         {
             Id = id,
-            Name = resource.Name,
-            Enabled = resource.Enabled,
-            DisplayName = resource.DisplayName,
-            Description = resource.Description,
-            ShowInDiscoveryDocument = resource.ShowInDiscoveryDocument,
-            RequireResourceIndicator = resource.RequireResourceIndicator,
-            UserClaims = resource.UserClaims?.AsReadOnly() ?? [],
+            Name = name,
+            Enabled = enabled,
+            DisplayName = displayName,
+            Description = description,
+            ShowInDiscoveryDocument = showInDiscoveryDocument,
+            RequireResourceIndicator = requireResourceIndicator,
+            UserClaims = userClaims?.AsReadOnly() ?? [],
             Scopes = scopeRefs,
-            AllowedAccessTokenSigningAlgorithms = resource.AllowedAccessTokenSigningAlgorithms?.AsReadOnly() ?? [],
+            AllowedAccessTokenSigningAlgorithms = allowedAccessTokenSigningAlgorithms?.AsReadOnly() ?? [],
             ApiSecrets = secrets,
-            ExtendedAttributeValues = EavPropertyMapper.SerializeFromCollection(resource.ExtendedProperties)
+            ExtendedAttributeValues = EavMapper.ToDsoList(extendedProperties)
         };
     }
 
-    private static IReadOnlyList<ApiResourceDso.SecretDso> BuildSecrets(
-        List<ApiResourceSecretConfiguration>? configSecrets,
-        IReadOnlyList<ApiResourceDso.SecretDso>? existingSecrets)
-    {
-        if (existingSecrets is null)
-        {
-            return [];
-        }
-
-        if (configSecrets is null || configSecrets.Count == 0)
-        {
-            return existingSecrets;
-        }
-
-        var metadataById = configSecrets.ToDictionary(s => s.Id);
-
-        return existingSecrets
-            .Select(existing =>
-            {
-                if (!metadataById.TryGetValue(existing.Id, out var updated))
-                {
-                    return existing;
-                }
-
-                return existing with
-                {
-                    Description = updated.Description,
-                    Expiration = updated.Expiration,
-                    Type = updated.Type
-                };
-            })
-            .ToList();
-    }
-
-    private static ApiResourceConfiguration MapToConfiguration(ApiResourceDso.V1 dso) =>
+    private static ApiResourceConfiguration MapToConfiguration(ApiResourceDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             Name = dso.Name,
@@ -476,7 +439,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             UserClaims = new List<string>(dso.UserClaims),
             Scopes = dso.Scopes.Select(s => s.Name).ToList(),
             AllowedAccessTokenSigningAlgorithms = new List<string>(dso.AllowedAccessTokenSigningAlgorithms),
-            ExtendedProperties = EavPropertyMapper.DeserializeToCollection(dso.ExtendedAttributeValues),
+            ExtendedProperties = EavMapper.ToAttributeValues(dso.ExtendedAttributeValues ?? [], schema).ToList(),
             ApiSecrets = dso.ApiSecrets
                 .Select(s => new ApiResourceSecretConfiguration
                 {

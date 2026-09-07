@@ -19,10 +19,10 @@
         <div class="alert alert-success" role="alert">
             <h4 class="alert-heading">Success!</h4>
             <p>
-                Client Id `<code>@Model.InputModel.ClientId</code>` created!
+                Client Id `<code>@Model.CreatedClientId</code>` created!
             </p>
             <hr />
-            <p class="mb-0">Click here to <a asp-page="/Admin/Clients/Edit" asp-route-id="@Model.InputModel.ClientId">continue</a>.</p>
+            <p class="mb-0">Click here to <a asp-page="/Admin/Clients/Edit" asp-route-id="@Model.CreatedClientId">continue</a>.</p>
         </div>
     }
     else
@@ -91,7 +91,7 @@
 
                                 <small class="d-block bg-white rounded border p-1 px-2">
                                     <span class="fw-medium">Note:</span>
-                                    On creation, the base URL (if set) will be used to automatically determine the default interaction URL paths.<br />
+                                    On creation, the base URL (if set) will be used to automatically determine the default interaction URL paths.
                                     For example, the default Redirect URI will be set to <code>&lt;base-url&gt;/signin-oidc</code>.
                                 </small>
 

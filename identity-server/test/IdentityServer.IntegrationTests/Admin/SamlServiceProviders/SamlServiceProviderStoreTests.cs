@@ -47,7 +47,7 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
         var entityId = $"https://sp-{Guid.NewGuid():N}.example.com";
         var certBase64 = GenerateSelfSignedCertBase64();
 
-        var config = new SamlServiceProviderConfiguration
+        var config = new CreateSamlServiceProvider
         {
             EntityId = entityId,
             Enabled = true,
@@ -75,7 +75,7 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
             ],
             Certificates =
             [
-                new SamlCertificateConfiguration { Base64Data = certBase64, Use = KeyUse.Signing }
+                new SamlCertificateInput { Base64Data = certBase64, Use = KeyUse.Signing }
             ],
             AllowIdpInitiated = true,
             AllowedScopes = ["openid", "profile"],
@@ -126,7 +126,7 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
         var entityId1 = $"https://sp1-{Guid.NewGuid():N}.example.com";
         var entityId2 = $"https://sp2-{Guid.NewGuid():N}.example.com";
 
-        var config1 = new SamlServiceProviderConfiguration
+        var config1 = new CreateSamlServiceProvider
         {
             EntityId = entityId1,
             AssertionConsumerServiceUrls =
@@ -142,7 +142,7 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
             AllowedScopes = ["openid"]
         };
 
-        var config2 = new SamlServiceProviderConfiguration
+        var config2 = new CreateSamlServiceProvider
         {
             EntityId = entityId2,
             AssertionConsumerServiceUrls =

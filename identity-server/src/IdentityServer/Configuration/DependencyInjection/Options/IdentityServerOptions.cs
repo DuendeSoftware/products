@@ -248,6 +248,13 @@ public class IdentityServerOptions
     public StoragePurgeOptions StoragePurge { get; set; } = new StoragePurgeOptions();
 
     /// <summary>
+    /// Gets or sets the settings for the background service that periodically processes outbox
+    /// events and dispatches them to registered handlers (e.g., back-channel logout for
+    /// expired sessions).
+    /// </summary>
+    public OutboxProcessorOptions OutboxProcessor { get; set; } = new OutboxProcessorOptions();
+
+    /// <summary>
     /// Gets or sets the Pushed Authorization Request (PAR) settings, including whether PAR is globally required.
     /// </summary>
     public PushedAuthorizationOptions PushedAuthorization { get; set; } = new PushedAuthorizationOptions();

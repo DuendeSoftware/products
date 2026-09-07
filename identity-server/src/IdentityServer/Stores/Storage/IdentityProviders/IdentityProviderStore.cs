@@ -87,6 +87,6 @@ internal sealed class IdentityProviderStore(
             Scheme = dso.Scheme,
             DisplayName = dso.DisplayName,
             Enabled = dso.Enabled,
-            Properties = new Dictionary<string, string>(dso.Properties)
+            Properties = EavPropertyMapper.ExtractStringProperties(dso.ExtendedAttributeValues)
         };
 }

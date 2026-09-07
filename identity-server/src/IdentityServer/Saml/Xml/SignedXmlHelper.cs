@@ -31,22 +31,45 @@ public static class SignedXmlHelper
             CryptoConfig.AddAlgorithm(type, algorithmUri);
         }
     }
-    /// <summary>
-    /// Adds an enveloped signature to the node.
-    /// </summary>
-    /// <param name="element">Element to sign</param>
-    /// <param name="certificate">Certificate to use to sign</param>
-    /// <param name="insertAfter">Insert the signature after this node.</param>
-    public static void Sign(
-        this XmlElement element,
-        X509Certificate2 certificate,
-        XmlNode insertAfter)
+    extension(XmlElement element)
     {
-        ArgumentNullException.ThrowIfNull(insertAfter);
+        /// <summary>
+        /// Adds an enveloped signature to the node.
+        /// </summary>
+        /// <param name="certificate">Certificate to use to sign</param>
+        /// <param name="insertAfter">Insert the signature after this node.</param>
+        public void Sign(
+            X509Certificate2 certificate,
+            XmlNode insertAfter)
+        {
+            ArgumentNullException.ThrowIfNull(insertAfter);
 
-        var signedXml = CreateSignedXml(element, certificate);
+            var signedXml = CreateSignedXml(element, certificate);
 
-        element.InsertAfter(signedXml.GetXml(), insertAfter);
+            element.InsertAfter(signedXml.GetXml(), insertAfter);
+        }
+
+        /// <summary>
+        /// Verifies a found Xml signature.
+        /// </summary>
+        /// <param name="keys">The signing keys that can be used to verify.</param>
+        /// <param name="allowedAlgorithms">Allowed algorithms. Values must be full algorithm identifier URIs
+        /// (e.g. <c>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</c>), matched by exact equality against
+        /// both the digest method and signature method in the signed XML.</param>
+        /// <returns>Tuple with possibly error message, and the signing key that worked.</returns>
+        internal (string? Error, SigningKey? WorkingKey) VerifySignature(
+            IEnumerable<SigningKey> keys,
+            IEnumerable<string> allowedAlgorithms)
+        {
+            try
+            {
+                return VerifySignatureCore(element, keys, allowedAlgorithms);
+            }
+            catch (CryptographicException e)
+            {
+                return (e.Message, null);
+            }
+        }
     }
 
     private static SignedXml CreateSignedXml(XmlElement element, X509Certificate2 certificate)
@@ -159,30 +182,6 @@ public static class SignedXmlHelper
                 ?? throw new CryptographicException("Reference target ID attribute must be named ID with uppercase letters");
 
             return element;
-        }
-    }
-
-    /// <summary>
-    /// Verifies a found Xml signature.
-    /// </summary>
-    /// <param name="signatureElement">The signature element to verify.</param>
-    /// <param name="keys">The signing keys that can be used to verify.</param>
-    /// <param name="allowedAlgorithms">Allowed algorithms. Values must be full algorithm identifier URIs
-    /// (e.g. <c>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</c>), matched by exact equality against
-    /// both the digest method and signature method in the signed XML.</param>
-    /// <returns>Tuple with possibly error message, and the signing key that worked.</returns>
-    internal static (string? Error, SigningKey? WorkingKey) VerifySignature(
-        this XmlElement signatureElement,
-        IEnumerable<SigningKey> keys,
-        IEnumerable<string> allowedAlgorithms)
-    {
-        try
-        {
-            return VerifySignatureCore(signatureElement, keys, allowedAlgorithms);
-        }
-        catch (CryptographicException e)
-        {
-            return (e.Message, null);
         }
     }
 

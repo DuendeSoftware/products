@@ -9,10 +9,13 @@ namespace Duende.IdentityServer.Saml.Bindings;
 
 internal static class SamlBindingExtensions
 {
-    internal static string ToUrn(this SamlBinding binding) => binding switch
+    extension(SamlBinding binding)
     {
-        SamlBinding.HttpRedirect => SamlConstants.Bindings.HttpRedirect,
-        SamlBinding.HttpPost => SamlConstants.Bindings.HttpPost,
-        _ => throw new ArgumentOutOfRangeException(nameof(binding), binding, "Unknown SAML binding")
-    };
+        internal string ToUrn() => binding switch
+        {
+            SamlBinding.HttpRedirect => SamlConstants.Bindings.HttpRedirect,
+            SamlBinding.HttpPost => SamlConstants.Bindings.HttpPost,
+            _ => throw new ArgumentOutOfRangeException(nameof(binding), binding, "Unknown SAML binding")
+        };
+    }
 }

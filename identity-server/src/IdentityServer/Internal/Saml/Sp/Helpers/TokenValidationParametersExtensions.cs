@@ -9,14 +9,17 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
     {
         private static readonly PropertyInfo requireAudienceProperty = typeof(TokenValidationParameters).GetProperty("RequireAudience");
 
-        public static TokenValidationParameters SetRequireAudience(this TokenValidationParameters tokenValidationParameters, bool value)
+        extension(TokenValidationParameters tokenValidationParameters)
         {
-            if (requireAudienceProperty != null)
+            public TokenValidationParameters SetRequireAudience(bool value)
             {
-                requireAudienceProperty.SetValue(tokenValidationParameters, value);
-            }
+                if (requireAudienceProperty != null)
+                {
+                    requireAudienceProperty.SetValue(tokenValidationParameters, value);
+                }
 
-            return tokenValidationParameters;
+                return tokenValidationParameters;
+            }
         }
     }
 }

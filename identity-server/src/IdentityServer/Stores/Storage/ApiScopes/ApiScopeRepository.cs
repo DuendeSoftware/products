@@ -19,7 +19,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.ApiScopes;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ApiScopeRepository(IStoreFactory storeFactory)
+internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -34,8 +34,8 @@ internal sealed class ApiScopeRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, ApiScopeDso.V1 dso, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(ApiScopeNameDskV1.Create(dso.Name))],
@@ -47,15 +47,15 @@ internal sealed class ApiScopeRepository(IStoreFactory storeFactory)
 
     internal async Task<(ApiScopeDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(id), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((ApiScopeDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(ApiScopeDso.V1 Dso, int Version)?> TryReadByNameAsync(string name, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             ApiScopeDso.EntityType,
             DataStorageKey.Create(ApiScopeNameDskV1.Create(name)),
             ct);
@@ -63,7 +63,7 @@ internal sealed class ApiScopeRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, ApiScopeDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -74,18 +74,18 @@ internal sealed class ApiScopeRepository(IStoreFactory storeFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(ApiScopeDso.EntityType, UuidV7.From(id), [], ct);
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(ApiScopeDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<QueryResult<ApiScopeDso.V1>> QueryAsync(
         QueryRequest<ApiScopeFilter, ApiScopeSortField> request,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await store.QueryAsync<ApiScopeDso.V1>(
+        var result = await storage.QueryAsync<ApiScopeDso.V1>(
             ApiScopeDso.EntityType,
             filter,
             sort,
@@ -104,10 +104,10 @@ internal sealed class ApiScopeRepository(IStoreFactory storeFactory)
             return [];
         }
 
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = Fields.Name.In(nameList);
 
-        var result = await store.QueryAsync<ApiScopeDso.V1>(
+        var result = await storage.QueryAsync<ApiScopeDso.V1>(
             ApiScopeDso.EntityType,
             filter,
             new SortParameter(Fields.Name),

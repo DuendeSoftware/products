@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Duende.IdentityServer.IntegrationTests.Admin.PersistedGrants;
 
 /// <summary>
-/// Integration tests for IPersistedGrantStore backed by IStore storage.
+/// Integration tests for IPersistedGrantStore backed by IStorage storage.
 /// Covers upsert semantics, filter-based queries, batch deletes, and round-trip fidelity.
 /// </summary>
 public sealed class PersistedGrantStoreTests : IAsyncLifetime

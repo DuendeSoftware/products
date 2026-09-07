@@ -11,29 +11,33 @@ namespace Duende.IdentityServer.EntityFramework.Mappers;
 /// </summary>
 public static class PushedAuthorizationRequestMappers
 {
-    /// <summary>
-    /// Maps an entity to a model.
-    /// </summary>
-    /// <param name="entity">The entity.</param>
-    /// <returns></returns>
-    public static Models.PushedAuthorizationRequest ToModel(this PushedAuthorizationRequest entity) => entity == null ? null :
-            new Models.PushedAuthorizationRequest
-            {
-                ReferenceValueHash = entity.ReferenceValueHash,
-                ExpiresAtUtc = entity.ExpiresAtUtc,
-                Parameters = entity.Parameters,
-            };
+    extension(PushedAuthorizationRequest entity)
+    {
+        /// <summary>
+        /// Maps an entity to a model.
+        /// </summary>
+        /// <returns></returns>
+        public Models.PushedAuthorizationRequest ToModel() => entity == null ? null :
+                new Models.PushedAuthorizationRequest
+                {
+                    ReferenceValueHash = entity.ReferenceValueHash,
+                    ExpiresAtUtc = entity.ExpiresAtUtc,
+                    Parameters = entity.Parameters,
+                };
+    }
 
-    /// <summary>
-    /// Maps a model to an entity.
-    /// </summary>
-    /// <param name="model">The model.</param>
-    /// <returns></returns>
-    public static Entities.PushedAuthorizationRequest ToEntity(this Models.PushedAuthorizationRequest model) => model == null ? null :
-            new Entities.PushedAuthorizationRequest
-            {
-                ReferenceValueHash = model.ReferenceValueHash,
-                ExpiresAtUtc = model.ExpiresAtUtc,
-                Parameters = model.Parameters,
-            };
+    extension(Models.PushedAuthorizationRequest model)
+    {
+        /// <summary>
+        /// Maps a model to an entity.
+        /// </summary>
+        /// <returns></returns>
+        public Entities.PushedAuthorizationRequest ToEntity() => model == null ? null :
+                new Entities.PushedAuthorizationRequest
+                {
+                    ReferenceValueHash = model.ReferenceValueHash,
+                    ExpiresAtUtc = model.ExpiresAtUtc,
+                    Parameters = model.Parameters,
+                };
+    }
 }

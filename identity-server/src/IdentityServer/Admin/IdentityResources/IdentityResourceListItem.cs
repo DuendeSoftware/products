@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Admin.IdentityResources;
 public sealed record IdentityResourceListItem
 {
     /// <summary>Storage identifier.</summary>
-    public required Guid Id { get; init; }
+    public required IdentityResourceId Id { get; init; }
 
     /// <summary>The unique name of the identity resource.</summary>
     public required string Name { get; init; }

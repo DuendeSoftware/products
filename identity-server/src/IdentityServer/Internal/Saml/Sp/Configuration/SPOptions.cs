@@ -1,5 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
+
 using System.Collections.ObjectModel;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Internal.Saml.Sp.Helpers;
@@ -28,10 +29,14 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
         }
 
         /// <summary>
-        /// Return Uri to redirect the client to, if no return uri was specified
-        /// when initiating the signin sequence.
+        /// URL to redirect to after processing an unsolicited (IdP-initiated) response.
         /// </summary>
-        public Uri ReturnUrl { get; set; }
+        public Uri IdpInitiatedCallbackUrl { get; set; }
+
+        /// <summary>
+        /// Maximum length (in bytes) of SAML RelayState to persist in auth properties.
+        /// </summary>
+        public int MaxRelayStateLength { get; set; } = 1024;
 
         /// <summary>
         /// Recommendation of cache refresh interval to those who reads our
@@ -132,7 +137,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
 
         /// <summary>
         /// By default, the service provider uses the host, protocol, port and
-        /// application root path from the HTTP request when creating links. 
+        /// application root path from the HTTP request when creating links.
         /// This might not be accurate in reverse proxy or load-balancing
         /// situations. You can override the origin used for link generation
         /// for the entire application using this property. To override per request,
@@ -311,7 +316,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
         public SigningBehavior AuthenticateRequestSigningBehavior { get; set; }
 
         /// <summary>
-        /// Signing algorithm for metadata and outbound messages. Can be 
+        /// Signing algorithm for metadata and outbound messages. Can be
         /// overriden for each <see cref="IdentityProvider"/>.
         /// </summary>
         public string OutboundSigningAlgorithm { get; set; }

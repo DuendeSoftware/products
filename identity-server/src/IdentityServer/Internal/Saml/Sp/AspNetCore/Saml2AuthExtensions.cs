@@ -12,68 +12,65 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     internal static class Saml2AuthExtensions
     {
-        /// <summary>
-        /// Register Saml2 Authentication with default scheme name.
-        /// </summary>
-        /// <param name="builder">Authentication Builder</param>
-        /// <param name="configureOptions">Action that configures the Saml2 Options</param>
-        /// <returns></returns>
-        public static AuthenticationBuilder AddSaml2(
-            this AuthenticationBuilder builder,
-            Action<Saml2Options> configureOptions)
-            => builder.AddSaml2(Saml2Defaults.Scheme, configureOptions);
-
-        /// <summary>
-        /// Register Saml2 Authentication with a custom scheme name.
-        /// </summary>
-        /// <param name="builder">Authentication Builder</param>
-        /// <param name="scheme">Name of the authentication scheme</param>
-        /// <param name="configureOptions">Action that configures Saml2 Options</param>
-        /// <returns>Authentication Builder</returns>
-        public static AuthenticationBuilder AddSaml2(
-            this AuthenticationBuilder builder,
-            string scheme,
-            Action<Saml2Options> configureOptions)
-            => builder.AddSaml2(scheme, Saml2Defaults.DisplayName, configureOptions);
-
-        /// <summary>
-        /// Register Saml2 Authentication with a custom scheme name.
-        /// </summary>
-        /// <param name="builder">Authentication Builder</param>
-        /// <param name="scheme">Name of the authentication scheme</param>
-        /// <param name="configureOptions">Action that configures Saml2 Options</param>
-        /// <param name="displayName">Display name of scheme</param>
-        /// <returns>Authentication Builder</returns>
-        public static AuthenticationBuilder AddSaml2(
-            this AuthenticationBuilder builder,
-            string scheme,
-            string displayName,
-            Action<Saml2Options> configureOptions)
+        extension(AuthenticationBuilder builder)
         {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
+            /// <summary>
+            /// Register Saml2 Authentication with default scheme name.
+            /// </summary>
+            /// <param name="configureOptions">Action that configures the Saml2 Options</param>
+            /// <returns></returns>
+            public AuthenticationBuilder AddSaml2(
+                Action<Saml2Options> configureOptions)
+                => builder.AddSaml2(Saml2Defaults.Scheme, configureOptions);
 
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<Saml2Options>, PostConfigureSaml2Options>());
+            /// <summary>
+            /// Register Saml2 Authentication with a custom scheme name.
+            /// </summary>
+            /// <param name="scheme">Name of the authentication scheme</param>
+            /// <param name="configureOptions">Action that configures Saml2 Options</param>
+            /// <returns>Authentication Builder</returns>
+            public AuthenticationBuilder AddSaml2(
+                string scheme,
+                Action<Saml2Options> configureOptions)
+                => builder.AddSaml2(scheme, Saml2Defaults.DisplayName, configureOptions);
 
-            builder.Services.Configure<AuthenticationOptions>(o =>
+            /// <summary>
+            /// Register Saml2 Authentication with a custom scheme name.
+            /// </summary>
+            /// <param name="scheme">Name of the authentication scheme</param>
+            /// <param name="configureOptions">Action that configures Saml2 Options</param>
+            /// <param name="displayName">Display name of scheme</param>
+            /// <returns>Authentication Builder</returns>
+            public AuthenticationBuilder AddSaml2(
+                string scheme,
+                string displayName,
+                Action<Saml2Options> configureOptions)
             {
-                o.AddScheme(scheme, s =>
+                if (builder == null)
                 {
-                    s.HandlerType = typeof(Saml2Handler);
-                    s.DisplayName = displayName;
+                    throw new ArgumentNullException(nameof(builder));
+                }
+
+                builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<Saml2Options>, PostConfigureSaml2Options>());
+
+                builder.Services.Configure<AuthenticationOptions>(o =>
+                {
+                    o.AddScheme(scheme, s =>
+                    {
+                        s.HandlerType = typeof(Saml2Handler);
+                        s.DisplayName = displayName;
+                    });
                 });
-            });
 
-            if (configureOptions != null)
-            {
-                builder.Services.Configure(scheme, configureOptions);
+                if (configureOptions != null)
+                {
+                    builder.Services.Configure(scheme, configureOptions);
+                }
+
+                builder.Services.AddTransient<Saml2Handler>();
+
+                return builder;
             }
-
-            builder.Services.AddTransient<Saml2Handler>();
-
-            return builder;
         }
     }
 }

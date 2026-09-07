@@ -7,7 +7,7 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Validation;
 using Duende.Storage;
-using Duende.Storage.Internal;
+using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Duende.Storage.Schema;
@@ -29,10 +29,10 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         return scope.ServiceProvider.GetRequiredService<IIdentityProviderAdmin>();
     }
 
-    private async Task<Guid> CreateProviderAsync(IIdentityProviderAdmin admin, string? scheme = null)
+    private async Task<IdentityProviderId> CreateProviderAsync(IIdentityProviderAdmin admin, string? scheme = null)
     {
         var result = await admin.CreateAsync(
-            new IdentityProviderConfiguration
+            new CreateIdentityProvider
             {
                 Scheme = scheme ?? $"provider_{Guid.NewGuid():N}",
                 Type = "test"
@@ -47,22 +47,19 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     {
         var admin = NewAdmin();
         var scheme = $"scheme_{Guid.NewGuid():N}";
-        var provider = new IdentityProviderConfiguration
+        var provider = new CreateIdentityProvider
         {
             Scheme = scheme,
             DisplayName = "Test Provider",
             Enabled = true,
-            Type = "oidc",
-            Properties = new Dictionary<string, string>
-            {
-                ["Authority"] = "https://idp.example.com",
-                ["ClientId"] = "my-client"
-            }
+            Type = "oidc"
         };
+        provider.ExtendedProperties.Set(AttributeCode.Create("Authority"), "https://idp.example.com");
+        provider.ExtendedProperties.Set(AttributeCode.Create("ClientId"), "my-client");
 
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
-        createResult.Id.ShouldNotBe(Guid.Empty);
+        createResult.Id.Value.ShouldNotBe(Guid.Empty);
         createResult.Version.ShouldNotBeNull();
         createResult.Version.Value.ShouldBe(1);
 
@@ -74,9 +71,10 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         loaded.DisplayName.ShouldBe(provider.DisplayName);
         loaded.Enabled.ShouldBe(provider.Enabled);
         loaded.Type.ShouldBe(provider.Type);
-        loaded.Properties.ShouldNotBeNull();
-        loaded.Properties.ShouldContainKeyAndValue("Authority", "https://idp.example.com");
-        loaded.Properties.ShouldContainKeyAndValue("ClientId", "my-client");
+        loaded.ExtendedProperties.TryGet(AttributeCode.Create("Authority"), out var authorityAttr).ShouldBeTrue();
+        authorityAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("https://idp.example.com");
+        loaded.ExtendedProperties.TryGet(AttributeCode.Create("ClientId"), out var clientIdAttr).ShouldBeTrue();
+        clientIdAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("my-client");
     }
 
     [Fact]
@@ -84,7 +82,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     {
         var admin = NewAdmin();
         var scheme = $"scheme_{Guid.NewGuid():N}";
-        var provider = new IdentityProviderConfiguration
+        var provider = new CreateIdentityProvider
         {
             Scheme = scheme,
             DisplayName = "ByScheme Test",
@@ -127,12 +125,12 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var scheme = $"scheme_{Guid.NewGuid():N}";
 
         var first = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = scheme, Type = "test" },
+            new CreateIdentityProvider { Scheme = scheme, Type = "test" },
             _ct);
         first.IsSuccess.ShouldBeTrue();
 
         var second = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = scheme, Type = "test" },
+            new CreateIdentityProvider { Scheme = scheme, Type = "test" },
             _ct);
         second.IsSuccess.ShouldBeFalse();
         second.Errors.ShouldNotBeNull();
@@ -146,7 +144,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var scheme = $"scheme_{Guid.NewGuid():N}";
 
         var createResult = await admin.CreateAsync(
-            new IdentityProviderConfiguration
+            new CreateIdentityProvider
             {
                 Scheme = scheme,
                 DisplayName = "Original",
@@ -159,7 +157,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var getResult = await admin.GetAsync(createResult.Id, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item;
+        var toUpdate = getResult.Item.ToUpdate();
         toUpdate.DisplayName = "Updated";
         toUpdate.Enabled = false;
 
@@ -178,7 +176,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         var createResult = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
+            new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
             _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
@@ -186,7 +184,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         getResult.Found.ShouldBeTrue();
 
         var wrongVersion = (DataVersion)999;
-        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item, wrongVersion, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item.ToUpdate(), wrongVersion, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
@@ -197,11 +195,11 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     public async Task update_nonexistent_returns_not_found()
     {
         var admin = NewAdmin();
-        var nonExistentId = Guid.CreateVersion7();
+        IdentityProviderId nonExistentId = Guid.CreateVersion7();
 
         var result = await admin.UpdateAsync(
             nonExistentId,
-            new IdentityProviderConfiguration { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
+            new UpdateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
             (DataVersion)1,
             _ct);
 
@@ -216,7 +214,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         var createResult = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
+            new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
             _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
@@ -274,10 +272,10 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = enabledScheme, Type = "test", Enabled = true },
+            new CreateIdentityProvider { Scheme = enabledScheme, Type = "test", Enabled = true },
             _ct);
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = disabledScheme, Type = "test", Enabled = false },
+            new CreateIdentityProvider { Scheme = disabledScheme, Type = "test", Enabled = false },
             _ct);
 
         var enabledResult = await admin.QueryAsync(
@@ -306,10 +304,10 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = withTypeScheme, Type = uniqueType },
+            new CreateIdentityProvider { Scheme = withTypeScheme, Type = uniqueType },
             _ct);
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = withoutTypeScheme, Type = "other" },
+            new CreateIdentityProvider { Scheme = withoutTypeScheme, Type = "other" },
             _ct);
 
         var result = await admin.QueryAsync(
@@ -330,10 +328,10 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = matchScheme, Type = "test", DisplayName = uniqueName },
+            new CreateIdentityProvider { Scheme = matchScheme, Type = "test", DisplayName = uniqueName },
             _ct);
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = noMatchScheme, Type = "test", DisplayName = "other" },
+            new CreateIdentityProvider { Scheme = noMatchScheme, Type = "test", DisplayName = "other" },
             _ct);
 
         var result = await admin.QueryAsync(
@@ -352,11 +350,11 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = prefix + "c", Type = "test" }, _ct);
+            new CreateIdentityProvider { Scheme = prefix + "c", Type = "test" }, _ct);
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = prefix + "a", Type = "test" }, _ct);
+            new CreateIdentityProvider { Scheme = prefix + "a", Type = "test" }, _ct);
         await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = prefix + "b", Type = "test" }, _ct);
+            new CreateIdentityProvider { Scheme = prefix + "b", Type = "test" }, _ct);
 
         var result = await admin.QueryAsync(
             QueryRequest.Create<IdentityProviderFilter, IdentityProviderSortField>(
@@ -375,7 +373,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         var result = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = "", Type = "test" },
+            new CreateIdentityProvider { Scheme = "", Type = "test" },
             _ct);
 
         result.IsSuccess.ShouldBeFalse();
@@ -392,7 +390,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = NewAdmin();
 
         var result = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "" },
+            new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "" },
             _ct);
 
         result.IsSuccess.ShouldBeFalse();
@@ -410,12 +408,11 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         services.AddLogging();
 
         var dbName = $"test_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
-                opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddIdentityServer()
-            .AddConfigurationStorage()
+            .AddStorage(storage =>
+                storage.AddSqliteStore(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
             .AddIdentityProviderConfigurationValidator<RejectAllIdentityProvidersValidator>();
 
         await using var provider = services.BuildServiceProvider();
@@ -427,7 +424,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var admin = scope.ServiceProvider.GetRequiredService<IIdentityProviderAdmin>();
 
         var result = await admin.CreateAsync(
-            new IdentityProviderConfiguration { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
+            new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
             _ct);
 
         result.IsSuccess.ShouldBeFalse();

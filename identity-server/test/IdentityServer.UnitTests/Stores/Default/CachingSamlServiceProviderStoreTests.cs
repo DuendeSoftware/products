@@ -6,6 +6,7 @@
 using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.Common;
@@ -26,7 +27,8 @@ public class CachingSamlServiceProviderStoreTests : IDisposable
     {
         _serviceProvider = TestHybridCacheHelper.BuildServiceProvider(_fakeTimeProvider);
         var cache = TestHybridCacheHelper.GetCache(_serviceProvider);
-        _subject = new CachingSamlServiceProviderStore<SpySamlServiceProviderStore>(_options, _spy, cache);
+        var policy = new CachePolicy<SamlServiceProvider>(null);
+        _subject = new CachingSamlServiceProviderStore<SpySamlServiceProviderStore>(policy, _options, _spy, cache);
     }
 
     public void Dispose() => _serviceProvider.Dispose();

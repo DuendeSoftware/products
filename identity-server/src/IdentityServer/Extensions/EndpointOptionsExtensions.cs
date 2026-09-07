@@ -9,24 +9,27 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class EndpointOptionsExtensions
 {
-    public static bool IsEndpointEnabled(this EndpointsOptions options, Endpoint endpoint) => endpoint?.Name switch
+    extension(EndpointsOptions options)
     {
-        IdentityServerConstants.EndpointNames.Authorize => options.EnableAuthorizeEndpoint,
-        IdentityServerConstants.EndpointNames.CheckSession => options.EnableCheckSessionEndpoint,
-        IdentityServerConstants.EndpointNames.DeviceAuthorization => options.EnableDeviceAuthorizationEndpoint,
-        IdentityServerConstants.EndpointNames.Discovery => options.EnableDiscoveryEndpoint,
-        IdentityServerConstants.EndpointNames.EndSession => options.EnableEndSessionEndpoint,
-        IdentityServerConstants.EndpointNames.Introspection => options.EnableIntrospectionEndpoint,
-        IdentityServerConstants.EndpointNames.Revocation => options.EnableTokenRevocationEndpoint,
-        IdentityServerConstants.EndpointNames.Token => options.EnableTokenEndpoint,
-        IdentityServerConstants.EndpointNames.UserInfo => options.EnableUserInfoEndpoint,
-        IdentityServerConstants.EndpointNames.PushedAuthorization => options.EnablePushedAuthorizationEndpoint,
-        IdentityServerConstants.EndpointNames.BackchannelAuthentication => options.EnableBackchannelAuthenticationEndpoint,
-        IdentityServerConstants.EndpointNames.SamlMetadata => options.EnableSamlMetadataEndpoint,
-        IdentityServerConstants.EndpointNames.SamlSingleSignOnService => options.EnableSamlSigninEndpoint,
-        IdentityServerConstants.EndpointNames.SamlSingleSignOnCallback => options.EnableSamlSigninCallbackEndpoint,
-        IdentityServerConstants.EndpointNames.SamlSingleLogoutService => options.EnableSamlLogoutEndpoint,
-        IdentityServerConstants.EndpointNames.SamlSingleLogoutCallback => options.EnableSamlLogoutCallbackEndpoint,
-        _ => true
-    };
+        public bool IsEndpointEnabled(Endpoint endpoint) => endpoint?.Name switch
+        {
+            IdentityServerConstants.EndpointNames.Authorize => options.EnableAuthorizeEndpoint,
+            IdentityServerConstants.EndpointNames.CheckSession => options.EnableCheckSessionEndpoint,
+            IdentityServerConstants.EndpointNames.DeviceAuthorization => options.EnableDeviceAuthorizationEndpoint,
+            IdentityServerConstants.EndpointNames.Discovery => options.EnableDiscoveryEndpoint,
+            IdentityServerConstants.EndpointNames.EndSession => options.EnableEndSessionEndpoint,
+            IdentityServerConstants.EndpointNames.Introspection => options.EnableIntrospectionEndpoint,
+            IdentityServerConstants.EndpointNames.Revocation => options.EnableTokenRevocationEndpoint,
+            IdentityServerConstants.EndpointNames.Token => options.EnableTokenEndpoint,
+            IdentityServerConstants.EndpointNames.UserInfo => options.EnableUserInfoEndpoint,
+            IdentityServerConstants.EndpointNames.PushedAuthorization => options.EnablePushedAuthorizationEndpoint,
+            IdentityServerConstants.EndpointNames.BackchannelAuthentication => options.EnableBackchannelAuthenticationEndpoint,
+            IdentityServerConstants.EndpointNames.SamlMetadata => options.EnableSamlMetadataEndpoint,
+            IdentityServerConstants.EndpointNames.SamlSingleSignOnService => options.EnableSamlSigninEndpoint,
+            IdentityServerConstants.EndpointNames.SamlSingleSignOnCallback => options.EnableSamlSigninCallbackEndpoint,
+            IdentityServerConstants.EndpointNames.SamlSingleLogoutService => options.EnableSamlLogoutEndpoint,
+            IdentityServerConstants.EndpointNames.SamlSingleLogoutCallback => options.EnableSamlLogoutCallbackEndpoint,
+            _ => true
+        };
+    }
 }

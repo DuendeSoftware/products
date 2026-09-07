@@ -10,38 +10,41 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class ClaimsExtensions
 {
-    public static Dictionary<string, object> ToClaimsDictionary(this IEnumerable<Claim> claims)
+    extension(IEnumerable<Claim> claims)
     {
-        var d = new Dictionary<string, object>();
-
-        if (claims == null)
+        public Dictionary<string, object> ToClaimsDictionary()
         {
-            return d;
-        }
+            var d = new Dictionary<string, object>();
 
-        var distinctClaims = claims.Distinct(new ClaimComparer());
-
-        foreach (var claim in distinctClaims)
-        {
-            if (!d.TryGetValue(claim.Type, out var value))
+            if (claims == null)
             {
-                d.Add(claim.Type, GetValue(claim));
+                return d;
             }
-            else
+
+            var distinctClaims = claims.Distinct(new ClaimComparer());
+
+            foreach (var claim in distinctClaims)
             {
-                if (value is List<object> list)
+                if (!d.TryGetValue(claim.Type, out var value))
                 {
-                    list.Add(GetValue(claim));
+                    d.Add(claim.Type, GetValue(claim));
                 }
                 else
                 {
-                    d.Remove(claim.Type);
-                    d.Add(claim.Type, new List<object> { value, GetValue(claim) });
+                    if (value is List<object> list)
+                    {
+                        list.Add(GetValue(claim));
+                    }
+                    else
+                    {
+                        d.Remove(claim.Type);
+                        d.Add(claim.Type, new List<object> { value, GetValue(claim) });
+                    }
                 }
             }
-        }
 
-        return d;
+            return d;
+        }
     }
 
     private static object GetValue(Claim claim)

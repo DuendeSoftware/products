@@ -309,4 +309,51 @@ public sealed class SamlStandaloneRegistrationTests
         Should.Throw<OptionsValidationException>(() =>
             optionsMonitor.Get(SamlServiceProviderDefaults.Scheme));
     }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void AddSamlServiceProvider_maps_idp_initiated_callback_url_to_handler_options()
+    {
+        var services = CreateServices();
+
+        services.AddIdentityServer();
+        services.AddAuthentication().AddSamlServiceProvider(opts =>
+        {
+            opts.SpEntityId = "https://sp.example.com";
+            opts.IdpEntityId = "https://idp.example.com";
+            opts.SingleSignOnServiceUrl = "https://idp.example.com/sso";
+            opts.AllowUnsolicitedAuthnResponse = true;
+            opts.IdpInitiatedCallbackUrl = "/dashboard";
+        });
+
+        using var provider = services.BuildServiceProvider();
+        var optionsMonitor = provider.GetRequiredService<IOptionsMonitor<Saml2HandlerOptions>>();
+        var options = optionsMonitor.Get(SamlServiceProviderDefaults.Scheme);
+
+        options.SPOptions.IdpInitiatedCallbackUrl.ShouldNotBeNull();
+        options.SPOptions.IdpInitiatedCallbackUrl.ToString().ShouldBe("/dashboard");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void AddSamlServiceProvider_validates_invalid_idp_initiated_callback_url_scheme()
+    {
+        var services = CreateServices();
+
+        services.AddIdentityServer();
+        services.AddAuthentication().AddSamlServiceProvider(opts =>
+        {
+            opts.SpEntityId = "https://sp.example.com";
+            opts.IdpEntityId = "https://idp.example.com";
+            opts.SingleSignOnServiceUrl = "https://idp.example.com/sso";
+            opts.AllowUnsolicitedAuthnResponse = true;
+            opts.IdpInitiatedCallbackUrl = "javascript:alert(1)";
+        });
+
+        using var provider = services.BuildServiceProvider();
+        var optionsMonitor = provider.GetRequiredService<IOptionsMonitor<Saml2HandlerOptions>>();
+
+        Should.Throw<OptionsValidationException>(() =>
+            optionsMonitor.Get(SamlServiceProviderDefaults.Scheme));
+    }
 }

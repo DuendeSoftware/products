@@ -14,24 +14,28 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 internal static class JsonWebKeyExtensions
 {
-    /// <summary>
-    /// Create the value of a thumbprint-based cnf claim
-    /// </summary>
-    public static string CreateThumbprintCnf(this JsonWebKey jwk)
+    extension(JsonWebKey jwk)
     {
-        var jkt = jwk.CreateThumbprint();
-        var values = new Dictionary<string, string>
+        /// <summary>
+        /// Create the value of a thumbprint-based cnf claim
+        /// </summary>
+        public string CreateThumbprintCnf()
         {
-            { JwtClaimTypes.ConfirmationMethods.JwkThumbprint, jkt }
-        };
-        return JsonSerializer.Serialize(values);
-    }
-    /// <summary>
-    /// Create the value of a thumbprint
-    /// </summary>
-    public static string CreateThumbprint(this JsonWebKey jwk)
-    {
-        var jkt = Base64Url.EncodeToString(jwk.ComputeJwkThumbprint());
-        return jkt;
+            var jkt = jwk.CreateThumbprint();
+            var values = new Dictionary<string, string>
+            {
+                { JwtClaimTypes.ConfirmationMethods.JwkThumbprint, jkt }
+            };
+            return JsonSerializer.Serialize(values);
+        }
+
+        /// <summary>
+        /// Create the value of a thumbprint
+        /// </summary>
+        public string CreateThumbprint()
+        {
+            var jkt = Base64Url.EncodeToString(jwk.ComputeJwkThumbprint());
+            return jkt;
+        }
     }
 }

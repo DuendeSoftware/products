@@ -324,7 +324,8 @@ public class DynamicProvidersTests
         redirectUri.ShouldStartWith("https://server/federation/idp1/signin");
 
         var cache = _host.Resolve<HybridCache>(ServiceProviderKeys.ConfigurationStoreCache);
-        await cache.RemoveAsync(CacheKey.For<IdentityProvider>("idp1"), _ct);
+        var cachePolicy = _host.Resolve<CachePolicy<IdentityProvider>>();
+        await cache.RemoveAsync(cachePolicy.BuildKey("idp1"), _ct);
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
 

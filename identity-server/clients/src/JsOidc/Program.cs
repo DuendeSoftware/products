@@ -1,18 +1,26 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore;
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
 
-namespace JsOidc;
+app.UseDefaultFiles();
 
-#pragma warning disable ASPDEPR008 // Ignore IWebHost deprecation warnings
+// enable to test w/ CSP
+//app.Use(async (ctx, next) =>
+//{
+//    ctx.Response.OnStarting(() =>
+//    {
+//        if (ctx.Response.ContentType?.StartsWith("text/html") == true)
+//        {
+//            ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; connect-src http://localhost:5000 http://localhost:3721; frame-src 'self' http://localhost:5000");
+//        }
+//        return Task.CompletedTask;
+//    });
 
-public class Program
-{
-    public static void Main(string[] args) => BuildWebHost(args).Run();
+//    await next();
+//});
 
-    public static IWebHost BuildWebHost(string[] args) =>
-        WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .Build();
-}
+app.UseStaticFiles();
+
+app.Run();

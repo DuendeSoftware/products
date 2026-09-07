@@ -3,8 +3,8 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Stores.Storage.IdentityProviders;
 using Duende.Storage.EntityAttributeValue;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -13,36 +13,31 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class DataExtensionSchemaBuilderExtensions
 {
-    /// <summary>
-    ///     Registers a fixed set of data extension schemas using an in-memory store.
-    ///     Schemas are immutable at runtime. <see cref="ISchemaAdmin"/> is NOT registered;
-    ///     attempting to resolve it will fail.
-    /// </summary>
-    /// <param name="builder">The IdentityServer builder.</param>
-    /// <param name="schemas">The schema definitions to make available.</param>
-    /// <returns>The builder for chaining.</returns>
-    public static IIdentityServerBuilder AddInMemoryDataExtensionSchemas(
-        this IIdentityServerBuilder builder,
-        IEnumerable<SchemaConfiguration> schemas)
+    extension(IIdentityServerBuilder builder)
     {
-        var store = new InMemorySchemaStore(schemas);
-        builder.Services.RemoveAll<ISchemaStore>();
-        builder.Services.RemoveAll<ISchemaAdmin>();
-        builder.Services.AddSingleton<ISchemaStore>(store);
-        return builder;
-    }
-
-    /// <summary>
-    ///     Registers data extension schema services backed by the database storage layer.
-    ///     Both <see cref="ISchemaStore"/> (read) and <see cref="ISchemaAdmin"/> (write) are registered,
-    ///     backed by the configured storage provider.
-    /// </summary>
-    /// <param name="builder">The IdentityServer builder.</param>
-    /// <returns>The builder for chaining.</returns>
-    public static IIdentityServerBuilder AddStorageDataExtensionSchemas(
-        this IIdentityServerBuilder builder)
-    {
-        StorageSchemaAdmin.RegisterServices(builder.Services);
-        return builder;
+        /// <summary>
+        ///     Registers a fixed set of data extension schemas using an in-memory store.
+        ///     Schemas are immutable at runtime. <see cref="ISchemaAdmin"/> is NOT registered;
+        ///     attempting to resolve it will fail.
+        ///     <para>
+        ///         Built-in identity provider schemas (e.g. <c>idp:oidc</c>) are always included
+        ///         alongside the caller-supplied schemas so that standard providers continue to work.
+        ///     </para>
+        /// </summary>
+        /// <param name="schemas">The schema definitions to make available.</param>
+        /// <returns>The builder for chaining.</returns>
+        public IIdentityServerBuilder AddInMemoryDataExtensionSchemas(
+            IEnumerable<SchemaConfiguration> schemas)
+        {
+            // Built-ins come first so that caller-supplied schemas with the same SchemaId override
+            // them (InMemorySchemaStore uses last-wins semantics for duplicate IDs).
+            var allSchemas = BuiltInSchemas.All.Concat(schemas);
+            var store = new InMemorySchemaStore(allSchemas);
+            builder.Services.AddTransient<ISchemaAdmin>(_
+                => throw new NotSupportedException(
+                    $"{nameof(ISchemaAdmin)} is not supported when using In Memory Schemas"));
+            builder.Services.AddSingleton<ISchemaStore>(store);
+            return builder;
+        }
     }
 }

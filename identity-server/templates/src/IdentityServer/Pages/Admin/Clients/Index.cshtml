@@ -97,9 +97,9 @@
                             form="delete-form"
                             name="Input.Button"
                             value="delete"
-                            asp-page="/admin/clients/delete"
+                            asp-page="/Admin/Clients/Delete"
                             asp-route-clientid="@client.ClientId"
-                            data-confirm="Are you sure you want to delete this client?">
+                            data-confirm="Are you sure you want to delete this Client?">
                         <i class="bi bi-trash"></i>
                         <span class="d-none">Delete</span>
                     </button>
@@ -107,19 +107,18 @@
                 </td>
             </tr>
         }
+        @if (!Model.Clients.Any())
+        {
+            <tr>
+                <td colspan="4" class="text-center p-4">
+                    <div class="alert alert-light text-center mb-0">
+                        You do not have any Clients configured.<br />
+                        Click "Create Client" above to begin adding a new client.
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
 <form id="delete-form" method="post" class="d-none"></form>
-
-@if (!Model.Clients.Any())
-{
-    <div class="row">
-        <div class="col">
-            <div class="alert alert-light text-center">
-                You do not have any Clients configured.<br />
-                Click "Create Client" above to begin adding a new client.
-            </div>
-        </div>
-    </div>
-}

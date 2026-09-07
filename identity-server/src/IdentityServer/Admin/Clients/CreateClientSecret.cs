@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.Admin.Clients;
 /// Used both when creating a client with initial secrets and when adding secrets via
 /// <see cref="IClientAdmin.CreateSecretAsync"/>.
 /// </summary>
-public class CreateClientSecret
+public sealed class CreateClientSecret
 {
     /// <summary>
     /// The plaintext secret value. The value is hashed before storage and is never exposed by reads.

@@ -23,6 +23,7 @@ public class CachingResourceStore<T> : IResourceStore
 {
     private const string AllKey = "__all__";
 
+    private readonly CachePolicy<Resources> _policy;
     private readonly IdentityServerOptions _options;
     private readonly HybridCache _cache;
     private readonly IResourceStore _inner;
@@ -30,14 +31,17 @@ public class CachingResourceStore<T> : IResourceStore
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingResourceStore{T}"/> class.
     /// </summary>
+    /// <param name="policy">The cache policy.</param>
     /// <param name="options">The options.</param>
     /// <param name="inner">The inner.</param>
     /// <param name="cache">The cache.</param>
     public CachingResourceStore(
+        CachePolicy<Resources> policy,
         IdentityServerOptions options,
         T inner,
         [FromKeyedServices(ServiceProviderKeys.ConfigurationStoreCache)] HybridCache cache)
     {
+        _policy = policy;
         _options = options;
         _inner = inner;
         _cache = cache;
@@ -109,8 +113,8 @@ public class CachingResourceStore<T> : IResourceStore
 
     private async Task<Resources> GetCachedResourcesAsync(Ct ct)
     {
-        var cacheKey = CacheKey.For<Resources>(AllKey);
-        var cacheOptions = CacheKey.WriteOptions(_options.Caching.ResourceStoreExpiration);
+        var cacheKey = _policy.BuildKey(AllKey);
+        var cacheOptions = _policy.WriteOptions(_options.Caching.ResourceStoreExpiration);
 
         try
         {
@@ -123,6 +127,7 @@ public class CachingResourceStore<T> : IResourceStore
                     return all ?? throw new NotCachedException();
                 },
                 cacheOptions,
+                tags: _policy.Tags,
                 cancellationToken: ct);
         }
         catch (NotCachedException)

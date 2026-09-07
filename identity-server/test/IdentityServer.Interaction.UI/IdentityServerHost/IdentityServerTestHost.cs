@@ -12,11 +12,14 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Duende.IdentityServer.Interaction.SharedHosts.IdentityServer;
 
+public delegate void ConfigureWebApp(WebApplication app, Action<WebApplication> next);
+
 public class IdentityServerTestHost(IScenarioConfigurator configurator,
     string name,
     Action<IIdentityServerBuilder>? configureIdentityServer = null,
     Action<IdentityServerOptions>? configureOptions = null,
-    Action<IServiceCollection>? configureServices = null) : TestHost(configurator, name)
+    Action<IServiceCollection>? configureServices = null,
+    ConfigureWebApp? configureApp = null) : TestHost(configurator, name)
 {
     private readonly ICollection<Client> _clients = new List<Client>();
     private IEnumerable<IdentityResource> _identityResources = [];
@@ -45,12 +48,23 @@ public class IdentityServerTestHost(IScenarioConfigurator configurator,
             .AddApplicationPart(typeof(IdentityServerTestHost).Assembly);
 
         var app = builder.Build();
+        Action<WebApplication> configureDefaultPipeline = inner =>
+        {
+            inner.UseStaticFiles();
+            inner.UseRouting();
+            inner.UseIdentityServer();
+            inner.UseAuthorization();
+            inner.MapRazorPages();
+        };
 
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseIdentityServer();
-        app.UseAuthorization();
-        app.MapRazorPages();
+        if (configureApp is null)
+        {
+            configureDefaultPipeline(app);
+        }
+        else
+        {
+            configureApp(app, configureDefaultPipeline);
+        }
 
         return app;
     }

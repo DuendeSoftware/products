@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Xml;
 using Duende.IdentityServer.Saml.Common;
@@ -33,71 +34,69 @@ public static class XmlHelpers
         return Base64UrlTextEncoder.Encode(bytes);
     }
 
-    /// <summary>
-    /// Get an Xml traverser for an XmlDocument
-    /// </summary>
-    /// <param name="xmlElement">Source XmlElement. Typically the document element</param>
-    /// <returns>XmlTraverser located at DocumentElement</returns>
-    public static XmlTraverser GetXmlTraverser(this XmlElement xmlElement)
-        => new(xmlElement ?? throw new ArgumentException("DocumentElement cannot be null"));
-
-    /// <summary>
-    /// Sets an attribute if the value is not null.
-    /// </summary>
-    /// <param name="element">Element to set attribute on.</param>
-    /// <param name="name">Name of attribute</param>
-    /// <param name="value">String value. If null, no attribute is set/created</param>
-    public static void SetAttributeIfValue(this XmlElement element, string name, string? value)
+    extension(XmlElement element)
     {
-        if (value != null)
+        /// <summary>
+        /// Get an Xml traverser for an XmlDocument
+        /// </summary>
+        /// <returns>XmlTraverser located at DocumentElement</returns>
+        [SuppressMessage("Design", "CA1024:Use properties where appropriate", Justification = "Changing this extension method to a property would be a breaking API change")]
+        public XmlTraverser GetXmlTraverser()
+            => new(element ?? throw new ArgumentException("DocumentElement cannot be null"));
+
+        /// <summary>
+        /// Sets an attribute if the value is not null.
+        /// </summary>
+        /// <param name="name">Name of attribute</param>
+        /// <param name="value">String value. If null, no attribute is set/created</param>
+        public void SetAttributeIfValue(string name, string? value)
         {
-            element.SetAttribute(name, value);
+            if (value != null)
+            {
+                element.SetAttribute(name, value);
+            }
         }
-    }
 
-    /// <summary>
-    /// Sets a DateTimeUtc attribute in the correct format.
-    /// </summary>
-    /// <param name="element">Element to set attribute on.</param>
-    /// <param name="name">Name of attribute</param>
-    /// <param name="value">DateTimeUtc value.</param>
-    public static void SetAttribute(this XmlElement element, string name, DateTimeUtc value) =>
-        element.SetAttribute(name, value.ToString());
+        /// <summary>
+        /// Sets a DateTimeUtc attribute in the correct format.
+        /// </summary>
+        /// <param name="name">Name of attribute</param>
+        /// <param name="value">DateTimeUtc value.</param>
+        public void SetAttribute(string name, DateTimeUtc value) =>
+            element.SetAttribute(name, value.ToString());
 
-    /// <summary>
-    /// Sets a DateTimeUtc attribute in the correct format, if the value is not null (HasValue)
-    /// </summary>
-    /// <param name="element">Element to set attribute on.</param>
-    /// <param name="name">Name of attribute</param>
-    /// <param name="value">DateTimeUtc value.</param>
-    public static void SetAttributeIfValue(this XmlElement element, string name, DateTimeUtc? value)
-    {
-        if (value.HasValue)
+        /// <summary>
+        /// Sets a DateTimeUtc attribute in the correct format, if the value is not null (HasValue)
+        /// </summary>
+        /// <param name="name">Name of attribute</param>
+        /// <param name="value">DateTimeUtc value.</param>
+        public void SetAttributeIfValue(string name, DateTimeUtc? value)
         {
-            element.SetAttribute(name, value.Value);
+            if (value.HasValue)
+            {
+                element.SetAttribute(name, value.Value);
+            }
         }
-    }
 
-    /// <summary>
-    /// Sets a TimeSpan attribute in the correct format.
-    /// </summary>
-    /// <param name="element">Element to set attribute on.</param>
-    /// <param name="name">Name of attribute</param>
-    /// <param name="value">TimeSpan value.</param>
-    public static void SetAttribute(this XmlElement element, string name, TimeSpan value) =>
-        element.SetAttribute(name, XmlConvert.ToString(value));
+        /// <summary>
+        /// Sets a TimeSpan attribute in the correct format.
+        /// </summary>
+        /// <param name="name">Name of attribute</param>
+        /// <param name="value">TimeSpan value.</param>
+        public void SetAttribute(string name, TimeSpan value) =>
+            element.SetAttribute(name, XmlConvert.ToString(value));
 
-    /// <summary>
-    /// Sets a TimeSpan attribute in the correct format, if the value is not null (HasValue)
-    /// </summary>
-    /// <param name="element">Element to set attribute on.</param>
-    /// <param name="name">Name of attribute</param>
-    /// <param name="value">TimeSpan value.</param>
-    public static void SetAttributeIfValue(this XmlElement element, string name, TimeSpan? value)
-    {
-        if (value.HasValue)
+        /// <summary>
+        /// Sets a TimeSpan attribute in the correct format, if the value is not null (HasValue)
+        /// </summary>
+        /// <param name="name">Name of attribute</param>
+        /// <param name="value">TimeSpan value.</param>
+        public void SetAttributeIfValue(string name, TimeSpan? value)
         {
-            element.SetAttribute(name, value.Value);
+            if (value.HasValue)
+            {
+                element.SetAttribute(name, value.Value);
+            }
         }
     }
 }

@@ -12,11 +12,11 @@ namespace Duende.IdentityServer.Hosting;
 /// Background service that periodically purges expired entities from the storage layer.
 /// </summary>
 internal sealed class StoragePurgeHost(
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     IdentityServerOptions options,
     ILogger<StoragePurgeHost> logger) : BackgroundService
 {
-    // IStore.PurgeExpiredAsync enforces [1, 1000]; clamp here to avoid noisy exceptions.
+    // IStorage.PurgeExpiredAsync enforces [1, 1000]; clamp here to avoid noisy exceptions.
     private const int MinBatchSize = 1;
     private const int MaxBatchSize = 1000;
     private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(1);
@@ -80,14 +80,14 @@ internal sealed class StoragePurgeHost(
 
         try
         {
-            var store = await storeFactory.GetStore(ct);
+            var storage = await storageFactory.GetStorage(ct);
             var batchSize = Math.Clamp(options.StoragePurge.BatchSize, MinBatchSize, MaxBatchSize);
 
             var deleted = batchSize;
             while (deleted >= batchSize)
             {
                 ct.ThrowIfCancellationRequested();
-                deleted = await store.PurgeExpiredAsync(batchSize, ct);
+                deleted = await storage.PurgeExpiredAsync(batchSize, ct);
                 logger.PurgedBatch(LogLevel.Debug, deleted);
             }
         }

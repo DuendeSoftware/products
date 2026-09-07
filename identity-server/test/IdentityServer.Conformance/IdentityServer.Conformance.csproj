@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Duende.IdentityServer.Conformance</RootNamespace>
+    <!-- Conformance tests require Docker and are excluded from the default test run -->
+    <TestCategory>conformance</TestCategory>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);IDE0058;CA1711;CA1812;EnableGenerateDocumentationFile</NoWarn>
+    <!-- URLs are passed as strings throughout because Playwright and the conformance
+         suite REST API both work with string URLs. Changing to Uri would add friction
+         with no practical benefit in this test-support library. -->
+    <NoWarn>$(NoWarn);CA1054;CA1056;CA2234</NoWarn>
+    <!-- Best-effort teardown and health-check loops intentionally catch all exceptions. -->
+    <NoWarn>$(NoWarn);CA1031</NoWarn>
+    <!-- HttpClientHandler is owned by HttpClient which is disposed via IDisposable. -->
+    <NoWarn>$(NoWarn);CA2000</NoWarn>
+    <!-- Null checks on public API parameters are omitted; callers are internal test code. -->
+    <NoWarn>$(NoWarn);CA1062</NoWarn>
+    <!-- GC.SuppressFinalize not needed on sealed async-disposable test fixtures. -->
+    <NoWarn>$(NoWarn);CA1816</NoWarn>
+    <!-- The conformance suite uses a self-signed certificate; CRL checking must be disabled. -->
+    <NoWarn>$(NoWarn);CA5400</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Exclude the Host subdirectory — it is a separate project built independently -->
+    <Compile Remove="Host\**" />
+    <EmbeddedResource Remove="Host\**" />
+    <None Remove="Host\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="Microsoft.Playwright.Xunit.v3" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="System.Net.Http.Json" />
+    <Using Include="System.Text.Json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="conformance-reports\" />
+  </ItemGroup>
+</Project>

@@ -10,6 +10,8 @@ namespace Duende.IdentityServer.Admin.Clients;
 
 /// <summary>
 /// Represents a client configuration returned by admin read operations.
+/// Immutable read model -- to modify, use <see cref="ToUpdate"/> to obtain a mutable
+/// <see cref="UpdateClient"/> and pass it to <see cref="IClientAdmin.UpdateAsync"/>.
 /// </summary>
 public sealed class ClientConfiguration
 {
@@ -277,62 +279,57 @@ public sealed class ClientConfiguration
     /// <summary>
     /// Allowed grant types (e.g., <c>"authorization_code"</c>, <c>"client_credentials"</c>).
     /// </summary>
-    public IReadOnlyList<string>? AllowedGrantTypes { get; init; }
+    public IReadOnlyList<string> AllowedGrantTypes { get; init; } = [];
 
     /// <summary>
     /// Allowed scopes the client may request.
     /// </summary>
-    public IReadOnlyList<string>? AllowedScopes { get; init; }
+    public IReadOnlyList<string> AllowedScopes { get; init; } = [];
 
     /// <summary>
     /// Allowed redirect URIs for token and authorization code delivery.
     /// </summary>
-    public IReadOnlyList<string>? RedirectUris { get; init; }
+    public IReadOnlyList<string> RedirectUris { get; init; } = [];
 
     /// <summary>
     /// Allowed post-logout redirect URIs.
     /// </summary>
-    public IReadOnlyList<string>? PostLogoutRedirectUris { get; init; }
+    public IReadOnlyList<string> PostLogoutRedirectUris { get; init; } = [];
 
     /// <summary>
     /// Allowed signing algorithms for identity tokens.
     /// If empty, the server default signing algorithm is used.
     /// </summary>
-    public IReadOnlyList<string>? AllowedIdentityTokenSigningAlgorithms { get; init; }
+    public IReadOnlyList<string> AllowedIdentityTokenSigningAlgorithms { get; init; } = [];
 
     /// <summary>
     /// External identity provider restrictions.
     /// If empty, all configured identity providers are allowed.
     /// </summary>
-    public IReadOnlyList<string>? IdentityProviderRestrictions { get; init; }
+    public IReadOnlyList<string> IdentityProviderRestrictions { get; init; } = [];
 
     /// <summary>
     /// Allowed CORS origins for JavaScript clients.
     /// </summary>
-    public IReadOnlyList<string>? AllowedCorsOrigins { get; init; }
+    public IReadOnlyList<string> AllowedCorsOrigins { get; init; } = [];
 
     /// <summary>
     /// Client claims to be included in tokens.
     /// </summary>
-    public IReadOnlyList<ClientClaimConfiguration>? Claims { get; init; }
+    public IReadOnlyList<ClientClaimConfiguration> Claims { get; init; } = [];
 
     /// <summary>
-    /// Client secrets — metadata only. The secret value is never exposed.
+    /// Client secrets (metadata only). The secret value is never exposed.
     /// To add a new secret, use <c>CreateSecretAsync</c> (accepts plaintext, hashes before storage).
     /// To change a secret value, delete the existing secret and create a new one.
     /// </summary>
-    public IReadOnlyList<ClientSecretConfiguration>? ClientSecrets { get; init; }
+    public IReadOnlyList<ClientSecretConfiguration> ClientSecrets { get; init; } = [];
 
     /// <summary>
     /// Extended attributes for this client, validated against a configured schema at the store boundary.
     /// Use this to attach arbitrary typed metadata to a client.
     /// </summary>
-    public IReadOnlyCollection<AttributeValue> ExtendedProperties { get; init; } = [];
-
-    /// <summary>
-    /// Data version for optimistic concurrency. <see langword="null"/> for new clients.
-    /// </summary>
-    public DataVersion? Version { get; init; }
+    public AttributeValueCollection ExtendedProperties { get; init; } = new();
 
     /// <summary>
     /// Creates an update model from this configuration.
@@ -392,7 +389,7 @@ public sealed class ClientConfiguration
         AllowedIdentityTokenSigningAlgorithms = Copy(AllowedIdentityTokenSigningAlgorithms),
         IdentityProviderRestrictions = Copy(IdentityProviderRestrictions),
         AllowedCorsOrigins = Copy(AllowedCorsOrigins),
-        Claims = Claims?.Select(c => new ClientClaimConfiguration
+        Claims = Claims.Select(c => new ClientClaimConfiguration
         {
             Type = c.Type,
             Value = c.Value,
@@ -467,7 +464,7 @@ public sealed class ClientConfiguration
         };
     }
 
-    private static List<string>? Copy(IReadOnlyList<string>? values) => values is null ? null : [.. values];
+    private static List<string> Copy(IReadOnlyList<string> values) => [.. values];
 
     private AttributeValueCollection CopyExtendedProperties()
     {

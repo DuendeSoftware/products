@@ -58,7 +58,7 @@
                             <ul class="list-group list-group-flush">
                                 @foreach (var scope in Model.View.ApiScopes)
                                 {
-                                    <partial name="_ScopeListItem" model="scope" />
+                                    <partial name="_ScopeListItem" model="@scope" />
                                 }
                             </ul>
                         </div>

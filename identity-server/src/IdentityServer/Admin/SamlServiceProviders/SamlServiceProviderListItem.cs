@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Admin.SamlServiceProviders;
 public sealed record SamlServiceProviderListItem
 {
     /// <summary>Storage identifier.</summary>
-    public required Guid Id { get; init; }
+    public required SamlServiceProviderId Id { get; init; }
 
     /// <summary>SAML entity ID.</summary>
     public required string EntityId { get; init; }

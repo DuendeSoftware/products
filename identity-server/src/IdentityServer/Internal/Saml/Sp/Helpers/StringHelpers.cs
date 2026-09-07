@@ -4,14 +4,17 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
 {
     static class StringHelpers
     {
-        public static string NullIfEmpty(this string source)
+        extension(string source)
         {
-            if (string.IsNullOrEmpty(source))
+            public string NullIfEmpty()
             {
-                return null;
-            }
+                if (string.IsNullOrEmpty(source))
+                {
+                    return null;
+                }
 
-            return source;
+                return source;
+            }
         }
     }
 }

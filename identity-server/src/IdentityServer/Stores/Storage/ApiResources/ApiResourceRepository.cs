@@ -20,7 +20,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.ApiResources;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
+internal sealed class ApiResourceRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -36,8 +36,8 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, ApiResourceDso.V1 dso, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(ApiResourceNameDskV1.Create(dso.Name))],
@@ -59,8 +59,8 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
             return await CreateAsync(id, dso, ct);
         }
 
-        var store = await storeFactory.GetStore(ct);
-        var operations = new List<IStoreOperation>();
+        var storage = await storageFactory.GetStorage(ct);
+        var operations = new List<IStorageOperation>();
 
         // First operation: create the ApiResource
         operations.Add(CreateOperation.For(
@@ -73,7 +73,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
         // For each scope, read and update with the new back-reference
         foreach (var scopeRef in scopeRefs)
         {
-            var scopeResult = await store.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
+            var scopeResult = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
             if (!scopeResult.Found)
             {
                 // Scope was deleted — treat as concurrency conflict
@@ -95,21 +95,21 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
                 Expiration.NoExpiration));
         }
 
-        var batchResult = await store.ExecuteBatchAsync(operations, [], ct);
+        var batchResult = await storage.ExecuteBatchAsync(operations, [], ct);
         return MapBatchToCreateResult(batchResult);
     }
 
     internal async Task<(ApiResourceDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(ApiResourceDso.EntityType, UuidV7.From(id), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(ApiResourceDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((ApiResourceDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(ApiResourceDso.V1 Dso, int Version)?> TryReadByNameAsync(string name, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             ApiResourceDso.EntityType,
             DataStorageKey.Create(ApiResourceNameDskV1.Create(name)),
             ct);
@@ -117,7 +117,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, ApiResourceDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -141,8 +141,8 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
             return await UpdateAsync(id, dso, expectedVersion, ct);
         }
 
-        var store = await storeFactory.GetStore(ct);
-        var operations = new List<IStoreOperation>();
+        var storage = await storageFactory.GetStorage(ct);
+        var operations = new List<IStorageOperation>();
 
         // First operation: update the ApiResource
         operations.Add(UpdateOperation.For(
@@ -163,7 +163,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
         // Scopes that need a back-reference rename (present in both added and removed)
         foreach (var scopeRef in addedScopeRefs.Where(s => removedIdSet.Contains(s.Id)))
         {
-            var scopeResult = await store.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
+            var scopeResult = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
             if (!scopeResult.Found)
             {
                 // Scope was deleted — treat as concurrency conflict
@@ -190,7 +190,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
         // Scopes added (not in the removed list — genuinely new scope references)
         foreach (var scopeRef in addedScopeRefs.Where(s => !removedIdSet.Contains(s.Id)))
         {
-            var scopeResult = await store.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
+            var scopeResult = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
             if (!scopeResult.Found)
             {
                 // Scope was deleted — treat as concurrency conflict
@@ -215,7 +215,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
         // Scopes removed (not in the added list — genuinely dropped scope references)
         foreach (var scopeId in removedScopeIds.Where(sid => !addedById.ContainsKey(sid)))
         {
-            var scopeResult = await store.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeId), ct);
+            var scopeResult = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeId), ct);
             if (!scopeResult.Found)
             {
                 // Scope was already deleted — nothing to update, skip
@@ -238,12 +238,12 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
                 Expiration.NoExpiration));
         }
 
-        var batchResult = await store.ExecuteBatchAsync(operations, [], ct);
+        var batchResult = await storage.ExecuteBatchAsync(operations, [], ct);
         return MapBatchToUpdateResult(batchResult);
     }
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).DeleteAsync(ApiResourceDso.EntityType, UuidV7.From(id), [], ct);
+        await (await storageFactory.GetStorage(ct)).DeleteAsync(ApiResourceDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<DeleteResult> DeleteWithScopeCleanupAsync(
         Guid id,
@@ -256,13 +256,13 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
             return await DeleteAsync(id, ct);
         }
 
-        var store = await storeFactory.GetStore(ct);
-        var operations = new List<IStoreOperation>();
+        var storage = await storageFactory.GetStorage(ct);
+        var operations = new List<IStorageOperation>();
 
         // For each scope, read and update to remove the back-reference
         foreach (var scopeRef in scopeRefs)
         {
-            var scopeResult = await store.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
+            var scopeResult = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
             if (!scopeResult.Found)
             {
                 // Scope was already deleted — nothing to update, skip
@@ -288,7 +288,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
         // Last operation: delete the ApiResource by ID
         operations.Add(DeleteOperation.ById(ApiResourceDso.EntityType, UuidV7.From(id)));
 
-        var batchResult = await store.ExecuteBatchAsync(operations, [], ct);
+        var batchResult = await storage.ExecuteBatchAsync(operations, [], ct);
         return MapBatchToDeleteResult(batchResult);
     }
 
@@ -296,12 +296,12 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
         QueryRequest<ApiResourceFilter, ApiResourceSortField> request,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await store.QueryAsync<ApiResourceDso.V1>(
+        var result = await storage.QueryAsync<ApiResourceDso.V1>(
             ApiResourceDso.EntityType,
             filter,
             sort,
@@ -320,10 +320,10 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
             return [];
         }
 
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var filter = Fields.Name.In(nameList);
 
-        var result = await store.QueryAsync<ApiResourceDso.V1>(
+        var result = await storage.QueryAsync<ApiResourceDso.V1>(
             ApiResourceDso.EntityType,
             filter,
             new SortParameter(Fields.Name),
@@ -336,7 +336,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
 
     internal async Task<List<ApiResourceDso.V1>> FindByScopeNamesAsync(IEnumerable<string> scopeNames, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var scopeList = scopeNames.Distinct(StringComparer.Ordinal).ToList();
 
         if (scopeList.Count == 0)
@@ -351,7 +351,7 @@ internal sealed class ApiResourceRepository(IStoreFactory storeFactory)
             filter = filter is null ? scopeFilter : filter.Or(scopeFilter);
         }
 
-        var result = await store.QueryAsync<ApiResourceDso.V1>(
+        var result = await storage.QueryAsync<ApiResourceDso.V1>(
             ApiResourceDso.EntityType,
             filter!,
             new SortParameter(Fields.Name),

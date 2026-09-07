@@ -15,38 +15,40 @@ namespace Duende.IdentityServer.ConformanceReport;
 /// </summary>
 public static class IdentityServerBuilderExtensions
 {
-    /// <summary>
-    /// Adds conformance assessment to IdentityServer.
-    /// </summary>
-    public static IIdentityServerBuilder AddConformanceReport(
-        this IIdentityServerBuilder builder,
-        Action<ConformanceReportOptions>? configure = null)
+    extension(IIdentityServerBuilder builder)
     {
-        ArgumentNullException.ThrowIfNull(builder);
-
-        var services = builder.Services;
-
-        // Add core conformance services
-        _ = services.AddConformanceReport(configure);
-
-        // Register the server options provider that adapts IdentityServerOptions
-        services.TryAddScoped<Func<ConformanceReportServerOptions>>(sp =>
+        /// <summary>
+        /// Adds conformance assessment to IdentityServer.
+        /// </summary>
+        public IIdentityServerBuilder AddConformanceReport(
+            Action<ConformanceReportOptions>? configure = null)
         {
-            var options = sp.GetRequiredService<IOptions<IdentityServerOptions>>().Value;
-            return options.ToConformanceReportServerOptions;
-        });
+            ArgumentNullException.ThrowIfNull(builder);
 
-        // Register license info from IdentityServer license
-        services.TryAddSingleton(sp =>
-        {
-            var licenseInformation = sp.GetRequiredService<LicenseInformation>();
-            return ToConformanceReportLicenseInfo(licenseInformation);
-        });
+            var services = builder.Services;
 
-        // Register client store adapter
-        services.TryAddScoped<IConformanceReportClientStore, IdentityServerClientStore>();
+            // Add core conformance services
+            _ = services.AddConformanceReport(configure);
 
-        return builder;
+            // Register the server options provider that adapts IdentityServerOptions
+            services.TryAddScoped<Func<ConformanceReportServerOptions>>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<IdentityServerOptions>>().Value;
+                return options.ToConformanceReportServerOptions;
+            });
+
+            // Register license info from IdentityServer license
+            services.TryAddSingleton(sp =>
+            {
+                var licenseInformation = sp.GetRequiredService<LicenseInformation>();
+                return ToConformanceReportLicenseInfo(licenseInformation);
+            });
+
+            // Register client store adapter
+            services.TryAddScoped<IConformanceReportClientStore, IdentityServerClientStore>();
+
+            return builder;
+        }
     }
 
     internal static ConformanceReportLicenseInfo ToConformanceReportLicenseInfo(

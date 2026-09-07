@@ -95,21 +95,43 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// information.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    /// <remark> This method must set the "secret" and "plainText" properties of
-    /// the context's Items dictionary.</remark>
-    /// <returns>A task that returns an <see cref="IStepResult"/>, which either
-    /// represents that this step succeeded or failed.</returns>
+    /// <remarks> When a shared secret is generated, this method must set the
+    /// "secret" and "plainText" properties of the context's Items
+    /// dictionary.</remarks>
 
     protected virtual async Task<IStepResult> AddClientSecret(
         DynamicClientRegistrationContext context)
     {
-        if (context.Client.ClientSecrets.Count == 0 && context.Request.TokenEndpointAuthenticationMethod != "none")
+        // This method generates a secret, but only when appropriate.
+        var authMethod = context.Request.TokenEndpointAuthenticationMethod;
+
+        // We skip generation for the "none" authentication method, where no secret is used by definition.
+        if (authMethod is "none")
         {
-            var (secret, plainText) = await GenerateSecret(context);
-            context.Items["secret"] = secret;
-            context.Items["plainText"] = plainText;
-            context.Client.ClientSecrets.Add(secret);
+            return new SuccessfulStep();
         }
+
+        // We also skip for the private_key_jwt authentication method. The client must generate a
+        // public-private key pair and share the public key with us.
+        if (authMethod is OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt)
+        {
+            return new SuccessfulStep();
+        }
+
+        // If the client sent us a secret that isn't a JWK, we'll just use that secret.
+        // Note that the client might send a JWK secret that it is not using for client
+        // authentication. For example, the client might use signed authorization requests
+        // (JAR) without private_key_jwt client authentication.
+        if (context.Client.ClientSecrets.Any(s => s.Type is not Constants.SecretTypes.Jwk))
+        {
+            return new SuccessfulStep();
+        }
+
+        // Otherwise
+        var (secret, plainText) = await GenerateSecret(context);
+        context.Items["secret"] = secret;
+        context.Items["plainText"] = plainText;
+        context.Client.ClientSecrets.Add(secret);
         return new SuccessfulStep();
     }
 

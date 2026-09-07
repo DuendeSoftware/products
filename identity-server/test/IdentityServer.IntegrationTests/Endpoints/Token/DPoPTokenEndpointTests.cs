@@ -18,6 +18,8 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
 public class DPoPTokenEndpointTests : DPoPEndpointTestBase
 {
+    public DPoPTokenEndpointTests() => InitializePipeline();
+
     protected const string Category = "DPoP Token endpoint";
 
     private ClientCredentialsTokenRequest CreateClientCredentialsTokenRequest(

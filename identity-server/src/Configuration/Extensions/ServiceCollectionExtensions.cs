@@ -13,11 +13,14 @@ namespace Duende.IdentityServer.Configuration;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds the in memory client configuration store to DI. 
-    /// </summary>
-    /// <remark>
-    /// This is for testing and demos only.
-    /// </remark>
-    public static IServiceCollection AddInMemoryClientConfigurationStore(this IdentityServerConfigurationBuilder builder) => builder.Services.AddTransient<IClientConfigurationStore, InMemoryClientConfigurationStore>();
+    extension(IdentityServerConfigurationBuilder builder)
+    {
+        /// <summary>
+        /// Adds the in memory client configuration store to DI.
+        /// </summary>
+        /// <remark>
+        /// This is for testing and demos only.
+        /// </remark>
+        public IServiceCollection AddInMemoryClientConfigurationStore() => builder.Services.AddTransient<IClientConfigurationStore, InMemoryClientConfigurationStore>();
+    }
 }

@@ -44,9 +44,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
             }
         }
 
-        public static IEnumerator<T> AsGeneric<T>(this IEnumerator source)
+        extension(IEnumerator source)
         {
-            return new GenericEnumeratorAdapter<T>(source);
+            public IEnumerator<T> AsGeneric<T>()
+            {
+                return new GenericEnumeratorAdapter<T>(source);
+            }
         }
     }
 }

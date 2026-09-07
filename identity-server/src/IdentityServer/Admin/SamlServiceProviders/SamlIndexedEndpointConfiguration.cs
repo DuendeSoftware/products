@@ -9,26 +9,27 @@ namespace Duende.IdentityServer.Admin.SamlServiceProviders;
 
 /// <summary>
 /// Represents an indexed SAML endpoint (e.g., ACS URL) with location, binding, index, and default indicator.
+/// Immutable value type -- always fully replaced, never mutated in place.
 /// </summary>
-public class SamlIndexedEndpointConfiguration
+public sealed class SamlIndexedEndpointConfiguration
 {
     /// <summary>
     /// The URL of the endpoint.
     /// </summary>
-    public required string Location { get; set; }
+    public required string Location { get; init; }
 
     /// <summary>
     /// The SAML binding used by the endpoint.
     /// </summary>
-    public SamlBinding Binding { get; set; }
+    public SamlBinding Binding { get; init; }
 
     /// <summary>
     /// The index of the endpoint.
     /// </summary>
-    public int Index { get; set; }
+    public int Index { get; init; }
 
     /// <summary>
     /// Whether this is the default endpoint.
     /// </summary>
-    public bool IsDefault { get; set; }
+    public bool IsDefault { get; init; }
 }

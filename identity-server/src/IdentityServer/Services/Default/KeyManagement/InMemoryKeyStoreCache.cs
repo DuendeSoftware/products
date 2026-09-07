@@ -3,25 +3,27 @@
 
 #nullable enable
 
+using Duende.Spaces;
+
 namespace Duende.IdentityServer.Services.KeyManagement;
 
 /// <summary>
-/// In-memory implementation of ISigningKeyStoreCache based on static variables. This expects to be used as a singleton.
+/// In-memory implementation of ISigningKeyStoreCache. This is a scoped facade over InMemoryKeyStoreCacheState.
 /// </summary>
-internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
+internal sealed class InMemoryKeyStoreCache(
+    TimeProvider timeProvider,
+    InMemoryKeyStoreCacheState state,
+    ISpaceContextAccessor? spaceContextAccessor) : ISigningKeyStoreCache
 {
-    private readonly TimeProvider _timeProvider;
+    private string GetPartitionKey()
+    {
+        if (spaceContextAccessor is null || !spaceContextAccessor.IsSpaceIdConfigured())
+        {
+            return "__default__";
+        }
 
-    private object _lock = new object();
-
-    private DateTime _expires = DateTime.MinValue;
-    private IReadOnlyCollection<KeyContainer>? _cache;
-
-    /// <summary>
-    /// Constructor for InMemoryKeyStoreCache.
-    /// </summary>
-    /// <param name="timeProvider"></param>
-    public InMemoryKeyStoreCache(TimeProvider timeProvider) => _timeProvider = timeProvider;
+        return spaceContextAccessor.GetSpaceId().Value.ToString();
+    }
 
     /// <summary>
     /// Returns cached keys.
@@ -29,21 +31,10 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// <returns></returns>
     public Task<IReadOnlyCollection<KeyContainer>?> GetKeysAsync(Ct ct)
     {
-        DateTime expires;
-        IReadOnlyCollection<KeyContainer>? keys;
-
-        lock (_lock)
-        {
-            expires = _expires;
-            keys = _cache;
-        }
-
-        if (keys != null && expires >= _timeProvider.GetUtcNow().UtcDateTime)
-        {
-            return Task.FromResult<IReadOnlyCollection<KeyContainer>?>(keys);
-        }
-
-        return Task.FromResult<IReadOnlyCollection<KeyContainer>?>(null);
+        var partitionKey = GetPartitionKey();
+        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var keys = state.GetKeys(partitionKey, now);
+        return Task.FromResult(keys);
     }
 
     /// <summary>
@@ -55,12 +46,10 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// <returns></returns>
     public Task StoreKeysAsync(IReadOnlyCollection<KeyContainer> keys, TimeSpan duration, Ct ct)
     {
-        lock (_lock)
-        {
-            _expires = _timeProvider.GetUtcNow().UtcDateTime.Add(duration);
-            _cache = keys;
-        }
-
+        var partitionKey = GetPartitionKey();
+        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var expires = now.Add(duration);
+        state.StoreKeys(partitionKey, keys, now, expires);
         return Task.CompletedTask;
     }
 }

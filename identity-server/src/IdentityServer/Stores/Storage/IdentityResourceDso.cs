@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 
 namespace Duende.IdentityServer.Stores.Storage;
@@ -24,6 +25,6 @@ internal static class IdentityResourceDso
         public required bool Required { get; init; }
         public required bool Emphasize { get; init; }
         public required IReadOnlyList<string> UserClaims { get; init; }
-        public IReadOnlyList<AttributeValueEntryDso>? ExtendedAttributeValues { get; init; }
+        public IReadOnlyList<AttributeValueDso.V1>? ExtendedAttributeValues { get; init; }
     }
 }

@@ -4,6 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin.IdentityResources;
+using Duende.Storage;
 using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Admin;
@@ -19,14 +20,14 @@ public interface IIdentityResourceAdmin
     /// <param name="resource">The identity resource definition.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The storage ID and version on success, or validation/conflict errors.</returns>
-    Task<SaveResult<Guid>> CreateAsync(IdentityResourceConfiguration resource, Ct ct);
+    Task<SaveResult<IdentityResourceId>> CreateAsync(CreateIdentityResource resource, Ct ct);
 
     /// <summary>
     /// Gets an identity resource by its storage identifier.
     /// </summary>
     /// <param name="id">The storage identifier.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<GetResult<IdentityResourceConfiguration>> GetAsync(Guid id, Ct ct);
+    Task<GetResult<IdentityResourceConfiguration>> GetAsync(IdentityResourceId id, Ct ct);
 
     /// <summary>
     /// Gets an identity resource by its unique name.
@@ -42,14 +43,14 @@ public interface IIdentityResourceAdmin
     /// <param name="resource">The updated identity resource definition.</param>
     /// <param name="expectedVersion">Expected version for optimistic concurrency.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> UpdateAsync(Guid id, IdentityResourceConfiguration resource, DataVersion expectedVersion, Ct ct);
+    Task<SaveResult<IdentityResourceId>> UpdateAsync(IdentityResourceId id, UpdateIdentityResource resource, DataVersion expectedVersion, Ct ct);
 
     /// <summary>
     /// Deletes an identity resource.
     /// </summary>
     /// <param name="id">The storage identifier of the identity resource to delete.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<SaveResult<Guid>> DeleteAsync(Guid id, Ct ct);
+    Task<SaveResult<IdentityResourceId>> DeleteAsync(IdentityResourceId id, Ct ct);
 
     /// <summary>
     /// Queries identity resources with optional filtering, sorting, and pagination.
