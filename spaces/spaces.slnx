@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Spaces/Spaces.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Spaces.Tests/Spaces.Tests.csproj" />
+  </Folder>
+</Solution>
