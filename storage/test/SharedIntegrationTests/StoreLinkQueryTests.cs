@@ -14,7 +14,7 @@ namespace Duende.Storage.IntegrationTests;
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Integration tests for QueryLinks across all store types.
+/// Integration tests for QueryLinks across all storage types.
 /// Uses a Users / Roles / Groups domain to make link traversals readable:
 ///   UserRole  : User  → Role   (a user has a role)
 ///   UserGroup : User  → Group  (a user belongs to a group)
@@ -61,22 +61,22 @@ public partial class StoreLinkQueryTests
     {
         // Given a user linked to a role, querying roles for that user returns the role.
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
 
-        _ = await store.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(UserRole, userId, roleId, [], _ct);
+        _ = await storage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(UserRole, userId, roleId, [], _ct);
 
         var query = LinkQuery.From(Role)
             .Join(UserRole)
             .Where(User, userId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("admin");
@@ -87,22 +87,22 @@ public partial class StoreLinkQueryTests
     {
         // Given a user linked to a role, querying users for that role returns the user (reverse traversal).
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
 
-        _ = await store.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(UserRole, userId, roleId, [], _ct);
+        _ = await storage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(UserRole, userId, roleId, [], _ct);
 
         var query = LinkQuery.From(User)
             .Join(UserRole)
             .Where(Role, roleId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<UserDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync<UserDso>(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("alice");
@@ -113,14 +113,14 @@ public partial class StoreLinkQueryTests
     {
         // Querying roles for a user that has none returns an empty page.
         await using var fixture = await CreateProviderAsync();
-        var queryStore = fixture.Store;
+        var queryStorage = fixture.Storage;
 
         var query = LinkQuery.From(Role)
             .Join(UserRole)
             .Where(User, UuidV7.New())
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.ShouldBeEmpty();
         result.TotalCount.ShouldBe(0);
@@ -135,17 +135,17 @@ public partial class StoreLinkQueryTests
     {
         // A user belongs to 5 groups; paging with size 3 yields two pages.
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var userId = UuidV7.New();
-        _ = await store.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
 
         for (var i = 0; i < 5; i++)
         {
             var groupId = UuidV7.New();
-            _ = await store.CreateAsync(groupId, new GroupDso($"group-{i}"), [], [], Expiration.NoExpiration, [], _ct);
-            _ = await store.LinkAsync(UserGroup, userId, groupId, [], _ct);
+            _ = await storage.CreateAsync(groupId, new GroupDso($"group-{i}"), [], [], Expiration.NoExpiration, [], _ct);
+            _ = await storage.LinkAsync(UserGroup, userId, groupId, [], _ct);
         }
 
         var query = LinkQuery.From(Group)
@@ -153,8 +153,8 @@ public partial class StoreLinkQueryTests
             .Where(User, userId)
             .Build();
 
-        var page1 = await queryStore.QueryLinksAsync<GroupDso>(query, DataRange.FromPage(1, 3), _ct);
-        var page2 = await queryStore.QueryLinksAsync<GroupDso>(query, DataRange.FromPage(2, 3), _ct);
+        var page1 = await queryStorage.QueryLinksAsync<GroupDso>(query, DataRange.FromPage(1, 3), _ct);
+        var page2 = await queryStorage.QueryLinksAsync<GroupDso>(query, DataRange.FromPage(2, 3), _ct);
 
         page1.Items.Count.ShouldBe(3);
         page1.TotalCount.ShouldBe(5);
@@ -172,25 +172,25 @@ public partial class StoreLinkQueryTests
     {
         // Two users share the same role — querying all roles should return it only once.
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var aliceId = UuidV7.New();
         var bobId = UuidV7.New();
         var roleId = UuidV7.New();
 
-        _ = await store.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(bobId, new UserDso("bob"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(bobId, new UserDso("bob"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
 
-        _ = await store.LinkAsync(UserRole, aliceId, roleId, [], _ct);
-        _ = await store.LinkAsync(UserRole, bobId, roleId, [], _ct);
+        _ = await storage.LinkAsync(UserRole, aliceId, roleId, [], _ct);
+        _ = await storage.LinkAsync(UserRole, bobId, roleId, [], _ct);
 
         var query = LinkQuery.From(Role)
             .Join(UserRole)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count(r => r.Value.Name == "admin").ShouldBe(1);
     }
@@ -206,19 +206,19 @@ public partial class StoreLinkQueryTests
         // Multi-hop query: starting from User, traverse UserGroup then GroupRole,
         // filtered to a specific role — should return alice.
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var aliceId = UuidV7.New();
         var engineersId = UuidV7.New();
         var adminRoleId = UuidV7.New();
 
-        _ = await store.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(engineersId, new GroupDso("engineers"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(adminRoleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(engineersId, new GroupDso("engineers"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(adminRoleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
 
-        _ = await store.LinkAsync(UserGroup, aliceId, engineersId, [], _ct);
-        _ = await store.LinkAsync(GroupRole, engineersId, adminRoleId, [], _ct);
+        _ = await storage.LinkAsync(UserGroup, aliceId, engineersId, [], _ct);
+        _ = await storage.LinkAsync(GroupRole, engineersId, adminRoleId, [], _ct);
 
         // From User, hop through UserGroup (User→Group), then GroupRole (Group→Role),
         // filter where Role = adminRoleId
@@ -228,7 +228,7 @@ public partial class StoreLinkQueryTests
             .Where(Role, adminRoleId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<UserDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync<UserDso>(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("alice");
@@ -243,11 +243,11 @@ public partial class StoreLinkQueryTests
     {
         // Space A: alice → admin
         await using var fixtureA = await CreateProviderAsync();
-        var storeA = fixtureA.Store;
+        var storeA = fixtureA.Storage;
 
         // Space B: separate provider = separate SpaceId
         await using var fixtureB = await CreateProviderAsync();
-        var queryStoreB = fixtureB.Store;
+        var queryStoreB = fixtureB.Storage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
@@ -270,12 +270,12 @@ public partial class StoreLinkQueryTests
     public async Task SameUserRoleLinkInDifferentSpacesAreIndependentAsync()
     {
         await using var fixtureA = await CreateProviderAsync();
-        var storeA = fixtureA.Store;
-        var queryStoreA = fixtureA.Store;
+        var storeA = fixtureA.Storage;
+        var queryStoreA = fixtureA.Storage;
 
         await using var fixtureB = await CreateProviderAsync();
-        var storeB = fixtureB.Store;
-        var queryStoreB = fixtureB.Store;
+        var storeB = fixtureB.Storage;
+        var queryStoreB = fixtureB.Storage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
@@ -309,11 +309,11 @@ public partial class StoreLinkQueryTests
     public async Task DeleteInSpaceADoesNotAffectSpaceBAsync()
     {
         await using var fixtureA = await CreateProviderAsync();
-        var storeA = fixtureA.Store;
+        var storeA = fixtureA.Storage;
 
         await using var fixtureB = await CreateProviderAsync();
-        var storeB = fixtureB.Store;
-        var queryStoreB = fixtureB.Store;
+        var storeB = fixtureB.Storage;
+        var queryStoreB = fixtureB.Storage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
@@ -337,7 +337,7 @@ public partial class StoreLinkQueryTests
         result.Items.Count.ShouldBe(1);
     }
 
-    private async Task<IStoreFixture> CreateProviderAsync() =>
+    private async Task<IStorageFixture> CreateProviderAsync() =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             services.AddDsoRegistration<UserDso>();

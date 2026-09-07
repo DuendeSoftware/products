@@ -8,17 +8,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.Sqlite;
 
-internal sealed class StoreFixture : IStoreFixture
+internal sealed class StoreFixture : IStorageFixture
 {
     private const string ServiceKey = "test";
     private readonly ServiceProvider _provider;
 
-    public IStore Store { get; }
+    public IStorage Storage { get; }
 
-    private StoreFixture(ServiceProvider provider, IStore store)
+    private StoreFixture(ServiceProvider provider, IStorage storage)
     {
         _provider = provider;
-        Store = store;
+        Storage = storage;
     }
 
     public static async Task<StoreFixture> CreateAsync(
@@ -39,8 +39,8 @@ internal sealed class StoreFixture : IStoreFixture
         await schema.MigrateAsync(ct);
 
         var pooledStore = provider.GetRequiredKeyedService<IPooledStore>(ServiceKey);
-        var store = pooledStore.OpenPool(1);
-        return new StoreFixture(provider, store);
+        var storage = pooledStore.OpenPool(1);
+        return new StoreFixture(provider, storage);
     }
 
     public async ValueTask DisposeAsync() => await _provider.DisposeAsync();

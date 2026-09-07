@@ -33,7 +33,7 @@ internal sealed class OracleStore(
     DataStorageTypeRegistry dataStorageTypeRegistry,
     TimeProvider timeProvider,
     OutboxSubscribers outboxSubscribers,
-    ILogger<OracleStore> logger) : StoreBase, IStore, IDatabaseSchema
+    ILogger<OracleStore> logger) : StoreBase, IStorage, IDatabaseSchema
 {
     private const int RequiredSchemaVersion = 2;
     private static readonly ISqlDialect Dialect = new OracleDialect();
@@ -469,9 +469,9 @@ internal sealed class OracleStore(
         return sb.ToString();
     }
 
-    // ───────────────────────── IStore — Create ─────────────────────────
+    // ───────────────────────── IStorage — Create ─────────────────────────
 
-    async Task<CreateResult> IStore.CreateAsync<TDso>(
+    async Task<CreateResult> IStorage.CreateAsync<TDso>(
         Storage.UuidV7 id,
         TDso value,
         IReadOnlyCollection<DataStorageKey> keys,
@@ -507,9 +507,9 @@ internal sealed class OracleStore(
         };
     }
 
-    // ───────────────────────── IStore — TryRead (by id) ─────────────────────────
+    // ───────────────────────── IStorage — TryRead (by id) ─────────────────────────
 
-    async Task<StoreGetResult> IStore.TryReadAsync(
+    async Task<StoreGetResult> IStorage.TryReadAsync(
         EntityType entityType,
         Storage.UuidV7 id,
         Ct ct)
@@ -555,9 +555,9 @@ internal sealed class OracleStore(
         }
     }
 
-    // ───────────────────────── IStore — TryRead (by key) ─────────────────────────
+    // ───────────────────────── IStorage — TryRead (by key) ─────────────────────────
 
-    async Task<StoreGetResult> IStore.TryReadAsync(
+    async Task<StoreGetResult> IStorage.TryReadAsync(
         EntityType entityType,
         DataStorageKey key,
         Ct ct)
@@ -614,9 +614,9 @@ internal sealed class OracleStore(
         }
     }
 
-    // ───────────────────────── IStore — TryReadMany ─────────────────────────
+    // ───────────────────────── IStorage — TryReadMany ─────────────────────────
 
-    async Task<IReadOnlyList<StoreGetResult>> IStore.TryReadManyAsync(
+    async Task<IReadOnlyList<StoreGetResult>> IStorage.TryReadManyAsync(
         EntityType entityType,
         IReadOnlySet<Storage.UuidV7> ids,
         int maximum,
@@ -695,9 +695,9 @@ internal sealed class OracleStore(
         return results;
     }
 
-    // ───────────────────────── IStore — Update ─────────────────────────
+    // ───────────────────────── IStorage — Update ─────────────────────────
 
-    async Task<UpdateResult> IStore.UpdateAsync<TDso>(
+    async Task<UpdateResult> IStorage.UpdateAsync<TDso>(
         Storage.UuidV7 id,
         TDso dso,
         int expectedEntityVersion,
@@ -735,9 +735,9 @@ internal sealed class OracleStore(
         };
     }
 
-    // ───────────────────────── IStore — Delete (by id) ─────────────────────────
+    // ───────────────────────── IStorage — Delete (by id) ─────────────────────────
 
-    async Task<DeleteResult> IStore.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<DeleteResult> IStorage.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         var deleteOp = DeleteOperation.ById(entityType, id);
 
@@ -757,9 +757,9 @@ internal sealed class OracleStore(
         return DeleteResult.Success;
     }
 
-    // ───────────────────────── IStore — Delete (by key) ─────────────────────────
+    // ───────────────────────── IStorage — Delete (by key) ─────────────────────────
 
-    async Task<DeleteResult> IStore.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<DeleteResult> IStorage.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         var deleteOp = DeleteOperation.ByKey(entityType, key);
 
@@ -779,10 +779,10 @@ internal sealed class OracleStore(
         return DeleteResult.Success;
     }
 
-    // ───────────────────────── IStore — Link ─────────────────────────
+    // ───────────────────────── IStorage — Link ─────────────────────────
 
     /// <inheritdoc/>
-    async Task<LinkResult> IStore.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<LinkResult> IStorage.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         await using var connection = await OpenConnectionAsync(ct);
         var schema = await ResolveSchemaAsync(connection, ct);
@@ -800,10 +800,10 @@ internal sealed class OracleStore(
         return outcome == OperationOutcome.AlreadyLinked ? LinkResult.AlreadyLinked : LinkResult.Success;
     }
 
-    // ───────────────────────── IStore — Unlink ─────────────────────────
+    // ───────────────────────── IStorage — Unlink ─────────────────────────
 
     /// <inheritdoc/>
-    async Task<UnlinkResult> IStore.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<UnlinkResult> IStorage.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         await using var connection = await OpenConnectionAsync(ct);
         var schema = await ResolveSchemaAsync(connection, ct);
@@ -938,10 +938,10 @@ internal sealed class OracleStore(
         }
     }
 
-    // ───────────────────────── IStore — ExecuteBatch ─────────────────────────
+    // ───────────────────────── IStorage — ExecuteBatch ─────────────────────────
 
-    async Task<BatchResult> IStore.ExecuteBatchAsync(
-        IReadOnlyList<IStoreOperation> operations,
+    async Task<BatchResult> IStorage.ExecuteBatchAsync(
+        IReadOnlyList<IStorageOperation> operations,
         IReadOnlyList<OutboxEvent> outboxEvents,
         Ct ct)
     {
@@ -986,9 +986,9 @@ internal sealed class OracleStore(
         return new BatchResult(true, results);
     }
 
-    // ───────────────────────── IStore — GetOutboxEventsForSubscriber ─────────────────────────
+    // ───────────────────────── IStorage — GetOutboxEventsForSubscriber ─────────────────────────
 
-    async Task<OutboxEventsPage> IStore.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
+    async Task<OutboxEventsPage> IStorage.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
     {
         await using var connection = await OpenConnectionAsync(ct);
         var schema = await ResolveSchemaAsync(connection, ct);
@@ -1065,9 +1065,9 @@ internal sealed class OracleStore(
         }
     }
 
-    // ───────────────────────── IStore — DeleteOutboxEvents ─────────────────────────
+    // ───────────────────────── IStorage — DeleteOutboxEvents ─────────────────────────
 
-    async Task IStore.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
+    async Task IStorage.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
     {
         if (ids.Count == 0)
         {
@@ -1102,9 +1102,9 @@ internal sealed class OracleStore(
         }
     }
 
-    // ───────────────────────── IStore — QueryAsync ─────────────────────────
+    // ───────────────────────── IStorage — QueryAsync ─────────────────────────
 
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope<TDso>>> IStorage.QueryAsync<TDso>(
         EntityType entityType,
         IQueryExpression filter,
         SortParameter sort,
@@ -1317,9 +1317,9 @@ internal sealed class OracleStore(
         };
     }
 
-    // ───────────────────────── IStore — QueryFieldsAsync ─────────────────────────
+    // ───────────────────────── IStorage — QueryFieldsAsync ─────────────────────────
 
-    async Task<QueryResult<ProjectedResult>> IStore.QueryFieldsAsync(
+    async Task<QueryResult<ProjectedResult>> IStorage.QueryFieldsAsync(
         EntityType entityType,
         IReadOnlyCollection<Field> fields,
         IQueryExpression filter,
@@ -2160,10 +2160,10 @@ internal sealed class OracleStore(
         }
     }
 
-    // ───────────────────────── IStore — QueryLinksAsync ─────────────────────────
+    // ───────────────────────── IStorage — QueryLinksAsync ─────────────────────────
 
     /// <inheritdoc/>
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryLinksAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope<TDso>>> IStorage.QueryLinksAsync<TDso>(
         LinkQueryDescriptor query,
         DataRange dataRange,
         Ct ct)
@@ -2320,9 +2320,9 @@ internal sealed class OracleStore(
         };
     }
 
-    // ───────────────────────── IStore — CountAsync ─────────────────────────
+    // ───────────────────────── IStorage — CountAsync ─────────────────────────
 
-    async Task<long> IStore.CountAsync(
+    async Task<long> IStorage.CountAsync(
         EntityType entityType,
         IQueryExpression? filter,
         Ct ct)
@@ -2366,9 +2366,9 @@ internal sealed class OracleStore(
         return Convert.ToInt64(result, CultureInfo.InvariantCulture);
     }
 
-    // ───────────────────────── IStore — PurgeExpiredAsync ─────────────────────────
+    // ───────────────────────── IStorage — PurgeExpiredAsync ─────────────────────────
 
-    async Task<int> IStore.PurgeExpiredAsync(int batchSize, Ct ct)
+    async Task<int> IStorage.PurgeExpiredAsync(int batchSize, Ct ct)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(batchSize, StorageConstants.TtlCleanupMaxBatchSize);
@@ -2501,9 +2501,9 @@ internal sealed class OracleStore(
         return expired.Count;
     }
 
-    Task<PurgeResult> IStore.PurgePoolAsync(Ct ct) => ((IStore)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+    Task<PurgeResult> IStorage.PurgePoolAsync(Ct ct) => ((IStorage)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
 
-    async Task<PurgeResult> IStore.PurgePoolAsync(int batchSize, Ct ct)
+    async Task<PurgeResult> IStorage.PurgePoolAsync(int batchSize, Ct ct)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
 

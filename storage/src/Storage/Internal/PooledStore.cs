@@ -8,13 +8,13 @@ namespace Duende.Storage.Internal;
 
 internal class PooledStore(IServiceProvider serviceProvider, object? serviceKey) : IPooledStore
 {
-    public IStore OpenPool(PoolId poolId)
+    public IStorage OpenPool(PoolId poolId)
     {
-        var store = serviceKey is null
-            ? serviceProvider.GetRequiredService<IStore>()
-            : serviceProvider.GetRequiredKeyedService<IStore>(serviceKey);
-        store.SetPoolId(poolId);
-        return store;
+        var storage = serviceKey is null
+            ? serviceProvider.GetRequiredService<IStorage>()
+            : serviceProvider.GetRequiredKeyedService<IStorage>(serviceKey);
+        storage.SetPoolId(poolId);
+        return storage;
     }
 
     public Task<CheckSchemaVersionResult> CheckVersionAsync(Ct ct)

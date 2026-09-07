@@ -14,7 +14,7 @@ using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 namespace Duende.Storage.IntegrationTests;
 
 /// <summary>
-/// Tests for basic query expressions across all store implementations.
+/// Tests for basic query expressions across all storage implementations.
 /// Focuses on testing various field types and operations, with special emphasis on range queries
 /// for datetime and number fields which are critical for filtering data.
 /// </summary>
@@ -26,7 +26,7 @@ public partial class QueryStoreBasicExpressionTests
 
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
-    private async Task<IStoreFixture> CreateProviderAsync() =>
+    private async Task<IStorageFixture> CreateProviderAsync() =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             services.AddDsoRegistration<TestEntityDso>();
@@ -35,7 +35,7 @@ public partial class QueryStoreBasicExpressionTests
         });
 
     private static async Task<UuidV7> CreateEntityAsync(
-        IStore store,
+        IStorage storage,
         string name,
         int? score = null,
         decimal? price = null,
@@ -43,10 +43,10 @@ public partial class QueryStoreBasicExpressionTests
         DateTimeOffset? lastLogin = null,
         bool? isActive = null,
         string? status = null,
-        Ct ct = default) => await CreateTestEntityAsync(store, name, score, price, createdAt, lastLogin, isActive, status, ct);
+        Ct ct = default) => await CreateTestEntityAsync(storage, name, score, price, createdAt, lastLogin, isActive, status, ct);
 
     private static async Task<UuidV7> CreateTestEntityAsync(
-        IStore store,
+        IStorage storage,
         string name,
         int? score = null,
         decimal? price = null,
@@ -102,7 +102,7 @@ public partial class QueryStoreBasicExpressionTests
 
         var searchFields = searchFieldsBuilder.Build();
 
-        var storeInterface = store;
+        var storeInterface = storage;
         var result = await storeInterface.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
         result.ShouldBe(CreateResult.Success);
         return id;
@@ -113,17 +113,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice");
-        _ = await CreateTestEntityAsync(store, "alice"); // Different case - stored as same uppercase value
-        _ = await CreateTestEntityAsync(store, "Bob");
+        _ = await CreateTestEntityAsync(storage, "Alice");
+        _ = await CreateTestEntityAsync(storage, "alice"); // Different case - stored as same uppercase value
+        _ = await CreateTestEntityAsync(storage, "Bob");
 
         var filter = new StringField("name").Equals("Alice");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Both "Alice" and "alice" are stored as "ALICE" in search fields,
         // so querying for "Alice" (uppercased to "ALICE") matches both entries.
@@ -137,17 +137,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice Smith");
-        _ = await CreateTestEntityAsync(store, "Bob Jones");
-        _ = await CreateTestEntityAsync(store, "Charlie Smith");
+        _ = await CreateTestEntityAsync(storage, "Alice Smith");
+        _ = await CreateTestEntityAsync(storage, "Bob Jones");
+        _ = await CreateTestEntityAsync(storage, "Charlie Smith");
 
         var filter = new StringField("name").Contains("Smith");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -160,17 +160,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alpha");
-        _ = await CreateTestEntityAsync(store, "Beta");
-        _ = await CreateTestEntityAsync(store, "Alpha Centauri");
+        _ = await CreateTestEntityAsync(storage, "Alpha");
+        _ = await CreateTestEntityAsync(storage, "Beta");
+        _ = await CreateTestEntityAsync(storage, "Alpha Centauri");
 
         var filter = new StringField("name").StartsWith("Alpha");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -186,18 +186,18 @@ public partial class QueryStoreBasicExpressionTests
         string[] activePendingStatuses = ["active", "pending"];
 
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice", status: "active");
-        _ = await CreateTestEntityAsync(store, "Bob", status: "pending");
-        _ = await CreateTestEntityAsync(store, "Charlie", status: "inactive");
-        _ = await CreateTestEntityAsync(store, "David", status: "active");
+        _ = await CreateTestEntityAsync(storage, "Alice", status: "active");
+        _ = await CreateTestEntityAsync(storage, "Bob", status: "pending");
+        _ = await CreateTestEntityAsync(storage, "Charlie", status: "inactive");
+        _ = await CreateTestEntityAsync(storage, "David", status: "active");
 
         var filter = new StringField("status").In(activePendingStatuses);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -211,18 +211,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 50);
-        _ = await CreateTestEntityAsync(store, "User2", score: 75);
-        _ = await CreateTestEntityAsync(store, "User3", score: 100);
-        _ = await CreateTestEntityAsync(store, "User4", score: 125);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 75);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 100);
+        _ = await CreateTestEntityAsync(storage, "User4", score: 125);
 
         var filter = new NumberField("score").GreaterThan(75);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -235,17 +235,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Age25", score: 25);
-        _ = await CreateTestEntityAsync(store, "Age30", score: 30);
-        _ = await CreateTestEntityAsync(store, "Age35", score: 35);
+        _ = await CreateTestEntityAsync(storage, "Age25", score: 25);
+        _ = await CreateTestEntityAsync(storage, "Age30", score: 30);
+        _ = await CreateTestEntityAsync(storage, "Age35", score: 35);
 
         var filter = new NumberField("score").GreaterThan(25);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — GreaterThan(25) must use > not >=, so Age25 must NOT appear
         result.Items.Count.ShouldBe(2);
@@ -259,17 +259,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Age25", score: 25);
-        _ = await CreateTestEntityAsync(store, "Age30", score: 30);
-        _ = await CreateTestEntityAsync(store, "Age35", score: 35);
+        _ = await CreateTestEntityAsync(storage, "Age25", score: 25);
+        _ = await CreateTestEntityAsync(storage, "Age30", score: 30);
+        _ = await CreateTestEntityAsync(storage, "Age35", score: 35);
 
         var filter = new NumberField("score").Equals(25);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — Equal(25) must use = so only Age25 matches
         result.Items.Count.ShouldBe(1);
@@ -281,19 +281,19 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange — verifies GreaterThan and Equal produce distinct SQL operators
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Age25", score: 25);
-        _ = await CreateTestEntityAsync(store, "Age30", score: 30);
-        _ = await CreateTestEntityAsync(store, "Age35", score: 35);
+        _ = await CreateTestEntityAsync(storage, "Age25", score: 25);
+        _ = await CreateTestEntityAsync(storage, "Age30", score: 30);
+        _ = await CreateTestEntityAsync(storage, "Age35", score: 35);
 
         var greaterThanFilter = new NumberField("score").GreaterThan(25);
         var equalFilter = new NumberField("score").Equals(25);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var greaterThanResult = await store.QueryAsync<TestEntityDso>(_testEntityType, greaterThanFilter, SortParameter.Empty, page, _ct);
-        var equalResult = await store.QueryAsync<TestEntityDso>(_testEntityType, equalFilter, SortParameter.Empty, page, _ct);
+        var greaterThanResult = await storage.QueryAsync<TestEntityDso>(_testEntityType, greaterThanFilter, SortParameter.Empty, page, _ct);
+        var equalResult = await storage.QueryAsync<TestEntityDso>(_testEntityType, equalFilter, SortParameter.Empty, page, _ct);
 
         // Assert — the two filters must produce non-overlapping results
         greaterThanResult.Items.Count.ShouldBe(2);
@@ -309,22 +309,22 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var boundary = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var after1 = new DateTimeOffset(2024, 9, 1, 0, 0, 0, TimeSpan.Zero);
         var after2 = new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Boundary", createdAt: boundary);
-        _ = await CreateTestEntityAsync(store, "After1", createdAt: after1);
-        _ = await CreateTestEntityAsync(store, "After2", createdAt: after2);
+        _ = await CreateTestEntityAsync(storage, "Boundary", createdAt: boundary);
+        _ = await CreateTestEntityAsync(storage, "After1", createdAt: after1);
+        _ = await CreateTestEntityAsync(storage, "After2", createdAt: after2);
 
         var cutoff = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").GreaterThan(cutoff);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — GreaterThan must use > so the boundary date is excluded
         result.Items.Count.ShouldBe(2);
@@ -338,20 +338,20 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var boundary = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var other = new DateTimeOffset(2024, 9, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Boundary", createdAt: boundary);
-        _ = await CreateTestEntityAsync(store, "Other", createdAt: other);
+        _ = await CreateTestEntityAsync(storage, "Boundary", createdAt: boundary);
+        _ = await CreateTestEntityAsync(storage, "Other", createdAt: other);
 
         var cutoff = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").Equals(cutoff);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — Equal must use = so only the exact date matches
         result.Items.Count.ShouldBe(1);
@@ -363,17 +363,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 50);
-        _ = await CreateTestEntityAsync(store, "User2", score: 75);
-        _ = await CreateTestEntityAsync(store, "User3", score: 100);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 75);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 100);
 
         var filter = new NumberField("score").GreaterOrEqual(75);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -386,18 +386,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 25);
-        _ = await CreateTestEntityAsync(store, "User2", score: 50);
-        _ = await CreateTestEntityAsync(store, "User3", score: 75);
-        _ = await CreateTestEntityAsync(store, "User4", score: 100);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 25);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 75);
+        _ = await CreateTestEntityAsync(storage, "User4", score: 100);
 
         var filter = new NumberField("score").LessThan(60);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -410,17 +410,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 25);
-        _ = await CreateTestEntityAsync(store, "User2", score: 50);
-        _ = await CreateTestEntityAsync(store, "User3", score: 75);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 25);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 75);
 
         var filter = new NumberField("score").LessOrEqual(50);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -433,19 +433,19 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 10);
-        _ = await CreateTestEntityAsync(store, "User2", score: 25);
-        _ = await CreateTestEntityAsync(store, "User3", score: 50);
-        _ = await CreateTestEntityAsync(store, "User4", score: 75);
-        _ = await CreateTestEntityAsync(store, "User5", score: 100);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 10);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 25);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User4", score: 75);
+        _ = await CreateTestEntityAsync(storage, "User5", score: 100);
 
         var filter = new NumberField("score").Between(25, 75);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should include boundaries (25 and 75)
         result.Items.Count.ShouldBe(3);
@@ -459,19 +459,19 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Product1", price: 9.99m);
-        _ = await CreateTestEntityAsync(store, "Product2", price: 19.99m);
-        _ = await CreateTestEntityAsync(store, "Product3", price: 29.99m);
-        _ = await CreateTestEntityAsync(store, "Product4", price: 39.99m);
-        _ = await CreateTestEntityAsync(store, "Product5", price: 49.99m);
+        _ = await CreateTestEntityAsync(storage, "Product1", price: 9.99m);
+        _ = await CreateTestEntityAsync(storage, "Product2", price: 19.99m);
+        _ = await CreateTestEntityAsync(storage, "Product3", price: 29.99m);
+        _ = await CreateTestEntityAsync(storage, "Product4", price: 39.99m);
+        _ = await CreateTestEntityAsync(storage, "Product5", price: 49.99m);
 
         var filter = new NumberField("price").Between(15.0m, 35.0m);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -485,19 +485,19 @@ public partial class QueryStoreBasicExpressionTests
         // Arrange
         decimal[] testNumberValues = [10.0m, 30.0m, 50.0m];
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 10);
-        _ = await CreateTestEntityAsync(store, "User2", score: 20);
-        _ = await CreateTestEntityAsync(store, "User3", score: 30);
-        _ = await CreateTestEntityAsync(store, "User4", score: 40);
-        _ = await CreateTestEntityAsync(store, "User5", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 10);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 20);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 30);
+        _ = await CreateTestEntityAsync(storage, "User4", score: 40);
+        _ = await CreateTestEntityAsync(storage, "User5", score: 50);
 
         var filter = new NumberField("score").In(testNumberValues);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -511,23 +511,23 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 9, 1, 0, 0, 0, TimeSpan.Zero);
         var date4 = new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: date3);
-        _ = await CreateTestEntityAsync(store, "Event4", createdAt: date4);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: date3);
+        _ = await CreateTestEntityAsync(storage, "Event4", createdAt: date4);
 
         var cutoffDate = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").GreaterThan(cutoffDate);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -540,21 +540,21 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: date3);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: date3);
 
         var cutoffDate = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").GreaterOrEqual(cutoffDate);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -567,23 +567,23 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var date4 = new DateTimeOffset(2024, 9, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: date3);
-        _ = await CreateTestEntityAsync(store, "Event4", createdAt: date4);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: date3);
+        _ = await CreateTestEntityAsync(storage, "Event4", createdAt: date4);
 
         var cutoffDate = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").LessThan(cutoffDate);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -596,21 +596,21 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: date3);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: date3);
 
         var cutoffDate = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").LessOrEqual(cutoffDate);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -623,18 +623,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var date4 = new DateTimeOffset(2024, 9, 1, 0, 0, 0, TimeSpan.Zero);
         var date5 = new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: date3);
-        _ = await CreateTestEntityAsync(store, "Event4", createdAt: date4);
-        _ = await CreateTestEntityAsync(store, "Event5", createdAt: date5);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: date3);
+        _ = await CreateTestEntityAsync(storage, "Event4", createdAt: date4);
+        _ = await CreateTestEntityAsync(storage, "Event5", createdAt: date5);
 
         var startDate = new DateTime(2024, 3, 1, 0, 0, 0, DateTimeKind.Utc);
         var endDate = new DateTime(2024, 9, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -642,7 +642,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should include boundaries (March 1 and September 1)
         result.Items.Count.ShouldBe(3);
@@ -656,16 +656,16 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 6, 1, 8, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 6, 1, 16, 0, 0, TimeSpan.Zero);
         var date4 = new DateTimeOffset(2024, 6, 1, 20, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", lastLogin: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", lastLogin: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", lastLogin: date3);
-        _ = await CreateTestEntityAsync(store, "Event4", lastLogin: date4);
+        _ = await CreateTestEntityAsync(storage, "Event1", lastLogin: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", lastLogin: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", lastLogin: date3);
+        _ = await CreateTestEntityAsync(storage, "Event4", lastLogin: date4);
 
         var startTime = new DateTime(2024, 6, 1, 10, 0, 0, DateTimeKind.Utc);
         var endTime = new DateTime(2024, 6, 1, 18, 0, 0, DateTimeKind.Utc);
@@ -673,7 +673,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -686,21 +686,21 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 13, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 6, 2, 12, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: date3);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: date3);
 
         var targetDate = new DateTime(2024, 6, 1, 12, 0, 0, DateTimeKind.Utc);
         var filter = new DateTimeField("recordedAt").Equals(targetDate);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -712,17 +712,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", isActive: true);
-        _ = await CreateTestEntityAsync(store, "User2", isActive: false);
-        _ = await CreateTestEntityAsync(store, "User3", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "User1", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "User2", isActive: false);
+        _ = await CreateTestEntityAsync(storage, "User3", isActive: true);
 
         var filter = new BooleanField("isActive").IsTrue();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -735,17 +735,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", isActive: true);
-        _ = await CreateTestEntityAsync(store, "User2", isActive: false);
-        _ = await CreateTestEntityAsync(store, "User3", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "User1", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "User2", isActive: false);
+        _ = await CreateTestEntityAsync(storage, "User3", isActive: true);
 
         var filter = new BooleanField("isActive").IsFalse();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -757,17 +757,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", isActive: true);
-        _ = await CreateTestEntityAsync(store, "User2", isActive: false);
-        _ = await CreateTestEntityAsync(store, "User3", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "User1", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "User2", isActive: false);
+        _ = await CreateTestEntityAsync(storage, "User3", isActive: true);
 
         var filterTrue = new BooleanField("isActive").Equals(true);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filterTrue, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filterTrue, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -780,17 +780,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 50);
-        _ = await CreateTestEntityAsync(store, "User2", score: 75);
-        _ = await CreateTestEntityAsync(store, "User3", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 50);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 75);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 50);
 
         var filter = new NumberField("score").Equals(50);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -803,17 +803,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Product1", price: 19.99m);
-        _ = await CreateTestEntityAsync(store, "Product2", price: 29.99m);
-        _ = await CreateTestEntityAsync(store, "Product3", price: 19.99m);
+        _ = await CreateTestEntityAsync(storage, "Product1", price: 19.99m);
+        _ = await CreateTestEntityAsync(storage, "Product2", price: 29.99m);
+        _ = await CreateTestEntityAsync(storage, "Product3", price: 19.99m);
 
         var filter = new NumberField("price").Equals(19.99m);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -826,18 +826,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Account1", score: -100);
-        _ = await CreateTestEntityAsync(store, "Account2", score: -50);
-        _ = await CreateTestEntityAsync(store, "Account3", score: 0);
-        _ = await CreateTestEntityAsync(store, "Account4", score: 50);
+        _ = await CreateTestEntityAsync(storage, "Account1", score: -100);
+        _ = await CreateTestEntityAsync(storage, "Account2", score: -50);
+        _ = await CreateTestEntityAsync(storage, "Account3", score: 0);
+        _ = await CreateTestEntityAsync(storage, "Account4", score: 50);
 
         var filter = new NumberField("score").LessThan(0);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -850,19 +850,19 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Item1", score: -100);
-        _ = await CreateTestEntityAsync(store, "Item2", score: -75);
-        _ = await CreateTestEntityAsync(store, "Item3", score: -50);
-        _ = await CreateTestEntityAsync(store, "Item4", score: -25);
-        _ = await CreateTestEntityAsync(store, "Item5", score: 0);
+        _ = await CreateTestEntityAsync(storage, "Item1", score: -100);
+        _ = await CreateTestEntityAsync(storage, "Item2", score: -75);
+        _ = await CreateTestEntityAsync(storage, "Item3", score: -50);
+        _ = await CreateTestEntityAsync(storage, "Item4", score: -25);
+        _ = await CreateTestEntityAsync(storage, "Item5", score: 0);
 
         var filter = new NumberField("score").Between(-80, -40);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -875,18 +875,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Zero1", score: 0);
-        _ = await CreateTestEntityAsync(store, "Positive", score: 10);
-        _ = await CreateTestEntityAsync(store, "Zero2", score: 0);
-        _ = await CreateTestEntityAsync(store, "Negative", score: -10);
+        _ = await CreateTestEntityAsync(storage, "Zero1", score: 0);
+        _ = await CreateTestEntityAsync(storage, "Positive", score: 10);
+        _ = await CreateTestEntityAsync(storage, "Zero2", score: 0);
+        _ = await CreateTestEntityAsync(storage, "Negative", score: -10);
 
         var filter = new NumberField("score").Equals(0);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -899,17 +899,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var jan = new DateTimeOffset(2024, 1, 15, 0, 0, 0, TimeSpan.Zero);
         var mar = new DateTimeOffset(2024, 3, 15, 0, 0, 0, TimeSpan.Zero);
         var jun = new DateTimeOffset(2024, 6, 15, 0, 0, 0, TimeSpan.Zero);
         var sep = new DateTimeOffset(2024, 9, 15, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: jan);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: mar);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: jun);
-        _ = await CreateTestEntityAsync(store, "Event4", createdAt: sep);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: jan);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: mar);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: jun);
+        _ = await CreateTestEntityAsync(storage, "Event4", createdAt: sep);
 
         // Match dates in January OR June (using Equals with OR)
         var jan1 = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc);
@@ -920,7 +920,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -933,22 +933,22 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var date1 = new DateTimeOffset(2024, 6, 1, 12, 30, 45, 123, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 12, 30, 45, 456, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 6, 1, 12, 30, 45, 789, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", lastLogin: date1);
-        _ = await CreateTestEntityAsync(store, "Event2", lastLogin: date2);
-        _ = await CreateTestEntityAsync(store, "Event3", lastLogin: date3);
+        _ = await CreateTestEntityAsync(storage, "Event1", lastLogin: date1);
+        _ = await CreateTestEntityAsync(storage, "Event2", lastLogin: date2);
+        _ = await CreateTestEntityAsync(storage, "Event3", lastLogin: date3);
 
         var targetDate = new DateTime(2024, 6, 1, 12, 30, 45, 456, DateTimeKind.Utc);
         var filter = new DateTimeField("lastLogin").Equals(targetDate);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -960,18 +960,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "user@example.com");
-        _ = await CreateTestEntityAsync(store, "user_123");
-        _ = await CreateTestEntityAsync(store, "user-test");
-        _ = await CreateTestEntityAsync(store, "user.name");
+        _ = await CreateTestEntityAsync(storage, "user@example.com");
+        _ = await CreateTestEntityAsync(storage, "user_123");
+        _ = await CreateTestEntityAsync(storage, "user-test");
+        _ = await CreateTestEntityAsync(storage, "user.name");
 
         var filter = new StringField("name").Equals("user@example.com");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -983,17 +983,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", status: "active");
-        _ = await CreateTestEntityAsync(store, "User2", status: "pending");
+        _ = await CreateTestEntityAsync(storage, "User1", status: "active");
+        _ = await CreateTestEntityAsync(storage, "User2", status: "pending");
 
         string[] emptyStatuses = [];
         var filter = new StringField("status").In(emptyStatuses);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -1004,18 +1004,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test that % is treated as a literal character, not a wildcard
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "100% Complete");
-        _ = await CreateTestEntityAsync(store, "50% Done");
-        _ = await CreateTestEntityAsync(store, "100 Complete");
-        _ = await CreateTestEntityAsync(store, "100X Complete");
+        _ = await CreateTestEntityAsync(storage, "100% Complete");
+        _ = await CreateTestEntityAsync(storage, "50% Done");
+        _ = await CreateTestEntityAsync(storage, "100 Complete");
+        _ = await CreateTestEntityAsync(storage, "100X Complete");
 
         var filter = new StringField("name").Contains("100%");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should only match "100% Complete", not "100 Complete" or "100X Complete"
         result.Items.Count.ShouldBe(1);
@@ -1027,18 +1027,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test that _ is treated as a literal character, not a single-char wildcard
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "user_name");
-        _ = await CreateTestEntityAsync(store, "user-name");
-        _ = await CreateTestEntityAsync(store, "username");
-        _ = await CreateTestEntityAsync(store, "userXname");
+        _ = await CreateTestEntityAsync(storage, "user_name");
+        _ = await CreateTestEntityAsync(storage, "user-name");
+        _ = await CreateTestEntityAsync(storage, "username");
+        _ = await CreateTestEntityAsync(storage, "userXname");
 
         var filter = new StringField("name").Contains("user_");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should only match "user_name", not "user-name", "username", or "userXname"
         result.Items.Count.ShouldBe(1);
@@ -1050,17 +1050,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test that % at the start is treated as a literal character
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "%discount_code");
-        _ = await CreateTestEntityAsync(store, "Xdiscount_code");
-        _ = await CreateTestEntityAsync(store, "discount_code");
+        _ = await CreateTestEntityAsync(storage, "%discount_code");
+        _ = await CreateTestEntityAsync(storage, "Xdiscount_code");
+        _ = await CreateTestEntityAsync(storage, "discount_code");
 
         var filter = new StringField("name").StartsWith("%discount");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should only match "%discount_code"
         result.Items.Count.ShouldBe(1);
@@ -1072,17 +1072,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test that _ at the start is treated as a literal character
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "_private_method");
-        _ = await CreateTestEntityAsync(store, "Xprivate_method");
-        _ = await CreateTestEntityAsync(store, "private_method");
+        _ = await CreateTestEntityAsync(storage, "_private_method");
+        _ = await CreateTestEntityAsync(storage, "Xprivate_method");
+        _ = await CreateTestEntityAsync(storage, "private_method");
 
         var filter = new StringField("name").StartsWith("_private");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should only match "_private_method"
         result.Items.Count.ShouldBe(1);
@@ -1094,17 +1094,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test that backslash is treated as a literal character
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, @"C:\Windows\System32");
-        _ = await CreateTestEntityAsync(store, @"C:/Windows/System32");
-        _ = await CreateTestEntityAsync(store, @"Windows\System32");
+        _ = await CreateTestEntityAsync(storage, @"C:\Windows\System32");
+        _ = await CreateTestEntityAsync(storage, @"C:/Windows/System32");
+        _ = await CreateTestEntityAsync(storage, @"Windows\System32");
 
         var filter = new StringField("name").Contains(@"Windows\System");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should match paths with backslashes, not forward slashes
         result.Items.Count.ShouldBe(2);
@@ -1117,17 +1117,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test that multiple wildcard characters are all escaped
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "discount_50%_off");
-        _ = await CreateTestEntityAsync(store, "discountX50XX off");
-        _ = await CreateTestEntityAsync(store, "discount-50%-off");
+        _ = await CreateTestEntityAsync(storage, "discount_50%_off");
+        _ = await CreateTestEntityAsync(storage, "discountX50XX off");
+        _ = await CreateTestEntityAsync(storage, "discount-50%-off");
 
         var filter = new StringField("name").Contains("discount_50%");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should only match "discount_50%_off"
         result.Items.Count.ShouldBe(1);
@@ -1139,17 +1139,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test StartsWith with multiple wildcard characters
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "_%special_prefix%_test");
-        _ = await CreateTestEntityAsync(store, "XXspecial_prefixXX test");
-        _ = await CreateTestEntityAsync(store, "special_prefix_test");
+        _ = await CreateTestEntityAsync(storage, "_%special_prefix%_test");
+        _ = await CreateTestEntityAsync(storage, "XXspecial_prefixXX test");
+        _ = await CreateTestEntityAsync(storage, "special_prefix_test");
 
         var filter = new StringField("name").StartsWith("_%special");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should only match "_%special_prefix%_test"
         result.Items.Count.ShouldBe(1);
@@ -1161,18 +1161,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 10);
-        _ = await CreateTestEntityAsync(store, "User2", score: 20);
-        _ = await CreateTestEntityAsync(store, "User3", score: 30);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 10);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 20);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 30);
 
         decimal[] singleValue = [20.0m];
         var filter = new NumberField("score").In(singleValue);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1184,17 +1184,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 10);
-        _ = await CreateTestEntityAsync(store, "User2", score: 20);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 10);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 20);
 
         decimal[] emptyValues = [];
         var filter = new NumberField("score").In(emptyValues);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -1205,15 +1205,15 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var startOfDay = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var endOfDay = new DateTimeOffset(2024, 6, 1, 23, 59, 59, 999, TimeSpan.Zero);
         var nextDay = new DateTimeOffset(2024, 6, 2, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "StartOfDay", createdAt: startOfDay);
-        _ = await CreateTestEntityAsync(store, "EndOfDay", createdAt: endOfDay);
-        _ = await CreateTestEntityAsync(store, "NextDay", createdAt: nextDay);
+        _ = await CreateTestEntityAsync(storage, "StartOfDay", createdAt: startOfDay);
+        _ = await CreateTestEntityAsync(storage, "EndOfDay", createdAt: endOfDay);
+        _ = await CreateTestEntityAsync(storage, "NextDay", createdAt: nextDay);
 
         // Filter for everything before end of June 1st
         var cutoff = new DateTime(2024, 6, 2, 0, 0, 0, DateTimeKind.Utc);
@@ -1221,7 +1221,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1234,17 +1234,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Item1", price: 999999999.99m);
-        _ = await CreateTestEntityAsync(store, "Item2", price: 1000000000.00m);
-        _ = await CreateTestEntityAsync(store, "Item3", price: 1000000000.01m);
+        _ = await CreateTestEntityAsync(storage, "Item1", price: 999999999.99m);
+        _ = await CreateTestEntityAsync(storage, "Item2", price: 1000000000.00m);
+        _ = await CreateTestEntityAsync(storage, "Item3", price: 1000000000.01m);
 
         var filter = new NumberField("price").GreaterThan(1000000000.00m);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1256,17 +1256,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Item1", price: 0.001m);
-        _ = await CreateTestEntityAsync(store, "Item2", price: 0.002m);
-        _ = await CreateTestEntityAsync(store, "Item3", price: 0.003m);
+        _ = await CreateTestEntityAsync(storage, "Item1", price: 0.001m);
+        _ = await CreateTestEntityAsync(storage, "Item2", price: 0.002m);
+        _ = await CreateTestEntityAsync(storage, "Item3", price: 0.003m);
 
         var filter = new NumberField("price").Between(0.0015m, 0.0025m);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1278,17 +1278,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "john.smith@example.com");
-        _ = await CreateTestEntityAsync(store, "jane.doe@example.com");
-        _ = await CreateTestEntityAsync(store, "bob@test.com");
+        _ = await CreateTestEntityAsync(storage, "john.smith@example.com");
+        _ = await CreateTestEntityAsync(storage, "jane.doe@example.com");
+        _ = await CreateTestEntityAsync(storage, "bob@test.com");
 
         var filter = new StringField("name").Contains("@example.com");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1301,21 +1301,21 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var midnight = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var oneSecondAfter = new DateTimeOffset(2024, 6, 1, 0, 0, 1, TimeSpan.Zero);
         var oneSecondBefore = new DateTimeOffset(2024, 5, 31, 23, 59, 59, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Before", createdAt: oneSecondBefore);
-        _ = await CreateTestEntityAsync(store, "Midnight", createdAt: midnight);
-        _ = await CreateTestEntityAsync(store, "After", createdAt: oneSecondAfter);
+        _ = await CreateTestEntityAsync(storage, "Before", createdAt: oneSecondBefore);
+        _ = await CreateTestEntityAsync(storage, "Midnight", createdAt: midnight);
+        _ = await CreateTestEntityAsync(storage, "After", createdAt: oneSecondAfter);
 
         var filter = new DateTimeField("recordedAt").Equals(new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1327,12 +1327,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Simulate NOT by testing values outside a range
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Low", score: 10);
-        _ = await CreateTestEntityAsync(store, "MidLow", score: 40);
-        _ = await CreateTestEntityAsync(store, "MidHigh", score: 60);
-        _ = await CreateTestEntityAsync(store, "High", score: 90);
+        _ = await CreateTestEntityAsync(storage, "Low", score: 10);
+        _ = await CreateTestEntityAsync(storage, "MidLow", score: 40);
+        _ = await CreateTestEntityAsync(storage, "MidHigh", score: 60);
+        _ = await CreateTestEntityAsync(storage, "High", score: 90);
 
         // Get all values NOT between 30 and 70 (i.e., less than 30 OR greater than 70)
         var filter = new NumberField("score").LessThan(30)
@@ -1340,7 +1340,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1353,15 +1353,15 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange - Test all four field types in one complex query
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var date1 = new DateTimeOffset(2024, 1, 15, 10, 30, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 15, 14, 45, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Match1", score: 75, price: 25.50m, createdAt: date1, isActive: true, status: "premium");
-        _ = await CreateTestEntityAsync(store, "NoMatch1", score: 45, price: 25.50m, createdAt: date1, isActive: true, status: "basic");
-        _ = await CreateTestEntityAsync(store, "NoMatch2", score: 75, price: 15.00m, createdAt: date1, isActive: false, status: "premium");
-        _ = await CreateTestEntityAsync(store, "Match2", score: 85, price: 30.00m, createdAt: date2, isActive: true, status: "premium");
+        _ = await CreateTestEntityAsync(storage, "Match1", score: 75, price: 25.50m, createdAt: date1, isActive: true, status: "premium");
+        _ = await CreateTestEntityAsync(storage, "NoMatch1", score: 45, price: 25.50m, createdAt: date1, isActive: true, status: "basic");
+        _ = await CreateTestEntityAsync(storage, "NoMatch2", score: 75, price: 15.00m, createdAt: date1, isActive: false, status: "premium");
+        _ = await CreateTestEntityAsync(storage, "Match2", score: 85, price: 30.00m, createdAt: date2, isActive: true, status: "premium");
 
         // Complex filter: score >= 70 AND price > 20 AND isActive = true AND status = "premium"
         var filter = new NumberField("score").GreaterOrEqual(70)
@@ -1371,7 +1371,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1384,12 +1384,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1", score: 50, price: 10.0m);
-        _ = await CreateTestEntityAsync(store, "User2", score: 75, price: 20.0m);
-        _ = await CreateTestEntityAsync(store, "User3", score: 100, price: 30.0m);
-        _ = await CreateTestEntityAsync(store, "User4", score: 125, price: 40.0m);
+        _ = await CreateTestEntityAsync(storage, "User1", score: 50, price: 10.0m);
+        _ = await CreateTestEntityAsync(storage, "User2", score: 75, price: 20.0m);
+        _ = await CreateTestEntityAsync(storage, "User3", score: 100, price: 30.0m);
+        _ = await CreateTestEntityAsync(storage, "User4", score: 125, price: 40.0m);
 
         // Score between 60-110 AND price between 15-35
         var filter = new NumberField("score").Between(60, 110)
@@ -1397,7 +1397,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1410,16 +1410,16 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var jan = new DateTimeOffset(2024, 1, 15, 0, 0, 0, TimeSpan.Zero);
         var apr = new DateTimeOffset(2024, 4, 15, 0, 0, 0, TimeSpan.Zero);
         var jul = new DateTimeOffset(2024, 7, 15, 0, 0, 0, TimeSpan.Zero);
         var oct = new DateTimeOffset(2024, 10, 15, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Event1", createdAt: jan);
-        _ = await CreateTestEntityAsync(store, "Event2", createdAt: apr);
-        _ = await CreateTestEntityAsync(store, "Event3", createdAt: jul);
-        _ = await CreateTestEntityAsync(store, "Event4", createdAt: oct);
+        _ = await CreateTestEntityAsync(storage, "Event1", createdAt: jan);
+        _ = await CreateTestEntityAsync(storage, "Event2", createdAt: apr);
+        _ = await CreateTestEntityAsync(storage, "Event3", createdAt: jul);
+        _ = await CreateTestEntityAsync(storage, "Event4", createdAt: oct);
 
         // Created in Q1 (Jan-Mar) OR Q4 (Oct-Dec)
         var q1Start = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -1432,7 +1432,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1445,15 +1445,15 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
         var date1 = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateTestEntityAsync(store, "Alice", score: 85, createdAt: date1, isActive: true, status: "premium");
-        _ = await CreateTestEntityAsync(store, "Bob", score: 45, createdAt: date2, isActive: false, status: "basic");
-        _ = await CreateTestEntityAsync(store, "Charlie", score: 95, createdAt: date3, isActive: true, status: "premium");
-        _ = await CreateTestEntityAsync(store, "David", score: 75, createdAt: date2, isActive: true, status: "basic");
+        _ = await CreateTestEntityAsync(storage, "Alice", score: 85, createdAt: date1, isActive: true, status: "premium");
+        _ = await CreateTestEntityAsync(storage, "Bob", score: 45, createdAt: date2, isActive: false, status: "basic");
+        _ = await CreateTestEntityAsync(storage, "Charlie", score: 95, createdAt: date3, isActive: true, status: "premium");
+        _ = await CreateTestEntityAsync(storage, "David", score: 75, createdAt: date2, isActive: true, status: "basic");
 
         // Complex filter: (score >= 80 AND isActive) OR (createdAt after June 1 AND status = premium)
         var juneFirst = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -1464,7 +1464,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1477,12 +1477,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create 25 entities with scores from 10 to 250 (step of 10)
         for (var i = 1; i <= 25; i++)
         {
-            _ = await CreateEntityAsync(store, $"User{i:D2}", score: i * 10);
+            _ = await CreateEntityAsync(storage, $"User{i:D2}", score: i * 10);
         }
 
         // Filter: score between 50 and 200 (should match 16 items: 50, 60, 70...200)
@@ -1491,19 +1491,19 @@ public partial class QueryStoreBasicExpressionTests
 
         // Act - Get page 1
         var page1Request = DataRange.FromPage(1, 5);
-        var page1 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page1Request, Ct.None);
+        var page1 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page1Request, Ct.None);
 
         // Act - Get page 2
         var page2Request = DataRange.FromPage(2, 5);
-        var page2 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page2Request, Ct.None);
+        var page2 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page2Request, Ct.None);
 
         // Act - Get page 3
         var page3Request = DataRange.FromPage(3, 5);
-        var page3 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page3Request, Ct.None);
+        var page3 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page3Request, Ct.None);
 
         // Act - Get page 4 (last page with 1 item)
         var page4Request = DataRange.FromPage(4, 5);
-        var page4 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page4Request, Ct.None);
+        var page4 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page4Request, Ct.None);
 
         // Assert - Page 1
         page1.Items.Count.ShouldBe(5);
@@ -1538,7 +1538,7 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create 30 entities spread across 2024
         for (var month = 1; month <= 12; month++)
@@ -1546,7 +1546,7 @@ public partial class QueryStoreBasicExpressionTests
             for (var day = 1; day <= 15; day += 7) // Day 1, 8, 15
             {
                 var date = new DateTimeOffset(2024, month, day, 12, 0, 0, TimeSpan.Zero);
-                _ = await CreateEntityAsync(store, $"Event{month:D2}_{day:D2}", createdAt: date);
+                _ = await CreateEntityAsync(storage, $"Event{month:D2}_{day:D2}", createdAt: date);
             }
         }
 
@@ -1558,15 +1558,15 @@ public partial class QueryStoreBasicExpressionTests
 
         // Act - Get first page
         var page1Request = DataRange.FromPage(1, 7);
-        var page1 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page1Request, Ct.None);
+        var page1 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page1Request, Ct.None);
 
         // Act - Get second page
         var page2Request = DataRange.FromPage(2, 7);
-        var page2 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page2Request, Ct.None);
+        var page2 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page2Request, Ct.None);
 
         // Act - Get third page (partial)
         var page3Request = DataRange.FromPage(3, 7);
-        var page3 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page3Request, Ct.None);
+        var page3 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page3Request, Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(7);
@@ -1585,12 +1585,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create 50 entities
         for (var i = 1; i <= 50; i++)
         {
-            _ = await CreateEntityAsync(store, $"Item{i:D2}",
+            _ = await CreateEntityAsync(storage, $"Item{i:D2}",
                 score: i,
                 isActive: i % 2 == 0, // Even numbers are active
                 status: i % 3 == 0 ? "premium" : "basic");
@@ -1604,10 +1604,10 @@ public partial class QueryStoreBasicExpressionTests
         var sort = new SortParameter(new NumberField("score"));
 
         // Test exact page break: 12 items with page size 4 = exactly 3 pages
-        var page1 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
-        var page2 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
-        var page3 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
-        var page4 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 4), Ct.None);
+        var page1 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
+        var page2 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
+        var page3 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
+        var page4 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 4), Ct.None);
 
         // Assert - Verify exact page break
         page1.Items.Count.ShouldBe(4);
@@ -1634,12 +1634,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create exactly 10 items
         for (var i = 1; i <= 10; i++)
         {
-            _ = await CreateEntityAsync(store, $"Item{i:D2}", score: i * 10);
+            _ = await CreateEntityAsync(storage, $"Item{i:D2}", score: i * 10);
         }
 
         var filter = Query.All();
@@ -1649,7 +1649,7 @@ public partial class QueryStoreBasicExpressionTests
         var pages = new List<QueryResult<MetadataEnvelope<TestEntityDso>>>();
         for (var pageNum = 1; pageNum <= 5; pageNum++)
         {
-            var page = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort,
+            var page = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort,
                 DataRange.FromPage(pageNum, 3), Ct.None);
             pages.Add(page);
         }
@@ -1679,21 +1679,21 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create exactly 20 items (will be exactly 4 pages of 5)
         for (var i = 1; i <= 20; i++)
         {
-            _ = await CreateEntityAsync(store, $"Item{i:D2}", score: i);
+            _ = await CreateEntityAsync(storage, $"Item{i:D2}", score: i);
         }
 
         var filter = Query.All();
         var sort = new SortParameter(new NumberField("score"));
 
         // Act
-        var page1 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page4 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 5), Ct.None);
-        var page5 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(5, 5), Ct.None);
+        var page1 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page4 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 5), Ct.None);
+        var page5 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(5, 5), Ct.None);
 
         // Assert
         // Last page should be full (not partial)
@@ -1711,11 +1711,11 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 1; i <= 10; i++)
         {
-            _ = await CreateEntityAsync(store, $"Item{i}", score: i * 10);
+            _ = await CreateEntityAsync(storage, $"Item{i}", score: i * 10);
         }
 
         // Filter that matches only one item
@@ -1723,8 +1723,8 @@ public partial class QueryStoreBasicExpressionTests
         var sort = new SortParameter(new NumberField("score"));
 
         // Act
-        var page1 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page2 = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
+        var page1 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page2 = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(1);
@@ -1740,17 +1740,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice Smith");
-        _ = await CreateTestEntityAsync(store, "Charlie Smith");
-        _ = await CreateTestEntityAsync(store, "Bob Jones");
+        _ = await CreateTestEntityAsync(storage, "Alice Smith");
+        _ = await CreateTestEntityAsync(storage, "Charlie Smith");
+        _ = await CreateTestEntityAsync(storage, "Bob Jones");
 
         var filter = new StringField("name").EndsWith("Smith");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1763,18 +1763,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice Smith");
-        _ = await CreateTestEntityAsync(store, "Charlie Smith");
-        _ = await CreateTestEntityAsync(store, "Bob Jones");
+        _ = await CreateTestEntityAsync(storage, "Alice Smith");
+        _ = await CreateTestEntityAsync(storage, "Charlie Smith");
+        _ = await CreateTestEntityAsync(storage, "Bob Jones");
 
         // Lowercase suffix - should match case-insensitively
         var filter = new StringField("name").EndsWith("smith");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1787,18 +1787,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "discount50%");
-        _ = await CreateTestEntityAsync(store, "discount50");
-        _ = await CreateTestEntityAsync(store, "no match");
+        _ = await CreateTestEntityAsync(storage, "discount50%");
+        _ = await CreateTestEntityAsync(storage, "discount50");
+        _ = await CreateTestEntityAsync(storage, "no match");
 
         // The '%' character should be treated as a literal, not a wildcard
         var filter = new StringField("name").EndsWith("50%");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1810,18 +1810,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "user_name");
-        _ = await CreateTestEntityAsync(store, "username");
-        _ = await CreateTestEntityAsync(store, "no match");
+        _ = await CreateTestEntityAsync(storage, "user_name");
+        _ = await CreateTestEntityAsync(storage, "username");
+        _ = await CreateTestEntityAsync(storage, "no match");
 
         // The '_' character should be treated as a literal, not a single-character wildcard
         var filter = new StringField("name").EndsWith("_name");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1833,17 +1833,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alpha");
-        _ = await CreateTestEntityAsync(store, "Beta");
-        _ = await CreateTestEntityAsync(store, "Gamma");
+        _ = await CreateTestEntityAsync(storage, "Alpha");
+        _ = await CreateTestEntityAsync(storage, "Beta");
+        _ = await CreateTestEntityAsync(storage, "Gamma");
 
         var filter = new StringField("name").EndsWith("xyz_nomatch");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -1854,17 +1854,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice");
-        _ = await CreateTestEntityAsync(store, "Bob");
-        _ = await CreateTestEntityAsync(store, "Charlie");
+        _ = await CreateTestEntityAsync(storage, "Alice");
+        _ = await CreateTestEntityAsync(storage, "Bob");
+        _ = await CreateTestEntityAsync(storage, "Charlie");
 
         var filter = Query.Not(new StringField("name").Equals("Alice"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1877,17 +1877,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "alice@example.com");
-        _ = await CreateTestEntityAsync(store, "bob@test.com");
-        _ = await CreateTestEntityAsync(store, "charlie@example.com");
+        _ = await CreateTestEntityAsync(storage, "alice@example.com");
+        _ = await CreateTestEntityAsync(storage, "bob@test.com");
+        _ = await CreateTestEntityAsync(storage, "charlie@example.com");
 
         var filter = Query.Not(new StringField("name").Contains("example"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1899,17 +1899,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alpha");
-        _ = await CreateTestEntityAsync(store, "Alpha Centauri");
-        _ = await CreateTestEntityAsync(store, "Beta");
+        _ = await CreateTestEntityAsync(storage, "Alpha");
+        _ = await CreateTestEntityAsync(storage, "Alpha Centauri");
+        _ = await CreateTestEntityAsync(storage, "Beta");
 
         var filter = Query.Not(new StringField("name").StartsWith("Alpha"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1921,17 +1921,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice Smith");
-        _ = await CreateTestEntityAsync(store, "Charlie Smith");
-        _ = await CreateTestEntityAsync(store, "Bob Jones");
+        _ = await CreateTestEntityAsync(storage, "Alice Smith");
+        _ = await CreateTestEntityAsync(storage, "Charlie Smith");
+        _ = await CreateTestEntityAsync(storage, "Bob Jones");
 
         var filter = Query.Not(new StringField("name").EndsWith("Smith"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1943,12 +1943,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice", score: 80, isActive: true);
-        _ = await CreateTestEntityAsync(store, "Bob", score: 90, isActive: true);
-        _ = await CreateTestEntityAsync(store, "Charlie", score: 70, isActive: false);
-        _ = await CreateTestEntityAsync(store, "David", score: 60, isActive: true);
+        _ = await CreateTestEntityAsync(storage, "Alice", score: 80, isActive: true);
+        _ = await CreateTestEntityAsync(storage, "Bob", score: 90, isActive: true);
+        _ = await CreateTestEntityAsync(storage, "Charlie", score: 70, isActive: false);
+        _ = await CreateTestEntityAsync(storage, "David", score: 60, isActive: true);
 
         // NOT(score > 75 AND isActive = true) => excludes Alice and Bob
         var filter = Query.Not(new NumberField("score").GreaterThan(75)
@@ -1956,7 +1956,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1969,12 +1969,12 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice", status: "active");
-        _ = await CreateTestEntityAsync(store, "Bob", status: "pending");
-        _ = await CreateTestEntityAsync(store, "Charlie", status: "inactive");
-        _ = await CreateTestEntityAsync(store, "David", status: "banned");
+        _ = await CreateTestEntityAsync(storage, "Alice", status: "active");
+        _ = await CreateTestEntityAsync(storage, "Bob", status: "pending");
+        _ = await CreateTestEntityAsync(storage, "Charlie", status: "inactive");
+        _ = await CreateTestEntityAsync(storage, "David", status: "banned");
 
         // NOT(status = "active" OR status = "pending") => only inactive and banned
         var filter = Query.Not(new StringField("status").Equals("active")
@@ -1982,7 +1982,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -1995,18 +1995,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice");
-        _ = await CreateTestEntityAsync(store, "Bob");
-        _ = await CreateTestEntityAsync(store, "Charlie");
+        _ = await CreateTestEntityAsync(storage, "Alice");
+        _ = await CreateTestEntityAsync(storage, "Bob");
+        _ = await CreateTestEntityAsync(storage, "Charlie");
 
         // NOT(NOT(name = "Alice")) is equivalent to name = "Alice"
         var filter = Query.Not(Query.Not(new StringField("name").Equals("Alice")));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -2018,17 +2018,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Active1", isActive: true);
-        _ = await CreateTestEntityAsync(store, "Inactive1", isActive: false);
-        _ = await CreateTestEntityAsync(store, "Active2", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "Active1", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "Inactive1", isActive: false);
+        _ = await CreateTestEntityAsync(storage, "Active2", isActive: true);
 
         var filter = Query.Not(new BooleanField("isActive").IsTrue());
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -2040,16 +2040,16 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "WithScore", score: 42);
-        _ = await CreateTestEntityAsync(store, "WithoutScore");
+        _ = await CreateTestEntityAsync(storage, "WithScore", score: 42);
+        _ = await CreateTestEntityAsync(storage, "WithoutScore");
 
         var filter = Query.Not(new NumberField("score").Present());
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -2061,17 +2061,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "WithStatus", status: "active");
-        _ = await CreateTestEntityAsync(store, "WithoutStatus");
-        _ = await CreateTestEntityAsync(store, "AlsoWithStatus", status: "pending");
+        _ = await CreateTestEntityAsync(storage, "WithStatus", status: "active");
+        _ = await CreateTestEntityAsync(storage, "WithoutStatus");
+        _ = await CreateTestEntityAsync(storage, "AlsoWithStatus", status: "pending");
 
         var filter = new StringField("status").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -2084,17 +2084,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "WithScore", score: 42);
-        _ = await CreateTestEntityAsync(store, "WithoutScore");
-        _ = await CreateTestEntityAsync(store, "AlsoWithScore", score: 99);
+        _ = await CreateTestEntityAsync(storage, "WithScore", score: 42);
+        _ = await CreateTestEntityAsync(storage, "WithoutScore");
+        _ = await CreateTestEntityAsync(storage, "AlsoWithScore", score: 99);
 
         var filter = new NumberField("score").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -2107,18 +2107,18 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var date = new DateTimeOffset(2024, 6, 15, 12, 0, 0, TimeSpan.Zero);
-        _ = await CreateTestEntityAsync(store, "WithDate", createdAt: date);
-        _ = await CreateTestEntityAsync(store, "WithoutDate");
-        _ = await CreateTestEntityAsync(store, "AlsoWithDate", createdAt: date.AddDays(1));
+        _ = await CreateTestEntityAsync(storage, "WithDate", createdAt: date);
+        _ = await CreateTestEntityAsync(storage, "WithoutDate");
+        _ = await CreateTestEntityAsync(storage, "AlsoWithDate", createdAt: date.AddDays(1));
 
         var filter = new DateTimeField("recordedAt").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -2131,17 +2131,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "WithFlag", isActive: true);
-        _ = await CreateTestEntityAsync(store, "WithFalseFlag", isActive: false);
-        _ = await CreateTestEntityAsync(store, "WithoutFlag");
+        _ = await CreateTestEntityAsync(storage, "WithFlag", isActive: true);
+        _ = await CreateTestEntityAsync(storage, "WithFalseFlag", isActive: false);
+        _ = await CreateTestEntityAsync(storage, "WithoutFlag");
 
         var filter = new BooleanField("isActive").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -2154,16 +2154,16 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "User1");
-        _ = await CreateTestEntityAsync(store, "User2");
+        _ = await CreateTestEntityAsync(storage, "User1");
+        _ = await CreateTestEntityAsync(storage, "User2");
 
         var filter = new NumberField("score").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -2174,11 +2174,11 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestEntityAsync(store, "Alice", score: 80, status: "active");
-        _ = await CreateTestEntityAsync(store, "Bob", score: 50);           // no status
-        _ = await CreateTestEntityAsync(store, "Charlie", status: "active"); // no score
+        _ = await CreateTestEntityAsync(storage, "Alice", score: 80, status: "active");
+        _ = await CreateTestEntityAsync(storage, "Bob", score: 50);           // no status
+        _ = await CreateTestEntityAsync(storage, "Charlie", status: "active"); // no score
 
         // Present(score) AND status = "active"
         var filter = new NumberField("score").Present()
@@ -2186,7 +2186,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -2204,17 +2204,17 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestUserWithTagsAsync(store, "Alice", AdminUserTags);
-        _ = await CreateTestUserWithTagsAsync(store, "Bob", UserOnlyTags);
-        _ = await CreateTestUserWithTagsAsync(store, "Charlie", AdminModeratorTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Alice", AdminUserTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Bob", UserOnlyTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Charlie", AdminModeratorTags);
 
         var filter = new StringArrayField("tags").Contains("admin");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(UserEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(UserEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -2227,16 +2227,16 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestUserWithTagsAsync(store, "Alice", AdminUserTags);
-        _ = await CreateTestUserWithTagsAsync(store, "Bob", UserOnlyTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Alice", AdminUserTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Bob", UserOnlyTags);
 
         var filter = new StringArrayField("tags").Contains("superadmin");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(UserEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(UserEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -2247,11 +2247,11 @@ public partial class QueryStoreBasicExpressionTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateTestUserWithTagsAsync(store, "Alice", AdminUserTags);
-        _ = await CreateTestUserWithTagsAsync(store, "AdminBob", AdminOnlyTags);
-        _ = await CreateTestUserWithTagsAsync(store, "Bob", UserOnlyTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Alice", AdminUserTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "AdminBob", AdminOnlyTags);
+        _ = await CreateTestUserWithTagsAsync(storage, "Bob", UserOnlyTags);
 
         // tags contains "admin" AND name starts with "Alice"
         var filter = new StringArrayField("tags").Contains("admin")
@@ -2259,7 +2259,7 @@ public partial class QueryStoreBasicExpressionTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(UserEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(UserEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -2267,7 +2267,7 @@ public partial class QueryStoreBasicExpressionTests
     }
 
     private static async Task<UuidV7> CreateTestUserWithTagsAsync(
-        IStore store,
+        IStorage storage,
         string name,
         string[] tags,
         Ct ct = default)
@@ -2282,7 +2282,7 @@ public partial class QueryStoreBasicExpressionTests
         }
 
         var searchFields = searchFieldsBuilder.Build();
-        var storeInterface = store;
+        var storeInterface = storage;
         var result = await storeInterface.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
         result.ShouldBe(CreateResult.Success);
         return id;

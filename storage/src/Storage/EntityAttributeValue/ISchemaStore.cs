@@ -14,7 +14,7 @@ public interface ISchemaStore
     /// <param name="schemaId">The schema identifier.</param>
     /// <param name="ct">A cancellation token.</param>
     /// <returns>
-    ///     The schema if found; <c>null</c> if no schema with the given ID exists.
+    ///     The schema if found, or an empty schema if not found.
     /// </returns>
-    Task<IReadOnlyAttributeSchema?> GetAsync(SchemaId schemaId, CancellationToken ct);
+    Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, CancellationToken ct);
 }

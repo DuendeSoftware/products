@@ -27,7 +27,7 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var entityType = TestDso.DsoVersion.EntityType;
         var ids = new List<UuidV7>();
@@ -37,34 +37,34 @@ public partial class PurgeExpiredTests
         {
             var id = UuidV7.New();
             ids.Add(id);
-            (await store.CreateAsync(id, new TestDso($"purge-{i}-{Guid.NewGuid()}"), [], [],
+            (await storage.CreateAsync(id, new TestDso($"purge-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         // Create 2 that won't expire
         var persistId1 = UuidV7.New();
         var persistId2 = UuidV7.New();
-        (await store.CreateAsync(persistId1, new TestDso($"persist-1-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(persistId1, new TestDso($"persist-1-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.CreateAsync(persistId2, new TestDso($"persist-2-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(persistId2, new TestDso($"persist-2-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
         // Advance time past expiration
         tp.Advance(TimeSpan.FromHours(2));
 
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
 
         purged.ShouldBeGreaterThanOrEqualTo(5);
 
         // Expired entities should be gone
         foreach (var id in ids)
         {
-            (await store.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
+            (await storage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
         }
 
         // Persistent entities should remain
-        (await store.TryReadAsync(entityType, persistId1, _ct)).Found.ShouldBeTrue();
-        (await store.TryReadAsync(entityType, persistId2, _ct)).Found.ShouldBeTrue();
+        (await storage.TryReadAsync(entityType, persistId1, _ct)).Found.ShouldBeTrue();
+        (await storage.TryReadAsync(entityType, persistId2, _ct)).Found.ShouldBeTrue();
     }
 
     [Fact]
@@ -72,13 +72,13 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create an entity that won't expire
-        (await store.CreateAsync(UuidV7.New(), new TestDso($"alive-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(UuidV7.New(), new TestDso($"alive-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
 
         purged.ShouldBe(0);
     }
@@ -88,7 +88,7 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var entityType = TestDso.DsoVersion.EntityType;
 
@@ -98,14 +98,14 @@ public partial class PurgeExpiredTests
         {
             var id = UuidV7.New();
             ids.Add(id);
-            (await store.CreateAsync(id, new TestDso($"multi-batch-{i}-{Guid.NewGuid()}"), [], [],
+            (await storage.CreateAsync(id, new TestDso($"multi-batch-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         tp.Advance(TimeSpan.FromHours(2));
 
         // PurgeExpired only processes a single batch — with batchSize 3, it should purge at most 3
-        var purged = await store.PurgeExpiredAsync(batchSize: 3, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 3, _ct);
         purged.ShouldBeLessThanOrEqualTo(3);
         purged.ShouldBeGreaterThan(0);
 
@@ -113,7 +113,7 @@ public partial class PurgeExpiredTests
         var totalPurged = purged;
         while (purged > 0)
         {
-            purged = await store.PurgeExpiredAsync(batchSize: 3, _ct);
+            purged = await storage.PurgeExpiredAsync(batchSize: 3, _ct);
             totalPurged += purged;
         }
 
@@ -122,7 +122,7 @@ public partial class PurgeExpiredTests
         // All expired entities should be gone
         foreach (var id in ids)
         {
-            (await store.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
+            (await storage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
         }
     }
 
@@ -131,8 +131,8 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
@@ -145,30 +145,30 @@ public partial class PurgeExpiredTests
         };
 
         // Create two entities and link them; left expires in 1 hour
-        (await store.CreateAsync(leftId, new TestDso($"left-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(leftId, new TestDso($"left-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.CreateAsync(rightId, new TestDso2($"right-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(rightId, new TestDso2($"right-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.LinkAsync(testLink, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
+        (await storage.LinkAsync(testLink, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
 
         // Verify the link exists
         var query = LinkQuery.From(TestDso2.DsoVersion.EntityType)
             .Join(testLink)
             .Where(TestDso.DsoVersion.EntityType, leftId)
             .Build();
-        var before = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var before = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         before.Items.Count.ShouldBe(1);
 
         // Advance past expiration and purge
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(1);
 
         // Left entity gone
-        (await store.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeFalse();
+        (await storage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeFalse();
 
         // Link should be gone too
-        var after = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var after = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         after.Items.ShouldBeEmpty();
     }
 
@@ -177,12 +177,12 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
 
         // Create entity that expires in 1 hour
-        (await store.CreateAsync(id, new TestDso($"ttl-race-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(id, new TestDso($"ttl-race-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
 
         // Advance past expiry
@@ -190,16 +190,16 @@ public partial class PurgeExpiredTests
 
         // Extend the entity's TTL before purge runs
         var entityType = TestDso.DsoVersion.EntityType;
-        var version = (await store.TryReadAsync(entityType, id, _ct)).Version.ShouldNotBeNull();
-        (await store.UpdateAsync(id, new TestDso($"ttl-extended-{Guid.NewGuid()}"), version, [], [],
+        var version = (await storage.TryReadAsync(entityType, id, _ct)).Version.ShouldNotBeNull();
+        (await storage.UpdateAsync(id, new TestDso($"ttl-extended-{Guid.NewGuid()}"), version, [], [],
             Expiration.InRelative(TimeSpan.FromHours(5)), [], _ct)).ShouldBe(UpdateResult.Success);
 
         // PurgeExpired should skip this entity because expires_at is now in the future
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBe(0);
 
         // Entity should still exist
-        (await store.TryReadAsync(entityType, id, _ct)).Found.ShouldBeTrue();
+        (await storage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeTrue();
     }
 
     [Fact]
@@ -207,8 +207,8 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
@@ -221,33 +221,33 @@ public partial class PurgeExpiredTests
         };
 
         // Create two entities and link them; left expires in 1 hour
-        (await store.CreateAsync(leftId, new TestDso($"left-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(leftId, new TestDso($"left-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.CreateAsync(rightId, new TestDso2($"right-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(rightId, new TestDso2($"right-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.LinkAsync(testLink, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
+        (await storage.LinkAsync(testLink, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
 
         // Advance past expiry
         tp.Advance(TimeSpan.FromHours(2));
 
         // Extend the left entity's TTL before purge runs
-        var version = (await store.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Version.ShouldNotBeNull();
-        (await store.UpdateAsync(leftId, new TestDso($"extended-{Guid.NewGuid()}"), version, [], [],
+        var version = (await storage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Version.ShouldNotBeNull();
+        (await storage.UpdateAsync(leftId, new TestDso($"extended-{Guid.NewGuid()}"), version, [], [],
             Expiration.InRelative(TimeSpan.FromHours(5)), [], _ct)).ShouldBe(UpdateResult.Success);
 
         // PurgeExpired should skip this entity — TTL was extended
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBe(0);
 
         // Left entity should still exist
-        (await store.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeTrue();
+        (await storage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeTrue();
 
         // Link should still exist
         var query = LinkQuery.From(TestDso2.DsoVersion.EntityType)
             .Join(testLink)
             .Where(TestDso.DsoVersion.EntityType, leftId)
             .Build();
-        var after = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var after = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         after.Items.Count.ShouldBe(1);
     }
 
@@ -256,7 +256,7 @@ public partial class PurgeExpiredTests
     {
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp, [new WildcardTestSubscriber()]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var entityType = TestDso.DsoVersion.EntityType;
         var ids = new List<UuidV7>();
@@ -265,15 +265,15 @@ public partial class PurgeExpiredTests
         {
             var id = UuidV7.New();
             ids.Add(id);
-            (await store.CreateAsync(id, new TestDso($"outbox-{i}-{Guid.NewGuid()}"), [], [],
+            (await storage.CreateAsync(id, new TestDso($"outbox-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(3);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
         page.Events.Count.ShouldBe(3);
 
         foreach (var id in ids)
@@ -287,7 +287,7 @@ public partial class PurgeExpiredTests
             (evt.Dso is TestDso).ShouldBeTrue();
 
             // Entity should be deleted
-            (await store.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
+            (await storage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
         }
     }
 
@@ -297,19 +297,19 @@ public partial class PurgeExpiredTests
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         // Use default CreateServiceProvider (no outbox) — outbox is disabled by default
         await using var fixture = await CreateProviderAsync(tp);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 0; i < 3; i++)
         {
-            (await store.CreateAsync(UuidV7.New(), new TestDso($"no-outbox-{i}-{Guid.NewGuid()}"), [], [],
+            (await storage.CreateAsync(UuidV7.New(), new TestDso($"no-outbox-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(3);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
         page.Events.ShouldBeEmpty();
     }
 
@@ -320,26 +320,26 @@ public partial class PurgeExpiredTests
         var testDsoTypeId = (int)TestDso.DsoVersion.EntityType.Id;
         await using var fixture = await CreateProviderAsync(tp,
             [new TypeFilteredTestSubscriber("typed-sub", [testDsoTypeId])]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create entities of both types with expiration
         var testDsoId = UuidV7.New();
         var testDso2Id = UuidV7.New();
-        (await store.CreateAsync(testDsoId, new TestDso($"typed-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(testDsoId, new TestDso($"typed-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.CreateAsync(testDso2Id, new TestDso2($"typed2-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(testDso2Id, new TestDso2($"typed2-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
 
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(2);
 
         // Both entities should be deleted
-        (await store.TryReadAsync(TestDso.DsoVersion.EntityType, testDsoId, _ct)).Found.ShouldBeFalse();
-        (await store.TryReadAsync(TestDso2.DsoVersion.EntityType, testDso2Id, _ct)).Found.ShouldBeFalse();
+        (await storage.TryReadAsync(TestDso.DsoVersion.EntityType, testDsoId, _ct)).Found.ShouldBeFalse();
+        (await storage.TryReadAsync(TestDso2.DsoVersion.EntityType, testDso2Id, _ct)).Found.ShouldBeFalse();
 
         // Outbox should only have events for TestDso, not TestDso2
-        var page = await store.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("typed-sub"), 100, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("typed-sub"), 100, _ct);
         page.Events.Count.ShouldBe(1);
         page.Events[0].EntityTypeId.ShouldBe(testDsoTypeId);
         page.Events[0].SubjectId.ShouldBe(UuidV7.From(testDsoId.Value));
@@ -351,19 +351,19 @@ public partial class PurgeExpiredTests
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         // Outbox enabled but NO subscribers
         await using var fixture = await CreateProviderAsync(tp, []);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 0; i < 2; i++)
         {
-            (await store.CreateAsync(UuidV7.New(), new TestDso($"no-sub-{i}-{Guid.NewGuid()}"), [], [],
+            (await storage.CreateAsync(UuidV7.New(), new TestDso($"no-sub-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(2);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
         page.Events.ShouldBeEmpty();
     }
 
@@ -373,21 +373,21 @@ public partial class PurgeExpiredTests
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp,
             [new NamedTestSubscriber("sub-a"), new NamedTestSubscriber("sub-b")]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 0; i < 2; i++)
         {
             var id = UuidV7.New();
-            (await store.CreateAsync(id, new TestDso($"fanout-{i}-{Guid.NewGuid()}"), [], [],
+            (await storage.CreateAsync(id, new TestDso($"fanout-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(2);
 
-        var pageA = await store.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-a"), 100, _ct);
-        var pageB = await store.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-b"), 100, _ct);
+        var pageA = await storage.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-a"), 100, _ct);
+        var pageB = await storage.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-b"), 100, _ct);
         var allEvents = pageA.Events.Concat(pageB.Events).ToList();
         allEvents.Count.ShouldBe(4); // 2 entities × 2 subscribers
 
@@ -407,21 +407,21 @@ public partial class PurgeExpiredTests
         var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateProviderAsync(tp,
             [new NamedTestSubscriber("sub-x"), new NamedTestSubscriber("sub-y")]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id1 = UuidV7.New();
         var id2 = UuidV7.New();
-        (await store.CreateAsync(id1, new TestDso($"eid-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(id1, new TestDso($"eid-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
-        (await store.CreateAsync(id2, new TestDso($"eid-{Guid.NewGuid()}"), [], [],
+        (await storage.CreateAsync(id2, new TestDso($"eid-{Guid.NewGuid()}"), [], [],
             Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
 
         tp.Advance(TimeSpan.FromHours(2));
-        var purged = await store.PurgeExpiredAsync(batchSize: 100, _ct);
+        var purged = await storage.PurgeExpiredAsync(batchSize: 100, _ct);
         purged.ShouldBeGreaterThanOrEqualTo(2);
 
-        var pageX = await store.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-x"), 100, _ct);
-        var pageY = await store.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-y"), 100, _ct);
+        var pageX = await storage.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-x"), 100, _ct);
+        var pageY = await storage.GetOutboxEventsForSubscriberAsync(SubscriberName.Create("sub-y"), 100, _ct);
         var allEvents = pageX.Events.Concat(pageY.Events).ToList();
         allEvents.Count.ShouldBe(4); // 2 entities × 2 subscribers
 
@@ -442,7 +442,7 @@ public partial class PurgeExpiredTests
         allEvents.Select(e => e.MessageId).Distinct().Count().ShouldBe(4);
     }
 
-    private async Task<IStoreFixture> CreateProviderAsync(FakeTimeProvider tp) =>
+    private async Task<IStorageFixture> CreateProviderAsync(FakeTimeProvider tp) =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             _ = services.AddSingleton(tp);
@@ -451,7 +451,7 @@ public partial class PurgeExpiredTests
             services.AddDsoRegistration<TestDso2>();
         });
 
-    private async Task<IStoreFixture> CreateProviderAsync(FakeTimeProvider tp, IOutboxSubscriber[] subscribers) =>
+    private async Task<IStorageFixture> CreateProviderAsync(FakeTimeProvider tp, IOutboxSubscriber[] subscribers) =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             _ = services.AddSingleton(tp);

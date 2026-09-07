@@ -14,7 +14,7 @@ public class SqliteStoreTests
     private readonly Ct _ct = TestContext.Current.CancellationToken;
     private readonly IServiceProvider _serviceProvider;
     private readonly string _connectionString;
-    private const string ServiceKey = "my-sqlite-store";
+    private const string ServiceKey = "my-sqlite-storage";
 
     public SqliteStoreTests()
     {
@@ -27,13 +27,13 @@ public class SqliteStoreTests
     }
 
     [Fact]
-    public void Can_resolve_store()
+    public void Can_resolve_storage()
     {
         var pooledStore = _serviceProvider.GetRequiredKeyedService<IPooledStore>(ServiceKey);
 
-        var store = pooledStore.OpenPool(1);
+        var storage = pooledStore.OpenPool(1);
 
-        _ = store.ShouldNotBeNull();
+        _ = storage.ShouldNotBeNull();
     }
 
     [Fact]

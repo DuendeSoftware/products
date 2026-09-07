@@ -10,7 +10,7 @@ namespace Duende.Storage.Internal.Operations;
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-public sealed class UnlinkOperation : IStoreOperation
+public sealed class UnlinkOperation : IStorageOperation
 {
     private UnlinkOperation(LinkDefinition definition, UuidV7 leftEntityId, UuidV7 rightEntityId)
     {
@@ -20,7 +20,7 @@ public sealed class UnlinkOperation : IStoreOperation
     }
 
     /// <summary>
-    /// Gets the entity type for this operation (the left entity type, for the IStoreOperation contract).
+    /// Gets the entity type for this operation (the left entity type, for the IStorageOperation contract).
     /// </summary>
     public EntityType EntityType => Definition.Left;
 

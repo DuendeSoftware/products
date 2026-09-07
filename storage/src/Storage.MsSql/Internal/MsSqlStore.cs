@@ -34,7 +34,7 @@ internal sealed class MsSqlStore(
     DataStorageTypeRegistry dataStorageTypeRegistry,
     TimeProvider timeProvider,
     OutboxSubscribers outboxSubscribers,
-    ILogger<MsSqlStore> logger) : StoreBase, IStore, IDatabaseSchema
+    ILogger<MsSqlStore> logger) : StoreBase, IStorage, IDatabaseSchema
 {
     private const int RequiredSchemaVersion = 2;
     private readonly string _schemaName = options.SchemaName;
@@ -425,7 +425,7 @@ internal sealed class MsSqlStore(
         return string.Join(Environment.NewLine + "GO" + Environment.NewLine, scripts.Select(s => s.Sql));
     }
 
-    async Task<CreateResult> IStore.CreateAsync<TDso>(
+    async Task<CreateResult> IStorage.CreateAsync<TDso>(
         Storage.UuidV7 id,
         TDso value,
         IReadOnlyCollection<DataStorageKey> keys,
@@ -460,7 +460,7 @@ internal sealed class MsSqlStore(
         };
     }
 
-    async Task<StoreGetResult> IStore.TryReadAsync(
+    async Task<StoreGetResult> IStorage.TryReadAsync(
         EntityType entityType,
         Storage.UuidV7 id,
         Ct ct)
@@ -503,7 +503,7 @@ internal sealed class MsSqlStore(
         return StoreGetResult.IsFound(item, id.Value, valueVersion, created, lastUpdated);
     }
 
-    async Task<StoreGetResult> IStore.TryReadAsync(
+    async Task<StoreGetResult> IStorage.TryReadAsync(
         EntityType entityType,
         DataStorageKey key,
         Ct ct)
@@ -557,7 +557,7 @@ internal sealed class MsSqlStore(
         return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
     }
 
-    async Task<IReadOnlyList<StoreGetResult>> IStore.TryReadManyAsync(
+    async Task<IReadOnlyList<StoreGetResult>> IStorage.TryReadManyAsync(
         EntityType entityType,
         IReadOnlySet<Storage.UuidV7> ids,
         int maximum,
@@ -620,7 +620,7 @@ internal sealed class MsSqlStore(
         return results;
     }
 
-    async Task<UpdateResult> IStore.UpdateAsync<TDso>(
+    async Task<UpdateResult> IStorage.UpdateAsync<TDso>(
         Storage.UuidV7 id,
         TDso dso,
         int expectedEntityVersion,
@@ -657,7 +657,7 @@ internal sealed class MsSqlStore(
         };
     }
 
-    async Task<DeleteResult> IStore.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<DeleteResult> IStorage.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         var deleteOp = DeleteOperation.ById(entityType, id);
 
@@ -676,7 +676,7 @@ internal sealed class MsSqlStore(
         return DeleteResult.Success;
     }
 
-    async Task<DeleteResult> IStore.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<DeleteResult> IStorage.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         var deleteOp = DeleteOperation.ByKey(entityType, key);
 
@@ -696,7 +696,7 @@ internal sealed class MsSqlStore(
     }
 
     /// <inheritdoc/>
-    async Task<LinkResult> IStore.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<LinkResult> IStorage.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         await using var connection = OpenConnection();
         await connection.OpenAsync(ct);
@@ -714,7 +714,7 @@ internal sealed class MsSqlStore(
     }
 
     /// <inheritdoc/>
-    async Task<UnlinkResult> IStore.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<UnlinkResult> IStorage.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         await using var connection = OpenConnection();
         await connection.OpenAsync(ct);
@@ -840,8 +840,8 @@ internal sealed class MsSqlStore(
         _ = await cmd.ExecuteNonQueryAsync(ct);
     }
 
-    async Task<BatchResult> IStore.ExecuteBatchAsync(
-        IReadOnlyList<IStoreOperation> operations,
+    async Task<BatchResult> IStorage.ExecuteBatchAsync(
+        IReadOnlyList<IStorageOperation> operations,
         IReadOnlyList<OutboxEvent> outboxEvents,
         Ct ct)
     {
@@ -888,7 +888,7 @@ internal sealed class MsSqlStore(
         return new BatchResult(true, results);
     }
 
-    async Task<OutboxEventsPage> IStore.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
+    async Task<OutboxEventsPage> IStorage.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
     {
         await using var connection = OpenConnection();
         await connection.OpenAsync(ct);
@@ -961,7 +961,7 @@ internal sealed class MsSqlStore(
         return new OutboxEventsPage(events, hasMore);
     }
 
-    async Task IStore.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
+    async Task IStorage.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
     {
         if (ids.Count == 0)
         {
@@ -995,7 +995,7 @@ internal sealed class MsSqlStore(
         }
     }
 
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope<TDso>>> IStorage.QueryAsync<TDso>(
         EntityType entityType,
         IQueryExpression filter,
         SortParameter sort,
@@ -1218,7 +1218,7 @@ internal sealed class MsSqlStore(
         };
     }
 
-    async Task<QueryResult<ProjectedResult>> IStore.QueryFieldsAsync(
+    async Task<QueryResult<ProjectedResult>> IStorage.QueryFieldsAsync(
         EntityType entityType,
         IReadOnlyCollection<Field> fields,
         IQueryExpression filter,
@@ -2471,7 +2471,7 @@ internal sealed class MsSqlStore(
     }
 
     /// <inheritdoc/>
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryLinksAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope<TDso>>> IStorage.QueryLinksAsync<TDso>(
         LinkQueryDescriptor query,
         DataRange dataRange,
         Ct ct)
@@ -2627,7 +2627,7 @@ internal sealed class MsSqlStore(
         };
     }
 
-    async Task<long> IStore.CountAsync(
+    async Task<long> IStorage.CountAsync(
         EntityType entityType,
         IQueryExpression? filter,
         Ct ct)
@@ -2670,7 +2670,7 @@ internal sealed class MsSqlStore(
         return Convert.ToInt64(result, CultureInfo.InvariantCulture);
     }
 
-    async Task<int> IStore.PurgeExpiredAsync(int batchSize, Ct ct)
+    async Task<int> IStorage.PurgeExpiredAsync(int batchSize, Ct ct)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(batchSize, StorageConstants.TtlCleanupMaxBatchSize);
@@ -2759,9 +2759,9 @@ internal sealed class MsSqlStore(
         return deleted;
     }
 
-    Task<PurgeResult> IStore.PurgePoolAsync(Ct ct) => ((IStore)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+    Task<PurgeResult> IStorage.PurgePoolAsync(Ct ct) => ((IStorage)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
 
-    async Task<PurgeResult> IStore.PurgePoolAsync(int batchSize, Ct ct)
+    async Task<PurgeResult> IStorage.PurgePoolAsync(int batchSize, Ct ct)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
 

@@ -25,46 +25,49 @@ public static class InMemorySchemaStoreTests
     public static async Task get_returns_schema_for_known_id()
     {
         var config = MakeConfig("client", "department");
-        var store = new InMemorySchemaStore([config]);
+        var storage = new InMemorySchemaStore([config]);
 
-        var schema = await store.GetAsync(SchemaId.Create("client"), Ct);
+        var result = await storage.GetAsync(SchemaId.Create("client"), Ct);
 
-        _ = schema.ShouldNotBeNull();
+        _ = result.ShouldNotBeNull();
+        result.AttributeDefinitions.ShouldNotBeEmpty();
     }
 
     [Fact]
-    public static async Task get_returns_null_for_unknown_id()
+    public static async Task get_returns_empty_schema_for_unknown_id()
     {
         var config = MakeConfig("client", "department");
-        var store = new InMemorySchemaStore([config]);
+        var storage = new InMemorySchemaStore([config]);
 
-        var schema = await store.GetAsync(SchemaId.Create("unknown"), Ct);
+        var result = await storage.GetAsync(SchemaId.Create("unknown"), Ct);
 
-        schema.ShouldBeNull();
+        _ = result.ShouldNotBeNull();
+        result.AttributeDefinitions.ShouldBeEmpty();
+        result.Groups.ShouldBeEmpty();
     }
 
     [Fact]
     public static async Task get_is_case_insensitive()
     {
         var config = MakeConfig("client", "department");
-        var store = new InMemorySchemaStore([config]);
+        var storage = new InMemorySchemaStore([config]);
 
-        var schema = await store.GetAsync(SchemaId.Create("CLIENT"), Ct);
+        var result = await storage.GetAsync(SchemaId.Create("CLIENT"), Ct);
 
-        _ = schema.ShouldNotBeNull();
+        result.AttributeDefinitions.ShouldNotBeEmpty();
     }
 
     [Fact]
     public static async Task get_returns_schema_with_correct_attribute_definitions()
     {
         var config = MakeConfig("client", "department", "environment");
-        var store = new InMemorySchemaStore([config]);
+        var storage = new InMemorySchemaStore([config]);
 
-        var schema = await store.GetAsync(SchemaId.Create("client"), Ct);
+        var result = await storage.GetAsync(SchemaId.Create("client"), Ct);
 
-        _ = schema.ShouldNotBeNull();
-        schema.AttributeDefinitions.ShouldContainKey(AttributeCode.Create("department"));
-        schema.AttributeDefinitions.ShouldContainKey(AttributeCode.Create("environment"));
+        _ = result.ShouldNotBeNull();
+        result.AttributeDefinitions.ShouldContainKey(AttributeCode.Create("department"));
+        result.AttributeDefinitions.ShouldContainKey(AttributeCode.Create("environment"));
     }
 
     [Fact]
@@ -72,22 +75,22 @@ public static class InMemorySchemaStoreTests
     {
         var clientConfig = MakeConfig("client", "department");
         var idpConfig = MakeConfig("idp", "provider_type");
-        var store = new InMemorySchemaStore([clientConfig, idpConfig]);
+        var storage = new InMemorySchemaStore([clientConfig, idpConfig]);
 
-        var clientSchema = await store.GetAsync(SchemaId.Create("client"), Ct);
+        var result = await storage.GetAsync(SchemaId.Create("client"), Ct);
 
-        _ = clientSchema.ShouldNotBeNull();
-        clientSchema.AttributeDefinitions.ShouldContainKey(AttributeCode.Create("department"));
-        clientSchema.AttributeDefinitions.ShouldNotContainKey(AttributeCode.Create("provider_type"));
+        _ = result.ShouldNotBeNull();
+        result.AttributeDefinitions.ShouldContainKey(AttributeCode.Create("department"));
+        result.AttributeDefinitions.ShouldNotContainKey(AttributeCode.Create("provider_type"));
     }
 
     [Fact]
-    public static async Task get_returns_null_when_no_schemas_registered()
+    public static async Task get_returns_empty_schema_when_no_schemas_registered()
     {
-        var store = new InMemorySchemaStore([]);
+        var storage = new InMemorySchemaStore([]);
 
-        var schema = await store.GetAsync(SchemaId.Create("client"), Ct);
+        var result = await storage.GetAsync(SchemaId.Create("client"), Ct);
 
-        schema.ShouldBeNull();
+        result.AttributeDefinitions.ShouldBeEmpty();
     }
 }

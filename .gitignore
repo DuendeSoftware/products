@@ -21,6 +21,8 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+!docs/releases/
+!docs/releases/**
 x64/
 x86/
 
@@ -237,6 +239,7 @@ artifacts
 *.Artifacts/
 
 reports
+!docs/estimation/estimation/reports/
 
 *.db
 *.db-shm
@@ -244,6 +247,8 @@ reports
 nul
 .weave
 progress.txt
+log.txt
+conformance-reports/
 
 # AdminStudio runtime data (secrets, user stores)
 faro-connections.json

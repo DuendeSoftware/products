@@ -13,7 +13,7 @@ internal sealed class OracleMigrationFixtureFactory(AspireFixture aspire) : IMig
 {
     public async Task<IMigrationFixture> CreateAsync(CancellationToken ct)
     {
-        // Each migration test gets its own fresh Oracle user (schema), so the store
+        // Each migration test gets its own fresh Oracle user (schema), so the storage
         // writes into that user's own schema (no SchemaName option required).
         var (connectionString, user) = await OracleDatabasePool.CreateUserAsync(aspire.ServerConnectionString, ct);
 

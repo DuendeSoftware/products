@@ -29,6 +29,8 @@ public sealed class InMemorySchemaStore : ISchemaStore
     }
 
     /// <inheritdoc/>
-    public Task<IReadOnlyAttributeSchema?> GetAsync(SchemaId schemaId, CancellationToken ct) =>
-        Task.FromResult(_schemas.TryGetValue(schemaId, out var schema) ? schema : null);
+    public Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, CancellationToken ct) =>
+        Task.FromResult(_schemas.TryGetValue(schemaId, out var schema)
+            ? schema
+            : (IReadOnlyAttributeSchema)AttributeSchema.Empty);
 }

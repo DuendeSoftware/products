@@ -4,7 +4,7 @@
 namespace Duende.Storage.Internal;
 
 /// <summary>
-/// The result of an Unlink operation on <see cref="IStore"/>.
+/// The result of an Unlink operation on <see cref="IStorage"/>.
 /// </summary>
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.

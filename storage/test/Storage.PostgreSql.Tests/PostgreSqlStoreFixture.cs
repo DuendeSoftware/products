@@ -9,11 +9,11 @@ namespace Duende.Storage.PostgreSql;
 
 internal sealed class PostgreSqlStoreFixture(
     ServiceProvider provider,
-    IStore store,
+    IStorage storage,
     PostgreSqlDatabasePool pool,
-    string connectionString) : IStoreFixture
+    string connectionString) : IStorageFixture
 {
-    public IStore Store { get; } = store;
+    public IStorage Storage { get; } = storage;
 
     public async ValueTask DisposeAsync()
     {

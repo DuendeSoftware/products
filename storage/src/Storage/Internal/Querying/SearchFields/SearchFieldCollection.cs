@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace Duende.Storage.Internal.Querying.SearchFields;
 
 /// <summary>
-/// Immutable collection of search field values that can be passed to IStore.Create/Update methods.
+/// Immutable collection of search field values that can be passed to IStorage.Create/Update methods.
 /// Use <see cref="SearchFieldsBuilder"/> to construct instances.
 /// </summary>
 /// <remarks>

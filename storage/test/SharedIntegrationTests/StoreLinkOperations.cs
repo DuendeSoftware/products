@@ -11,7 +11,7 @@ using Duende.Storage.Pagination;
 namespace Duende.Storage.IntegrationTests;
 
 /// <summary>
-/// Integration tests for Link/Unlink operations across all store types.
+/// Integration tests for Link/Unlink operations across all storage types.
 /// Covers basic link/unlink, batch operations, and cascade delete behavior.
 /// </summary>
 public partial class StoreLinkOperations
@@ -32,17 +32,17 @@ public partial class StoreLinkOperations
     public async Task CanLinkAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // Create entities on both sides
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
-        var result = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        var result = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         result.ShouldBe(LinkResult.Success);
 
@@ -51,7 +51,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.Count.ShouldBe(1);
         page.Items[0].Value.Value.ShouldBe("right");
     }
@@ -60,13 +60,13 @@ public partial class StoreLinkOperations
     public async Task LinkDuplicateReturnsAlreadyLinkedAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
-        var second = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        var second = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         second.ShouldBe(LinkResult.AlreadyLinked);
     }
@@ -75,17 +75,17 @@ public partial class StoreLinkOperations
     public async Task UnlinkRemovesLinkAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
-        var unlinkResult = await store.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
+        var unlinkResult = await storage.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
         unlinkResult.ShouldBe(UnlinkResult.Success);
 
         // Verify the link is gone
@@ -93,7 +93,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -101,13 +101,13 @@ public partial class StoreLinkOperations
     public async Task UnlinkNonExistentReturnsSuccessAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // No link was ever created
-        var result = await store.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
+        var result = await storage.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
 
         result.ShouldBe(UnlinkResult.Success);
     }
@@ -116,13 +116,13 @@ public partial class StoreLinkOperations
     public async Task LinkWithoutEntityExistingSucceedsAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // No entities created — no referential integrity check
-        var result = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        var result = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         result.ShouldBe(LinkResult.Success);
     }
@@ -135,16 +135,16 @@ public partial class StoreLinkOperations
     public async Task CanLinkInBatchAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
-        var batchResult = await store.ExecuteBatchAsync(
+        var batchResult = await storage.ExecuteBatchAsync(
             [LinkOperation.For(TestLink, leftId, rightId)],
             [],
             _ct);
@@ -158,7 +158,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.Count.ShouldBe(1);
     }
 
@@ -166,13 +166,13 @@ public partial class StoreLinkOperations
     public async Task CanMixCreateAndLinkInBatchAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        var batchResult = await store.ExecuteBatchAsync(
+        var batchResult = await storage.ExecuteBatchAsync(
             [
                 CreateOperation.For(leftId, new TestDso("created-left"), [], SearchFieldCollection.Empty, Expiration.NoExpiration),
                 CreateOperation.For(rightId, new TestDso2("created-right"), [], SearchFieldCollection.Empty, Expiration.NoExpiration),
@@ -186,14 +186,14 @@ public partial class StoreLinkOperations
         batchResult.Results.ShouldAllBe(r => r.Outcome == OperationOutcome.Success);
 
         // Verify entity exists
-        (await store.TryReadAsync(LeftEntityType, leftId, _ct)).Found.ShouldBeTrue();
+        (await storage.TryReadAsync(LeftEntityType, leftId, _ct)).Found.ShouldBeTrue();
 
         // Verify link exists
         var query = LinkQuery.From(RightEntityType)
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.Count.ShouldBe(1);
     }
 
@@ -201,16 +201,16 @@ public partial class StoreLinkOperations
     public async Task BatchLinkDuplicateIsIdempotentAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // First link
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Batch with duplicate link — should succeed (idempotent)
-        var batchResult = await store.ExecuteBatchAsync(
+        var batchResult = await storage.ExecuteBatchAsync(
             [LinkOperation.For(TestLink, leftId, rightId)],
             [],
             _ct);
@@ -223,17 +223,17 @@ public partial class StoreLinkOperations
     public async Task CanUnlinkInBatchAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
-        var batchResult = await store.ExecuteBatchAsync(
+        var batchResult = await storage.ExecuteBatchAsync(
             [UnlinkOperation.For(TestLink, leftId, rightId)],
             [],
             _ct);
@@ -246,7 +246,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -258,25 +258,25 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityRemovesLinksWhereEntityIsLeftAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete the left entity
-        _ = await store.DeleteAsync(LeftEntityType, leftId, [], _ct);
+        _ = await storage.DeleteAsync(LeftEntityType, leftId, [], _ct);
 
         // Query from right side — link should be gone
         var query = LinkQuery.From(LeftEntityType)
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -284,25 +284,25 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityRemovesLinksWhereEntityIsRightAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete the right entity
-        _ = await store.DeleteAsync(RightEntityType, rightId, [], _ct);
+        _ = await storage.DeleteAsync(RightEntityType, rightId, [], _ct);
 
         // Query from left side — link should be gone
         var query = LinkQuery.From(RightEntityType)
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -310,27 +310,27 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityRemovesMultipleLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId1 = UuidV7.New();
         var rightId2 = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId1, new TestDso2("right1"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId2, new TestDso2("right2"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId1, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId2, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId1, new TestDso2("right1"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId2, new TestDso2("right2"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId1, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId2, [], _ct);
 
         // Delete the left entity — both links should go
-        _ = await store.DeleteAsync(LeftEntityType, leftId, [], _ct);
+        _ = await storage.DeleteAsync(LeftEntityType, leftId, [], _ct);
 
         var query = LinkQuery.From(LeftEntityType)
             .Join(TestLink)
             .Where(RightEntityType, rightId1)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -338,18 +338,18 @@ public partial class StoreLinkOperations
     public async Task BatchDeleteEntityRemovesLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete via batch
-        var batchResult = await store.ExecuteBatchAsync(
+        var batchResult = await storage.ExecuteBatchAsync(
             [DeleteOperation.ById(LeftEntityType, leftId)],
             [],
             _ct);
@@ -361,7 +361,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -369,19 +369,19 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityByKeyRemovesLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
         var leftKey = new TestJsonKeyDsk($"left-key-{Guid.NewGuid()}");
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete the left entity by key (not by ID)
-        var result = await store.DeleteAsync(LeftEntityType, DataStorageKey.Create(leftKey), [], _ct);
+        var result = await storage.DeleteAsync(LeftEntityType, DataStorageKey.Create(leftKey), [], _ct);
         result.ShouldBe(DeleteResult.Success);
 
         // Link should be gone
@@ -389,7 +389,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -397,19 +397,19 @@ public partial class StoreLinkOperations
     public async Task BatchDeleteEntityByKeyRemovesLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
-        var queryStore = fixture.Store;
+        var storage = fixture.Storage;
+        var queryStorage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
         var leftKey = new TestJsonKeyDsk($"left-key-{Guid.NewGuid()}");
 
-        _ = await store.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete via batch by key
-        var batchResult = await store.ExecuteBatchAsync(
+        var batchResult = await storage.ExecuteBatchAsync(
             [DeleteOperation.ByKey(LeftEntityType, DataStorageKey.Create(leftKey))],
             [],
             _ct);
@@ -420,7 +420,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStore.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -433,14 +433,14 @@ public partial class StoreLinkOperations
         // could allow two transactions to both observe "not exists" and then
         // one would hit an unhandled PK violation exception.
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         const int Concurrency = 10;
         var tasks = Enumerable.Range(0, Concurrency)
-            .Select(_ => store.LinkAsync(TestLink, leftId, rightId, [], _ct))
+            .Select(_ => storage.LinkAsync(TestLink, leftId, rightId, [], _ct))
             .ToArray();
 
         var results = await Task.WhenAll(tasks);
@@ -449,7 +449,7 @@ public partial class StoreLinkOperations
         results.Count(r => r == LinkResult.AlreadyLinked).ShouldBe(Concurrency - 1);
     }
 
-    private async Task<IStoreFixture> CreateProviderAsync() =>
+    private async Task<IStorageFixture> CreateProviderAsync() =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             services.AddDsoRegistration<TestDso>();

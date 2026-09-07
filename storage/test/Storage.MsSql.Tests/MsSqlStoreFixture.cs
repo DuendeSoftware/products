@@ -9,11 +9,11 @@ namespace Duende.Storage.MsSql;
 
 internal sealed class MsSqlStoreFixture(
     ServiceProvider provider,
-    IStore store,
+    IStorage storage,
     MsSqlDatabasePool pool,
-    string connectionString) : IStoreFixture
+    string connectionString) : IStorageFixture
 {
-    public IStore Store { get; } = store;
+    public IStorage Storage { get; } = storage;
 
     public async ValueTask DisposeAsync()
     {

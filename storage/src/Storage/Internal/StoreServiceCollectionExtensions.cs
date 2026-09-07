@@ -16,7 +16,7 @@ internal static class StoreServiceCollectionExtensions
         /// Registers store services with a specific service key for multi-store scenarios.
         /// </summary>
         internal IServiceCollection AddStore<TStoreBase>(object serviceKey)
-            where TStoreBase : IStore, IDatabaseSchema
+            where TStoreBase : IStorage, IDatabaseSchema
         {
             services.TryAddSingleton<TimeProvider>(_ => TimeProvider.System);
             services.TryAddSingleton<DataStorageTypeRegistry>();
@@ -24,7 +24,7 @@ internal static class StoreServiceCollectionExtensions
                 (provider, _) => new PooledStore(provider, serviceKey));
             _ = services.AddKeyedSingleton<OutboxSubscribers>(serviceKey);
 
-            _ = services.AddKeyedTransient<IStore>(serviceKey,
+            _ = services.AddKeyedTransient<IStorage>(serviceKey,
                 (sp, _) => sp.GetRequiredKeyedService<TStoreBase>(serviceKey));
             _ = services.AddKeyedTransient<IDatabaseSchema>(serviceKey,
                 (sp, _) => sp.GetRequiredKeyedService<TStoreBase>(serviceKey));
@@ -35,7 +35,7 @@ internal static class StoreServiceCollectionExtensions
         /// Registers store services without a service key for single-store scenarios.
         /// </summary>
         internal IServiceCollection AddStore<TStoreBase>()
-            where TStoreBase : IStore, IDatabaseSchema
+            where TStoreBase : IStorage, IDatabaseSchema
         {
             services.TryAddSingleton<TimeProvider>(_ => TimeProvider.System);
             services.TryAddSingleton<DataStorageTypeRegistry>();
@@ -43,7 +43,7 @@ internal static class StoreServiceCollectionExtensions
                 new PooledStore(provider, null));
             _ = services.AddSingleton<OutboxSubscribers>();
 
-            _ = services.AddTransient<IStore>(sp =>
+            _ = services.AddTransient<IStorage>(sp =>
                 sp.GetRequiredService<TStoreBase>());
             _ = services.AddTransient<IDatabaseSchema>(sp =>
                 sp.GetRequiredService<TStoreBase>());

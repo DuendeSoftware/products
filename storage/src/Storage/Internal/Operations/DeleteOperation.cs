@@ -9,7 +9,7 @@ namespace Duende.Storage.Internal.Operations;
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-public sealed class DeleteOperation : IStoreOperation
+public sealed class DeleteOperation : IStorageOperation
 {
     private DeleteOperation(EntityType entityType, UuidV7? id, DataStorageKey? key)
     {

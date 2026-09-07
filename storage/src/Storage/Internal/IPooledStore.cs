@@ -17,6 +17,6 @@ public interface IPooledStore : IDatabaseSchema
     /// Opens a store scoped to the specified pool.
     /// </summary>
     /// <param name="poolId">The pool identifier.</param>
-    /// <returns>An <see cref="IStore"/> scoped to the specified pool.</returns>
-    IStore OpenPool(PoolId poolId);
+    /// <returns>An <see cref="IStorage"/> scoped to the specified pool.</returns>
+    IStorage OpenPool(PoolId poolId);
 }

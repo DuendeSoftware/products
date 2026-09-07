@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.Sqlite;
 
-internal sealed class SqliteStoreFixtureFactory : IStoreFixtureFactory
+internal sealed class SqliteStoreFixtureFactory : IStorageFixtureFactory
 {
-    public async Task<IStoreFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configure = null) =>
+    public async Task<IStorageFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configure = null) =>
         await StoreFixture.CreateAsync(ct, configure);
 }

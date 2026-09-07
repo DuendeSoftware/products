@@ -9,7 +9,7 @@ namespace Duende.Storage.PostgreSql;
 public class PostgreSqlStoreTests(AspireFixture fixture) : IClassFixture<AspireFixture>
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private const string ServiceKey = "my-postgresql-store";
+    private const string ServiceKey = "my-postgresql-storage";
 
     private ServiceProvider CreateServiceProvider()
     {
@@ -21,15 +21,15 @@ public class PostgreSqlStoreTests(AspireFixture fixture) : IClassFixture<AspireF
     }
 
     [Fact]
-    public void Can_resolve_store()
+    public void Can_resolve_storage()
     {
         var serviceProvider = CreateServiceProvider();
 
         var pooledStore = serviceProvider.GetRequiredKeyedService<IPooledStore>(ServiceKey);
 
-        var store = pooledStore.OpenPool(1);
+        var storage = pooledStore.OpenPool(1);
 
-        _ = store.ShouldNotBeNull();
+        _ = storage.ShouldNotBeNull();
     }
 
     [Fact]

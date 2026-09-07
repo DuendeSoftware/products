@@ -11,7 +11,7 @@ namespace Duende.Storage.Oracle;
 /// lightweight "CREATE DATABASE" per test, so each pooled "database" is a dedicated
 /// Oracle user/schema. A test checks out a schema, runs, then returns it; on return
 /// the tables are cleared so the next test starts clean. The returned connection
-/// string connects as the pooled user, so the store writes into that user's own
+/// string connects as the pooled user, so the storage writes into that user's own
 /// schema (no <c>SchemaName</c> option required).
 /// </summary>
 internal sealed class OracleDatabasePool(string serverConnectionString)

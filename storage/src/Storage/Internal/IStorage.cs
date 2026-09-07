@@ -19,7 +19,7 @@ namespace Duende.Storage.Internal;
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-public interface IStore
+public interface IStorage
 {
     internal void SetPoolId(PoolId poolId);
 
@@ -224,7 +224,7 @@ public interface IStore
     /// When Success is false, Results contains outcomes only for operations attempted
     /// (up to and including the failed operation). No changes have been persisted.
     /// </returns>
-    Task<BatchResult> ExecuteBatchAsync(IReadOnlyList<IStoreOperation> operations, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct);
+    Task<BatchResult> ExecuteBatchAsync(IReadOnlyList<IStorageOperation> operations, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct);
 
     /// <summary>
     /// Retrieves the oldest page of outbox events for a specific subscriber, ordered by sequence number.

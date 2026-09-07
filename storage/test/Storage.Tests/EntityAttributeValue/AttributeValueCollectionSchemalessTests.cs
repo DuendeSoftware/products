@@ -5,7 +5,7 @@ namespace Duende.Storage.EntityAttributeValue;
 
 /// <summary>
 /// Tests for <see cref="AttributeValueCollection"/> created via the parameterless
-/// constructor (schema-less mode). Validation is deferred to the admin store boundary.
+/// constructor (schema-less mode). Validation is deferred to the admin storage boundary.
 /// </summary>
 public static class AttributeValueCollectionSchemalessTests
 {
@@ -133,8 +133,8 @@ public static class AttributeValueCollectionSchemalessTests
             ]
         };
 
-        var store = new InMemorySchemaStore([config]);
-        return store.GetAsync(config.SchemaId, CancellationToken.None)
-            .GetAwaiter().GetResult()!;
+        var storage = new InMemorySchemaStore([config]);
+        return storage.GetAsync(config.SchemaId, CancellationToken.None)
+            .GetAwaiter().GetResult();
     }
 }

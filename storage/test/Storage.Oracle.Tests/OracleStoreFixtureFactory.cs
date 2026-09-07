@@ -9,11 +9,11 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Duende.Storage.Oracle;
 
-internal sealed class OracleStoreFixtureFactory(AspireFixture aspire) : IStoreFixtureFactory
+internal sealed class OracleStoreFixtureFactory(AspireFixture aspire) : IStorageFixtureFactory
 {
     private const string ServiceKey = "test";
 
-    public async Task<IStoreFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configure = null)
+    public async Task<IStorageFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configure = null)
     {
         var connectionString = await aspire.Pool.GetConnectionStringAsync(ct);
 
@@ -28,8 +28,8 @@ internal sealed class OracleStoreFixtureFactory(AspireFixture aspire) : IStoreFi
         await schema.MigrateAsync(ct);
 
         var pooledStore = provider.GetRequiredKeyedService<IPooledStore>(ServiceKey);
-        var store = pooledStore.OpenPool(1);
+        var storage = pooledStore.OpenPool(1);
 
-        return new OracleStoreFixture(provider, store, aspire.Pool, connectionString);
+        return new OracleStoreFixture(provider, storage, aspire.Pool, connectionString);
     }
 }

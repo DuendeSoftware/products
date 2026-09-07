@@ -35,7 +35,7 @@ internal sealed class PostgreSqlStore(
     DataStorageTypeRegistry dataStorageTypeRegistry,
     TimeProvider timeProvider,
     OutboxSubscribers outboxSubscribers,
-    ILogger<PostgreSqlStore> logger) : StoreBase, IStore, IDatabaseSchema
+    ILogger<PostgreSqlStore> logger) : StoreBase, IStorage, IDatabaseSchema
 {
     private const int RequiredSchemaVersion = 2;
     private static readonly ISqlDialect Dialect = new PostgreSqlDialect();
@@ -374,7 +374,7 @@ internal sealed class PostgreSqlStore(
     /// <summary>
     /// Creates a new entity in the store.
     /// </summary>
-    async Task<CreateResult> IStore.CreateAsync<TDso>(
+    async Task<CreateResult> IStorage.CreateAsync<TDso>(
         Storage.UuidV7 id,
         TDso dso,
         IReadOnlyCollection<DataStorageKey> keys,
@@ -408,7 +408,7 @@ internal sealed class PostgreSqlStore(
         };
     }
 
-    async Task<StoreGetResult> IStore.TryReadAsync(
+    async Task<StoreGetResult> IStorage.TryReadAsync(
         EntityType entityType,
         Storage.UuidV7 id,
         Ct ct)
@@ -447,7 +447,7 @@ internal sealed class PostgreSqlStore(
         return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
     }
 
-    async Task<StoreGetResult> IStore.TryReadAsync(
+    async Task<StoreGetResult> IStorage.TryReadAsync(
         EntityType entityType,
         DataStorageKey key,
         Ct ct)
@@ -500,7 +500,7 @@ internal sealed class PostgreSqlStore(
         return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
     }
 
-    async Task<IReadOnlyList<StoreGetResult>> IStore.TryReadManyAsync(
+    async Task<IReadOnlyList<StoreGetResult>> IStorage.TryReadManyAsync(
         EntityType entityType,
         IReadOnlySet<Storage.UuidV7> ids,
         int maximum,
@@ -555,7 +555,7 @@ internal sealed class PostgreSqlStore(
     /// <summary>
     /// Updates an existing entity in the store.
     /// </summary>
-    async Task<UpdateResult> IStore.UpdateAsync<TDso>(
+    async Task<UpdateResult> IStorage.UpdateAsync<TDso>(
         Storage.UuidV7 id,
         TDso dso,
         int expectedEntityVersion,
@@ -591,7 +591,7 @@ internal sealed class PostgreSqlStore(
         };
     }
 
-    async Task<DeleteResult> IStore.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<DeleteResult> IStorage.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         var deleteOp = DeleteOperation.ById(entityType, id);
 
@@ -609,7 +609,7 @@ internal sealed class PostgreSqlStore(
         return DeleteResult.Success;
     }
 
-    async Task<DeleteResult> IStore.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<DeleteResult> IStorage.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         var deleteOp = DeleteOperation.ByKey(entityType, key);
 
@@ -766,7 +766,7 @@ internal sealed class PostgreSqlStore(
     /// <summary>
     /// Queries entities with the specified pagination strategy.
     /// </summary>
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope<TDso>>> IStorage.QueryAsync<TDso>(
         EntityType entityType,
         IQueryExpression filter,
         SortParameter sort,
@@ -883,7 +883,7 @@ internal sealed class PostgreSqlStore(
     /// <summary>
     /// Queries for specific field values with the specified pagination strategy.
     /// </summary>
-    async Task<QueryResult<ProjectedResult>> IStore.QueryFieldsAsync(
+    async Task<QueryResult<ProjectedResult>> IStorage.QueryFieldsAsync(
         EntityType entityType,
         IReadOnlyCollection<Field> fields,
         IQueryExpression filter,
@@ -1665,7 +1665,7 @@ internal sealed class PostgreSqlStore(
     private sealed record SchemaComment(uint Version);
 
     /// <inheritdoc/>
-    async Task<LinkResult> IStore.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<LinkResult> IStorage.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         await using var cnn = await dataSource.OpenConnectionAsync(ct);
         await using var tx = await cnn.BeginTransactionAsync(ct);
@@ -1682,7 +1682,7 @@ internal sealed class PostgreSqlStore(
     }
 
     /// <inheritdoc/>
-    async Task<UnlinkResult> IStore.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    async Task<UnlinkResult> IStorage.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         await using var cnn = await dataSource.OpenConnectionAsync(ct);
         await using var tx = await cnn.BeginTransactionAsync(ct);
@@ -1802,8 +1802,8 @@ internal sealed class PostgreSqlStore(
     /// <summary>
     /// Executes multiple operations atomically in a single transaction.
     /// </summary>
-    async Task<BatchResult> IStore.ExecuteBatchAsync(
-        IReadOnlyList<IStoreOperation> operations,
+    async Task<BatchResult> IStorage.ExecuteBatchAsync(
+        IReadOnlyList<IStorageOperation> operations,
         IReadOnlyList<OutboxEvent> outboxEvents,
         Ct ct)
     {
@@ -1849,7 +1849,7 @@ internal sealed class PostgreSqlStore(
         return new BatchResult(true, results);
     }
 
-    async Task<OutboxEventsPage> IStore.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
+    async Task<OutboxEventsPage> IStorage.GetOutboxEventsForSubscriberAsync(SubscriberName subscriberName, int count, Ct ct)
     {
         await using var cnn = await dataSource.OpenConnectionAsync(ct);
         await using var cmd = cnn.CreateCommand();
@@ -1920,7 +1920,7 @@ internal sealed class PostgreSqlStore(
         return new OutboxEventsPage(events, hasMore);
     }
 
-    async Task IStore.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
+    async Task IStorage.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
     {
         if (ids.Count == 0)
         {
@@ -2259,7 +2259,7 @@ internal sealed class PostgreSqlStore(
     }
 
     /// <inheritdoc/>
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IStore.QueryLinksAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope<TDso>>> IStorage.QueryLinksAsync<TDso>(
         LinkQueryDescriptor query,
         DataRange dataRange,
         Ct ct)
@@ -2410,7 +2410,7 @@ internal sealed class PostgreSqlStore(
         };
     }
 
-    async Task<long> IStore.CountAsync(
+    async Task<long> IStorage.CountAsync(
         EntityType entityType,
         IQueryExpression? filter,
         Ct ct)
@@ -2449,7 +2449,7 @@ internal sealed class PostgreSqlStore(
         return Convert.ToInt64(result, CultureInfo.InvariantCulture);
     }
 
-    async Task<int> IStore.PurgeExpiredAsync(int batchSize, Ct ct)
+    async Task<int> IStorage.PurgeExpiredAsync(int batchSize, Ct ct)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(batchSize, StorageConstants.TtlCleanupMaxBatchSize);
@@ -2542,9 +2542,9 @@ internal sealed class PostgreSqlStore(
         return deleted;
     }
 
-    Task<PurgeResult> IStore.PurgePoolAsync(Ct ct) => ((IStore)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+    Task<PurgeResult> IStorage.PurgePoolAsync(Ct ct) => ((IStorage)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
 
-    async Task<PurgeResult> IStore.PurgePoolAsync(int batchSize, Ct ct)
+    async Task<PurgeResult> IStorage.PurgePoolAsync(int batchSize, Ct ct)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
 

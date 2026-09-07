@@ -24,7 +24,7 @@ public static class StorageBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(configure);
             var builder = new StorageBuilder(services);
-            services.TryAddSingleton<IStoreFactory, DefaultPoolStoreFactory>();
+            services.TryAddSingleton<IStorageFactory, DefaultPoolStoreFactory>();
             configure(builder);
             return services;
         }

@@ -8,7 +8,7 @@ namespace Duende.Storage.Internal;
 /// It will ALWAYS return a store for the default pool id. 
 /// </summary>
 /// <param name="pooledStore"></param>
-internal class DefaultPoolStoreFactory(IPooledStore pooledStore) : IStoreFactory
+internal class DefaultPoolStoreFactory(IPooledStore pooledStore) : IStorageFactory
 {
-    public Task<IStore> GetStore(CancellationToken ct) => Task.FromResult(pooledStore.OpenPool(PoolId.Default));
+    public Task<IStorage> GetStorage(CancellationToken ct) => Task.FromResult(pooledStore.OpenPool(PoolId.Default));
 }

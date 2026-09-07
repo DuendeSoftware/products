@@ -13,7 +13,7 @@ using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 namespace Duende.Storage.IntegrationTests;
 
 /// <summary>
-/// Tests for array filter expressions across all store implementations.
+/// Tests for array filter expressions across all storage implementations.
 /// Tests SCIM2-compatible array filtering where all conditions must match within the same array item.
 ///
 /// Test Coverage for OR Expressions in Array Filters:
@@ -36,7 +36,7 @@ public partial class QueryStoreArrayFilterTests
 
     private static readonly string[] WorkBusinessTypes = ["work", "business"];
 
-    private async Task<IStoreFixture> CreateProviderAsync() =>
+    private async Task<IStorageFixture> CreateProviderAsync() =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             services.AddDsoRegistration<TestEntityDso>();
@@ -45,7 +45,7 @@ public partial class QueryStoreArrayFilterTests
         });
 
     private static async Task<UuidV7> CreateUserWithEmailsAsync(
-        IStore store,
+        IStorage storage,
         string name,
         EmailAddress[] emails,
         Ct ct)
@@ -75,8 +75,8 @@ public partial class QueryStoreArrayFilterTests
         }
 
         var searchFields = searchFieldsBuilder.Build();
-        // IStore extends IStore, so we can cast
-        var storeInterface = store;
+        // IStorage extends IStorage, so we can cast
+        var storeInterface = storage;
         var result = await storeInterface.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
         result.ShouldBe(CreateResult.Success);
         return id;
@@ -87,18 +87,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "personal", Value = "bob@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "work", Value = "charlie@work.com" }
         ], Ct.None);
 
@@ -106,7 +106,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -119,19 +119,19 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@example.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@home.com" },
             new EmailAddress { Type = "personal", Value = "bob@example.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "work", Value = "charlie@example.com" }
         ], Ct.None);
 
@@ -144,7 +144,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -156,18 +156,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "business", Value = "bob@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "other", Value = "charlie@test.com" }
         ], Ct.None);
 
@@ -178,7 +178,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -191,17 +191,17 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@work.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "personal", Value = "charlie@home.com" }
         ], Ct.None);
 
@@ -211,7 +211,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -223,9 +223,9 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
@@ -238,7 +238,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -249,10 +249,10 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [], Ct.None);
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [], Ct.None);
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@work.com" }
         ], Ct.None);
 
@@ -260,7 +260,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -272,19 +272,19 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange - Simulating SCIM2 user schema
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "User1", [
+        _ = await CreateUserWithEmailsAsync(storage, "User1", [
             new EmailAddress { Type = "work", Value = "user1@example.com" },
             new EmailAddress { Type = "home", Value = "user1@personal.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User2", [
+        _ = await CreateUserWithEmailsAsync(storage, "User2", [
             new EmailAddress { Type = "work", Value = "user2@test.com" },
             new EmailAddress { Type = "other", Value = "user2@example.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User3", [
+        _ = await CreateUserWithEmailsAsync(storage, "User3", [
             new EmailAddress { Type = "home", Value = "user3@example.com" }
         ], Ct.None);
 
@@ -295,7 +295,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -307,18 +307,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@company.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@example.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "personal", Value = "charlie@other.com" }
         ], Ct.None);
 
@@ -329,7 +329,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -342,18 +342,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "personal", Value = "charlie@personal.com" }
         ], Ct.None);
 
@@ -364,7 +364,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -377,18 +377,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "business", Value = "bob@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "other", Value = "charlie@test.com" }
         ], Ct.None);
 
@@ -399,7 +399,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -413,22 +413,22 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var date1 = new DateTimeOffset(2024, 1, 15, 10, 30, 0, TimeSpan.Zero);
         var date2 = new DateTimeOffset(2024, 6, 15, 14, 45, 0, TimeSpan.Zero);
         var date3 = new DateTimeOffset(2024, 12, 20, 16, 0, 0, TimeSpan.Zero);
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com", CreatedAt = date1 },
             new EmailAddress { Type = "personal", Value = "alice@home.com", CreatedAt = date2 }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "business", Value = "bob@company.com", CreatedAt = date2 }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "other", Value = "charlie@test.com", CreatedAt = date3 }
         ], Ct.None);
 
@@ -439,7 +439,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -452,18 +452,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com", Priority = 1 },
             new EmailAddress { Type = "personal", Value = "alice@home.com", Priority = 2 }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "business", Value = "bob@company.com", Priority = 2 }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "other", Value = "charlie@test.com", Priority = 5 }
         ], Ct.None);
 
@@ -474,7 +474,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -487,17 +487,17 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "personal", Value = "bob@example.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "business", Value = "charlie@test.com" }
         ], Ct.None);
 
@@ -509,7 +509,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -522,21 +522,21 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "User1", [
+        _ = await CreateUserWithEmailsAsync(storage, "User1", [
             new EmailAddress { Type = "work", Value = "user1@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User2", [
+        _ = await CreateUserWithEmailsAsync(storage, "User2", [
             new EmailAddress { Type = "personal", Value = "user2@example.org" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User3", [
+        _ = await CreateUserWithEmailsAsync(storage, "User3", [
             new EmailAddress { Type = "other", Value = "user3@test.net" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User4", [
+        _ = await CreateUserWithEmailsAsync(storage, "User4", [
             new EmailAddress { Type = "business", Value = "user4@other.com" }
         ], Ct.None);
 
@@ -547,7 +547,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -561,17 +561,17 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "AdminUser", [
+        _ = await CreateUserWithEmailsAsync(storage, "AdminUser", [
             new EmailAddress { Type = "admin", Value = "admin@system.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "SupportUser", [
+        _ = await CreateUserWithEmailsAsync(storage, "SupportUser", [
             new EmailAddress { Type = "support", Value = "support@system.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "RegularUser", [
+        _ = await CreateUserWithEmailsAsync(storage, "RegularUser", [
             new EmailAddress { Type = "user", Value = "user@system.com" }
         ], Ct.None);
 
@@ -582,7 +582,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -595,21 +595,21 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "User1", [
+        _ = await CreateUserWithEmailsAsync(storage, "User1", [
             new EmailAddress { Type = "work", Value = "user1@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User2", [
+        _ = await CreateUserWithEmailsAsync(storage, "User2", [
             new EmailAddress { Type = "personal", Value = "user2@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User3", [
+        _ = await CreateUserWithEmailsAsync(storage, "User3", [
             new EmailAddress { Type = "business", Value = "user3@biz.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "User4", [
+        _ = await CreateUserWithEmailsAsync(storage, "User4", [
             new EmailAddress { Type = "other", Value = "user4@test.com" }
         ], Ct.None);
 
@@ -621,7 +621,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -635,21 +635,21 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "TeamA", [
+        _ = await CreateUserWithEmailsAsync(storage, "TeamA", [
             new EmailAddress { Type = "work", Value = "teama@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "TeamB", [
+        _ = await CreateUserWithEmailsAsync(storage, "TeamB", [
             new EmailAddress { Type = "business", Value = "teamb@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "TeamC", [
+        _ = await CreateUserWithEmailsAsync(storage, "TeamC", [
             new EmailAddress { Type = "contractor", Value = "teamc@contractor.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "External", [
+        _ = await CreateUserWithEmailsAsync(storage, "External", [
             new EmailAddress { Type = "external", Value = "ext@external.com" }
         ], Ct.None);
 
@@ -660,7 +660,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -674,12 +674,12 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create 15 users with work emails
         for (var i = 1; i <= 15; i++)
         {
-            _ = await CreateUserWithEmailsAsync(store, $"User{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"User{i:D2}", [
                 new EmailAddress { Type = "work", Value = $"user{i}@work.com" },
                 new EmailAddress { Type = "personal", Value = $"user{i}@home.com" }
             ], Ct.None);
@@ -688,7 +688,7 @@ public partial class QueryStoreArrayFilterTests
         // Add 5 users without work emails
         for (var i = 16; i <= 20; i++)
         {
-            _ = await CreateUserWithEmailsAsync(store, $"User{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"User{i:D2}", [
                 new EmailAddress { Type = "personal", Value = $"user{i}@home.com" }
             ], Ct.None);
         }
@@ -697,10 +697,10 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Get pages with size 5 (should be 3 pages: 5+5+5)
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
-        var page3 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 5), Ct.None);
-        var page4 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 5), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
+        var page3 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 5), Ct.None);
+        var page4 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 5), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(5);
@@ -727,7 +727,7 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create 14 users with various email patterns
         for (var i = 1; i <= 14; i++)
@@ -743,7 +743,7 @@ public partial class QueryStoreArrayFilterTests
                 emails.Add(new EmailAddress { Type = "work", Value = $"user{i}@example.com" });
             }
 
-            _ = await CreateUserWithEmailsAsync(store, $"User{i:D2}", emails.ToArray(), Ct.None);
+            _ = await CreateUserWithEmailsAsync(storage, $"User{i:D2}", emails.ToArray(), Ct.None);
         }
 
         // Filter: work emails containing "@example.com" (should match users 3, 6, 9, 12)
@@ -753,8 +753,8 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size 3 creates 2 pages (3+1)
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 3), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 3), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 3), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 3), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(3);
@@ -773,15 +773,15 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create users A1-A10 and B1-B10, all with work emails
         for (var i = 1; i <= 10; i++)
         {
-            _ = await CreateUserWithEmailsAsync(store, $"A{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"A{i:D2}", [
                 new EmailAddress { Type = "work", Value = $"a{i}@work.com" }
             ], Ct.None);
-            _ = await CreateUserWithEmailsAsync(store, $"B{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"B{i:D2}", [
                 new EmailAddress { Type = "work", Value = $"b{i}@work.com" }
             ], Ct.None);
         }
@@ -792,9 +792,9 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size 4 creates 3 pages (4+4+2)
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
-        var page3 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
+        var page3 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
 
         // Assert
         page1.TotalCount.ShouldBe(10);
@@ -813,15 +813,15 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create 8 users with work emails, 8 with business emails
         for (var i = 1; i <= 8; i++)
         {
-            _ = await CreateUserWithEmailsAsync(store, $"WorkUser{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"WorkUser{i:D2}", [
                 new EmailAddress { Type = "work", Value = $"work{i}@company.com" }
             ], Ct.None);
-            _ = await CreateUserWithEmailsAsync(store, $"BizUser{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"BizUser{i:D2}", [
                 new EmailAddress { Type = "business", Value = $"biz{i}@company.com" }
             ], Ct.None);
         }
@@ -833,9 +833,9 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size 6 creates 3 pages (6+6+4)
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 6), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 6), Ct.None);
-        var page3 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 6), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 6), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 6), Ct.None);
+        var page3 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 6), Ct.None);
 
         // Assert
         page1.TotalCount.ShouldBe(16);
@@ -856,12 +856,12 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "User1", [
+        _ = await CreateUserWithEmailsAsync(storage, "User1", [
             new EmailAddress { Type = "personal", Value = "user1@home.com" }
         ], Ct.None);
-        _ = await CreateUserWithEmailsAsync(store, "User2", [
+        _ = await CreateUserWithEmailsAsync(storage, "User2", [
             new EmailAddress { Type = "personal", Value = "user2@home.com" }
         ], Ct.None);
 
@@ -869,8 +869,8 @@ public partial class QueryStoreArrayFilterTests
         var filter = Query.ArrayFilter("emails", new StringField("type").Equals("work"));
 
         // Act
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(2, 10), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(2, 10), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(0);
@@ -885,12 +885,12 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Create exactly 12 users with work emails (exactly 3 pages of 4)
         for (var i = 1; i <= 12; i++)
         {
-            _ = await CreateUserWithEmailsAsync(store, $"User{i:D2}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"User{i:D2}", [
                 new EmailAddress { Type = "work", Value = $"user{i}@work.com" }
             ], Ct.None);
         }
@@ -899,10 +899,10 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
-        var page3 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
-        var page4 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 4), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
+        var page3 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
+        var page4 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 4), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(4);
@@ -925,11 +925,11 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 1; i <= 5; i++)
         {
-            _ = await CreateUserWithEmailsAsync(store, $"User{i}", [
+            _ = await CreateUserWithEmailsAsync(storage, $"User{i}", [
                 new EmailAddress { Type = "work", Value = $"user{i}@work.com" }
             ], Ct.None);
         }
@@ -938,9 +938,9 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size of 2 creates 3 pages (2+2+1)
-        var page1 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 2), Ct.None);
-        var page2 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 2), Ct.None);
-        var page3 = await store.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 2), Ct.None);
+        var page1 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 2), Ct.None);
+        var page2 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 2), Ct.None);
+        var page3 = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 2), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(2);
@@ -961,18 +961,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@company.org" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "personal", Value = "charlie@work.com" }
         ], Ct.None);
 
@@ -981,7 +981,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Alice (alice@work.com) and Charlie (charlie@work.com) match
         result.Items.Count.ShouldBe(2);
@@ -994,18 +994,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@company.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "personal", Value = "bob@company.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "work", Value = "charlie@other.org" }
         ], Ct.None);
 
@@ -1017,7 +1017,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -1029,18 +1029,18 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" },
             new EmailAddress { Type = "personal", Value = "alice@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "personal", Value = "bob@home.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "personal", Value = "charlie@home.com" }
         ], Ct.None);
 
@@ -1050,7 +1050,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Only Alice has an email where type != "personal"
         result.Items.Count.ShouldBe(1);
@@ -1062,17 +1062,17 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "work", Value = "bob@work.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [
             new EmailAddress { Type = "personal", Value = "charlie@home.com" }
         ], Ct.None);
 
@@ -1082,7 +1082,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Only Charlie has no work email
         result.Items.Count.ShouldBe(1);
@@ -1094,25 +1094,25 @@ public partial class QueryStoreArrayFilterTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateUserWithEmailsAsync(store, "Alice", [
+        _ = await CreateUserWithEmailsAsync(storage, "Alice", [
             new EmailAddress { Type = "work", Value = "alice@work.com" }
         ], Ct.None);
 
-        _ = await CreateUserWithEmailsAsync(store, "Bob", [
+        _ = await CreateUserWithEmailsAsync(storage, "Bob", [
             new EmailAddress { Type = "personal", Value = "bob@home.com" }
         ], Ct.None);
 
         // Charlie has no emails
-        _ = await CreateUserWithEmailsAsync(store, "Charlie", [], Ct.None);
+        _ = await CreateUserWithEmailsAsync(storage, "Charlie", [], Ct.None);
 
         // Filter: emails where value is present (any email value exists)
         var filter = Query.ArrayFilter("emails", new StringField("value").Present());
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await storage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Alice and Bob have email entries, Charlie has none
         result.Items.Count.ShouldBe(2);

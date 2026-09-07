@@ -15,17 +15,17 @@ using Duende.Storage.Querying;
 namespace Duende.Storage.Internal;
 
 /// <summary>
-/// Decorates an <see cref="IStore"/> with tracing and metrics instrumentation.
+/// Decorates an <see cref="IStorage"/> with tracing and metrics instrumentation.
 /// </summary>
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-internal sealed class InstrumentedStore(IStore inner, StorageMetrics metrics, string dbSystem) : IStore
+internal sealed class InstrumentedStore(IStorage inner, StorageMetrics metrics, string dbSystem) : IStorage
 {
     /// <summary>
     /// Gets the inner store being decorated.
     /// </summary>
-    public IStore Inner => inner;
+    public IStorage Inner => inner;
 
     /// <inheritdoc />
     public void SetPoolId(PoolId poolId) => inner.SetPoolId(poolId);
@@ -333,7 +333,7 @@ internal sealed class InstrumentedStore(IStore inner, StorageMetrics metrics, st
         }
     }
 
-    public async Task<BatchResult> ExecuteBatchAsync(IReadOnlyList<IStoreOperation> operations, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
+    public async Task<BatchResult> ExecuteBatchAsync(IReadOnlyList<IStorageOperation> operations, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
         using var activity = StartActivity("Store.ExecuteBatch", null, StorageTelemetryConstants.Operations.Batch);
         var start = Stopwatch.GetTimestamp();

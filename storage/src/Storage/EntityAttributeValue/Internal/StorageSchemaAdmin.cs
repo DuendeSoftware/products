@@ -1,62 +1,44 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Duende.Storage.Querying;
 
-namespace Duende.Storage.EntityAttributeValue;
+namespace Duende.Storage.EntityAttributeValue.Internal;
 
 /// <summary>
 ///     A storage-backed implementation of <see cref="ISchemaStore"/> and <see cref="ISchemaAdmin"/>
 ///     that persists schemas to the database via the storage layer.
 /// </summary>
-public sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
+internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
 {
-    private readonly IStoreFactory _storeFactory;
-
-    /// <summary>
-    ///     Registers <see cref="StorageSchemaAdmin"/> as both <see cref="ISchemaStore"/> and
-    ///     <see cref="ISchemaAdmin"/> in the service collection, including DSO registration.
-    /// </summary>
-    /// <param name="services">The service collection to register with.</param>
-    public static void RegisterServices(IServiceCollection services)
-    {
-        services.AddDsoRegistration<AttributeSchemaDso.V1>();
-        _ = services.RemoveAll<ISchemaStore>();
-        _ = services.RemoveAll<ISchemaAdmin>();
-        _ = services.AddSingleton<StorageSchemaAdmin>();
-        _ = services.AddSingleton<ISchemaStore>(sp => sp.GetRequiredService<StorageSchemaAdmin>());
-        _ = services.AddSingleton<ISchemaAdmin>(sp => sp.GetRequiredService<StorageSchemaAdmin>());
-    }
+    private readonly IStorageFactory _storageFactory;
 
     /// <summary>
     ///     Initialises a new <see cref="StorageSchemaAdmin"/>.
     /// </summary>
-    /// <param name="storeFactory">The store factory for obtaining a scoped store.</param>
-    public StorageSchemaAdmin(IStoreFactory storeFactory) =>
-        _storeFactory = storeFactory;
+    /// <param name="storageFactory">The storage factory for obtaining a scoped storage.</param>
+    public StorageSchemaAdmin(IStorageFactory storageFactory) =>
+        _storageFactory = storageFactory;
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyAttributeSchema?> GetAsync(SchemaId schemaId, CancellationToken ct)
+    public async Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, CancellationToken ct)
     {
-        var store = await _storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await _storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
 
         if (!result.Found)
         {
-            return null;
+            return AttributeSchema.Empty;
         }
 
         var dso = (AttributeSchemaDso.V1)result.Dso;
@@ -65,11 +47,11 @@ public sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
     }
 
     /// <inheritdoc/>
-    async Task<SchemaSaveResult> ISchemaAdmin.CreateAsync(SchemaConfiguration schema, CancellationToken ct)
+    async Task<SaveResult<SchemaId>> ISchemaAdmin.CreateAsync(SchemaConfiguration schema, CancellationToken ct)
     {
-        var store = await _storeFactory.GetStore(ct);
+        var storage = await _storageFactory.GetStorage(ct);
         var id = UuidV7.New();
-        var createResult = await store.CreateAsync(
+        var createResult = await storage.CreateAsync(
             id,
             ToDso(schema),
             [DataStorageKey.Create(SchemaIdDskV1.Create(schema.SchemaId))],
@@ -80,60 +62,60 @@ public sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
 
         return createResult switch
         {
-            CreateResult.Success => SchemaSaveResult.Success(schema.SchemaId, 1),
+            CreateResult.Success => SaveResult.Success(schema.SchemaId, (DataVersion)1),
             CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                SchemaSaveResult.Failure(SchemaError.AlreadyExists(schema.SchemaId.ToString())),
-            CreateResult.ConcurrencyConflict => SchemaSaveResult.Failure(SchemaError.VersionConflict()),
-            _ => SchemaSaveResult.Failure(SchemaError.ValidationFailed("Failed to create schema."))
+                SaveResult.Failure<SchemaId>(StorageError.AlreadyExists("schema", schema.SchemaId.ToString())),
+            CreateResult.ConcurrencyConflict => SaveResult.Failure<SchemaId>(StorageError.VersionConflict()),
+            _ => SaveResult.Failure<SchemaId>(StorageError.ValidationFailed("Failed to create schema."))
         };
     }
 
     /// <inheritdoc/>
-    async Task<SchemaGetResult> ISchemaAdmin.GetAsync(SchemaId schemaId, CancellationToken ct)
+    async Task<GetResult<SchemaConfiguration>> ISchemaAdmin.GetAsync(SchemaId schemaId, CancellationToken ct)
     {
-        var store = await _storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await _storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
 
         if (!result.Found)
         {
-            return SchemaGetResult.NotFound();
+            return GetResult.NotFound<SchemaConfiguration>();
         }
 
         var config = ToConfiguration(schemaId, (AttributeSchemaDso.V1)result.Dso);
-        return SchemaGetResult.Ok(config, result.Version.Value);
+        return GetResult.Found(config, (DataVersion)result.Version.Value);
     }
 
     /// <inheritdoc/>
-    public async Task<SchemaSaveResult> UpdateAsync(
+    public async Task<SaveResult<SchemaId>> UpdateAsync(
         SchemaId schemaId,
         SchemaConfiguration schema,
-        int expectedVersion,
+        DataVersion expectedVersion,
         CancellationToken ct)
     {
         if (schemaId != schema.SchemaId)
         {
-            return SchemaSaveResult.Failure(
-                SchemaError.ValidationFailed("Schema ID in the body must match the route schema ID."));
+            return SaveResult.Failure<SchemaId>(
+                StorageError.ValidationFailed("Schema ID in the body must match the route schema ID."));
         }
 
-        var store = await _storeFactory.GetStore(ct);
-        var existing = await store.TryReadAsync(
+        var storage = await _storageFactory.GetStorage(ct);
+        var existing = await storage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
 
         if (!existing.Found)
         {
-            return SchemaSaveResult.Failure(SchemaError.NotFound(schemaId.ToString()));
+            return SaveResult.Failure<SchemaId>(StorageError.NotFound("schema", schemaId.ToString()));
         }
 
-        var updateResult = await store.UpdateAsync(
+        var updateResult = await storage.UpdateAsync(
             existing.Id,
             ToDso(schema),
-            expectedVersion,
+            expectedVersion.Value,
             [DataStorageKey.Create(SchemaIdDskV1.Create(schema.SchemaId))],
             SearchFieldCollection.Empty,
             expiration: Expiration.NoExpiration,
@@ -142,43 +124,43 @@ public sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
 
         return updateResult switch
         {
-            UpdateResult.Success => SchemaSaveResult.Success(schema.SchemaId, expectedVersion + 1),
-            UpdateResult.UnexpectedVersion => SchemaSaveResult.Failure(SchemaError.VersionConflict()),
-            UpdateResult.KeyConflict => SchemaSaveResult.Failure(SchemaError.AlreadyExists(schema.SchemaId.ToString())),
-            _ => SchemaSaveResult.Failure(SchemaError.NotFound(schemaId.ToString()))
+            UpdateResult.Success => SaveResult.Success(schema.SchemaId, (DataVersion)(expectedVersion.Value + 1)),
+            UpdateResult.UnexpectedVersion => SaveResult.Failure<SchemaId>(StorageError.VersionConflict()),
+            UpdateResult.KeyConflict => SaveResult.Failure<SchemaId>(StorageError.AlreadyExists("schema", schema.SchemaId.ToString())),
+            _ => SaveResult.Failure<SchemaId>(StorageError.NotFound("schema", schemaId.ToString()))
         };
     }
 
     /// <inheritdoc/>
-    public async Task<SchemaSaveResult> DeleteAsync(SchemaId schemaId, CancellationToken ct)
+    public async Task<SaveResult<SchemaId>> DeleteAsync(SchemaId schemaId, CancellationToken ct)
     {
-        var store = await _storeFactory.GetStore(ct);
+        var storage = await _storageFactory.GetStorage(ct);
 
-        var existing = await store.TryReadAsync(
+        var existing = await storage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
 
         if (!existing.Found)
         {
-            return SchemaSaveResult.Failure(SchemaError.NotFound(schemaId.ToString()));
+            return SaveResult.Failure<SchemaId>(StorageError.NotFound("schema", schemaId.ToString()));
         }
 
-        var deleteResult = await store.DeleteAsync(AttributeSchemaDso.EntityType, existing.Id, [], ct);
+        var deleteResult = await storage.DeleteAsync(AttributeSchemaDso.EntityType, existing.Id, [], ct);
 
         return deleteResult switch
         {
-            DeleteResult.Success => SchemaSaveResult.Success(schemaId, 0),
-            DeleteResult.ConcurrencyConflict => SchemaSaveResult.Failure(SchemaError.VersionConflict()),
-            _ => SchemaSaveResult.Failure(SchemaError.NotFound(schemaId.ToString()))
+            DeleteResult.Success => SaveResult.Success(schemaId, (DataVersion)0),
+            DeleteResult.ConcurrencyConflict => SaveResult.Failure<SchemaId>(StorageError.VersionConflict()),
+            _ => SaveResult.Failure<SchemaId>(StorageError.NotFound("schema", schemaId.ToString()))
         };
     }
 
     /// <inheritdoc/>
-    public async Task<SchemaQueryResult> QueryAsync(CancellationToken ct)
+    public async Task<QueryResult<SchemaSummary>> QueryAsync(CancellationToken ct)
     {
-        var store = await _storeFactory.GetStore(ct);
-        var result = await store.QueryAsync<AttributeSchemaDso.V1>(
+        var storage = await _storageFactory.GetStorage(ct);
+        var result = await storage.QueryAsync<AttributeSchemaDso.V1>(
             AttributeSchemaDso.EntityType,
             filter: Query.All(),
             sort: SortParameter.Empty,
@@ -199,7 +181,12 @@ public sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
             };
         }).ToList();
 
-        return SchemaQueryResult.Ok(summaries, summaries.Count);
+        return new QueryResult<SchemaSummary>
+        {
+            Items = summaries,
+            TotalCount = summaries.Count,
+            HasMoreData = false
+        };
     }
 
     // === Mapping ===

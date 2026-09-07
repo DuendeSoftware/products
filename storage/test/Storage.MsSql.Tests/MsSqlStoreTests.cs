@@ -10,7 +10,7 @@ namespace Duende.Storage.MsSql;
 public class MsSqlStoreTests(AspireFixture fixture) : IClassFixture<AspireFixture>
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private const string ServiceKey = "my-mssql-store";
+    private const string ServiceKey = "my-mssql-storage";
 
     private ServiceProvider CreateServiceProvider()
     {
@@ -23,15 +23,15 @@ public class MsSqlStoreTests(AspireFixture fixture) : IClassFixture<AspireFixtur
     }
 
     [Fact]
-    public void Can_resolve_store()
+    public void Can_resolve_storage()
     {
         var serviceProvider = CreateServiceProvider();
 
         var pooledStore = serviceProvider.GetRequiredKeyedService<IPooledStore>(ServiceKey);
 
-        var store = pooledStore.OpenPool(1);
+        var storage = pooledStore.OpenPool(1);
 
-        _ = store.ShouldNotBeNull();
+        _ = storage.ShouldNotBeNull();
     }
 
     [Fact]

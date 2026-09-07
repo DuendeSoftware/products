@@ -13,7 +13,7 @@ using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 namespace Duende.Storage.IntegrationTests;
 
 /// <summary>
-/// Tests for GuidField, ExactMatchField, and the guid_value column across all store implementations.
+/// Tests for GuidField, ExactMatchField, and the guid_value column across all storage implementations.
 /// Covers:
 /// - GuidField: Equals, In, Present
 /// - ExactMatchField: Equals, In, Present, case-insensitivity
@@ -29,7 +29,7 @@ public partial class QueryStoreGuidFieldTests
 
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
-    private async Task<IStoreFixture> CreateProviderAsync() =>
+    private async Task<IStorageFixture> CreateProviderAsync() =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
             services.AddDsoRegistration<TestGuidEntityDso>();
@@ -37,7 +37,7 @@ public partial class QueryStoreGuidFieldTests
         });
 
     private static async Task<UuidV7> CreateGuidEntityAsync(
-        IStore store,
+        IStorage storage,
         string name,
         Guid? resourceId = null,
         string? apiKey = null,
@@ -72,14 +72,14 @@ public partial class QueryStoreGuidFieldTests
         }
 
         var searchFields = searchFieldsBuilder.Build();
-        var storeInterface = store;
+        var storeInterface = storage;
         var result = await storeInterface.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
         result.ShouldBe(CreateResult.Success);
         return id;
     }
 
     private static async Task<UuidV7> CreateUserWithEmailsAndGuidsAsync(
-        IStore store,
+        IStorage storage,
         string name,
         (string type, string value, Guid? correlationId)[] emails,
         Ct ct)
@@ -105,7 +105,7 @@ public partial class QueryStoreGuidFieldTests
         }
 
         var searchFields = searchFieldsBuilder.Build();
-        var storeInterface = store;
+        var storeInterface = storage;
         var result = await storeInterface.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
         result.ShouldBe(CreateResult.Success);
         return id;
@@ -116,21 +116,21 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var guid1 = Guid.NewGuid();
         var guid2 = Guid.NewGuid();
         var guid3 = Guid.NewGuid();
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", resourceId: guid1);
-        _ = await CreateGuidEntityAsync(store, "Entity2", resourceId: guid2);
-        _ = await CreateGuidEntityAsync(store, "Entity3", resourceId: guid3);
+        _ = await CreateGuidEntityAsync(storage, "Entity1", resourceId: guid1);
+        _ = await CreateGuidEntityAsync(storage, "Entity2", resourceId: guid2);
+        _ = await CreateGuidEntityAsync(storage, "Entity3", resourceId: guid3);
 
         var filter = new GuidField("resourceId").Equals(guid2);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -142,15 +142,15 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", resourceId: Guid.NewGuid());
+        _ = await CreateGuidEntityAsync(storage, "Entity1", resourceId: Guid.NewGuid());
 
         var filter = new GuidField("resourceId").Equals(Guid.NewGuid());
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -161,22 +161,22 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var guid1 = Guid.NewGuid();
         var guid2 = Guid.NewGuid();
         var guid3 = Guid.NewGuid();
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", resourceId: guid1);
-        _ = await CreateGuidEntityAsync(store, "Entity2", resourceId: guid2);
-        _ = await CreateGuidEntityAsync(store, "Entity3", resourceId: guid3);
+        _ = await CreateGuidEntityAsync(storage, "Entity1", resourceId: guid1);
+        _ = await CreateGuidEntityAsync(storage, "Entity2", resourceId: guid2);
+        _ = await CreateGuidEntityAsync(storage, "Entity3", resourceId: guid3);
 
         Guid[] searchGuids = [guid1, guid3];
         var filter = new GuidField("resourceId").In(searchGuids);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -189,17 +189,17 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "WithGuid", resourceId: Guid.NewGuid());
-        _ = await CreateGuidEntityAsync(store, "WithoutGuid");
-        _ = await CreateGuidEntityAsync(store, "AlsoWithGuid", resourceId: Guid.NewGuid());
+        _ = await CreateGuidEntityAsync(storage, "WithGuid", resourceId: Guid.NewGuid());
+        _ = await CreateGuidEntityAsync(storage, "WithoutGuid");
+        _ = await CreateGuidEntityAsync(storage, "AlsoWithGuid", resourceId: Guid.NewGuid());
 
         var filter = new GuidField("resourceId").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -212,17 +212,17 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "secret-key-123");
-        _ = await CreateGuidEntityAsync(store, "Entity2", apiKey: "different-key-456");
-        _ = await CreateGuidEntityAsync(store, "Entity3", apiKey: "another-key-789");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "secret-key-123");
+        _ = await CreateGuidEntityAsync(storage, "Entity2", apiKey: "different-key-456");
+        _ = await CreateGuidEntityAsync(storage, "Entity3", apiKey: "another-key-789");
 
         var filter = new ExactMatchField("apiKey").Equals("secret-key-123");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -234,15 +234,15 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "My-Secret-Key");
-        _ = await CreateGuidEntityAsync(store, "Entity2", apiKey: "other-key");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "My-Secret-Key");
+        _ = await CreateGuidEntityAsync(storage, "Entity2", apiKey: "other-key");
 
         // Act — query with different casing than what was stored
         var filter = new ExactMatchField("apiKey").Equals("MY-SECRET-KEY");
         var page = DataRange.FromPage(1, 10);
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — should match because both are uppercased before hashing
         result.Items.Count.ShouldBe(1);
@@ -254,16 +254,16 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "ABC-DEF");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "ABC-DEF");
 
         // Query with lowercase
         var filter = new ExactMatchField("apiKey").Equals("abc-def");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -275,19 +275,19 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "key-alpha");
-        _ = await CreateGuidEntityAsync(store, "Entity2", apiKey: "key-beta");
-        _ = await CreateGuidEntityAsync(store, "Entity3", apiKey: "key-gamma");
-        _ = await CreateGuidEntityAsync(store, "Entity4", apiKey: "key-delta");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "key-alpha");
+        _ = await CreateGuidEntityAsync(storage, "Entity2", apiKey: "key-beta");
+        _ = await CreateGuidEntityAsync(storage, "Entity3", apiKey: "key-gamma");
+        _ = await CreateGuidEntityAsync(storage, "Entity4", apiKey: "key-delta");
 
         string[] searchKeys = ["key-alpha", "key-gamma", "key-delta"];
         var filter = new ExactMatchField("apiKey").In(searchKeys);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(3);
@@ -301,10 +301,10 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "Key-Alpha");
-        _ = await CreateGuidEntityAsync(store, "Entity2", apiKey: "KEY-BETA");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "Key-Alpha");
+        _ = await CreateGuidEntityAsync(storage, "Entity2", apiKey: "KEY-BETA");
 
         // Query with mixed casing
         string[] searchKeys = ["key-alpha", "key-beta"];
@@ -312,7 +312,7 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -325,17 +325,17 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "WithApiKey", apiKey: "some-key");
-        _ = await CreateGuidEntityAsync(store, "WithoutApiKey");
-        _ = await CreateGuidEntityAsync(store, "AlsoWithApiKey", apiKey: "another-key");
+        _ = await CreateGuidEntityAsync(storage, "WithApiKey", apiKey: "some-key");
+        _ = await CreateGuidEntityAsync(storage, "WithoutApiKey");
+        _ = await CreateGuidEntityAsync(storage, "AlsoWithApiKey", apiKey: "another-key");
 
         var filter = new ExactMatchField("apiKey").Present();
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -348,15 +348,15 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "existing-key");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "existing-key");
 
         var filter = new ExactMatchField("apiKey").Equals("nonexistent-key");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -367,18 +367,18 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "key-a");
-        _ = await CreateGuidEntityAsync(store, "Entity2", apiKey: "key-b");
-        _ = await CreateGuidEntityAsync(store, "Entity3", apiKey: "key-c");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "key-a");
+        _ = await CreateGuidEntityAsync(storage, "Entity2", apiKey: "key-b");
+        _ = await CreateGuidEntityAsync(storage, "Entity3", apiKey: "key-c");
 
         var filter = new ExactMatchField("apiKey").Equals("key-a")
             .Or(new ExactMatchField("apiKey").Equals("key-c"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -391,18 +391,18 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var excludeGuid = Guid.NewGuid();
-        _ = await CreateGuidEntityAsync(store, "Excluded", resourceId: excludeGuid);
-        _ = await CreateGuidEntityAsync(store, "Included1", resourceId: Guid.NewGuid());
-        _ = await CreateGuidEntityAsync(store, "Included2", resourceId: Guid.NewGuid());
+        _ = await CreateGuidEntityAsync(storage, "Excluded", resourceId: excludeGuid);
+        _ = await CreateGuidEntityAsync(storage, "Included1", resourceId: Guid.NewGuid());
+        _ = await CreateGuidEntityAsync(storage, "Included2", resourceId: Guid.NewGuid());
 
         var filter = Query.Not(new GuidField("resourceId").Equals(excludeGuid));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -415,17 +415,17 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Excluded", apiKey: "banned-key");
-        _ = await CreateGuidEntityAsync(store, "Included1", apiKey: "good-key");
-        _ = await CreateGuidEntityAsync(store, "Included2", apiKey: "another-key");
+        _ = await CreateGuidEntityAsync(storage, "Excluded", apiKey: "banned-key");
+        _ = await CreateGuidEntityAsync(storage, "Included1", apiKey: "good-key");
+        _ = await CreateGuidEntityAsync(storage, "Included2", apiKey: "another-key");
 
         var filter = Query.Not(new ExactMatchField("apiKey").Equals("banned-key"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -438,19 +438,19 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — tests combining GuidField with regular StringField queries
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var targetGuid = Guid.NewGuid();
-        _ = await CreateGuidEntityAsync(store, "Match", resourceId: targetGuid, tag: "premium");
-        _ = await CreateGuidEntityAsync(store, "WrongTag", resourceId: targetGuid, tag: "standard");
-        _ = await CreateGuidEntityAsync(store, "WrongGuid", resourceId: Guid.NewGuid(), tag: "premium");
+        _ = await CreateGuidEntityAsync(storage, "Match", resourceId: targetGuid, tag: "premium");
+        _ = await CreateGuidEntityAsync(storage, "WrongTag", resourceId: targetGuid, tag: "standard");
+        _ = await CreateGuidEntityAsync(storage, "WrongGuid", resourceId: Guid.NewGuid(), tag: "premium");
 
         var filter = new GuidField("resourceId").Equals(targetGuid)
             .And(new StringField("tag").Equals("premium"));
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -462,18 +462,18 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — GuidField within array items (e.g., emails with correlation IDs)
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var targetCorrelationId = Guid.NewGuid();
         var otherCorrelationId = Guid.NewGuid();
 
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Alice",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Alice",
         [
             ("work", "alice@work.com", targetCorrelationId),
             ("personal", "alice@home.com", otherCorrelationId)
         ], _ct);
 
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Bob",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Bob",
         [
             ("work", "bob@work.com", Guid.NewGuid()),
             ("personal", "bob@home.com", Guid.NewGuid())
@@ -484,7 +484,7 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
@@ -496,23 +496,23 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var correlationId1 = Guid.NewGuid();
         var correlationId2 = Guid.NewGuid();
         var correlationId3 = Guid.NewGuid();
 
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Alice",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Alice",
         [
             ("work", "alice@work.com", correlationId1)
         ], _ct);
 
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Bob",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Bob",
         [
             ("work", "bob@work.com", correlationId2)
         ], _ct);
 
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Charlie",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Charlie",
         [
             ("work", "charlie@work.com", correlationId3)
         ], _ct);
@@ -523,7 +523,7 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -536,19 +536,19 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — combines GuidField and StringField within the same array item
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var targetCorrelationId = Guid.NewGuid();
 
         // Alice: work email has target correlation ID
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Alice",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Alice",
         [
             ("work", "alice@work.com", targetCorrelationId),
             ("personal", "alice@home.com", Guid.NewGuid())
         ], _ct);
 
         // Bob: has target correlation ID but on a personal email, not work
-        _ = await CreateUserWithEmailsAndGuidsAsync(store, "Bob",
+        _ = await CreateUserWithEmailsAndGuidsAsync(storage, "Bob",
         [
             ("work", "bob@work.com", Guid.NewGuid()),
             ("personal", "bob@home.com", targetCorrelationId)
@@ -561,7 +561,7 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — Only Alice has a work email with the target correlation ID
         result.Items.Count.ShouldBe(1);
@@ -573,17 +573,17 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — multiple entities with the same exact-match value
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
-        _ = await CreateGuidEntityAsync(store, "Entity1", apiKey: "shared-key");
-        _ = await CreateGuidEntityAsync(store, "Entity2", apiKey: "shared-key");
-        _ = await CreateGuidEntityAsync(store, "Entity3", apiKey: "different-key");
+        _ = await CreateGuidEntityAsync(storage, "Entity1", apiKey: "shared-key");
+        _ = await CreateGuidEntityAsync(storage, "Entity2", apiKey: "shared-key");
+        _ = await CreateGuidEntityAsync(storage, "Entity3", apiKey: "different-key");
 
         var filter = new ExactMatchField("apiKey").Equals("shared-key");
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -596,18 +596,18 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — multiple entities sharing the same GUID value
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var sharedGuid = Guid.NewGuid();
-        _ = await CreateGuidEntityAsync(store, "Entity1", resourceId: sharedGuid);
-        _ = await CreateGuidEntityAsync(store, "Entity2", resourceId: sharedGuid);
-        _ = await CreateGuidEntityAsync(store, "Entity3", resourceId: Guid.NewGuid());
+        _ = await CreateGuidEntityAsync(storage, "Entity1", resourceId: sharedGuid);
+        _ = await CreateGuidEntityAsync(storage, "Entity2", resourceId: sharedGuid);
+        _ = await CreateGuidEntityAsync(storage, "Entity3", resourceId: Guid.NewGuid());
 
         var filter = new GuidField("resourceId").Equals(sharedGuid);
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
@@ -620,11 +620,11 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — create 5 entities with distinct GUIDs, paginate with page size 2
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 0; i < 5; i++)
         {
-            _ = await CreateGuidEntityAsync(store, $"Item{i}", resourceId: Guid.NewGuid(), ct: _ct);
+            _ = await CreateGuidEntityAsync(storage, $"Item{i}", resourceId: Guid.NewGuid(), ct: _ct);
         }
 
         var filter = new GuidField("resourceId").Present();
@@ -632,7 +632,7 @@ public partial class QueryStoreGuidFieldTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 2);
 
         // Act
-        var page1 = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
+        var page1 = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
 
         // Assert
         page1.Items.Count.ShouldBe(2);
@@ -645,11 +645,11 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — create 5 entities, paginate through all with page size 2
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 0; i < 5; i++)
         {
-            _ = await CreateGuidEntityAsync(store, $"Item{i}", resourceId: Guid.NewGuid(), ct: _ct);
+            _ = await CreateGuidEntityAsync(storage, $"Item{i}", resourceId: Guid.NewGuid(), ct: _ct);
         }
 
         var filter = new GuidField("resourceId").Present();
@@ -663,7 +663,7 @@ public partial class QueryStoreGuidFieldTests
         do
         {
             var cursor = DataRange.FromContinuationToken(token?.Value ?? ContinuationToken.Beginning, 2);
-            var page = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
+            var page = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
             allItems.AddRange(page.Items);
             token = page.NextToken;
             pageCount++;
@@ -686,11 +686,11 @@ public partial class QueryStoreGuidFieldTests
     {
         // Arrange — create 5 entities with distinct api keys, paginate with ExactMatchField sort
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 0; i < 5; i++)
         {
-            _ = await CreateGuidEntityAsync(store, $"Item{i}", apiKey: $"key-{i:D3}", ct: _ct);
+            _ = await CreateGuidEntityAsync(storage, $"Item{i}", apiKey: $"key-{i:D3}", ct: _ct);
         }
 
         var filter = new ExactMatchField("apiKey").Present();
@@ -704,7 +704,7 @@ public partial class QueryStoreGuidFieldTests
         do
         {
             var cursor = DataRange.FromContinuationToken(token?.Value ?? ContinuationToken.Beginning, 2);
-            var page = await store.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
+            var page = await storage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
             allItems.AddRange(page.Items);
             token = page.NextToken;
             pageCount++;

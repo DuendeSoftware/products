@@ -9,11 +9,11 @@ namespace Duende.Storage.Oracle;
 
 internal sealed class OracleStoreFixture(
     ServiceProvider provider,
-    IStore store,
+    IStorage storage,
     OracleDatabasePool pool,
-    string connectionString) : IStoreFixture
+    string connectionString) : IStorageFixture
 {
-    public IStore Store { get; } = store;
+    public IStorage Storage { get; } = storage;
 
     public async ValueTask DisposeAsync()
     {

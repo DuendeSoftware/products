@@ -15,7 +15,7 @@ using SubscriberName = Duende.Storage.Internal.Outbox.SubscriberName;
 namespace Duende.Storage.IntegrationTests;
 
 /// <summary>
-/// Integration tests for outbox event write and read operations across all store types.
+/// Integration tests for outbox event write and read operations across all storage types.
 /// </summary>
 public partial class StoreOutboxOperations
 {
@@ -31,15 +31,15 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsAreWrittenOnCreate()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent();
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
         var persistedEvt = page.Events.Single(e => e.EventId == evt.Id);
         (persistedEvt.Dso is not null).ShouldBeTrue();
@@ -50,15 +50,15 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventWithoutDsoTypeSchemaVersionHasNullDso()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent() with { DsoTypeSchemaVersion = null };
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         var persistedEvt = page.Events.Single(e => e.EventId == evt.Id);
         (persistedEvt.Dso is null).ShouldBeTrue();
     }
@@ -67,17 +67,17 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsAreWrittenOnUpdate()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
-        (await store.CreateAsync(id, new TestDso("v"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
-        var version = (await store.TryReadAsync(EntityType, id, _ct)).Version!.Value;
+        (await storage.CreateAsync(id, new TestDso("v"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        var version = (await storage.TryReadAsync(EntityType, id, _ct)).Version!.Value;
 
         var evt = MakeEvent();
-        var result = await store.UpdateAsync(id, new TestDso("v2"), version, [], SearchFieldCollection.Empty, null, [evt], _ct);
+        var result = await storage.UpdateAsync(id, new TestDso("v2"), version, [], SearchFieldCollection.Empty, null, [evt], _ct);
         result.ShouldBe(UpdateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
     }
 
@@ -85,16 +85,16 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsAreWrittenOnDelete()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
-        (await store.CreateAsync(id, new TestDso("v"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await storage.CreateAsync(id, new TestDso("v"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
         var evt = MakeEvent();
-        var result = await store.DeleteAsync(EntityType, id, [evt], _ct);
+        var result = await storage.DeleteAsync(EntityType, id, [evt], _ct);
         result.ShouldBe(DeleteResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
     }
 
@@ -102,16 +102,16 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsAreWrittenOnLink()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         var evt = MakeEvent();
-        var result = await store.LinkAsync(TestLink, leftId, rightId, [evt], _ct);
+        var result = await storage.LinkAsync(TestLink, leftId, rightId, [evt], _ct);
         result.ShouldBe(LinkResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
     }
 
@@ -119,17 +119,17 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsAreWrittenOnUnlink()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
-        _ = await store.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         var evt = MakeEvent();
-        var result = await store.UnlinkAsync(TestLink, leftId, rightId, [evt], _ct);
+        var result = await storage.UnlinkAsync(TestLink, leftId, rightId, [evt], _ct);
         result.ShouldBe(UnlinkResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
     }
 
@@ -137,19 +137,19 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsAreWrittenOnBatch()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
-        var operations = new IStoreOperation[]
+        var operations = new IStorageOperation[]
         {
             CreateOperation.For(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration)
         };
 
         var evt = MakeEvent();
-        var result = await store.ExecuteBatchAsync(operations, [evt], _ct);
+        var result = await storage.ExecuteBatchAsync(operations, [evt], _ct);
         result.Success.ShouldBeTrue();
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldContain(e => e.EventId == evt.Id);
     }
 
@@ -157,17 +157,17 @@ public partial class StoreOutboxOperations
     public async Task MultipleOutboxEventsPerTransactionAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt1 = MakeEvent();
         var evt2 = MakeEvent();
         var evt3 = MakeEvent();
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt1, evt2, evt3], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt1, evt2, evt3], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.Select(e => e.EventId).ShouldContain(evt1.Id);
         page.Events.Select(e => e.EventId).ShouldContain(evt2.Id);
         page.Events.Select(e => e.EventId).ShouldContain(evt3.Id);
@@ -177,24 +177,24 @@ public partial class StoreOutboxOperations
     public async Task DeleteOutboxEventsRemovesByIdAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var evt1 = MakeEvent();
         var evt2 = MakeEvent();
         var evt3 = MakeEvent();
 
         var id = UuidV7.New();
-        _ = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt1, evt2, evt3], _ct);
+        _ = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt1, evt2, evt3], _ct);
 
         // Get persisted events to retrieve their MessageIds
-        var allEvents = (await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct)).Events;
+        var allEvents = (await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct)).Events;
         var msgId1 = allEvents.Single(e => e.EventId == evt1.Id).MessageId;
         var msgId2 = allEvents.Single(e => e.EventId == evt2.Id).MessageId;
 
         // Delete first two by MessageId
-        await store.DeleteOutboxEventsAsync([msgId1, msgId2], _ct);
+        await storage.DeleteOutboxEventsAsync([msgId1, msgId2], _ct);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldNotContain(e => e.EventId == evt1.Id);
         page.Events.ShouldNotContain(e => e.EventId == evt2.Id);
         page.Events.ShouldContain(e => e.EventId == evt3.Id);
@@ -204,16 +204,16 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsNotWrittenWhenOperationFailsAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
-        (await store.CreateAsync(id, new TestDso("existing"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await storage.CreateAsync(id, new TestDso("existing"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
         var evt = MakeEvent();
-        var result = await store.CreateAsync(id, new TestDso("duplicate"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("duplicate"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.AlreadyExists);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldNotContain(e => e.EventId == evt.Id);
     }
 
@@ -221,24 +221,24 @@ public partial class StoreOutboxOperations
     public async Task BatchOutboxEventsNotWrittenWhenBatchFailsAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         // Pre-create an entity to cause conflict
         var existingId = UuidV7.New();
-        (await store.CreateAsync(existingId, new TestDso("existing"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await storage.CreateAsync(existingId, new TestDso("existing"), [], [], Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
         var newId = UuidV7.New();
-        var operations = new IStoreOperation[]
+        var operations = new IStorageOperation[]
         {
             CreateOperation.For(newId, new TestDso("new"), [], SearchFieldCollection.Empty, Expiration.NoExpiration),
             CreateOperation.For(existingId, new TestDso("conflict"), [], SearchFieldCollection.Empty, Expiration.NoExpiration), // will fail
         };
 
         var evt = MakeEvent();
-        var result = await store.ExecuteBatchAsync(operations, [evt], _ct);
+        var result = await storage.ExecuteBatchAsync(operations, [evt], _ct);
         result.Success.ShouldBeFalse();
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldNotContain(e => e.EventId == evt.Id);
     }
 
@@ -246,15 +246,15 @@ public partial class StoreOutboxOperations
     public async Task OutboxEventsNotWrittenWhenDeletingNonExistentEntityAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var nonExistentId = UuidV7.New();
         var evt = MakeEvent();
 
-        var result = await store.DeleteAsync(EntityType, nonExistentId, [evt], _ct);
+        var result = await storage.DeleteAsync(EntityType, nonExistentId, [evt], _ct);
         result.ShouldBe(DeleteResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldNotContain(e => e.EventId == evt.Id);
     }
 
@@ -262,15 +262,15 @@ public partial class StoreOutboxOperations
     public async Task NoMessagesWrittenWhenNoSubscribersAsync()
     {
         await using var fixture = await CreateProviderAsync([]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent();
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldBeEmpty();
     }
 
@@ -279,15 +279,15 @@ public partial class StoreOutboxOperations
     {
         var subscriber = new TestSubscriber("sub-a");
         await using var fixture = await CreateProviderAsync([subscriber]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent();
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(subscriber.SubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(subscriber.SubscriberName, 10, _ct);
         page.Events.Count.ShouldBe(1);
         page.Events[0].EventId.ShouldBe(evt.Id);
         page.Events[0].SubscriberName.ShouldBe(subscriber.SubscriberName);
@@ -300,17 +300,17 @@ public partial class StoreOutboxOperations
         var subB = new TestSubscriber("sub-b");
         var subC = new TestSubscriber("sub-c");
         await using var fixture = await CreateProviderAsync([subA, subB, subC]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent();
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var pageA = await store.GetOutboxEventsForSubscriberAsync(subA.SubscriberName, 10, _ct);
-        var pageB = await store.GetOutboxEventsForSubscriberAsync(subB.SubscriberName, 10, _ct);
-        var pageC = await store.GetOutboxEventsForSubscriberAsync(subC.SubscriberName, 10, _ct);
+        var pageA = await storage.GetOutboxEventsForSubscriberAsync(subA.SubscriberName, 10, _ct);
+        var pageB = await storage.GetOutboxEventsForSubscriberAsync(subB.SubscriberName, 10, _ct);
+        var pageC = await storage.GetOutboxEventsForSubscriberAsync(subC.SubscriberName, 10, _ct);
         var allEvents = pageA.Events.Concat(pageB.Events).Concat(pageC.Events).ToList();
 
         // All 3 rows share the same EventId but have distinct MessageIds and SubscriberNames
@@ -333,15 +333,15 @@ public partial class StoreOutboxOperations
                 services.AddDsoRegistration<TestDso2>();
             });
 
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent();
 
-        var result = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        var result = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
         result.ShouldBe(CreateResult.Success);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 10, _ct);
         page.Events.ShouldNotContain(e => e.EventId == evt.Id);
     }
 
@@ -351,17 +351,17 @@ public partial class StoreOutboxOperations
         var subA = new TestSubscriber("sub-a");
         var subB = new TestSubscriber("sub-b");
         await using var fixture = await CreateProviderAsync([subA, subB]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
         var evt = MakeEvent();
-        _ = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
+        _ = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [evt], _ct);
 
-        var pageA = await store.GetOutboxEventsForSubscriberAsync(subA.SubscriberName, 10, _ct);
+        var pageA = await storage.GetOutboxEventsForSubscriberAsync(subA.SubscriberName, 10, _ct);
         pageA.Events.ShouldAllBe(e => e.SubscriberName == subA.SubscriberName);
         pageA.Events.Count.ShouldBe(1);
 
-        var pageB = await store.GetOutboxEventsForSubscriberAsync(subB.SubscriberName, 10, _ct);
+        var pageB = await storage.GetOutboxEventsForSubscriberAsync(subB.SubscriberName, 10, _ct);
         pageB.Events.ShouldAllBe(e => e.SubscriberName == subB.SubscriberName);
         pageB.Events.Count.ShouldBe(1);
     }
@@ -371,21 +371,21 @@ public partial class StoreOutboxOperations
     {
         var sub = new TestSubscriber("sub-paged");
         await using var fixture = await CreateProviderAsync([sub]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 1; i <= 5; i++)
         {
             var id = UuidV7.New();
-            _ = await store.CreateAsync(id, new TestDso($"v{i}"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [MakeEvent()], _ct);
+            _ = await storage.CreateAsync(id, new TestDso($"v{i}"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [MakeEvent()], _ct);
         }
 
-        var page1 = await store.GetOutboxEventsForSubscriberAsync(sub.SubscriberName, 3, _ct);
+        var page1 = await storage.GetOutboxEventsForSubscriberAsync(sub.SubscriberName, 3, _ct);
         page1.Events.Count.ShouldBe(3);
         page1.HasMore.ShouldBeTrue();
 
-        await store.DeleteOutboxEventsAsync(page1.Events.Select(e => e.MessageId).ToList(), _ct);
+        await storage.DeleteOutboxEventsAsync(page1.Events.Select(e => e.MessageId).ToList(), _ct);
 
-        var page2 = await store.GetOutboxEventsForSubscriberAsync(sub.SubscriberName, 3, _ct);
+        var page2 = await storage.GetOutboxEventsForSubscriberAsync(sub.SubscriberName, 3, _ct);
         page2.Events.Count.ShouldBe(2);
         page2.HasMore.ShouldBeFalse();
     }
@@ -396,12 +396,12 @@ public partial class StoreOutboxOperations
         var subA = new TestSubscriber("sub-a");
         var subB = new TestSubscriber("sub-b");
         await using var fixture = await CreateProviderAsync([subA]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         var id = UuidV7.New();
-        _ = await store.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [MakeEvent()], _ct);
+        _ = await storage.CreateAsync(id, new TestDso("v"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [MakeEvent()], _ct);
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(subB.SubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(subB.SubscriberName, 10, _ct);
         page.Events.ShouldBeEmpty();
         page.HasMore.ShouldBeFalse();
     }
@@ -411,15 +411,15 @@ public partial class StoreOutboxOperations
     {
         var sub = new TestSubscriber("sub-ordered");
         await using var fixture = await CreateProviderAsync([sub]);
-        var store = fixture.Store;
+        var storage = fixture.Storage;
 
         for (var i = 1; i <= 3; i++)
         {
             var id = UuidV7.New();
-            _ = await store.CreateAsync(id, new TestDso($"v{i}"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [MakeEvent()], _ct);
+            _ = await storage.CreateAsync(id, new TestDso($"v{i}"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [MakeEvent()], _ct);
         }
 
-        var page = await store.GetOutboxEventsForSubscriberAsync(sub.SubscriberName, 10, _ct);
+        var page = await storage.GetOutboxEventsForSubscriberAsync(sub.SubscriberName, 10, _ct);
         page.Events.Count.ShouldBe(3);
         page.Events.Select(e => e.SequenceNumber)
             .ShouldBe(page.Events.Select(e => e.SequenceNumber).OrderBy(n => n));
@@ -437,10 +437,10 @@ public partial class StoreOutboxOperations
         DsoTypeSchemaVersion = (int)TestDso.DsoVersion.SchemaVersion,
     };
 
-    private async Task<IStoreFixture> CreateProviderAsync()
+    private async Task<IStorageFixture> CreateProviderAsync()
         => await CreateProviderAsync([new WildcardTestSubscriber()]);
 
-    private async Task<IStoreFixture> CreateProviderAsync(IOutboxSubscriber[] subscribers) =>
+    private async Task<IStorageFixture> CreateProviderAsync(IOutboxSubscriber[] subscribers) =>
         await FixtureFactory.CreateAsync(
             _ct,
             services =>
@@ -455,7 +455,7 @@ public partial class StoreOutboxOperations
 
     /// <summary>
     /// Wildcard subscriber that matches all entity types and event names, used to ensure
-    /// outbox events are written to the store in tests.
+    /// outbox events are written to the storage in tests.
     /// </summary>
     private sealed class WildcardTestSubscriber : IOutboxSubscriber
     {

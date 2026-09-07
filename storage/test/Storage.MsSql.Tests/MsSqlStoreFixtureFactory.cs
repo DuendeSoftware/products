@@ -9,11 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.MsSql;
 
-internal sealed class MsSqlStoreFixtureFactory(AspireFixture aspire) : IStoreFixtureFactory
+internal sealed class MsSqlStoreFixtureFactory(AspireFixture aspire) : IStorageFixtureFactory
 {
     private const string ServiceKey = "test";
 
-    public async Task<IStoreFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configure = null)
+    public async Task<IStorageFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configure = null)
     {
         var connectionString = await aspire.Pool.GetConnectionStringAsync(ct);
 
@@ -28,8 +28,8 @@ internal sealed class MsSqlStoreFixtureFactory(AspireFixture aspire) : IStoreFix
         await schema.MigrateAsync(ct);
 
         var pooledStore = provider.GetRequiredKeyedService<IPooledStore>(ServiceKey);
-        var store = pooledStore.OpenPool(1);
+        var storage = pooledStore.OpenPool(1);
 
-        return new MsSqlStoreFixture(provider, store, aspire.Pool, connectionString);
+        return new MsSqlStoreFixture(provider, storage, aspire.Pool, connectionString);
     }
 }

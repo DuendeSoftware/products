@@ -44,7 +44,7 @@ public static class AttributeTypeDsoRoundTripTests
     private static AttributeType RoundTrip(AttributeType original)
     {
         var dso = ToTypeDso(original);
-        // Simulate JSON serialization round-trip (what the store would do)
+        // Simulate JSON serialization round-trip (what the storage would do)
         var json = JsonSerializer.Serialize(dso);
         var deserialized = JsonSerializer.Deserialize<AttributeTypeDso>(json);
         return ToTypeValueObject(deserialized!);
