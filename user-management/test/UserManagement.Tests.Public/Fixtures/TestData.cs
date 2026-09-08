@@ -173,12 +173,23 @@ internal static class TestData
             _ => Count().ToString(CultureInfo.InvariantCulture)
         };
 
-    internal static async Task AddAttributeDefinitions(IUserProfileSchemaAdmin admin, Ct ct)
+    internal static async Task AddAttributeDefinitions(ISchemaAdmin schemaAdmin, Ct ct)
     {
+        var getResult = await schemaAdmin.GetAsync(SchemaId.UserProfile, ct);
+        var schema = getResult.Found
+            ? getResult.Item!
+            : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+
         foreach (var definition in CreateAttributeDefinitions())
         {
-            (await admin.TryAddAttributeDefinitionAsync(definition, ct)).ShouldBeTrue();
+            schema.AttributeDefinitions.Add(definition);
         }
+
+        var saveResult = getResult.Found
+            ? await schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, ct)
+            : await schemaAdmin.CreateAsync(schema, ct);
+
+        saveResult.IsSuccess.ShouldBeTrue();
     }
 
     internal static IEnumerable<AttributeDefinition> CreateAttributeDefinitions() =>

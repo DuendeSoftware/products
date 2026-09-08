@@ -24,7 +24,7 @@ public sealed class PasswordExpirationTests
     private static async Task<(UserSubjectId SubjectId, AttributeCode Code, object Value)> RegisterUserWithPasswordAsync(
         IUserAuthenticatorsSelfService selfService,
         IUserProfileSelfService profileSelfService,
-        IUserProfileSchemaAdmin schemaAdmin,
+        ISchemaAdmin schemaAdmin,
         IExternalAuthenticator externalAuthenticator,
         Ct ct)
     {
@@ -45,7 +45,7 @@ public sealed class PasswordExpirationTests
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: 30);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
         var passwordAuthenticator = sp.GetRequiredService<IPasswordAuthenticator>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
@@ -67,7 +67,7 @@ public sealed class PasswordExpirationTests
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: 30);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
         var passwordAuthenticator = sp.GetRequiredService<IPasswordAuthenticator>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
@@ -89,7 +89,7 @@ public sealed class PasswordExpirationTests
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: null);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
         var passwordAuthenticator = sp.GetRequiredService<IPasswordAuthenticator>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 
@@ -110,7 +110,7 @@ public sealed class PasswordExpirationTests
         await using var sp = await CreateServiceProviderAsync(maxAgeDays: 30);
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
         var passwordAuthenticator = sp.GetRequiredService<IPasswordAuthenticator>();
         var timeProvider = sp.GetRequiredService<FakeTimeProvider>();
 

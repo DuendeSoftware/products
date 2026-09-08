@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Admin;
 using Duende.UserManagement.Internal;
 using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Internal.Storage;
@@ -16,7 +16,7 @@ namespace Duende.UserManagement.Membership.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class MembershipAdmin(
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     MembershipRepository membershipRepo,
     RoleRepository roleRepo,
     GroupRepository groupRepo,
@@ -37,12 +37,12 @@ internal sealed class MembershipAdmin(
         if (!roleResult.HasValue)
         {
             logger.AssignRoleNotFound(LogLevel.Information, roleId, subjectId);
-            return AdminError.NotFound(nameof(Role), roleId.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Role), roleId.ToString()));
         }
 
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var store = await storeFactory.GetStore(ct);
-        _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, roleResult.Value.Role.StoreId, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, roleResult.Value.Role.StoreId, [], ct);
 
         logger.AssignRoleSucceeded(LogLevel.Information, roleId, subjectId);
         return SaveResult.Success(roleId, 0);
@@ -59,7 +59,7 @@ internal sealed class MembershipAdmin(
         if (!roleResult.HasValue)
         {
             logger.RemoveRoleNotFound(LogLevel.Information, roleId, subjectId);
-            return AdminError.NotFound(nameof(Role), roleId.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Role), roleId.ToString()));
         }
 
         var existing = await membershipRepo.ResolveUserUuidsAsync([subjectId], ct);
@@ -69,8 +69,8 @@ internal sealed class MembershipAdmin(
             return SaveResult.Success(roleId, 0);
         }
 
-        var store = await storeFactory.GetStore(ct);
-        _ = await store.UnlinkAsync(MembershipLinkDefinitions.MembershipRole, existing.Resolved[subjectId], roleResult.Value.Role.StoreId, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        _ = await storage.UnlinkAsync(MembershipLinkDefinitions.MembershipRole, existing.Resolved[subjectId], roleResult.Value.Role.StoreId, [], ct);
 
         logger.RemoveRoleSucceeded(LogLevel.Information, roleId, subjectId);
         return SaveResult.Success(roleId, 0);
@@ -86,18 +86,18 @@ internal sealed class MembershipAdmin(
         if (!roleResult.HasValue)
         {
             logger.AssignRoleToGroupRoleNotFound(LogLevel.Information, roleId, groupId);
-            return AdminError.NotFound(nameof(Role), roleId.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Role), roleId.ToString()));
         }
 
         var groupResult = await groupRepo.TryReadAsync(groupId, ct);
         if (!groupResult.HasValue)
         {
             logger.AssignRoleToGroupGroupNotFound(LogLevel.Information, roleId, groupId);
-            return AdminError.NotFound(nameof(Group), groupId.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Group), groupId.ToString()));
         }
 
-        var store = await storeFactory.GetStore(ct);
-        _ = await store.LinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        _ = await storage.LinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
 
         logger.AssignRoleToGroupSucceeded(LogLevel.Information, roleId, groupId);
         return SaveResult.Success(roleId, 0);
@@ -113,18 +113,18 @@ internal sealed class MembershipAdmin(
         if (!roleResult.HasValue)
         {
             logger.RemoveRoleFromGroupRoleNotFound(LogLevel.Information, roleId, groupId);
-            return AdminError.NotFound(nameof(Role), roleId.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Role), roleId.ToString()));
         }
 
         var groupResult = await groupRepo.TryReadAsync(groupId, ct);
         if (!groupResult.HasValue)
         {
             logger.RemoveRoleFromGroupGroupNotFound(LogLevel.Information, roleId, groupId);
-            return AdminError.NotFound(nameof(Group), groupId.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Group), groupId.ToString()));
         }
 
-        var store = await storeFactory.GetStore(ct);
-        _ = await store.UnlinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        _ = await storage.UnlinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
 
         logger.RemoveRoleFromGroupSucceeded(LogLevel.Information, roleId, groupId);
         return SaveResult.Success(roleId, 0);
@@ -141,12 +141,12 @@ internal sealed class MembershipAdmin(
         if (!groupResult.HasValue)
         {
             logger.AssignGroupNotFound(LogLevel.Information, groupId, subjectId);
-            return AdminError.NotFound(nameof(Group), groupId.ToString());
+            return SaveResult.Failure<GroupId>(StorageError.NotFound(nameof(Group), groupId.ToString()));
         }
 
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var store = await storeFactory.GetStore(ct);
-        _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, groupResult.Value.Group.StoreId, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, groupResult.Value.Group.StoreId, [], ct);
 
         logger.AssignGroupSucceeded(LogLevel.Information, groupId, subjectId);
         return SaveResult.Success(groupId, 0);
@@ -163,7 +163,7 @@ internal sealed class MembershipAdmin(
         if (!groupResult.HasValue)
         {
             logger.RemoveGroupNotFound(LogLevel.Information, groupId, subjectId);
-            return AdminError.NotFound(nameof(Group), groupId.ToString());
+            return SaveResult.Failure<GroupId>(StorageError.NotFound(nameof(Group), groupId.ToString()));
         }
 
         var existing = await membershipRepo.ResolveUserUuidsAsync([subjectId], ct);
@@ -173,8 +173,8 @@ internal sealed class MembershipAdmin(
             return SaveResult.Success(groupId, 0);
         }
 
-        var store = await storeFactory.GetStore(ct);
-        _ = await store.UnlinkAsync(MembershipLinkDefinitions.MembershipGroup, existing.Resolved[subjectId], groupResult.Value.Group.StoreId, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        _ = await storage.UnlinkAsync(MembershipLinkDefinitions.MembershipGroup, existing.Resolved[subjectId], groupResult.Value.Group.StoreId, [], ct);
 
         logger.RemoveGroupSucceeded(LogLevel.Information, groupId, subjectId);
         return SaveResult.Success(groupId, 0);
@@ -189,7 +189,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         var query = LinkQuery
             .From(RoleDso.EntityType)
@@ -197,7 +197,7 @@ internal sealed class MembershipAdmin(
             .Where(UserDso.EntityType, existing.Resolved[subjectId])
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipQueryExecuted(LogLevel.Debug, subjectId);
         return ToRoleQueryResult(result);
@@ -212,7 +212,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         // Multi-hop: Role ← GroupRole ← Group ← MembershipGroup ← User
         var query = LinkQuery
@@ -222,7 +222,7 @@ internal sealed class MembershipAdmin(
             .Where(UserDso.EntityType, existing.Resolved[subjectId])
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipQueryExecuted(LogLevel.Debug, subjectId);
         return ToRoleQueryResult(result);
@@ -236,7 +236,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         var query = LinkQuery
             .From(RoleDso.EntityType)
@@ -244,7 +244,7 @@ internal sealed class MembershipAdmin(
             .Where(GroupDso.EntityType, groupResult.Value.Group.StoreId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipGroupQueryExecuted(LogLevel.Debug, groupId);
         return ToRoleQueryResult(result);
@@ -259,7 +259,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<GroupListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         var query = LinkQuery
             .From(GroupDso.EntityType)
@@ -267,7 +267,7 @@ internal sealed class MembershipAdmin(
             .Where(UserDso.EntityType, existing.Resolved[subjectId])
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipQueryExecuted(LogLevel.Debug, subjectId);
         return new QueryResult<GroupListItem>
@@ -294,7 +294,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<MembershipRoleMemberListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         var query = LinkQuery
             .From(UserDso.EntityType)
@@ -302,7 +302,7 @@ internal sealed class MembershipAdmin(
             .Where(RoleDso.EntityType, roleResult.Value.Role.StoreId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipRoleQueryExecuted(LogLevel.Debug, roleId);
         return new QueryResult<MembershipRoleMemberListItem>
@@ -327,7 +327,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleGroupMemberListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         var query = LinkQuery
             .From(GroupDso.EntityType)
@@ -335,7 +335,7 @@ internal sealed class MembershipAdmin(
             .Where(RoleDso.EntityType, roleResult.Value.Role.StoreId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipRoleQueryExecuted(LogLevel.Debug, roleId);
         return new QueryResult<RoleGroupMemberListItem>
@@ -361,7 +361,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<MembershipGroupMemberListItem>();
         }
 
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
 
         var query = LinkQuery
             .From(UserDso.EntityType)
@@ -369,7 +369,7 @@ internal sealed class MembershipAdmin(
             .Where(GroupDso.EntityType, groupResult.Value.Group.StoreId)
             .Build();
 
-        var result = await queryStore.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryStorage.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipGroupQueryExecuted(LogLevel.Debug, groupId);
         return new QueryResult<MembershipGroupMemberListItem>

@@ -18,7 +18,7 @@ internal sealed class DefaultScimSchemaMapper : IScimSchemaMapper
             Type = MapAttributeType(definition.AttributeType),
             MultiValued = definition.AttributeType is ListAttributeType,
             Description = definition.Description?.ToString(),
-            Required = false,
+            Required = definition.IsRequired,
             CaseExact = definition.AttributeType is ScalarAttributeType scalar
                 && scalar.DataType != ScalarDataType.String,
             Mutability = ScimConstants.MutabilityValues.ReadWrite,

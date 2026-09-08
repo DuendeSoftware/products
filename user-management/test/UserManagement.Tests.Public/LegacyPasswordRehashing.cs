@@ -30,7 +30,7 @@ public sealed class LegacyPasswordRehashing
 
         var selfService = seedProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = seedProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = seedProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = seedProvider.GetRequiredService<ISchemaAdmin>();
 
         var subjectId = await seedProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(externalAuthenticatorAddress, _ct);
 
@@ -78,7 +78,7 @@ public sealed class LegacyPasswordRehashing
         var selfService = sp.GetRequiredService<IUserAuthenticatorsSelfService>();
         var auth = sp.GetRequiredService<IPasswordAuthenticator>();
         var profileSelfService = sp.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
 
         var externalAuthenticatorAddress = TestData.CreateExternalAuthenticatorAddress();
         var rawPassword = $"ABcd12!@{Guid.NewGuid()}";
@@ -116,7 +116,7 @@ public sealed class LegacyPasswordRehashing
         {
             var selfService = seedProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
             var profileSelfService = seedProvider.GetRequiredService<IUserProfileSelfService>();
-            var schemaAdmin = seedProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+            var schemaAdmin = seedProvider.GetRequiredService<ISchemaAdmin>();
 
             var subjectId = await seedProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(externalAuthenticatorAddress, _ct);
 

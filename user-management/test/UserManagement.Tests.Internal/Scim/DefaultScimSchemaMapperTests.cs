@@ -144,6 +144,24 @@ public sealed class DefaultScimSchemaMapperTests
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void MapRequiredAttributeReturnsDefinitionRequirement(bool isRequired)
+    {
+        var definition = new AttributeDefinition
+        {
+            Code = AttributeCode.Create("department"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("Department name"),
+            IsRequired = isRequired
+        };
+
+        var result = _mapper.Map(definition);
+
+        result.Required.ShouldBe(isRequired);
+    }
+
+    [Theory]
     [InlineData(ScalarDataType.Boolean, "boolean")]
     [InlineData(ScalarDataType.Date, "dateTime")]
     [InlineData(ScalarDataType.DateTime, "dateTime")]

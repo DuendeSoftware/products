@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
+using Duende.Storage.EntityAttributeValue;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.External;
@@ -20,7 +21,7 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
     private IExternalAuthenticator _externalAuthenticator = null!;
     private IUserProfileSelfService _profileSelfService = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private ServiceProvider _serviceProvider = null!;
     private IUserImporter _importer = null!;
     private IPasswordHashAlgorithm _hashAlgorithm = null!;
@@ -32,7 +33,7 @@ public sealed class PasswordAuthentication : IAsyncLifetime
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
         _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _importer = _serviceProvider.GetRequiredService<IUserImporter>();
         _hashAlgorithm = _serviceProvider.GetRequiredService<IPasswordHashAlgorithm>();
     }

@@ -8,7 +8,7 @@ using Duende.Storage.Internal.Operations;
 namespace Duende.UserManagement.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserRepository(IStoreFactory storeFactory)
+internal sealed class UserRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -17,9 +17,9 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var id = UuidV7.New();
-        return await store.CreateAsync(
+        return await storage.CreateAsync(
             id,
             new UserDso.V1(id.Value, subjectId.Value, []),
             [DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId))],
@@ -31,13 +31,13 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 
     internal async Task<(UserDso.V1 User, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found ? ((UserDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(UserDso.V1 user, int expectedVersion, Ct ct) =>
-        await (await storeFactory.GetStore(ct)).UpdateAsync(
+        await (await storageFactory.GetStorage(ct)).UpdateAsync(
             UuidV7.From(user.Id),
             user,
             expectedVersion,
@@ -72,8 +72,8 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
 
     internal async Task<long> GetCountAsync(Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CountAsync(UserDso.EntityType, null, ct);
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CountAsync(UserDso.EntityType, null, ct);
     }
 
     internal static DeleteOperation DeleteBatchOperation(UserSubjectId subjectId) =>
@@ -87,13 +87,13 @@ internal sealed class UserRepository(IStoreFactory storeFactory)
     internal async Task<(Dictionary<UserSubjectId, UuidV7> Resolved, List<UserSubjectId> NotFound)>
         ResolveUserUuidsAsync(IReadOnlyList<UserSubjectId> subjectIds, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var resolved = new Dictionary<UserSubjectId, UuidV7>(subjectIds.Count);
         var notFound = new List<UserSubjectId>();
 
         foreach (var subjectId in subjectIds)
         {
-            var result = await store.TryReadAsync(
+            var result = await storage.TryReadAsync(
                 UserDso.EntityType,
                 DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)),
                 ct);

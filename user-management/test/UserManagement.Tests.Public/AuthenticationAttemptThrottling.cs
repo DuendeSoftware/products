@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
+using Duende.Storage.EntityAttributeValue;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.External;
@@ -24,7 +25,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
     private IUserAuthenticatorsSelfService _authenticatorsSelfService = null!;
     private IExternalAuthenticator _externalAuthenticator = null!;
     private IUserProfileSelfService _profileSelfService = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private IUserSelfService _userSelfService = null!;
     private ServiceProvider _serviceProvider = null!;
     private FakeTimeProvider _timeProvider = null!;
@@ -44,7 +45,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         _authenticatorsSelfService = _serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
         _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _userSelfService = _serviceProvider.GetRequiredService<IUserSelfService>();
         _timeProvider = _serviceProvider.GetRequiredService<FakeTimeProvider>();
     }
@@ -204,7 +205,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         var passwordAuthenticator = serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = serviceProvider.GetRequiredService<ISchemaAdmin>();
         var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, subjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, ct: _ct);
@@ -275,7 +276,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         var passwordAuthenticator = serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = serviceProvider.GetRequiredService<ISchemaAdmin>();
         var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, subjectId, _ct);
         var (_, wrongSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, ct: _ct);
@@ -308,7 +309,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         var passwordAuthenticator = serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = serviceProvider.GetRequiredService<ISchemaAdmin>();
         var ct = TestContext.Current.CancellationToken;
         var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), ct);
         var (correctPassword, correctSupplied) = await TestData.CreatePasswordPairAsync(passwordFactory, subjectId, ct);
@@ -340,7 +341,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         var passwordAuthenticator = serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = serviceProvider.GetRequiredService<ISchemaAdmin>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
         var ct = TestContext.Current.CancellationToken;
 
@@ -449,7 +450,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         var recoveryCodeAuthenticator = serviceProvider.GetRequiredService<IRecoveryCodeAuthenticator>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = serviceProvider.GetRequiredService<ISchemaAdmin>();
         var ct = TestContext.Current.CancellationToken;
 
         var subjectId = await serviceProvider.GetRequiredService<IExternalAuthenticator>().CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), ct);
@@ -487,7 +488,7 @@ public sealed class AuthenticationAttemptThrottling : IAsyncLifetime
         var passwordAuthenticator = serviceProvider.GetRequiredService<IPasswordAuthenticator>();
         var passwordFactory = serviceProvider.GetRequiredService<IUserAuthenticatorsSelfService>();
         var profileSelfService = serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        var schemaAdmin = serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = serviceProvider.GetRequiredService<ISchemaAdmin>();
         var timeProvider = serviceProvider.GetRequiredService<FakeTimeProvider>();
         var ct = TestContext.Current.CancellationToken;
 

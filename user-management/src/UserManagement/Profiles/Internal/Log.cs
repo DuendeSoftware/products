@@ -43,47 +43,6 @@ internal static partial class Log
     [LoggerMessage(Message = $"User profile update failed for subject {{{LogParameters.SubjectId}}} (concurrency conflict)")]
     internal static partial void UserProfileUpdateFailed(this ILogger logger, LogLevel level, UserSubjectId subjectId);
 
-    // Schema Admin
-
-    [LoggerMessage(Message = $"User profile schema attribute definition added: {{{Parameters.AttributeName}}}")]
-    internal static partial void SchemaAttributeAdded(this ILogger logger, LogLevel level, string attributeName);
-
-    [LoggerMessage(Message = $"User profile schema attribute definition add failed: {{{Parameters.AttributeName}}}")]
-    internal static partial void SchemaAttributeAddFailed(this ILogger logger, LogLevel level, string attributeName);
-
-    [LoggerMessage(Message = $"User profile schema attribute definition removed: {{{Parameters.AttributeName}}}")]
-    internal static partial void SchemaAttributeRemoved(this ILogger logger, LogLevel level, string attributeName);
-
-    [LoggerMessage(Message = $"User profile schema attribute definition remove failed: {{{Parameters.AttributeName}}}")]
-    internal static partial void SchemaAttributeRemoveFailed(this ILogger logger, LogLevel level, string attributeName);
-
-    [LoggerMessage(Message = $"User profile schema group added: {{{Parameters.GroupName}}}")]
-    internal static partial void SchemaGroupAdded(this ILogger logger, LogLevel level, string groupName);
-
-    [LoggerMessage(Message = $"User profile schema group add failed: {{{Parameters.GroupName}}}")]
-    internal static partial void SchemaGroupAddFailed(this ILogger logger, LogLevel level, string groupName);
-
-    [LoggerMessage(Message = $"User profile schema group removed: {{{Parameters.GroupName}}}")]
-    internal static partial void SchemaGroupRemoved(this ILogger logger, LogLevel level, string groupName);
-
-    [LoggerMessage(Message = $"User profile schema group remove failed: {{{Parameters.GroupName}}}")]
-    internal static partial void SchemaGroupRemoveFailed(this ILogger logger, LogLevel level, string groupName);
-
-    [LoggerMessage(Message = $"User profile schema attributes reordered (group={{{Parameters.GroupName}}})")]
-    internal static partial void SchemaAttributesReordered(this ILogger logger, LogLevel level, string? groupName);
-
-    [LoggerMessage(Message = "User profile schema attributes reorder failed: schema not found")]
-    internal static partial void SchemaAttributesReorderFailedSchemaNotFound(this ILogger logger, LogLevel level);
-
-    [LoggerMessage(Message = $"User profile schema attributes reorder failed: group {{{Parameters.GroupName}}} not found")]
-    internal static partial void SchemaAttributesReorderFailedGroupNotFound(this ILogger logger, LogLevel level, string groupName);
-
-    [LoggerMessage(Message = "User profile schema groups reordered")]
-    internal static partial void SchemaGroupsReordered(this ILogger logger, LogLevel level);
-
-    [LoggerMessage(Message = "User profile schema groups reorder failed: schema not found")]
-    internal static partial void SchemaGroupsReorderFailedSchemaNotFound(this ILogger logger, LogLevel level);
-
     // Schema Freshness
 
     [LoggerMessage(Level = LogLevel.Warning,
@@ -97,7 +56,6 @@ internal static partial class Log
     private static class Parameters
     {
         internal const string AttributeName = nameof(AttributeName);
-        internal const string GroupName = nameof(GroupName);
         internal const string SchemaId = nameof(SchemaId);
         internal const string Version = nameof(Version);
         internal const string CurrentSchemaId = nameof(CurrentSchemaId);

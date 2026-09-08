@@ -20,7 +20,7 @@ public sealed class ComplexAttributeIntegrationTests : IAsyncLifetime
     private static readonly AttributeCode NameAttr = AttributeCode.Create("name");
 
     private ServiceProvider _serviceProvider = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private IUserProfileSelfService _selfService = null!;
     private UserProfileReader _reader = null!;
     private readonly Ct _ct = TestContext.Current.CancellationToken;
@@ -28,7 +28,7 @@ public sealed class ComplexAttributeIntegrationTests : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _selfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
         _reader = _serviceProvider.GetRequiredService<UserProfileReader>();
     }
@@ -38,8 +38,21 @@ public sealed class ComplexAttributeIntegrationTests : IAsyncLifetime
     private Task<QueryResult<UserProfileListItem>> Query(string? filter) =>
         _reader.QueryAsync(filter, "", SortDirection.Ascending, 1, 20, _ct);
 
-    private async Task AddDefinition(AttributeDefinition definition) =>
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(definition, _ct)).ShouldBeTrue();
+    private async Task AddDefinition(AttributeDefinition definition)
+    {
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        if (schema.AttributeDefinitions.Any(d => d.Code == definition.Code))
+        {
+            return;
+        }
+
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _schemaAdmin.CreateAsync(schema, _ct);
+        saveResult.IsSuccess.ShouldBeTrue();
+    }
 
     /// <summary>
     ///     Registers a "name" string attribute in the schema (idempotent) and
@@ -47,14 +60,13 @@ public sealed class ComplexAttributeIntegrationTests : IAsyncLifetime
     /// </summary>
     private async Task CreateUserWithAttributes(string userName, AttributeValueCollection attributes)
     {
-        // Ensure the "name" attribute is defined (TryAdd is idempotent)
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = NameAttr,
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("User name")
-            }, _ct);
+        // Ensure the "name" attribute is defined (idempotent via get-modify-save)
+        await AddDefinition(new AttributeDefinition
+        {
+            Code = NameAttr,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("User name")
+        });
 
         var schema = await _selfService.GetSchemaAsync(_ct);
         var collection = new AttributeValueCollection(schema);

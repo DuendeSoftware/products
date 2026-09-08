@@ -4,7 +4,6 @@
 using System.Globalization;
 using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Filtering;
@@ -22,7 +21,7 @@ namespace Duende.UserManagement.Profiles.Internal.Storage;
 /// dynamic schema to resolve attribute types.
 /// </summary>
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserProfileReader(IStoreFactory storeFactory, AttributeSchemaRepository schemaRepo)
+internal sealed class UserProfileReader(IStorageFactory storageFactory, ISchemaStore schemaStore)
 {
     /// <summary>
     /// Queries users using a SCIM filter expression with page-based pagination and sort support.
@@ -79,15 +78,13 @@ internal sealed class UserProfileReader(IStoreFactory storeFactory, AttributeSch
         // Note: filtering and sorting only work on attributes that have IsQueryable = true in the schema.
         // Non-indexed attributes are stored only in the entity's JSON payload and cannot be used in
         // filter expressions or sort parameters — attempting to do so throws NotSupportedException.
-        var queryStore = await storeFactory.GetStore(ct);
-        var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
-        var attributeDefinitions = schema?.AttributeDefinitions ??
-                                   new Dictionary<AttributeCode, AttributeDefinition>();
+        var queryStorage = await storageFactory.GetStorage(ct);
+        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
-        var queryFilter = TranslateFilter(filter, attributeDefinitions);
-        var sort = BuildSortParameter(sortBy, sortDirection, attributeDefinitions);
+        var queryFilter = TranslateFilter(filter, schema.AttributeDefinitions);
+        var sort = BuildSortParameter(sortBy, sortDirection, schema.AttributeDefinitions);
 
-        var result = await queryStore.QueryAsync<UserProfileDso.V1>(
+        var result = await queryStorage.QueryAsync<UserProfileDso.V1>(
             UserProfileDso.EntityType,
             queryFilter,
             sort,
@@ -137,7 +134,7 @@ internal sealed class UserProfileReader(IStoreFactory storeFactory, AttributeSch
             : QueryBuilder.All();
     }
 
-    private static UserProfileListItem ToListItem(UserProfileDso.V1 dso, AttributeSchema? schema)
+    private static UserProfileListItem ToListItem(UserProfileDso.V1 dso, IReadOnlyAttributeSchema? schema)
     {
         var subjectId = UserSubjectId.Load(dso.SubjectId);
 

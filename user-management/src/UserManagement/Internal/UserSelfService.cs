@@ -15,7 +15,7 @@ namespace Duende.UserManagement.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserSelfService(
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     ILogger<UserSelfService> logger,
     IUserProfileSelfService profileSelfService,
     IUserAuthenticatorsSelfService authenticatorsSelfService,
@@ -31,7 +31,7 @@ internal sealed class UserSelfService(
         }
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserDeregisterStarting(LogLevel.Debug, subjectId);
-        List<IStoreOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];
+        List<IStorageOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];
 
         if (authenticatorsRepo is not null)
         {
@@ -59,15 +59,15 @@ internal sealed class UserSelfService(
     public IUserProfileSelfService Profiles => profileSelfService;
     public IUserAuthenticatorsSelfService Authenticators => authenticatorsSelfService;
 
-    private async Task<bool> ExecuteBatchAsync(List<IStoreOperation> operations, Ct ct)
+    private async Task<bool> ExecuteBatchAsync(List<IStorageOperation> operations, Ct ct)
     {
         if (operations.Count == 0)
         {
             return false;
         }
 
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.ExecuteBatchAsync(operations, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.ExecuteBatchAsync(operations, [], ct);
         return result.Success;
     }
 }

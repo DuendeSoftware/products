@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Pagination;
 using Duende.UserManagement;
-using Duende.UserManagement.Admin;
 using Duende.UserManagement.Membership;
 using Microsoft.Extensions.DependencyInjection;
 

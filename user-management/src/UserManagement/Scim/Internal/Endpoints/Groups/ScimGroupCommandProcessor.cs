@@ -7,7 +7,6 @@ using Duende.Storage;
 using Duende.Storage.Internal.Filtering;
 using Duende.Storage.Internal.Filtering.Expressions;
 using Duende.Storage.Internal.Operations;
-using Duende.UserManagement.Admin;
 using Duende.UserManagement.Internal;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Membership;
@@ -876,7 +875,7 @@ internal sealed class ScimGroupCommandProcessor(
         };
     }
 
-    private static ScimOperationResult MapSaveErrors(IReadOnlyList<AdminError> errors)
+    private static ScimOperationResult MapSaveErrors(IReadOnlyList<StorageError> errors)
     {
         var first = errors[0];
         return first.Code switch

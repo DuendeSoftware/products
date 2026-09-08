@@ -17,7 +17,7 @@ public sealed class EscalatingLockoutTests
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
-    private static async Task<(ServiceProvider ServiceProvider, IPasswordAuthenticator PasswordAuthenticator, IUserAuthenticatorsSelfService SelfService, IUserProfileSelfService ProfileSelfService, IUserProfileSchemaAdmin SchemaAdmin, FakeTimeProvider TimeProvider, IExternalAuthenticator ExternalAuthenticator)> CreateAsync(
+    private static async Task<(ServiceProvider ServiceProvider, IPasswordAuthenticator PasswordAuthenticator, IUserAuthenticatorsSelfService SelfService, IUserProfileSelfService ProfileSelfService, ISchemaAdmin SchemaAdmin, FakeTimeProvider TimeProvider, IExternalAuthenticator ExternalAuthenticator)> CreateAsync(
         Action<UserAuthenticationOptions> configure)
     {
         var sp = await UsersServiceProviderFactory.CreateWithOptionsAsync(configure);
@@ -26,7 +26,7 @@ public sealed class EscalatingLockoutTests
             sp.GetRequiredService<IPasswordAuthenticator>(),
             sp.GetRequiredService<IUserAuthenticatorsSelfService>(),
             sp.GetRequiredService<IUserProfileSelfService>(),
-            sp.GetRequiredService<IUserProfileSchemaAdmin>(),
+            sp.GetRequiredService<ISchemaAdmin>(),
             sp.GetRequiredService<FakeTimeProvider>(),
             sp.GetRequiredService<IExternalAuthenticator>()
         );
@@ -35,7 +35,7 @@ public sealed class EscalatingLockoutTests
     private async Task<(AttributeCode Code, object UntypedValue, NonValidatedPassword Correct, NonValidatedPassword Wrong)> SetupUserWithPasswordAsync(
         IUserAuthenticatorsSelfService selfService,
         IUserProfileSelfService profileSelfService,
-        IUserProfileSchemaAdmin schemaAdmin,
+        ISchemaAdmin schemaAdmin,
         IExternalAuthenticator externalAuthenticator)
     {
         var subjectId = await externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);

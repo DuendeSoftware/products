@@ -16,7 +16,6 @@ using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Membership.Internal;
 using Duende.UserManagement.Membership.Internal.Storage;
 using Duende.UserManagement.Profiles;
-using Duende.UserManagement.Profiles.Internal;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -26,12 +25,12 @@ namespace Duende.UserManagement.Import.Internal;
 internal sealed class UserImporter(
     IUserImportConflictResolver conflictResolver,
     TimeProvider timeProvider,
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     ILogger<UserImporter> logger,
     UserManagementLicenseValidator licenseValidator,
     UserProfileRepository profileRepo,
     UserAuthenticatorsRepository authenticatorsRepo,
-    AttributeSchemaRepository schemaRepo,
+    ISchemaStore schemaStore,
     GroupRepository groupRepo,
     RoleRepository roleRepo,
     MembershipRepository membershipRepo) : IUserImporter
@@ -47,27 +46,7 @@ internal sealed class UserImporter(
         logger.BatchImportStarted(LogLevel.Debug, records.Count);
 
         // Load schema once for the entire batch (only needed if any record has profile attributes)
-        AttributeSchema? schema = null;
-        if (records.Any(r => r.ProfileAttributes is not null))
-        {
-            schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema
-                ?? AttributeSchema.Empty;
-
-            // Validate schema freshness for all records upfront — fail the entire batch on mismatch
-            var currentSchema = schema;
-            foreach (var record in records)
-            {
-                if (record.ProfileAttributes is not null &&
-                    !SchemaFreshnessCheck.IsValid(record.ProfileAttributes, currentSchema, logger))
-                {
-                    return new UserImportBatchResult
-                    {
-                        Results = records.Select(r => Fail(r.SubjectId,
-                            "Schema version mismatch: the batch was validated against a stale schema.")).ToList()
-                    };
-                }
-            }
-        }
+        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
         var results = new List<UserImportResult>(records.Count);
 
@@ -94,22 +73,11 @@ internal sealed class UserImporter(
 
     private async Task<UserImportResult> ImportRecordAsync(
         UserImportRecord record,
-        AttributeSchema? schema,
+        IReadOnlyAttributeSchema? schema,
         Ct ct)
     {
         using var scope = logger.BeginSubjectScope(record.SubjectId);
-        // 1. Validate profile attributes against schema (if provided)
-        if (record.ProfileAttributes is not null)
-        {
-            var currentSchema = schema ?? AttributeSchema.Empty;
-            if (!SchemaFreshnessCheck.IsValid(record.ProfileAttributes, currentSchema, logger))
-            {
-                return Fail(record.SubjectId, "Schema version mismatch: the profile attributes were validated against a stale schema.");
-            }
-        }
-
-
-        // 2. Validate membership references exist before attempting batch
+        // 1. Validate membership references exist before attempting batch
         if (record.Memberships is not null)
         {
             var membershipError = await ValidateMembershipReferencesAsync(record.Memberships, ct);
@@ -120,11 +88,11 @@ internal sealed class UserImporter(
             }
         }
 
-        // 3. Attempt atomic batch create with retry loop
+        // 2. Attempt atomic batch create with retry loop
         return await TryBatchCreateWithConflictResolutionAsync(record, schema, ct);
     }
 
-    private async Task<UserImportResult> TryBatchCreateWithConflictResolutionAsync(UserImportRecord record, AttributeSchema? schema, Ct ct)
+    private async Task<UserImportResult> TryBatchCreateWithConflictResolutionAsync(UserImportRecord record, IReadOnlyAttributeSchema? schema, Ct ct)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
@@ -135,8 +103,8 @@ internal sealed class UserImporter(
                 return new UserImportResult { SubjectId = record.SubjectId, Status = UserImportStatus.Skipped };
             }
 
-            var store = await storeFactory.GetStore(ct);
-            var result = await store.ExecuteBatchAsync(operations, [], ct);
+            var storage = await storageFactory.GetStorage(ct);
+            var result = await storage.ExecuteBatchAsync(operations, [], ct);
 
             if (result.Success)
             {
@@ -167,10 +135,10 @@ internal sealed class UserImporter(
         return Fail(record.SubjectId, "Max retries exceeded for import.");
     }
 
-    private async Task<(List<IStoreOperation> Operations, int UserDsoIndex, int ProfileIndex, int AuthIndex, int MembershipLinkStartIndex)> BuildBatchOperationsAsync(
+    private async Task<(List<IStorageOperation> Operations, int UserDsoIndex, int ProfileIndex, int AuthIndex, int MembershipLinkStartIndex)> BuildBatchOperationsAsync(
         UserImportRecord record, Ct ct)
     {
-        List<IStoreOperation> operations = [];
+        List<IStorageOperation> operations = [];
         var profileIndex = -1;
         var authIndex = -1;
         var membershipLinkStartIndex = -1;
@@ -324,7 +292,7 @@ internal sealed class UserImporter(
     private async Task<UserImportResult> OverwriteExistingUserAsync(
         UserImportRecord record,
         UserSubjectId targetSubjectId,
-        AttributeSchema? schema,
+        IReadOnlyAttributeSchema? schema,
         Ct ct)
     {
         if (record.ProfileAttributes is not null)
@@ -357,7 +325,7 @@ internal sealed class UserImporter(
         return new UserImportResult { SubjectId = record.SubjectId, Status = UserImportStatus.Updated };
     }
 
-    private async Task<string?> MergeProfileAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection? attributes, AttributeSchema? schema, Ct ct)
+    private async Task<string?> MergeProfileAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection? attributes, IReadOnlyAttributeSchema? schema, Ct ct)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
@@ -567,7 +535,7 @@ internal sealed class UserImporter(
     private async Task<string?> MergeMembershipsAsync(UserSubjectId subjectId, MembershipImport import, Ct ct)
     {
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
 
         if (import.Groups is not null)
         {
@@ -575,7 +543,7 @@ internal sealed class UserImporter(
             {
                 var (resolvedGroup, _) = await groupRepo.TryReadAsync(groupId, ct)
                     ?? throw new InvalidOperationException($"Group '{groupId}' not found during import.");
-                _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, resolvedGroup.StoreId, [], ct);
+                _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, resolvedGroup.StoreId, [], ct);
             }
         }
 
@@ -585,7 +553,7 @@ internal sealed class UserImporter(
             {
                 var (resolvedRole, _) = await roleRepo.TryReadAsync(roleId, ct)
                     ?? throw new InvalidOperationException($"Role '{roleId}' not found during import.");
-                _ = await store.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, resolvedRole.StoreId, [], ct);
+                _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, resolvedRole.StoreId, [], ct);
             }
         }
 

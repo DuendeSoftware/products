@@ -3,6 +3,7 @@
 
 using System.Net;
 using System.Text.Json;
+using Duende.Storage.EntityAttributeValue;
 using Duende.UserManagement;
 
 namespace Duende.Platform.UserManagement.Scim;
@@ -56,6 +57,26 @@ public sealed class ScimSchemasEndpointTests(ITestOutputHelper output, WebServer
             .Single(a => a.GetProperty("name").GetString() == "userName");
         userName.GetProperty("required").GetBoolean().ShouldBeTrue();
         userName.GetProperty("uniqueness").GetString().ShouldBe("server");
+    }
+
+    [Fact]
+    public async Task get_User_schema_includes_required_dynamic_attribute()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterAttributeDefinitionAsync(
+            "employeeNumber",
+            ScalarDataType.String,
+            "Employee number",
+            isUnique: false,
+            isRequired: true);
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var employeeNumber = body.RootElement.GetProperty("attributes").EnumerateArray()
+            .Single(a => a.GetProperty("name").GetString() == "employeeNumber");
+        employeeNumber.GetProperty("required").GetBoolean().ShouldBeTrue();
     }
 
     [Fact]

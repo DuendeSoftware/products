@@ -49,7 +49,7 @@ internal static class ScimRequestMapper
     /// Maps a <see cref="ScimUserRequest"/> to domain objects.
     /// Returns an error result if validation fails or attributes cannot be mapped.
     /// </summary>
-    internal static MappingResult Map(ScimUserRequest request, AttributeSchema? schema)
+    internal static MappingResult Map(ScimUserRequest request, IReadOnlyAttributeSchema? schema)
     {
         // Build the attribute collection
         var collection = schema is not null

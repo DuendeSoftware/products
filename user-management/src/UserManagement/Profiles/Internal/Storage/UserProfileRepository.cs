@@ -1,11 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Globalization;
-using System.Text.Json;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Filtering;
@@ -21,8 +18,8 @@ using Duende.UserManagement.Internal.Storage;
 namespace Duende.UserManagement.Profiles.Internal.Storage;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserProfileRepository(
-    IStoreFactory storeFactory,
-    AttributeSchemaRepository schemaRepo,
+    IStorageFactory storageFactory,
+    ISchemaStore schemaStore,
     UserRepository userRepository)
 {
     internal enum Keys
@@ -30,11 +27,13 @@ internal sealed class UserProfileRepository(
         SubjectId = 1,
     }
 
+    private Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) => schemaStore.GetAsync(SchemaId.UserProfile, ct);
+
     internal async Task<CreateResult> CreateAsync(UserProfile profile, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var operations = await BuildCreateOperationsAsync(profile, ct);
-        var result = await store.ExecuteBatchAsync(operations, [], ct);
+        var result = await storage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return CreateResult.Success;
@@ -51,10 +50,10 @@ internal sealed class UserProfileRepository(
 
     internal async Task<(UserProfile UserProfile, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found
-            ? (ToEntity(result.Dso, (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema), result.Version.Value)
+            ? (ToEntity(result.Dso, await GetSchemaAsync(ct)), result.Version.Value)
             : null;
     }
 
@@ -66,13 +65,13 @@ internal sealed class UserProfileRepository(
     internal async Task<(Dictionary<UserSubjectId, UuidV7> Resolved, List<UserSubjectId> NotFound)>
         ResolveProfileUuidsAsync(IReadOnlyList<UserSubjectId> subjectIds, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var resolved = new Dictionary<UserSubjectId, UuidV7>(subjectIds.Count);
         var notFound = new List<UserSubjectId>();
 
         foreach (var subjectId in subjectIds)
         {
-            var result = await store.TryReadAsync(
+            var result = await storage.TryReadAsync(
                 UserProfileDso.EntityType,
                 DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)),
                 ct);
@@ -92,14 +91,14 @@ internal sealed class UserProfileRepository(
 
     internal async Task<(UserProfile UserProfile, int Version)?> TryReadAsync(AttributeCode code, object value, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(AttributeValueDskV1.Create(code, value)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(AttributeValueDskV1.Create(code, value)), ct);
         return result.Found
-            ? (ToEntity(result.Dso, (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema), result.Version.Value)
+            ? (ToEntity(result.Dso, await GetSchemaAsync(ct)), result.Version.Value)
             : null;
     }
 
-    private static UserProfile ToEntity(IDataStorageObject value, AttributeSchema? schema) =>
+    private static UserProfile ToEntity(IDataStorageObject value, IReadOnlyAttributeSchema? schema) =>
         value switch
         {
             UserProfileDso.V1 v1 => ToEntity(v1, schema),
@@ -108,9 +107,9 @@ internal sealed class UserProfileRepository(
 
     internal async Task<UpdateResult> UpdateAsync(UserProfile profile, int expectedVersion, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var operations = await BuildUpdateOperationsAsync(profile, expectedVersion, ct);
-        var result = await store.ExecuteBatchAsync(operations, [], ct);
+        var result = await storage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return UpdateResult.Success;
@@ -126,12 +125,12 @@ internal sealed class UserProfileRepository(
         };
     }
 
-    internal async Task<IReadOnlyList<IStoreOperation>> CreateBatchOperationAsync(UserProfile profile, Ct ct) =>
+    internal async Task<IReadOnlyList<IStorageOperation>> CreateBatchOperationAsync(UserProfile profile, Ct ct) =>
         await BuildCreateOperationsAsync(profile, ct);
 
     internal async Task<(CreateOperation AspectOp, UserDso.AspectRef AspectRef)> CreateAspectBatchOperationAsync(UserProfile profile, Ct ct)
     {
-        var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
+        var schema = await GetSchemaAsync(ct);
         var aspectOp = CreateOperation.For(
             profile.Id.Uuid,
             ToDso(profile),
@@ -148,12 +147,12 @@ internal sealed class UserProfileRepository(
     internal static UserDso.AspectRef GetAspectRef(UserProfile profile, int version) =>
         new(profile.Id.Uuid.Value, version, UserProfileDso.EntityType.Id);
 
-    internal async Task<IReadOnlyList<IStoreOperation>> UpdateBatchOperationAsync(UserProfile profile, int expectedVersion, Ct ct) =>
+    internal async Task<IReadOnlyList<IStorageOperation>> UpdateBatchOperationAsync(UserProfile profile, int expectedVersion, Ct ct) =>
         await BuildUpdateOperationsAsync(profile, expectedVersion, ct);
 
     internal async Task<UpdateOperation> UpdateAspectOnlyBatchOperationAsync(UserProfile profile, int expectedVersion, Ct ct)
     {
-        var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
+        var schema = await GetSchemaAsync(ct);
         return UpdateOperation.For(
             profile.Id.Uuid,
             ToDso(profile),
@@ -172,8 +171,8 @@ internal sealed class UserProfileRepository(
     internal async Task<QueryResult<UserProfile>> QueryAsync(
         FilterBy? filter, SortBy? sort, DataRange? range, Ct ct)
     {
-        var queryStore = await storeFactory.GetStore(ct);
-        var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
+        var queryStorage = await storageFactory.GetStorage(ct);
+        var schema = await GetSchemaAsync(ct);
         var attributeDefinitions = schema?.AttributeDefinitions ??
                                    new Dictionary<AttributeCode, AttributeDefinition>();
 
@@ -185,7 +184,7 @@ internal sealed class UserProfileRepository(
             throw new NotSupportedException("User profile continuation-token pagination requires a valid sort.");
         }
 
-        var result = await queryStore.QueryAsync<UserProfileDso.V1>(
+        var result = await queryStorage.QueryAsync<UserProfileDso.V1>(
             UserProfileDso.EntityType,
             queryFilter,
             sortParam,
@@ -195,9 +194,9 @@ internal sealed class UserProfileRepository(
         return result.ConvertTo(envelope => ToEntity(envelope.Value, schema));
     }
 
-    private async Task<List<IStoreOperation>> BuildCreateOperationsAsync(UserProfile profile, Ct ct)
+    private async Task<List<IStorageOperation>> BuildCreateOperationsAsync(UserProfile profile, Ct ct)
     {
-        var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
+        var schema = await GetSchemaAsync(ct);
 
         var aspectRef = new UserDso.AspectRef(profile.Id.Uuid.Value, 1, UserProfileDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(profile.SubjectId, ct);
@@ -212,16 +211,16 @@ internal sealed class UserProfileRepository(
             GetSearchFields(profile, schema),
             Expiration.NoExpiration);
 
-        IStoreOperation userOp = existingUser is var (user, userVersion)
+        IStorageOperation userOp = existingUser is var (user, userVersion)
             ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
             : UserRepository.CreateBatchOperation(profile.SubjectId, [aspectRef]);
 
         return [userOp, aspectOp];
     }
 
-    private async Task<List<IStoreOperation>> BuildUpdateOperationsAsync(UserProfile profile, int expectedVersion, Ct ct)
+    private async Task<List<IStorageOperation>> BuildUpdateOperationsAsync(UserProfile profile, int expectedVersion, Ct ct)
     {
-        var schema = (await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct))?.AttributeSchema;
+        var schema = await GetSchemaAsync(ct);
         var aspectOp = UpdateOperation.For(
             profile.Id.Uuid,
             ToDso(profile),
@@ -236,7 +235,7 @@ internal sealed class UserProfileRepository(
         var aspectRef = new UserDso.AspectRef(profile.Id.Uuid.Value, expectedVersion + 1, UserProfileDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(profile.SubjectId, ct);
 
-        IStoreOperation userOp = existingUser is var (user, userVersion)
+        IStorageOperation userOp = existingUser is var (user, userVersion)
             ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
             : UserRepository.CreateBatchOperation(profile.SubjectId, [aspectRef]);
 
@@ -291,105 +290,15 @@ internal sealed class UserProfileRepository(
     private static UserProfileDso.V1 ToDso(UserProfile entity) => new(
         entity.Id.Uuid.Value,
         entity.SubjectId.Value,
-        [.. entity.Attributes.Values.Select(ToDso)]);
+        EavMapper.ToDsoList(entity.Attributes.Values));
 
-    private static UserProfile ToEntity(UserProfileDso.V1 dso, AttributeSchema? schema) =>
+    private static UserProfile ToEntity(UserProfileDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
         UserProfile.Load(
             UserProfileId.Load(dso.Id),
             UserSubjectId.Load(dso.SubjectId),
-            ToValueObjects(dso.Attributes, schema));
+            EavMapper.ToAttributeValues(dso.Attributes, schema));
 
-    private static AttributeValueDso.V1 ToDso(AttributeValue vo) => new(
-        vo.Code.Value, vo.UntypedValue switch
-        {
-            IReadOnlyDictionary<string, object> or IReadOnlyList<object> => vo.UntypedValue,
-            IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-            _ => vo.UntypedValue.ToString()!
-        });
-
-    private static IEnumerable<AttributeValue> ToValueObjects(List<AttributeValueDso.V1> dsos, AttributeSchema? schema)
-    {
-        if (schema is null)
-        {
-            yield break;
-        }
-
-        foreach (var dso in dsos)
-        {
-            var name = AttributeCode.Load(dso.Name);
-            if (!schema.AttributeDefinitions.TryGetValue(name, out var definition))
-            {
-                continue;
-            }
-
-            // For non-scalar types, normalize JsonElement to CLR types before creating the attribute.
-            if (definition.AttributeType is not ScalarAttributeType)
-            {
-                var normalized = dso.Value is JsonElement je ? NormalizeJsonElement(je) : dso.Value;
-                if (normalized is IReadOnlyDictionary<string, object> dict)
-                {
-                    yield return AttributeValue.Load(name, dict);
-                }
-                else if (normalized is IReadOnlyList<object> list)
-                {
-                    yield return AttributeValue.Load(name, list);
-                }
-                continue;
-            }
-
-            var stringValue = dso.Value as string ?? dso.Value?.ToString();
-
-            switch (definition.DataType)
-            {
-                case ScalarDataType.Boolean:
-                    if (bool.TryParse(stringValue, out var boolValue))
-                    {
-                        yield return AttributeValue.Load(name, boolValue);
-                    }
-
-                    continue;
-                case ScalarDataType.Date:
-                    if (DateOnly.TryParse(stringValue, CultureInfo.InvariantCulture, out var dateValue))
-                    {
-                        yield return AttributeValue.Load(name, dateValue);
-                    }
-
-                    continue;
-                case ScalarDataType.DateTime:
-                    if (DateTimeOffset.TryParse(stringValue, CultureInfo.InvariantCulture, out var dateTimeOffsetValue))
-                    {
-                        yield return AttributeValue.Load(name, dateTimeOffsetValue);
-                    }
-
-                    continue;
-                case ScalarDataType.Decimal:
-                    if (decimal.TryParse(stringValue, CultureInfo.InvariantCulture, out var decimalValue))
-                    {
-                        yield return AttributeValue.Load(name, decimalValue);
-                    }
-
-                    continue;
-                case ScalarDataType.Integer:
-                    if (int.TryParse(stringValue, CultureInfo.InvariantCulture, out var intValue))
-                    {
-                        yield return AttributeValue.Load(name, intValue);
-                    }
-
-                    continue;
-                case ScalarDataType.String:
-                    if (stringValue is not null)
-                    {
-                        yield return AttributeValue.Load(name, stringValue);
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException(
-                        $"The {name} schema attribute has an unknown data type: {definition.DataType}");
-            }
-        }
-    }
-
-    private static List<DataStorageKey> GetJsonKeys(UserProfile profile, AttributeSchema? schema)
+    private static List<DataStorageKey> GetJsonKeys(UserProfile profile, IReadOnlyAttributeSchema? schema)
     {
         List<DataStorageKey> keys = [];
 
@@ -414,7 +323,7 @@ internal sealed class UserProfileRepository(
         return keys;
     }
 
-    private static SearchFieldCollection GetSearchFields(UserProfile profile, AttributeSchema? schema)
+    private static SearchFieldCollection GetSearchFields(UserProfile profile, IReadOnlyAttributeSchema? schema)
     {
         var builder = new SearchFieldsBuilder();
 
@@ -494,23 +403,4 @@ internal sealed class UserProfileRepository(
         }
     }
 
-    /// <summary>
-    ///     Converts a <see cref="JsonElement"/> to a CLR object suitable for domain use.
-    /// </summary>
-    private static object? NormalizeJsonElement(JsonElement element) =>
-        element.ValueKind switch
-        {
-            JsonValueKind.String => element.GetString(),
-            JsonValueKind.Number => element.TryGetDecimal(out var d) ? d : element.GetDouble(),
-            JsonValueKind.True => true,
-            JsonValueKind.False => false,
-            JsonValueKind.Null => null,
-            JsonValueKind.Undefined => null,
-            JsonValueKind.Object => element.EnumerateObject()
-                .ToDictionary(p => p.Name, p => NormalizeJsonElement(p.Value)),
-            JsonValueKind.Array => element.EnumerateArray()
-                .Select(NormalizeJsonElement)
-                .ToList(),
-            _ => element.GetRawText()
-        };
 }

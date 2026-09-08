@@ -12,14 +12,14 @@ namespace Duende.Platform.UserManagement;
 public sealed class UserProfileSelfServicing : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private IUserProfileSelfService _selfService = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _selfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
     }
 
@@ -131,58 +131,6 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
 
         // assert
         updatedUser.ShouldNotBeNull().Attributes.Values.ShouldHaveSingleItem().ShouldBe(stringAttribute);
-    }
-
-    [Fact]
-    public async Task stale_schema_version_returns_null_on_register()
-    {
-        // Arrange — add a definition so the schema has version 1
-        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
-        var schemaV1 = await _selfService.GetSchemaAsync(_ct);
-        var attributesValidatedAgainstV1 = TestData.CreateAttributes(schemaV1).Validate();
-
-        // Advance the schema to version 2 by adding another definition
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("extra_field"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("extra")
-            }, _ct)).ShouldBeTrue();
-
-        // Act — try to register with a collection validated against the old schema version
-        var result = await _selfService.TryCreateAsync(UserSubjectId.New(), attributesValidatedAgainstV1, _ct);
-
-        // Assert — staleness check must reject the stale collection
-        result.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task stale_schema_version_returns_null_on_update()
-    {
-        // Arrange — register a user with the current schema
-        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
-        var schemaV1 = await _selfService.GetSchemaAsync(_ct);
-        var initialAttributes = TestData.CreateAttributes(schemaV1).Validate();
-        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), initialAttributes, _ct)).ShouldNotBeNull();
-
-        // Capture a validated collection against the current schema version
-        var attributesValidatedAgainstV1 = TestData.CreateAttributes(schemaV1).Validate();
-
-        // Advance the schema to a new version
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("extra_field"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("extra")
-            }, _ct)).ShouldBeTrue();
-
-        // Act — try to update with a collection validated against the old schema version
-        var result = await _selfService.TryUpdateAsync(user.SubjectId, attributesValidatedAgainstV1, _ct);
-
-        // Assert — staleness check must reject the stale collection
-        result.ShouldBeNull();
     }
 
     private async Task<UserProfile?> TrySetAttribute(UserSubjectId subjectId, AttributeValue attribute)

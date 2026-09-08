@@ -17,7 +17,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.UserManagement.Membership.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class RoleRepository(IStoreFactory storeFactory)
+internal sealed class RoleRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -34,8 +34,8 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Create
     internal async Task<CreateResult> CreateAsync(Role role, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             role.StoreId,
             ToDso(role),
             GetKeys(role),
@@ -48,8 +48,8 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Read by RoleId (DSK lookup)
     internal async Task<(Role Role, int Version)?> TryReadAsync(RoleId id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleIdDskV1.Create(id)),
             ct);
@@ -61,8 +61,8 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Read by Name
     internal async Task<(Role Role, int Version)?> TryReadAsync(RoleName name, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleNameDskV1.Create(name)),
             ct);
@@ -74,8 +74,8 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Update
     internal async Task<UpdateResult> UpdateAsync(Role role, int expectedVersion, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.UpdateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.UpdateAsync(
             role.StoreId,
             ToDso(role),
             expectedVersion,
@@ -89,8 +89,8 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
     // Delete by RoleId (DSK-based)
     internal async Task<DeleteResult> DeleteAsync(RoleId id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.DeleteAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.DeleteAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleIdDskV1.Create(id)),
             [],
@@ -104,12 +104,12 @@ internal sealed class RoleRepository(IStoreFactory storeFactory)
         DataRange? range,
         Ct ct)
     {
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
         var queryFilter = BuildFilter(filter);
         var sortParam = BuildSort(sort);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await queryStore.QueryAsync<RoleDso.V1>(
+        var result = await queryStorage.QueryAsync<RoleDso.V1>(
             RoleDso.EntityType,
             queryFilter,
             sortParam,

@@ -1,8 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Admin;
 
 namespace Duende.UserManagement.Membership;
 
@@ -43,7 +43,7 @@ public interface IRoleAdmin
     /// A result containing the updated role ID with its new version on success,
     /// or an error if update failed (e.g., version conflict, not found).
     /// </returns>
-    Task<SaveResult<RoleId>> UpdateAsync(RoleId id, Role role, Admin.DataVersion expectedVersion, Ct ct);
+    Task<SaveResult<RoleId>> UpdateAsync(RoleId id, Role role, DataVersion expectedVersion, Ct ct);
 
     /// <summary>
     /// Deletes a role by its unique identifier.

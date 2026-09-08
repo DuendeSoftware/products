@@ -20,7 +20,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
     private readonly List<OtpAddress> _otpAddresses = [.. TestData.SubjectIdTypes.Select(TestData.CreateOtpAddress)];
     private IUserProfileAdmin _admin = null!;
     private IUserAdmin _userAdmin = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public static TheoryData<string> AttributeNames { get; } = [.. TestData.CreateAttributeDefinitions().Select(d => d.Code.ToString())];
@@ -32,7 +32,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
         _userAdmin = _serviceProvider.GetRequiredService<IUserAdmin>();
         _externalAuthenticatorAddresses.Count.ShouldBeGreaterThan(1);
         _otpAddresses.Count.ShouldBeGreaterThan(1);
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
@@ -202,7 +202,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
     public async Task Can_query_with_equality_filter_on_boolean()
     {
         var boolAttr = AttributeCode.Create("active");
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition { Code = boolAttr, AttributeType = new ScalarAttributeType(ScalarDataType.Boolean), Description = AttributeDescription.Create("Active flag") }, _ct);
         var attrs = new AttributeValueCollection(await _admin.GetSchemaAsync(_ct));
         attrs.Set(boolAttr, true);
@@ -219,7 +219,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
     public async Task Can_query_with_filter_on_integer()
     {
         var intAttr = AttributeCode.Create("age");
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition { Code = intAttr, AttributeType = new ScalarAttributeType(ScalarDataType.Integer), Description = AttributeDescription.Create("Age") }, _ct);
         var attrs = new AttributeValueCollection(await _admin.GetSchemaAsync(_ct));
         attrs.Set(intAttr, 42);
@@ -236,7 +236,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
     public async Task Can_query_with_filter_on_decimal()
     {
         var decAttr = AttributeCode.Create("score");
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition { Code = decAttr, AttributeType = new ScalarAttributeType(ScalarDataType.Decimal), Description = AttributeDescription.Create("Score") }, _ct);
         var attrs = new AttributeValueCollection(await _admin.GetSchemaAsync(_ct));
         attrs.Set(decAttr, 99.5m);
@@ -253,7 +253,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
     public async Task Can_query_with_filter_on_date()
     {
         var dateAttr = AttributeCode.Create("birthdate");
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition { Code = dateAttr, AttributeType = new ScalarAttributeType(ScalarDataType.Date), Description = AttributeDescription.Create("Birth date") }, _ct);
         var attrs = new AttributeValueCollection(await _admin.GetSchemaAsync(_ct));
         attrs.Set(dateAttr, new DateOnly(1990, 6, 15));
@@ -270,8 +270,8 @@ public sealed class UserProfileAdministration : IAsyncLifetime
     public async Task Can_query_with_filter_on_datetime()
     {
         var dtAttr = AttributeCode.Create("some_date");
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition { Code = dtAttr, AttributeType = new ScalarAttributeType(ScalarDataType.DateTime), Description = AttributeDescription.Create("some_date") }, _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(
+            new AttributeDefinition { Code = dtAttr, AttributeType = new ScalarAttributeType(ScalarDataType.DateTime), Description = AttributeDescription.Create("some_date") }, _ct);
         var attrs = new AttributeValueCollection(await _admin.GetSchemaAsync(_ct));
         var timestamp = new DateTimeOffset(2024, 1, 15, 10, 30, 0, TimeSpan.Zero);
         attrs.Set(dtAttr, timestamp);
@@ -316,7 +316,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
             [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
         });
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition { Code = emailAttr, AttributeType = emailType, Description = AttributeDescription.Create("Email address") }, _ct);
 
         var schema = await _admin.GetSchemaAsync(_ct);
@@ -365,7 +365,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
             [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
         });
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition
             {
                 Code = emailsAttr,
@@ -416,7 +416,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
             [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
             [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
         });
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition
             {
                 Code = emailsAttr,
@@ -457,7 +457,18 @@ public sealed class UserProfileAdministration : IAsyncLifetime
             AttributeType = new ScalarAttributeType(ScalarDataType.String),
             Description = AttributeDescription.Create("User name attribute")
         };
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(definition, ct);
+        await AddDefinitionAsync(definition, ct);
+    }
+
+    private async Task AddDefinitionAsync(AttributeDefinition definition, Ct ct)
+    {
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, ct)
+            : await _schemaAdmin.CreateAsync(schema, ct);
+        saveResult.IsSuccess.ShouldBeTrue();
     }
 
     private async Task<UserProfile> AddUserWithName(string name, Ct ct)

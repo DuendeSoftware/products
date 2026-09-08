@@ -8,7 +8,7 @@ using Duende.UserManagement.Authentication.Internal.Storage;
 namespace Duende.UserManagement.Authentication.Otp.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
+internal sealed class OtpWorkflowRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -18,8 +18,8 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(OtpWorkflow workflow, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             workflow.Id.Uuid,
             ToDso(workflow),
             [
@@ -34,8 +34,8 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<UpdateResult> UpdateAsync(OtpWorkflow workflow, int expectedVersion, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.UpdateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.UpdateAsync(
             workflow.Id.Uuid,
             ToDso(workflow),
             expectedVersion,
@@ -51,8 +51,8 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<(OtpWorkflow OtpWorkflow, int Version)?> TryReadAsync(OtpAddress address, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(address)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(address)), ct);
         return result.Found
             ? (ToEntity(result.Dso), result.Version.Value)
             : null;
@@ -60,8 +60,8 @@ internal sealed class OtpWorkflowRepository(IStoreFactory storeFactory)
 
     internal async Task<(OtpWorkflow OtpWorkflow, int Version)?> TryReadAsync(OtpToken token, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(token)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(token)), ct);
         return result.Found
             ? (ToEntity(result.Dso), result.Version.Value)
             : null;

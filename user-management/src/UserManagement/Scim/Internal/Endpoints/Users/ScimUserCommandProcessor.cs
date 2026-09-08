@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication;
@@ -17,7 +16,6 @@ using Duende.UserManagement.Internal.Modules;
 using Duende.UserManagement.Internal.Services;
 using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles;
-using Duende.UserManagement.Profiles.Internal;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Duende.UserManagement.Scim.Internal.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +28,7 @@ namespace Duende.UserManagement.Scim.Internal.Endpoints.Users;
 
 internal sealed class ScimUserCommandProcessor(
     UserProfileRepository profileRepo,
-    AttributeSchemaRepository schemaRepo,
+    ISchemaStore schemaStore,
     IServerUrls serverUrls,
     IOptions<ScimEndpointOptions> scimOptions,
     IEnumerable<IDuendePlatformFeature> features,
@@ -39,13 +37,13 @@ internal sealed class ScimUserCommandProcessor(
     ILogger<ScimUserCommandProcessor> logger,
     TimeProvider timeProvider,
     UserManagementLicenseValidator licenseValidator,
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     UserRepository userRepository,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     ValidatedPlainTextPasswordFactory? passwordFactory = null,
     PasswordHashAlgorithms? passwordHashAlgorithms = null)
 {
-    private readonly IStoreFactory _storeFactory = storeFactory;
+    private readonly IStorageFactory _storageFactory = storageFactory;
     private readonly UserRepository _userRepository = userRepository;
 
     private bool IsAuthenticationEnabled => features.OfType<UserAuthenticationFeature>().Any();
@@ -159,7 +157,7 @@ internal sealed class ScimUserCommandProcessor(
             return ReplaceValidationResult.Fail(preconditionError);
         }
 
-        var schemaResult = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct);
+        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
         if (string.IsNullOrWhiteSpace(body.UserName))
         {
@@ -168,19 +166,12 @@ internal sealed class ScimUserCommandProcessor(
                 ScimOperationResult.Error(400, ScimConstants.ErrorTypes.InvalidValue, "userName is required."));
         }
 
-        var mapping = ScimRequestMapper.Map(body, schemaResult?.AttributeSchema);
+        var mapping = ScimRequestMapper.Map(body, schema);
         if (!mapping.IsSuccess)
         {
             logger.ScimReplaceUserValidationFailed(LogLevel.Information, id, mapping.ErrorDetail ?? string.Empty);
             return ReplaceValidationResult.Fail(
                 ScimOperationResult.Error(400, mapping.ErrorScimType, mapping.ErrorDetail));
-        }
-
-        var currentSchema = schemaResult?.AttributeSchema ?? AttributeSchema.Empty;
-        if (!SchemaFreshnessCheck.IsValid(mapping.Attributes!, currentSchema, logger))
-        {
-            return ReplaceValidationResult.Fail(
-                ScimOperationResult.Error(409, "Schema version mismatch. Please retry with the current schema."));
         }
 
         if (mapping.Password is not null && !IsAuthenticationEnabled)
@@ -206,7 +197,7 @@ internal sealed class ScimUserCommandProcessor(
         ReplaceValidationResult validated, Ct ct)
     {
         // Resolve profile aspect: update existing or create new
-        IStoreOperation profileAspectOp;
+        IStorageOperation profileAspectOp;
         int newProfileVersion;
         UserProfile updatedProfile;
 
@@ -231,7 +222,7 @@ internal sealed class ScimUserCommandProcessor(
         // Each aspect (profile, authenticators) tracks its own version independently.
         var profileAspectRef = UserProfileRepository.GetAspectRef(updatedProfile, newProfileVersion);
         List<UserDso.AspectRef> aspectReferences = [profileAspectRef];
-        List<IStoreOperation> operations = [];
+        List<IStorageOperation> operations = [];
 
         // Optionally handle password: validate, hash, and create/update the authenticators aspect
         if (IsAuthenticationEnabled && validated.Mapping!.Password != null)
@@ -270,7 +261,7 @@ internal sealed class ScimUserCommandProcessor(
 
         // Build the root UserDso operation — it holds references to all aspect versions.
         // This ensures the UserDso always points to the correct version of each aspect.
-        IStoreOperation userOp;
+        IStorageOperation userOp;
         int newUserDsoVersion;
         if (validated.UserExistingResult is not null)
         {
@@ -290,7 +281,7 @@ internal sealed class ScimUserCommandProcessor(
             newUserDsoVersion = 1;
         }
 
-        var orderedOperations = new List<IStoreOperation> { userOp };
+        var orderedOperations = new List<IStorageOperation> { userOp };
         orderedOperations.AddRange(operations);
         orderedOperations.Add(profileAspectOp);
 
@@ -304,12 +295,12 @@ internal sealed class ScimUserCommandProcessor(
     /// </summary>
     private async Task<ScimOperationResult> ExecuteReplaceBatchAsync(
         string id,
-        List<IStoreOperation> operations,
+        List<IStorageOperation> operations,
         UserProfile updatedProfile,
         int newUserDsoVersion,
         Ct ct)
     {
-        var batchResult = await (await _storeFactory.GetStore(ct)).ExecuteBatchAsync(operations, [], ct);
+        var batchResult = await (await _storageFactory.GetStorage(ct)).ExecuteBatchAsync(operations, [], ct);
         if (!batchResult.Success)
         {
             var mapError = MapBatchError(batchResult);
@@ -340,7 +331,7 @@ internal sealed class ScimUserCommandProcessor(
     }
 
     private sealed record ReplaceBuildResult(
-        List<IStoreOperation> Operations,
+        List<IStorageOperation> Operations,
         UserProfile UpdatedProfile,
         int NewUserDsoVersion)
     {
@@ -424,8 +415,7 @@ internal sealed class ScimUserCommandProcessor(
             return preconditionError;
         }
 
-        var schemaResult = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct);
-        var schema = schemaResult?.AttributeSchema;
+        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
         var profile = profileExistingResult.Value.UserProfile;
 
         // Read authenticators if authentication is enabled
@@ -444,11 +434,10 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         // Dispatch patch operations — intercept password-targeted ops
-        var effectiveSchema = schema ?? AttributeSchema.Empty;
-        var attributes = new AttributeValueCollection(effectiveSchema);
+        var attributes = new AttributeValueCollection(schema);
         foreach (var attr in profile.Attributes.Values)
         {
-            if (effectiveSchema.AttributeDefinitions.ContainsKey(attr.Code))
+            if (schema.AttributeDefinitions.ContainsKey(attr.Code))
             {
                 attributes.Set(attr);
             }
@@ -568,11 +557,6 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         var validatedAttributes = attributes.Validate();
-        var currentSchemaForPatch = effectiveSchema;
-        if (!SchemaFreshnessCheck.IsValid(validatedAttributes, currentSchemaForPatch, logger))
-        {
-            return ScimOperationResult.Error(409, "Schema version mismatch. Please retry with the current schema.");
-        }
 
         profile.ReplaceAttributes(validatedAttributes);
 
@@ -584,7 +568,7 @@ internal sealed class ScimUserCommandProcessor(
 
         // Collect aspect refs starting with profile
         List<UserDso.AspectRef> aspectReferences = [profileAspectRef];
-        List<IStoreOperation> operations = [];
+        List<IStorageOperation> operations = [];
 
         // Handle password changes in the same batch
         if (IsAuthenticationEnabled && (passwordToSet is not null || removePassword))
@@ -633,7 +617,7 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         // Build UserDso update operation incorporating all aspect refs
-        IStoreOperation userOp;
+        IStorageOperation userOp;
         int newUserDsoVersion;
         if (userExistingResult is not null)
         {
@@ -654,11 +638,11 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         // Final ordered list: userOp first, then auth ops (already in operations), then profile aspect last
-        var orderedOperations = new List<IStoreOperation> { userOp };
+        var orderedOperations = new List<IStorageOperation> { userOp };
         orderedOperations.AddRange(operations);
         orderedOperations.Add(profileAspectOp);
 
-        var batchResult = await (await _storeFactory.GetStore(ct)).ExecuteBatchAsync(orderedOperations, [], ct);
+        var batchResult = await (await _storageFactory.GetStorage(ct)).ExecuteBatchAsync(orderedOperations, [], ct);
         if (!batchResult.Success)
         {
             var mapError = MapBatchError(batchResult);
@@ -755,8 +739,7 @@ internal sealed class ScimUserCommandProcessor(
 
     private async Task<Result<UserProfile, ScimOperationResult>> TryCreateUserAsync(ScimUserRequest body, Ct ct)
     {
-        var schemaResult = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct);
-        var schema = schemaResult?.AttributeSchema;
+        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
         var mapping = ScimRequestMapper.Map(body, schema);
         if (!mapping.IsSuccess)
@@ -765,16 +748,10 @@ internal sealed class ScimUserCommandProcessor(
             return Result.Create(ScimOperationResult.Error(400, mapping.ErrorScimType, mapping.ErrorDetail));
         }
 
-        var currentSchemaForCreate = schema ?? AttributeSchema.Empty;
-        if (!SchemaFreshnessCheck.IsValid(mapping.Attributes!, currentSchemaForCreate, logger))
-        {
-            return Result.Create(ScimOperationResult.Error(409, "Schema version mismatch. Please retry with the current schema."));
-        }
-
         var subjectId = UserSubjectId.New();
         var profile = new UserProfile(subjectId, mapping.Attributes!);
 
-        List<IStoreOperation> operations = [];
+        List<IStorageOperation> operations = [];
         List<UserDso.AspectRef> aspectReferences = [];
 
         var (profileAspectOp, profileAspectRef) = await profileRepo.CreateAspectBatchOperationAsync(profile, ct);
@@ -800,11 +777,11 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         // Final ordered list: userOp first, then auth ops (already in operations), then profile aspect last
-        var orderedOps = new List<IStoreOperation> { UserRepository.CreateBatchOperation(subjectId, aspectReferences) };
+        var orderedOps = new List<IStorageOperation> { UserRepository.CreateBatchOperation(subjectId, aspectReferences) };
         orderedOps.AddRange(operations);
         orderedOps.Add(profileAspectOp);
 
-        var batchResult = await (await _storeFactory.GetStore(ct)).ExecuteBatchAsync(orderedOps, [], ct);
+        var batchResult = await (await _storageFactory.GetStorage(ct)).ExecuteBatchAsync(orderedOps, [], ct);
         if (batchResult.Success)
         {
             licenseValidator.ValidateUserCount();
@@ -831,7 +808,7 @@ internal sealed class ScimUserCommandProcessor(
     private static ApplyResult ApplyOperation(
         ScimPatchOperation op,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
 #pragma warning disable CA1308
         var opLower = op.Op?.ToLowerInvariant();
@@ -849,7 +826,7 @@ internal sealed class ScimUserCommandProcessor(
     private static ApplyResult ApplyAdd(
         ScimPatchOperation op,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
         if (op.Path is null)
         {
@@ -877,7 +854,7 @@ internal sealed class ScimUserCommandProcessor(
     private static ApplyResult ApplyReplace(
         ScimPatchOperation op,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
         if (op.Path is null)
         {
@@ -896,7 +873,7 @@ internal sealed class ScimUserCommandProcessor(
     private static ApplyResult ApplyValueObjectKeys(
         ScimPatchOperation op,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
         if (op.Value is not { ValueKind: JsonValueKind.Object } valueObj)
         {
@@ -925,7 +902,7 @@ internal sealed class ScimUserCommandProcessor(
     private static IReadOnlyDictionary<string, object>? SnapshotComplexAttribute(
         string path,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
         if (schema is null || path.Contains('.', StringComparison.Ordinal))
         {
@@ -952,7 +929,7 @@ internal sealed class ScimUserCommandProcessor(
         string path,
         IReadOnlyDictionary<string, object> existingSnapshot,
         AttributeValueCollection attributes,
-        AttributeSchema schema)
+        IReadOnlyAttributeSchema schema)
     {
         if (!AttributeCode.TryCreate(path, out var attrName) ||
             !schema.AttributeDefinitions.TryGetValue(attrName, out var definition) ||
@@ -984,7 +961,7 @@ internal sealed class ScimUserCommandProcessor(
     private static ApplyResult ApplyRemove(
         ScimPatchOperation op,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
         if (op.Path is null)
         {
@@ -1043,7 +1020,7 @@ internal sealed class ScimUserCommandProcessor(
         string path,
         JsonElement value,
         AttributeValueCollection attributes,
-        AttributeSchema? schema)
+        IReadOnlyAttributeSchema? schema)
     {
         if (path.Contains('[', StringComparison.Ordinal) || path.Contains(']', StringComparison.Ordinal))
         {
@@ -1182,7 +1159,7 @@ internal sealed class ScimUserCommandProcessor(
         string path,
         JsonElement value,
         AttributeValueCollection attributes,
-        AttributeSchema schema)
+        IReadOnlyAttributeSchema schema)
     {
         var dotIndex = path.IndexOf('.', StringComparison.Ordinal);
         var parentPathRaw = path[..dotIndex];
@@ -1246,7 +1223,7 @@ internal sealed class ScimUserCommandProcessor(
         JsonElement value,
         ComplexAttributeType complexType,
         AttributeValueCollection attributes,
-        AttributeSchema schema)
+        IReadOnlyAttributeSchema schema)
     {
         var dotIndex = remainingSubPath.IndexOf('.', StringComparison.Ordinal);
         var segmentKey = remainingSubPath[..dotIndex];
@@ -1296,7 +1273,7 @@ internal sealed class ScimUserCommandProcessor(
     private static ApplyResult ApplyDotNotationRemove(
         string path,
         AttributeValueCollection attributes,
-        AttributeSchema schema)
+        IReadOnlyAttributeSchema schema)
     {
         var dotIndex = path.IndexOf('.', StringComparison.Ordinal);
         var parentPathRaw = path[..dotIndex];

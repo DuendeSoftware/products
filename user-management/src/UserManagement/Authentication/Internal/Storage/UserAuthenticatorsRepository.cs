@@ -24,7 +24,7 @@ using Microsoft.Extensions.Options;
 namespace Duende.UserManagement.Authentication.Internal.Storage;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserAuthenticatorsRepository(
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     IOptions<UserAuthenticatorsRepository.Options> options,
     IDataProtectionProvider dataProtectionProvider,
     UserRepository userRepository)
@@ -42,9 +42,9 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<CreateResult> CreateAsync(UserAuthenticators authenticators, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var operations = await BuildCreateOperationsAsync(authenticators, ct);
-        var result = await store.ExecuteBatchAsync(operations, [], ct);
+        var result = await storage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return CreateResult.Success;
@@ -59,7 +59,7 @@ internal sealed class UserAuthenticatorsRepository(
         };
     }
 
-    internal async Task<IReadOnlyList<IStoreOperation>> CreateBatchOperationAsync(UserAuthenticators authenticators, Ct ct) =>
+    internal async Task<IReadOnlyList<IStorageOperation>> CreateBatchOperationAsync(UserAuthenticators authenticators, Ct ct) =>
         await BuildCreateOperationsAsync(authenticators, ct);
 
     internal CreateOperation CreateAspectBatchOperation(UserAuthenticators authenticators) =>
@@ -81,15 +81,15 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(OtpAddress otpAddress, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(OtpAddressDskV1.Create(otpAddress)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(OtpAddressDskV1.Create(otpAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
@@ -97,16 +97,16 @@ internal sealed class UserAuthenticatorsRepository(
         ExternalAuthenticatorAddress externalAuthenticatorAddress,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(
         PasskeyCredentialId credentialId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(credentialId)), ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(credentialId)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
@@ -119,9 +119,9 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<UpdateResult> UpdateAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var operations = await BuildUpdateOperationsAsync(authenticators, expectedVersion, ct);
-        var result = await store.ExecuteBatchAsync(operations, [], ct);
+        var result = await storage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return UpdateResult.Success;
@@ -137,7 +137,7 @@ internal sealed class UserAuthenticatorsRepository(
         };
     }
 
-    internal async Task<IReadOnlyList<IStoreOperation>> UpdateBatchOperationAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct) =>
+    internal async Task<IReadOnlyList<IStorageOperation>> UpdateBatchOperationAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct) =>
         await BuildUpdateOperationsAsync(authenticators, expectedVersion, ct);
 
     internal UpdateOperation UpdateAspectOnlyBatchOperation(UserAuthenticators authenticators, int expectedVersion) =>
@@ -157,14 +157,14 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<QueryResult<UserAuthenticators>> QueryAsync(DataRange? range, Ct ct)
     {
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
         if (dataRange.TokenValue is not null)
         {
             throw new NotSupportedException("User authenticator queries do not support continuation-token pagination.");
         }
 
-        var result = await queryStore.QueryAsync<UserAuthenticatorsDso.V1>(
+        var result = await queryStorage.QueryAsync<UserAuthenticatorsDso.V1>(
             UserAuthenticatorsDso.EntityType,
             AllExpression.Instance,
             SortParameter.Empty,
@@ -174,7 +174,7 @@ internal sealed class UserAuthenticatorsRepository(
         return result.ConvertTo(envelope => ToEntity(envelope.Value));
     }
 
-    private async Task<List<IStoreOperation>> BuildCreateOperationsAsync(UserAuthenticators authenticators, Ct ct)
+    private async Task<List<IStorageOperation>> BuildCreateOperationsAsync(UserAuthenticators authenticators, Ct ct)
     {
         var aspectRef = new UserDso.AspectRef(authenticators.Id.Uuid.Value, 1, UserAuthenticatorsDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(authenticators.SubjectId, ct);
@@ -189,14 +189,14 @@ internal sealed class UserAuthenticatorsRepository(
             [],
             Expiration.NoExpiration);
 
-        IStoreOperation userOp = existingUser is var (user, userVersion)
+        IStorageOperation userOp = existingUser is var (user, userVersion)
             ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
             : UserRepository.CreateBatchOperation(authenticators.SubjectId, [aspectRef]);
 
         return [userOp, aspectOp];
     }
 
-    private async Task<List<IStoreOperation>> BuildUpdateOperationsAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
+    private async Task<List<IStorageOperation>> BuildUpdateOperationsAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
     {
         var aspectOp = UpdateOperation.For(
             authenticators.Id.Uuid,
@@ -212,7 +212,7 @@ internal sealed class UserAuthenticatorsRepository(
         var aspectRef = new UserDso.AspectRef(authenticators.Id.Uuid.Value, expectedVersion + 1, UserAuthenticatorsDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(authenticators.SubjectId, ct);
 
-        IStoreOperation userOp = existingUser is var (user, userVersion)
+        IStorageOperation userOp = existingUser is var (user, userVersion)
             ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
             : UserRepository.CreateBatchOperation(authenticators.SubjectId, [aspectRef]);
 

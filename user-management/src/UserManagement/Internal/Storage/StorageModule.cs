@@ -20,6 +20,6 @@ internal sealed class StorageModule : IDuendeModule
             "AddPostgreSqlStore(), AddMsSqlStore(), or AddSqliteStore() inside the " +
             "AddUserManagementInternal configuration callback."));
 
-        services.TryAddSingleton<IStoreFactory, DefaultPoolStoreFactory>();
+        services.TryAddSingleton<IStorageFactory, DefaultPoolStoreFactory>();
     }
 }

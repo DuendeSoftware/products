@@ -1,9 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Admin;
 using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Membership.Internal.Storage;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,7 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
         if (existing.HasValue)
         {
             logger.GroupCreateDuplicateName(LogLevel.Warning, dto.Name.Value);
-            return AdminError.AlreadyExists("Group", dto.Name.Value, nameof(dto.Name));
+            return SaveResult.Failure<GroupId>(StorageError.AlreadyExists("Group", dto.Name.Value, nameof(dto.Name)));
         }
 
         // Create the domain entity
@@ -47,8 +48,8 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
 
         return result switch
         {
-            CreateResult.AlreadyExists => AdminError.AlreadyExists("Group", dto.Name.Value, nameof(dto.Name)),
-            CreateResult.KeyConflict => AdminError.DuplicateValue(nameof(dto.Name), dto.Name.Value),
+            CreateResult.AlreadyExists => SaveResult.Failure<GroupId>(StorageError.AlreadyExists("Group", dto.Name.Value, nameof(dto.Name))),
+            CreateResult.KeyConflict => SaveResult.Failure<GroupId>(StorageError.DuplicateValue(nameof(dto.Name), dto.Name.Value)),
             _ => throw new InvalidOperationException($"Unknown value {result}")
         };
     }
@@ -60,13 +61,13 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
         if (!result.HasValue)
         {
             logger.GroupNotFound(LogLevel.Warning, id);
-            return new GetResult<Membership.Group>();
+            return GetResult.NotFound<Membership.Group>();
         }
 
         return GetResult.Found(ToDto(result.Value.Group), result.Value.Version);
     }
 
-    public async Task<SaveResult<GroupId>> UpdateAsync(GroupId id, Membership.Group dto, Admin.DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<GroupId>> UpdateAsync(GroupId id, Membership.Group dto, DataVersion expectedVersion, Ct ct)
     {
         if (!licenseValidator.ValidateRolesAndGroups())
         {
@@ -77,7 +78,7 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
         if (!existing.HasValue)
         {
             logger.GroupNotFound(LogLevel.Warning, id);
-            return AdminError.NotFound("Group", id.ToString());
+            return SaveResult.Failure<GroupId>(StorageError.NotFound("Group", id.ToString()));
         }
 
         var (group, currentVersion) = existing.Value;
@@ -98,13 +99,13 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
         if (result == UpdateResult.UnexpectedVersion)
         {
             logger.GroupUpdateVersionConflict(LogLevel.Warning, id);
-            return AdminError.VersionConflict();
+            return SaveResult.Failure<GroupId>(StorageError.VersionConflict());
         }
 
         return result switch
         {
-            UpdateResult.DoesNotExist => AdminError.NotFound("Group", id.ToString()),
-            UpdateResult.KeyConflict => AdminError.DuplicateValue(nameof(dto.Name), dto.Name.Value),
+            UpdateResult.DoesNotExist => SaveResult.Failure<GroupId>(StorageError.NotFound("Group", id.ToString())),
+            UpdateResult.KeyConflict => SaveResult.Failure<GroupId>(StorageError.DuplicateValue(nameof(dto.Name), dto.Name.Value)),
             _ => throw new InvalidOperationException($"Unknown value {result}")
         };
     }
@@ -120,7 +121,7 @@ internal sealed class GroupAdmin(GroupRepository groupRepository, ILogger<GroupA
         if (!existing.HasValue)
         {
             logger.GroupDeleteNotFound(LogLevel.Warning, id);
-            return AdminError.NotFound("Group", id.ToString());
+            return SaveResult.Failure<GroupId>(StorageError.NotFound("Group", id.ToString()));
         }
 
         // Delete via repository

@@ -26,7 +26,7 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
     private ServiceProvider _sp = null!;
     private IExternalAuthenticator _externalAuthenticator = null!;
     private IUserProfileAdmin _userProfileAdmin = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private IUserAuthenticatorsAdmin _authenticatorsAdmin = null!;
     private IMembershipAdmin _membershipAdmin = null!;
     private IRoleAdmin _roleAdmin = null!;
@@ -38,7 +38,7 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
         _sp = await UsersServiceProviderFactory.CreateAsync();
         _externalAuthenticator = _sp.GetRequiredService<IExternalAuthenticator>();
         _userProfileAdmin = _sp.GetRequiredService<IUserProfileAdmin>();
-        _schemaAdmin = _sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _sp.GetRequiredService<ISchemaAdmin>();
         _authenticatorsAdmin = _sp.GetRequiredService<IUserAuthenticatorsAdmin>();
         _membershipAdmin = _sp.GetRequiredService<IMembershipAdmin>();
         _roleAdmin = _sp.GetRequiredService<IRoleAdmin>();
@@ -60,24 +60,20 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
         new(MakeSubject(sub), EmptyClient, "test");
 
     private async Task DefineStringAttribute(string code) =>
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create(code),
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create(code)
-            },
-            _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create(code),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create(code)
+        });
 
     private async Task DefineBoolAttribute(string code) =>
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create(code),
-                AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
-                Description = AttributeDescription.Create(code)
-            },
-            _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create(code),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+            Description = AttributeDescription.Create(code)
+        });
 
     private async Task<UserSubjectId> CreateUserWithStringAttributes(params (string code, string value)[] attrs)
     {
@@ -395,14 +391,23 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
     }
 
     private async Task DefineAttribute(string code, AttributeType attributeType) =>
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create(code),
-                AttributeType = attributeType,
-                Description = AttributeDescription.Create(code)
-            },
-            _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create(code),
+            AttributeType = attributeType,
+            Description = AttributeDescription.Create(code)
+        });
+
+    private async Task AddDefinitionAsync(AttributeDefinition definition)
+    {
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _schemaAdmin.CreateAsync(schema, _ct);
+        saveResult.IsSuccess.ShouldBeTrue();
+    }
 
     [Fact]
     public void DI_resolves_UserManagementProfileService_when_AddUserManagement_is_configured()

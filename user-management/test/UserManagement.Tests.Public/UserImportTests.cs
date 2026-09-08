@@ -18,7 +18,7 @@ public sealed class UserImportTests : IAsyncLifetime
     private ServiceProvider _serviceProvider = null!;
     private IUserImporter _import = null!;
     private IUserProfileAdmin _profileAdmin = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private IGroupAdmin _groupAdmin = null!;
     private IRoleAdmin _roleAdmin = null!;
     private IMembershipAdmin _membershipAdmin = null!;
@@ -32,7 +32,7 @@ public sealed class UserImportTests : IAsyncLifetime
 
         _import = _serviceProvider.GetRequiredService<IUserImporter>();
         _profileAdmin = _serviceProvider.GetRequiredService<IUserProfileAdmin>();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _groupAdmin = _serviceProvider.GetRequiredService<IGroupAdmin>();
         _roleAdmin = _serviceProvider.GetRequiredService<IRoleAdmin>();
         _membershipAdmin = _serviceProvider.GetRequiredService<IMembershipAdmin>();
@@ -58,7 +58,7 @@ public sealed class UserImportTests : IAsyncLifetime
     public async Task import_profile_with_schema_attributes_round_trips()
     {
         var attrName = AttributeCode.Create($"email_{Guid.NewGuid():N}"[..20]);
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(_schemaAdmin,
             new AttributeDefinition { Code = attrName, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("email") },
             _ct);
 
@@ -87,7 +87,7 @@ public sealed class UserImportTests : IAsyncLifetime
         var hashedData = _hashAlgorithm.Hash(rawPassword);
 
         var userNameCode = AttributeCode.Create("userName");
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(_schemaAdmin,
             new AttributeDefinition { Code = userNameCode, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("user id"), IsUnique = true },
             _ct);
 
@@ -286,14 +286,14 @@ public sealed class UserImportTests : IAsyncLifetime
         await using var sp = await CreateProviderWithResolver(
             new LambdaConflictResolver(c => Task.FromResult<UserImportConflictResolution>(new UserImportConflictResolution.Overwrite(c.Record.SubjectId))));
         var import = sp.GetRequiredService<IUserImporter>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
         var profileAdmin = sp.GetRequiredService<IUserProfileAdmin>();
 
         var attr1Name = AttributeCode.Create($"a1_{Guid.NewGuid():N}"[..20]);
         var attr2Name = AttributeCode.Create($"a2_{Guid.NewGuid():N}"[..20]);
-        _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(schemaAdmin,
             new AttributeDefinition { Code = attr1Name, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("first") }, _ct);
-        _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(schemaAdmin,
             new AttributeDefinition { Code = attr2Name, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("second") }, _ct);
 
         var subjectId = UserSubjectId.New();
@@ -383,10 +383,10 @@ public sealed class UserImportTests : IAsyncLifetime
             new LambdaConflictResolver(_ => Task.FromResult<UserImportConflictResolution>(new UserImportConflictResolution.Skip())));
         var import = sp.GetRequiredService<IUserImporter>();
         var profileAdmin = sp.GetRequiredService<IUserProfileAdmin>();
-        var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
 
         var userNameCode = AttributeCode.Create("userName");
-        _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(schemaAdmin,
             new AttributeDefinition { Code = userNameCode, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("unique"), IsUnique = true },
             _ct);
 
@@ -430,7 +430,7 @@ public sealed class UserImportTests : IAsyncLifetime
     public async Task unique_key_conflict_with_skip_resolver_skips_incoming_record()
     {
         var attrName = AttributeCode.Create($"uniq_{Guid.NewGuid():N}"[..20]);
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(_schemaAdmin,
             new AttributeDefinition { Code = attrName, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("unique"), IsUnique = true },
             _ct);
 
@@ -480,11 +480,11 @@ public sealed class UserImportTests : IAsyncLifetime
 
         await using (sp)
         {
-            var schemaAdmin = sp.GetRequiredService<IUserProfileSchemaAdmin>();
+            var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
             var profileAdmin = sp.GetRequiredService<IUserProfileAdmin>();
             var import = sp.GetRequiredService<IUserImporter>();
 
-            _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+            await AddDefinitionAsync(schemaAdmin,
                 new AttributeDefinition { Code = attrName, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("unique"), IsUnique = true },
                 _ct);
 
@@ -576,13 +576,13 @@ public sealed class UserImportTests : IAsyncLifetime
         // Step 1: Import user with password hashed by fake algorithm
         await using var importProvider = await CreateProviderWithFakeAlgorithm(preferFake: true, dbId: dbId);
         var importAdmin = importProvider.GetRequiredService<IUserImporter>();
-        var schemaAdmin = importProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        var schemaAdmin = importProvider.GetRequiredService<ISchemaAdmin>();
         var profileAdmin = importProvider.GetRequiredService<IUserProfileAdmin>();
         var fakeAlgo = importProvider.GetServices<IPasswordHashAlgorithm>()
             .Single(a => a.AlgorithmId == FakePasswordHashAlgorithm.Id);
 
         var userNameCode = AttributeCode.Create("userName");
-        _ = await schemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(schemaAdmin,
             new AttributeDefinition { Code = userNameCode, AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("user id"), IsUnique = true },
             _ct);
 
@@ -666,6 +666,17 @@ public sealed class UserImportTests : IAsyncLifetime
         : IUserImportConflictResolver
     {
         public Task<UserImportConflictResolution> ResolveAsync(UserImportConflict conflict, Ct ct) => resolve(conflict);
+    }
+
+    private static async Task AddDefinitionAsync(ISchemaAdmin schemaAdmin, AttributeDefinition definition, Ct ct)
+    {
+        var getResult = await schemaAdmin.GetAsync(SchemaId.UserProfile, ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, ct)
+            : await schemaAdmin.CreateAsync(schema, ct);
+        saveResult.IsSuccess.ShouldBeTrue();
     }
 
 }

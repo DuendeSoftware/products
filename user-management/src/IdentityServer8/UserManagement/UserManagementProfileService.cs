@@ -75,6 +75,7 @@ public class UserManagementProfileService(
     /// </summary>
     protected virtual async Task GetProfileDataAsync(ProfileDataRequestContext context, UserProfile profile, Ct ct)
     {
+        ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(profile);
         var claims = new List<Claim>();
 

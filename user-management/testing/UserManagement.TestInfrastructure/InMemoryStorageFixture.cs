@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.UserManagement;
 
-internal sealed class InMemoryStoreFixture
+internal sealed class InMemoryStorageFixture
 {
     /// <summary>
     /// Gets the DSO type registry used by the fixture.
@@ -24,7 +24,7 @@ internal sealed class InMemoryStoreFixture
     /// <summary>
     /// Creates a new fixture with a default space and system time provider.
     /// </summary>
-    public InMemoryStoreFixture()
+    public InMemoryStorageFixture()
         : this(TimeProvider.System)
     {
     }
@@ -32,14 +32,14 @@ internal sealed class InMemoryStoreFixture
     /// <summary>
     /// Creates a new fixture with custom dependencies.
     /// </summary>
-    public InMemoryStoreFixture(TimeProvider timeProvider) => TimeProvider = timeProvider;
+    public InMemoryStorageFixture(TimeProvider timeProvider) => TimeProvider = timeProvider;
 
-    public static IStore Build()
+    public static IStorage Build()
     {
         var dbId = Guid.NewGuid();
         return new ServiceCollection()
                 .AddStorageInternal(storage => storage.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared"))
                 .BuildServiceProvider()
-                .GetRequiredService<IStore>();
+                .GetRequiredService<IStorage>();
     }
 }

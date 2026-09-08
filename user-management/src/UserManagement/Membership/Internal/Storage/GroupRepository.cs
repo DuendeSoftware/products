@@ -19,7 +19,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.UserManagement.Membership.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class GroupRepository(IStoreFactory storeFactory)
+internal sealed class GroupRepository(IStorageFactory storageFactory)
 {
     internal enum Keys
     {
@@ -35,8 +35,8 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
 
     internal async Task<CreateResult> CreateAsync(Group group, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.CreateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.CreateAsync(
             group.StoreId,
             ToDso(group),
             GetKeys(group),
@@ -48,8 +48,8 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
 
     internal async Task<(Group Group, int Version)?> TryReadAsync(GroupId id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             GroupDso.EntityType,
             DataStorageKey.Create(GroupIdDskV1.Create(id)),
             ct);
@@ -60,8 +60,8 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
 
     internal async Task<(Group Group, int Version)?> TryReadAsync(GroupName name, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             GroupDso.EntityType,
             DataStorageKey.Create(GroupNameDskV1.Create(name)),
             ct);
@@ -72,8 +72,8 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
 
     internal async Task<UpdateResult> UpdateAsync(Group group, int expectedVersion, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.UpdateAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.UpdateAsync(
             group.StoreId,
             ToDso(group),
             expectedVersion,
@@ -86,8 +86,8 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
 
     internal async Task<DeleteResult> DeleteAsync(GroupId id, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.DeleteAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.DeleteAsync(
             GroupDso.EntityType,
             DataStorageKey.Create(GroupIdDskV1.Create(id)),
             [],
@@ -103,10 +103,10 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
         IReadOnlyList<UuidV7> userUuids,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var groupUuid = group.StoreId;
 
-        var ops = new List<IStoreOperation>
+        var ops = new List<IStorageOperation>
         {
             CreateOperation.For(groupUuid, ToDso(group), GetKeys(group), GetSearchFields(group), Expiration.NoExpiration)
         };
@@ -116,7 +116,7 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
             ops.Add(LinkOperation.For(MembershipLinkDefinitions.MembershipGroup, userUuid, groupUuid));
         }
 
-        return await store.ExecuteBatchAsync(ops, [], ct);
+        return await storage.ExecuteBatchAsync(ops, [], ct);
     }
 
     /// <summary>
@@ -131,10 +131,10 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
         IReadOnlyList<UuidV7> linksToRemove,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var groupUuid = group.StoreId;
 
-        var ops = new List<IStoreOperation>
+        var ops = new List<IStorageOperation>
         {
             UpdateOperation.For(groupUuid, ToDso(group), expectedVersion, GetKeys(group), GetSearchFields(group), expiration: null)
         };
@@ -149,7 +149,7 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
             ops.Add(LinkOperation.For(MembershipLinkDefinitions.MembershipGroup, userUuid, groupUuid));
         }
 
-        return await store.ExecuteBatchAsync(ops, [], ct);
+        return await storage.ExecuteBatchAsync(ops, [], ct);
     }
 
     /// <summary>
@@ -161,9 +161,9 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
         IReadOnlyList<UuidV7> linksToRemove,
         Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
 
-        var ops = new List<IStoreOperation>();
+        var ops = new List<IStorageOperation>();
 
         foreach (var userUuid in linksToRemove)
         {
@@ -180,7 +180,7 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
             return BatchResult.Successful(0);
         }
 
-        return await store.ExecuteBatchAsync(ops, [], ct);
+        return await storage.ExecuteBatchAsync(ops, [], ct);
     }
 
     internal async Task<QueryResult<Group>> QueryAsync(
@@ -189,12 +189,12 @@ internal sealed class GroupRepository(IStoreFactory storeFactory)
         DataRange? range,
         Ct ct)
     {
-        var queryStore = await storeFactory.GetStore(ct);
+        var queryStorage = await storageFactory.GetStorage(ct);
         var queryFilter = BuildFilter(filter);
         var sortParam = BuildSort(sort);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await queryStore.QueryAsync<GroupDso.V1>(
+        var result = await queryStorage.QueryAsync<GroupDso.V1>(
             GroupDso.EntityType,
             queryFilter,
             sortParam,

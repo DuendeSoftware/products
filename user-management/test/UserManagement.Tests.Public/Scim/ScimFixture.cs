@@ -38,7 +38,7 @@ public sealed class ScimFixture : IAsyncDisposable
     public ScimGroupHttpClient GroupClient { get; private set; } = null!;
 
     public IUserProfileAdmin UserProfileAdmin { get; private set; } = null!;
-    public IUserProfileSchemaAdmin UserSchemaAdmin { get; private set; } = null!;
+    public ISchemaAdmin UserSchemaAdmin { get; private set; } = null!;
     public IGroupAdmin GroupAdmin { get; private set; } = null!;
     public IMembershipAdmin MembershipAdmin { get; private set; } = null!;
     public IUserAuthenticatorsAdmin AuthenticatorsAdmin { get; private set; } = null!;
@@ -121,7 +121,7 @@ public sealed class ScimFixture : IAsyncDisposable
         await _server.GetRequiredService<IPooledStore>().MigrateAsync(TestContext.Current.CancellationToken);
 
         UserProfileAdmin = _server.Services.GetRequiredService<IUserProfileAdmin>();
-        UserSchemaAdmin = _server.Services.GetRequiredService<IUserProfileSchemaAdmin>();
+        UserSchemaAdmin = _server.Services.GetRequiredService<ISchemaAdmin>();
         GroupAdmin = _server.Services.GetRequiredService<IGroupAdmin>();
         MembershipAdmin = _server.Services.GetRequiredService<IMembershipAdmin>();
         AuthenticatorsAdmin = _server.Services.GetRequiredService<IUserAuthenticatorsAdmin>();
@@ -269,16 +269,25 @@ public sealed class ScimFixture : IAsyncDisposable
         string name,
         ScalarDataType dataType,
         string description,
-        bool isUnique = false)
+        bool isUnique = false) =>
+        await RegisterAttributeDefinitionAsync(name, dataType, description, isUnique, isRequired: false);
+
+    public async Task RegisterAttributeDefinitionAsync(
+        string name,
+        ScalarDataType dataType,
+        string description,
+        bool isUnique,
+        bool isRequired)
     {
         var ct = TestContext.Current.CancellationToken;
-        _ = await UserSchemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition
             {
                 Code = AttributeCode.Create(name),
                 AttributeType = new ScalarAttributeType(dataType),
                 Description = AttributeDescription.Create(description),
-                IsUnique = isUnique
+                IsUnique = isUnique,
+                IsRequired = isRequired
             },
             ct);
     }
@@ -293,7 +302,7 @@ public sealed class ScimFixture : IAsyncDisposable
         string description)
     {
         var ct = TestContext.Current.CancellationToken;
-        _ = await UserSchemaAdmin.TryAddAttributeDefinitionAsync(
+        await AddDefinitionAsync(
             new AttributeDefinition
             {
                 Code = AttributeCode.Create(name),
@@ -301,6 +310,17 @@ public sealed class ScimFixture : IAsyncDisposable
                 Description = AttributeDescription.Create(description)
             },
             ct);
+    }
+
+    private async Task AddDefinitionAsync(AttributeDefinition definition, CancellationToken ct)
+    {
+        var getResult = await UserSchemaAdmin.GetAsync(SchemaId.UserProfile, ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await UserSchemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, ct)
+            : await UserSchemaAdmin.CreateAsync(schema, ct);
+        saveResult.IsSuccess.ShouldBeTrue();
     }
 
     /// <summary>

@@ -16,7 +16,7 @@ namespace Duende.UserManagement.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserAdmin(
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     ILogger<UserAdmin> logger,
     IUserProfileAdmin profileAdmin,
     IMembershipAdmin membershipAdmin,
@@ -33,7 +33,7 @@ internal sealed class UserAdmin(
         }
         using var scope = logger.BeginSubjectScope(subjectId);
         logger.UserDeleteStarting(LogLevel.Debug, subjectId);
-        List<IStoreOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];
+        List<IStorageOperation> operations = [UserRepository.DeleteBatchOperation(subjectId)];
 
         if (authenticatorsRepo is not null)
         {
@@ -65,15 +65,15 @@ internal sealed class UserAdmin(
 
     public IUserAuthenticatorsAdmin Authenticators => authenticatorsAdmin;
 
-    private async Task<bool> ExecuteBatchAsync(List<IStoreOperation> operations, Ct ct)
+    private async Task<bool> ExecuteBatchAsync(List<IStorageOperation> operations, Ct ct)
     {
         if (operations.Count == 0)
         {
             return false;
         }
 
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.ExecuteBatchAsync(operations, [], ct);
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.ExecuteBatchAsync(operations, [], ct);
         return result.Success;
     }
 }

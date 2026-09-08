@@ -19,12 +19,12 @@ namespace Duende.Platform.UserManagement;
 /// <summary>
 /// Integration tests for <see cref="UserProfileReader"/>.
 /// Verifies that users created with dynamic schema attributes can be queried
-/// using SCIM filter expressions against the in-memory store.
+/// using SCIM filter expressions against the in-memory storage.
 /// </summary>
 public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
 {
     private ServiceProvider _serviceProvider = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private IUserProfileSelfService _selfService = null!;
     private UserProfileReader _profileReader = null!;
     private readonly Ct _ct = TestContext.Current.CancellationToken;
@@ -32,7 +32,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _selfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
         _profileReader = _serviceProvider.GetRequiredService<UserProfileReader>();
     }
@@ -42,61 +42,62 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
     private async Task SetupSchema()
     {
         // Define schema attributes of all supported data types
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("name"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("The user's name")
-            }, _ct)).ShouldBeTrue();
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
 
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("is_active"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
-                Description = AttributeDescription.Create("Whether the user is active")
-            }, _ct)).ShouldBeTrue();
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("name"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("The user's name")
+        });
 
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("birth_date"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.Date),
-                Description = AttributeDescription.Create("Date of birth")
-            }, _ct)).ShouldBeTrue();
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("is_active"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+            Description = AttributeDescription.Create("Whether the user is active")
+        });
 
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("registered_at"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.DateTime),
-                Description = AttributeDescription.Create("Account creation timestamp")
-            }, _ct)).ShouldBeTrue();
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("birth_date"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Date),
+            Description = AttributeDescription.Create("Date of birth")
+        });
 
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("score"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.Decimal),
-                Description = AttributeDescription.Create("User score")
-            }, _ct)).ShouldBeTrue();
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("registered_at"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.DateTime),
+            Description = AttributeDescription.Create("Account creation timestamp")
+        });
 
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("level"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.Integer),
-                Description = AttributeDescription.Create("User level")
-            }, _ct)).ShouldBeTrue();
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("score"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Decimal),
+            Description = AttributeDescription.Create("User score")
+        });
 
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = AttributeCode.Create("department"),
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("Department name")
-            }, _ct)).ShouldBeTrue();
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("level"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Integer),
+            Description = AttributeDescription.Create("User level")
+        });
+
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("department"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("Department name")
+        });
+
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _schemaAdmin.CreateAsync(schema, _ct);
+        saveResult.IsSuccess.ShouldBeTrue();
     }
 
     private async Task<UserProfile> CreateUserProfile(
@@ -516,24 +517,22 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
     {
         // Arrange — register a non-indexed attribute
         var secretAttr = AttributeCode.Create("secret_note");
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = secretAttr,
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("A non-indexed attribute"),
-                IsQueryable = false
-            }, _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = secretAttr,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("A non-indexed attribute"),
+            IsQueryable = false
+        });
 
         // Also register a regular indexed attribute so we can create a user
         var nameAttr = AttributeCode.Create("name");
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = nameAttr,
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("Name")
-            }, _ct);
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = nameAttr,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("Name")
+        });
 
         var schema = await _selfService.GetSchemaAsync(_ct);
         var attributes = new AttributeValueCollection(schema);
@@ -554,24 +553,22 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
     {
         // Arrange — register an indexed attribute and a non-indexed attribute
         var searchableCode = AttributeCode.Create("searchable");
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = searchableCode,
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("An indexed, searchable attribute"),
-                IsQueryable = true
-            }, _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = searchableCode,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("An indexed, searchable attribute"),
+            IsQueryable = true
+        });
 
         var hiddenCode = AttributeCode.Create("hidden");
-        (await _schemaAdmin.TryAddAttributeDefinitionAsync(
-            new AttributeDefinition
-            {
-                Code = hiddenCode,
-                AttributeType = new ScalarAttributeType(ScalarDataType.String),
-                Description = AttributeDescription.Create("A non-indexed attribute not written to the search index"),
-                IsQueryable = false
-            }, _ct)).ShouldBeTrue();
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = hiddenCode,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("A non-indexed attribute not written to the search index"),
+            IsQueryable = false
+        });
 
         // Create a user with both attributes set
         var schema = await _selfService.GetSchemaAsync(_ct);
@@ -581,12 +578,12 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         _ = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
 
         // Resolve the store directly to verify search-index behaviour
-        var storeFactory = _serviceProvider.GetRequiredService<IStoreFactory>();
-        var store = await storeFactory.GetStore(_ct);
+        var storageFactory = _serviceProvider.GetRequiredService<IStorageFactory>();
+        var storage = await storageFactory.GetStorage(_ct);
 
         // Assert 1: filtering by the indexed attribute finds the user
         var searchableField = new StringField("searchable");
-        var indexedResult = await store.QueryFieldsAsync(
+        var indexedResult = await storage.QueryFieldsAsync(
             UserProfileDso.EntityType,
             [searchableField],
             StoreQuery.Where(searchableField.Equals("findme")),
@@ -599,7 +596,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         // Assert 2: filtering by the non-indexed attribute returns no results because
         // the value was never written to the search index
         var hiddenField = new StringField("hidden");
-        var nonIndexedFilterResult = await store.QueryFieldsAsync(
+        var nonIndexedFilterResult = await storage.QueryFieldsAsync(
             UserProfileDso.EntityType,
             [hiddenField],
             StoreQuery.Where(hiddenField.Equals("secret")),
@@ -611,7 +608,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
 
         // Assert 3: projecting the non-indexed field returns no data for it —
         // the field was never written to the search index so it cannot be projected
-        var projectionResult = await store.QueryFieldsAsync(
+        var projectionResult = await storage.QueryFieldsAsync(
             UserProfileDso.EntityType,
             [hiddenField],
             StoreQuery.All(),
@@ -628,4 +625,19 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         }
     }
 
+    private async Task AddDefinitionAsync(AttributeDefinition definition)
+    {
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        if (schema.AttributeDefinitions.Any(d => d.Code == definition.Code))
+        {
+            return;
+        }
+
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _schemaAdmin.CreateAsync(schema, _ct);
+        saveResult.IsSuccess.ShouldBeTrue();
+    }
 }

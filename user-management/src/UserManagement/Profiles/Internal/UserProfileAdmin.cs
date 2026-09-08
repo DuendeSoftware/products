@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
 using Duende.UserManagement.Internal;
@@ -14,21 +13,15 @@ namespace Duende.UserManagement.Profiles.Internal;
 
 #pragma warning disable CS1573 // Parameter 'parameter' has no matching param tag in the XML comment for 'parameter' (but other parameters do)
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSchemaRepository schemaRepo, ILogger<UserProfileAdmin> logger, UserManagementLicenseValidator licenseValidator) : IUserProfileAdmin
+internal sealed class UserProfileAdmin(UserProfileRepository repo, ISchemaStore schemaStore, ILogger<UserProfileAdmin> logger, UserManagementLicenseValidator licenseValidator) : IUserProfileAdmin
 {
-    public async Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) =>
-        await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } record ? record.AttributeSchema : AttributeSchema.Empty;
+    public Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) => schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
     public async Task<Profiles.UserProfile?> TryAddAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
         if (!licenseValidator.ValidateProfiles())
         {
             UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
-        }
-        var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
-        if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
-        {
-            return null;
         }
 
         var profile = new UserProfile(subjectId, attributes);
@@ -83,11 +76,11 @@ internal sealed class UserProfileAdmin(UserProfileRepository repo, AttributeSche
         ArgumentNullException.ThrowIfNull(attributes);
 
         var result = await repo.QueryAsync(request.Filter, request.Sort, request.Range, ct);
-        var schema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
+        var schema = await GetSchemaAsync(ct);
         return result.ConvertTo(profile => ProjectAttributes(profile, attributes, schema));
     }
 
-    private static UserProfileAttributeProjection ProjectAttributes(UserProfile profile, HashSet<AttributeCode> attributes, AttributeSchema schema)
+    private static UserProfileAttributeProjection ProjectAttributes(UserProfile profile, HashSet<AttributeCode> attributes, IReadOnlyAttributeSchema schema)
     {
         var values = profile.Attributes
             .Where(kvp => attributes.Contains(kvp.Key) && schema.AttributeDefinitions.ContainsKey(kvp.Key))

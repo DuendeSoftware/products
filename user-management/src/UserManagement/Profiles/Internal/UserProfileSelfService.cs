@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Internal;
 using Duende.UserManagement.Internal.Licensing;
@@ -12,22 +11,16 @@ using Microsoft.Extensions.Logging;
 namespace Duende.UserManagement.Profiles.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserProfileSelfService(UserProfileRepository repo, AttributeSchemaRepository schemaRepo, ILogger<UserProfileSelfService> logger, UserManagementLicenseValidator licenseValidator)
+internal sealed class UserProfileSelfService(UserProfileRepository repo, ISchemaStore schemaStore, ILogger<UserProfileSelfService> logger, UserManagementLicenseValidator licenseValidator)
     : IUserProfileSelfService
 {
-    public async Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) =>
-        await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } record ? record.AttributeSchema : AttributeSchema.Empty;
+    public Task<IReadOnlyAttributeSchema> GetSchemaAsync(Ct ct) => schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
     public async Task<Profiles.UserProfile?> TryCreateAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection attributes, Ct ct)
     {
         if (!licenseValidator.ValidateProfiles())
         {
             UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
-        }
-        var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
-        if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
-        {
-            return null;
         }
 
         var profile = new UserProfile(subjectId, attributes);
@@ -60,11 +53,6 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, Attribu
         if (!licenseValidator.ValidateProfiles())
         {
             UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
-        }
-        var currentSchema = await schemaRepo.TryReadAsync(UserProfileSchemaId.Value, ct) is { } r ? r.AttributeSchema : AttributeSchema.Empty;
-        if (!SchemaFreshnessCheck.IsValid(attributes, currentSchema, logger))
-        {
-            return null;
         }
 
         if (await repo.TryReadAsync(subjectId, ct) is not { } record)

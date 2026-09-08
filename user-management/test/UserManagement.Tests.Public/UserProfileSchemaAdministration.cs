@@ -14,7 +14,7 @@ namespace Duende.Platform.UserManagement;
 public sealed class UserProfileSchemaAdministration : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private IUserProfileSchemaAdmin _admin = null!;
+    private ISchemaAdmin _admin = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public static TheoryData<SerializableDefinition> AttributeDefinitions { get; } =
@@ -23,19 +23,177 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _admin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _admin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
+
+    private async Task<(SchemaConfiguration Schema, int Version)> GetOrCreateSchemaAsync()
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (getResult.Found)
+        {
+            return (getResult.Item!, getResult.Version!.Value);
+        }
+
+        var schema = new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        var createResult = await _admin.CreateAsync(schema, _ct);
+        createResult.IsSuccess.ShouldBeTrue();
+        var freshGet = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        return (freshGet.Item!, freshGet.Version!.Value);
+    }
+
+    private async Task<bool> TryAddDefinitionAsync(AttributeDefinition definition)
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        if (schema.AttributeDefinitions.Any(d => d.Code == definition.Code))
+        {
+            return false;
+        }
+
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await _admin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _admin.CreateAsync(schema, _ct);
+        return saveResult.IsSuccess;
+    }
+
+    private async Task<bool> TryRemoveDefinitionAsync(AttributeCode code)
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (!getResult.Found)
+        {
+            return true;
+        }
+
+        var schema = getResult.Item!;
+        var toRemove = schema.AttributeDefinitions.FirstOrDefault(d => d.Code == code);
+        if (toRemove is not null)
+        {
+            _ = schema.AttributeDefinitions.Remove(toRemove);
+        }
+
+        var saveResult = await _admin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct);
+        return saveResult.IsSuccess;
+    }
+
+    private async Task<IReadOnlyDictionary<AttributeCode, AttributeDefinition>> GetAllDefinitionsAsync()
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (!getResult.Found)
+        {
+            return new Dictionary<AttributeCode, AttributeDefinition>();
+        }
+
+        return getResult.Item!.AttributeDefinitions.ToDictionary(d => d.Code, d => d);
+    }
+
+    private async Task<bool> TryAddGroupAsync(AttributeGroup group)
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        if (schema.Groups.Any(g => g.Code == group.Code))
+        {
+            return false;
+        }
+
+        schema.Groups.Add(group);
+        var saveResult = getResult.Found
+            ? await _admin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _admin.CreateAsync(schema, _ct);
+        return saveResult.IsSuccess;
+    }
+
+    private async Task<bool> TryRemoveGroupAsync(AttributeGroupCode code)
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (!getResult.Found)
+        {
+            return true;
+        }
+
+        var schema = getResult.Item!;
+        var toRemove = schema.Groups.FirstOrDefault(g => g.Code == code);
+        if (toRemove is not null)
+        {
+            _ = schema.Groups.Remove(toRemove);
+        }
+
+        // Ungroup any attributes that belonged to this group - replace with new instances
+        var toUpdate = schema.AttributeDefinitions.Where(a => a.GroupCode == code).ToList();
+        foreach (var attr in toUpdate)
+        {
+            _ = schema.AttributeDefinitions.Remove(attr);
+            schema.AttributeDefinitions.Add(attr with { GroupCode = null });
+        }
+
+        var saveResult = await _admin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct);
+        return saveResult.IsSuccess;
+    }
+
+    private async Task<IReadOnlyDictionary<AttributeGroupCode, AttributeGroup>> GetAllGroupsAsync()
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (!getResult.Found)
+        {
+            return new Dictionary<AttributeGroupCode, AttributeGroup>();
+        }
+
+        return getResult.Item!.Groups.ToDictionary(g => g.Code, g => g);
+    }
+
+    private async Task<bool> ReorderAttributesAsync(AttributeGroupCode groupCode, IReadOnlyList<AttributeDefinition> ordered)
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (!getResult.Found)
+        {
+            return false;
+        }
+
+        var schema = getResult.Item!;
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            var existing = schema.AttributeDefinitions.First(a => a.Code == ordered[i].Code);
+            _ = schema.AttributeDefinitions.Remove(existing);
+            schema.AttributeDefinitions.Add(existing with { Order = i });
+        }
+
+        var saveResult = await _admin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct);
+        return saveResult.IsSuccess;
+    }
+
+    private async Task<bool> ReorderGroupsAsync(IReadOnlyList<AttributeGroupCode> ordered)
+    {
+        var getResult = await _admin.GetAsync(SchemaId.UserProfile, _ct);
+        if (!getResult.Found)
+        {
+            return false;
+        }
+
+        var schema = getResult.Item!;
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            var group = schema.Groups.First(g => g.Code == ordered[i]);
+            group = group with { Order = i };
+            var existing = schema.Groups.First(g => g.Code == ordered[i]);
+            _ = schema.Groups.Remove(existing);
+            schema.Groups.Add(group);
+        }
+
+        var saveResult = await _admin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct);
+        return saveResult.IsSuccess;
+    }
 
     [Theory]
     [MemberData(nameof(AttributeDefinitions))]
     public async Task can_add_attribute_definitions(SerializableDefinition definition)
     {
-        var added = await _admin.TryAddAttributeDefinitionAsync(definition.Definition, _ct);
+        var added = await TryAddDefinitionAsync(definition.Definition);
 
         added.ShouldBeTrue();
-        var actual = (await _admin.GetAllAttributeDefinitionsAsync(_ct)).ShouldHaveSingleItem().Value;
+        var allDefs = await GetAllDefinitionsAsync();
+        var actual = allDefs.ShouldHaveSingleItem().Value;
         actual.Code.ShouldBe(definition.Definition.Code);
         actual.AttributeType.ShouldBe(definition.Definition.AttributeType);
         actual.Description.ShouldBe(definition.Definition.Description);
@@ -47,9 +205,9 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     public async Task cannot_add_attribute_definitions_twice()
     {
         var definition = TestData.CreateAttributeDefinitions().First();
-        (await _admin.TryAddAttributeDefinitionAsync(definition, _ct)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(definition)).ShouldBeTrue();
 
-        var added = await _admin.TryAddAttributeDefinitionAsync(definition, _ct);
+        var added = await TryAddDefinitionAsync(definition);
 
         added.ShouldBeFalse();
     }
@@ -58,12 +216,12 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     public async Task can_remove_attribute_definitions()
     {
         var definition = TestData.CreateAttributeDefinitions().First();
-        (await _admin.TryAddAttributeDefinitionAsync(definition, _ct)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(definition)).ShouldBeTrue();
 
-        var removed = await _admin.TryRemoveAttributeDefinitionAsync(definition, _ct);
+        var removed = await TryRemoveDefinitionAsync(definition.Code);
 
         removed.ShouldBeTrue();
-        (await _admin.GetAllAttributeDefinitionsAsync(_ct)).ShouldBeEmpty();
+        (await GetAllDefinitionsAsync()).ShouldBeEmpty();
     }
 
     [Fact]
@@ -71,7 +229,7 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     {
         var name = TestData.CreateAttributeDefinitions().First().Code;
 
-        var removed = await _admin.TryRemoveAttributeDefinitionAsync(name, _ct);
+        var removed = await TryRemoveDefinitionAsync(name);
 
         removed.ShouldBeTrue();
     }
@@ -85,10 +243,10 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
             null,
             0);
 
-        var added = await _admin.TryAddGroupAsync(group, _ct);
+        var added = await TryAddGroupAsync(group);
 
         added.ShouldBeTrue();
-        var groups = await _admin.GetAllGroupsAsync(_ct);
+        var groups = await GetAllGroupsAsync();
         groups.ShouldContainKey(group.Code);
         groups[group.Code].DisplayName.ShouldBe(group.DisplayName);
     }
@@ -101,9 +259,9 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
             AttributeDisplayName.Create("Personal Information"),
             null,
             0);
-        (await _admin.TryAddGroupAsync(group, _ct)).ShouldBeTrue();
+        (await TryAddGroupAsync(group)).ShouldBeTrue();
 
-        var added = await _admin.TryAddGroupAsync(group, _ct);
+        var added = await TryAddGroupAsync(group);
 
         added.ShouldBeFalse();
     }
@@ -116,12 +274,12 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
             AttributeDisplayName.Create("Personal Information"),
             null,
             0);
-        (await _admin.TryAddGroupAsync(group, _ct)).ShouldBeTrue();
+        (await TryAddGroupAsync(group)).ShouldBeTrue();
 
-        var removed = await _admin.TryRemoveGroupAsync(group.Code, _ct);
+        var removed = await TryRemoveGroupAsync(group.Code);
 
         removed.ShouldBeTrue();
-        (await _admin.GetAllGroupsAsync(_ct)).ShouldBeEmpty();
+        (await GetAllGroupsAsync()).ShouldBeEmpty();
     }
 
     [Fact]
@@ -129,7 +287,7 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     {
         var groupName = AttributeGroupCode.Create("personal_info");
         var group = new AttributeGroup(groupName, AttributeDisplayName.Create("Personal Information"), null, 0);
-        (await _admin.TryAddGroupAsync(group, _ct)).ShouldBeTrue();
+        (await TryAddGroupAsync(group)).ShouldBeTrue();
 
         var definition = new AttributeDefinition
         {
@@ -139,12 +297,12 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
             GroupCode = groupName,
             Order = 0
         };
-        (await _admin.TryAddAttributeDefinitionAsync(definition, _ct)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(definition)).ShouldBeTrue();
 
-        (await _admin.TryRemoveGroupAsync(groupName, _ct)).ShouldBeTrue();
+        (await TryRemoveGroupAsync(groupName)).ShouldBeTrue();
 
-        var attrs = await _admin.GetAllAttributeDefinitionsAsync(_ct);
-        attrs[definition].GroupCode.ShouldBeNull();
+        var attrs = await GetAllDefinitionsAsync();
+        attrs[definition.Code].GroupCode.ShouldBeNull();
     }
 
     [Fact]
@@ -152,19 +310,19 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     {
         var groupName = AttributeGroupCode.Create("personal_info");
         var group = new AttributeGroup(groupName, AttributeDisplayName.Create("Personal Information"), null, 0);
-        (await _admin.TryAddGroupAsync(group, _ct)).ShouldBeTrue();
+        (await TryAddGroupAsync(group)).ShouldBeTrue();
 
         var first = new AttributeDefinition { Code = AttributeCode.Create("first_name"), AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("First"), GroupCode = groupName, Order = 0 };
         var last = new AttributeDefinition { Code = AttributeCode.Create("last_name"), AttributeType = new ScalarAttributeType(ScalarDataType.String), Description = AttributeDescription.Create("Last"), GroupCode = groupName, Order = 1 };
-        (await _admin.TryAddAttributeDefinitionAsync(first, _ct)).ShouldBeTrue();
-        (await _admin.TryAddAttributeDefinitionAsync(last, _ct)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(first)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(last)).ShouldBeTrue();
 
         // Reverse order
-        (await _admin.ReorderAttributesAsync(groupName, [last, first], _ct)).ShouldBeTrue();
+        (await ReorderAttributesAsync(groupName, [last, first])).ShouldBeTrue();
 
-        var attrs = await _admin.GetAllAttributeDefinitionsAsync(_ct);
-        attrs[last].Order.ShouldBe(0);
-        attrs[first].Order.ShouldBe(1);
+        var attrs = await GetAllDefinitionsAsync();
+        attrs[last.Code].Order.ShouldBe(0);
+        attrs[first.Code].Order.ShouldBe(1);
     }
 
     [Fact]
@@ -172,7 +330,7 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
     {
         var groupName = AttributeGroupCode.Create("settings");
         var group = new AttributeGroup(groupName, AttributeDisplayName.Create("Settings"), null, 0);
-        (await _admin.TryAddGroupAsync(group, _ct)).ShouldBeTrue();
+        (await TryAddGroupAsync(group)).ShouldBeTrue();
 
         var indexed = new AttributeDefinition
         {
@@ -193,15 +351,15 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
             IsQueryable = false
         };
 
-        (await _admin.TryAddAttributeDefinitionAsync(indexed, _ct)).ShouldBeTrue();
-        (await _admin.TryAddAttributeDefinitionAsync(nonIndexed, _ct)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(indexed)).ShouldBeTrue();
+        (await TryAddDefinitionAsync(nonIndexed)).ShouldBeTrue();
 
         // Reorder: this should not change the IsQueryable flag
-        (await _admin.ReorderAttributesAsync(groupName, [nonIndexed, indexed], _ct)).ShouldBeTrue();
+        (await ReorderAttributesAsync(groupName, [nonIndexed, indexed])).ShouldBeTrue();
 
-        var attrs = await _admin.GetAllAttributeDefinitionsAsync(_ct);
-        attrs[indexed].IsQueryable.ShouldBeTrue();
-        attrs[nonIndexed].IsQueryable.ShouldBeFalse();
+        var attrs = await GetAllDefinitionsAsync();
+        attrs[indexed.Code].IsQueryable.ShouldBeTrue();
+        attrs[nonIndexed.Code].IsQueryable.ShouldBeFalse();
     }
 
     [Fact]
@@ -211,13 +369,13 @@ public sealed class UserProfileSchemaAdministration : IAsyncLifetime
         var nameB = AttributeGroupCode.Create("group_b");
         var groupA = new AttributeGroup(nameA, AttributeDisplayName.Create("Group A"), null, 0);
         var groupB = new AttributeGroup(nameB, AttributeDisplayName.Create("Group B"), null, 1);
-        (await _admin.TryAddGroupAsync(groupA, _ct)).ShouldBeTrue();
-        (await _admin.TryAddGroupAsync(groupB, _ct)).ShouldBeTrue();
+        (await TryAddGroupAsync(groupA)).ShouldBeTrue();
+        (await TryAddGroupAsync(groupB)).ShouldBeTrue();
 
         // Reverse order
-        (await _admin.ReorderGroupsAsync([nameB, nameA], _ct)).ShouldBeTrue();
+        (await ReorderGroupsAsync([nameB, nameA])).ShouldBeTrue();
 
-        var groups = await _admin.GetAllGroupsAsync(_ct);
+        var groups = await GetAllGroupsAsync();
         groups[nameB].Order.ShouldBe(0);
         groups[nameA].Order.ShouldBe(1);
     }

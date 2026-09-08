@@ -89,7 +89,7 @@ public sealed class KestrelBasedTestServer : IAsyncDisposable
 
     /// <summary>
     /// Registers a hostname alias so that requests arriving with the given hostname
-    /// are dispatched to this server's pipeline. Useful for multi-space scenarios
+    /// are dispatched to this server's pipeline. Useful for Spaces scenarios
     /// where space origins differ from the server's canonical hostname.
     /// Only available after <see cref="StartAsync"/>.
     /// </summary>

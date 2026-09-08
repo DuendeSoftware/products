@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
+using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Internal;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement;
@@ -25,7 +26,7 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
     private ServiceProvider _serviceProvider = null!;
     private FakeTimeProvider _timeProvider = null!;
     private IUserProfileSelfService _profileSelfService = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
     private FakeOtpDispatcher _otpDispatcher = null!;
     private IOtpSender _otpSender = null!;
 
@@ -37,7 +38,7 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
         _externalAuthenticator = _serviceProvider.GetRequiredService<IExternalAuthenticator>();
         _timeProvider = _serviceProvider.GetRequiredService<FakeTimeProvider>();
         _profileSelfService = _serviceProvider.GetRequiredService<IUserProfileSelfService>();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
         _otpDispatcher = _serviceProvider.GetRequiredService<FakeOtpDispatcher>();
         _otpSender = _serviceProvider.GetRequiredService<IOtpSender>();
     }

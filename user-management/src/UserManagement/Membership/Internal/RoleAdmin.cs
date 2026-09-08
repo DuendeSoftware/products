@@ -1,9 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
+using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Querying;
-using Duende.UserManagement.Admin;
 using Duende.UserManagement.Internal.Licensing;
 using Duende.UserManagement.Membership.Internal.Storage;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,7 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
         if (existing.HasValue)
         {
             logger.RoleCreateDuplicateName(LogLevel.Warning, dto.Name.Value);
-            return AdminError.AlreadyExists("Role", dto.Name.Value, nameof(dto.Name));
+            return SaveResult.Failure<RoleId>(StorageError.AlreadyExists("Role", dto.Name.Value, nameof(dto.Name)));
         }
 
         // Create the domain entity
@@ -47,8 +48,8 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
 
         return result switch
         {
-            CreateResult.AlreadyExists => AdminError.AlreadyExists("Role", dto.Name.Value, nameof(dto.Name)),
-            CreateResult.KeyConflict => AdminError.DuplicateValue(nameof(dto.Name), dto.Name.Value),
+            CreateResult.AlreadyExists => SaveResult.Failure<RoleId>(StorageError.AlreadyExists("Role", dto.Name.Value, nameof(dto.Name))),
+            CreateResult.KeyConflict => SaveResult.Failure<RoleId>(StorageError.DuplicateValue(nameof(dto.Name), dto.Name.Value)),
             _ => throw new InvalidOperationException($"Unknown value {result}")
         };
     }
@@ -60,13 +61,13 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
         if (!result.HasValue)
         {
             logger.RoleNotFound(LogLevel.Warning, id);
-            return new GetResult<Membership.Role>();
+            return GetResult.NotFound<Membership.Role>();
         }
 
         return GetResult.Found(ToDto(result.Value.Role), result.Value.Version);
     }
 
-    public async Task<SaveResult<RoleId>> UpdateAsync(RoleId id, Membership.Role dto, Admin.DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<RoleId>> UpdateAsync(RoleId id, Membership.Role dto, DataVersion expectedVersion, Ct ct)
     {
         if (!licenseValidator.ValidateRolesAndGroups())
         {
@@ -77,7 +78,7 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
         if (!existing.HasValue)
         {
             logger.RoleNotFound(LogLevel.Warning, id);
-            return AdminError.NotFound("Role", id.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound("Role", id.ToString()));
         }
 
         var (role, currentVersion) = existing.Value;
@@ -98,13 +99,13 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
         if (result == UpdateResult.UnexpectedVersion)
         {
             logger.RoleUpdateVersionConflict(LogLevel.Warning, id);
-            return AdminError.VersionConflict();
+            return SaveResult.Failure<RoleId>(StorageError.VersionConflict());
         }
 
         return result switch
         {
-            UpdateResult.DoesNotExist => AdminError.NotFound("Role", id.ToString()),
-            UpdateResult.KeyConflict => AdminError.DuplicateValue(nameof(dto.Name), dto.Name.Value),
+            UpdateResult.DoesNotExist => SaveResult.Failure<RoleId>(StorageError.NotFound("Role", id.ToString())),
+            UpdateResult.KeyConflict => SaveResult.Failure<RoleId>(StorageError.DuplicateValue(nameof(dto.Name), dto.Name.Value)),
             _ => throw new InvalidOperationException($"Unknown value {result}")
         };
     }
@@ -120,7 +121,7 @@ internal sealed class RoleAdmin(RoleRepository roleRepository, ILogger<RoleAdmin
         if (!existing.HasValue)
         {
             logger.RoleDeleteNotFound(LogLevel.Warning, id);
-            return AdminError.NotFound("Role", id.ToString());
+            return SaveResult.Failure<RoleId>(StorageError.NotFound("Role", id.ToString()));
         }
 
         // Delete via repository

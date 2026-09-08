@@ -3,10 +3,8 @@
 
 using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.UserManagement;
 using Duende.UserManagement.Profiles;
-using Duende.UserManagement.Profiles.Internal;
 using Duende.UserManagement.Scim.Internal;
 using Duende.UserManagement.Scim.Internal.Endpoints.Users;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,35 +14,41 @@ namespace Duende.Platform.UserManagement.Scim;
 public sealed class ScimRequestMapperTests : IAsyncLifetime
 {
     private ServiceProvider _serviceProvider = null!;
-    private IUserProfileSchemaAdmin _schemaAdmin = null!;
-    private AttributeSchemaRepository _schemaRepo = null!;
+    private ISchemaAdmin _schemaAdmin = null!;
+    private ISchemaStore _schemaStore = null!;
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     public async ValueTask InitializeAsync()
     {
         _serviceProvider = await UsersServiceProviderFactory.CreateAsync();
-        _schemaAdmin = _serviceProvider.GetRequiredService<IUserProfileSchemaAdmin>();
-        _schemaRepo = _serviceProvider.GetRequiredService<AttributeSchemaRepository>();
+        _schemaAdmin = _serviceProvider.GetRequiredService<ISchemaAdmin>();
+        _schemaStore = _serviceProvider.GetRequiredService<ISchemaStore>();
     }
 
     public ValueTask DisposeAsync() => _serviceProvider.DisposeAsync();
 
-    private async Task<AttributeSchema> GetSchemaAsync()
+    private async Task AddDefinitionAsync(AttributeDefinition definition)
     {
-        var result = await _schemaRepo.TryReadAsync(UserProfileSchemaId.Value, _ct);
-        _ = result.ShouldNotBeNull();
-        return result!.Value.AttributeSchema;
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, _ct);
+        var schema = getResult.Found ? getResult.Item! : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        schema.AttributeDefinitions.Add(definition);
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, _ct)
+            : await _schemaAdmin.CreateAsync(schema, _ct);
+        saveResult.IsSuccess.ShouldBeTrue();
     }
+
+    private Task<IReadOnlyAttributeSchema> GetSchemaAsync() => _schemaStore.GetAsync(SchemaId.UserProfile, _ct);
 
     [Fact]
     public async Task StringAttributeMapsToAttributeValueWithStringValue()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("nickname"),
             AttributeType = new ScalarAttributeType(ScalarDataType.String),
             Description = AttributeDescription.Create("Nickname")
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
 
         var request = new ScimUserRequest
@@ -68,12 +72,12 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     [Fact]
     public async Task BooleanAttributeMapsToAttributeValueWithBoolValue()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("active"),
             AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
             Description = AttributeDescription.Create("Active flag")
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
 
         var request = new ScimUserRequest
@@ -97,12 +101,12 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     [Fact]
     public async Task IntegerAttributeMapsToAttributeValueWithIntValue()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("logincount"),
             AttributeType = new ScalarAttributeType(ScalarDataType.Integer),
             Description = AttributeDescription.Create("Login count")
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
 
         var request = new ScimUserRequest
@@ -126,12 +130,12 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     [Fact]
     public async Task DecimalAttributeMapsToAttributeValueWithDecimalValue()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("score"),
             AttributeType = new ScalarAttributeType(ScalarDataType.Decimal),
             Description = AttributeDescription.Create("Score")
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
 
         var request = new ScimUserRequest
@@ -173,12 +177,12 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     [Fact]
     public async Task InvalidValueTypeForAttributeReturnsError()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("age"),
             AttributeType = new ScalarAttributeType(ScalarDataType.Integer),
             Description = AttributeDescription.Create("Age")
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
 
         // Passing a string value for an Integer attribute
@@ -234,13 +238,13 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     [Fact]
     public async Task NonUniqueUserNameAttributeReturnsError()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("username"),
             AttributeType = new ScalarAttributeType(ScalarDataType.String),
             Description = AttributeDescription.Create("User login name"),
             IsUnique = false
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
         var request = new ScimUserRequest { Schemas = [ScimConstants.UserSchemaUrn], UserName = "alice" };
 
@@ -254,12 +258,12 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
     [Fact]
     public async Task UserNameNotInSchemaReturnsError()
     {
-        _ = await _schemaAdmin.TryAddAttributeDefinitionAsync(new AttributeDefinition
+        await AddDefinitionAsync(new AttributeDefinition
         {
             Code = AttributeCode.Create("nickname"),
             AttributeType = new ScalarAttributeType(ScalarDataType.String),
             Description = AttributeDescription.Create("Nickname")
-        }, _ct);
+        });
         var schema = await GetSchemaAsync();
         var request = new ScimUserRequest { Schemas = [ScimConstants.UserSchemaUrn], UserName = "alice" };
 

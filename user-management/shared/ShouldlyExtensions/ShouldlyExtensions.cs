@@ -66,4 +66,30 @@ public static class ShouldlyExtensions
             );
         }
     }
+
+    /// <summary>
+    /// Polls the specified assertion until it passes or the timeout is exceeded.
+    /// Useful for asserting eventual consistency when background services are involved.
+    /// </summary>
+    /// <param name="action">The assertion to evaluate repeatedly.</param>
+    /// <param name="timeout">Maximum time to wait. Defaults to 5 seconds.</param>
+    /// <param name="pollInterval">Delay between attempts. Defaults to 100ms.</param>
+    public static async Task ShouldSatisfyEventually(Func<Task> action, TimeSpan? timeout = null, TimeSpan? pollInterval = null)
+    {
+        var deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(5));
+        var interval = pollInterval ?? TimeSpan.FromMilliseconds(100);
+
+        while (true)
+        {
+            try
+            {
+                await action();
+                return;
+            }
+            catch when (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(interval);
+            }
+        }
+    }
 }

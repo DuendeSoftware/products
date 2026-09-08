@@ -9,15 +9,15 @@ namespace Duende.UserManagement.Authentication.Passkeys.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class PasskeyAuthenticationChallengeRepository(
-    IStoreFactory storeFactory,
+    IStorageFactory storageFactory,
     IOptions<UserAuthenticationOptions> options) : IPasskeyAuthenticationChallengeStore
 {
     public async Task<CreateResult> CreateAsync(PasskeyAuthenticationChallenge challenge, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
+        var storage = await storageFactory.GetStorage(ct);
         var expiration = Expiration.InRelative(options.Value.Passkeys.ChallengeTimeout);
 
-        return await store.CreateAsync(
+        return await storage.CreateAsync(
             challenge.Id.Uuid.Value,
             ToDso(challenge),
             [],
@@ -30,8 +30,8 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
     public async Task<PasskeyAuthenticationChallenge?> TryReadAsync(
         PasskeyAuthenticationChallengeId challengeId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        var result = await store.TryReadAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        var result = await storage.TryReadAsync(
             PasskeyAuthenticationChallengeDso.EntityType,
             challengeId.Uuid.Value,
             ct);
@@ -48,8 +48,8 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
 
     public async Task<DeleteResult> DeleteAsync(PasskeyAuthenticationChallengeId challengeId, Ct ct)
     {
-        var store = await storeFactory.GetStore(ct);
-        return await store.DeleteAsync(
+        var storage = await storageFactory.GetStorage(ct);
+        return await storage.DeleteAsync(
             PasskeyAuthenticationChallengeDso.EntityType,
             challengeId.Uuid.Value,
             [],
