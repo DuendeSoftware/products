@@ -45,5 +45,10 @@ public class PushedAuthorizationOptions
     /// Specifies whether clients may use redirect uris that were not previously
     /// registered. Defaults to false. 
     /// </summary>
+    /// <remarks>
+    /// Only confidential clients may use unregistered redirect URIs, and those URIs must use
+    /// the <c>https</c> scheme. Unregistered redirect URIs matching an entry in
+    /// <see cref="ValidationOptions.InvalidRedirectUriPrefixes"/> are rejected.
+    /// </remarks>
     public bool AllowUnregisteredPushedRedirectUris { get; set; }
 }
