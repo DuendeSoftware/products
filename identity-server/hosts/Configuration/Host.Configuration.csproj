@@ -61,4 +61,9 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
     </ItemGroup>
+
+    <ItemGroup>
+        <!-- Development host only, not shipped. Affects the OTLP exporter disk retry feature, which this host doesn't use. -->
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+    </ItemGroup>
 </Project>

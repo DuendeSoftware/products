@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityModel;
@@ -46,6 +47,20 @@ internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequest
         if(validatedRequest.IsError)
         {
             return validatedRequest;
+        }
+
+        // -- Client Binding Validation --
+        // RFC 9126 section 2.2 requires that a pushed authorization request
+        // be bound to the client that authenticated to the PAR endpoint. If
+        // the body client_id is present but does not match the authenticated
+        // client, reject the request. A missing or empty body client_id is
+        // left to the downstream authorize-request validator to reject.
+        var bodyClientId = context.RequestParameters.Get(OidcConstants.AuthorizeRequest.ClientId);
+        if (bodyClientId.IsPresent() && !string.Equals(bodyClientId, context.Client.ClientId, StringComparison.Ordinal))
+        {
+            return new PushedAuthorizationValidationResult(
+                OidcConstants.AuthorizeErrors.InvalidRequest,
+                "Pushed authorization client_id does not match the authenticated client");
         }
 
         var authorizeRequestValidation = await _authorizeRequestValidator.ValidateAsync(context.RequestParameters, 
