@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="../../test.props" />
+  <Import Project="../test.props" />
+
+  <ItemGroup>
+    <!-- Test projects only, not shipped. AngleSharp 1.1.2 (HTML parsing in integration tests) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
+  </ItemGroup>
 </Project>

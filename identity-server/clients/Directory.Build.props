@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="../../samples.props" />
+  <Import Project="../samples.props" />
+
+  <ItemGroup>
+    <!-- Sample clients only, not shipped. OpenTelemetry.Exporter.OpenTelemetryProtocol 1.11.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+  </ItemGroup>
 </Project>

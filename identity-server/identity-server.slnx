@@ -1,0 +1,77 @@
+<Solution>
+  <Folder Name="/aspire/">
+    <Project Path="aspire/AppHost/AppHost.csproj" />
+    <Project Path="aspire/ServiceDefaults/ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/clients/">
+    <Project Path="clients/src/APIs/DPoPApi/DPoPApi.csproj" />
+    <Project Path="clients/src/APIs/MtlsApi/MtlsApi.csproj" />
+    <Project Path="clients/src/APIs/ResourceBasedApi/ResourceBasedApi.csproj" />
+    <Project Path="clients/src/APIs/SimpleApi/SimpleApi.csproj" />
+    <Project Path="clients/src/ConsoleCibaClient/ConsoleCibaClient.csproj" />
+    <Project Path="clients/src/ConsoleClientCredentialsFlow/ConsoleClientCredentialsFlow.csproj" />
+    <Project Path="clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi/ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />
+    <Project Path="clients/src/ConsoleClientCredentialsFlowDPoP/ConsoleClientCredentialsFlowDPoP.csproj" />
+    <Project Path="clients/src/ConsoleClientCredentialsFlowPostBody/ConsoleClientCredentialsFlowPostBody.csproj" />
+    <Project Path="clients/src/ConsoleCode/ConsoleCode.csproj" />
+    <Project Path="clients/src/ConsoleCustomGrant/ConsoleExtensionGrant.csproj" />
+    <Project Path="clients/src/ConsoleDcrClient/ConsoleDcrClient.csproj" />
+    <Project Path="clients/src/ConsoleDeviceFlow/ConsoleDeviceFlow.csproj" />
+    <Project Path="clients/src/ConsoleEphemeralMtlsClient/ConsoleEphemeralMtlsClient.csproj" />
+    <Project Path="clients/src/ConsoleIntrospectionClient/ConsoleIntrospectionClient.csproj" />
+    <Project Path="clients/src/ConsoleMTLSClient/ConsoleMTLSClient.csproj" />
+    <Project Path="clients/src/ConsoleParameterizedScopeClient/ConsoleParameterizedScopeClient.csproj" />
+    <Project Path="clients/src/ConsolePrivateKeyJwtClient/ConsolePrivateKeyJwtClient.csproj" />
+    <Project Path="clients/src/ConsoleResourceIndicators/ConsoleResourceIndicators.csproj" />
+    <Project Path="clients/src/ConsoleResourceOwnerFlow/ConsoleResourceOwnerFlow.csproj" />
+    <Project Path="clients/src/ConsoleResourceOwnerFlowPublic/ConsoleResourceOwnerFlowPublic.csproj" />
+    <Project Path="clients/src/ConsoleResourceOwnerFlowReference/ConsoleResourceOwnerFlowReference.csproj" />
+    <Project Path="clients/src/ConsoleResourceOwnerFlowRefreshToken/ConsoleResourceOwnerFlowRefreshToken.csproj" />
+    <Project Path="clients/src/ConsoleResourceOwnerFlowUserInfo/ConsoleResourceOwnerFlowUserInfo.csproj" />
+    <Project Path="clients/src/ConsoleScopesResources/ConsoleScopesResources.csproj" />
+    <Project Path="clients/src/Constants/Constants.csproj" />
+    <Project Path="clients/src/JsOidc/JsOidc.csproj" />
+    <Project Path="clients/src/MvcAutomaticTokenManagement/MvcAutomaticTokenManagement.csproj" />
+    <Project Path="clients/src/MvcCode/MvcCode.csproj" />
+    <Project Path="clients/src/MvcDPoP/MvcDPoP.csproj" />
+    <Project Path="clients/src/MvcHybridBackChannel/MvcHybridBackChannel.csproj" />
+    <Project Path="clients/src/MvcJarJwt/MvcJarJwt.csproj" />
+    <Project Path="clients/src/MvcJarUriJwt/MvcJarUriJwt.csproj" />
+    <Project Path="clients/src/WindowsConsoleSystemBrowser/WindowsConsoleSystemBrowser.csproj" />
+  </Folder>
+  <Folder Name="/hosts/">
+    <Project Path="hosts/AspNetIdentity/Host.AspNetIdentity.csproj" />
+    <Project Path="hosts/Configuration/Host.Configuration.csproj" />
+    <Project Path="hosts/EntityFramework-dotnet9/Host.EntityFramework.dotnet9.csproj" />
+    <Project Path="hosts/EntityFramework/Host.EntityFramework.csproj" />
+    <Project Path="hosts/main/Host.Main.csproj" />
+  </Folder>
+  <Folder Name="/migrations/">
+    <Project Path="migrations/AspNetIdentityDb/AspNetIdentityDb.csproj" />
+    <Project Path="migrations/IdentityServerDb/IdentityServerDb.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AspNetIdentity/Duende.IdentityServer.AspNetIdentity.csproj" />
+    <Project Path="src/Configuration.EntityFramework/Duende.IdentityServer.Configuration.EntityFramework.csproj" />
+    <Project Path="src/Configuration/Duende.IdentityServer.Configuration.csproj" />
+    <Project Path="src/EntityFramework.Storage/Duende.IdentityServer.EntityFramework.Storage.csproj" />
+    <Project Path="src/EntityFramework/Duende.IdentityServer.EntityFramework.csproj" />
+    <Project Path="src/IdentityServer/Duende.IdentityServer.csproj" />
+    <Project Path="src/Storage/Duende.IdentityServer.Storage.csproj" />
+  </Folder>
+  <Folder Name="/templates/">
+    <Project Path="templates/src/IdentityServerAspNetIdentity/IdentityServerAspNetIdentity.csproj" />
+    <Project Path="templates/src/IdentityServerEmpty/IdentityServerEmpty.csproj" />
+    <Project Path="templates/src/IdentityServerEntityFramework/IdentityServerEntityFramework.csproj" />
+    <Project Path="templates/src/IdentityServerInMem/IdentityServerInMem.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Configuration.IntegrationTests/Configuration.IntegrationTests.csproj" />
+    <Project Path="test/EntityFramework.Storage.UnitTests/EntityFramework.Storage.UnitTests.csproj" />
+    <Project Path="test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
+    <Project Path="test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
+  </Folder>
+</Solution>
