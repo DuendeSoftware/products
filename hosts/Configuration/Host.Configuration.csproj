@@ -62,4 +62,9 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
     </ItemGroup>
+
+    <ItemGroup>
+        <!-- Non-shipped dev host: OTLP exporter advisory (disk retry temp path) is only fixed in 1.15.3; not referenced by any shipped package. -->
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+    </ItemGroup>
 </Project>

@@ -220,6 +220,91 @@ public class ClientConfigurationValidation
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task implicit_only_client_without_redirect_uri_should_fail_when_unregistered_par_redirects_are_allowed()
+    {
+        _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = true;
+        var client = new Client
+        {
+            ClientId = "id",
+            AllowedGrantTypes = GrantTypes.Implicit,
+            AllowedScopes = { "openid" }
+        };
+
+        await ShouldFailAsync(client, "No redirect URI configured.");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_only_client_with_null_redirect_uris_should_fail_when_unregistered_par_redirects_are_allowed()
+    {
+        _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = true;
+        var client = new Client
+        {
+            ClientId = "id",
+            AllowedGrantTypes = GrantTypes.Implicit,
+            AllowedScopes = { "openid" },
+            RedirectUris = null
+        };
+
+        await ShouldFailAsync(client, "No redirect URI configured.");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task confidential_client_without_redirect_uri_should_succeed_when_unregistered_par_redirects_are_allowed()
+    {
+        _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = true;
+        var client = new Client
+        {
+            ClientId = "id",
+            AllowedGrantTypes = GrantTypes.Code,
+            ClientSecrets = { new Secret("secret") },
+            AllowedScopes = { "openid" }
+        };
+
+        var context = await ValidateAsync(client);
+
+        context.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_and_client_credentials_client_without_redirect_uri_should_succeed_when_unregistered_par_redirects_are_allowed()
+    {
+        _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = true;
+        var client = new Client
+        {
+            ClientId = "id",
+            AllowedGrantTypes = GrantTypes.ImplicitAndClientCredentials,
+            ClientSecrets = { new Secret("secret") },
+            AllowedScopes = { "openid" }
+        };
+
+        var context = await ValidateAsync(client);
+
+        context.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_only_client_with_registered_redirect_uri_should_succeed_when_unregistered_par_redirects_are_allowed()
+    {
+        _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = true;
+        var client = new Client
+        {
+            ClientId = "id",
+            AllowedGrantTypes = GrantTypes.Implicit,
+            AllowedScopes = { "openid" },
+            RedirectUris = { "https://client.example/callback" }
+        };
+
+        var context = await ValidateAsync(client);
+
+        context.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task empty_grant_types_collection_should_fail()
     {
         var client = new Client
@@ -356,7 +441,8 @@ public class ClientConfigurationValidation
         var client = new Client
         {
             ClientId = "id",
-            AllowedGrantTypes = GrantTypes.Implicit,
+            AllowedGrantTypes = GrantTypes.ClientCredentials,
+            ClientSecrets = { new Secret("secret") },
             AllowedScopes = { "foo" },
             RedirectUris = null
         };
