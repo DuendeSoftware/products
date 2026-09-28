@@ -96,4 +96,34 @@ public class StrictRedirectUriValidatorAppAuthValidation
         }, default);
         result.ShouldBeFalse();
     }
+
+    [Fact]
+    public async Task par_scheme_gate_should_preserve_loopback_fallback_and_reject_javascript()
+    {
+        var options = TestIdentityServerOptions.Create();
+        options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = true;
+        var subject = new StrictRedirectUriValidatorAppAuth(TestLogger.Create<StrictRedirectUriValidatorAppAuth>(), options);
+        var client = new Client
+        {
+            RequireClientSecret = true,
+            RequirePkce = true,
+            RedirectUris = { "http://127.0.0.1" }
+        };
+
+        var loopbackResult = await subject.IsRedirectUriValidAsync(new RedirectUriValidationContext
+        {
+            AuthorizeRequestType = AuthorizeRequestType.PushedAuthorization,
+            RequestedUri = "http://127.0.0.1:5000/cb",
+            Client = client
+        }, default);
+        var javascriptResult = await subject.IsRedirectUriValidAsync(new RedirectUriValidationContext
+        {
+            AuthorizeRequestType = AuthorizeRequestType.PushedAuthorization,
+            RequestedUri = "javascript:alert(1)",
+            Client = client
+        }, default);
+
+        loopbackResult.ShouldBeTrue();
+        javascriptResult.ShouldBeFalse();
+    }
 }
