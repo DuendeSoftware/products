@@ -28,4 +28,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="AngleSharp" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test only: AngleSharp parses HTML from the in-process test host, not untrusted input. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
+  </ItemGroup>
 </Project>

@@ -2,18 +2,29 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using FluentAssertions;
 using Duende.IdentityModel;
 using IntegrationTests.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
+using JsonWebKey = Duende.IdentityServer.Models.JsonWebKey;
+using WilsonJsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
 namespace IntegrationTests.Endpoints.Authorize;
 
@@ -23,13 +34,26 @@ public class PushedAuthorizationTests
     private readonly IdentityServerPipeline _mockPipeline = new();
     private Client _client;
     private string clientSecret = Guid.NewGuid().ToString();
+    private Client _client2;
+    private Client _publicClient;
+    private const string PublicClientId = "par_public_client";
+    private Client _privateKeyJwtClient;
+    private const string PrivateKeyJwtClientId = "par_private_key_jwt_client";
+
+    private WilsonJsonWebKey _privateKey;
+    private JsonWebKey _publicKey;
+    private WilsonJsonWebKey _privateKeyJwtSigningKey;
+    private JsonWebKey _privateKeyJwtPublicKey;
     
     public PushedAuthorizationTests()
     {
+        ConfigureClientKeys();
         ConfigureClients();
         ConfigureUsers();
         ConfigureScopesAndResources();
 
+        _mockPipeline.OnPostConfigureServices += services =>
+            new IdentityServerBuilder(services).AddJwtBearerClientAuthentication();
         _mockPipeline.Initialize(enableLogging: true);
 
         _mockPipeline.Options.Endpoints.EnablePushedAuthorizationEndpoint = true;
@@ -257,6 +281,510 @@ public class PushedAuthorizationTests
         authorizeCallbackResponse.Headers.Location.Should().Be(expectedCallback);
     }
 
+    [Fact]
+    public async Task request_is_rejected_when_basic_authenticated_client_does_not_match_client_id()
+    {
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client1",
+            basicClientSecret: clientSecret,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task request_is_rejected_when_public_authenticated_client_does_not_match_client_id()
+    {
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: PublicClientId,
+            basicClientSecret: "irrelevant-nonempty-value",
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task request_is_rejected_when_private_key_jwt_authenticated_client_does_not_match_client_id()
+    {
+        var (parJson, statusCode) = await PushWithPrivateKeyJwtAsync(
+            authenticatedClientId: PrivateKeyJwtClientId,
+            signingKey: _privateKeyJwtSigningKey,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task request_succeeds_when_public_authenticated_client_matches_client_id()
+    {
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: PublicClientId,
+            basicClientSecret: "irrelevant-nonempty-value",
+            form: new Dictionary<string, string>
+            {
+                { "client_id", PublicClientId },
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _publicClient.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.Created);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.GetProperty("request_uri").GetString().Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task request_succeeds_when_private_key_jwt_authenticated_client_matches_client_id()
+    {
+        var (parJson, statusCode) = await PushWithPrivateKeyJwtAsync(
+            authenticatedClientId: PrivateKeyJwtClientId,
+            signingKey: _privateKeyJwtSigningKey,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", PrivateKeyJwtClientId },
+                { "response_type", "code" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _privateKeyJwtClient.RedirectUris.First() },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.Created);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.GetProperty("request_uri").GetString().Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task request_is_rejected_when_private_key_jwt_signature_is_invalid()
+    {
+        var (parJson, statusCode) = await PushWithPrivateKeyJwtAsync(
+            authenticatedClientId: PrivateKeyJwtClientId,
+            signingKey: _privateKey, // wrong key: not par_private_key_jwt_client's
+            form: new Dictionary<string, string>
+            {
+                { "client_id", PrivateKeyJwtClientId },
+                { "response_type", "code" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _privateKeyJwtClient.RedirectUris.First() },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.TokenErrors.InvalidClient);
+    }
+
+    [Fact]
+    public async Task request_without_client_id_is_rejected()
+    {
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client1",
+            basicClientSecret: clientSecret,
+            form: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _client.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task request_with_empty_client_id_is_rejected()
+    {
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client1",
+            basicClientSecret: clientSecret,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "" },
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _client.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task request_is_rejected_when_client_id_differs_only_by_case()
+    {
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client1",
+            basicClientSecret: clientSecret,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "Client1" },
+                { "response_type", "id_token" },
+                { "scope", "openid profile" },
+                { "redirect_uri", _client.RedirectUris.First() },
+                { "nonce", "123_nonce" },
+                { "state", "123_state" },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task jar_request_succeeds_when_basic_authenticated_client_matches_client_id()
+    {
+        var jar = BuildJarToken(
+            issuer: "client2",
+            signingKey: _privateKey,
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "client_id", "client2" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+                { "nonce", "123_nonce" },
+            });
+
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client2",
+            basicClientSecret: "secret",
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.Created);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.GetProperty("request_uri").GetString().Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task jar_request_succeeds_when_private_key_jwt_authenticated_client_matches_client_id()
+    {
+        // The client_assertion (authenticates the client) and the "request" JAR
+        // (carries the client_id claim) are distinct JWTs, both signed here for
+        // the same client.
+        var jar = BuildJarToken(
+            issuer: PrivateKeyJwtClientId,
+            signingKey: _privateKeyJwtSigningKey,
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "code" },
+                { "client_id", PrivateKeyJwtClientId },
+                { "redirect_uri", _privateKeyJwtClient.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+            });
+
+        var (parJson, statusCode) = await PushWithPrivateKeyJwtAsync(
+            authenticatedClientId: PrivateKeyJwtClientId,
+            signingKey: _privateKeyJwtSigningKey,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", PrivateKeyJwtClientId },
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.Created);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.GetProperty("request_uri").GetString().Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task jar_request_is_rejected_when_basic_authenticated_client_does_not_match_client_id()
+    {
+        var jar = BuildJarToken(
+            issuer: "client2",
+            signingKey: _privateKey,
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "client_id", "client2" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+                { "nonce", "123_nonce" },
+            });
+
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client1",
+            basicClientSecret: clientSecret,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task jar_request_is_rejected_when_private_key_jwt_authenticated_client_does_not_match_client_id()
+    {
+        var jar = BuildJarToken(
+            issuer: "client2",
+            signingKey: _privateKey,
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "client_id", "client2" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+                { "nonce", "123_nonce" },
+            });
+
+        var (parJson, statusCode) = await PushWithPrivateKeyJwtAsync(
+            authenticatedClientId: PrivateKeyJwtClientId,
+            signingKey: _privateKeyJwtSigningKey,
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task jar_request_is_rejected_when_payload_client_id_does_not_match_form_client_id()
+    {
+        var jar = BuildJarToken(
+            issuer: "client2",
+            signingKey: _privateKey,
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "client_id", "client1" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+                { "nonce", "123_nonce" },
+            });
+
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client2",
+            basicClientSecret: "secret",
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        parJson.RootElement.GetProperty("error_description").GetString()
+            .Should().Be("Invalid JWT request");
+    }
+
+    [Fact]
+    public async Task jar_request_is_rejected_when_signature_is_invalid()
+    {
+        var jar = BuildJarToken(
+            issuer: "client2",
+            signingKey: _privateKeyJwtSigningKey, // wrong key: not client2's
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "client_id", "client2" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+                { "nonce", "123_nonce" },
+            });
+
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client2",
+            basicClientSecret: "secret",
+            form: new Dictionary<string, string>
+            {
+                { "client_id", "client2" },
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+        parJson.RootElement.GetProperty("error").GetString()
+            .Should().Be(OidcConstants.AuthorizeErrors.InvalidRequestObject);
+        parJson.RootElement.GetProperty("error_description").GetString()
+            .Should().Be("Invalid JWT request");
+    }
+
+    [Fact]
+    public async Task jar_request_without_form_client_id_is_rejected()
+    {
+        var jar = BuildJarToken(
+            issuer: "client2",
+            signingKey: _privateKey,
+            claims: new Dictionary<string, string>
+            {
+                { "response_type", "id_token" },
+                { "client_id", "client2" },
+                { "redirect_uri", _client2.RedirectUris.First() },
+                { "scope", "openid profile" },
+                { "state", "123_state" },
+                { "nonce", "123_nonce" },
+            });
+
+        var (parJson, statusCode) = await PushWithBasicAuthAsync(
+            basicClientId: "client2",
+            basicClientSecret: "secret",
+            form: new Dictionary<string, string>
+            {
+                { "request", jar },
+            });
+
+        statusCode.Should().Be(HttpStatusCode.BadRequest);
+        parJson.Should().NotBeNull();
+        parJson.RootElement.TryGetProperty("request_uri", out _).Should().BeFalse();
+    }
+
+    private static string BuildJarToken(
+        string issuer,
+        WilsonJsonWebKey signingKey,
+        Dictionary<string, string> claims,
+        DateTime? expires = null)
+    {
+        expires ??= DateTime.UtcNow.AddMinutes(10);
+        var jwt = new JwtSecurityToken(
+            new JwtHeader(new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256)),
+            new JwtPayload(
+                issuer,
+                IdentityServerPipeline.BaseUrl,
+                claims.Select(x => new Claim(x.Key, x.Value)),
+                notBefore: null,
+                expires: expires));
+
+        return new JwtSecurityTokenHandler().WriteToken(jwt);
+    }
+
+    /// <summary>
+    /// Pushes a plain (non-JAR) authorization request, authenticating via an
+    /// HTTP Basic Authorization header. This intentionally bypasses
+    /// <see cref="IdentityServerPipeline.PushAuthorizationRequestAsync(Dictionary{string,string})"/>
+    /// so that a per-request Authorization header can be set without
+    /// leaking auth state across tests via shared default request headers.
+    /// </summary>
+    private async Task<(JsonDocument, HttpStatusCode)> PushWithBasicAuthAsync(
+        string basicClientId,
+        string basicClientSecret,
+        Dictionary<string, string> form)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, IdentityServerPipeline.ParEndpoint)
+        {
+            Content = new FormUrlEncodedContent(form)
+        };
+        var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicClientId}:{basicClientSecret}"));
+        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+
+        var httpResponse = await _mockPipeline.BackChannelClient.SendAsync(request);
+        var statusCode = httpResponse.StatusCode;
+        var rawContent = await httpResponse.Content.ReadAsStringAsync();
+        var parsed = rawContent.Length > 0 ? JsonDocument.Parse(rawContent) : null;
+        return (parsed, statusCode);
+    }
+
+    /// <summary>
+    /// Pushes a plain (non-JAR) authorization request, authenticating with a
+    /// private_key_jwt client_assertion signed by and valid for
+    /// <paramref name="authenticatedClientId"/>.
+    /// </summary>
+    private async Task<(JsonDocument, HttpStatusCode)> PushWithPrivateKeyJwtAsync(
+        string authenticatedClientId,
+        WilsonJsonWebKey signingKey,
+        Dictionary<string, string> form)
+    {
+        var now = DateTime.UtcNow;
+        var assertion = new JwtSecurityToken(
+            issuer: authenticatedClientId,
+            audience: IdentityServerPipeline.BaseUrl + "/connect/par",
+            claims: new[]
+            {
+                new Claim(JwtClaimTypes.Subject, authenticatedClientId),
+                new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
+                new Claim(JwtClaimTypes.IssuedAt, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+            },
+            notBefore: now,
+            expires: now.AddMinutes(1),
+            signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256));
+
+        var assertionValue = new JwtSecurityTokenHandler().WriteToken(assertion);
+
+        var parameters = new Dictionary<string, string>(form)
+        {
+            { "client_assertion_type", OidcConstants.ClientAssertionTypes.JwtBearer },
+            { "client_assertion", assertionValue }
+        };
+
+        var httpResponse = await _mockPipeline.BackChannelClient.PostAsync(
+            IdentityServerPipeline.ParEndpoint, new FormUrlEncodedContent(parameters));
+        var statusCode = httpResponse.StatusCode;
+        var rawContent = await httpResponse.Content.ReadAsStringAsync();
+        var parsed = rawContent.Length > 0 ? JsonDocument.Parse(rawContent) : null;
+        return (parsed, statusCode);
+    }
+
     private void ConfigureScopesAndResources()
     {
         _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {
@@ -298,6 +826,34 @@ public class PushedAuthorizationTests
         });
     }
 
+    private void ConfigureClientKeys()
+    {
+        var rsaKey = CryptoHelper.CreateRsaSecurityKey();
+        _privateKey = JsonWebKeyConverter.ConvertFromRSASecurityKey(rsaKey);
+
+        _publicKey = new JsonWebKey
+        {
+            kty = "RSA",
+            use = "sig",
+            kid = rsaKey.KeyId,
+            e = _privateKey.E,
+            n = _privateKey.N,
+            alg = _privateKey.Alg
+        };
+
+        var privateKeyJwtRsaKey = CryptoHelper.CreateRsaSecurityKey();
+        _privateKeyJwtSigningKey = JsonWebKeyConverter.ConvertFromRSASecurityKey(privateKeyJwtRsaKey);
+        _privateKeyJwtPublicKey = new JsonWebKey
+        {
+            kty = "RSA",
+            use = "sig",
+            kid = privateKeyJwtRsaKey.KeyId,
+            e = _privateKeyJwtSigningKey.E,
+            n = _privateKeyJwtSigningKey.N,
+            alg = _privateKeyJwtSigningKey.Alg
+        };
+    }
+
     private void ConfigureClients()
     {
         _mockPipeline.Clients.AddRange(new Client[]
@@ -314,6 +870,49 @@ public class PushedAuthorizationTests
                 RequirePkce = false,
                 AllowedScopes = new List<string> { "openid", "profile" },
                 RedirectUris = new List<string> { "https://client1/callback" },
+            },
+            _client2 = new Client
+            {
+                ClientId = "client2",
+                ClientSecrets = new []
+                {
+                    new Secret("secret".Sha256()),
+                    new Secret(JsonSerializer.Serialize(_publicKey))
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey
+                    }
+                },
+                AllowedGrantTypes = GrantTypes.Implicit,
+                RequireConsent = false,
+                RequirePkce = false,
+                AllowedScopes = new List<string> { "openid", "profile" },
+                RedirectUris = new List<string> { "https://client2/callback" },
+            },
+            _publicClient = new Client
+            {
+                ClientId = PublicClientId,
+                RequireClientSecret = false,
+                AllowedGrantTypes = GrantTypes.Implicit,
+                RequireConsent = false,
+                RequirePkce = false,
+                AllowedScopes = new List<string> { "openid", "profile" },
+                RedirectUris = new List<string> { "https://par-public-client/callback" },
+            },
+            _privateKeyJwtClient = new Client
+            {
+                ClientId = PrivateKeyJwtClientId,
+                ClientSecrets = new []
+                {
+                    new Secret(JsonSerializer.Serialize(_privateKeyJwtPublicKey))
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey
+                    }
+                },
+                AllowedGrantTypes = GrantTypes.Code,
+                RequireConsent = false,
+                RequirePkce = false,
+                AllowedScopes = new List<string> { "openid", "profile" },
+                RedirectUris = new List<string> { "https://par-private-key-jwt-client/callback" },
             },
         });
     }

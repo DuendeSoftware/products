@@ -40,4 +40,9 @@
         <ProjectReference Include="..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- Dev host only, not shipped. Keep the OpenTelemetry version aligned with the release branch. -->
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+    </ItemGroup>
+
 </Project>
