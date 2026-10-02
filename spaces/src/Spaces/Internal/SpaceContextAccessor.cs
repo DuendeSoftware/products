@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics;
+using Duende.Spaces.Internal.Licensing;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.Spaces.Internal;
@@ -15,7 +16,7 @@ namespace Duende.Spaces.Internal;
 /// to restore the previous context. The middleware wraps downstream execution with a
 /// <c>space.request</c> activity; nested calls produce <c>space.override</c> activities.
 /// </remarks>
-internal sealed class SpaceContextAccessor(ILogger<SpaceContextAccessor> logger) : ISpaceContextAccessor
+internal sealed class SpaceContextAccessor(ILogger<SpaceContextAccessor> logger, SpacesLicenseValidator licenseValidator) : ISpaceContextAccessor
 {
     internal static readonly ActivitySource Source = new(SpacesTracing.ActivitySourceName);
 
@@ -39,6 +40,11 @@ internal sealed class SpaceContextAccessor(ILogger<SpaceContextAccessor> logger)
     /// <inheritdoc/>
     public IDisposable SetSpace(SpaceId spaceId)
     {
+        if (!licenseValidator.ValidateSpaces())
+        {
+            SpacesLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Spaces feature.");
+        }
+
         var original = _current.Value;
         var parentScope = _currentScope.Value;
         _current.Value = spaceId;

@@ -1,15 +1,16 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Private.Licencing.V2;
 using Duende.Spaces.Internal;
+using Duende.Spaces.Internal.Licensing;
 using Duende.Spaces.Internal.Storage;
-using Duende.Storage.EntityAttributeValue;
+using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
-using Microsoft.Extensions.Caching.Hybrid;
+using Duende.Storage.Internal.Outbox;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace Duende.Spaces;
 
@@ -19,75 +20,74 @@ namespace Duende.Spaces;
 public static class SpacesServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds Spaces services to the service collection.
+    /// Adds Spaces services to the service collection, storing Spaces data in the default storage
+    /// instance.
     /// </summary>
     /// <remarks>
-    /// Registers a Transient <see cref="IStorageFactory"/> that routes storage operations to the
-    /// pool corresponding to the current space context. When the default storage factory is also
-    /// registered (via <c>TryAddSingleton</c>), it will not overwrite this registration because
-    /// an <see cref="IStorageFactory"/> is already present in the container.
+    /// Registers a transient <see cref="IPartitionedStorageFactory"/> that routes storage operations to the
+    /// pool of the current space. Duende.Storage registers its default factory with
+    /// <c>TryAddTransient</c>, so this registration wins regardless of the order in which storage
+    /// and Spaces are added.
     /// </remarks>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddSpaces(this IServiceCollection services)
+    public static IServiceCollection AddSpaces(this IServiceCollection services) =>
+        services.AddSpaces(StorageInstanceId.Default);
+
+    /// <summary>
+    /// Adds Spaces services to the service collection, storing Spaces data in the given
+    /// <paramref name="storageInstanceId"/>.
+    /// </summary>
+    /// <remarks>
+    /// Registers a transient <see cref="IPartitionedStorageFactory"/> that routes storage operations to the
+    /// pool of the current space. Duende.Storage registers its default factory with
+    /// <c>TryAddTransient</c>, so this registration wins regardless of the order in which storage
+    /// and Spaces are added.
+    /// </remarks>
+    /// <param name="services">The service collection.</param>
+    /// <param name="storageInstanceId">The storage instance to route Spaces category storage to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    internal static IServiceCollection AddSpaces(this IServiceCollection services, StorageInstanceId storageInstanceId)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        // Register the Spaces store factory as Transient.
-        // StorageModule uses TryAddSingleton for DefaultStorageFactory, so it will not overwrite this.
-        _ = services.AddTransient<IStorageFactory>(sp =>
-        {
-            var pooledStore = sp.GetRequiredService<IPooledStore>();
-            var contextAccessor = sp.GetRequiredService<ISpaceContextAccessor>();
-            var spaceStore = sp.GetRequiredService<ISpaceStore>();
-            return new SpacesStorageFactory(pooledStore, contextAccessor, spaceStore);
-        });
+        services.GetOrAddStorageInstanceRouter().AddMapping(DataCategoryName.Spaces, storageInstanceId);
+
+        _ = services.AddTransient<IPartitionedStorageFactory, SpacesPartitionedStorageFactory>();
+        services.TryAddTransient<DefaultPartitionedStorageFactory>();
 
         services.TryAddSingleton<ISpaceContextAccessor, SpaceContextAccessor>();
 
-        // Management storage accessor — Singleton because IPooledStore is Singleton.
-        services.TryAddSingleton<ManagementStorageAccessor>(sp =>
-        {
-            var pooledStore = sp.GetRequiredService<IPooledStore>();
-            return new ManagementStorageAccessor(pooledStore);
-        });
+        services.TryAddTransient<ManagementStorageAccessor>();
 
-        // Space repository — Singleton (depends only on Singleton ManagementStorageAccessor and HybridCache).
-        services.TryAddSingleton<SpaceRepository>(sp =>
-        {
-            var storageAccessor = sp.GetRequiredService<ManagementStorageAccessor>();
-            var pooledStore = sp.GetRequiredService<IPooledStore>();
-            var cache = sp.GetService<HybridCache>();
-            var schemaStore = sp.GetService<ISchemaStore>();
-            return new SpaceRepository(storageAccessor, pooledStore, cache, schemaStore);
-        });
+        services.TryAddTransient<SpaceRepository>();
+        services.TryAddTransient<SpaceRouting>();
 
         // Space resolution infrastructure
-        services.TryAddSingleton<ISpaceStore>(sp =>
-        {
-            var repo = sp.GetRequiredService<SpaceRepository>();
-            var cache = sp.GetRequiredService<HybridCache>();
-            var options = sp.GetRequiredService<IOptions<SpacesOptions>>();
-            return new SpaceStore(repo, cache, options);
-        });
-        services.TryAddSingleton<ISpacePathRewriter, DefaultSpacePathRewriter>();
+        services.TryAddTransient<ISpaceStore, SpaceStore>();
+        services.TryAddTransient<ISpacePathRewriter, DefaultSpacePathRewriter>();
 
-        // Space admin — Singleton for CRUD management of spaces.
-        services.TryAddSingleton<ISpaceAdmin>(sp =>
-        {
-            var repo = sp.GetRequiredService<SpaceRepository>();
-            var schemaStore = sp.GetService<ISchemaStore>();
-            return new SpaceAdmin(repo, schemaStore);
-        });
+        _ = services.AddTransient<IAmbientOutboxProcessingContextProvider,
+            SpaceAwareAmbientOutboxProcessingContext>();
+
+        services.TryAddTransient<ISpaceAdmin, SpaceAdmin>();
 
         // HybridCache for space resolution caching.
         _ = services.AddHybridCache();
+
+        // Replace (not TryAdd) so this wins over IdentityServer's default factory regardless of registration order.
+        _ = services.Replace(ServiceDescriptor.Transient<IHybridCacheFactory, SpaceAwareHybridCacheFactory>());
 
         // Register the SpaceDso type for deserialization
         services.AddDsoRegistration<SpaceDso.V1>();
 
         // Options
         _ = services.AddOptions<SpacesOptions>();
+
+        // Licensing
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<LicenseValidator>();
+        services.TryAddSingleton<SpacesLicenseValidator>();
 
         return services;
     }

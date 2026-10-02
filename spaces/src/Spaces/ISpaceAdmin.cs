@@ -44,6 +44,25 @@ public interface ISpaceAdmin
     Task<SaveResult<SpaceId>> DeleteAsync(SpaceId id, Ct ct);
 
     /// <summary>
+    /// Restores a previously deleted space, making it active again.
+    /// Calling this on a space that is already active is a no-op success: no write occurs
+    /// and the same version is returned.
+    /// </summary>
+    /// <remarks>
+    /// Fails with one <see cref="StorageError"/> per conflict when any of the space's
+    /// remembered unique extended attribute values are currently claimed by another space
+    /// (code <c>eav_conflict</c>, one entry per conflicting value, enumeration is exhaustive).
+    /// Fails with a <see cref="StorageError"/> per missing attribute when the current schema
+    /// no longer represents an attribute stored on the deleted space (code <c>schema_drift</c>).
+    /// Fails with a <see cref="StorageError"/> of code <c>not_found</c> when the space was
+    /// never created, or was already purged.
+    /// </remarks>
+    /// <param name="id">The storage identifier of the space to restore.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <seealso cref="DeleteAsync"/>
+    Task<SaveResult<SpaceId>> UndeleteAsync(SpaceId id, Ct ct);
+
+    /// <summary>
     /// Permanently purges a previously deleted space. This first purges all data in the
     /// space's storage pool, then removes the space record itself. The space must have
     /// been logically deleted via <see cref="DeleteAsync"/> before it can be purged.

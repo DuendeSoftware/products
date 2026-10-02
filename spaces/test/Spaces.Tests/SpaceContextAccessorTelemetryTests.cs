@@ -22,6 +22,7 @@ public class SpaceContextAccessorTelemetryTests : IDisposable
         var sc = new ServiceCollection();
         sc.AddLogging(b => b.AddProvider(_logProvider));
         sc.AddSpaces();
+        TestSpacesLicense.RegisterEntitled(sc);
         var sp = sc.BuildServiceProvider();
         _sut = sp.GetRequiredService<ISpaceContextAccessor>();
 

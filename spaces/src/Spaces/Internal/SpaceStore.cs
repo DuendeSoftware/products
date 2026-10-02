@@ -1,7 +1,8 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Duende.Spaces.Internal.Storage;
+using Duende.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
@@ -48,6 +49,15 @@ internal sealed class SpaceStore(
                 factory: static (state, _) => ValueTask.FromResult<SpaceConfiguration?>(state?.Enabled == true ? state : null),
                 options: CacheEntryOptions,
                 cancellationToken: ct);
+
+            // Prime the routing lookup as well, so the first storage access for this space
+            // doesn't read the space record again just to find its pool.
+            _ = await cache.GetOrCreateAsync(
+                key: SpaceCacheKeys.ForSpaceIdRouting(config.Id),
+                state: (int?)config.PoolId.Value,
+                factory: static (state, _) => ValueTask.FromResult(state),
+                options: CacheEntryOptions,
+                cancellationToken: ct);
         }
 
         return config is { Enabled: true }
@@ -84,6 +94,21 @@ internal sealed class SpaceStore(
         {
             var result = await state.spaceRepository.GetByIdAsync(state.spaceId, token);
             return result is { Found: true, Item.Enabled: true } ? result.Item : null;
+        }, CacheEntryOptions, cancellationToken: ct);
+
+        return config?.ToSpace();
+    }
+
+    public async Task<Space?> TryGetSpaceByPoolId(PoolId poolId, Ct ct)
+    {
+        ArgumentNullException.ThrowIfNull(poolId);
+
+        var cacheKey = SpaceCacheKeys.ForPoolId(poolId);
+
+        var config = await cache.GetOrCreateAsync(cacheKey, (poolId, spaceRepository), static async (state, token) =>
+        {
+            var result = await state.spaceRepository.GetByPoolIdAsync(state.poolId, token);
+            return result is { Enabled: true } ? result : null;
         }, CacheEntryOptions, cancellationToken: ct);
 
         return config?.ToSpace();

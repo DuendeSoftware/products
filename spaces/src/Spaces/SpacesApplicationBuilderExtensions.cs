@@ -1,8 +1,10 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Duende.Spaces.Internal;
+using Duende.Spaces.Internal.Licensing;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Spaces;
 
@@ -17,5 +19,15 @@ public static class SpacesApplicationBuilderExtensions
     /// <param name="app">The application builder.</param>
     /// <returns>The application builder.</returns>
     public static IApplicationBuilder UseSpaceResolution(this IApplicationBuilder app)
-        => app.UseMiddleware<SpaceResolutionMiddleware>();
+    {
+        ArgumentNullException.ThrowIfNull(app);
+
+        var licenseValidator = app.ApplicationServices.GetRequiredService<SpacesLicenseValidator>();
+        if (!licenseValidator.ValidateSpaces())
+        {
+            SpacesLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Spaces feature.");
+        }
+
+        return app.UseMiddleware<SpaceResolutionMiddleware>();
+    }
 }

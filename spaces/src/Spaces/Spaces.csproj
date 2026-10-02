@@ -11,8 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Duende.Private.Licensing" />
     <PackageReference Include="Duende.Storage" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.Spaces.Tests" />
   </ItemGroup>
 
 </Project>

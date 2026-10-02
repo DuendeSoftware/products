@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using System.Net.Http.Json;
@@ -30,18 +30,19 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         builder.Services.AddSingleton<TimeProvider>(_timeProvider);
 
         builder.Services.AddSpaces();
+        TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.Configure<SpacesOptions>(opt =>
         {
             opt.LocalCacheExpiration = TimeSpan.FromSeconds(30);
             opt.Expiration = TimeSpan.FromSeconds(30);
             opt.FallbackToDefault = true;
         });
-        builder.Services.AddStorageInternal(b => b.AddSqliteInMemoryStore());
+        builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
 
         _app = builder.Build();
 
-        var schema = _app.Services.GetRequiredService<IDatabaseSchema>();
-        await schema.MigrateAsync(CancellationToken.None);
+        var storageInstanceSchema = _app.Services.GetRequiredService<IStorageInstanceSchema>();
+        await storageInstanceSchema.MigrateAsync(CancellationToken.None);
 
         _admin = _app.Services.GetRequiredService<ISpaceAdmin>();
 
@@ -196,7 +197,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
             },
             CancellationToken.None);
 
-        // First request — populates the cache
+        // First request : populates the cache
         var response1 = await _client.SendAsync(
             new HttpRequestMessage(HttpMethod.Get, "http://cached.example.com/api/info"));
         response1.EnsureSuccessStatusCode();
@@ -204,7 +205,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         result1.ShouldNotBeNull();
         result1.SpaceId.ShouldBe(space.Id!.ToString());
 
-        // Delete the space — AdminDeleteAsync also calls BustCache which clears the key
+        // Delete the space : AdminDeleteAsync also calls BustCache which clears the key
         await _admin.DeleteAsync(space.Id!, CancellationToken.None);
 
         // Advance time past the cache TTL
@@ -351,7 +352,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
             },
             CancellationToken.None);
 
-        // Request to /t/api/info — the /t prefix signals an explicit space request,
+        // Request to /t/api/info : the /t prefix signals an explicit space request,
         // extracting "api" as the segment. No space matches "/api", so this is a 404.
         var response = await _client.GetAsync("/t/api/info");
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.NotFound);
@@ -369,7 +370,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
             },
             CancellationToken.None);
 
-        // Request to /t/beta/api/info (wrong tenant segment) — explicitly asking for
+        // Request to /t/beta/api/info (wrong tenant segment) : explicitly asking for
         // a space that doesn't exist via the path prefix should always 404, never
         // silently fall back to default.
         var response = await _client.GetAsync("/t/beta/api/info");
@@ -402,13 +403,14 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddSpaces();
+        TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.Configure<SpacesOptions>(opt => opt.FallbackToDefault = false);
-        builder.Services.AddStorageInternal(b => b.AddSqliteInMemoryStore());
+        builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
 
         await using var app = builder.Build();
 
-        var schema = app.Services.GetRequiredService<IDatabaseSchema>();
-        await schema.MigrateAsync(CancellationToken.None);
+        var storageInstanceSchema = app.Services.GetRequiredService<IStorageInstanceSchema>();
+        await storageInstanceSchema.MigrateAsync(CancellationToken.None);
 
         app.UseSpaceResolution();
         app.MapGet("/api/info", (ISpaceContextAccessor ctx) =>
@@ -421,7 +423,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         await app.StartAsync();
         using var client = app.GetTestClient();
 
-        // Request to an unknown host — no space matches, fallback is disabled,
+        // Request to an unknown host : no space matches, fallback is disabled,
         // so the middleware returns 404 without invoking the rest of the pipeline.
         var request = new HttpRequestMessage(HttpMethod.Get, "http://unknown.example.com/api/info");
         var response = await client.SendAsync(request);
@@ -432,7 +434,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
     [Fact]
     public void fallback_to_default_is_false_by_default()
     {
-        // The FallbackToDefault option must default to false — resolving to the
+        // The FallbackToDefault option must default to false : resolving to the
         // default space should be an explicit opt-in, not a silent fallback.
         var options = new SpacesOptions();
         options.FallbackToDefault.ShouldBeFalse();
@@ -566,9 +568,73 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task deleted_space_no_longer_resolves_via_pattern_or_origin_claim()
+    {
+        // These tests validate the clean-404 optimization / defense-in-depth behavior
+        // of the runtime read paths (cache busting on delete), not the actual security
+        // boundary. The real security boundary is the data-plane factory lockout,
+        // covered by StorageFactoryTests.
+        var space = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "Deletable Space",
+                MatchPatterns = [new SpaceMatchPattern { Origin = "http://deletable.example.com" }]
+            },
+            CancellationToken.None);
+
+        var spaceStore = _app.Services.GetRequiredService<ISpaceStore>();
+        var pattern = new SpaceMatchPattern { Origin = "http://deletable.example.com" };
+
+        var preDeleteResult = await spaceStore.TryResolveSpace(pattern, TestContext.Current.CancellationToken);
+        preDeleteResult.ShouldNotBeNull();
+        preDeleteResult.SpaceId.ShouldBe(space.Id);
+
+        var preDeleteClaimed = await spaceStore.IsOriginClaimed("http://deletable.example.com", TestContext.Current.CancellationToken);
+        preDeleteClaimed.ShouldBeTrue();
+
+        await _admin.DeleteAsync(space.Id!, CancellationToken.None);
+
+        var postDeleteResult = await spaceStore.TryResolveSpace(pattern, TestContext.Current.CancellationToken);
+        postDeleteResult.ShouldBeNull();
+
+        var postDeleteClaimed = await spaceStore.IsOriginClaimed("http://deletable.example.com", TestContext.Current.CancellationToken);
+        postDeleteClaimed.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task deleted_space_no_longer_resolves_by_id()
+    {
+        // This test independently exercises the by-id runtime read path
+        // (ISpaceStore.TryGetSpace), rather than relying solely on the pattern-
+        // resolution path above. It validates the clean-404 optimization /
+        // defense-in-depth behavior, not the actual security boundary (which is
+        // the data-plane factory lockout, covered by a different test file).
+        var space = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "Deletable By Id Space",
+                MatchPatterns = [new SpaceMatchPattern { Origin = "http://deletable-byid.example.com" }]
+            },
+            CancellationToken.None);
+
+        var spaceStore = _app.Services.GetRequiredService<ISpaceStore>();
+
+        var preDeleteSpace = await spaceStore.TryGetSpace(space.Id!, TestContext.Current.CancellationToken);
+        preDeleteSpace.ShouldNotBeNull();
+
+        // The repository preserves Enabled=true on delete, only setting IsDeleted=true,
+        // so this test proves the by-id runtime read excludes deleted spaces
+        // independent of the Enabled flag.
+        await _admin.DeleteAsync(space.Id!, CancellationToken.None);
+
+        var postDeleteSpace = await spaceStore.TryGetSpace(space.Id!, TestContext.Current.CancellationToken);
+        postDeleteSpace.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task origin_only_space_resolves_without_path()
     {
-        // Space B: matches on origin only — no path configured
+        // Space B: matches on origin only : no path configured
         var spaceB = await _admin.CreateAsync(
             new CreateSpaceConfiguration
             {

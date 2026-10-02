@@ -1,10 +1,11 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Spaces.Internal.Licensing;
 using Duende.Spaces.Internal.Storage;
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Querying;
 
@@ -13,11 +14,16 @@ namespace Duende.Spaces.Internal;
 /// <summary>
 /// Internal implementation of <see cref="ISpaceAdmin"/> that delegates to <see cref="SpaceRepository"/>.
 /// </summary>
-internal sealed class SpaceAdmin(SpaceRepository repository, ISchemaStore? schemaStore) : ISpaceAdmin
+internal sealed class SpaceAdmin(
+    SpaceRepository repository,
+    ISchemaStore? schemaStore,
+    SpacesLicenseValidator licenseValidator) : ISpaceAdmin
 {
     /// <inheritdoc/>
     public async Task<SaveResult<SpaceId>> CreateAsync(CreateSpaceConfiguration configuration, Ct ct)
     {
+        EnsureLicensed();
+
         if (configuration.PoolId is { } poolId && poolId.Value <= 0)
         {
             return SaveResult.Failure<SpaceId>(StorageError.ValidationFailed(
@@ -43,24 +49,37 @@ internal sealed class SpaceAdmin(SpaceRepository repository, ISchemaStore? schem
             return SaveResult.Failure<SpaceId>(uniquenessError);
         }
 
-        return await repository.CreateAsync(configuration.Name, configuration.MatchPatterns, configuration.PoolId, extendedProperties, ct);
+        var createResult = await repository.CreateAsync(configuration.Name, configuration.MatchPatterns,
+            configuration.PoolId, extendedProperties, ct);
+        if (createResult.IsSuccess)
+        {
+            await ValidateSpaceCountAsync(ct);
+        }
+
+        return createResult;
     }
 
     /// <inheritdoc/>
-    public Task<GetResult<SpaceConfiguration>> GetAsync(SpaceId id, Ct ct) =>
-        repository.GetByIdAsync(id, ct);
+    public Task<GetResult<SpaceConfiguration>> GetAsync(SpaceId id, Ct ct)
+    {
+        EnsureLicensed();
+        return repository.GetByIdRawAsync(id, ct);
+    }
 
     /// <inheritdoc/>
-    public async Task<SaveResult<SpaceId>> UpdateAsync(SpaceId id, SpaceConfiguration space, DataVersion expectedVersion, Ct ct)
+    public async Task<SaveResult<SpaceId>> UpdateAsync(SpaceId id, SpaceConfiguration space,
+        DataVersion expectedVersion, Ct ct)
     {
+        EnsureLicensed();
+
         var validationError = ValidatePatterns(space.MatchPatterns);
         if (validationError is not null)
         {
             return SaveResult.Failure<SpaceId>(validationError);
         }
 
-        // PoolId is immutable after creation
-        var existing = await repository.GetByIdAsync(id, ct);
+        // PoolId is immutable via UpdateAsync
+        var existing = await repository.GetByIdRawAsync(id, ct);
         if (!existing.Found)
         {
             return SaveResult.Failure<SpaceId>(StorageError.NotFound("space", id.Value.ToString()));
@@ -72,6 +91,24 @@ internal sealed class SpaceAdmin(SpaceRepository repository, ISchemaStore? schem
                 "PoolId cannot be changed after creation.", "PoolId"));
         }
 
+        // A deleted space's match patterns remain reserved until purge (see IsPatternRegisteredAsync).
+        // Allowing Update to change patterns on a deleted space could let it silently release a
+        // reservation or (via pattern reuse) claim a new one, which would weaken that invariant.
+        // Reject pattern changes explicitly instead of silently discarding them.
+        //
+        // This is a best-effort, fast-fail pre-check based on the state read above (which can go
+        // stale if the space is concurrently deleted between this read and the repository's
+        // persistence-time read). It exists purely to skip unnecessary schema/uniqueness work for
+        // the common case; SpaceRepository.UpdateAsync independently re-derives IsDeleted from the
+        // current row at persistence time and is the sole authority for enforcing the freeze.
+        if (existing.Item.IsDeleted &&
+            !SpaceMatchPatternPolicy.PatternsMatch(space.MatchPatterns, existing.Item.MatchPatterns))
+        {
+            return SaveResult.Failure<SpaceId>(StorageError.ValidationFailed(
+                "Cannot change match patterns of a deleted space. Patterns remain reserved until the space is purged.",
+                "MatchPatterns"));
+        }
+
         var extendedProperties = EavMapper.ToMutableCollection(space.ExtendedProperties ?? []);
         var schemaError = await ValidateExtendedPropertiesAsync(extendedProperties, ct);
         if (schemaError is not null)
@@ -79,26 +116,65 @@ internal sealed class SpaceAdmin(SpaceRepository repository, ISchemaStore? schem
             return SaveResult.Failure<SpaceId>(schemaError);
         }
 
-        var uniquenessError = await CheckPatternUniquenessAsync(space.MatchPatterns, excludeSpaceId: id, ct);
-        if (uniquenessError is not null)
+        if (!existing.Item.IsDeleted)
         {
-            return SaveResult.Failure<SpaceId>(uniquenessError);
+            var uniquenessError = await CheckPatternUniquenessAsync(space.MatchPatterns, excludeSpaceId: id, ct);
+            if (uniquenessError is not null)
+            {
+                return SaveResult.Failure<SpaceId>(uniquenessError);
+            }
         }
 
         return await repository.UpdateAsync(space, extendedProperties, expectedVersion.Value, ct);
     }
 
     /// <inheritdoc/>
-    public Task<SaveResult<SpaceId>> DeleteAsync(SpaceId id, Ct ct) =>
-        repository.DeleteAsync(id, ct);
+    public Task<SaveResult<SpaceId>> DeleteAsync(SpaceId id, Ct ct)
+    {
+        EnsureLicensed();
+        return repository.DeleteAsync(id, ct);
+    }
 
     /// <inheritdoc/>
-    public Task<SaveResult<SpaceId>> PurgeAsync(SpaceId id, Ct ct) =>
-        repository.PurgeAsync(id, ct);
+    public async Task<SaveResult<SpaceId>> UndeleteAsync(SpaceId id, Ct ct)
+    {
+        EnsureLicensed();
+
+        var result = await repository.UndeleteAsync(id, ct);
+        if (result.IsSuccess)
+        {
+            await ValidateSpaceCountAsync(ct);
+        }
+
+        return result;
+    }
 
     /// <inheritdoc/>
-    public Task<QueryResult<SpaceListItem>> QueryAsync(QueryRequest<SpaceFilter, SpaceSortField> request, Ct ct) =>
-        repository.QueryAsync(request, ct);
+    public Task<SaveResult<SpaceId>> PurgeAsync(SpaceId id, Ct ct)
+    {
+        EnsureLicensed();
+        return repository.PurgeAsync(id, ct);
+    }
+
+    /// <inheritdoc/>
+    public Task<QueryResult<SpaceListItem>> QueryAsync(QueryRequest<SpaceFilter, SpaceSortField> request, Ct ct)
+    {
+        EnsureLicensed();
+        return repository.QueryAsync(request, ct);
+    }
+
+    private void EnsureLicensed()
+    {
+        if (!licenseValidator.ValidateSpaces())
+        {
+            SpacesLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Spaces feature.");
+        }
+    }
+
+    // Success-path hand-off to the license validator's soft count check.
+    // Failure isolation lives inside SpacesLicenseValidator.ValidateSpaceCountAsync; nothing here can throw.
+    private async Task ValidateSpaceCountAsync(Ct ct) =>
+        await licenseValidator.ValidateSpaceCountAsync(repository.GetActiveCountAsync, ct);
 
     private async Task<StorageError?> ValidateExtendedPropertiesAsync(
         AttributeValueCollection extendedProperties,
@@ -155,12 +231,19 @@ internal sealed class SpaceAdmin(SpaceRepository repository, ISchemaStore? schem
             return StorageError.ValidationFailed("At least one match pattern is required.", "MatchPatterns");
         }
 
+        var seen = new HashSet<(string? Origin, string? Path)>();
         foreach (var pattern in patterns)
         {
             if (pattern.Origin is null && string.IsNullOrEmpty(pattern.Path))
             {
                 return StorageError.ValidationFailed(
                     "Each match pattern must have at least one of Origin or Path set.", "MatchPatterns");
+            }
+
+            if (!seen.Add(SpaceMatchPatternPolicy.NormalizePatternKey(pattern)))
+            {
+                return StorageError.ValidationFailed(
+                    $"Duplicate match pattern: Origin='{pattern.Origin}', Path='{pattern.Path}'.", "MatchPatterns");
             }
         }
 

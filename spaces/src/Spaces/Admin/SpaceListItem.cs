@@ -1,5 +1,7 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
+
+using Duende.Storage;
 
 namespace Duende.Spaces;
 
@@ -22,4 +24,7 @@ public sealed record SpaceListItem
 
     /// <summary>Number of configured match patterns.</summary>
     public int MatchPatternCount { get; init; }
+
+    /// <summary>Whether the space is logically deleted.</summary>
+    public bool IsDeleted { get; init; }
 }

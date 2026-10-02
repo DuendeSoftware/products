@@ -14,6 +14,7 @@ public class SpaceContextAccessorTests
         var sc = new ServiceCollection();
         sc.AddLogging();
         sc.AddSpaces();
+        TestSpacesLicense.RegisterEntitled(sc);
         var sp = sc.BuildServiceProvider();
         _sut = sp.GetRequiredService<ISpaceContextAccessor>();
     }

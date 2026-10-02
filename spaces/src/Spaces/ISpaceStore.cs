@@ -1,5 +1,7 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
+
+using Duende.Storage;
 
 namespace Duende.Spaces;
 
@@ -25,4 +27,9 @@ public interface ISpaceStore
     /// Tries to look up a space by its ID.
     /// </summary>
     Task<Space?> TryGetSpace(SpaceId spaceId, Ct ct);
+
+    /// <summary>
+    /// Tries to look up a space by its assigned pool id.
+    /// </summary>
+    Task<Space?> TryGetSpaceByPoolId(PoolId poolId, Ct ct);
 }

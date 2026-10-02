@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using System.Net.Http.Json;
@@ -27,18 +27,19 @@ public sealed class SpaceResolutionWithoutPrefixTests : IAsyncLifetime
         builder.WebHost.UseTestServer();
 
         builder.Services.AddSpaces();
+        TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.Configure<SpacesOptions>(opt =>
         {
             // Disable path prefix — spaces match directly on first segment
             opt.SpacePathPrefix = null;
             opt.FallbackToDefault = true;
         });
-        builder.Services.AddStorageInternal(b => b.AddSqliteInMemoryStore());
+        builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
 
         _app = builder.Build();
 
-        var schema = _app.Services.GetRequiredService<IDatabaseSchema>();
-        await schema.MigrateAsync(CancellationToken.None);
+        var storageInstanceSchema = _app.Services.GetRequiredService<IStorageInstanceSchema>();
+        await storageInstanceSchema.MigrateAsync(CancellationToken.None);
 
         _admin = _app.Services.GetRequiredService<ISpaceAdmin>();
 
