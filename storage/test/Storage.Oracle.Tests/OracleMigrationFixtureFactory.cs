@@ -13,18 +13,19 @@ internal sealed class OracleMigrationFixtureFactory(AspireFixture aspire) : IMig
 {
     public async Task<IMigrationFixture> CreateAsync(CancellationToken ct)
     {
-        // Each migration test gets its own fresh Oracle user (schema), so the storage
-        // writes into that user's own schema (no SchemaName option required).
-        var (connectionString, user) = await OracleDatabasePool.CreateUserAsync(aspire.ServerConnectionString, ct);
+        // Each migration test gets its own fresh Oracle user (schema), independent of
+        // the shared provisioner's pool, so the storage writes into that user's own
+        // schema (no SchemaName option required) and the schema is guaranteed unmigrated.
+        var (connectionString, user) = await OracleTestDatabaseProvisioner.CreateFreshUserAsync(aspire.ServerConnectionString, ct);
 
         var services = new ServiceCollection();
         _ = services.AddLogging();
         _ = services.AddKeyedSingleton<CreateOracleConnection>("migration-test", () => new OracleConnection(connectionString));
-        _ = services.AddStorageInternal(storage => storage.AddOracleStore("migration-test", _ => { }));
+        _ = services.AddStorageInternal(storage => storage.AddOracle(sp => sp.GetRequiredKeyedService<CreateOracleConnection>("migration-test"), _ => { }));
         var provider = services.BuildServiceProvider();
 
-        var schema = provider.GetRequiredKeyedService<IDatabaseSchema>("migration-test");
-        return new OracleMigrationFixture(provider, aspire.ServerConnectionString, user, schema, connectionString);
+        var storageInstanceSchema = await provider.GetRequiredService<IStorageInstanceSchemaFactory>().GetStorageInstanceSchema(ct);
+        return new OracleMigrationFixture(provider, aspire.ServerConnectionString, user, storageInstanceSchema, connectionString);
     }
 }
 
@@ -32,10 +33,11 @@ internal sealed class OracleMigrationFixture(
     ServiceProvider provider,
     string serverConnectionString,
     string user,
-    IDatabaseSchema schema,
+    IStorageInstanceSchema storageInstanceSchema,
     string connectionString) : IMigrationFixture
 {
-    public IDatabaseSchema Schema => schema;
+    public uint RequiredVersion => 2u;
+    public IStorageInstanceSchema StorageInstanceSchema => storageInstanceSchema;
 
     /// <summary>
     /// Executes raw SQL against the schema. Oracle runs a single statement per command
@@ -67,7 +69,7 @@ internal sealed class OracleMigrationFixture(
         {
             OracleConnection.ClearAllPools();
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            await OracleDatabasePool.DropUserAsync(serverConnectionString, user, cts.Token);
+            await OracleTestDatabaseProvisioner.DropUserAsync(serverConnectionString, user, cts.Token);
         }
 #pragma warning disable CA1031
         catch (Exception ex)

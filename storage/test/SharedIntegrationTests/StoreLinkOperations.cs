@@ -32,17 +32,17 @@ public partial class StoreLinkOperations
     public async Task CanLinkAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // Create entities on both sides
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
-        var result = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        var result = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         result.ShouldBe(LinkResult.Success);
 
@@ -60,13 +60,13 @@ public partial class StoreLinkOperations
     public async Task LinkDuplicateReturnsAlreadyLinkedAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
-        var second = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        var second = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         second.ShouldBe(LinkResult.AlreadyLinked);
     }
@@ -75,17 +75,17 @@ public partial class StoreLinkOperations
     public async Task UnlinkRemovesLinkAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
-        var unlinkResult = await storage.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
+        var unlinkResult = await partitionedStorage.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
         unlinkResult.ShouldBe(UnlinkResult.Success);
 
         // Verify the link is gone
@@ -101,13 +101,13 @@ public partial class StoreLinkOperations
     public async Task UnlinkNonExistentReturnsSuccessAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // No link was ever created
-        var result = await storage.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
+        var result = await partitionedStorage.UnlinkAsync(TestLink, leftId, rightId, [], _ct);
 
         result.ShouldBe(UnlinkResult.Success);
     }
@@ -116,13 +116,13 @@ public partial class StoreLinkOperations
     public async Task LinkWithoutEntityExistingSucceedsAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // No entities created — no referential integrity check
-        var result = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        var result = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         result.ShouldBe(LinkResult.Success);
     }
@@ -135,16 +135,16 @@ public partial class StoreLinkOperations
     public async Task CanLinkInBatchAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
-        var batchResult = await storage.ExecuteBatchAsync(
+        var batchResult = await partitionedStorage.ExecuteBatchAsync(
             [LinkOperation.For(TestLink, leftId, rightId)],
             [],
             _ct);
@@ -166,13 +166,13 @@ public partial class StoreLinkOperations
     public async Task CanMixCreateAndLinkInBatchAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        var batchResult = await storage.ExecuteBatchAsync(
+        var batchResult = await partitionedStorage.ExecuteBatchAsync(
             [
                 CreateOperation.For(leftId, new TestDso("created-left"), [], SearchFieldCollection.Empty, Expiration.NoExpiration),
                 CreateOperation.For(rightId, new TestDso2("created-right"), [], SearchFieldCollection.Empty, Expiration.NoExpiration),
@@ -186,7 +186,7 @@ public partial class StoreLinkOperations
         batchResult.Results.ShouldAllBe(r => r.Outcome == OperationOutcome.Success);
 
         // Verify entity exists
-        (await storage.TryReadAsync(LeftEntityType, leftId, _ct)).Found.ShouldBeTrue();
+        (await partitionedStorage.TryReadAsync(LeftEntityType, leftId, _ct)).Found.ShouldBeTrue();
 
         // Verify link exists
         var query = LinkQuery.From(RightEntityType)
@@ -201,16 +201,16 @@ public partial class StoreLinkOperations
     public async Task BatchLinkDuplicateIsIdempotentAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         // First link
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Batch with duplicate link — should succeed (idempotent)
-        var batchResult = await storage.ExecuteBatchAsync(
+        var batchResult = await partitionedStorage.ExecuteBatchAsync(
             [LinkOperation.For(TestLink, leftId, rightId)],
             [],
             _ct);
@@ -223,17 +223,17 @@ public partial class StoreLinkOperations
     public async Task CanUnlinkInBatchAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
-        var batchResult = await storage.ExecuteBatchAsync(
+        var batchResult = await partitionedStorage.ExecuteBatchAsync(
             [UnlinkOperation.For(TestLink, leftId, rightId)],
             [],
             _ct);
@@ -258,18 +258,18 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityRemovesLinksWhereEntityIsLeftAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete the left entity
-        _ = await storage.DeleteAsync(LeftEntityType, leftId, [], _ct);
+        _ = await partitionedStorage.DeleteAsync(LeftEntityType, leftId, [], _ct);
 
         // Query from right side — link should be gone
         var query = LinkQuery.From(LeftEntityType)
@@ -284,18 +284,18 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityRemovesLinksWhereEntityIsRightAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete the right entity
-        _ = await storage.DeleteAsync(RightEntityType, rightId, [], _ct);
+        _ = await partitionedStorage.DeleteAsync(RightEntityType, rightId, [], _ct);
 
         // Query from left side — link should be gone
         var query = LinkQuery.From(RightEntityType)
@@ -310,21 +310,21 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityRemovesMultipleLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId1 = UuidV7.New();
         var rightId2 = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId1, new TestDso2("right1"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId2, new TestDso2("right2"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId1, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId2, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId1, new TestDso2("right1"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId2, new TestDso2("right2"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId1, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId2, [], _ct);
 
         // Delete the left entity — both links should go
-        _ = await storage.DeleteAsync(LeftEntityType, leftId, [], _ct);
+        _ = await partitionedStorage.DeleteAsync(LeftEntityType, leftId, [], _ct);
 
         var query = LinkQuery.From(LeftEntityType)
             .Join(TestLink)
@@ -338,18 +338,18 @@ public partial class StoreLinkOperations
     public async Task BatchDeleteEntityRemovesLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete via batch
-        var batchResult = await storage.ExecuteBatchAsync(
+        var batchResult = await partitionedStorage.ExecuteBatchAsync(
             [DeleteOperation.ById(LeftEntityType, leftId)],
             [],
             _ct);
@@ -369,19 +369,19 @@ public partial class StoreLinkOperations
     public async Task DeleteEntityByKeyRemovesLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
         var leftKey = new TestJsonKeyDsk($"left-key-{Guid.NewGuid()}");
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete the left entity by key (not by ID)
-        var result = await storage.DeleteAsync(LeftEntityType, DataStorageKey.Create(leftKey), [], _ct);
+        var result = await partitionedStorage.DeleteAsync(LeftEntityType, DataStorageKey.Create(leftKey), [], _ct);
         result.ShouldBe(DeleteResult.Success);
 
         // Link should be gone
@@ -397,19 +397,19 @@ public partial class StoreLinkOperations
     public async Task BatchDeleteEntityByKeyRemovesLinksAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
         var leftKey = new TestJsonKeyDsk($"left-key-{Guid.NewGuid()}");
 
-        _ = await storage.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(TestLink, leftId, rightId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [DataStorageKey.Create(leftKey)], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         // Delete via batch by key
-        var batchResult = await storage.ExecuteBatchAsync(
+        var batchResult = await partitionedStorage.ExecuteBatchAsync(
             [DeleteOperation.ByKey(LeftEntityType, DataStorageKey.Create(leftKey))],
             [],
             _ct);
@@ -433,14 +433,14 @@ public partial class StoreLinkOperations
         // could allow two transactions to both observe "not exists" and then
         // one would hit an unhandled PK violation exception.
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
         const int Concurrency = 10;
         var tasks = Enumerable.Range(0, Concurrency)
-            .Select(_ => storage.LinkAsync(TestLink, leftId, rightId, [], _ct))
+            .Select(_ => partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct))
             .ToArray();
 
         var results = await Task.WhenAll(tasks);

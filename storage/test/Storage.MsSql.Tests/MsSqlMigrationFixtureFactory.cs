@@ -14,31 +14,32 @@ internal sealed class MsSqlMigrationFixtureFactory(AspireFixture aspire) : IMigr
 {
     public async Task<IMigrationFixture> CreateAsync(CancellationToken ct)
     {
-        var connectionString = await aspire.Pool.GetConnectionStringAsync(ct);
+        var db = aspire.DatabaseProvisioner.Provision();
+        await db.CreateAsync(ct);
         var schemaName = "s_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
 
         var services = new ServiceCollection();
         _ = services.AddLogging();
-        _ = services.AddKeyedSingleton<CreateSqlConnection>("migration-test", () => new SqlConnection(connectionString));
-        _ = services.AddStorageInternal(storage => storage.AddMsSqlStore("migration-test", o => o.SchemaName = schemaName));
+        _ = services.AddStorageInternal(storage => storage.AddMsSql(_ => db.Connect, o => o.SchemaName = schemaName));
         var provider = services.BuildServiceProvider();
 
-        var schema = provider.GetRequiredKeyedService<IDatabaseSchema>("migration-test");
-        return new MsSqlMigrationFixture(provider, schemaName, schema, connectionString);
+        var storageInstanceSchema = await provider.GetRequiredService<IStorageInstanceSchemaFactory>().GetStorageInstanceSchema(ct);
+        return new MsSqlMigrationFixture(provider, schemaName, storageInstanceSchema, db);
     }
 }
 
 internal sealed class MsSqlMigrationFixture(
     ServiceProvider provider,
     string schemaName,
-    IDatabaseSchema schema,
-    string connectionString) : IMigrationFixture
+    IStorageInstanceSchema storageInstanceSchema,
+    ProvisionedTestDatabase db) : IMigrationFixture
 {
-    public IDatabaseSchema Schema => schema;
+    public uint RequiredVersion => 2u;
+    public IStorageInstanceSchema StorageInstanceSchema => storageInstanceSchema;
 
     public async Task ExecuteSqlAsync(string sql, CancellationToken ct)
     {
-        await using var connection = new SqlConnection(connectionString);
+        await using var connection = new SqlConnection(db.ConnectionString);
         await connection.OpenAsync(ct);
 
         // Split on GO batch separators so each migration script runs in its
@@ -63,7 +64,7 @@ internal sealed class MsSqlMigrationFixture(
     {
         await provider.DisposeAsync();
 
-        await using var connection = new SqlConnection(connectionString);
+        await using var connection = new SqlConnection(db.ConnectionString);
         await connection.OpenAsync();
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = $"""
@@ -101,5 +102,8 @@ internal sealed class MsSqlMigrationFixture(
             DROP SCHEMA IF EXISTS [{schemaName}];
             """;
         _ = await cmd.ExecuteNonQueryAsync();
+        // Intentionally not released back to the provisioner's pool: the database
+        // stays checked out until DropAllAsync cleans it up at suite teardown,
+        // matching the original migration fixture behaviour.
     }
 }

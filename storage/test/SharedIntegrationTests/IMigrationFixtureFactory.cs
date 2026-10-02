@@ -18,12 +18,15 @@ public interface IMigrationFixtureFactory
 }
 
 /// <summary>
-/// A disposable fixture that exposes the <see cref="IDatabaseSchema"/> and
+/// A disposable fixture that exposes the <see cref="IStorageInstanceSchema"/> and
 /// a way to execute raw SQL against the same database.
 /// </summary>
 public interface IMigrationFixture : IAsyncDisposable
 {
-    IDatabaseSchema Schema { get; }
+    // The version that the latest value of the storage is at. 
+    uint RequiredVersion { get; }
+
+    IStorageInstanceSchema StorageInstanceSchema { get; }
 
     /// <summary>
     /// Executes raw SQL against the database backing this fixture.

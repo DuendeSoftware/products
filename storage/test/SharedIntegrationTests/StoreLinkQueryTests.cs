@@ -61,15 +61,15 @@ public partial class StoreLinkQueryTests
     {
         // Given a user linked to a role, querying roles for that user returns the role.
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
 
-        _ = await storage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(UserRole, userId, roleId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(UserRole, userId, roleId, [], _ct);
 
         var query = LinkQuery.From(Role)
             .Join(UserRole)
@@ -87,15 +87,15 @@ public partial class StoreLinkQueryTests
     {
         // Given a user linked to a role, querying users for that role returns the user (reverse traversal).
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
 
-        _ = await storage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.LinkAsync(UserRole, userId, roleId, [], _ct);
+        _ = await partitionedStorage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.LinkAsync(UserRole, userId, roleId, [], _ct);
 
         var query = LinkQuery.From(User)
             .Join(UserRole)
@@ -113,7 +113,7 @@ public partial class StoreLinkQueryTests
     {
         // Querying roles for a user that has none returns an empty page.
         await using var fixture = await CreateProviderAsync();
-        var queryStorage = fixture.Storage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var query = LinkQuery.From(Role)
             .Join(UserRole)
@@ -135,17 +135,17 @@ public partial class StoreLinkQueryTests
     {
         // A user belongs to 5 groups; paging with size 3 yields two pages.
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var userId = UuidV7.New();
-        _ = await storage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(userId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
 
         for (var i = 0; i < 5; i++)
         {
             var groupId = UuidV7.New();
-            _ = await storage.CreateAsync(groupId, new GroupDso($"group-{i}"), [], [], Expiration.NoExpiration, [], _ct);
-            _ = await storage.LinkAsync(UserGroup, userId, groupId, [], _ct);
+            _ = await partitionedStorage.CreateAsync(groupId, new GroupDso($"group-{i}"), [], [], Expiration.NoExpiration, [], _ct);
+            _ = await partitionedStorage.LinkAsync(UserGroup, userId, groupId, [], _ct);
         }
 
         var query = LinkQuery.From(Group)
@@ -172,19 +172,19 @@ public partial class StoreLinkQueryTests
     {
         // Two users share the same role — querying all roles should return it only once.
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var aliceId = UuidV7.New();
         var bobId = UuidV7.New();
         var roleId = UuidV7.New();
 
-        _ = await storage.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(bobId, new UserDso("bob"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(bobId, new UserDso("bob"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(roleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
 
-        _ = await storage.LinkAsync(UserRole, aliceId, roleId, [], _ct);
-        _ = await storage.LinkAsync(UserRole, bobId, roleId, [], _ct);
+        _ = await partitionedStorage.LinkAsync(UserRole, aliceId, roleId, [], _ct);
+        _ = await partitionedStorage.LinkAsync(UserRole, bobId, roleId, [], _ct);
 
         var query = LinkQuery.From(Role)
             .Join(UserRole)
@@ -206,19 +206,19 @@ public partial class StoreLinkQueryTests
         // Multi-hop query: starting from User, traverse UserGroup then GroupRole,
         // filtered to a specific role — should return alice.
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
         var aliceId = UuidV7.New();
         var engineersId = UuidV7.New();
         var adminRoleId = UuidV7.New();
 
-        _ = await storage.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(engineersId, new GroupDso("engineers"), [], [], Expiration.NoExpiration, [], _ct);
-        _ = await storage.CreateAsync(adminRoleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(aliceId, new UserDso("alice"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(engineersId, new GroupDso("engineers"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(adminRoleId, new RoleDso("admin"), [], [], Expiration.NoExpiration, [], _ct);
 
-        _ = await storage.LinkAsync(UserGroup, aliceId, engineersId, [], _ct);
-        _ = await storage.LinkAsync(GroupRole, engineersId, adminRoleId, [], _ct);
+        _ = await partitionedStorage.LinkAsync(UserGroup, aliceId, engineersId, [], _ct);
+        _ = await partitionedStorage.LinkAsync(GroupRole, engineersId, adminRoleId, [], _ct);
 
         // From User, hop through UserGroup (User→Group), then GroupRole (Group→Role),
         // filter where Role = adminRoleId
@@ -243,11 +243,11 @@ public partial class StoreLinkQueryTests
     {
         // Space A: alice → admin
         await using var fixtureA = await CreateProviderAsync();
-        var storeA = fixtureA.Storage;
+        var storeA = fixtureA.PartitionedStorage;
 
         // Space B: separate provider = separate SpaceId
         await using var fixtureB = await CreateProviderAsync();
-        var queryStoreB = fixtureB.Storage;
+        var queryStoreB = fixtureB.PartitionedStorage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
@@ -270,12 +270,12 @@ public partial class StoreLinkQueryTests
     public async Task SameUserRoleLinkInDifferentSpacesAreIndependentAsync()
     {
         await using var fixtureA = await CreateProviderAsync();
-        var storeA = fixtureA.Storage;
-        var queryStoreA = fixtureA.Storage;
+        var storeA = fixtureA.PartitionedStorage;
+        var queryStoreA = fixtureA.PartitionedStorage;
 
         await using var fixtureB = await CreateProviderAsync();
-        var storeB = fixtureB.Storage;
-        var queryStoreB = fixtureB.Storage;
+        var storeB = fixtureB.PartitionedStorage;
+        var queryStoreB = fixtureB.PartitionedStorage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();
@@ -309,11 +309,11 @@ public partial class StoreLinkQueryTests
     public async Task DeleteInSpaceADoesNotAffectSpaceBAsync()
     {
         await using var fixtureA = await CreateProviderAsync();
-        var storeA = fixtureA.Storage;
+        var storeA = fixtureA.PartitionedStorage;
 
         await using var fixtureB = await CreateProviderAsync();
-        var storeB = fixtureB.Storage;
-        var queryStoreB = fixtureB.Storage;
+        var storeB = fixtureB.PartitionedStorage;
+        var queryStoreB = fixtureB.PartitionedStorage;
 
         var userId = UuidV7.New();
         var roleId = UuidV7.New();

@@ -19,7 +19,7 @@ public sealed class AspireFixture : IAsyncLifetime
     /// <summary>
     /// Pool of reusable databases shared across all test classes in this collection.
     /// </summary>
-    internal MsSqlDatabasePool Pool { get; private set; } = null!;
+    internal MsSqlTestDatabaseProvisioner DatabaseProvisioner { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -49,9 +49,9 @@ public sealed class AspireFixture : IAsyncLifetime
         _serverConnectionString = (await _app.GetConnectionStringAsync("sqlserver", ct))!;
         ServerConnectionString = _serverConnectionString;
 
-        Pool = new MsSqlDatabasePool(_serverConnectionString);
+        DatabaseProvisioner = new MsSqlTestDatabaseProvisioner(_serverConnectionString);
 
-        // Create a dedicated database for MsSqlStoreTests (smoke tests that
+        // Create a dedicated database for MsSqlStorageEngineTests (smoke tests that
         // need a persistent connection string rather than a pooled one).
         _databaseName = $"test_{Guid.NewGuid():N}";
         await using var connection = new SqlConnection(_serverConnectionString);
@@ -72,9 +72,9 @@ public sealed class AspireFixture : IAsyncLifetime
         if (_app != null && _serverConnectionString != null && _databaseName != null)
         {
             // Drop all pooled databases.
-            if (Pool != null)
+            if (DatabaseProvisioner != null)
             {
-                await Pool.DropAllAsync();
+                await DatabaseProvisioner.DropAllAsync();
             }
 
             // Drop the dedicated smoke-test database.

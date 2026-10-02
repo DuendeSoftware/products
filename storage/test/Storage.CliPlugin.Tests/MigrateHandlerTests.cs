@@ -65,8 +65,8 @@ public sealed class MigrateHandlerTests
 
         await using var serviceProvider =
             DatabaseProviderFactory.CreateServiceProvider("sqlite", connectionString, null);
-        var schema = serviceProvider.GetRequiredService<IDatabaseSchema>();
-        var versionResult = await schema.CheckVersionAsync(Ct.None);
+        var storageInstanceSchema = serviceProvider.GetRequiredService<IStorageInstanceSchema>();
+        var versionResult = await storageInstanceSchema.CheckVersionAsync(Ct.None);
 
         versionResult.CurrentVersion.ShouldBe(0u);
     }

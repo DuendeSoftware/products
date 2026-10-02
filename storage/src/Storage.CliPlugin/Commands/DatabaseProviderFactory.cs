@@ -26,7 +26,7 @@ internal static class DatabaseProviderFactory
         {
             case "postgresql":
                 _ = services.AddSingleton(_ => NpgsqlDataSource.Create(connectionString));
-                _ = services.AddStorageInternal(storage => storage.AddPostgreSqlStore(options =>
+                _ = services.AddStorageInternal(storage => storage.AddPostgreSql(options =>
                 {
                     if (schemaName is not null)
                     {
@@ -37,7 +37,7 @@ internal static class DatabaseProviderFactory
 
             case "mssql":
                 _ = services.AddSingleton<CreateSqlConnection>(() => new SqlConnection(connectionString));
-                _ = services.AddStorageInternal(storage => storage.AddMsSqlStore(options =>
+                _ = services.AddStorageInternal(storage => storage.AddMsSql(options =>
                 {
                     if (schemaName is not null)
                     {
@@ -47,7 +47,7 @@ internal static class DatabaseProviderFactory
                 break;
 
             case "sqlite":
-                _ = services.AddStorageInternal(storage => storage.AddSqliteStore(options => options.ConnectionString = connectionString));
+                _ = services.AddStorageInternal(storage => storage.AddSqlite(options => options.ConnectionString = connectionString));
                 break;
 
             default:

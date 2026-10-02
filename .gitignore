@@ -23,6 +23,8 @@
 [Rr]eleases/
 !docs/releases/
 !docs/releases/**
+!docs/product/releases/
+!docs/product/releases/**
 x64/
 x86/
 

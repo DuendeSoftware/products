@@ -33,6 +33,7 @@
     <InternalsVisibleTo Include="Authentication.Tests.Internal" />
     <InternalsVisibleTo Include="Duende.Storage.Samples.EavSchema" />
     <InternalsVisibleTo Include="Duende.Spaces" />
+    <InternalsVisibleTo Include="Duende.Spaces.Tests" />
     <InternalsVisibleTo Include="Duende.UserManagement" />
     <InternalsVisibleTo Include="Duende.UserManagement.Tests.Internal" />
     <InternalsVisibleTo Include="Duende.UserManagement.Tests.Public" />

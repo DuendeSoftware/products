@@ -62,9 +62,14 @@ if (startAll || resources.Contains("postgresql"))
 if (startAll || resources.Contains("oracle"))
 {
     var oraclePassword = builder.AddParameter("oracle-password", "DuendeTests1");
+    // AddOracle's own connection string connects to the CDB root as SYSTEM, which cannot
+    // create common users without a "C##" prefix (ORA-65096). Add the container's default
+    // pluggable database (FREEPDB1) as a child resource so tests connect to a PDB instead,
+    // where ordinary (non-common) user/schema creation is allowed.
     _ = builder.AddOracle("oracle", oraclePassword, port: 37835)
         .WithLifetime(ContainerLifetime.Persistent)
-        .WithContainerName("duende-storage-oracle");
+        .WithContainerName("duende-storage-oracle")
+        .AddDatabase("oracledb", "FREEPDB1");
 }
 
 var app = builder.Build();

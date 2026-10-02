@@ -15,12 +15,13 @@
     <PackageVersion Include="Duende.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageVersion Include="Duende.IdentityModel" Version="8.1.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
-    <PackageVersion Include="Duende.IdentityServer" Version="8.1.0-preview.2" />
-    <PackageVersion Include="Duende.Private.Licensing" Version="2.0.1" />
-    <PackageVersion Include="Duende.RazorSlices" Version="1.0.0" />
-    <PackageVersion Include="Duende.Storage" Version="2.0.0-preview.1.89" />
-    <PackageVersion Include="Duende.Storage.PostgreSql" Version="2.0.0-preview.1.89" />
-    <PackageVersion Include="Duende.Storage.Sqlite" Version="2.0.0-preview.1.89" />
+    <PackageVersion Include="Duende.IdentityServer" Version="8.1.0-preview.3.158" />
+    <PackageVersion Include="Duende.Private.Licensing" Version="2.0.3" />
+    <PackageVersion Include="Duende.RazorSlices" Version="1.0.1" />
+    <PackageVersion Include="Duende.Spaces" Version="1.0.0-preview.2.159" />
+    <PackageVersion Include="Duende.Storage" Version="2.0.0-preview.2.158" />
+    <PackageVersion Include="Duende.Storage.PostgreSql" Version="2.0.0-preview.2.158" />
+    <PackageVersion Include="Duende.Storage.Sqlite" Version="2.0.0-preview.2.158" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
     <PackageVersion Include="Markdig" Version="1.1.1" />
     <PackageVersion Include="MartinCostello.Logging.XUnit.v3" Version="0.7.1" />

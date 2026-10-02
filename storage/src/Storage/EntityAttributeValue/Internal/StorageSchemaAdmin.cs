@@ -16,22 +16,14 @@ namespace Duende.Storage.EntityAttributeValue.Internal;
 ///     A storage-backed implementation of <see cref="ISchemaStore"/> and <see cref="ISchemaAdmin"/>
 ///     that persists schemas to the database via the storage layer.
 /// </summary>
-internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
+internal sealed class StorageSchemaAdmin(IPartitionedStorageFactory partitionedStorageFactory) : ISchemaStore, ISchemaAdmin
 {
-    private readonly IStorageFactory _storageFactory;
-
-    /// <summary>
-    ///     Initialises a new <see cref="StorageSchemaAdmin"/>.
-    /// </summary>
-    /// <param name="storageFactory">The storage factory for obtaining a scoped storage.</param>
-    public StorageSchemaAdmin(IStorageFactory storageFactory) =>
-        _storageFactory = storageFactory;
-
+    private static readonly DataCategoryName DataCategory = DataCategoryName.DynamicSchemas;
     /// <inheritdoc/>
     public async Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, CancellationToken ct)
     {
-        var storage = await _storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategory, ct);
+        var result = await partitionedStorage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
@@ -49,9 +41,9 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
     /// <inheritdoc/>
     async Task<SaveResult<SchemaId>> ISchemaAdmin.CreateAsync(SchemaConfiguration schema, CancellationToken ct)
     {
-        var storage = await _storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategory, ct);
         var id = UuidV7.New();
-        var createResult = await storage.CreateAsync(
+        var createResult = await partitionedStorage.CreateAsync(
             id,
             ToDso(schema),
             [DataStorageKey.Create(SchemaIdDskV1.Create(schema.SchemaId))],
@@ -73,8 +65,8 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
     /// <inheritdoc/>
     async Task<GetResult<SchemaConfiguration>> ISchemaAdmin.GetAsync(SchemaId schemaId, CancellationToken ct)
     {
-        var storage = await _storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategory, ct);
+        var result = await partitionedStorage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
@@ -101,8 +93,8 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
                 StorageError.ValidationFailed("Schema ID in the body must match the route schema ID."));
         }
 
-        var storage = await _storageFactory.GetStorage(ct);
-        var existing = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategory, ct);
+        var existing = await partitionedStorage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
@@ -112,7 +104,7 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
             return SaveResult.Failure<SchemaId>(StorageError.NotFound("schema", schemaId.ToString()));
         }
 
-        var updateResult = await storage.UpdateAsync(
+        var updateResult = await partitionedStorage.UpdateAsync(
             existing.Id,
             ToDso(schema),
             expectedVersion.Value,
@@ -134,9 +126,9 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
     /// <inheritdoc/>
     public async Task<SaveResult<SchemaId>> DeleteAsync(SchemaId schemaId, CancellationToken ct)
     {
-        var storage = await _storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategory, ct);
 
-        var existing = await storage.TryReadAsync(
+        var existing = await partitionedStorage.TryReadAsync(
             AttributeSchemaDso.EntityType,
             DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
             ct);
@@ -146,7 +138,7 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
             return SaveResult.Failure<SchemaId>(StorageError.NotFound("schema", schemaId.ToString()));
         }
 
-        var deleteResult = await storage.DeleteAsync(AttributeSchemaDso.EntityType, existing.Id, [], ct);
+        var deleteResult = await partitionedStorage.DeleteAsync(AttributeSchemaDso.EntityType, existing.Id, [], ct);
 
         return deleteResult switch
         {
@@ -159,8 +151,8 @@ internal sealed class StorageSchemaAdmin : ISchemaStore, ISchemaAdmin
     /// <inheritdoc/>
     public async Task<QueryResult<SchemaSummary>> QueryAsync(CancellationToken ct)
     {
-        var storage = await _storageFactory.GetStorage(ct);
-        var result = await storage.QueryAsync<AttributeSchemaDso.V1>(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategory, ct);
+        var result = await partitionedStorage.QueryAsync<AttributeSchemaDso.V1>(
             AttributeSchemaDso.EntityType,
             filter: Query.All(),
             sort: SortParameter.Empty,

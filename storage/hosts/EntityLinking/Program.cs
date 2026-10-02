@@ -7,6 +7,7 @@ using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Pagination;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection();
 services.AddLogging();
-services.AddStorageInternal(storage => storage.AddSqliteStore(options =>
+services.AddStorageInternal(storage => storage.AddSqlite(options =>
 {
     options.ConnectionString = "Data Source=linking-sample.db";
 }));
@@ -31,9 +32,13 @@ services.AddDsoRegistration<DeveloperDso>();
 services.AddDsoRegistration<ProjectDso>();
 
 var provider = services.BuildServiceProvider();
-var pooledStore = provider.GetRequiredService<IPooledStore>();
-await pooledStore.MigrateAsync(CancellationToken.None);
-var store = pooledStore.OpenPool(1);
+await provider.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
+
+// Storage for a data category comes from IPartitionedStorageFactory; the category resolves to
+// the default storage instance and pool here. In a real product, Spaces resolves the category
+// to a tenant's own pool instead.
+var teamsCategory = DataCategoryName.Create("teams");
+var store = await provider.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(teamsCategory, Ct.None);
 
 Console.WriteLine("✓ Store initialized\n");
 

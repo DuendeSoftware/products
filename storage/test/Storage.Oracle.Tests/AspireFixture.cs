@@ -19,9 +19,9 @@ public sealed class AspireFixture : IAsyncLifetime
     public string ConnectionString { get; private set; } = null!;
 
     /// <summary>
-    /// Pool of reusable schemas shared across all test classes in this collection.
+    /// Provisions reusable schemas shared across all test classes in this collection.
     /// </summary>
-    internal OracleDatabasePool Pool { get; private set; } = null!;
+    internal OracleTestDatabaseProvisioner DatabaseProvisioner { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -48,22 +48,27 @@ public sealed class AspireFixture : IAsyncLifetime
             }
         }
 
-        ServerConnectionString = (await _app.GetConnectionStringAsync("oracle", ct))!;
+        // Use the "oracledb" child resource (the FREEPDB1 pluggable database), not the
+        // "oracle" server resource — the server's own connection string targets the CDB
+        // root, where user/schema creation requires a "C##" prefix (ORA-65096).
+        ServerConnectionString = (await _app.GetConnectionStringAsync("oracledb", ct))!;
 
-        Pool = new OracleDatabasePool(ServerConnectionString);
+        DatabaseProvisioner = new OracleTestDatabaseProvisioner(ServerConnectionString);
 
-        // Dedicated schema for the smoke tests (OracleStoreTests) that need a
+        // Dedicated schema for the smoke tests (OracleStorageEngineTests) that need a
         // persistent connection string rather than a pooled one.
-        ConnectionString = await Pool.GetConnectionStringAsync(ct);
+        var db = DatabaseProvisioner.Provision();
+        await db.CreateAsync(ct);
+        ConnectionString = db.ConnectionString;
     }
 
     public async ValueTask DisposeAsync()
     {
         if (_app != null)
         {
-            if (Pool != null)
+            if (DatabaseProvisioner != null)
             {
-                await Pool.DropAllAsync();
+                await DatabaseProvisioner.DropAllAsync();
             }
 
             await _app.DisposeAsync();

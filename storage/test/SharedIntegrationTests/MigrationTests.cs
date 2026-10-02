@@ -14,11 +14,20 @@ public partial class MigrationTests
     {
         await using var fixture = await MigrationFixtureFactory.CreateAsync(_ct);
 
-        await fixture.Schema.MigrateAsync(_ct);
+        var schemaVersionResult = await fixture.StorageInstanceSchema.CheckVersionAsync(_ct);
+        schemaVersionResult.CurrentVersion.ShouldBe(0u,
+            "Before test, current version should be 0");
+        schemaVersionResult.IsCompatible.ShouldBeFalse();
+        schemaVersionResult.RequiredVersion.ShouldBe(fixture.RequiredVersion);
 
-        var result = await fixture.Schema.VerifySchemaAsync(_ct);
+        await fixture.StorageInstanceSchema.MigrateAsync(_ct);
+
+        var result = await fixture.StorageInstanceSchema.VerifySchemaAsync(_ct);
         result.IsValid.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
+        schemaVersionResult = await fixture.StorageInstanceSchema.CheckVersionAsync(_ct);
+        schemaVersionResult.CurrentVersion.ShouldBe(fixture.RequiredVersion,
+            "After migration, version should be updated");
     }
 
     [Fact]
@@ -26,10 +35,10 @@ public partial class MigrationTests
     {
         await using var fixture = await MigrationFixtureFactory.CreateAsync(_ct);
 
-        await fixture.Schema.MigrateAsync(_ct);
-        await fixture.Schema.MigrateAsync(_ct);
+        await fixture.StorageInstanceSchema.MigrateAsync(_ct);
+        await fixture.StorageInstanceSchema.MigrateAsync(_ct);
 
-        var result = await fixture.Schema.VerifySchemaAsync(_ct);
+        var result = await fixture.StorageInstanceSchema.VerifySchemaAsync(_ct);
         result.IsValid.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
     }
@@ -39,12 +48,12 @@ public partial class MigrationTests
     {
         await using var fixture = await MigrationFixtureFactory.CreateAsync(_ct);
 
-        var script = fixture.Schema.BuildMigrationScript(DatabaseSchemaVersion.Zero);
+        var script = fixture.StorageInstanceSchema.BuildMigrationScript(DatabaseSchemaVersion.Zero);
         script.ShouldNotBeNullOrWhiteSpace();
 
         await fixture.ExecuteSqlAsync(script, _ct);
 
-        var result = await fixture.Schema.VerifySchemaAsync(_ct);
+        var result = await fixture.StorageInstanceSchema.VerifySchemaAsync(_ct);
         result.IsValid.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
     }
@@ -56,12 +65,12 @@ public partial class MigrationTests
         // MsSql/PostgreSql use version gates; SQLite uses IF NOT EXISTS.
         await using var fixture = await MigrationFixtureFactory.CreateAsync(_ct);
 
-        var script = fixture.Schema.BuildMigrationScript(DatabaseSchemaVersion.Zero);
+        var script = fixture.StorageInstanceSchema.BuildMigrationScript(DatabaseSchemaVersion.Zero);
 
         await fixture.ExecuteSqlAsync(script, _ct);
         await fixture.ExecuteSqlAsync(script, _ct);
 
-        var result = await fixture.Schema.VerifySchemaAsync(_ct);
+        var result = await fixture.StorageInstanceSchema.VerifySchemaAsync(_ct);
         result.IsValid.ShouldBeTrue();
         result.Errors.ShouldBeEmpty();
     }

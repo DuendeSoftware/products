@@ -6,7 +6,6 @@ using Duende.Storage.IntegrationTests;
 using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Duende.Storage.PostgreSql;
 
@@ -14,31 +13,33 @@ internal sealed class PostgreSqlMigrationFixtureFactory(AspireFixture aspire) : 
 {
     public async Task<IMigrationFixture> CreateAsync(CancellationToken ct)
     {
-        var connectionString = await aspire.Pool.GetConnectionStringAsync(ct);
+        var db = aspire.DatabaseProvisioner.Provision();
+        await db.CreateAsync(ct);
         var schemaName = "s_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
         var services = new ServiceCollection();
         _ = services.AddLogging();
-        _ = services.AddNpgsqlDataSource(connectionString, serviceKey: "migration-test");
-        _ = services.AddStorageInternal(storage => storage.AddPostgreSqlStore("migration-test", o => o.SchemaName = schemaName));
+        _ = services.AddStorageInternal(storage => storage.AddPostgreSql(
+            _ => db.DataSource,
+            o => o.SchemaName = schemaName));
         var provider = services.BuildServiceProvider();
 
-        var schema = provider.GetRequiredKeyedService<IDatabaseSchema>("migration-test");
-        return new PostgreSqlMigrationFixture(provider, schemaName, schema, connectionString);
+        var storageInstanceSchema = await provider.GetRequiredService<IStorageInstanceSchemaFactory>().GetStorageInstanceSchema(ct);
+        return new PostgreSqlMigrationFixture(provider, schemaName, storageInstanceSchema, db);
     }
 }
 
 internal sealed class PostgreSqlMigrationFixture(
     ServiceProvider provider,
     string schemaName,
-    IDatabaseSchema schema,
-    string connectionString) : IMigrationFixture
+    IStorageInstanceSchema storageInstanceSchema,
+    ProvisionedTestDatabase db) : IMigrationFixture
 {
-    private NpgsqlDataSource _dataSource = NpgsqlDataSource.Create(connectionString);
-    public IDatabaseSchema Schema => schema;
+    public uint RequiredVersion => 2u;
+    public IStorageInstanceSchema StorageInstanceSchema => storageInstanceSchema;
 
     public async Task ExecuteSqlAsync(string sql, CancellationToken ct)
     {
-        await using var cmd = _dataSource.CreateCommand(sql);
+        await using var cmd = db.DataSource.CreateCommand(sql);
         _ = await cmd.ExecuteNonQueryAsync(ct);
     }
 
@@ -46,9 +47,13 @@ internal sealed class PostgreSqlMigrationFixture(
     {
         await provider.DisposeAsync();
 
-        var dropCommand = _dataSource.CreateCommand("DROP SCHEMA IF EXISTS \"" + schemaName + "\" CASCADE");
+        var dropCommand = db.DataSource.CreateCommand("DROP SCHEMA IF EXISTS \"" + schemaName + "\" CASCADE");
         _ = await dropCommand.ExecuteNonQueryAsync();
 
-        await _dataSource.DisposeAsync();
+        // Intentionally not released back to the provisioner's pool: the database
+        // stays checked out until DropAllAsync cleans it up at suite teardown,
+        // matching the original migration fixture behaviour. Only the owned
+        // NpgsqlDataSource is disposed here.
+        await db.DataSource.DisposeAsync();
     }
 }

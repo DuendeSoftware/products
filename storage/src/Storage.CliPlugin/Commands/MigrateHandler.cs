@@ -36,8 +36,8 @@ internal static partial class MigrateHandler
 
             await using var serviceProvider =
                 DatabaseProviderFactory.CreateServiceProvider(provider, connectionString, schemaName);
-            var schema = serviceProvider.GetRequiredService<IDatabaseSchema>();
-            var result = await schema.CheckVersionAsync(ct);
+            var storageInstanceSchema = serviceProvider.GetRequiredService<IStorageInstanceSchema>();
+            var result = await storageInstanceSchema.CheckVersionAsync(ct);
 
             await @out.WriteLineAsync($"Current schema version: {result.CurrentVersion}");
             await @out.WriteLineAsync($"Required schema version: {result.RequiredVersion}");
@@ -57,7 +57,7 @@ internal static partial class MigrateHandler
 
             if (dryRun)
             {
-                var sql = schema.BuildMigrationScript(new DatabaseSchemaVersion((int)result.CurrentVersion));
+                var sql = storageInstanceSchema.BuildMigrationScript(new DatabaseSchemaVersion((int)result.CurrentVersion));
                 await @out.WriteLineAsync(sql);
                 await @out.WriteLineAsync("Dry run complete. No changes were made.");
                 return 0;
@@ -65,7 +65,7 @@ internal static partial class MigrateHandler
 
             await @out.WriteLineAsync(
                 $"Migrating from version {result.CurrentVersion} to version {result.RequiredVersion}...");
-            await schema.MigrateAsync(ct);
+            await storageInstanceSchema.MigrateAsync(ct);
             await @out.WriteLineAsync($"Migration complete. Schema is now at version {result.RequiredVersion}.");
             return 0;
         }

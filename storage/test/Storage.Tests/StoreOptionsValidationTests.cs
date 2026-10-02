@@ -12,7 +12,7 @@ public sealed class StoreOptionsValidationTests
     [Fact]
     public void mssql_schema_name_at_max_length_passes()
     {
-        var options = new MsSqlStoreOptions { SchemaName = new string('a', 88) };
+        var options = new MsSqlStorageEngineOptions { SchemaName = new string('a', 88) };
         var results = ValidateOptions(options);
         results.ShouldBeEmpty();
     }
@@ -20,7 +20,7 @@ public sealed class StoreOptionsValidationTests
     [Fact]
     public void mssql_schema_name_exceeding_max_length_fails()
     {
-        var options = new MsSqlStoreOptions { SchemaName = new string('a', 89) };
+        var options = new MsSqlStorageEngineOptions { SchemaName = new string('a', 89) };
         var results = ValidateOptions(options);
         results.ShouldContain(r => r.MemberNames.Contains("SchemaName"));
     }
@@ -28,7 +28,7 @@ public sealed class StoreOptionsValidationTests
     [Fact]
     public void postgresql_schema_name_at_max_length_passes()
     {
-        var options = new PostgreSqlStoreOptions { SchemaName = new string('a', 63) };
+        var options = new PostgreSqlStorageEngineOptions { SchemaName = new string('a', 63) };
         var results = ValidateOptions(options);
         results.ShouldBeEmpty();
     }
@@ -36,7 +36,7 @@ public sealed class StoreOptionsValidationTests
     [Fact]
     public void postgresql_schema_name_exceeding_max_length_fails()
     {
-        var options = new PostgreSqlStoreOptions { SchemaName = new string('a', 64) };
+        var options = new PostgreSqlStorageEngineOptions { SchemaName = new string('a', 64) };
         var results = ValidateOptions(options);
         results.ShouldContain(r => r.MemberNames.Contains("SchemaName"));
     }

@@ -32,11 +32,11 @@ public partial class SystemTimestampQueryTests
             services.AddDsoRegistration<TestEntityDso>();
         });
 
-    private static async Task<UuidV7> CreateEntityAsync(IStorage storage, string name, Ct ct)
+    private static async Task<UuidV7> CreateEntityAsync(IPartitionedStorage partitionedStorage, string name, Ct ct)
     {
         var id = UuidV7.New();
         var dso = new TestEntityDso { Name = name };
-        (await storage.CreateAsync(id, dso, [], [], Expiration.NoExpiration, [], ct)).ShouldBe(CreateResult.Success);
+        (await partitionedStorage.CreateAsync(id, dso, [], [], Expiration.NoExpiration, [], ct)).ShouldBe(CreateResult.Success);
         return id;
     }
 
@@ -52,14 +52,14 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(jan);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(storage, "Jan", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Jan", _ct);
         tp.SetUtcNow(jun);
-        _ = await CreateEntityAsync(storage, "Jun", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Jun", _ct);
         tp.SetUtcNow(dec);
-        _ = await CreateEntityAsync(storage, "Dec", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Dec", _ct);
 
         var filter = SystemFields.CreatedAtField.GreaterThan(jun);
         var page = DataRange.FromPage(1, 10);
@@ -86,16 +86,16 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(jan);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(storage, "Jan", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Jan", _ct);
         tp.SetUtcNow(mar);
-        _ = await CreateEntityAsync(storage, "Mar", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Mar", _ct);
         tp.SetUtcNow(sep);
-        _ = await CreateEntityAsync(storage, "Sep", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Sep", _ct);
         tp.SetUtcNow(dec);
-        _ = await CreateEntityAsync(storage, "Dec", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Dec", _ct);
 
         var filter = SystemFields.CreatedAtField.Between(feb, oct);
         var page = DataRange.FromPage(1, 10);
@@ -119,14 +119,14 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(t1);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(storage, "First", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "First", _ct);
         tp.SetUtcNow(t2);
-        _ = await CreateEntityAsync(storage, "Second", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Second", _ct);
         tp.SetUtcNow(t3);
-        _ = await CreateEntityAsync(storage, "Third", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Third", _ct);
 
         var filter = SystemFields.CreatedAtField.Equals(t2);
         var page = DataRange.FromPage(1, 10);
@@ -151,18 +151,18 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(t1);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        var idA = await CreateEntityAsync(storage, "EntityA", _ct);
-        var idB = await CreateEntityAsync(storage, "EntityB", _ct);
+        var idA = await CreateEntityAsync(partitionedStorage, "EntityA", _ct);
+        var idB = await CreateEntityAsync(partitionedStorage, "EntityB", _ct);
 
         // Advance clock and update only EntityB
         tp.SetUtcNow(t2);
-        var readResult = await storage.TryReadAsync(_testEntityType, idB, _ct);
+        var readResult = await partitionedStorage.TryReadAsync(_testEntityType, idB, _ct);
         readResult.Found.ShouldBeTrue();
         var updatedDso = new TestEntityDso { Name = "EntityB-updated" };
-        (await storage.UpdateAsync(idB, updatedDso, readResult.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
+        (await partitionedStorage.UpdateAsync(idB, updatedDso, readResult.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
             .ShouldBe(UpdateResult.Success);
 
         var filter = SystemFields.LastUpdatedAtField.GreaterThan(midpoint);
@@ -188,14 +188,14 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(t1);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(storage, "Charlie", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Charlie", _ct);
         tp.SetUtcNow(t2);
-        _ = await CreateEntityAsync(storage, "Alpha", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Alpha", _ct);
         tp.SetUtcNow(t3);
-        _ = await CreateEntityAsync(storage, "Bravo", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Bravo", _ct);
 
         var sort = new SortParameter(SystemFields.CreatedAtField);
         var page = DataRange.FromPage(1, 10);
@@ -220,14 +220,14 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(t1);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(storage, "Charlie", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Charlie", _ct);
         tp.SetUtcNow(t2);
-        _ = await CreateEntityAsync(storage, "Alpha", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Alpha", _ct);
         tp.SetUtcNow(t3);
-        _ = await CreateEntityAsync(storage, "Bravo", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Bravo", _ct);
 
         var sort = new SortParameter(SystemFields.CreatedAtField, SortDirection.Descending);
         var page = DataRange.FromPage(1, 10);
@@ -255,29 +255,29 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(t0);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        var idA = await CreateEntityAsync(storage, "A", _ct);
-        var idB = await CreateEntityAsync(storage, "B", _ct);
-        var idC = await CreateEntityAsync(storage, "C", _ct);
+        var idA = await CreateEntityAsync(partitionedStorage, "A", _ct);
+        var idB = await CreateEntityAsync(partitionedStorage, "B", _ct);
+        var idC = await CreateEntityAsync(partitionedStorage, "C", _ct);
 
         // Update C at t1
         tp.SetUtcNow(t1);
-        var readC = await storage.TryReadAsync(_testEntityType, idC, _ct);
-        (await storage.UpdateAsync(idC, new TestEntityDso { Name = "C" }, readC.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
+        var readC = await partitionedStorage.TryReadAsync(_testEntityType, idC, _ct);
+        (await partitionedStorage.UpdateAsync(idC, new TestEntityDso { Name = "C" }, readC.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
             .ShouldBe(UpdateResult.Success);
 
         // Update A at t2
         tp.SetUtcNow(t2);
-        var readA = await storage.TryReadAsync(_testEntityType, idA, _ct);
-        (await storage.UpdateAsync(idA, new TestEntityDso { Name = "A" }, readA.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
+        var readA = await partitionedStorage.TryReadAsync(_testEntityType, idA, _ct);
+        (await partitionedStorage.UpdateAsync(idA, new TestEntityDso { Name = "A" }, readA.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
             .ShouldBe(UpdateResult.Success);
 
         // Update B at t3
         tp.SetUtcNow(t3);
-        var readB = await storage.TryReadAsync(_testEntityType, idB, _ct);
-        (await storage.UpdateAsync(idB, new TestEntityDso { Name = "B" }, readB.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
+        var readB = await partitionedStorage.TryReadAsync(_testEntityType, idB, _ct);
+        (await partitionedStorage.UpdateAsync(idB, new TestEntityDso { Name = "B" }, readB.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
             .ShouldBe(UpdateResult.Success);
 
         var sort = new SortParameter(SystemFields.LastUpdatedAtField);
@@ -306,16 +306,16 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(jan);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(storage, "Jan", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Jan", _ct);
         tp.SetUtcNow(mar);
-        _ = await CreateEntityAsync(storage, "Mar", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Mar", _ct);
         tp.SetUtcNow(sep);
-        _ = await CreateEntityAsync(storage, "Sep", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Sep", _ct);
         tp.SetUtcNow(dec);
-        _ = await CreateEntityAsync(storage, "Dec", _ct);
+        _ = await CreateEntityAsync(partitionedStorage, "Dec", _ct);
 
         // Filter: created >= Mar, Sort: descending
         var filter = SystemFields.CreatedAtField.GreaterOrEqual(mar);
@@ -344,16 +344,16 @@ public partial class SystemTimestampQueryTests
 
         var tp = new FakeTimeProvider(t1);
         await using var fixture = await CreateProviderAsync(tp);
-        var storage = fixture.Storage;
-        var queryStorage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
 
-        var id = await CreateEntityAsync(storage, "Entity1", _ct);
+        var id = await CreateEntityAsync(partitionedStorage, "Entity1", _ct);
 
         // Update to advance last_updated
         tp.SetUtcNow(t2);
-        var readResult = await storage.TryReadAsync(_testEntityType, id, _ct);
+        var readResult = await partitionedStorage.TryReadAsync(_testEntityType, id, _ct);
         readResult.Found.ShouldBeTrue();
-        (await storage.UpdateAsync(id, new TestEntityDso { Name = "Entity1-updated" }, readResult.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
+        (await partitionedStorage.UpdateAsync(id, new TestEntityDso { Name = "Entity1-updated" }, readResult.Version!.Value, [], [], Expiration.NoExpiration, [], _ct))
             .ShouldBe(UpdateResult.Success);
 
         // Project using public alias names

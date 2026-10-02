@@ -20,8 +20,8 @@ public sealed class DatabaseProviderFactoryTests
 
         await using var serviceProvider = DatabaseProviderFactory.CreateServiceProvider(provider, connectionString, null);
 
-        var schema = serviceProvider.GetRequiredService<IDatabaseSchema>();
-        _ = schema.ShouldNotBeNull();
+        var storageInstanceSchema = serviceProvider.GetRequiredService<IStorageInstanceSchema>();
+        _ = storageInstanceSchema.ShouldNotBeNull();
     }
 
     [Fact]

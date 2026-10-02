@@ -14,4 +14,6 @@ public interface IStorageBuilder
     /// Gets the service collection used to register storage services.
     /// </summary>
     public IServiceCollection Services { get; }
+
+    internal StorageInstanceId StorageInstanceId { get; }
 }

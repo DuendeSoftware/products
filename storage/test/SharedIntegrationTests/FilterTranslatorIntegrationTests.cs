@@ -46,7 +46,7 @@ public partial class FilterTranslatorIntegrationTests
         });
 
     private static async Task<UuidV7> CreateTestEntityAsync(
-        IStorage storage,
+        IPartitionedStorage partitionedStorage,
         string name,
         int? score = null,
         decimal? price = null,
@@ -102,32 +102,32 @@ public partial class FilterTranslatorIntegrationTests
 
         var searchFields = searchFieldsBuilder.Build();
 
-        var result = await storage.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
+        var result = await partitionedStorage.CreateAsync(id, dso, Array.Empty<DataStorageKey>(), searchFields, Expiration.NoExpiration, [], ct);
         result.ShouldBe(CreateResult.Success);
         return id;
     }
 
     private static async Task<QueryResult<MetadataEnvelope<TestEntityDso>>> TranslateAndQueryAsync(
-        IStorage storage, string filterString, EntityType entityType)
+        IPartitionedStorage partitionedStorage, string filterString, EntityType entityType)
     {
         var resolver = new TestEntityAttributeResolver();
         var translator = new FilterTranslator(resolver);
         var filter = translator.Translate(filterString)!;
         var page = DataRange.FromPage(1, 10);
-        return await storage.QueryAsync<TestEntityDso>(entityType, filter, SortParameter.Empty, page, Ct.None);
+        return await partitionedStorage.QueryAsync<TestEntityDso>(entityType, filter, SortParameter.Empty, page, Ct.None);
     }
 
     [Fact]
     public async Task FilterAndQuerySimpleEqualityAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Alice");
-        _ = await CreateTestEntityAsync(storage, "Bob");
-        _ = await CreateTestEntityAsync(storage, "Charlie");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alice");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Bob");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Charlie");
 
-        var result = await TranslateAndQueryAsync(storage, "name eq \"Alice\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "name eq \"Alice\"", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("Alice");
@@ -137,13 +137,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryNotEqualAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Alice");
-        _ = await CreateTestEntityAsync(storage, "Bob");
-        _ = await CreateTestEntityAsync(storage, "Charlie");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alice");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Bob");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Charlie");
 
-        var result = await TranslateAndQueryAsync(storage, "name ne \"Alice\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "name ne \"Alice\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "Bob");
@@ -154,13 +154,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryContainsAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Alice Smith");
-        _ = await CreateTestEntityAsync(storage, "Bob Jones");
-        _ = await CreateTestEntityAsync(storage, "Charlie Smith");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alice Smith");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Bob Jones");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Charlie Smith");
 
-        var result = await TranslateAndQueryAsync(storage, "name co \"Smith\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "name co \"Smith\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "Alice Smith");
@@ -171,13 +171,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryStartsWithAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Alpha");
-        _ = await CreateTestEntityAsync(storage, "Beta");
-        _ = await CreateTestEntityAsync(storage, "Alpha Centauri");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alpha");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Beta");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alpha Centauri");
 
-        var result = await TranslateAndQueryAsync(storage, "name sw \"Alpha\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "name sw \"Alpha\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "Alpha");
@@ -188,13 +188,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryEndsWithAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Alice Smith");
-        _ = await CreateTestEntityAsync(storage, "Bob Jones");
-        _ = await CreateTestEntityAsync(storage, "John Smith");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alice Smith");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Bob Jones");
+        _ = await CreateTestEntityAsync(partitionedStorage, "John Smith");
 
-        var result = await TranslateAndQueryAsync(storage, "name ew \"Smith\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "name ew \"Smith\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "Alice Smith");
@@ -205,13 +205,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryPresentAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "WithScore1", score: 80);
-        _ = await CreateTestEntityAsync(storage, "NoScore");
-        _ = await CreateTestEntityAsync(storage, "WithScore2", score: 50);
+        _ = await CreateTestEntityAsync(partitionedStorage, "WithScore1", score: 80);
+        _ = await CreateTestEntityAsync(partitionedStorage, "NoScore");
+        _ = await CreateTestEntityAsync(partitionedStorage, "WithScore2", score: 50);
 
-        var result = await TranslateAndQueryAsync(storage, "score pr", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "score pr", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "WithScore1");
@@ -222,13 +222,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryBooleanEqualityAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Active", isActive: true);
-        _ = await CreateTestEntityAsync(storage, "Inactive", isActive: false);
-        _ = await CreateTestEntityAsync(storage, "Unknown");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Active", isActive: true);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Inactive", isActive: false);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Unknown");
 
-        var result = await TranslateAndQueryAsync(storage, "isActive eq true", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "isActive eq true", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("Active");
@@ -238,13 +238,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryNumberGreaterThanAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Low", score: 50);
-        _ = await CreateTestEntityAsync(storage, "Boundary", score: 75);
-        _ = await CreateTestEntityAsync(storage, "High", score: 100);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Low", score: 50);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Boundary", score: 75);
+        _ = await CreateTestEntityAsync(partitionedStorage, "High", score: 100);
 
-        var result = await TranslateAndQueryAsync(storage, "score gt 75", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "score gt 75", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("High");
@@ -254,13 +254,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryNumberLessOrEqualAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Low", score: 25);
-        _ = await CreateTestEntityAsync(storage, "Boundary", score: 50);
-        _ = await CreateTestEntityAsync(storage, "High", score: 75);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Low", score: 25);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Boundary", score: 50);
+        _ = await CreateTestEntityAsync(partitionedStorage, "High", score: 75);
 
-        var result = await TranslateAndQueryAsync(storage, "score le 50", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "score le 50", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "Low");
@@ -271,12 +271,12 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryNumberEqualDecimalAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Cheap", price: 19.99m);
-        _ = await CreateTestEntityAsync(storage, "Expensive", price: 29.99m);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Cheap", price: 19.99m);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Expensive", price: 29.99m);
 
-        var result = await TranslateAndQueryAsync(storage, "price eq 19.99", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "price eq 19.99", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("Cheap");
@@ -286,13 +286,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryDateTimeGreaterThanAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "May", createdAt: new DateTimeOffset(2024, 5, 1, 0, 0, 0, TimeSpan.Zero));
-        _ = await CreateTestEntityAsync(storage, "July", createdAt: new DateTimeOffset(2024, 7, 1, 0, 0, 0, TimeSpan.Zero));
-        _ = await CreateTestEntityAsync(storage, "December", createdAt: new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero));
+        _ = await CreateTestEntityAsync(partitionedStorage, "May", createdAt: new DateTimeOffset(2024, 5, 1, 0, 0, 0, TimeSpan.Zero));
+        _ = await CreateTestEntityAsync(partitionedStorage, "July", createdAt: new DateTimeOffset(2024, 7, 1, 0, 0, 0, TimeSpan.Zero));
+        _ = await CreateTestEntityAsync(partitionedStorage, "December", createdAt: new DateTimeOffset(2024, 12, 1, 0, 0, 0, TimeSpan.Zero));
 
-        var result = await TranslateAndQueryAsync(storage, "recordedAt gt \"2024-06-01T00:00:00Z\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "recordedAt gt \"2024-06-01T00:00:00Z\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "July");
@@ -303,13 +303,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryAndCombinationAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "User1", score: 30);
-        _ = await CreateTestEntityAsync(storage, "User2", score: 80);
-        _ = await CreateTestEntityAsync(storage, "Admin1", score: 90);
+        _ = await CreateTestEntityAsync(partitionedStorage, "User1", score: 30);
+        _ = await CreateTestEntityAsync(partitionedStorage, "User2", score: 80);
+        _ = await CreateTestEntityAsync(partitionedStorage, "Admin1", score: 90);
 
-        var result = await TranslateAndQueryAsync(storage, "name sw \"User\" and score gt 50", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "name sw \"User\" and score gt 50", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Value.Name.ShouldBe("User2");
@@ -319,13 +319,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryOrCombinationAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "ActiveEntity", status: "active");
-        _ = await CreateTestEntityAsync(storage, "PendingEntity", status: "pending");
-        _ = await CreateTestEntityAsync(storage, "ArchivedEntity", status: "archived");
+        _ = await CreateTestEntityAsync(partitionedStorage, "ActiveEntity", status: "active");
+        _ = await CreateTestEntityAsync(partitionedStorage, "PendingEntity", status: "pending");
+        _ = await CreateTestEntityAsync(partitionedStorage, "ArchivedEntity", status: "archived");
 
-        var result = await TranslateAndQueryAsync(storage, "status eq \"active\" or status eq \"pending\"", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "status eq \"active\" or status eq \"pending\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "ActiveEntity");
@@ -336,13 +336,13 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryNotExpressionAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "Alice");
-        _ = await CreateTestEntityAsync(storage, "Bob");
-        _ = await CreateTestEntityAsync(storage, "Charlie");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Alice");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Bob");
+        _ = await CreateTestEntityAsync(partitionedStorage, "Charlie");
 
-        var result = await TranslateAndQueryAsync(storage, "not (name eq \"Alice\")", _testEntityType);
+        var result = await TranslateAndQueryAsync(partitionedStorage, "not (name eq \"Alice\")", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
         result.Items.ShouldContain(x => x.Value.Name == "Bob");
@@ -353,15 +353,15 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryComplexNestedAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "A", score: 80, isActive: true, status: "standard");
-        _ = await CreateTestEntityAsync(storage, "B", score: 30, isActive: true, status: "premium");
-        _ = await CreateTestEntityAsync(storage, "C", score: 80, isActive: false, status: "standard");
-        _ = await CreateTestEntityAsync(storage, "D", score: 20, isActive: false, status: "basic");
+        _ = await CreateTestEntityAsync(partitionedStorage, "A", score: 80, isActive: true, status: "standard");
+        _ = await CreateTestEntityAsync(partitionedStorage, "B", score: 30, isActive: true, status: "premium");
+        _ = await CreateTestEntityAsync(partitionedStorage, "C", score: 80, isActive: false, status: "standard");
+        _ = await CreateTestEntityAsync(partitionedStorage, "D", score: 20, isActive: false, status: "basic");
 
         var result = await TranslateAndQueryAsync(
-            storage,
+            partitionedStorage,
             "(score gt 50 and isActive eq true) or status eq \"premium\"",
             _testEntityType);
 
@@ -374,14 +374,14 @@ public partial class FilterTranslatorIntegrationTests
     public async Task FilterAndQueryPrecedenceAndBindsTighterThanOrAsync()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateTestEntityAsync(storage, "a", score: 10);
-        _ = await CreateTestEntityAsync(storage, "b", score: 80);
-        _ = await CreateTestEntityAsync(storage, "c", score: 90);
+        _ = await CreateTestEntityAsync(partitionedStorage, "a", score: 10);
+        _ = await CreateTestEntityAsync(partitionedStorage, "b", score: 80);
+        _ = await CreateTestEntityAsync(partitionedStorage, "c", score: 90);
 
         var result = await TranslateAndQueryAsync(
-            storage,
+            partitionedStorage,
             "name eq \"a\" or name eq \"b\" and score gt 50",
             _testEntityType);
 

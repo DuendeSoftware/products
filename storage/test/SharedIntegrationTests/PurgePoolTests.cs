@@ -17,15 +17,15 @@ public partial class PurgePoolTests
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
     private static readonly SubscriberName WildcardSubscriberName =
-        SubscriberName.Create("purge-pool-subscriber");
+        SubscriberName.Create("purge-pool-subscription");
 
     [Fact]
     public async Task purge_empty_pool_returns_zero_result()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
-        var result = await storage.PurgePoolAsync(_ct);
+        var result = await partitionedStorage.PurgePoolAsync(_ct);
 
         result.ShouldBe(PurgeResult.Empty);
         result.EntitiesDeleted.ShouldBe(0);
@@ -37,7 +37,7 @@ public partial class PurgePoolTests
     public async Task purge_removes_all_entities_in_pool()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var entityType = TestDso.DsoVersion.EntityType;
         var ids = new List<UuidV7>();
@@ -47,18 +47,18 @@ public partial class PurgePoolTests
         {
             var id = UuidV7.New();
             ids.Add(id);
-            (await storage.CreateAsync(id, new TestDso($"purge-all-{i}-{Guid.NewGuid()}"), [], [],
+            (await partitionedStorage.CreateAsync(id, new TestDso($"purge-all-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
         }
 
-        var result = await storage.PurgePoolAsync(_ct);
+        var result = await partitionedStorage.PurgePoolAsync(_ct);
 
         result.EntitiesDeleted.ShouldBe(5);
 
         // All entities should be gone
         foreach (var id in ids)
         {
-            (await storage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
+            (await partitionedStorage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
         }
     }
 
@@ -66,38 +66,38 @@ public partial class PurgePoolTests
     public async Task purge_does_not_affect_other_pools()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var entityType = TestDso.DsoVersion.EntityType;
 
         // Insert in pool 1 (default pool from fixture)
         var poolAId = UuidV7.New();
-        (await storage.CreateAsync(poolAId, new TestDso($"pool-a-{Guid.NewGuid()}"), [], [],
+        (await partitionedStorage.CreateAsync(poolAId, new TestDso($"pool-a-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
         // Switch to pool 2 and insert there
-        storage.SetPoolId(2);
+        partitionedStorage.SetPoolId(2);
         var poolBId = UuidV7.New();
-        (await storage.CreateAsync(poolBId, new TestDso($"pool-b-{Guid.NewGuid()}"), [], [],
+        (await partitionedStorage.CreateAsync(poolBId, new TestDso($"pool-b-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
 
         // Purge pool 2
-        var result = await storage.PurgePoolAsync(_ct);
+        var result = await partitionedStorage.PurgePoolAsync(_ct);
         result.EntitiesDeleted.ShouldBe(1);
 
         // Pool 2 entity should be gone
-        (await storage.TryReadAsync(entityType, poolBId, _ct)).Found.ShouldBeFalse();
+        (await partitionedStorage.TryReadAsync(entityType, poolBId, _ct)).Found.ShouldBeFalse();
 
-        // Switch back to pool 1 — its entity must be untouched
-        storage.SetPoolId(1);
-        (await storage.TryReadAsync(entityType, poolAId, _ct)).Found.ShouldBeTrue();
+        // Switch back to default — its entity must be untouched
+        partitionedStorage.SetPoolId(PoolId.Default);
+        (await partitionedStorage.TryReadAsync(entityType, poolAId, _ct)).Found.ShouldBeTrue();
     }
 
     [Fact]
     public async Task purge_removes_entity_links_in_pool()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var testLink = new LinkDefinition
         {
@@ -109,52 +109,52 @@ public partial class PurgePoolTests
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        (await storage.CreateAsync(leftId, new TestDso($"link-left-{Guid.NewGuid()}"), [], [],
+        (await partitionedStorage.CreateAsync(leftId, new TestDso($"link-left-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
-        (await storage.CreateAsync(rightId, new TestDso2($"link-right-{Guid.NewGuid()}"), [], [],
+        (await partitionedStorage.CreateAsync(rightId, new TestDso2($"link-right-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
-        (await storage.LinkAsync(testLink, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
+        (await partitionedStorage.LinkAsync(testLink, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
 
-        var result = await storage.PurgePoolAsync(_ct);
+        var result = await partitionedStorage.PurgePoolAsync(_ct);
 
         result.EntitiesDeleted.ShouldBeGreaterThanOrEqualTo(2);
         result.EntityLinksDeleted.ShouldBeGreaterThanOrEqualTo(1);
 
         // Entities gone
-        (await storage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeFalse();
-        (await storage.TryReadAsync(TestDso2.DsoVersion.EntityType, rightId, _ct)).Found.ShouldBeFalse();
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeFalse();
+        (await partitionedStorage.TryReadAsync(TestDso2.DsoVersion.EntityType, rightId, _ct)).Found.ShouldBeFalse();
     }
 
     [Fact]
     public async Task purge_removes_outbox_events_in_pool()
     {
-        await using var fixture = await CreateProviderWithSubscriberAsync();
-        var storage = fixture.Storage;
+        await using var fixture = await CreateProviderWithSubscriptionAsync();
+        var partitionedStorage = fixture.PartitionedStorage;
 
         // Insert an entity with an outbox event attached
         var id = UuidV7.New();
         var evt = MakeEvent();
-        (await storage.CreateAsync(id, new TestDso($"outbox-{Guid.NewGuid()}"), [], [],
+        (await partitionedStorage.CreateAsync(id, new TestDso($"outbox-{Guid.NewGuid()}"), [], [],
             Expiration.NoExpiration, [evt], _ct)).ShouldBe(CreateResult.Success);
 
         // Verify outbox event is present before purge
-        var before = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
+        var before = await fixture.DefaultCrossPartitionStorage.GetOutboxEventsForSubscriptionAsync(WildcardSubscriberName, 100, _ct);
         before.Events.Count.ShouldBeGreaterThanOrEqualTo(1);
 
-        var result = await storage.PurgePoolAsync(_ct);
+        var result = await partitionedStorage.PurgePoolAsync(_ct);
 
         result.OutboxEventsDeleted.ShouldBeGreaterThanOrEqualTo(1);
 
         // Outbox should be empty after purge
-        var after = await storage.GetOutboxEventsForSubscriberAsync(WildcardSubscriberName, 100, _ct);
+        var after = await fixture.DefaultCrossPartitionStorage.GetOutboxEventsForSubscriptionAsync(WildcardSubscriberName, 100, _ct);
         after.Events.ShouldBeEmpty();
     }
 
     [Fact]
     public async Task purge_returns_correct_counts_per_table()
     {
-        await using var fixture = await CreateProviderWithSubscriberAsync();
-        var storage = fixture.Storage;
+        await using var fixture = await CreateProviderWithSubscriptionAsync();
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var testLink = new LinkDefinition
         {
@@ -170,7 +170,7 @@ public partial class PurgePoolTests
             var id = UuidV7.New();
             leftIds.Add(id);
             var evt = MakeEvent();
-            (await storage.CreateAsync(id, new TestDso($"count-left-{i}-{Guid.NewGuid()}"), [], [],
+            (await partitionedStorage.CreateAsync(id, new TestDso($"count-left-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.NoExpiration, [evt], _ct)).ShouldBe(CreateResult.Success);
         }
 
@@ -180,15 +180,15 @@ public partial class PurgePoolTests
         {
             var id = UuidV7.New();
             rightIds.Add(id);
-            (await storage.CreateAsync(id, new TestDso2($"count-right-{i}-{Guid.NewGuid()}"), [], [],
+            (await partitionedStorage.CreateAsync(id, new TestDso2($"count-right-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         // Create 2 links
-        (await storage.LinkAsync(testLink, leftIds[0], rightIds[0], [], _ct)).ShouldBe(LinkResult.Success);
-        (await storage.LinkAsync(testLink, leftIds[1], rightIds[1], [], _ct)).ShouldBe(LinkResult.Success);
+        (await partitionedStorage.LinkAsync(testLink, leftIds[0], rightIds[0], [], _ct)).ShouldBe(LinkResult.Success);
+        (await partitionedStorage.LinkAsync(testLink, leftIds[1], rightIds[1], [], _ct)).ShouldBe(LinkResult.Success);
 
-        var result = await storage.PurgePoolAsync(_ct);
+        var result = await partitionedStorage.PurgePoolAsync(_ct);
 
         // 3 TestDso + 2 TestDso2 = 5 entities
         result.EntitiesDeleted.ShouldBe(5);
@@ -202,7 +202,7 @@ public partial class PurgePoolTests
     public async Task purge_with_small_batch_size_completes_correctly()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         var entityType = TestDso.DsoVersion.EntityType;
         var ids = new List<UuidV7>();
@@ -212,19 +212,19 @@ public partial class PurgePoolTests
         {
             var id = UuidV7.New();
             ids.Add(id);
-            (await storage.CreateAsync(id, new TestDso($"batch-{i}-{Guid.NewGuid()}"), [], [],
+            (await partitionedStorage.CreateAsync(id, new TestDso($"batch-{i}-{Guid.NewGuid()}"), [], [],
                 Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
         }
 
         // Purge with batchSize=2 — exercises the internal loop
-        var result = await storage.PurgePoolAsync(batchSize: 2, _ct);
+        var result = await partitionedStorage.PurgePoolAsync(batchSize: 2, _ct);
 
         result.EntitiesDeleted.ShouldBe(5);
 
         // All entities must be gone regardless of batching
         foreach (var id in ids)
         {
-            (await storage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
+            (await partitionedStorage.TryReadAsync(entityType, id, _ct)).Found.ShouldBeFalse();
         }
     }
 
@@ -232,12 +232,12 @@ public partial class PurgePoolTests
     public async Task purge_with_invalid_batch_size_throws()
     {
         await using var fixture = await CreateProviderAsync();
-        var storage = fixture.Storage;
+        var partitionedStorage = fixture.PartitionedStorage;
 
         _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(
-            () => storage.PurgePoolAsync(batchSize: 0, _ct));
+            () => partitionedStorage.PurgePoolAsync(batchSize: 0, _ct));
         _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(
-            () => storage.PurgePoolAsync(batchSize: -1, _ct));
+            () => partitionedStorage.PurgePoolAsync(batchSize: -1, _ct));
     }
 
     private static OutboxEvent MakeEvent() => new()
@@ -258,19 +258,19 @@ public partial class PurgePoolTests
             services.AddDsoRegistration<TestDso2>();
         });
 
-    private async Task<IStorageFixture> CreateProviderWithSubscriberAsync() =>
+    private async Task<IStorageFixture> CreateProviderWithSubscriptionAsync() =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
-            _ = services.AddSingleton<IOutboxSubscriber>(new WildcardTestSubscriber());
+            _ = services.AddSingleton<IOutboxSubscription>(new WildcardTestSubscription());
             services.AddDsoRegistration<TestDso>();
             services.AddDsoRegistration<TestDso2>();
         });
 
     /// <summary>
-    /// Wildcard subscriber that matches all entity types and event names,
+    /// Wildcard subscription that matches all entity types and event names,
     /// used to ensure outbox events are written to the storage in tests.
     /// </summary>
-    private sealed class WildcardTestSubscriber : IOutboxSubscriber
+    private sealed class WildcardTestSubscription : IOutboxSubscription
     {
         public SubscriberName SubscriberName => WildcardSubscriberName;
         public bool IsEnabled => true;

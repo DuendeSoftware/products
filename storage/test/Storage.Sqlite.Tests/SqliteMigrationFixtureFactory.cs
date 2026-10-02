@@ -11,28 +11,29 @@ namespace Duende.Storage.Sqlite;
 
 internal sealed class SqliteMigrationFixtureFactory : IMigrationFixtureFactory
 {
-    public Task<IMigrationFixture> CreateAsync(CancellationToken ct)
+    public async Task<IMigrationFixture> CreateAsync(CancellationToken ct)
     {
         var dbName = $"migration_test_{Guid.NewGuid():N}";
         var connectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared";
 
         var services = new ServiceCollection();
         _ = services.AddLogging();
-        _ = services.AddStorageInternal(storage => storage.AddSqliteStore("migration-test", opt => opt.ConnectionString = connectionString));
+        _ = services.AddStorageInternal(storage => storage.AddSqlite(opt => opt.ConnectionString = connectionString));
         var provider = services.BuildServiceProvider();
 
-        var schema = provider.GetRequiredKeyedService<IDatabaseSchema>("migration-test");
-        IMigrationFixture fixture = new SqliteMigrationFixture(provider, schema, connectionString);
-        return Task.FromResult(fixture);
+        var storageInstanceSchema = await provider.GetRequiredService<IStorageInstanceSchemaFactory>().GetStorageInstanceSchema(ct);
+        IMigrationFixture fixture = new SqliteMigrationFixture(provider, storageInstanceSchema, connectionString);
+        return fixture;
     }
 }
 
 internal sealed class SqliteMigrationFixture(
     ServiceProvider provider,
-    IDatabaseSchema schema,
+    IStorageInstanceSchema storageInstanceSchema,
     string connectionString) : IMigrationFixture
 {
-    public IDatabaseSchema Schema => schema;
+    public uint RequiredVersion => 2u;
+    public IStorageInstanceSchema StorageInstanceSchema => storageInstanceSchema;
 
     public async Task ExecuteSqlAsync(string sql, CancellationToken ct)
     {

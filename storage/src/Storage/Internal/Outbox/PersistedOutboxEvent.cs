@@ -12,10 +12,10 @@ namespace Duende.Storage.Internal.Outbox;
 /// </remarks>
 public sealed record PersistedOutboxEvent
 {
-    /// <summary>The store-generated unique identifier for this persisted message (one per subscriber fanout row).</summary>
+    /// <summary>The store-generated unique identifier for this persisted message (one per subscription fanout row).</summary>
     public required OutboxEventId MessageId { get; init; }
 
-    /// <summary>The caller-supplied event identifier, shared across all subscriber copies of the same logical event.</summary>
+    /// <summary>The caller-supplied event identifier, shared across all subscription copies of the same logical event.</summary>
     public required OutboxEventId EventId { get; init; }
 
     /// <summary>When the event occurred.</summary>
@@ -42,7 +42,7 @@ public sealed record PersistedOutboxEvent
     /// <summary>The serialized event payload (typically JSON).</summary>
     public required string Payload { get; init; }
 
-    /// <summary>The name of the subscriber this event was addressed to at write time.</summary>
+    /// <summary>The name of the subscription this event was addressed to at write time.</summary>
     public required SubscriberName SubscriberName { get; init; }
 
     /// <summary>The deserialized data storage object when the payload represents a versioned DSO. Null for domain events or when the DSO type is not registered.</summary>

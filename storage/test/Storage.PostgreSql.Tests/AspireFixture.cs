@@ -17,9 +17,9 @@ public sealed class AspireFixture : IAsyncLifetime
     public string ConnectionString { get; private set; } = null!;
 
     /// <summary>
-    /// Pool of reusable databases shared across all test classes in this collection.
+    /// Provisions reusable databases shared across all test classes in this collection.
     /// </summary>
-    internal PostgreSqlDatabasePool Pool { get; private set; } = null!;
+    internal PostgreSqlTestDatabaseProvisioner DatabaseProvisioner { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -49,9 +49,9 @@ public sealed class AspireFixture : IAsyncLifetime
         _serverConnectionString = (await _app.GetConnectionStringAsync("postgresql", ct))!;
         ServerConnectionString = _serverConnectionString;
 
-        Pool = new PostgreSqlDatabasePool(_serverConnectionString);
+        DatabaseProvisioner = new PostgreSqlTestDatabaseProvisioner(_serverConnectionString);
 
-        // Create a dedicated database for PostgreSqlStoreTests (smoke tests that
+        // Create a dedicated database for PostgreSqlStorageEngineTests (smoke tests that
         // need a persistent connection string rather than a pooled one).
         _databaseName = $"test_{Guid.NewGuid():N}";
         await using var dataSource = NpgsqlDataSource.Create(_serverConnectionString);
@@ -70,9 +70,9 @@ public sealed class AspireFixture : IAsyncLifetime
         if (_app != null && _serverConnectionString != null && _databaseName != null)
         {
             // Drop all pooled databases.
-            if (Pool != null)
+            if (DatabaseProvisioner != null)
             {
-                await Pool.DropAllAsync();
+                await DatabaseProvisioner.DropAllAsync();
             }
 
             // Drop the dedicated smoke-test database.

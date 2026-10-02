@@ -11,6 +11,7 @@ using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 var services = new ServiceCollection();
 services.AddLogging();
 
-services.AddStorageInternal(storage => storage.AddSqliteStore(options =>
+services.AddStorageInternal(storage => storage.AddSqlite(options =>
 {
     options.ConnectionString = "Data Source=sample.db";
 }));
@@ -31,13 +32,17 @@ services.AddDsoRegistration<ProductDso>();
 var provider = services.BuildServiceProvider();
 
 // ──────────────────────────────────────────────────────────────
-// 2. Create schema and open a pool (logical tenant)
+// 2. Create schema and get storage for a data category
 // ──────────────────────────────────────────────────────────────
 
-var pooledStore = provider.GetRequiredService<IPooledStore>();
-await pooledStore.MigrateAsync(CancellationToken.None);
+var productsCategory = DataCategoryName.Create("products");
 
-var store = pooledStore.OpenPool(1); // Pool 1 — think of it as a tenant
+await provider.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
+
+// Storage for a data category comes from IPartitionedStorageFactory. In a single-tenant host
+// like this sample, the category simply resolves to the default storage instance and pool.
+// In a real product, Spaces resolves the category to a tenant's own pool instead.
+var store = await provider.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(productsCategory, Ct.None);
 
 Console.WriteLine("✓ Store initialized with SQLite\n");
 
