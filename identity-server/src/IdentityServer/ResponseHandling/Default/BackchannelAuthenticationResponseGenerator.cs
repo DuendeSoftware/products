@@ -79,7 +79,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
             throw new ArgumentNullException(nameof(validationResult.ValidatedRequest.Client));
         }
 
-        Logger.LogTrace("Creating response for backchannel authentication request");
+        Logger.CreatingResponseForBackchannelAuthenticationRequest();
 
         var request = new BackChannelAuthenticationRequest
         {

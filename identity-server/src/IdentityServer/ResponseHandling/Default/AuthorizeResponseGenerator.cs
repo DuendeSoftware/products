@@ -100,7 +100,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
             return await CreateHybridFlowResponseAsync(request, ct);
         }
 
-        Logger.LogError("Unsupported grant type: {GrantType}", request.GrantType);
+        Logger.UnsupportedGrantType(request.GrantType);
         throw new InvalidOperationException("invalid grant type: " + request.GrantType);
     }
 
@@ -112,7 +112,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <returns></returns>
     protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
-        Logger.LogDebug("Creating Hybrid Flow response.");
+        Logger.CreatingHybridFlowResponse();
 
         var code = await CreateCodeAsync(request, ct);
         var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code, ct);
@@ -131,7 +131,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <returns></returns>
     protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct)
     {
-        Logger.LogDebug("Creating Authorization Code Flow response.");
+        Logger.CreatingAuthorizationCodeFlowResponse();
 
         var code = await CreateCodeAsync(request, ct);
         var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code, ct);
@@ -156,7 +156,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <returns></returns>
     protected virtual async Task<AuthorizeResponse> CreateImplicitFlowResponseAsync(ValidatedAuthorizeRequest request, Ct ct, string authorizationCode = null)
     {
-        Logger.LogDebug("Creating Implicit Flow response.");
+        Logger.CreatingImplicitFlowResponse();
 
         string accessTokenValue = null;
         var accessTokenLifetime = 0;

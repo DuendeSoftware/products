@@ -48,11 +48,11 @@ public class InMemoryCorsPolicyService : ICorsPolicyService
 
         if (result)
         {
-            Logger.LogDebug("Client list checked and origin: {0} is allowed", origin);
+            Logger.ClientListCheckedAndOriginValueIsAllowed(origin);
         }
         else
         {
-            Logger.LogDebug("Client list checked and origin: {0} is not allowed", origin);
+            Logger.ClientListCheckedAndOriginValueIsNot(origin);
         }
 
         return Task.FromResult(result);

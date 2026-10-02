@@ -54,7 +54,7 @@ internal class UserInfoEndpoint : IEndpointHandler
 
         if (!HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsPost(context.Request.Method))
         {
-            _logger.LogWarning("Invalid HTTP method for userinfo endpoint.");
+            _logger.InvalidHTTPMethodForUserinfoEndpoint();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
@@ -63,22 +63,18 @@ internal class UserInfoEndpoint : IEndpointHandler
 
     private async Task<IEndpointResult> ProcessUserInfoRequestAsync(HttpContext context)
     {
-        _logger.LogDebug("Start userinfo request");
+        _logger.StartUserinfoRequest();
 
         // userinfo requires an access token on the request
         var tokenUsageResult = await _tokenUsageValidator.ValidateAsync(context);
         if (tokenUsageResult.TokenFound == false)
         {
-            var error = "No access token found.";
-
-#pragma warning disable CA2254 // Structured logging is not needed for this message
-            _logger.LogError(error);
-#pragma warning restore CA2254
+            _logger.NoAccessTokenFound();
             return Error(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
         // validate the request
-        _logger.LogTrace("Calling into userinfo request validator: {type}", _requestValidator.GetType().FullName);
+        _logger.CallingIntoUserinfoRequestValidator(_requestValidator.GetType().FullName);
         var validationResult = await _requestValidator.ValidateRequestAsync(tokenUsageResult.Token, context.RequestAborted);
 
         if (validationResult.IsError)
@@ -88,10 +84,10 @@ internal class UserInfoEndpoint : IEndpointHandler
         }
 
         // generate response
-        _logger.LogTrace("Calling into userinfo response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoUserinfoResponseGenerator(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(validationResult, context.RequestAborted);
 
-        _logger.LogDebug("End userinfo request");
+        _logger.EndUserinfoRequest();
         return new UserInfoResult(response);
     }
 

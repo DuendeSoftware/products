@@ -26,7 +26,7 @@ public class NotSupportedResourceOwnerPasswordValidator : IResourceOwnerPassword
     {
         context.Result = new GrantValidationResult(TokenRequestErrors.UnsupportedGrantType);
 
-        _logger.LogInformation("Resource owner password credential type not supported. Configure an IResourceOwnerPasswordValidator.");
+        _logger.ResourceOwnerPasswordCredentialTypeNotSupportedConfigure();
         return Task.CompletedTask;
     }
 }

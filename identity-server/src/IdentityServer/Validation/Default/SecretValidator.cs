@@ -44,7 +44,7 @@ public class SecretValidator : ISecretsListValidator
 
         foreach (var expired in secretsArray.Where(s => s.Expiration.HasExpired(_timeProvider.GetUtcNow().UtcDateTime)))
         {
-            _logger.LogInformation("Secret [{description}] is expired", expired.Description ?? "no description");
+            _logger.SecretIsExpired(expired.Description ?? "no description");
         }
 
         var currentSecrets = secretsArray.Where(s => !s.Expiration.HasExpired(_timeProvider.GetUtcNow().UtcDateTime)).ToArray();
@@ -56,12 +56,12 @@ public class SecretValidator : ISecretsListValidator
 
             if (secretValidationResult.Success)
             {
-                _logger.LogDebug("Secret validator success: {0}", validator.GetType().Name);
+                _logger.SecretValidatorSuccess(validator.GetType().Name);
                 return secretValidationResult;
             }
         }
 
-        _logger.LogDebug("Secret validators could not validate secret");
+        _logger.SecretValidatorsCouldNotValidateSecret();
         return new SecretValidationResult { Success = false };
     }
 }

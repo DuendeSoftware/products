@@ -20,14 +20,6 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private IIdentityProviderAdmin NewAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IIdentityProviderAdmin>();
-    }
 
     private async Task<IdentityProviderId> CreateProviderAsync(IIdentityProviderAdmin admin, string? scheme = null)
     {
@@ -45,7 +37,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_id_round_trips_all_fields()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
         var scheme = $"scheme_{Guid.NewGuid():N}";
         var provider = new CreateIdentityProvider
         {
@@ -80,7 +72,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_scheme_round_trips()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
         var scheme = $"scheme_{Guid.NewGuid():N}";
         var provider = new CreateIdentityProvider
         {
@@ -101,7 +93,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task get_by_id_returns_not_found_for_nonexistent_id()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         var result = await admin.GetAsync(UuidV7.New().Value, _ct);
 
@@ -111,7 +103,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task get_by_scheme_returns_not_found_for_nonexistent_scheme()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         var result = await admin.GetBySchemeAsync($"nonexistent_{Guid.NewGuid():N}", _ct);
 
@@ -121,7 +113,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_duplicate_scheme_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
         var scheme = $"scheme_{Guid.NewGuid():N}";
 
         var first = await admin.CreateAsync(
@@ -140,7 +132,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_changes_fields()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
         var scheme = $"scheme_{Guid.NewGuid():N}";
 
         var createResult = await admin.CreateAsync(
@@ -173,7 +165,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_with_wrong_version_returns_version_conflict()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         var createResult = await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
@@ -194,7 +186,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_nonexistent_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
         IdentityProviderId nonExistentId = Guid.CreateVersion7();
 
         var result = await admin.UpdateAsync(
@@ -211,7 +203,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_then_get_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         var createResult = await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "test" },
@@ -229,7 +221,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     public async Task query_returns_all_providers()
     {
         var prefix = $"q_{Guid.NewGuid():N}_";
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         await CreateProviderAsync(admin, prefix + "a");
         await CreateProviderAsync(admin, prefix + "b");
@@ -249,7 +241,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     public async Task query_filters_by_scheme()
     {
         var uniquePart = $"q_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         await CreateProviderAsync(admin, uniquePart + "_match1");
         await CreateProviderAsync(admin, uniquePart + "_match2");
@@ -269,7 +261,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     {
         var enabledScheme = $"q_enabled_{Guid.NewGuid():N}";
         var disabledScheme = $"q_disabled_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = enabledScheme, Type = "test", Enabled = true },
@@ -301,7 +293,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var uniqueType = $"type_{Guid.NewGuid():N}";
         var withTypeScheme = $"q_withtype_{Guid.NewGuid():N}";
         var withoutTypeScheme = $"q_notype_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = withTypeScheme, Type = uniqueType },
@@ -325,7 +317,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var uniqueName = $"display_{Guid.NewGuid():N}";
         var matchScheme = $"q_dname_match_{Guid.NewGuid():N}";
         var noMatchScheme = $"q_dname_nomatch_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = matchScheme, Type = "test", DisplayName = uniqueName },
@@ -347,7 +339,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     public async Task query_sorts_by_scheme()
     {
         var prefix = $"sort_{Guid.NewGuid():N}_";
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = prefix + "c", Type = "test" }, _ct);
@@ -370,7 +362,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task validation_rejects_missing_scheme()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         var result = await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = "", Type = "test" },
@@ -387,7 +379,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task validation_rejects_missing_type()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.IdentityProviderAdmin;
 
         var result = await admin.CreateAsync(
             new CreateIdentityProvider { Scheme = $"scheme_{Guid.NewGuid():N}", Type = "" },
@@ -411,13 +403,15 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
 
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
+                storage.AddSqlite(opt =>
                     opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddIdentityProviderConfigurationValidator<RejectAllIdentityProvidersValidator>();
 
         await using var provider = services.BuildServiceProvider();
 
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         using var scope = provider.CreateScope();
@@ -434,15 +428,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 
     private sealed class RejectAllIdentityProvidersValidator : IIdentityProviderConfigurationValidator
     {

@@ -5,26 +5,19 @@
 
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin.PersistedGrants;
 
 /// <summary>
-/// Integration tests for IPersistedGrantStore backed by IStorage storage.
+/// Integration tests for IPersistedGrantStore backed by IPartitionedStorage.
 /// Covers upsert semantics, filter-based queries, batch deletes, and round-trip fidelity.
 /// </summary>
 public sealed class PersistedGrantStoreTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
 
-    private IPersistedGrantStore NewStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IPersistedGrantStore>();
-    }
+    private IPersistedGrantStore NewStore() => _fixture.PersistedGrantStore;
 
     // === Helper ===
 
@@ -439,13 +432,5 @@ public sealed class PersistedGrantStoreTests : IAsyncLifetime
 
     public ValueTask InitializeAsync() => _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

@@ -4,14 +4,25 @@
 
 ## Enhancements
 - Added `AddStorage()` extension method
-  - Registers the complete set of Duende.Storage-backed configuration and operational stores, admin services, schema services, and supporting infrastructure (DSOs, repositories, pooled storage factory, outbox subscriber/processor, background purge hosted services) in a single call.
-  - A concrete database provider (for example `AddSqliteStore()`, `AddPostgreSqlStore()`, or `AddMsSqlStore()`) is selected via the `configure` delegate passed to `AddStorage()`.
+  - Registers the complete set of Duende.Storage-backed configuration and operational stores, admin services, schema services, and supporting infrastructure (DSOs, repositories, pooled storage factory, outbox subscription/processor, background purge hosted services) in a single call.
+  - A concrete database provider (for example `AddSqlite()`, `AddPostgreSql()`, or `AddMsSql()`) is selected via the `configure` delegate passed to `AddStorage()`.
   - Explicit store selector methods (such as `AddInMemoryClients()`) called after `AddStorage()` replace the corresponding registration made by it.
+- Cookies are now scoped to the resolved space path for path-based Spaces deployments, so two spaces can run independent login sessions in the same browser (#3428). There is no automatic migration of pre-existing root-scoped cookies; expect brief coexistence and possible reauthentication the first time a deployment enables path-based spaces. Configuring a `__Host-` cookie name on a non-root space path is now rejected; use the `__Secure-` prefix instead if you want a secure cookie name on a path-scoped space.
 
 # 8.0.0
 
 ## Breaking Changes
 - HTTP 303 (See Other) is now the unconditional redirect status code for all authorization and end-session redirects. The `UserInteractionOptions.UseHttp303Redirects` opt-in flag has been removed. This aligns IdentityServer with the FAPI 2.0 Security Profile (Section 5.3.2.2, item 11).
+
+## Enhancements
+- Tightened input length handling in access token and DPoP proof validation by @josephdecock
+  - These changes are defense in depth. Both paths already rejected oversized input, and we are not aware of either being exploitable.
+  - `TokenValidator` bounds the scan that tells a JWT apart from a reference token, so an over-long token is measured against `InputLengthRestrictions` without being read end to end first.
+  - `InputLengthRestrictions.DPoPProofToken` is now applied when a DPoP proof is presented to a protected resource. Previously it was only applied at the token and pushed authorization endpoints. `DefaultDPoPProofValidator` also checks it, so the restriction holds for callers that do not check it themselves.
+  - As a result, a valid DPoP proof longer than `InputLengthRestrictions.DPoPProofToken` is now rejected at protected resources, where it was previously accepted. The default limit is 4000 characters, so this is unlikely to affect you unless you emit unusually large proofs.
+- Added `InputLengthRestrictions.Prompt`, applied to the `prompt` and `suppressed_prompt` parameters at the authorize endpoint by @josephdecock
+  - The other free-form authorize parameters already had a length restriction, so this closes a gap rather than introducing a new kind of check. It is also defense in depth.
+  - The default is 100 characters. A longer `prompt` is now rejected, where it was previously accepted. The longest combination of built-in prompt modes is `login consent select_account`, at 28 characters, so this is unlikely to affect you unless you configure long custom values in `UserInteractionOptions.PromptValuesSupported`.
 
 # 7.4.0-preview.1
 

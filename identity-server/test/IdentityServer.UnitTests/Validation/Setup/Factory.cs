@@ -6,7 +6,6 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
-using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
@@ -273,7 +272,7 @@ internal static class Factory
             LicenseUsageTracker.CreateForTests(),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
-            new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
+            TestLogger.Create<AuthorizeRequestValidator>());
     }
 
     public static RequestObjectValidator CreateRequestObjectValidator(
@@ -306,7 +305,8 @@ internal static class Factory
         IProfileService profile = null,
         IIssuerNameService issuerNameService = null,
         IdentityServerOptions options = null,
-        TimeProvider timeProvider = null)
+        TimeProvider timeProvider = null,
+        ILogger<TokenValidator> logger = null)
     {
         options ??= TestIdentityServerOptions.Create();
         profile ??= new TestProfileService();
@@ -317,7 +317,7 @@ internal static class Factory
 
         var clients = CreateClientStore();
 
-        var logger = TestLogger.Create<TokenValidator>();
+        logger ??= TestLogger.Create<TokenValidator>();
 
         var keyInfo = new SecurityKeyInfo
         {

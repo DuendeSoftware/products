@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Extensions;
@@ -63,7 +64,8 @@ internal sealed class Saml2LogoutPageResultHttpWriter(
             SamlSessions = samlSessions,
             SamlLogoutRequestId = request.LogoutRequest.Id,
             SamlRelayState = request.RelayState ?? request.Saml2Message?.RelayState,
-            PostLogoutRedirectUri = callbackUrl
+            PostLogoutRedirectUri = callbackUrl,
+            SamlLogoutCorrelationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
         };
 
         var msg = new Message<LogoutMessage>(logoutMessage, timeProvider.GetUtcNow().UtcDateTime);

@@ -21,7 +21,7 @@ public class ConfirmationValidationMiddlewareOptions
 
 // this middleware validates the cnf claim (if present) against the thumbprint of the X.509 client certificate for the
 // current client
-public class ConfirmationValidationMiddleware(
+public partial class ConfirmationValidationMiddleware(
     RequestDelegate next,
     ILogger<ConfirmationValidationMiddlewareOptions> logger,
     ConfirmationValidationMiddlewareOptions? options = null)
@@ -48,15 +48,21 @@ public class ConfirmationValidationMiddleware(
                 if (string.IsNullOrWhiteSpace(sha256) ||
                     !thumbprint.Equals(sha256, StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogError("certificate thumbprint does not match cnf claim.");
+                    LogCertificateThumbprintMismatch(_logger);
                     await ctx.ChallengeAsync(_options.JwtBearerSchemeName);
                     return;
                 }
 
-                _logger.LogDebug("certificate thumbprint matches cnf claim.");
+                LogCertificateThumbprintMatch(_logger);
             }
         }
 
         await next(ctx);
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "certificate thumbprint does not match cnf claim.")]
+    private static partial void LogCertificateThumbprintMismatch(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "certificate thumbprint matches cnf claim.")]
+    private static partial void LogCertificateThumbprintMatch(ILogger logger);
 }

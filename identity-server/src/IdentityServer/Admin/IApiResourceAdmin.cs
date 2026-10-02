@@ -61,14 +61,21 @@ public interface IApiResourceAdmin
     Task<QueryResult<ApiResourceListItem>> QueryAsync(QueryRequest<ApiResourceFilter, ApiResourceSortField> request, Ct ct);
 
     /// <summary>
-    /// Creates a new secret for an API resource. The plaintext value is hashed before storage.
+    /// Creates a new secret for an API resource.
+    /// For the built-in key/certificate types (<c>X509Thumbprint</c>, <c>X509Name</c>, <c>X509CertificateBase64</c>, and
+    /// <c>JWK</c>, i.e. <see cref="IdentityServerConstants.SecretTypes.X509CertificateThumbprint"/>,
+    /// <see cref="IdentityServerConstants.SecretTypes.X509CertificateName"/>,
+    /// <see cref="IdentityServerConstants.SecretTypes.X509CertificateBase64"/>, and
+    /// <see cref="IdentityServerConstants.SecretTypes.JsonWebKey"/>), the value is stored verbatim (not hashed);
+    /// callers are responsible for supplying appropriate material for these types. All other types, including
+    /// <c>SharedSecret</c> and the default (<see langword="null"/>) type, are hashed before storage.
     /// </summary>
     /// <param name="apiResourceId">The storage ID of the API resource.</param>
-    /// <param name="plaintextValue">The plaintext secret (will be hashed before storage).</param>
-    /// <param name="hashAlgorithm">Hash algorithm to use (defaults to <see cref="SecretHashAlgorithm.Sha256"/>).</param>
+    /// <param name="plaintextValue">The plaintext secret value.</param>
+    /// <param name="hashAlgorithm">Hash algorithm to use when the value is hashed (defaults to <see cref="SecretHashAlgorithm.Sha256"/>).</param>
     /// <param name="description">Optional description.</param>
     /// <param name="expiration">Optional expiration date.</param>
-    /// <param name="type">Secret type (defaults to <c>"SharedSecret"</c>).</param>
+    /// <param name="type">Secret type (defaults to <c>"SharedSecret"</c>). See summary for which types are stored verbatim vs. hashed.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The new secret's storage <see cref="ApiResourceSecretId"/> on success, or errors on failure.</returns>
     Task<SaveResult<ApiResourceSecretId>> CreateSecretAsync(

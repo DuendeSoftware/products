@@ -26,7 +26,7 @@ public class StorageSamlSigninStateStoreContractTests : SamlSigninStateStoreCont
         services.AddSingleton(TimeProvider.System);
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<SamlSigninStateDso.V1>();
@@ -36,7 +36,7 @@ public class StorageSamlSigninStateStoreContractTests : SamlSigninStateStoreCont
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
     }
 

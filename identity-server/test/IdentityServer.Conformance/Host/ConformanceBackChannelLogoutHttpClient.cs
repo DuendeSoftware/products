@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.Conformance.Host;
 /// hostname (localhost) to the internal Docker hostname (nginx) so that
 /// IdentityServer can reach the conformance suite from inside the container.
 /// </summary>
-internal sealed class ConformanceBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
+internal sealed partial class ConformanceBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
 {
     private readonly HttpClient _client;
     private readonly ILogger<ConformanceBackChannelLogoutHttpClient> _logger;
@@ -36,26 +36,41 @@ internal sealed class ConformanceBackChannelLogoutHttpClient : IBackChannelLogou
 
         if (internalUrl != url)
         {
-            _logger.LogDebug("Rewrote backchannel logout URL from {ExternalUrl} to {InternalUrl}", url, internalUrl);
+            LogRewrittenUrl(_logger, url, internalUrl);
         }
 
         try
         {
             using var formEncodedContent = new FormUrlEncodedContent(payload);
-            var response = await _client.PostAsync(internalUrl, formEncodedContent, ct);
+            using var response = await _client.PostAsync(internalUrl, formEncodedContent, ct);
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogDebug("Backchannel logout succeeded for {Url}, status: {Status}", internalUrl, (int)response.StatusCode);
+                LogSuccess(_logger, internalUrl, (int)response.StatusCode);
             }
             else
             {
-                var body = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogWarning("Backchannel logout failed for {Url}, status: {Status}, body: {Body}", internalUrl, (int)response.StatusCode, body);
+                if (_logger.IsEnabled(LogLevel.Warning))
+                {
+                    var body = await response.Content.ReadAsStringAsync(ct);
+                    LogFailure(_logger, internalUrl, (int)response.StatusCode, body);
+                }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception invoking backchannel logout for {Url}", internalUrl);
+            LogException(_logger, internalUrl, ex);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Rewrote backchannel logout URL from {ExternalUrl} to {InternalUrl}")]
+    private static partial void LogRewrittenUrl(ILogger logger, string externalUrl, string internalUrl);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Backchannel logout succeeded for {Url}, status: {Status}")]
+    private static partial void LogSuccess(ILogger logger, string url, int status);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Backchannel logout failed for {Url}, status: {Status}, body: {Body}")]
+    private static partial void LogFailure(ILogger logger, string url, int status, string body);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Exception invoking backchannel logout for {Url}")]
+    private static partial void LogException(ILogger logger, string url, Exception exception);
 }

@@ -19,8 +19,10 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.ApiScopes;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
+internal sealed class ApiScopeRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Configuration, ct);
+
     internal enum Keys
     {
         Name = 1
@@ -34,8 +36,8 @@ internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, ApiScopeDso.V1 dso, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        return await partitionedStorage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(ApiScopeNameDskV1.Create(dso.Name))],
@@ -47,15 +49,15 @@ internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
 
     internal async Task<(ApiScopeDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(id), ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((ApiScopeDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(ApiScopeDso.V1 Dso, int Version)?> TryReadByNameAsync(string name, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(
             ApiScopeDso.EntityType,
             DataStorageKey.Create(ApiScopeNameDskV1.Create(name)),
             ct);
@@ -63,7 +65,7 @@ internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, ApiScopeDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).UpdateAsync(
+        await (await GetPartitionedStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -74,18 +76,18 @@ internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).DeleteAsync(ApiScopeDso.EntityType, UuidV7.From(id), [], ct);
+        await (await GetPartitionedStorage(ct)).DeleteAsync(ApiScopeDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<QueryResult<ApiScopeDso.V1>> QueryAsync(
         QueryRequest<ApiScopeFilter, ApiScopeSortField> request,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await storage.QueryAsync<ApiScopeDso.V1>(
+        var result = await partitionedStorage.QueryAsync<ApiScopeDso.V1>(
             ApiScopeDso.EntityType,
             filter,
             sort,
@@ -104,10 +106,10 @@ internal sealed class ApiScopeRepository(IStorageFactory storageFactory)
             return [];
         }
 
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var filter = Fields.Name.In(nameList);
 
-        var result = await storage.QueryAsync<ApiScopeDso.V1>(
+        var result = await partitionedStorage.QueryAsync<ApiScopeDso.V1>(
             ApiScopeDso.EntityType,
             filter,
             new SortParameter(Fields.Name),

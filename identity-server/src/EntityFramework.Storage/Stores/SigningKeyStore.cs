@@ -116,7 +116,7 @@ public class SigningKeyStore : ISigningKeyStore
                 }
 
                 // already deleted, so we can eat this exception
-                Logger.LogDebug("Concurrency exception caught deleting key id {kid}", id);
+                Log.ConcurrencyExceptionCaughtDeletingKeyIdValue(Logger, id);
             }
         }
     }

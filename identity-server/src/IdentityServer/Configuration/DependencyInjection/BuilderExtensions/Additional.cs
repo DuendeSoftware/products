@@ -578,10 +578,10 @@ public static class IdentityServerBuilderExtensionsAdditional
             {
                 var httpClientFactory = s.GetRequiredService<IHttpClientFactory>();
                 var httpClient = httpClientFactory.CreateClient(name);
-                var loggerFactory = s.GetRequiredService<ILoggerFactory>();
+                var logger = s.GetRequiredService<ILogger<DefaultJwtRequestUriHttpClient>>();
                 var options = s.GetRequiredService<IdentityServerOptions>();
 
-                return new DefaultJwtRequestUriHttpClient(httpClient, options, loggerFactory);
+                return new DefaultJwtRequestUriHttpClient(httpClient, options, logger);
             });
 
             return httpBuilder;
@@ -654,12 +654,15 @@ public static class IdentityServerBuilderExtensionsAdditional
         }
 
         /// <summary>
-        /// Ensures a keyed <see cref="HybridCache"/> for the configuration store cache is registered
-        /// exactly once. Subsequent calls are no-ops, so apps that register their own keyed
-        /// <see cref="HybridCache"/> first will not have it overridden.
+        /// Ensures a keyed <see cref="HybridCache"/> for the configuration store cache and a default
+        /// <see cref="IHybridCacheFactory"/> are registered. Existing registrations are left in
+        /// place, so apps can register their own keyed <see cref="HybridCache"/>, and Duende.Spaces
+        /// can replace the factory with a space-aware one, in either order.
         /// </summary>
         internal void EnsureConfigurationStoreHybridCache()
         {
+            builder.Services.TryAddTransient<IHybridCacheFactory, DefaultHybridCacheFactory>();
+
             if (builder.Services.Any(d =>
                     d.ServiceType == typeof(HybridCache) &&
                     d.IsKeyedService &&

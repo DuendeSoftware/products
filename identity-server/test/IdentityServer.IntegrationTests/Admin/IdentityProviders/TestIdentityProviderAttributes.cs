@@ -16,12 +16,12 @@ internal static class TestIdentityProviderAttributes
 
     public static readonly SchemaConfiguration Schema = new()
     {
-        SchemaId = SchemaId.IdentityProvider("oidc"),
+        SchemaId = SchemaId.OidcIdentityProvider,
         DisplayName = "OIDC Identity Provider (test)",
         Description = "Test schema for OIDC identity providers with extended attributes.",
         AttributeDefinitions =
         [
-            ..DefaultOidcProviderSchema.Schema.AttributeDefinitions,
+            ..DefaultOidcProviderSchema.CreateSchema().AttributeDefinitions,
             TenantId
         ]
     };

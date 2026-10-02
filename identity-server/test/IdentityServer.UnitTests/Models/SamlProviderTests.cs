@@ -172,4 +172,54 @@ public class SamlProviderTests
         provider.OutboundSigningAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
         provider.OutboundSigningAlgorithm.ShouldBe("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512");
     }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void authn_request_signing_behavior_should_default_to_never()
+    {
+        var provider = new SamlProvider();
+        provider.AuthnRequestSigningBehavior.ShouldBe(AuthnRequestSigningBehavior.Never);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void authn_request_signing_behavior_should_round_trip_and_store_exact_enum_name()
+    {
+        var provider = new SamlProvider();
+        provider.AuthnRequestSigningBehavior = AuthnRequestSigningBehavior.Always;
+
+        provider.AuthnRequestSigningBehavior.ShouldBe(AuthnRequestSigningBehavior.Always);
+        provider.Properties.ShouldContainKey("AuthnRequestSigningBehavior");
+        provider.Properties["AuthnRequestSigningBehavior"].ShouldBe(nameof(AuthnRequestSigningBehavior.Always));
+
+        provider.AuthnRequestSigningBehavior = AuthnRequestSigningBehavior.Never;
+        provider.Properties["AuthnRequestSigningBehavior"].ShouldBe(nameof(AuthnRequestSigningBehavior.Never));
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void authn_request_signing_behavior_should_return_never_when_property_missing()
+    {
+        var provider = new SamlProvider();
+        provider.Properties.ShouldNotContainKey("AuthnRequestSigningBehavior");
+        provider.AuthnRequestSigningBehavior.ShouldBe(AuthnRequestSigningBehavior.Never);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void authn_request_signing_behavior_should_return_never_when_property_empty()
+    {
+        var provider = new SamlProvider();
+        provider.Properties["AuthnRequestSigningBehavior"] = string.Empty;
+        provider.AuthnRequestSigningBehavior.ShouldBe(AuthnRequestSigningBehavior.Never);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void authn_request_signing_behavior_should_return_never_when_property_corrupt()
+    {
+        var provider = new SamlProvider();
+        provider.Properties["AuthnRequestSigningBehavior"] = "NotARealEnumValue";
+        provider.AuthnRequestSigningBehavior.ShouldBe(AuthnRequestSigningBehavior.Never);
+    }
 }

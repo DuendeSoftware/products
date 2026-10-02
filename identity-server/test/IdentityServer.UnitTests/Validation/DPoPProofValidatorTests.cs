@@ -141,6 +141,21 @@ public class DPoPProofValidatorTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task proof_token_longer_than_length_restriction_should_fail_validation()
+    {
+        // Defense in depth: callers are expected to enforce this restriction themselves, but
+        // the validator rejects an over-long proof rather than handing it to the JWT parser.
+        _context.ProofToken = new string('x', _options.InputLengthRestrictions.DPoPProofToken + 1);
+
+        var result = await _subject.ValidateAsync(_context, _ct);
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("DPoP proof token is too long.");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task ath_with_valid_access_token_should_pass_validation()
     {
         _context.ValidateAccessToken = true;

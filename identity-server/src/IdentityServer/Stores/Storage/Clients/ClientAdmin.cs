@@ -158,18 +158,16 @@ internal sealed class ClientAdmin(
 
         var (dso, version) = existing.Value;
 
-        var algorithm = secret.HashAlgorithm ?? SecretHashAlgorithm.Sha256;
-        var hashedValue = HashSecret(secret.PlaintextValue, algorithm);
-        var algorithmName = algorithm == SecretHashAlgorithm.Sha512 ? "SHA512" : "SHA256";
+        var shaped = ShapeSecret(secret);
 
         var secretId = UuidV7.New().Value;
         var newSecret = new ClientDso.SecretDso(
             Id: secretId,
-            Value: hashedValue,
+            Value: shaped.Value,
             Description: secret.Description,
             Expiration: secret.Expiration,
-            Type: secret.Type ?? IdentityServerConstants.SecretTypes.SharedSecret,
-            HashAlgorithm: algorithmName);
+            Type: shaped.Type,
+            HashAlgorithm: shaped.HashAlgorithmName);
 
         var updatedSecrets = dso.ClientSecrets.Append(newSecret).ToList();
         var updatedDso = dso with { ClientSecrets = updatedSecrets };
@@ -600,13 +598,13 @@ internal sealed class ClientAdmin(
 
     internal static Secret MapToIsSecret(CreateClientSecret secret)
     {
-        var algorithm = secret.HashAlgorithm ?? SecretHashAlgorithm.Sha256;
+        var shaped = ShapeSecret(secret);
         return new Secret
         {
-            Value = HashSecret(secret.PlaintextValue, algorithm),
+            Value = shaped.Value,
             Description = secret.Description,
             Expiration = secret.Expiration,
-            Type = secret.Type ?? IdentityServerConstants.SecretTypes.SharedSecret
+            Type = shaped.Type
         };
     }
 
@@ -615,16 +613,15 @@ internal sealed class ClientAdmin(
 
     private static ClientDso.SecretDso MapToSecretDso(CreateClientSecret secret)
     {
-        var algorithm = secret.HashAlgorithm ?? SecretHashAlgorithm.Sha256;
-        var algorithmName = algorithm == SecretHashAlgorithm.Sha512 ? "SHA512" : "SHA256";
+        var shaped = ShapeSecret(secret);
 
         return new ClientDso.SecretDso(
             Id: UuidV7.New().Value,
-            Value: HashSecret(secret.PlaintextValue, algorithm),
+            Value: shaped.Value,
             Description: secret.Description,
             Expiration: secret.Expiration,
-            Type: secret.Type ?? IdentityServerConstants.SecretTypes.SharedSecret,
-            HashAlgorithm: algorithmName);
+            Type: shaped.Type,
+            HashAlgorithm: shaped.HashAlgorithmName);
     }
 
     private static ClientConfiguration MapToConfiguration(ClientDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
@@ -744,15 +741,26 @@ internal sealed class ClientAdmin(
             RedirectUriCount = dso.RedirectUris.Count
         };
 
-    // === Secret Hashing ===
-
-    private static string HashSecret(string plaintext, SecretHashAlgorithm algorithm)
+    private static (string Type, string Value, string? HashAlgorithmName) ShapeSecret(CreateClientSecret secret)
     {
-        var bytes = Encoding.UTF8.GetBytes(plaintext);
-        return algorithm switch
+        var type = secret.Type ?? IdentityServerConstants.SecretTypes.SharedSecret;
+        var algorithm = secret.HashAlgorithm ?? SecretHashAlgorithm.Sha256;
+
+        if (type is IdentityServerConstants.SecretTypes.X509CertificateThumbprint
+            or IdentityServerConstants.SecretTypes.X509CertificateName
+            or IdentityServerConstants.SecretTypes.JsonWebKey
+            or IdentityServerConstants.SecretTypes.X509CertificateBase64)
         {
-            SecretHashAlgorithm.Sha512 => Convert.ToBase64String(SHA512.HashData(bytes)),
-            _ => Convert.ToBase64String(SHA256.HashData(bytes))
-        };
+            // Key-material secret types (JWK and X509 certificate values/thumbprints/names) are
+            // compared directly against key material by validators, so they must be stored verbatim.
+            return (type, secret.PlaintextValue, null);
+        }
+
+        var bytes = Encoding.UTF8.GetBytes(secret.PlaintextValue);
+        var (value, algorithmName) = algorithm == SecretHashAlgorithm.Sha512
+            ? (Convert.ToBase64String(SHA512.HashData(bytes)), "SHA512")
+            : (Convert.ToBase64String(SHA256.HashData(bytes)), "SHA256");
+
+        return (type, value, algorithmName);
     }
 }

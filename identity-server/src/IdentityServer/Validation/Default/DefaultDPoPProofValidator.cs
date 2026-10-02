@@ -82,28 +82,40 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 return result;
             }
 
+            // Enforce the length restriction before the proof is parsed, so that an
+            // over-long proof cannot force JWT parsing work. Callers are expected to check
+            // this too (and to report their own error), but this is the last line of defense
+            // for any caller that does not.
+            if (context.ProofToken.Length > Options.InputLengthRestrictions.DPoPProofToken)
+            {
+                Logger.DPoPProofTokenIsTooLong();
+                result.IsError = true;
+                result.ErrorDescription = "DPoP proof token is too long.";
+                return result;
+            }
+
             await ValidateHeaderAsync(context, result);
             if (result.IsError)
             {
-                Logger.LogDebug("Failed to validate DPoP header");
+                Logger.FailedToValidateDPoPHeader();
                 return result;
             }
 
             await ValidateSignatureAsync(context, result);
             if (result.IsError)
             {
-                Logger.LogDebug("Failed to validate DPoP signature");
+                Logger.FailedToValidateDPoPSignature();
                 return result;
             }
 
             await ValidatePayloadAsync(context, result, ct);
             if (result.IsError)
             {
-                Logger.LogDebug("Failed to validate DPoP payload");
+                Logger.FailedToValidateDPoPPayload();
                 return result;
             }
 
-            Logger.LogDebug("Successfully validated DPoP proof token with thumbprint: {jkt}", result.JsonWebKeyThumbprint);
+            Logger.SuccessfullyValidatedDPoPProofTokenWithThumbprint(result.JsonWebKeyThumbprint);
             result.IsError = false;
         }
         finally
@@ -131,7 +143,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP token: {error}", ex.Message);
+            Logger.ErrorParsingDPoPToken(ex.Message);
             result.IsError = true;
             result.ErrorDescription = "Malformed DPoP token.";
             return Task.CompletedTask;
@@ -167,7 +179,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP jwk value: {error}", ex.Message);
+            Logger.ErrorParsingDPoPJwkValue(ex.Message);
             result.IsError = true;
             result.ErrorDescription = "Invalid 'jwk' value.";
             return Task.CompletedTask;
@@ -197,7 +209,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 var cnfJson = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(cnf.Value);
                 if (cnfJson == null)
                 {
-                    Logger.LogDebug("Null cnf value in DPoP access token.");
+                    Logger.NullCnfValueInDPoPAccessToken();
                     result.IsError = true;
                     result.ErrorDescription = "Missing 'cnf' value.";
                     return Task.CompletedTask;
@@ -211,17 +223,17 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                     }
                     else
                     {
-                        Logger.LogDebug("jkt in DPoP access token does not match proof token key thumbprint.");
+                        Logger.JktInDPoPAccessTokenDoesNotMatch();
                     }
                 }
                 else
                 {
-                    Logger.LogDebug("jkt member missing from cnf claim in DPoP access token.");
+                    Logger.JktMemberMissingFromCnfClaimInDPoP();
                 }
             }
             catch (JsonException e)
             {
-                Logger.LogDebug("Failed to parse DPoP cnf claim: {JsonExceptionMessage}", e.Message);
+                Logger.FailedToParseDPoPCnfClaim(e.Message);
             }
 
             if (result.Confirmation == null)
@@ -264,7 +276,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP token: {error}", ex.Message);
+            Logger.ErrorParsingDPoPTokenDefaultDPoPProofValidator(ex.Message);
             result.IsError = true;
             result.ErrorDescription = "Invalid signature on DPoP token.";
             return;
@@ -272,7 +284,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         if (tokenValidationResult.Exception != null)
         {
-            Logger.LogDebug("Error parsing DPoP token: {error}", tokenValidationResult.Exception.Message);
+            Logger.ErrorParsingDPoPTokenDefaultDPoPProofValidator2(tokenValidationResult.Exception.Message);
             result.IsError = true;
             result.ErrorDescription = "Invalid signature on DPoP token.";
             return;
@@ -365,7 +377,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         await ValidateFreshnessAsync(context, result);
         if (result.IsError)
         {
-            Logger.LogDebug("Failed to validate DPoP token freshness");
+            Logger.FailedToValidateDPoPTokenFreshness();
             return;
         }
 
@@ -385,7 +397,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     {
         if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId, ct))
         {
-            Logger.LogDebug("Detected DPoP proof token replay for jti {jti}", result.TokenId);
+            Logger.DetectedDPoPProofTokenReplayForJti(result.TokenId);
             result.IsError = true;
             return;
         }
@@ -408,7 +420,10 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         skew *= 2;
         var cacheDuration = Options.DPoP.ProofTokenValidityDuration + skew;
 
-        Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            Logger.AddingProofTokenWithJtiToReplayCache(result.TokenId, cacheDuration);
+        }
 
         await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, TimeProvider.GetUtcNow().Add(cacheDuration), ct);
     }
@@ -471,7 +486,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         var time = await GetUnixTimeFromNonceAsync(context, result);
         if (time <= 0)
         {
-            Logger.LogDebug("Invalid time value read from the 'nonce' value");
+            Logger.InvalidTimeValueReadFromTheNonceValue();
 
             result.IsError = true;
             result.Error = OidcConstants.TokenErrors.UseDPoPNonce;
@@ -482,7 +497,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         if (IsExpired(context, result, Options.DPoP.ServerClockSkew, time))
         {
-            Logger.LogDebug("DPoP 'nonce' expiration failed. It's possible that the server farm clocks might not be closely synchronized, so consider setting the ServerClockSkew on the DPoPOptions on the IdentityServerOptions.");
+            Logger.DPoPNonceExpirationFailedItSPossibleThat();
 
             result.IsError = true;
             result.Error = OidcConstants.TokenErrors.UseDPoPNonce;
@@ -518,7 +533,10 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.ErrorParsingDPoPNonceValue(ex.ToString());
+            }
         }
 
         return ValueTask.FromResult<long>(0);
@@ -535,7 +553,10 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         if (start < issuedAtTime)
         {
             var diff = issuedAtTime - now;
-            Logger.LogDebug("Expiration check failed. Creation time was too far in the future. The time being checked was {iat}, and clock is now {now}. The time difference is {diff}", issuedAtTime, now, diff);
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.ExpirationCheckFailedCreationTimeWasTooFar(issuedAtTime, now, diff);
+            }
             return true;
         }
 
@@ -544,7 +565,10 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         if (expiration < end)
         {
             var diff = now - expiration;
-            Logger.LogDebug("Expiration check failed. Expiration has already happened. The expiration was at {exp}, and clock is now {now}. The time difference is {diff}", expiration, now, diff);
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.ExpirationCheckFailedExpirationHasAlreadyHappenedThe(expiration, now, diff);
+            }
             return true;
         }
 

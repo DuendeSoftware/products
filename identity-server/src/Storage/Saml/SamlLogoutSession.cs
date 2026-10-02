@@ -12,7 +12,11 @@ namespace Duende.IdentityServer.Saml;
 public sealed class SamlLogoutSession
 {
     /// <summary>
-    /// The logout ID that correlates this session to the <c>LogoutMessage</c>.
+    /// An opaque identifier that correlates this session to the SAML logout flow.
+    /// This is a server-side correlation ID, distinct from the protected handle used
+    /// to reference the <c>LogoutMessage</c> (e.g. in the logout URL); it is never
+    /// exposed to or round-tripped through the end user's browser. Store
+    /// implementations may impose their own length or format constraints.
     /// </summary>
     public required string LogoutId { get; init; }
 

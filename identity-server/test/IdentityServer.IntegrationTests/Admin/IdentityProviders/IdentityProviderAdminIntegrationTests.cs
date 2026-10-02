@@ -57,8 +57,10 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
                         options.EmitStaticAudienceClaim = true;
                     })
                     .AddStorage(storage =>
-                        storage.AddSqliteStore(opt =>
+                        storage.AddSqlite(opt =>
                             opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+                    .AddConfigurationStorage()
+                    .AddOperationalStorage()
                     .AddInMemoryApiScopes([new ApiScope("scope1")])
                     .AddInMemoryIdentityResources([new Models.IdentityResources.OpenId()]);
             },
@@ -109,7 +111,7 @@ public sealed class IdentityProviderAdminIntegrationTests(WebServerFixture webAp
         await _identityServer.StartAsync();
 
         // Run schema migration
-        var schema = _identityServer.GetRequiredService<IDatabaseSchema>();
+        var schema = _identityServer.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         _adminScope = _identityServer.Services.CreateScope();

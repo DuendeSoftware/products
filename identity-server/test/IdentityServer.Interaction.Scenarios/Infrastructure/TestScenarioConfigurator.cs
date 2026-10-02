@@ -30,11 +30,8 @@ internal sealed class TestScenarioConfigurator(ITestOutputHelper output) : IScen
     }
 }
 
-public class ExceptionLoggingFilter : IStartupFilter
+public partial class ExceptionLoggingFilter : IStartupFilter
 {
-    private static readonly Action<ILogger, Exception?> _logUnhandledException =
-        LoggerMessage.Define(LogLevel.Error, new EventId(0, "UnhandledException"), "Unhandled exception");
-
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) =>
         (builder) =>
         {
@@ -47,13 +44,16 @@ public class ExceptionLoggingFilter : IStartupFilter
                 catch (Exception e)
                 {
                     var logger = c.RequestServices.GetRequiredService<ILogger<TestScenarioConfigurator>>();
-                    _logUnhandledException(logger, e);
+                    LogUnhandledException(logger, e);
                     throw;
                 }
             });
 
             next(builder);
         };
+
+    [LoggerMessage(EventId = 0, EventName = "UnhandledException", Level = LogLevel.Error, Message = "Unhandled exception")]
+    private static partial void LogUnhandledException(ILogger logger, Exception exception);
 }
 
 /// <summary>

@@ -21,13 +21,19 @@ public class DefaultIssuerPathValidator(IIssuerNameService issuerNameService, IL
         var currentIssuer = await issuerNameService.GetCurrentAsync(ct);
         if (!Uri.TryCreate(currentIssuer, UriKind.Absolute, out var uri))
         {
-            logger.LogDebug("Current issuer is not a valid absolute URI: {Issuer}", currentIssuer.SanitizeLogParameter());
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.CurrentIssuerIsNotAValidAbsoluteURI(currentIssuer.SanitizeLogParameter());
+            }
             return false;
         }
 
         if (!string.Equals(uri.AbsolutePath, path, StringComparison.OrdinalIgnoreCase))
         {
-            logger.LogDebug("Current issuer path '{IssuerPath}' does not match the provided path '{ProvidedPath}'", uri.AbsolutePath.SanitizeLogParameter(), path.SanitizeLogParameter());
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.CurrentIssuerPathDoesNotMatchTheProvided(uri.AbsolutePath.SanitizeLogParameter(), path.SanitizeLogParameter());
+            }
             return false;
         }
 

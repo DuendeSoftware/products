@@ -38,7 +38,10 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml.DynamicProvider;
 /// Both IdentityServer hosts use EF with SQLite in-memory databases. Cross-references
 /// (SAML service providers, OIDC clients) are seeded into the EF stores after each host starts.
 /// </summary>
-internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Action<IServiceCollection>? additionalSpServices = null) : IAsyncLifetime
+internal sealed class SamlDynamicProviderFixture(
+    ITestOutputHelper output,
+    Action<IServiceCollection>? additionalSpServices = null,
+    Action<SamlProvider>? configureSamlProvider = null) : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
@@ -130,12 +133,12 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
                         options.KeyManagement.Enabled = false;
                     })
                     .AddSigningCredential(idpSigningCert)
-                    .AddConfigurationStore(options =>
+                    .AddEntityFrameworkConfigurationStore(options =>
                     {
                         options.ResolveDbContextOptions = (_, dbOptions) =>
                             dbOptions.UseSqlite(_idpSqliteConnection);
                     })
-                    .AddOperationalStore(options =>
+                    .AddEntityFrameworkOperationalStore(options =>
                     {
                         options.ResolveDbContextOptions = (_, dbOptions) =>
                             dbOptions.UseSqlite(_idpSqliteConnection);
@@ -220,12 +223,12 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
                         options.KeyManagement.Enabled = false;
                     })
                     .AddDeveloperSigningCredential(persistKey: false)
-                    .AddConfigurationStore(options =>
+                    .AddEntityFrameworkConfigurationStore(options =>
                     {
                         options.ResolveDbContextOptions = (_, dbOptions) =>
                             dbOptions.UseSqlite(_spSqliteConnection);
                     })
-                    .AddOperationalStore(options =>
+                    .AddEntityFrameworkOperationalStore(options =>
                     {
                         options.ResolveDbContextOptions = (_, dbOptions) =>
                             dbOptions.UseSqlite(_spSqliteConnection);
@@ -301,7 +304,7 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
         var creator = opDb.GetService<IRelationalDatabaseCreator>()!;
         await creator.CreateTablesAsync(_ct);
 
-        db.IdentityProviders.Add(new SamlProvider
+        var samlProvider = new SamlProvider
         {
             Scheme = "saml-idp",
             DisplayName = "SAML IdP (Webapp 3)",
@@ -313,7 +316,9 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
             WantAssertionsSigned = false,
             AllowUnsolicitedAuthnResponse = true,
             IdpInitiatedCallbackUrl = "/external-callback"
-        }.ToEntity());
+        };
+        configureSamlProvider?.Invoke(samlProvider);
+        db.IdentityProviders.Add(samlProvider.ToEntity());
 
         db.IdentityResources.Add(new IdentityResources.OpenId().ToEntity());
         db.IdentityResources.Add(new IdentityResources.Profile().ToEntity());
@@ -530,6 +535,36 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
 
         using var formContent = new FormUrlEncodedContent(formData);
         return await BrowserClient!.PostAsync(actionUrl, formContent, _ct);
+    }
+
+    /// <summary>
+    /// Triggers the dynamic SAML challenge directly on Webapp 2 (SpHost) and returns the
+    /// resulting HTTP-Redirect binding Location, without following the redirect. Useful for
+    /// inspecting the emitted AuthnRequest query string (SigAlg/Signature) in isolation.
+    /// </summary>
+    public async Task<Uri> GetChallengeRedirectLocationAsync()
+    {
+        using var client = SpHost!.CreateClient(allowAutoRedirect: false);
+        var response = await client.GetAsync("/account/login?ReturnUrl=/", _ct);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+        var location = response.Headers.Location;
+        location.ShouldNotBeNull();
+        return location;
+    }
+
+    /// <summary>
+    /// Re-fetches the dynamic SAML provider from Webapp 2's configured
+    /// <see cref="Duende.IdentityServer.Stores.IIdentityProviderStore"/> (going through the EF store and, if configured,
+    /// the caching decorator), proving that provider properties round trip through storage/cache
+    /// serialization.
+    /// </summary>
+    public async Task<SamlProvider> ReloadSamlProviderFromStoreAsync(string scheme = "saml-idp")
+    {
+        await using var scope = SpHost!.ConfiguredServices.CreateAsyncScope();
+        var store = scope.ServiceProvider.GetRequiredService<Duende.IdentityServer.Stores.IIdentityProviderStore>();
+        var provider = await store.GetBySchemeAsync(scheme, _ct);
+        provider.ShouldNotBeNull();
+        return new SamlProvider(provider!);
     }
 
     public async ValueTask DisposeAsync()

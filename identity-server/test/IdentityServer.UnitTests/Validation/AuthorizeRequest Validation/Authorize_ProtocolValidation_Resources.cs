@@ -7,7 +7,6 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
-using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
@@ -57,7 +56,7 @@ public class Authorize_ProtocolValidation_Resources
             LicenseUsageTracker.CreateForTests(),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
-            new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
+            TestLogger.Create<AuthorizeRequestValidator>());
 
     [Fact]
     [Trait("Category", Category)]

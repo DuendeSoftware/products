@@ -50,7 +50,7 @@ public class DefaultCorsPolicyService : ICorsPolicyService
         {
             if (AllowAll)
             {
-                Logger.LogDebug("AllowAll true, so origin: {0} is allowed", origin);
+                Logger.AllowAllTrueSoOriginValueIsAllowed(origin);
                 return Task.FromResult(true);
             }
 
@@ -58,16 +58,16 @@ public class DefaultCorsPolicyService : ICorsPolicyService
             {
                 if (AllowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
                 {
-                    Logger.LogDebug("AllowedOrigins configured and origin {0} is allowed", origin);
+                    Logger.AllowedOriginsConfiguredAndOriginValueIsAllowed(origin);
                     return Task.FromResult(true);
                 }
                 else
                 {
-                    Logger.LogDebug("AllowedOrigins configured and origin {0} is not allowed", origin);
+                    Logger.AllowedOriginsConfiguredAndOriginValueIsNotAllowed(origin);
                 }
             }
 
-            Logger.LogDebug("Exiting; origin {0} is not allowed", origin);
+            Logger.ExitingOriginValueIsNotAllowed(origin);
         }
 
         return Task.FromResult(false);

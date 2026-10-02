@@ -11,12 +11,14 @@ using Duende.Storage.Internal.Querying.SearchFields;
 namespace Duende.IdentityServer.Stores.Storage.SamlSigninState;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class SamlSigninStateRepository(IStorageFactory storageFactory)
+internal sealed class SamlSigninStateRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Operational, ct);
+
     internal async Task<CreateResult> CreateAsync(UuidV7 id, SamlSigninStateDso.V1 dso, Expiration expiration, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        return await partitionedStorage.CreateAsync(
             id,
             dso,
             [],
@@ -33,8 +35,8 @@ internal sealed class SamlSigninStateRepository(IStorageFactory storageFactory)
             return null;
         }
 
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(SamlSigninStateDso.EntityType, UuidV7.From(id), ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(SamlSigninStateDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((SamlSigninStateDso.V1)result.Dso, result.Version.Value) : null;
     }
 
@@ -44,7 +46,7 @@ internal sealed class SamlSigninStateRepository(IStorageFactory storageFactory)
         int expectedVersion,
         Expiration expiration,
         Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).UpdateAsync(
+        await (await GetPartitionedStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -61,7 +63,7 @@ internal sealed class SamlSigninStateRepository(IStorageFactory storageFactory)
             return;
         }
 
-        await (await storageFactory.GetStorage(ct)).DeleteAsync(
+        await (await GetPartitionedStorage(ct)).DeleteAsync(
             SamlSigninStateDso.EntityType,
             UuidV7.From(id),
             [],

@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.LocalApiAuthentication;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
@@ -165,7 +166,7 @@ public class LocalApiAuthenticationTests
         return result.AccessToken;
     }
 
-    private string CreateProofToken(string method, string url, string accessToken = null, string nonce = null, string jwkString = null)
+    private string CreateProofToken(string method, string url, string accessToken = null, string nonce = null, string jwkString = null, int padToLength = 0)
     {
         var jsonWebKey = new Microsoft.IdentityModel.Tokens.JsonWebKey(jwkString ?? _jwk);
 
@@ -225,6 +226,14 @@ public class LocalApiAuthenticationTests
         if (!string.IsNullOrEmpty(nonce))
         {
             payload.Add(JwtClaimTypes.Nonce, nonce);
+        }
+
+        if (padToLength > 0)
+        {
+            // Pad with an ignored claim so the proof stays valid while exceeding a length
+            // restriction. A malformed over-long string would be rejected by the JWT parser
+            // regardless, and so could not distinguish a length check from a parse failure.
+            payload.Add("padding", new string('x', padToLength));
         }
 
         var handler = new JsonWebTokenHandler() { SetDefaultTimesOnTokenCreation = false };
@@ -350,6 +359,28 @@ public class LocalApiAuthenticationTests
             var accessTokenJkt = jktJson.ToString();
             accessTokenJkt.ShouldNotBe(newJkt);
         }
+
+        var response = await _pipeline.BackChannelClient.SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task dpop_proof_token_too_long_should_be_rejected()
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, "https://server/api");
+        var at = await GetAccessTokenAsync(true);
+        req.Headers.Authorization = new AuthenticationHeaderValue("DPoP", at);
+
+        // An otherwise *valid* proof that exceeds the length restriction. It must be valid,
+        // or the JWT parser would reject it even without the length check and this test would
+        // pass whether or not the restriction is enforced.
+        var options = new IdentityServerOptions();
+        var proofToken = CreateProofToken("GET", "https://server/api", at,
+            padToLength: options.InputLengthRestrictions.DPoPProofToken);
+        proofToken.Length.ShouldBeGreaterThan(options.InputLengthRestrictions.DPoPProofToken);
+        req.Headers.Add("DPoP", proofToken);
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 

@@ -43,7 +43,7 @@ public class SecretParser : ISecretsListParser
             var parsedSecret = await parser.ParseAsync(context, ct);
             if (parsedSecret != null)
             {
-                _logger.LogDebug("Parser found secret: {type}", parser.GetType().Name);
+                _logger.ParserFoundSecret(parser.GetType().Name);
 
                 bestSecret = parsedSecret;
 
@@ -56,11 +56,11 @@ public class SecretParser : ISecretsListParser
 
         if (bestSecret != null)
         {
-            _logger.LogDebug("Secret id found: {id}", bestSecret.Id);
+            _logger.SecretIdFound(bestSecret.Id);
             return bestSecret;
         }
 
-        _logger.LogDebug("Parser found no secret");
+        _logger.ParserFoundNoSecret();
         return null;
     }
 

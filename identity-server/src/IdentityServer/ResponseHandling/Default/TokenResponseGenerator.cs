@@ -106,7 +106,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <returns></returns>
     protected virtual Task<TokenResponse> ProcessClientCredentialsRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for client credentials request");
+        Logger.CreatingResponseForClientCredentialsRequest();
 
         return ProcessTokenRequestAsync(request, ct);
     }
@@ -119,7 +119,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <returns></returns>
     protected virtual Task<TokenResponse> ProcessPasswordRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for password request");
+        Logger.CreatingResponseForPasswordRequest();
 
         return ProcessTokenRequestAsync(request, ct);
     }
@@ -133,7 +133,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <exception cref="System.InvalidOperationException">Client does not exist anymore.</exception>
     protected virtual async Task<TokenResponse> ProcessAuthorizationCodeRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for authorization code request");
+        Logger.CreatingResponseForAuthorizationCodeRequest();
 
         var response = await ProcessTokenRequestAsync(request, ct);
 
@@ -177,7 +177,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <returns></returns>
     protected virtual async Task<TokenResponse> ProcessRefreshTokenRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for refresh token request");
+        Logger.CreatingResponseForRefreshTokenRequest();
 
         var accessToken = request.ValidatedRequest.RefreshToken.GetAccessToken(request.ValidatedRequest.RequestedResourceIndicator);
 
@@ -238,7 +238,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <returns></returns>
     protected virtual async Task<TokenResponse> ProcessDeviceCodeRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for device code request");
+        Logger.CreatingResponseForDeviceCodeRequest();
 
         var response = await ProcessTokenRequestAsync(request, ct);
 
@@ -280,7 +280,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <returns></returns>
     protected virtual async Task<TokenResponse> ProcessCibaRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for CIBA request");
+        Logger.CreatingResponseForCIBARequest();
 
         var response = await ProcessTokenRequestAsync(request, ct);
 
@@ -319,7 +319,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <returns></returns>
     protected virtual Task<TokenResponse> ProcessExtensionGrantRequestAsync(TokenRequestValidationResult request, Ct ct)
     {
-        Logger.LogTrace("Creating response for extension grant request");
+        Logger.CreatingResponseForExtensionGrantRequest();
 
         return ProcessTokenRequestAsync(request, ct);
     }

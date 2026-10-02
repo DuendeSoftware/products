@@ -28,19 +28,17 @@ public class StorageIdentityProviderStoreContractTests : IdentityProviderStoreCo
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<IdentityProviderDso.V1>();
-        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
-        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<IdentityProviderRepository>();
         services.AddSingleton<IIdentityProviderFactory, TestIdentityProviderFactory>();
         services.AddScoped<IIdentityProviderStore, IdentityProviderStore>();
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 

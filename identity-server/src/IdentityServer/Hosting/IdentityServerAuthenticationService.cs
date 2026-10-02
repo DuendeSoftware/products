@@ -69,7 +69,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
 
     private void AugmentPrincipal(ClaimsPrincipal principal)
     {
-        _logger.LogDebug("Augmenting SignInContext");
+        _logger.AugmentingSignInContext();
 
         AssertRequiredClaims(principal);
         AugmentMissingClaims(principal, _timeProvider.GetUtcNow().UtcDateTime);
@@ -93,7 +93,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
                 // See: https://github.com/DuendeArchive/IdentityServer4/issues/4644
                 context.Response.OnStarting(async () =>
                 {
-                    _logger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
+                    _logger.SignOutCalledSetProcessingPostSignoutSessionCleanup();
 
                     // back channel logout
                     var user = await _session.GetUserAsync(context.RequestAborted);
@@ -154,19 +154,19 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
             identity.FindFirst(JwtClaimTypes.IdentityProvider) == null &&
             identity.FindFirst(JwtClaimTypes.AuthenticationMethod) == null)
         {
-            _logger.LogDebug("Removing amr claim with value: {value}", amr.Value);
+            _logger.RemovingAmrClaimWithValueValue(amr.Value);
             identity.RemoveClaim(amr);
 
-            _logger.LogDebug("Adding idp claim with value: {value}", amr.Value);
+            _logger.AddingIdpClaimWithValueValue(amr.Value);
             identity.AddClaim(new Claim(JwtClaimTypes.IdentityProvider, amr.Value));
 
-            _logger.LogDebug("Adding amr claim with value: {value}", Constants.ExternalAuthenticationMethod);
+            _logger.AddingAmrClaimWithValueValue(Constants.ExternalAuthenticationMethod);
             identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationMethod, Constants.ExternalAuthenticationMethod));
         }
 
         if (identity.FindFirst(JwtClaimTypes.IdentityProvider) == null)
         {
-            _logger.LogDebug("Adding idp claim with value: {value}", IdentityServerConstants.LocalIdentityProvider);
+            _logger.AddingIdpClaimWithValueValue2(IdentityServerConstants.LocalIdentityProvider);
             identity.AddClaim(new Claim(JwtClaimTypes.IdentityProvider, IdentityServerConstants.LocalIdentityProvider));
         }
 
@@ -174,12 +174,12 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         {
             if (identity.FindFirst(JwtClaimTypes.IdentityProvider).Value == IdentityServerConstants.LocalIdentityProvider)
             {
-                _logger.LogDebug("Adding amr claim with value: {value}", OidcConstants.AuthenticationMethods.Password);
+                _logger.AddingAmrClaimWithValueValue2(OidcConstants.AuthenticationMethods.Password);
                 identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationMethod, OidcConstants.AuthenticationMethods.Password));
             }
             else
             {
-                _logger.LogDebug("Adding amr claim with value: {value}", Constants.ExternalAuthenticationMethod);
+                _logger.AddingAmrClaimWithValueValue3(Constants.ExternalAuthenticationMethod);
                 identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationMethod, Constants.ExternalAuthenticationMethod));
             }
         }
@@ -188,7 +188,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         {
             var time = new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
 
-            _logger.LogDebug("Adding auth_time claim with value: {value}", time);
+            _logger.AddingAuthTimeClaimWithValueValue(time);
             identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationTime, time, ClaimValueTypes.Integer64));
         }
     }

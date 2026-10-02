@@ -27,9 +27,9 @@ public class CachingResourceStoreTests : IDisposable
     {
         _spy = new SpyResourceStore(_identityResources, _apiResources, _apiScopes);
         _serviceProvider = TestHybridCacheHelper.BuildServiceProvider(_fakeTimeProvider);
-        var cache = TestHybridCacheHelper.GetCache(_serviceProvider);
+        var cacheFactory = TestHybridCacheHelper.GetCacheFactory(_serviceProvider);
         var policy = new CachePolicy<Resources>(null);
-        _subject = new CachingResourceStore<SpyResourceStore>(policy, _options, _spy, cache);
+        _subject = new CachingResourceStore<SpyResourceStore>(policy, _options, _spy, cacheFactory);
     }
 
     public void Dispose() => _serviceProvider.Dispose();

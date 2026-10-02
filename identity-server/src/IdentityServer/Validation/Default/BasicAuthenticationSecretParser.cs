@@ -48,7 +48,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
     /// <inheritdoc/>
     public Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
-        _logger.LogDebug("Start parsing Basic Authentication secret");
+        _logger.StartParsingBasicAuthenticationSecret();
 
         var notfound = Task.FromResult<ParsedSecret>(null);
         var authorizationHeader = context.Request.Headers.Authorization.FirstOrDefault();
@@ -82,7 +82,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
 
         if (authorizationHeader.Length > authorizationHeaderHeaderMaxLength)
         {
-            _logger.LogError("Authorization header exceeds maximum length allowed.");
+            _logger.AuthorizationHeaderExceedsMaximumLengthAllowed();
             return notfound;
         }
 
@@ -96,19 +96,19 @@ public class BasicAuthenticationSecretParser : ISecretParser
         }
         catch (FormatException)
         {
-            _logger.LogWarning("Malformed Basic Authentication credential.");
+            _logger.MalformedBasicAuthenticationCredential();
             return notfound;
         }
         catch (ArgumentException)
         {
-            _logger.LogWarning("Malformed Basic Authentication credential.");
+            _logger.MalformedBasicAuthenticationCredentialBasicAuthenticationSecretParser();
             return notfound;
         }
 
         var ix = pair.IndexOf(':', StringComparison.InvariantCulture);
         if (ix == -1)
         {
-            _logger.LogWarning("Malformed Basic Authentication credential.");
+            _logger.MalformedBasicAuthenticationCredentialBasicAuthenticationSecretParser2();
             return notfound;
         }
 
@@ -120,7 +120,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
         {
             if (clientId.Length > _options.InputLengthRestrictions.ClientId)
             {
-                _logger.LogError("Client ID exceeds maximum length.");
+                _logger.ClientIDExceedsMaximumLength();
                 return notfound;
             }
 
@@ -128,7 +128,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
             {
                 if (secret.Length > _options.InputLengthRestrictions.ClientSecret)
                 {
-                    _logger.LogError("Client secret exceeds maximum length.");
+                    _logger.ClientSecretExceedsMaximumLength();
                     return notfound;
                 }
 
@@ -144,7 +144,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
             else
             {
                 // client secret is optional
-                _logger.LogDebug("client id without secret found");
+                _logger.ClientIdWithoutSecretFound();
 
                 var parsedSecret = new ParsedSecret
                 {
@@ -156,7 +156,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
             }
         }
 
-        _logger.LogDebug("No Basic Authentication secret found");
+        _logger.NoBasicAuthenticationSecretFound();
         return notfound;
     }
 

@@ -54,12 +54,12 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.DeviceAuthorization + "Endpoint");
 
-        _logger.LogTrace("Processing device authorize request.");
+        _logger.ProcessingDeviceAuthorizeRequest();
 
         // validate HTTP
         if (!HttpMethods.IsPost(context.Request.Method) || !context.Request.HasApplicationFormContentType())
         {
-            _logger.LogWarning("Invalid HTTP request for device authorize endpoint");
+            _logger.InvalidHTTPRequestForDeviceAuthorizeEndpoint();
             return Error(OidcConstants.TokenErrors.InvalidRequest);
         }
 
@@ -69,14 +69,14 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogWarning(ex, "Invalid HTTP request for device endpoint");
+            _logger.InvalidHTTPRequestForDeviceEndpoint(ex);
             return Error(OidcConstants.TokenErrors.InvalidRequest);
         }
     }
 
     private async Task<IEndpointResult> ProcessDeviceAuthorizationRequestAsync(HttpContext context)
     {
-        _logger.LogDebug("Start device authorize request.");
+        _logger.StartDeviceAuthorizeRequest();
 
         // validate client
         var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
@@ -99,14 +99,14 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
         }
 
         // create response
-        _logger.LogTrace("Calling into device authorize response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoDeviceAuthorizeResponseGenerator(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestResult, _urls.BaseUrl, context.RequestAborted);
 
         await _events.RaiseAsync(new DeviceAuthorizationSuccessEvent(response, requestResult), context.RequestAborted);
         Telemetry.Metrics.DeviceAuthentication(clientResult.Client.ClientId);
 
         // return result
-        _logger.LogDebug("Device authorize request success.");
+        _logger.DeviceAuthorizeRequestSuccess();
         return new DeviceAuthorizationResult(response);
     }
 
@@ -119,7 +119,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
             Custom = custom
         };
 
-        _logger.LogError("Device authorization error: {error}:{errorDescriptions}", error, errorDescription ?? "-no message-");
+        _logger.DeviceAuthorizationError(error, errorDescription ?? "-no message-");
 
         return new TokenErrorResult(response);
     }
@@ -130,19 +130,19 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
 
         if (response.DeviceCode != null)
         {
-            _logger.LogTrace("Device code issued for {clientId}: {deviceCode}", clientId, response.DeviceCode);
+            _logger.DeviceCodeIssuedFor(clientId, response.DeviceCode);
         }
         if (response.UserCode != null)
         {
-            _logger.LogTrace("User code issued for {clientId}: {userCode}", clientId, response.UserCode);
+            _logger.UserCodeIssuedFor(clientId, response.UserCode);
         }
         if (response.VerificationUri != null)
         {
-            _logger.LogTrace("Verification URI issued for {clientId}: {verificationUri}", clientId, response.VerificationUri);
+            _logger.VerificationURIIssuedFor(clientId, response.VerificationUri);
         }
         if (response.VerificationUriComplete != null)
         {
-            _logger.LogTrace("Verification URI (Complete) issued for {clientId}: {verificationUriComplete}", clientId, response.VerificationUriComplete);
+            _logger.VerificationURICompleteIssuedFor(clientId, response.VerificationUriComplete);
         }
     }
 }

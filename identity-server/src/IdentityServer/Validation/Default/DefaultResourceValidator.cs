@@ -46,7 +46,7 @@ public class DefaultResourceValidator : IResourceValidator
         {
             foreach (var invalidScope in parsedScopesResult.Errors)
             {
-                _logger.LogError("Invalid parsed scope {scope}, message: {error}", invalidScope.RawValue, invalidScope.Error);
+                _logger.InvalidParsedScopeMessage(invalidScope.RawValue, invalidScope.Error);
                 result.InvalidScopes.Add(invalidScope.RawValue);
             }
 
@@ -75,7 +75,7 @@ public class DefaultResourceValidator : IResourceValidator
             {
                 foreach (var invalid in invalidRequestedResourceIndicators)
                 {
-                    _logger.LogError("Invalid resource identifier {resource}. It is either not found, not enabled, or does not support any of the requested scopes.", invalid);
+                    _logger.InvalidResourceIdentifierItIsEitherNotFound(invalid);
                     result.InvalidResourceIndicators.Add(invalid);
                 }
 
@@ -172,7 +172,7 @@ public class DefaultResourceValidator : IResourceValidator
                 }
                 else
                 {
-                    _logger.LogError("Scope {scope} not found in store or not supported by requested resource indicators.", requestedScope.ParsedName);
+                    _logger.ScopeNotFoundInStoreOrNotSupported(requestedScope.ParsedName);
                     result.InvalidScopes.Add(requestedScope.RawValue);
                 }
             }
@@ -190,7 +190,7 @@ public class DefaultResourceValidator : IResourceValidator
         var allowed = client.AllowedScopes.Contains(identity.Name);
         if (!allowed)
         {
-            _logger.LogError("Client {client} is not allowed access to scope {scope}.", client.ClientId, identity.Name);
+            _logger.ClientIsNotAllowedAccessToScope(client.ClientId, identity.Name);
         }
         return Task.FromResult(allowed);
     }
@@ -206,7 +206,7 @@ public class DefaultResourceValidator : IResourceValidator
         var allowed = client.AllowedScopes.Contains(apiScope.Name);
         if (!allowed)
         {
-            _logger.LogError("Client {client} is not allowed access to scope {scope}.", client.ClientId, apiScope.Name);
+            _logger.ClientIsNotAllowedAccessToScopeDefaultResourceValidator(client.ClientId, apiScope.Name);
         }
         return Task.FromResult(allowed);
     }
@@ -221,7 +221,7 @@ public class DefaultResourceValidator : IResourceValidator
         var allowed = client.AllowOfflineAccess;
         if (!allowed)
         {
-            _logger.LogError("Client {client} is not allowed access to scope offline_access (via AllowOfflineAccess setting).", client.ClientId);
+            _logger.ClientIsNotAllowedAccessToScopeOffline(client.ClientId);
         }
         return Task.FromResult(allowed);
     }

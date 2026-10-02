@@ -49,11 +49,11 @@ public class PostBodySecretParser : ISecretParser
     /// <inheritdoc/>
     public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
-        _logger.LogDebug("Start parsing for secret in post body");
+        _logger.StartParsingForSecretInPostBody();
 
         if (!context.Request.HasApplicationFormContentType())
         {
-            _logger.LogDebug("Content type is not a form");
+            _logger.ContentTypeIsNotAFormPostBodySecretParser();
             return null;
         }
 
@@ -69,7 +69,7 @@ public class PostBodySecretParser : ISecretParser
             {
                 if (id.Length > _options.InputLengthRestrictions.ClientId)
                 {
-                    _logger.LogError("Client ID exceeds maximum length.");
+                    _logger.ClientIDExceedsMaximumLengthPostBodySecretParser();
                     return null;
                 }
 
@@ -77,7 +77,7 @@ public class PostBodySecretParser : ISecretParser
                 {
                     if (secret.Length > _options.InputLengthRestrictions.ClientSecret)
                     {
-                        _logger.LogError("Client secret exceeds maximum length.");
+                        _logger.ClientSecretExceedsMaximumLengthPostBodySecretParser();
                         return null;
                     }
 
@@ -91,7 +91,7 @@ public class PostBodySecretParser : ISecretParser
                 else
                 {
                     // client secret is optional
-                    _logger.LogDebug("client id without secret found");
+                    _logger.ClientIdWithoutSecretFoundPostBodySecretParser();
 
                     return new ParsedSecret
                     {
@@ -102,7 +102,7 @@ public class PostBodySecretParser : ISecretParser
             }
         }
 
-        _logger.LogDebug("No secret in post body found");
+        _logger.NoSecretInPostBodyFound();
         return null;
     }
 }

@@ -65,6 +65,13 @@ public class IdentityServerPipeline
     public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
     public List<TestUser> Users { get; set; } = new List<TestUser>();
 
+    /// <summary>
+    /// When set, enables SAML support and registers these SAML service providers
+    /// via AddSaml/AddInMemorySamlServiceProviders. Leave null to preserve the
+    /// default store/admin behavior expected by existing pipeline tests.
+    /// </summary>
+    public List<SamlServiceProvider> SamlServiceProviders { get; set; }
+
     public TestServer Server { get; set; }
     public HttpMessageHandler Handler { get; set; }
 
@@ -157,7 +164,7 @@ public class IdentityServerPipeline
             return handler;
         });
 
-        services.AddIdentityServer(options =>
+        var identityServerBuilder = services.AddIdentityServer(options =>
             {
                 options.Events = new EventsOptions
                 {
@@ -177,9 +184,22 @@ public class IdentityServerPipeline
             .AddInMemoryApiResources(ApiResources)
             .AddInMemoryApiScopes(ApiScopes)
             .AddTestUsers(Users)
-            .AddDeveloperSigningCredential(persistKey: false)
             .AddMutualTlsSecretValidators()
             .AddLicenseSummary();
+
+        if (SamlServiceProviders != null)
+        {
+            // SAML front-channel logout notifications require an X509 signing certificate;
+            // the developer RSA key cannot be auto-wrapped into one without key management enabled.
+            identityServerBuilder
+                .AddSigningCredential(Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers.CreateTestSigningCertificate(TimeProvider.System))
+                .AddSaml()
+                .AddInMemorySamlServiceProviders(SamlServiceProviders);
+        }
+        else
+        {
+            identityServerBuilder.AddDeveloperSigningCredential(persistKey: false);
+        }
 
         services.AddHttpClient(IdentityServerConstants.HttpClients.BackChannelLogoutHttpClient)
             .AddHttpMessageHandler(() => BackChannelMessageHandler);

@@ -49,27 +49,27 @@ public class ResourceOwnerPasswordValidator<TUser> : IResourceOwnerPasswordValid
             {
                 var sub = await _userManager.GetUserIdAsync(user);
 
-                _logger.LogInformation("Credentials validated for username: {username}", context.UserName);
+                _logger.CredentialsValidated(context.UserName);
 
                 context.Result = new GrantValidationResult(sub, AuthenticationMethods.Password);
                 return;
             }
             else if (result.IsLockedOut)
             {
-                _logger.LogInformation("Authentication failed for username: {username}, reason: locked out", context.UserName);
+                _logger.AuthenticationFailedLockedOut(context.UserName);
             }
             else if (result.IsNotAllowed)
             {
-                _logger.LogInformation("Authentication failed for username: {username}, reason: not allowed", context.UserName);
+                _logger.AuthenticationFailedNotAllowed(context.UserName);
             }
             else
             {
-                _logger.LogInformation("Authentication failed for username: {username}, reason: invalid credentials", context.UserName);
+                _logger.AuthenticationFailedInvalidCredentials(context.UserName);
             }
         }
         else
         {
-            _logger.LogInformation("No user found matching username: {username}", context.UserName);
+            _logger.UserNotFoundByUsername(context.UserName);
         }
 
         context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);

@@ -23,9 +23,9 @@ public class CachingClientStoreTests : IDisposable
     public CachingClientStoreTests()
     {
         _serviceProvider = TestHybridCacheHelper.BuildServiceProvider(_fakeTimeProvider);
-        var cache = TestHybridCacheHelper.GetCache(_serviceProvider);
+        var cacheFactory = TestHybridCacheHelper.GetCacheFactory(_serviceProvider);
         var policy = new CachePolicy<Client>(null);
-        _subject = new CachingClientStore<SpyClientStore>(policy, _options, _spy, cache);
+        _subject = new CachingClientStore<SpyClientStore>(policy, _options, _spy, cacheFactory);
     }
 
     public void Dispose() => _serviceProvider.Dispose();

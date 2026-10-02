@@ -157,7 +157,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRequestValidator.ValidateRequest");
 
-        _logger.LogDebug("Start token request validation");
+        _logger.StartTokenRequestValidation();
 
         ArgumentNullException.ThrowIfNull(context);
 
@@ -348,7 +348,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         // run custom validation
-        _logger.LogTrace("Calling into custom request validator: {type}", _customRequestValidator.GetType().FullName);
+        _logger.CallingIntoCustomRequestValidator(_customRequestValidator.GetType().FullName);
 
         var customValidationContext = new CustomTokenRequestValidationContext { Result = result };
         await _customRequestValidator.ValidateAsync(customValidationContext, ct);
@@ -380,7 +380,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     private async Task<TokenRequestValidationResult> ValidateAuthorizationCodeRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start validation of authorization code token request");
+        _logger.StartValidationOfAuthorizationCodeTokenRequest();
 
         /////////////////////////////////////////////
         // check if client is authorized for grant type
@@ -550,7 +550,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         var codeVerifier = parameters.Get(OidcConstants.TokenRequest.CodeVerifier);
         if (_validatedRequest.Client.RequirePkce || _validatedRequest.AuthorizationCode.CodeChallenge.IsPresent())
         {
-            _logger.LogDebug("Client required a proof key for code exchange. Starting PKCE validation");
+            _logger.ClientRequiredAProofKeyForCodeExchange();
 
             var proofKeyResult = ValidateAuthorizationCodeWithProofKeyParameters(codeVerifier, _validatedRequest.AuthorizationCode);
             if (proofKeyResult.IsError)
@@ -564,7 +564,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
         {
             if (codeVerifier.IsPresent())
             {
-                LogError("Unexpected code_verifier: {codeVerifier}. This happens when the client is trying to use PKCE, but it is not enabled. Set RequirePkce to true.", codeVerifier);
+                if (_logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.UnexpectedCodeVerifier(codeVerifier, CreateRequestDetails());
+                }
                 return Invalid(OidcConstants.TokenErrors.InvalidGrant);
             }
         }
@@ -581,14 +584,14 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
         }
 
-        _logger.LogDebug("Validation of authorization code token request success");
+        _logger.ValidationOfAuthorizationCodeTokenRequestSuccess();
 
         return Valid();
     }
 
     private async Task<TokenRequestValidationResult> ValidateClientCredentialsRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start client credentials token request validation");
+        _logger.StartClientCredentialsTokenRequestValidation();
 
         /////////////////////////////////////////////
         // check if client is authorized for grant type
@@ -620,13 +623,13 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.InvalidScope);
         }
 
-        _logger.LogDebug("{clientId} credentials token request validation success", _validatedRequest.Client.ClientId);
+        _logger.CredentialsTokenRequestValidationSuccess(_validatedRequest.Client.ClientId);
         return Valid();
     }
 
     private async Task<TokenRequestValidationResult> ValidateResourceOwnerCredentialRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start resource owner password token request validation");
+        _logger.StartResourceOwnerPasswordTokenRequestValidation();
 
         /////////////////////////////////////////////
         // check if client is authorized for grant type
@@ -737,13 +740,13 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _validatedRequest.Subject = resourceOwnerContext.Result.Subject;
 
         await RaiseSuccessfulResourceOwnerAuthenticationEventAsync(userName, resourceOwnerContext.Result.Subject.GetSubjectId(), resourceOwnerContext.Request.Client.ClientId, ct);
-        _logger.LogDebug("Resource owner password token request validation success.");
+        _logger.ResourceOwnerPasswordTokenRequestValidationSuccess();
         return Valid(resourceOwnerContext.Result.CustomResponse);
     }
 
     private async Task<TokenRequestValidationResult> ValidateRefreshTokenRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start validation of refresh token request");
+        _logger.StartValidationOfRefreshTokenRequest();
 
         var refreshTokenHandle = parameters.Get(OidcConstants.TokenRequest.RefreshToken);
         if (refreshTokenHandle.IsMissing())
@@ -898,7 +901,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
-        _logger.LogDebug("Validation of refresh token request success");
+        _logger.ValidationOfRefreshTokenRequestSuccess();
         // todo: more logging - similar to TokenValidator before
 
         return Valid();
@@ -906,7 +909,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     private async Task<TokenRequestValidationResult> ValidateDeviceCodeRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start validation of device code request");
+        _logger.StartValidationOfDeviceCodeRequest();
 
         /////////////////////////////////////////////
         // resource indicator not supported for device flow
@@ -980,14 +983,14 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         _validatedRequest.ValidatedResources = validatedResources;
 
-        _logger.LogDebug("Validation of device code token request success");
+        _logger.ValidationOfDeviceCodeTokenRequestSuccess();
 
         return Valid();
     }
 
     private async Task<TokenRequestValidationResult> ValidateCibaRequestRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start validation of CIBA request");
+        _logger.StartValidationOfCIBARequest();
 
         /////////////////////////////////////////////
         // check if client is authorized for grant type
@@ -1076,14 +1079,14 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
-        _logger.LogDebug("Validation of CIBA token request success");
+        _logger.ValidationOfCIBATokenRequestSuccess();
 
         return Valid();
     }
 
     private async Task<TokenRequestValidationResult> ValidateExtensionGrantRequestAsync(NameValueCollection parameters, Ct ct)
     {
-        _logger.LogDebug("Start validation of custom grant token request");
+        _logger.StartValidationOfCustomGrantTokenRequest();
 
         /////////////////////////////////////////////
         // check if client is allowed to use grant type
@@ -1160,7 +1163,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             _validatedRequest.Subject = result.Subject;
         }
 
-        _logger.LogDebug("Validation of extension grant token request success");
+        _logger.ValidationOfExtensionGrantTokenRequestSuccess();
         return Valid(result.CustomResponse);
     }
 
@@ -1171,7 +1174,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         var scopes = parameters.Get(OidcConstants.TokenRequest.Scope);
         if (scopes.IsMissing())
         {
-            _logger.LogTrace("Client provided no scopes - checking allowed scopes list");
+            _logger.ClientProvidedNoScopesCheckingAllowedScopesListTokenRequestValidator();
 
             if (!IEnumerableExtensions.IsNullOrEmpty(_validatedRequest.Client.AllowedScopes))
             {
@@ -1197,7 +1200,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 }
 
                 scopes = clientAllowedScopes.Distinct().ToSpaceSeparatedString();
-                _logger.LogTrace("Defaulting to: {scopes}", scopes);
+                _logger.DefaultingToTokenRequestValidator(scopes);
             }
             else
             {
@@ -1322,6 +1325,8 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     private TokenRequestValidationResult Invalid(string error, string errorDescription = null, Dictionary<string, object> customResponse = null) => new TokenRequestValidationResult(_validatedRequest, error, errorDescription, customResponse);
 
+    private TokenRequestValidationLog CreateRequestDetails() => new(_validatedRequest, _options.Logging.TokenRequestSensitiveValuesFilter);
+
     private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 
     private void LogWarning(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Warning, message, values);
@@ -1330,7 +1335,12 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     private void LogWithRequestDetails(LogLevel logLevel, string message = null, object values = null)
     {
-        var details = new TokenRequestValidationLog(_validatedRequest, _options.Logging.TokenRequestSensitiveValuesFilter);
+        if (!_logger.IsEnabled(logLevel))
+        {
+            return;
+        }
+
+        var details = CreateRequestDetails();
 
         if (message.IsPresent())
         {
@@ -1338,22 +1348,70 @@ internal class TokenRequestValidator : ITokenRequestValidator
             {
                 if (values == null)
                 {
-                    _logger.Log(logLevel, "{Message}: {@details}", message, details);
+                    LogMessageWithDetails(logLevel, message, details);
                 }
                 else
                 {
-                    _logger.Log(logLevel, "{Message}: {@values}, details: {@details}", message, values, details);
+                    LogMessageWithValuesAndDetails(logLevel, message, values, details);
                 }
 
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error logging {exception}, request details: {@details}", ex.Message, details);
+                _logger.ErrorLoggingRequestDetailsTokenRequestValidator(ex.Message, details);
             }
         }
         else
         {
-            _logger.Log(logLevel, "{@details}", details);
+            LogRequestDetails(logLevel, details);
+        }
+    }
+
+    private void LogMessageWithDetails(LogLevel logLevel, string message, object details)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Error:
+                _logger.RequestMessageWithDetailsError(message, details);
+                break;
+            case LogLevel.Warning:
+                _logger.RequestMessageWithDetailsWarning(message, details);
+                break;
+            case LogLevel.Information:
+                _logger.RequestMessageWithDetailsInformation(message, details);
+                break;
+        }
+    }
+
+    private void LogMessageWithValuesAndDetails(LogLevel logLevel, string message, object values, object details)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Error:
+                _logger.RequestMessageWithValuesAndDetailsError(message, values, details);
+                break;
+            case LogLevel.Warning:
+                _logger.RequestMessageWithValuesAndDetailsWarning(message, values, details);
+                break;
+            case LogLevel.Information:
+                _logger.RequestMessageWithValuesAndDetailsInformation(message, values, details);
+                break;
+        }
+    }
+
+    private void LogRequestDetails(LogLevel logLevel, object details)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Error:
+                _logger.RequestDetailsError(details);
+                break;
+            case LogLevel.Warning:
+                _logger.RequestDetailsWarning(details);
+                break;
+            case LogLevel.Information:
+                _logger.RequestDetailsInformation(details);
+                break;
         }
     }
 

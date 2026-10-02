@@ -42,10 +42,7 @@ public sealed class InMemorySamlLogoutSessionStore(
 
         if (_sessions.Count >= MaxEntries)
         {
-            logger.LogWarning(
-                "SAML logout session store has reached the maximum capacity of {MaxEntries}. " +
-                "Rejecting new session for logoutId {LogoutId}",
-                MaxEntries, session.LogoutId);
+            logger.SAMLLogoutSessionStoreHasReachedTheMaximum(MaxEntries, session.LogoutId);
             return Task.CompletedTask;
         }
 
@@ -127,10 +124,7 @@ public sealed class InMemorySamlLogoutSessionStore(
 
             if (!string.Equals(expected.SpEntityId, issuer, StringComparison.Ordinal))
             {
-                logger.LogWarning(
-                    "SAML logout response issuer mismatch for requestId {RequestId}. " +
-                    "Expected {ExpectedIssuer}, received {ActualIssuer}",
-                    requestId, expected.SpEntityId, issuer);
+                logger.SAMLLogoutResponseIssuerMismatchForRequestIdRequestId(requestId, expected.SpEntityId, issuer);
                 return Task.FromResult(false);
             }
 

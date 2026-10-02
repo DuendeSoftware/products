@@ -42,7 +42,7 @@ internal class EndSessionEndpoint : IEndpointHandler
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogWarning(ex, "Invalid HTTP request for end session endpoint");
+            _logger.InvalidHTTPRequestForEndSessionEndpoint(ex);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
     }
@@ -63,23 +63,27 @@ internal class EndSessionEndpoint : IEndpointHandler
         }
         else
         {
-            _logger.LogWarning("Invalid HTTP method for end session endpoint.");
+            _logger.InvalidHTTPMethodForEndSessionEndpoint();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
         var user = await _userSession.GetUserAsync(context.RequestAborted);
+        var subjectId = user?.GetSubjectId() ?? "anonymous";
 
-        _logger.LogDebug("Processing signout request for {subjectId}", user?.GetSubjectId() ?? "anonymous");
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.ProcessingSignoutRequestFor(subjectId);
+        }
 
         var result = await _endSessionRequestValidator.ValidateAsync(parameters, user, context.RequestAborted);
 
         if (result.IsError)
         {
-            _logger.LogError("Error processing end session request {error}", result.Error);
+            _logger.ErrorProcessingEndSessionRequest(result.Error);
         }
         else
         {
-            _logger.LogDebug("Success validating end session request from {clientId}", result.ValidatedRequest?.Client?.ClientId);
+            _logger.SuccessValidatingEndSessionRequestFrom(result.ValidatedRequest?.Client?.ClientId);
         }
 
         return new EndSessionResult(result);

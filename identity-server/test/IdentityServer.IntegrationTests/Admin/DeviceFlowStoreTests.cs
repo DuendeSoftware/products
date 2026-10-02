@@ -6,7 +6,6 @@
 using System.Security.Claims;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -14,14 +13,8 @@ public sealed class DeviceFlowStoreTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
 
-    private IDeviceFlowStore BuildStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IDeviceFlowStore>();
-    }
+    private IDeviceFlowStore BuildStore() => _fixture.DeviceFlowStore;
 
     [Fact]
     public async Task store_then_find_by_device_code_returns_data()
@@ -248,13 +241,5 @@ public sealed class DeviceFlowStoreTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

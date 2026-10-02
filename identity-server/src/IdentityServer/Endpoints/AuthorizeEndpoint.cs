@@ -36,7 +36,7 @@ internal sealed class AuthorizeEndpoint : AuthorizeEndpointBase
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Authorize + "Endpoint");
 
-        Logger.LogDebug("Start authorize request");
+        Logger.StartAuthorizeRequest();
 
         NameValueCollection values;
 
@@ -61,7 +61,10 @@ internal sealed class AuthorizeEndpoint : AuthorizeEndpointBase
         var user = await UserSession.GetUserAsync(context.RequestAborted);
         var result = await ProcessAuthorizeRequestAsync(values, user, context.RequestAborted);
 
-        Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");
+        if (Logger.IsEnabled(LogLevel.Trace))
+        {
+            Logger.EndAuthorizeRequestResultTypeAuthorizeEndpoint(result?.GetType().ToString() ?? "-none-");
+        }
 
         return result;
     }

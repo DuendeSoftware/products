@@ -47,7 +47,7 @@ public class TokenCleanupHost : IHostedService
                 throw new InvalidOperationException("Already started. Call Stop first.");
             }
 
-            _logger.LogDebug("Starting grant removal");
+            _logger.StartingGrantRemoval();
 
             _source = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
@@ -69,7 +69,7 @@ public class TokenCleanupHost : IHostedService
                 throw new InvalidOperationException("Not started. Call Start first.");
             }
 
-            _logger.LogDebug("Stopping grant removal");
+            _logger.StoppingGrantRemoval();
 
             await _source.CancelAsync();
             _source = null;
@@ -89,7 +89,7 @@ public class TokenCleanupHost : IHostedService
         {
             if (ct.IsCancellationRequested)
             {
-                _logger.LogDebug("CancellationRequested. Exiting.");
+                _logger.TokenCleanupCancellationRequested();
                 break;
             }
 
@@ -99,18 +99,18 @@ public class TokenCleanupHost : IHostedService
             }
             catch (TaskCanceledException)
             {
-                _logger.LogDebug("TaskCanceledException. Exiting.");
+                _logger.TaskCanceled();
                 break;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Task.Delay exception: {ExceptionMessage}. Exiting.", ex.Message);
+                _logger.TaskDelayFailed(ex.Message);
                 break;
             }
 
             if (ct.IsCancellationRequested)
             {
-                _logger.LogDebug("CancellationRequested. Exiting.");
+                _logger.TokenCleanupCancellationRequested();
                 break;
             }
 
@@ -133,7 +133,7 @@ public class TokenCleanupHost : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogError("Exception removing expired grants: {exception}", ex.Message);
+            _logger.ExpiredGrantRemovalFailed(ex.Message);
         }
     }
 }

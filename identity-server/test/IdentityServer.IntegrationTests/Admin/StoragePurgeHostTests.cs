@@ -3,13 +3,9 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Duende.Storage.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -28,9 +24,8 @@ public sealed class StoragePurgeHostTests : IAsyncLifetime
     [Fact]
     public async Task run_purge_removes_expired_persisted_grants()
     {
-        using var scope = _fixture.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPersistedGrantStore>();
-        var purgeHost = CreatePurgeHost(scope);
+        var store = _fixture.PersistedGrantStore;
+        var purgeHost = CreatePurgeHost();
 
         // Store a grant that is already expired
         var expiredGrant = new PersistedGrant
@@ -75,11 +70,10 @@ public sealed class StoragePurgeHostTests : IAsyncLifetime
     [Fact]
     public async Task run_purge_handles_multiple_batches()
     {
-        using var scope = _fixture.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPersistedGrantStore>();
-        var options = scope.ServiceProvider.GetRequiredService<IdentityServerOptions>();
+        var store = _fixture.PersistedGrantStore;
+        var options = _fixture.Options;
         options.StoragePurge.BatchSize = 5;
-        var purgeHost = CreatePurgeHost(scope);
+        var purgeHost = CreatePurgeHost();
 
         // Seed more expired grants than the batch size
         for (var i = 0; i < 12; i++)
@@ -106,11 +100,5 @@ public sealed class StoragePurgeHostTests : IAsyncLifetime
         remaining.Count.ShouldBe(0);
     }
 
-    private static StoragePurgeHost CreatePurgeHost(IServiceScope scope)
-    {
-        var storageFactory = scope.ServiceProvider.GetRequiredService<IStorageFactory>();
-        var options = scope.ServiceProvider.GetRequiredService<IdentityServerOptions>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<StoragePurgeHost>>();
-        return new StoragePurgeHost(storageFactory, options, logger);
-    }
+    private StoragePurgeHost CreatePurgeHost() => new(_fixture.StorageInstanceRouter, _fixture.CrossPartitionStorageFactory, _fixture.Options, _fixture.StoragePurgeHostLogger);
 }

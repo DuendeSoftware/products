@@ -40,7 +40,7 @@ public static class DbContextExtensions
 
                     // we get this if/when someone else already deleted the records
                     // we want to essentially ignore this, and keep working
-                    logger.LogDebug("Concurrency exception removing records: {exception}", ex.Message);
+                    Log.ConcurrencyExceptionRemovingRecordsValue(logger, ex.Message);
 
                     foreach (var entry in ex.Entries)
                     {
@@ -51,7 +51,7 @@ public static class DbContextExtensions
                 }
             }
 
-            logger.LogDebug("Too many concurrency exceptions. Exiting.");
+            Log.TooManyConcurrencyExceptionsExiting(logger);
 
             return list;
         }

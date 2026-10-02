@@ -61,7 +61,7 @@ public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<C
         {
             if (_httpContextAccessor.HttpContext == null)
             {
-                _logger?.LogDebug("Failed to configure server side sessions for the authentication cookie scheme \"{scheme}\" because there is no current HTTP request");
+                _logger?.FailedToConfigureServerSideSessionsForThe(_scheme);
                 return;
             }
 
@@ -72,7 +72,7 @@ public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<C
             if (sessionStore is InMemoryServerSideSessionStore)
             {
                 var logger = _httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("Duende.IdentityServer.Startup");
-                logger.LogInformation("You are using the in-memory version of the user session store. This will store user authentication sessions server side, but in memory only. If you are using this feature in production, you want to switch to a different store implementation.");
+                logger.InMemoryServerSideSessionStoreInUse();
             }
 
             options.SessionStore = new TicketStoreShim(_httpContextAccessor);

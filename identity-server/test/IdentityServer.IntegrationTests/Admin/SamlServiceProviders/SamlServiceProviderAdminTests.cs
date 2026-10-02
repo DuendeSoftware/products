@@ -5,12 +5,10 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
 using Duende.Storage;
 using Duende.Storage.Querying;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -18,14 +16,6 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private ISamlServiceProviderAdmin NewAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<ISamlServiceProviderAdmin>();
-    }
 
     private static CreateSamlServiceProvider CreateMinimalConfig(string? entityId = null) =>
         new()
@@ -52,7 +42,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_id_round_trips_all_fields()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var certBase64 = GenerateSelfSignedCertBase64();
 
         var config = new CreateSamlServiceProvider
@@ -150,7 +140,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_entity_id_returns_same()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = CreateMinimalConfig();
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -164,7 +154,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_duplicate_entity_id_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var entityId = $"https://sp-{Guid.NewGuid():N}.example.com";
         var config = CreateMinimalConfig(entityId);
 
@@ -179,7 +169,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_empty_entity_id_returns_required()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = new CreateSamlServiceProvider { EntityId = "" };
 
         var result = await admin.CreateAsync(config, _ct);
@@ -190,7 +180,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_duplicate_acs_index_returns_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
@@ -221,7 +211,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_invalid_acs_url_returns_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
@@ -245,7 +235,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_null_acs_entry_returns_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = new CreateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
@@ -260,7 +250,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_null_slo_entry_returns_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = CreateMinimalConfig();
         config.SingleLogoutServiceUrls = [null!];
 
@@ -272,7 +262,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_null_certificate_entry_returns_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = CreateMinimalConfig();
         config.Certificates = [null!];
 
@@ -286,7 +276,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_with_correct_version_succeeds()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = CreateMinimalConfig();
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -311,7 +301,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_with_wrong_version_returns_conflict()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = CreateMinimalConfig();
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -332,7 +322,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_nonexistent_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = new UpdateSamlServiceProvider
         {
             EntityId = $"https://sp-{Guid.NewGuid():N}.example.com",
@@ -359,7 +349,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_existing_succeeds()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config = CreateMinimalConfig();
 
         var createResult = await admin.CreateAsync(config, _ct);
@@ -377,7 +367,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task query_returns_matching_items()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var entityId1 = $"https://sp-{Guid.NewGuid():N}.example.com";
         var entityId2 = $"https://sp-{Guid.NewGuid():N}.example.com";
 
@@ -399,7 +389,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task certificates_get_assigned_ids_on_create()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var certBase64 = GenerateSelfSignedCertBase64();
 
         var config = CreateMinimalConfig();
@@ -424,7 +414,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task certificates_are_normalized_to_public_key_only_format()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
 
         // Generate a self-signed cert exported as DER (X509ContentType.Cert),
         // which only contains the public key. Normalization re-exports in the
@@ -456,7 +446,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_replaces_certificate_list()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var cert1 = GenerateSelfSignedCertBase64();
         var cert2 = GenerateSelfSignedCertBase64();
 
@@ -492,7 +482,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_entity_id_to_existing_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var config1 = CreateMinimalConfig();
         var config2 = CreateMinimalConfig();
 
@@ -518,7 +508,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task get_by_entity_id_nonexistent_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
         var result = await admin.GetByEntityIdAsync("https://nonexistent.example.com", _ct);
         result.Found.ShouldBeFalse();
     }
@@ -528,7 +518,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
     [Fact]
     public async Task certificate_normalization_produces_deterministic_output()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.SamlServiceProviderAdmin;
 
         // Generate a cert and use it for two different SPs to verify normalization is deterministic
         var certBase64 = GenerateSelfSignedCertBase64();
@@ -562,13 +552,5 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
     public ValueTask InitializeAsync() => _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

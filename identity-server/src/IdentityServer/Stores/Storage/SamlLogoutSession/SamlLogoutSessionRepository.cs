@@ -11,8 +11,10 @@ using Duende.Storage.Internal.Querying.SearchFields;
 namespace Duende.IdentityServer.Stores.Storage.SamlLogoutSession;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class SamlLogoutSessionRepository(IStorageFactory storageFactory)
+internal sealed class SamlLogoutSessionRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Operational, ct);
+
     internal enum Keys
     {
         LogoutId = 1,
@@ -21,8 +23,8 @@ internal sealed class SamlLogoutSessionRepository(IStorageFactory storageFactory
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, SamlLogoutSessionDso.V1 dso, Expiration expiration, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        return await partitionedStorage.CreateAsync(
             id,
             dso,
             BuildKeys(dso),
@@ -34,17 +36,17 @@ internal sealed class SamlLogoutSessionRepository(IStorageFactory storageFactory
 
     internal async Task<(SamlLogoutSessionDso.V1 Dso, int Version, Guid Id)?> TryReadByLogoutIdAsync(string logoutId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var key = DataStorageKey.Create(SamlLogoutSessionLogoutIdDskV1.Create(logoutId));
-        var result = await storage.TryReadAsync(SamlLogoutSessionDso.EntityType, key, ct);
+        var result = await partitionedStorage.TryReadAsync(SamlLogoutSessionDso.EntityType, key, ct);
         return result.Found ? ((SamlLogoutSessionDso.V1)result.Dso, result.Version.Value, result.Id.Value) : null;
     }
 
     internal async Task<(SamlLogoutSessionDso.V1 Dso, int Version, Guid Id)?> TryReadByRequestIdAsync(string requestId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var key = DataStorageKey.Create(SamlLogoutSessionRequestIdDskV1.Create(requestId));
-        var result = await storage.TryReadAsync(SamlLogoutSessionDso.EntityType, key, ct);
+        var result = await partitionedStorage.TryReadAsync(SamlLogoutSessionDso.EntityType, key, ct);
         return result.Found ? ((SamlLogoutSessionDso.V1)result.Dso, result.Version.Value, result.Id.Value) : null;
     }
 
@@ -54,7 +56,7 @@ internal sealed class SamlLogoutSessionRepository(IStorageFactory storageFactory
         int expectedVersion,
         Expiration expiration,
         Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).UpdateAsync(
+        await (await GetPartitionedStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -66,9 +68,9 @@ internal sealed class SamlLogoutSessionRepository(IStorageFactory storageFactory
 
     internal async Task DeleteByLogoutIdAsync(string logoutId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var key = DataStorageKey.Create(SamlLogoutSessionLogoutIdDskV1.Create(logoutId));
-        await storage.DeleteAsync(SamlLogoutSessionDso.EntityType, key, [], ct);
+        await partitionedStorage.DeleteAsync(SamlLogoutSessionDso.EntityType, key, [], ct);
     }
 
     private static DataStorageKey[] BuildKeys(SamlLogoutSessionDso.V1 dso)

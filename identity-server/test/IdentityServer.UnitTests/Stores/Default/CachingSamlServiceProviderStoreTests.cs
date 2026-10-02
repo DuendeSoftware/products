@@ -26,9 +26,9 @@ public class CachingSamlServiceProviderStoreTests : IDisposable
     public CachingSamlServiceProviderStoreTests()
     {
         _serviceProvider = TestHybridCacheHelper.BuildServiceProvider(_fakeTimeProvider);
-        var cache = TestHybridCacheHelper.GetCache(_serviceProvider);
+        var cacheFactory = TestHybridCacheHelper.GetCacheFactory(_serviceProvider);
         var policy = new CachePolicy<SamlServiceProvider>(null);
-        _subject = new CachingSamlServiceProviderStore<SpySamlServiceProviderStore>(policy, _options, _spy, cache);
+        _subject = new CachingSamlServiceProviderStore<SpySamlServiceProviderStore>(policy, _options, _spy, cacheFactory);
     }
 
     public void Dispose() => _serviceProvider.Dispose();

@@ -117,7 +117,7 @@ public static class AuthenticationTicketExtensions
 
                 if (envelope.Version != 1)
                 {
-                    logger.LogWarning("Deserializing AuthenticationTicket envelope found incorrect version for key {key}.", session.Key);
+                    logger.DeserializingAuthenticationTicketEnvelopeFoundIncorrectVersionForKey(session.Key);
                     return null;
                 }
 
@@ -128,7 +128,7 @@ public static class AuthenticationTicketExtensions
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to unprotect AuthenticationTicket payload for key {key}", session.Key);
+                    logger.FailedToUnprotectAuthenticationTicketPayloadForKeyKey(ex, session.Key);
                     return null;
                 }
 
@@ -160,7 +160,7 @@ public static class AuthenticationTicketExtensions
             catch (Exception ex)
             {
                 // failed deserialize
-                logger.LogError(ex, "Failed to deserialize UserSession payload for key {key}", session.Key);
+                logger.FailedToDeserializeUserSessionPayloadForKeyKey(ex, session.Key);
             }
 
             return null;

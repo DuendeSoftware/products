@@ -132,14 +132,16 @@ public sealed class ApiResourceExtendedPropertiesTests : IAsyncLifetime
         var dbName = $"test_{Guid.NewGuid():N}";
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
-                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
+                storage.AddSqlite(opt =>
+                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+            .AddConfigurationStorage()
+            .AddOperationalStorage();
 
         services.AddSingleton<ISchemaStore>(
             new InMemorySchemaStore([]));
 
         await using var provider = services.BuildServiceProvider();
-        var schema = provider.GetRequiredService<Duende.Storage.Schema.IDatabaseSchema>();
+        var schema = provider.GetRequiredService<Duende.Storage.Schema.IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         using var scope = provider.CreateScope();

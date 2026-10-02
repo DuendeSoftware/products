@@ -26,7 +26,7 @@ public class StoragePushedAuthorizationRequestStoreContractTests : PushedAuthori
         services.AddSingleton(TimeProvider.System);
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<PushedAuthorizationDso.V1>();
@@ -35,7 +35,7 @@ public class StoragePushedAuthorizationRequestStoreContractTests : PushedAuthori
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 

@@ -62,12 +62,12 @@ public class SamlServiceProviderStore : ISamlServiceProviderStore
 
         if (entity == null)
         {
-            Logger.LogDebug("{entityId} not found in database", entityId);
+            Log.ValueNotFoundInDatabase3(Logger, entityId);
             return null;
         }
 
         var model = entity.ToModel();
-        Logger.LogDebug("{entityId} found in database", entityId);
+        Log.ValueFoundInDatabase3(Logger, entityId);
         return model;
     }
 
@@ -94,6 +94,6 @@ public class SamlServiceProviderStore : ISamlServiceProviderStore
             yield return entity.ToModel();
         }
 
-        Logger.LogDebug("Retrieved {count} SAML Service Providers for enumeration", count);
+        Log.RetrievedValueSamlServiceProvidersForEnumeration(Logger, count);
     }
 }

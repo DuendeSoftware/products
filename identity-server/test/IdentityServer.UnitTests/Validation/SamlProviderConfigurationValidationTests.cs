@@ -38,6 +38,14 @@ public class SamlProviderConfigurationValidationTests
         return Convert.ToBase64String(cert.Export(X509ContentType.Cert));
     }
 
+    private static string CreateSelfSignedPkcs12Base64()
+    {
+        using var key = RSA.Create(2048);
+        var req = new CertificateRequest("CN=Test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(1));
+        return Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12));
+    }
+
     [Fact]
     [Trait("Category", Category)]
     public async Task valid_saml_provider_should_succeed()
@@ -150,6 +158,35 @@ public class SamlProviderConfigurationValidationTests
     {
         var provider = ValidProvider();
         provider.SigningCertificateBase64 = CreateSelfSignedCertBase64();
+
+        var ctx = new IdentityProviderConfigurationValidationContext(provider);
+        await _validator.ValidateAsync(ctx, default);
+
+        ctx.IsValid.ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task authn_request_signing_always_without_sp_signing_certificate_should_fail()
+    {
+        var provider = ValidProvider();
+        provider.AuthnRequestSigningBehavior = AuthnRequestSigningBehavior.Always;
+
+        var ctx = new IdentityProviderConfigurationValidationContext(provider);
+        await _validator.ValidateAsync(ctx, default);
+
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ShouldNotBeNull();
+        ctx.ErrorMessage.ShouldBe("SpSigningCertificateBase64 is required when AuthnRequestSigningBehavior is Always.");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task authn_request_signing_always_with_sp_signing_certificate_should_succeed()
+    {
+        var provider = ValidProvider();
+        provider.AuthnRequestSigningBehavior = AuthnRequestSigningBehavior.Always;
+        provider.SpSigningCertificateBase64 = CreateSelfSignedPkcs12Base64();
 
         var ctx = new IdentityProviderConfigurationValidationContext(provider);
         await _validator.ValidateAsync(ctx, default);

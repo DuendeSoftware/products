@@ -49,14 +49,14 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             .SingleOrDefault(x => x.Key == token.Key);
         if (existing == null)
         {
-            Logger.LogDebug("{persistedGrantKey} not found in database", token.Key);
+            Log.ValueNotFoundInDatabase2(Logger, token.Key);
 
             var persistedGrant = token.ToEntity();
             Context.PersistedGrants.Add(persistedGrant);
         }
         else
         {
-            Logger.LogDebug("{persistedGrantKey} found in database", token.Key);
+            Log.ValueFoundInDatabase2(Logger, token.Key);
 
             token.UpdateEntity(existing);
         }
@@ -67,7 +67,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            Logger.LogWarning("exception updating {persistedGrantKey} persisted grant in database: {error}", token.Key, ex.Message);
+            Log.ExceptionUpdatingValuePersistedGrantInDatabaseValue(Logger, token.Key, ex.Message);
         }
     }
 
@@ -81,7 +81,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             .SingleOrDefault(x => x.Key == key);
         var model = persistedGrant?.ToModel();
 
-        Logger.LogDebug("{persistedGrantKey} found in database: {persistedGrantKeyFound}", key, model != null);
+        Log.ValueFoundInDatabaseValue4(Logger, key, model != null);
 
         return model;
     }
@@ -97,7 +97,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             .Select(x => x.ToModel())
             .ToArrayAsync(ct);
 
-        Logger.LogDebug("{persistedGrantCount} persisted grants found for {@filter}", persistedGrants.Length, filter);
+        Log.ValuePersistedGrantsFoundForValue(Logger, persistedGrants.Length, filter);
 
         return persistedGrants;
     }
@@ -112,7 +112,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             .SingleOrDefault(x => x.Key == key);
         if (persistedGrant != null)
         {
-            Logger.LogDebug("removing {persistedGrantKey} persisted grant from database", key);
+            Log.RemovingValuePersistedGrantFromDatabase(Logger, key);
 
             Context.PersistedGrants.Remove(persistedGrant);
 
@@ -122,12 +122,12 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                Logger.LogInformation("exception removing {persistedGrantKey} persisted grant from database: {error}", key, ex.Message);
+                Log.ExceptionRemovingValuePersistedGrantFromDatabaseValue(Logger, key, ex.Message);
             }
         }
         else
         {
-            Logger.LogDebug("no {persistedGrantKey} persisted grant found in database", key);
+            Log.NoValuePersistedGrantFoundInDatabase(Logger, key);
         }
     }
 
@@ -142,7 +142,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             .ToArrayAsync(ct);
         persistedGrants = Filter(persistedGrants.AsQueryable(), filter).ToArray();
 
-        Logger.LogDebug("removing {persistedGrantCount} persisted grants from database for {@filter}", persistedGrants.Length, filter);
+        Log.RemovingValuePersistedGrantsFromDatabaseForValue(Logger, persistedGrants.Length, filter);
 
         Context.PersistedGrants.RemoveRange(persistedGrants);
 
@@ -152,7 +152,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            Logger.LogInformation("removing {persistedGrantCount} persisted grants from database for subject {@filter}: {error}", persistedGrants.Length, filter, ex.Message);
+            Log.RemovingValuePersistedGrantsFromDatabaseForSubject(Logger, persistedGrants.Length, filter, ex.Message);
 
             // Detach failed entries so they do not leak into subsequent SaveChanges calls.
             // Without this, these entries remain in the change tracker and can cause unexpected behaviors.

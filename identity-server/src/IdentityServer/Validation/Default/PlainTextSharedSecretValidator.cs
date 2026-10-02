@@ -40,14 +40,14 @@ public class PlainTextSharedSecretValidator : ISecretValidator
 
         if (parsedSecret.Type != IdentityServerConstants.ParsedSecretTypes.SharedSecret)
         {
-            _logger.LogError("Parsed secret should not be of type: {type}", parsedSecret.Type ?? "null");
+            _logger.ParsedSecretShouldNotBeOfType(parsedSecret.Type ?? "null");
             return fail;
         }
 
         var sharedSecrets = secrets.Where(s => s.Type == IdentityServerConstants.SecretTypes.SharedSecret);
         if (!sharedSecrets.Any())
         {
-            _logger.LogDebug("No shared secret configured for client.");
+            _logger.NoSharedSecretConfiguredForClientPlainTextSharedSecretValidator();
             return fail;
         }
 
@@ -69,7 +69,7 @@ public class PlainTextSharedSecretValidator : ISecretValidator
             }
         }
 
-        _logger.LogDebug("No matching plain text secret found.");
+        _logger.NoMatchingPlainTextSecretFound();
         return fail;
     }
 }

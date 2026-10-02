@@ -59,19 +59,19 @@ public class ValidatingSamlServiceProviderStore<T> : ISamlServiceProviderStore
 
         if (serviceProvider != null)
         {
-            _logger.LogTrace("Calling into SAML service provider configuration validator: {validatorType}", _validatorType);
+            _logger.CallingIntoSAMLServiceProviderConfigurationValidatorValidatorType(_validatorType);
 
             var context = new SamlServiceProviderConfigurationValidationContext(serviceProvider);
             await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {
-                _logger.LogDebug("SAML service provider configuration validation for {entityId} succeeded.", serviceProvider.EntityId);
+                _logger.SAMLServiceProviderConfigurationValidationForEntityIdSucceeded(serviceProvider.EntityId);
                 Telemetry.Metrics.SamlServiceProviderValidation(serviceProvider.EntityId);
                 return serviceProvider;
             }
 
-            _logger.LogError("Invalid SAML service provider configuration for {entityId}: {errorMessage}", serviceProvider.EntityId, context.ErrorMessage);
+            _logger.InvalidSAMLServiceProviderConfigurationForEntityIdErrorMessage(serviceProvider.EntityId, context.ErrorMessage);
             Telemetry.Metrics.SamlServiceProviderValidationFailure(serviceProvider.EntityId, context.ErrorMessage ?? "Validation failed");
             await _events.RaiseAsync(new InvalidSamlServiceProviderConfigurationEvent(serviceProvider, context.ErrorMessage ?? "Validation failed"), ct);
 
@@ -89,18 +89,18 @@ public class ValidatingSamlServiceProviderStore<T> : ISamlServiceProviderStore
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingSamlServiceProviderStore.GetAllSamlServiceProviders");
         await foreach (var serviceProvider in _inner.GetAllSamlServiceProvidersAsync(ct))
         {
-            _logger.LogTrace("Calling into SAML service provider configuration validator: {validatorType}", _validatorType);
+            _logger.CallingIntoSAMLServiceProviderConfigurationValidatorValidatorType2(_validatorType);
             var context = new SamlServiceProviderConfigurationValidationContext(serviceProvider);
             await _validator.ValidateAsync(context, ct);
             if (context.IsValid)
             {
-                _logger.LogDebug("SAML service provider configuration validation for {entityId} succeeded.", serviceProvider.EntityId);
+                _logger.SAMLServiceProviderConfigurationValidationForEntityIdSucceeded2(serviceProvider.EntityId);
                 Telemetry.Metrics.SamlServiceProviderValidation(serviceProvider.EntityId);
                 yield return serviceProvider;
             }
             else
             {
-                _logger.LogError("Invalid SAML service provider configuration for {entityId}: {errorMessage}", serviceProvider.EntityId, context.ErrorMessage);
+                _logger.InvalidSAMLServiceProviderConfigurationForEntityIdErrorMessage2(serviceProvider.EntityId, context.ErrorMessage);
                 Telemetry.Metrics.SamlServiceProviderValidationFailure(serviceProvider.EntityId, context.ErrorMessage ?? "Validation failed");
                 await _events.RaiseAsync(new InvalidSamlServiceProviderConfigurationEvent(serviceProvider, context.ErrorMessage ?? "Validation failed"), ct);
                 // Skip invalid service providers - do not yield

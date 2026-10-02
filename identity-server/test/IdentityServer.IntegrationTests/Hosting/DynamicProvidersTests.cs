@@ -6,6 +6,7 @@ using System.Net;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
+using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
@@ -19,9 +20,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
-public class DynamicProvidersTests
+public sealed class DynamicProvidersTests : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
+    private readonly WebServerFixture _webServerFixture;
     private GenericHost _host;
     private GenericHost _idp1;
     private GenericHost _idp2;
@@ -42,8 +44,10 @@ public class DynamicProvidersTests
 
     private Action<IdentityServerOptions> _configureIdentityServerOptions = options => { };
 
-    public DynamicProvidersTests()
+    public DynamicProvidersTests(WebServerFixture webServerFixture)
     {
+        _webServerFixture = webServerFixture;
+
         _idp1 = new GenericHost("https://idp1");
         _idp1.OnConfigureServices += services =>
         {
@@ -227,6 +231,10 @@ public class DynamicProvidersTests
             });
         };
     }
+
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Fact]
     public async Task challenge_should_trigger_authorize_request_to_dynamic_idp()
@@ -422,5 +430,159 @@ public class DynamicProvidersTests
                     return Task.FromResult((string)null);
                 }));
         }
+    }
+
+    private sealed class NoSpacesFixture : IAsyncDisposable
+    {
+        public required KestrelBasedTestServer MainServer { get; init; }
+        public required KestrelBasedTestServer IdpServer { get; init; }
+
+        public async ValueTask DisposeAsync()
+        {
+            await MainServer.DisposeAsync();
+            await IdpServer.DisposeAsync();
+        }
+    }
+
+    [Fact]
+    public async Task no_spaces_host_completes_static_external_login_unchanged()
+    {
+        await using var fixture = await CreateNoSpacesStaticExternalLoginFixtureAsync(
+            nameof(no_spaces_host_completes_static_external_login_unchanged));
+
+        using var mainClient = fixture.MainServer.CreateClient();
+        using var idpClient = fixture.IdpServer.CreateClient();
+
+        var challenge = await mainClient.GetAsync("/test/challenge", _ct);
+        challenge.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        var authorizeUrl = challenge.Headers.Location!.ToString();
+
+        (await idpClient.GetAsync("/login?sub=alice", _ct)).EnsureSuccessStatusCode();
+        var idpAuthorize = await idpClient.GetAsync(authorizeUrl, _ct);
+        idpAuthorize.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+
+        var callback = await mainClient.GetAsync(idpAuthorize.Headers.Location!.ToString(), _ct);
+        callback.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
+        var finish = await mainClient.GetAsync(callback.Headers.Location!.ToString(), _ct);
+        finish.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await finish.Content.ReadAsStringAsync(_ct)).ShouldBe("alice");
+    }
+
+    private async Task<NoSpacesFixture> CreateNoSpacesStaticExternalLoginFixtureAsync(string name)
+    {
+        const string oidcScheme = "no-spaces-oidc";
+        const string clientId = "no-spaces-client";
+        const string clientSecret = "secret";
+        var output = TestContext.Current.TestOutputHelper!;
+
+        var mainHostAlias = $"ms{Guid.NewGuid():N}"[..10];
+        var idpHostAlias = $"idp{Guid.NewGuid():N}"[..10];
+
+        KestrelBasedTestServer idpServer = null;
+
+        var mainServer = new KestrelBasedTestServer(
+            mainHostAlias,
+            _webServerFixture,
+            new PrefixedTestOutputHelper(output, name + "-main"),
+            services =>
+            {
+                services.AddRouting();
+
+                // Deliberately no services.AddSpaces(): this is the no-spaces regression host.
+                services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
+                    .AddInMemoryClients([])
+                    .AddInMemoryApiScopes([])
+                    .AddInMemoryIdentityResources([]);
+
+                services.AddAuthentication()
+                    .AddOpenIdConnect(oidcScheme, options =>
+                    {
+                        options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                        options.Authority = idpServer.BaseAddress.ToString().TrimEnd('/');
+                        options.ClientId = clientId;
+                        options.ClientSecret = clientSecret;
+                        options.CallbackPath = $"/signin-{oidcScheme}";
+                        options.ResponseType = "code";
+                        options.ResponseMode = "query";
+                        options.Scope.Clear();
+                        options.Scope.Add("openid");
+                        options.MapInboundClaims = false;
+                        options.SaveTokens = false;
+                        options.BackchannelHttpHandler = idpServer.CreateHandler();
+                    });
+            },
+            webapp =>
+            {
+                // Deliberately no webapp.UseSpaceResolution().
+                webapp.UseIdentityServer();
+
+                webapp.Use(async (ctx, next) =>
+                {
+                    if (ctx.Request.Path.Value == "/test/challenge")
+                    {
+                        await ctx.ChallengeAsync(oidcScheme,
+                            new AuthenticationProperties { RedirectUri = "/test/finish" });
+                        return;
+                    }
+
+                    if (ctx.Request.Path.Value == "/test/finish")
+                    {
+                        var external = await ctx.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+                        if (external.Succeeded)
+                        {
+                            ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+                            await ctx.Response.WriteAsync(external.Principal!.FindFirst("sub")!.Value);
+                        }
+                        else
+                        {
+                            ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        }
+                        return;
+                    }
+
+                    await next(ctx);
+                });
+            });
+
+        idpServer = new KestrelBasedTestServer(
+            idpHostAlias,
+            _webServerFixture,
+            new PrefixedTestOutputHelper(output, name + "-idp"),
+            services =>
+            {
+                services.AddRouting();
+                services.AddAuthorization();
+
+                services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
+                    .AddInMemoryClients([
+                        new Client
+                        {
+                            ClientId = clientId,
+                            ClientSecrets = { new Secret(clientSecret.Sha256()) },
+                            AllowedGrantTypes = GrantTypes.Code,
+                            RequireConsent = false,
+                            RedirectUris = { mainServer.BuildUrl($"/signin-{oidcScheme}").ToString() },
+                            AllowedScopes = { "openid" }
+                        }
+                    ])
+                    .AddInMemoryIdentityResources([new IdentityResources.OpenId()])
+                    .AddDeveloperSigningCredential(persistKey: false);
+            },
+            webapp =>
+            {
+                webapp.UseIdentityServer();
+
+                webapp.MapGet("/login", async ctx =>
+                {
+                    var sub = ctx.Request.Query["sub"].FirstOrDefault() ?? "external-user";
+                    await ctx.SignInAsync(new IdentityServerUser(sub).CreatePrincipal());
+                });
+            });
+
+        await idpServer.StartAsync();
+        await mainServer.StartAsync();
+
+        return new NoSpacesFixture { MainServer = mainServer, IdpServer = idpServer };
     }
 }

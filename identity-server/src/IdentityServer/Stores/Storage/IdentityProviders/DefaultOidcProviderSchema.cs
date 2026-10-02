@@ -9,10 +9,10 @@ namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
 
 /// <summary>
 /// Built-in attribute definitions for OIDC identity providers.
-/// These correspond to the properties used by <see cref="Models.OidcProvider"/> and are
-/// automatically registered in the schema store so that OIDC providers work out-of-the-box.
+/// These correspond to the properties used by <see cref="Models.OidcProvider"/> and back the
+/// schema that <c>AddOidcDynamicProvider()</c> registers so that OIDC providers work out-of-the-box.
 /// </summary>
-internal static class DefaultOidcProviderSchema
+public static class DefaultOidcProviderSchema
 {
     /// <summary>The base address of the OIDC provider (e.g. <c>https://idp.example.com</c>).</summary>
     public static readonly TypedAttributeDefinition<string> Authority =
@@ -39,9 +39,8 @@ internal static class DefaultOidcProviderSchema
     /// Defaults to <c>true</c> if not set.
     /// </summary>
     /// <remarks>
-    /// Defined as <c>string</c> (not <c>bool</c>) because <see cref="Models.OidcProvider"/> reads these
-    /// values from the Properties dictionary via string comparison, and
-    /// <see cref="EavPropertyMapper.ExtractStringProperties"/> must round-trip them as strings.
+    /// Defined as <c>string</c> rather than <c>bool</c> because <see cref="Models.OidcProvider"/> reads
+    /// these values from the properties dictionary using string comparison.
     /// </remarks>
     public static readonly TypedAttributeDefinition<string> GetClaimsFromUserInfoEndpoint =
         new(AttributeCode.Create("GetClaimsFromUserInfoEndpoint"), new ScalarAttributeType(ScalarDataType.String));
@@ -51,30 +50,31 @@ internal static class DefaultOidcProviderSchema
     /// Defaults to <c>true</c> if not set.
     /// </summary>
     /// <remarks>
-    /// Defined as <c>string</c> (not <c>bool</c>) because <see cref="Models.OidcProvider"/> reads these
-    /// values from the Properties dictionary via string comparison, and
-    /// <see cref="EavPropertyMapper.ExtractStringProperties"/> must round-trip them as strings.
+    /// Defined as <c>string</c> rather than <c>bool</c> because <see cref="Models.OidcProvider"/> reads
+    /// these values from the properties dictionary using string comparison.
     /// </remarks>
     public static readonly TypedAttributeDefinition<string> UsePkce =
         new(AttributeCode.Create("UsePkce"), new ScalarAttributeType(ScalarDataType.String));
 
     /// <summary>
-    /// The built-in schema for OIDC identity providers, registered with schema ID <c>idp:oidc</c>.
+    /// Creates the built-in schema for OIDC identity providers, registered with schema ID <c>idp:oidc</c>.
     /// </summary>
-    public static readonly SchemaConfiguration Schema = new()
-    {
-        SchemaId = SchemaId.IdentityProvider("oidc"),
-        DisplayName = "OIDC Identity Provider",
-        Description = "Built-in schema for OpenID Connect identity providers.",
-        AttributeDefinitions =
-        [
-            Authority,
-            ClientId,
-            ClientSecret,
-            ResponseType,
-            Scope,
-            GetClaimsFromUserInfoEndpoint,
-            UsePkce
-        ]
-    };
+    /// <returns>A new schema configuration.</returns>
+    public static SchemaConfiguration CreateSchema() =>
+        new()
+        {
+            SchemaId = SchemaId.OidcIdentityProvider,
+            DisplayName = "OIDC Identity Provider",
+            Description = "Built-in schema for OpenID Connect identity providers.",
+            AttributeDefinitions =
+            [
+                Authority,
+                ClientId,
+                ClientSecret,
+                ResponseType,
+                Scope,
+                GetClaimsFromUserInfoEndpoint,
+                UsePkce
+            ]
+        };
 }

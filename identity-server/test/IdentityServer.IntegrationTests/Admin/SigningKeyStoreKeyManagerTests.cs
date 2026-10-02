@@ -279,28 +279,26 @@ public sealed class SigningKeyStoreKeyManagerTests_FileSystem : SigningKeyStoreK
 }
 
 /// <summary>
-/// Runs KeyManager tests with the IStorage-backed SigningKeyStore backend.
+/// Runs KeyManager tests with the IPartitionedStorage-backed SigningKeyStore backend.
 /// </summary>
-public sealed class SigningKeyStoreKeyManagerTests_IStorage : SigningKeyStoreKeyManagerTestsBase
+public sealed class SigningKeyStoreKeyManagerTests_PartitionedStorage : SigningKeyStoreKeyManagerTestsBase
 {
     private readonly string _dbName = $"keymgr_{Guid.NewGuid():N}";
 
     protected override void ConfigureKeyStore(IServiceCollection services)
     {
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<KeyDso.V1>();
-        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
-        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<KeyRepository>();
         services.AddIdentityServerBuilder().AddSigningKeyStore<SigningKeyStore>();
     }
 
     protected override async Task InitializeStoreAsync()
     {
-        var schema = Pipeline.Resolve<IDatabaseSchema>();
+        var schema = Pipeline.Resolve<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 }

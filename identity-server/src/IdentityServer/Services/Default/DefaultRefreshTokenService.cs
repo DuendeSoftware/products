@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Globalization;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -77,7 +76,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             Error = OidcConstants.TokenErrors.InvalidGrant
         };
 
-        Logger.LogTrace("Start refresh token validation");
+        Logger.StartRefreshTokenValidation();
 
         /////////////////////////////////////////////
         // check if refresh token is valid
@@ -85,7 +84,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         var refreshToken = await RefreshTokenStore.GetRefreshTokenAsync(tokenHandle, ct);
         if (refreshToken == null)
         {
-            Logger.LogWarning("Invalid refresh token");
+            Logger.InvalidRefreshToken();
             return invalidGrant;
         }
 
@@ -94,7 +93,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         /////////////////////////////////////////////
         if (refreshToken.CreationTime.HasExceeded(refreshToken.Lifetime, TimeProvider.GetUtcNow().UtcDateTime))
         {
-            Logger.LogWarning("Refresh token has expired.");
+            Logger.RefreshTokenHasExpired();
             return invalidGrant;
         }
 
@@ -103,7 +102,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         /////////////////////////////////////////////
         if (client.ClientId != refreshToken.ClientId)
         {
-            Logger.LogError("{ClientId} tries to refresh token belonging to {RefreshTokenClientId}", client.ClientId, refreshToken.ClientId);
+            Logger.ClientIdTriesToRefreshTokenBelongingToRefreshTokenClientId(client.ClientId, refreshToken.ClientId);
             return invalidGrant;
         }
 
@@ -112,7 +111,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         /////////////////////////////////////////////
         if (!client.AllowOfflineAccess)
         {
-            Logger.LogError("{clientId} does not have access to offline_access scope anymore", client.ClientId);
+            Logger.ClientIdDoesNotHaveAccessToOfflineAccess(client.ClientId);
             return invalidGrant;
         }
 
@@ -123,7 +122,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         {
             if ((await AcceptConsumedTokenAsync(refreshToken)) == false)
             {
-                Logger.LogWarning("Rejecting refresh token because it has been consumed already.");
+                Logger.RejectingRefreshTokenBecauseItHasBeenConsumed();
                 return invalidGrant;
             }
         }
@@ -140,7 +139,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
 
         if (isActiveCtx.IsActive == false)
         {
-            Logger.LogError("{subjectId} has been disabled", refreshToken.Subject.GetSubjectId());
+            Logger.SubjectIdHasBeenDisabled(refreshToken.Subject.GetSubjectId());
             return invalidGrant;
         }
 
@@ -173,13 +172,12 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultRefreshTokenService.CreateRefreshToken");
 
-        Logger.LogDebug("Creating refresh token");
+        Logger.CreatingRefreshToken();
 
         int lifetime;
         if (request.Client.RefreshTokenExpiration == TokenExpiration.Absolute)
         {
-            Logger.LogDebug("Setting an absolute lifetime: {absoluteLifetime}",
-                request.Client.AbsoluteRefreshTokenLifetime);
+            Logger.SettingAnAbsoluteLifetimeAbsoluteLifetime(request.Client.AbsoluteRefreshTokenLifetime);
             lifetime = request.Client.AbsoluteRefreshTokenLifetime;
         }
         else
@@ -187,15 +185,11 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             lifetime = request.Client.SlidingRefreshTokenLifetime;
             if (request.Client.AbsoluteRefreshTokenLifetime > 0 && lifetime > request.Client.AbsoluteRefreshTokenLifetime)
             {
-                Logger.LogWarning(
-                    "Client {clientId}'s configured " + nameof(request.Client.SlidingRefreshTokenLifetime) +
-                    " of {slidingLifetime} exceeds its " + nameof(request.Client.AbsoluteRefreshTokenLifetime) +
-                    " of {absoluteLifetime}. The refresh_token's sliding lifetime will be capped to the absolute lifetime",
-                    request.Client.ClientId, lifetime, request.Client.AbsoluteRefreshTokenLifetime);
+                Logger.ClientClientIdSConfiguredNameofRequestClientSlidingRefreshTokenLifetime(request.Client.ClientId, lifetime, request.Client.AbsoluteRefreshTokenLifetime);
                 lifetime = request.Client.AbsoluteRefreshTokenLifetime;
             }
 
-            Logger.LogDebug("Setting a sliding lifetime: {slidingLifetime}", lifetime);
+            Logger.SettingASlidingLifetimeSlidingLifetime(lifetime);
         }
 
         var refreshToken = new RefreshToken
@@ -227,7 +221,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.UpdateRefreshToken");
 
-        Logger.LogDebug("Updating refresh token");
+        Logger.UpdatingRefreshToken();
 
         var handle = request.Handle;
         var needsCreate = false;
@@ -238,13 +232,13 @@ public class DefaultRefreshTokenService : IRefreshTokenService
 
             if (Options.DeleteOneTimeOnlyRefreshTokensOnUse)
             {
-                Logger.LogDebug("Token usage is one-time only and refresh behavior is delete. Deleting current handle, and generating new handle");
+                Logger.TokenUsageIsOneTimeOnlyAndRefresh();
 
                 await RefreshTokenStore.RemoveRefreshTokenAsync(handle, ct);
             }
             else
             {
-                Logger.LogDebug("Token usage is one-time only and refresh behavior is mark as consumed. Setting current handle as consumed, and generating new handle");
+                Logger.TokenUsageIsOneTimeOnlyAndRefresh2();
 
                 // flag as consumed
                 if (request.RefreshToken.ConsumedTime == null)
@@ -260,23 +254,22 @@ public class DefaultRefreshTokenService : IRefreshTokenService
 
         if (request.Client.RefreshTokenExpiration == TokenExpiration.Sliding)
         {
-            Logger.LogDebug("Refresh token expiration is sliding - extending lifetime");
+            Logger.RefreshTokenExpirationIsSlidingExtendingLifetime();
 
             // if absolute exp > 0, make sure we don't exceed absolute exp
             // if absolute exp = 0, allow indefinite slide
             var currentLifetime = request.RefreshToken.CreationTime.GetLifetimeInSeconds(TimeProvider.GetUtcNow().UtcDateTime);
-            Logger.LogDebug("Current lifetime: {currentLifetime}", currentLifetime.ToString(CultureInfo.InvariantCulture));
+            Logger.CurrentLifetimeCurrentLifetime(currentLifetime);
 
             var newLifetime = currentLifetime + request.Client.SlidingRefreshTokenLifetime;
-            Logger.LogDebug("New lifetime: {slidingLifetime}", newLifetime.ToString(CultureInfo.InvariantCulture));
+            Logger.NewLifetimeSlidingLifetime(newLifetime);
 
             // zero absolute refresh token lifetime represents unbounded absolute lifetime
             // if absolute lifetime > 0, cap at absolute lifetime
             if (request.Client.AbsoluteRefreshTokenLifetime > 0 && newLifetime > request.Client.AbsoluteRefreshTokenLifetime)
             {
                 newLifetime = request.Client.AbsoluteRefreshTokenLifetime;
-                Logger.LogDebug("New lifetime exceeds absolute lifetime, capping it to {newLifetime}",
-                    newLifetime.ToString(CultureInfo.InvariantCulture));
+                Logger.NewLifetimeExceedsAbsoluteLifetimeCappingItTo(newLifetime);
             }
 
             request.RefreshToken.Lifetime = newLifetime;
@@ -288,16 +281,16 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             // set it to null so that we save non-consumed token
             request.RefreshToken.ConsumedTime = null;
             handle = await RefreshTokenStore.StoreRefreshTokenAsync(request.RefreshToken, ct);
-            Logger.LogDebug("Created refresh token in store");
+            Logger.CreatedRefreshTokenInStore();
         }
         else if (needsUpdate)
         {
             await RefreshTokenStore.UpdateRefreshTokenAsync(handle, request.RefreshToken, ct);
-            Logger.LogDebug("Updated refresh token in store");
+            Logger.UpdatedRefreshTokenInStore();
         }
         else
         {
-            Logger.LogDebug("No updates to refresh token done");
+            Logger.NoUpdatesToRefreshTokenDone();
         }
 
         return handle;

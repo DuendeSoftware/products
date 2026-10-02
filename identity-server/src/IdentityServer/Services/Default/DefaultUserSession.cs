@@ -339,7 +339,7 @@ public class DefaultUserSession : IUserSession
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error decoding client list");
+                Logger.ErrorDecodingClientList(ex);
                 // clear so we don't keep failing
                 Properties.RemoveClientList();
                 await UpdateSessionCookie();
@@ -389,7 +389,7 @@ public class DefaultUserSession : IUserSession
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error getting SAML session list");
+                Logger.ErrorGettingSAMLSessionList(ex);
             }
         }
 

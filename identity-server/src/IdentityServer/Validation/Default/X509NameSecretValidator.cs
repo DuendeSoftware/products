@@ -30,7 +30,7 @@ public class X509NameSecretValidator : ISecretValidator
 
         if (parsedSecret.Type != IdentityServerConstants.ParsedSecretTypes.X509Certificate)
         {
-            _logger.LogDebug("X509 name secret validator cannot process {type}", parsedSecret.Type ?? "null");
+            _logger.X509NameSecretValidatorCannotProcess(parsedSecret.Type ?? "null");
             return fail;
         }
 
@@ -42,14 +42,14 @@ public class X509NameSecretValidator : ISecretValidator
         var name = cert.Subject;
         if (name == null)
         {
-            _logger.LogWarning("No subject/name found in X509 certificate.");
+            _logger.NoSubjectNameFoundInX509Certificate();
             return fail;
         }
 
         var nameSecrets = secrets.Where(s => s.Type == IdentityServerConstants.SecretTypes.X509CertificateName);
         if (!nameSecrets.Any())
         {
-            _logger.LogDebug("No x509 name secrets configured for client.");
+            _logger.NoX509NameSecretsConfiguredForClient();
             return fail;
         }
 
@@ -67,7 +67,7 @@ public class X509NameSecretValidator : ISecretValidator
             }
         }
 
-        _logger.LogDebug("No matching x509 name secret found.");
+        _logger.NoMatchingX509NameSecretFound();
         return fail;
     }
 }

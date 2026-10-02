@@ -3,12 +3,9 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 using Duende.Storage.EntityAttributeValue;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin.IdentityProviders;
 
@@ -18,27 +15,12 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private IIdentityProviderAdmin NewAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IIdentityProviderAdmin>();
-    }
-
-    private IIdentityProviderStore NewStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IIdentityProviderStore>();
-    }
 
     [Fact]
     public async Task admin_create_then_store_get_by_scheme_returns_provider()
     {
-        var admin = NewAdmin();
-        var store = NewStore();
+        var admin = _fixture.IdentityProviderAdmin;
+        var store = _fixture.IdentityProviderStore;
 
         var scheme = $"scheme_{Guid.NewGuid():N}";
         var config = new CreateIdentityProvider
@@ -64,8 +46,8 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
     [Fact]
     public async Task admin_create_oidc_then_store_returns_oidc_provider()
     {
-        var admin = NewAdmin();
-        var store = NewStore();
+        var admin = _fixture.IdentityProviderAdmin;
+        var store = _fixture.IdentityProviderStore;
 
         var scheme = $"oidc_{Guid.NewGuid():N}";
         var config = new CreateIdentityProvider
@@ -92,8 +74,8 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
     [Fact]
     public async Task admin_create_then_store_get_all_scheme_names_returns_name()
     {
-        var admin = NewAdmin();
-        var store = NewStore();
+        var admin = _fixture.IdentityProviderAdmin;
+        var store = _fixture.IdentityProviderStore;
 
         var scheme = $"scheme_{Guid.NewGuid():N}";
         await admin.CreateAsync(
@@ -117,8 +99,8 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
     [Fact]
     public async Task disabled_provider_still_returned_by_store()
     {
-        var admin = NewAdmin();
-        var store = NewStore();
+        var admin = _fixture.IdentityProviderAdmin;
+        var store = _fixture.IdentityProviderStore;
 
         var scheme = $"disabled_{Guid.NewGuid():N}";
         await admin.CreateAsync(
@@ -144,13 +126,5 @@ public sealed class IdentityProviderStoreTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

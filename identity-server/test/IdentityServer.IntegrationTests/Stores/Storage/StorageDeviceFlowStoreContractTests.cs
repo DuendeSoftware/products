@@ -24,19 +24,17 @@ public class StorageDeviceFlowStoreContractTests : DeviceFlowStoreContractTests
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<DeviceFlowDso.V1>();
-        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
-        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<DeviceFlowRepository>();
         services.AddScoped<IPersistentGrantSerializer, PersistentGrantSerializer>();
         services.AddScoped<IDeviceFlowStore, Duende.IdentityServer.Stores.Storage.DeviceFlow.DeviceFlowStore>();
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 

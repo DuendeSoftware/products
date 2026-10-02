@@ -40,14 +40,14 @@ public class HashedSharedSecretValidator : ISecretValidator
 
         if (parsedSecret.Type != IdentityServerConstants.ParsedSecretTypes.SharedSecret)
         {
-            _logger.LogDebug("Hashed shared secret validator cannot process {type}", parsedSecret.Type ?? "null");
+            _logger.HashedSharedSecretValidatorCannotProcess(parsedSecret.Type ?? "null");
             return fail;
         }
 
         var sharedSecrets = secrets.Where(s => s.Type == IdentityServerConstants.SecretTypes.SharedSecret);
         if (!sharedSecrets.Any())
         {
-            _logger.LogDebug("No shared secret configured for client.");
+            _logger.NoSharedSecretConfiguredForClient();
             return fail;
         }
 
@@ -74,12 +74,12 @@ public class HashedSharedSecretValidator : ISecretValidator
             }
             catch (FormatException)
             {
-                _logger.LogInformation("Secret: {description} uses invalid hashing algorithm.", secretDescription);
+                _logger.SecretUsesInvalidHashingAlgorithm(secretDescription);
                 return fail;
             }
             catch (ArgumentNullException)
             {
-                _logger.LogInformation("Secret: {description} is null.", secretDescription);
+                _logger.SecretIsNull(secretDescription);
                 return fail;
             }
 
@@ -93,7 +93,7 @@ public class HashedSharedSecretValidator : ISecretValidator
             }
             else
             {
-                _logger.LogInformation("Secret: {description} uses invalid hashing algorithm.", secretDescription);
+                _logger.SecretUsesInvalidHashingAlgorithmHashedSharedSecretValidator(secretDescription);
                 return fail;
             }
 
@@ -103,7 +103,7 @@ public class HashedSharedSecretValidator : ISecretValidator
             }
         }
 
-        _logger.LogDebug("No matching hashed secret found.");
+        _logger.NoMatchingHashedSecretFound();
         return fail;
     }
 }

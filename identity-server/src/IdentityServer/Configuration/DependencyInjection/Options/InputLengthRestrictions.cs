@@ -55,6 +55,17 @@ public class InputLengthRestrictions
     public int AcrValues { get; set; } = 300;
 
     /// <summary>
+    /// Gets or sets the maximum allowed length for the <c>prompt</c> parameter. Defaults to 100.
+    /// </summary>
+    /// <remarks>
+    /// The longest combination of the built-in prompt modes is
+    /// <c>login consent select_account</c>, at 28 characters (<c>none</c> and <c>create</c> must
+    /// be used on their own). The default leaves room for custom values configured through
+    /// <c>UserInteractionOptions.PromptValuesSupported</c>.
+    /// </remarks>
+    public int Prompt { get; set; } = Default;
+
+    /// <summary>
     /// Gets or sets the maximum allowed length for the <c>grant_type</c> parameter. Defaults to 100.
     /// </summary>
     public int GrantType { get; set; } = Default;

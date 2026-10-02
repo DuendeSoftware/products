@@ -34,25 +34,25 @@ internal class DiscoveryKeyEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
 
-        _logger.LogTrace("Processing discovery request.");
+        _logger.ProcessingDiscoveryRequestDiscoveryKeyEndpoint();
 
         // validate HTTP
         if (!HttpMethods.IsGet(context.Request.Method))
         {
-            _logger.LogWarning("Discovery endpoint only supports GET requests");
+            _logger.DiscoveryEndpointOnlySupportsGETRequestsDiscoveryKeyEndpoint();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        _logger.LogDebug("Start key discovery request");
+        _logger.StartKeyDiscoveryRequest();
 
         if (_options.Discovery.ShowKeySet == false)
         {
-            _logger.LogInformation("Key discovery disabled. 404.");
+            _logger.KeyDiscoveryDisabled404();
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
         // generate response
-        _logger.LogTrace("Calling into discovery response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoDiscoveryResponseGeneratorDiscoveryKeyEndpoint(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.CreateJwkDocumentAsync(context.RequestAborted);
 
         return new JsonWebKeysResult(response, _options.Discovery.ResponseCacheInterval);

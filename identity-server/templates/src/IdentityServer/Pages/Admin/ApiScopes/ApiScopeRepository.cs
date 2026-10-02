@@ -156,13 +156,13 @@ public class ApiScopeRepository(ConfigurationDbContext context)
         _ = await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct)
     {
-        var scope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Name == id)
+        var scope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Name == id, ct)
             ?? throw new ArgumentException("Invalid Api Scope");
 
         _ = _context.ApiScopes.Remove(scope);
-        _ = await _context.SaveChangesAsync();
+        _ = await _context.SaveChangesAsync(ct);
     }
 
 }

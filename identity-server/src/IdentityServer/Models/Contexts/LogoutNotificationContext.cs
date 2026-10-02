@@ -53,8 +53,10 @@ public class LogoutNotificationContext
     public LogoutNotificationReason? LogoutReason { get; set; }
 
     /// <summary>
-    /// The logout ID that correlates this context to the SAML logout session store.
-    /// Set only for SAML-initiated logouts; <see langword="null"/> for OIDC-initiated logouts.
+    /// The opaque correlation ID used to track responses from SAML logout
+    /// notifications. This is distinct from the protected handle used to reference
+    /// the logout message and is not intended for exposure to the end user.
+    /// <see langword="null"/> when no SAML logout response tracking is required.
     /// </summary>
     public string? SamlLogoutId { get; set; }
 }

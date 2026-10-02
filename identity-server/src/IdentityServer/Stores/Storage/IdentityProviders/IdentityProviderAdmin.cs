@@ -76,7 +76,7 @@ internal sealed class IdentityProviderAdmin(
         }
 
         var (dso, version) = result.Value;
-        var schema = await schemaStore.GetAsync(SchemaId.IdentityProvider(dso.Type), ct);
+        var schema = await schemaStore.GetAsync(SchemaId.BuildIdentityProviderId(dso.Type), ct);
         return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
@@ -90,7 +90,7 @@ internal sealed class IdentityProviderAdmin(
         }
 
         var (dso, version) = result.Value;
-        var schema = await schemaStore.GetAsync(SchemaId.IdentityProvider(dso.Type), ct);
+        var schema = await schemaStore.GetAsync(SchemaId.BuildIdentityProviderId(dso.Type), ct);
         return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
     }
 
@@ -174,7 +174,7 @@ internal sealed class IdentityProviderAdmin(
             return null;
         }
 
-        var schemaId = SchemaId.IdentityProvider(type);
+        var schemaId = SchemaId.BuildIdentityProviderId(type);
         var schema = await schemaStore.GetAsync(schemaId, ct);
 
         if (!extendedProperties.TryValidateAgainst(schema, out var errors))

@@ -157,13 +157,13 @@ public class IdentityScopeRepository(ConfigurationDbContext context)
         _ = await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, Ct ct)
     {
-        var scope = await _context.IdentityResources.SingleOrDefaultAsync(x => x.Name == id)
+        var scope = await _context.IdentityResources.SingleOrDefaultAsync(x => x.Name == id, ct)
             ?? throw new ArgumentException("Invalid Identity Scope");
 
         _ = _context.IdentityResources.Remove(scope);
-        _ = await _context.SaveChangesAsync();
+        _ = await _context.SaveChangesAsync(ct);
     }
 
 }

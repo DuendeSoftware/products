@@ -86,7 +86,7 @@ public class DefaultTokenService : ITokenService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateIdentityToken");
 
-        Logger.LogTrace("Creating identity token");
+        Logger.CreatingIdentityToken();
         request.Validate();
 
         // todo: Dom, add a test for this. validate the at and c hashes are correct for the id_token when the client's alg doesn't match the server default.
@@ -159,7 +159,7 @@ public class DefaultTokenService : ITokenService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateAccessToken");
 
-        Logger.LogTrace("Creating access token");
+        Logger.CreatingAccessToken();
         request.Validate();
 
         var claims = new List<Claim>();
@@ -231,13 +231,13 @@ public class DefaultTokenService : ITokenService
 
             if (token.AccessTokenType == AccessTokenType.Jwt)
             {
-                Logger.LogTrace("Creating JWT access token");
+                Logger.CreatingJWTAccessToken();
 
                 tokenResult = await CreationService.CreateTokenAsync(token, ct);
             }
             else
             {
-                Logger.LogTrace("Creating reference access token");
+                Logger.CreatingReferenceAccessToken();
 
                 var handle = await ReferenceTokenStore.StoreReferenceTokenAsync(token, ct);
 
@@ -246,7 +246,7 @@ public class DefaultTokenService : ITokenService
         }
         else if (token.Type == OidcConstants.TokenTypes.IdentityToken)
         {
-            Logger.LogTrace("Creating JWT identity token");
+            Logger.CreatingJWTIdentityToken();
 
             tokenResult = await CreationService.CreateTokenAsync(token, ct);
         }

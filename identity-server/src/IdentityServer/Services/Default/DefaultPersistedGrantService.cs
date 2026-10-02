@@ -118,14 +118,14 @@ public class DefaultPersistedGrantService : IPersistedGrantService
 
             if (errors.Count > 0)
             {
-                _logger.LogError(new AggregateException(errors), "One or more errors occured during deserialization of persisted grants, returning successfull items.");
+                _logger.OneOrMoreErrorsOccuredDuringDeserializationOf(new AggregateException(errors));
             }
 
             return consents.ToArray();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed processing results from grant store.");
+            _logger.FailedProcessingResultsFromGrantStore(ex);
         }
 
         return Array.Empty<Grant>();

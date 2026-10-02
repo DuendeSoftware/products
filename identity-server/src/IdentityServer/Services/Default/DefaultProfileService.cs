@@ -42,7 +42,7 @@ public class DefaultProfileService : IProfileService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.IsActive");
 
-        Logger.LogDebug("IsActive called from: {caller}", context.Caller);
+        Logger.IsActiveCalledFromCaller(context.Caller);
 
         context.IsActive = true;
         return Task.CompletedTask;

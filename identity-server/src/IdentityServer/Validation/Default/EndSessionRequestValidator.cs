@@ -113,7 +113,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("EndSessionRequestValidator.Validate");
 
-        Logger.LogDebug("Start end session request validation");
+        Logger.StartEndSessionRequestValidation();
 
         var validatedRequest = new ValidatedEndSessionRequest
         {
@@ -126,7 +126,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             if (uilocales.Length > Options.InputLengthRestrictions.UiLocale)
             {
                 var log = new EndSessionRequestValidationLog(validatedRequest);
-                Logger.LogWarning("UI locale too long. It will be ignored:{@details}", log);
+                Logger.UILocaleTooLongItWillBeIgnored(log);
             }
             else
             {
@@ -187,7 +187,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 }
                 else
                 {
-                    Logger.LogWarning("Invalid PostLogoutRedirectUri: {postLogoutRedirectUri}", redirectUri);
+                    Logger.InvalidPostLogoutRedirectUri(redirectUri);
                 }
             }
 
@@ -232,13 +232,11 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         if (request != null)
         {
             var log = new EndSessionRequestValidationLog(request);
-            Logger.LogInformation("{Message}:{@details}", message, log);
+            Logger.LogMessageEndSessionRequestValidator(message, log);
         }
         else
         {
-#pragma warning disable CA2254 // Structured logging is not needed for this message
-            Logger.LogInformation(message);
-#pragma warning restore CA2254
+            Logger.EndSessionValidationFailureWithoutDetails(message);
         }
 
         return new EndSessionValidationResult
@@ -257,7 +255,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     protected virtual void LogSuccess(ValidatedEndSessionRequest request)
     {
         var log = new EndSessionRequestValidationLog(request);
-        Logger.LogInformation("End session request validation success:{@details}", log);
+        Logger.EndSessionRequestValidationSuccess(log);
     }
 
     /// <summary>
@@ -341,18 +339,14 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             // SingleLogoutCallbackEndpoint can determine success/partial based on responses.
             if (endSessionMessage.Data.SamlLogoutId == null && notificationResult.Messages.Count > 0)
             {
-                Logger.LogWarning(
-                    "SAML front-channel logouts exist but SamlLogoutId is null. " +
-                    "SP logout response tracking will be unavailable for this session");
+                Logger.SamlLogoutIdMissing();
             }
 
             if (endSessionMessage.Data.SamlLogoutId != null)
             {
                 if (SamlLogoutSessionStore is null)
                 {
-                    Logger.LogError(
-                        "SAML logout session tracking was requested but ISamlLogoutSessionStore is not registered. " +
-                        "Ensure SAML support is configured via AddSaml().");
+                    Logger.SamlLogoutSessionStoreNotRegistered();
                     result.IsError = true;
                     result.Error = "SAML logout session store not configured";
                     return result;

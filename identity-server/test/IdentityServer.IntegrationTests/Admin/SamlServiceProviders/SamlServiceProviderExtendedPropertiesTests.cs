@@ -83,14 +83,16 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
 
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
+                storage.AddSqlite(opt =>
                     opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddSamlServiceProviderConfigurationValidator<NopSamlServiceProviderConfigurationValidator>();
 
         services.AddSingleton<ISchemaStore>(new InMemorySchemaStore([]));
 
         await using var provider = services.BuildServiceProvider();
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         using var scope = provider.CreateScope();
@@ -113,14 +115,16 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
 
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
+                storage.AddSqlite(opt =>
                     opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddSamlServiceProviderConfigurationValidator<NopSamlServiceProviderConfigurationValidator>();
 
         services.AddSingleton<ISchemaStore>(new InMemorySchemaStore([]));
 
         await using var provider = services.BuildServiceProvider();
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         using var scope = provider.CreateScope();

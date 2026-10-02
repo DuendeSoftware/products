@@ -14,7 +14,7 @@ public delegate WebApplication BuildWebApp(WebApplicationBuilder builder);
 /// <summary>
 /// Extension methods for registering scenarios and inline WebApplications as Aspire resources.
 /// </summary>
-public static class InlineWebAppExtensions
+public static partial class InlineWebAppExtensions
 {
 
     /// <summary>
@@ -131,7 +131,7 @@ public static class InlineWebAppExtensions
             await resource.Scenario.StartAsync(configurator, context.CancellationToken);
             resource.IsRunning = true;
 
-            resourceLogger.LogInformation("Scenario '{Name}' started", resource.Scenario.Name);
+            LogScenarioStarted(resourceLogger, resource.Scenario.Name);
 
             // Create and start the DevPortal for every scenario
             var htmlContent = LoadReadmeForScenario(resource.Scenario);
@@ -155,7 +155,7 @@ public static class InlineWebAppExtensions
         }
         catch (Exception ex)
         {
-            resourceLogger.LogError(ex, "Failed to start scenario '{Name}'", resource.Scenario.Name);
+            LogScenarioStartFailure(resourceLogger, resource.Scenario.Name, ex);
 
             await notificationService.PublishUpdateAsync(resource,
                 s => s with { State = KnownResourceStates.FailedToStart });
@@ -183,7 +183,7 @@ public static class InlineWebAppExtensions
             await resource.Scenario.StopAsync(context.CancellationToken);
             resource.IsRunning = false;
 
-            resourceLogger.LogInformation("Scenario '{Name}' stopped", resource.Scenario.Name);
+            LogScenarioStopped(resourceLogger, resource.Scenario.Name);
 
             await notificationService.PublishUpdateAsync(resource,
                 s => s with
@@ -196,7 +196,7 @@ public static class InlineWebAppExtensions
         }
         catch (Exception ex)
         {
-            resourceLogger.LogError(ex, "Failed to stop scenario '{Name}'", resource.Scenario.Name);
+            LogScenarioStopFailure(resourceLogger, resource.Scenario.Name, ex);
             return new ExecuteCommandResult { Success = false, ErrorMessage = ex.Message };
         }
     }
@@ -250,8 +250,11 @@ public static class InlineWebAppExtensions
             await app.StartAsync(context.CancellationToken);
             resource.App = app;
 
-            var urls = string.Join(", ", app.Urls);
-            resourceLogger.LogInformation("Inline web app '{Name}' started at {Urls}", name, urls);
+            if (resourceLogger.IsEnabled(LogLevel.Information))
+            {
+                var urls = string.Join(", ", app.Urls);
+                LogInlineAppStarted(resourceLogger, name, urls);
+            }
 
             await notificationService.PublishUpdateAsync(resource,
                 s => s with
@@ -265,7 +268,7 @@ public static class InlineWebAppExtensions
         }
         catch (Exception ex)
         {
-            resourceLogger.LogError(ex, "Failed to start inline web app '{Name}'", name);
+            LogInlineAppStartFailure(resourceLogger, name, ex);
 
             await notificationService.PublishUpdateAsync(resource,
                 s => s with { State = KnownResourceStates.FailedToStart });
@@ -292,7 +295,7 @@ public static class InlineWebAppExtensions
                 resource.App = null;
             }
 
-            resourceLogger.LogInformation("Inline web app '{Name}' stopped", name);
+            LogInlineAppStopped(resourceLogger, name);
 
             await notificationService.PublishUpdateAsync(resource,
                 s => s with
@@ -305,8 +308,32 @@ public static class InlineWebAppExtensions
         }
         catch (Exception ex)
         {
-            resourceLogger.LogError(ex, "Failed to stop inline web app '{Name}'", name);
+            LogInlineAppStopFailure(resourceLogger, name, ex);
             return new ExecuteCommandResult { Success = false, ErrorMessage = ex.Message };
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Scenario '{Name}' started")]
+    private static partial void LogScenarioStarted(ILogger logger, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to start scenario '{Name}'")]
+    private static partial void LogScenarioStartFailure(ILogger logger, string name, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Scenario '{Name}' stopped")]
+    private static partial void LogScenarioStopped(ILogger logger, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to stop scenario '{Name}'")]
+    private static partial void LogScenarioStopFailure(ILogger logger, string name, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Inline web app '{Name}' started at {Urls}", SkipEnabledCheck = true)]
+    private static partial void LogInlineAppStarted(ILogger logger, string name, string urls);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to start inline web app '{Name}'")]
+    private static partial void LogInlineAppStartFailure(ILogger logger, string name, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Inline web app '{Name}' stopped")]
+    private static partial void LogInlineAppStopped(ILogger logger, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to stop inline web app '{Name}'")]
+    private static partial void LogInlineAppStopFailure(ILogger logger, string name, Exception exception);
 }

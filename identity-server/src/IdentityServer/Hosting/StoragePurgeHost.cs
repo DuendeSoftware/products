@@ -12,11 +12,12 @@ namespace Duende.IdentityServer.Hosting;
 /// Background service that periodically purges expired entities from the storage layer.
 /// </summary>
 internal sealed class StoragePurgeHost(
-    IStorageFactory storageFactory,
+    IStorageInstanceRouter storageInstanceRouter,
+    ICrossPartitionStorageFactory crossPartitionStorageFactory,
     IdentityServerOptions options,
     ILogger<StoragePurgeHost> logger) : BackgroundService
 {
-    // IStorage.PurgeExpiredAsync enforces [1, 1000]; clamp here to avoid noisy exceptions.
+    // IPartitionedStorage.PurgeExpiredAsync enforces [1, 1000]; clamp here to avoid noisy exceptions.
     private const int MinBatchSize = 1;
     private const int MaxBatchSize = 1000;
     private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(1);
@@ -78,27 +79,39 @@ internal sealed class StoragePurgeHost(
             return;
         }
 
-        try
+        foreach (var storageInstanceId in storageInstanceRouter.GetAll())
         {
-            var storage = await storageFactory.GetStorage(ct);
-            var batchSize = Math.Clamp(options.StoragePurge.BatchSize, MinBatchSize, MaxBatchSize);
-
-            var deleted = batchSize;
-            while (deleted >= batchSize)
+            try
             {
-                ct.ThrowIfCancellationRequested();
-                deleted = await storage.PurgeExpiredAsync(batchSize, ct);
-                logger.PurgedBatch(LogLevel.Debug, deleted);
+                var crossPartitionStorage = await crossPartitionStorageFactory.GetCrossPartitionStorageAsync(storageInstanceId, ct);
+
+                // Purge every registered storage instance/pool in turn (not just a single
+                // operational-category instance), so a multi-instance/separate-database deployment
+                // purges expired entities everywhere they may live.
+                var batchSize = Math.Clamp(options.StoragePurge.BatchSize, MinBatchSize, MaxBatchSize);
+
+                var deleted = batchSize;
+                while (deleted >= batchSize)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    deleted = await crossPartitionStorage.PurgeExpiredAsync(batchSize, ct);
+                    logger.PurgedBatch(LogLevel.Debug, deleted);
+                }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected during shutdown — not an error.
-            logger.PurgeCancelled(LogLevel.Debug);
-        }
-        catch (Exception ex)
-        {
-            logger.PurgeException(LogLevel.Error, ex);
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                // Expected during shutdown — not an error.
+                logger.PurgeCancelled(LogLevel.Debug);
+                return;
+            }
+            catch (Exception ex)
+            {
+                // A failing instance must not stop purging of the others. This also catches an
+                // OperationCanceledException that did not originate from the caller-supplied ct
+                // (e.g. a store-internal timeout token), which must not be mistaken for a
+                // requested shutdown and silently abort purging of the remaining instances.
+                logger.PurgeException(LogLevel.Error, ex);
+            }
         }
     }
 }

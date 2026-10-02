@@ -11,8 +11,8 @@ internal static partial class Log
 {
     [LoggerMessage(
         EventName = nameof(SamlLogoutSessionStoreFailed),
-        Message = $"Failed to store SAML logout session {{{LogParameters.LogoutId}}}: {{{LogParameters.Result}}}")]
-    internal static partial void SamlLogoutSessionStoreFailed(this ILogger logger, LogLevel logLevel, string logoutId, string result);
+        Message = $"Failed to store SAML logout session: {{{LogParameters.Result}}}")]
+    internal static partial void SamlLogoutSessionStoreFailed(this ILogger logger, LogLevel logLevel, string result);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutSessionStored),
@@ -31,8 +31,8 @@ internal static partial class Log
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutSessionDeserializationFailed),
-        Message = $"Failed to deserialize SAML logout session {{{LogParameters.LogoutId}}}")]
-    internal static partial void SamlLogoutSessionDeserializationFailed(this ILogger logger, LogLevel logLevel, string logoutId);
+        Message = "Failed to deserialize SAML logout session")]
+    internal static partial void SamlLogoutSessionDeserializationFailed(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutSessionDeserializationFailedForRequestId),

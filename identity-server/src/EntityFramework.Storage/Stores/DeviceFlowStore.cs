@@ -70,7 +70,7 @@ public class DeviceFlowStore : IDeviceFlowStore
             .SingleOrDefault(x => x.UserCode == userCode);
         var model = ToModel(deviceFlowCodes?.Data);
 
-        Logger.LogDebug("{userCode} found in database: {userCodeFound}", userCode, model != null);
+        Log.ValueFoundInDatabaseValue2(Logger, userCode, model != null);
 
         return model;
     }
@@ -85,7 +85,7 @@ public class DeviceFlowStore : IDeviceFlowStore
             .SingleOrDefault(x => x.DeviceCode == deviceCode);
         var model = ToModel(deviceFlowCodes?.Data);
 
-        Logger.LogDebug("{deviceCode} found in database: {deviceCodeFound}", deviceCode, model != null);
+        Log.ValueFoundInDatabaseValue3(Logger, deviceCode, model != null);
 
         return model;
     }
@@ -100,11 +100,11 @@ public class DeviceFlowStore : IDeviceFlowStore
             .SingleOrDefault(x => x.UserCode == userCode);
         if (existing == null)
         {
-            Logger.LogError("{userCode} not found in database", userCode);
+            Log.ValueNotFoundInDatabase(Logger, userCode);
             throw new InvalidOperationException("Could not update device code");
         }
 
-        Logger.LogDebug("{userCode} found in database", userCode);
+        Log.ValueFoundInDatabase(Logger, userCode);
 
         existing.SubjectId = data.Subject?.FindFirst(JwtClaimTypes.Subject).Value;
         existing.SessionId = data.SessionId;
@@ -117,7 +117,7 @@ public class DeviceFlowStore : IDeviceFlowStore
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            Logger.LogWarning("exception updating {userCode} user code in database: {error}", userCode, ex.Message);
+            Log.ExceptionUpdatingValueUserCodeInDatabaseValue(Logger, userCode, ex.Message);
         }
     }
 
@@ -132,7 +132,7 @@ public class DeviceFlowStore : IDeviceFlowStore
 
         if (deviceFlowCodes != null)
         {
-            Logger.LogDebug("removing {deviceCode} device code from database", deviceCode);
+            Log.RemovingValueDeviceCodeFromDatabase(Logger, deviceCode);
 
             Context.DeviceFlowCodes.Remove(deviceFlowCodes);
 
@@ -142,12 +142,12 @@ public class DeviceFlowStore : IDeviceFlowStore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                Logger.LogInformation("exception removing {deviceCode} device code from database: {error}", deviceCode, ex.Message);
+                Log.ExceptionRemovingValueDeviceCodeFromDatabaseValue(Logger, deviceCode, ex.Message);
             }
         }
         else
         {
-            Logger.LogDebug("no {deviceCode} device code found in database", deviceCode);
+            Log.NoValueDeviceCodeFoundInDatabase(Logger, deviceCode);
         }
     }
 

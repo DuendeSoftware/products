@@ -54,13 +54,13 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
 
         using var activity = Tracing.BasicActivitySource.StartActivity("IntrospectionRequestValidator.Validate");
 
-        _logger.LogDebug("Introspection request validation started.");
+        _logger.IntrospectionRequestValidationStarted();
 
         // retrieve required token
         var token = parameters.Get("token");
         if (token == null)
         {
-            _logger.LogError("Token is missing");
+            _logger.TokenIsMissing();
 
             return new IntrospectionRequestValidationResult
             {
@@ -80,7 +80,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
                     var sanitized = hint.Replace(Environment.NewLine, "", StringComparison.InvariantCulture).Replace("\n", "", StringComparison.InvariantCulture).Replace("\r", "", StringComparison.InvariantCulture);
-                    _logger.LogDebug("Token type hint found in request: {tokenTypeHint}", sanitized);
+                    _logger.TokenTypeHintFoundInRequest(sanitized);
                 }
             }
             else
@@ -88,7 +88,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
                     var sanitized = hint.Replace(Environment.NewLine, "", StringComparison.InvariantCulture).Replace("\n", "", StringComparison.InvariantCulture).Replace("\r", "", StringComparison.InvariantCulture);
-                    _logger.LogDebug("Unsupported token type hint found in request: {tokenTypeHint}", sanitized);
+                    _logger.UnsupportedTokenTypeHintFoundInRequest(sanitized);
                 }
                 hint = null; // Discard an unknown hint, in line with RFC 7662
             }
@@ -126,7 +126,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
                     // fall back to refresh token
                     if (hint.IsPresent())
                     {
-                        _logger.LogDebug("Failed to validate token as access token. Possible incorrect token_type_hint parameter.");
+                        _logger.FailedToValidateTokenAsAccessTokenPossible();
                     }
                     claims = await GetRefreshTokenClaimsAsync(token, client, ct);
                 }
@@ -140,7 +140,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
                     // fall back to access token
                     if (hint.IsPresent())
                     {
-                        _logger.LogDebug("Failed to validate token as refresh token. Possible incorrect token_type_hint parameter.");
+                        _logger.FailedToValidateTokenAsRefreshTokenPossible();
                     }
                     claims = await GetAccessTokenClaimsAsync(token, client, ct);
                 }
@@ -150,7 +150,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
 
         if (claims != null)
         {
-            _logger.LogDebug("Introspection request validation successful.");
+            _logger.IntrospectionRequestValidationSuccessful();
 
             return new IntrospectionRequestValidationResult
             {
@@ -165,7 +165,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
         }
 
         // if we get here then fail
-        _logger.LogDebug("Token is invalid.");
+        _logger.TokenIsInvalid();
 
         return new IntrospectionRequestValidationResult
         {
@@ -220,7 +220,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             var tokenClientId = claims.SingleOrDefault(x => x.Type == JwtClaimTypes.ClientId)?.Value;
             if (tokenClientId == client.ClientId)
             {
-                _logger.LogDebug("Validated access token");
+                _logger.ValidatedAccessToken();
                 claims.Add(new Claim("token_type", TokenTypeHints.AccessToken));
                 return claims;
             }
@@ -239,7 +239,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
         var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token, null, ct);
         if (!tokenValidationResult.IsError)
         {
-            _logger.LogDebug("Validated access token");
+            _logger.ValidatedAccessTokenIntrospectionRequestValidator();
             return tokenValidationResult.Claims;
         }
 

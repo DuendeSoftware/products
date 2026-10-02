@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.Saml.Infrastructure;
 
 internal static class SamlLogParameters
 {
-    internal const string SecurityKey = "securityKey";
+    internal const string SecurityKey = "SecurityKey";
 }
 
 internal static partial class Log

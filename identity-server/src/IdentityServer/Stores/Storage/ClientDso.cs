@@ -108,7 +108,7 @@ internal static class ClientDso
         string? Description,
         DateTime? Expiration,
         string Type,
-        string HashAlgorithm);
+        string? HashAlgorithm);
 
     internal sealed record ClaimDso(
         string Type,

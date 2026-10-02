@@ -65,11 +65,15 @@ public interface IClientAdmin
     // === Secret Management ===
 
     /// <summary>
-    /// Creates a new secret for a client. The plaintext value is hashed before storage.
+    /// Creates a new secret for a client. <c>SharedSecret</c> and custom secret types are hashed before
+    /// storage; the built-in types <see cref="IdentityServerConstants.SecretTypes.X509CertificateThumbprint"/>,
+    /// <see cref="IdentityServerConstants.SecretTypes.X509CertificateName"/>,
+    /// <see cref="IdentityServerConstants.SecretTypes.X509CertificateBase64"/>, and
+    /// <see cref="IdentityServerConstants.SecretTypes.JsonWebKey"/> are stored verbatim.
     /// Secret metadata cannot be updated. To change a secret, delete it and create a new one.
     /// </summary>
     /// <param name="clientId">The storage ID of the client.</param>
-    /// <param name="secret">The secret to create. The plaintext value is hashed before storage.</param>
+    /// <param name="secret">The secret to create. See <see cref="CreateClientSecret"/> for the storage policy.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The new secret's storage <see cref="SecretId"/> on success, or errors on failure.</returns>
     Task<SaveResult<SecretId>> CreateSecretAsync(ClientId clientId, CreateClientSecret secret, Ct ct);

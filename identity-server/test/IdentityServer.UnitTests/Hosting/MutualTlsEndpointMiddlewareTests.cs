@@ -8,6 +8,7 @@ using Duende.IdentityServer.Hosting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Hosting;
@@ -147,6 +148,40 @@ public class MutualTlsEndpointMiddlewareTests
         var errorResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
         errorResponse.GetProperty("error").GetString().ShouldBe("invalid_client");
         errorResponse.GetProperty("error_description").GetString().ShouldBe("mTLS authentication failed.");
+    }
+
+    [Theory]
+    [Trait("Category", Category)]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Invoke_failed_auth_should_only_read_failure_message_when_debug_is_enabled(bool debugEnabled)
+    {
+        var logger = new FakeLogger<MutualTlsEndpointMiddleware>();
+        logger.ControlLevel(LogLevel.Debug, debugEnabled);
+        _subject = new MutualTlsEndpointMiddleware(Next, _options, logger);
+        _options.MutualTls.Enabled = true;
+        var context = CreateContext("localhost", "/connect/mtls/token");
+        var failure = new MessageTrackingException();
+        context.RequestServices = new MockServiceProvider(new MockAuthenticationService
+        {
+            Result = AuthenticateResult.Fail(failure)
+        });
+
+        await _subject.Invoke(context, null);
+
+        failure.MessageReadCount.ShouldBe(debugEnabled ? 1 : 0);
+        _nextWasCalled.ShouldBeFalse();
+        context.Response.StatusCode.ShouldBe(400);
+        if (debugEnabled)
+        {
+            var record = logger.Collector.LatestRecord;
+            record.Level.ShouldBe(LogLevel.Debug);
+            record.Message.ShouldBe("MTLS authentication failed, error: Certificate validation failed.");
+        }
+        else
+        {
+            logger.Collector.Count.ShouldBe(0);
+        }
     }
 
     [Fact]
@@ -530,6 +565,20 @@ public class MutualTlsEndpointMiddlewareTests
         context.Response.Body.Seek(0, SeekOrigin.Begin);
         using var reader = new StreamReader(context.Response.Body);
         return await reader.ReadToEndAsync();
+    }
+
+    private sealed class MessageTrackingException : Exception
+    {
+        public int MessageReadCount { get; private set; }
+
+        public override string Message
+        {
+            get
+            {
+                MessageReadCount++;
+                return "Certificate validation failed";
+            }
+        }
     }
 
     private class MockServiceProvider : IServiceProvider

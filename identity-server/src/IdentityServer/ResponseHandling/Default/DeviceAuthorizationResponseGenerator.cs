@@ -75,7 +75,7 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(baseUrl));
         }
 
-        Logger.LogTrace("Creating response for device authorization request");
+        Logger.CreatingResponseForDeviceAuthorizationRequest();
 
         var response = new DeviceAuthorizationResponse();
 

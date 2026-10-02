@@ -7,7 +7,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
@@ -73,9 +72,7 @@ public static class IdentityServerApplicationBuilderExtensions
             ArgumentNullException.ThrowIfNull(loggerFactory);
 
             var logger = loggerFactory.CreateLogger("Duende.IdentityServer.Startup");
-            logger.LogInformation("Starting Duende IdentityServer version {version} ({netversion})",
-                typeof(IdentityServerMiddleware).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion,
-                RuntimeInformation.FrameworkDescription);
+            logger.StartingDuendeIdentityServerVersionVersionNetversion(typeof(IdentityServerMiddleware).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion, RuntimeInformation.FrameworkDescription);
 
             var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
 
@@ -123,7 +120,7 @@ public static class IdentityServerApplicationBuilderExtensions
                 var persistedGrants = serviceProvider.GetRequiredService(typeof(IPersistedGrantStore));
                 if (persistedGrants.GetType().FullName == typeof(InMemoryPersistedGrantStore).FullName)
                 {
-                    logger.LogInformation("You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.");
+                    logger.InMemoryPersistedGrantStoreInUse();
                 }
 
                 ValidateOptions(options, logger);
@@ -140,7 +137,7 @@ public static class IdentityServerApplicationBuilderExtensions
 
         if (await schemes.GetDefaultAuthenticateSchemeAsync() == null && options.Authentication.CookieAuthenticationScheme == null)
         {
-            logger.LogWarning("No authentication scheme has been set. Setting either a default authentication scheme or a CookieAuthenticationScheme on IdentityServerOptions is required.");
+            logger.NoAuthenticationSchemeHasBeenSetSettingEither();
         }
         else
         {
@@ -151,7 +148,7 @@ public static class IdentityServerApplicationBuilderExtensions
                 authenticationScheme = await schemes.GetSchemeAsync(options.Authentication.CookieAuthenticationScheme);
                 if (authenticationScheme != null)
                 {
-                    logger.LogInformation("Using explicitly configured authentication scheme {scheme} for IdentityServer", options.Authentication.CookieAuthenticationScheme);
+                    logger.UsingExplicitlyConfiguredAuthenticationSchemeSchemeForIdentityServer(options.Authentication.CookieAuthenticationScheme);
                 }
             }
             else
@@ -159,7 +156,7 @@ public static class IdentityServerApplicationBuilderExtensions
                 authenticationScheme = await schemes.GetDefaultAuthenticateSchemeAsync();
                 if (authenticationScheme != null)
                 {
-                    logger.LogInformation("Using the default authentication scheme {scheme} for IdentityServer", authenticationScheme.Name);
+                    logger.UsingTheDefaultAuthenticationSchemeSchemeForIdentityServer(authenticationScheme.Name);
                 }
             }
 
@@ -170,14 +167,14 @@ public static class IdentityServerApplicationBuilderExtensions
 
             if (!typeof(IAuthenticationSignInHandler).IsAssignableFrom(authenticationScheme.HandlerType))
             {
-                logger.LogInformation("Authentication scheme {scheme} is configured for IdentityServer, but it is not a scheme that supports signin (like cookies). If you support interactive logins via the browser, then a cookie-based scheme should be used.", authenticationScheme.Name);
+                logger.AuthenticationSchemeSchemeIsConfiguredForIdentityServerBut(authenticationScheme.Name);
             }
 
-            logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for authentication", (await schemes.GetDefaultAuthenticateSchemeAsync())?.Name);
-            logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for sign-in", (await schemes.GetDefaultSignInSchemeAsync())?.Name);
-            logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for sign-out", (await schemes.GetDefaultSignOutSchemeAsync())?.Name);
-            logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for challenge", (await schemes.GetDefaultChallengeSchemeAsync())?.Name);
-            logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for forbid", (await schemes.GetDefaultForbidSchemeAsync())?.Name);
+            logger.UsingSchemeAsDefaultASPNETCoreScheme((await schemes.GetDefaultAuthenticateSchemeAsync())?.Name);
+            logger.UsingSchemeAsDefaultASPNETCoreScheme2((await schemes.GetDefaultSignInSchemeAsync())?.Name);
+            logger.UsingSchemeAsDefaultASPNETCoreScheme3((await schemes.GetDefaultSignOutSchemeAsync())?.Name);
+            logger.UsingSchemeAsDefaultASPNETCoreScheme4((await schemes.GetDefaultChallengeSchemeAsync())?.Name);
+            logger.UsingSchemeAsDefaultASPNETCoreScheme5((await schemes.GetDefaultForbidSchemeAsync())?.Name);
         }
     }
 
@@ -185,7 +182,7 @@ public static class IdentityServerApplicationBuilderExtensions
     {
         if (options.IssuerUri.IsPresent())
         {
-            logger.LogDebug("Custom IssuerUri set to {0}", options.IssuerUri);
+            logger.CustomIssuerUriSetToValue(options.IssuerUri);
         }
 
         // these three are dynamically populated later from the cookie handler options
@@ -258,9 +255,7 @@ public static class IdentityServerApplicationBuilderExtensions
         {
             var error = message ?? $"Required service {service.FullName} is not registered in the DI container. Aborting startup";
 
-#pragma warning disable CA2254 // This message may not be structured, and the value is also used below making conditionals awkward
-            logger.LogCritical(error);
-#pragma warning restore CA2254
+            logger.Message(error);
 
             if (doThrow)
             {

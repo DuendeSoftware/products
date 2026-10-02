@@ -3,11 +3,8 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -19,21 +16,6 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private ISamlServiceProviderAdmin BuildAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<ISamlServiceProviderAdmin>();
-    }
-
-    private ISamlServiceProviderStore BuildStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<ISamlServiceProviderStore>();
-    }
 
     private static string GenerateSelfSignedCertBase64() =>
         SamlTestCertificates.GenerateSelfSignedCertBase64();
@@ -41,8 +23,8 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
     [Fact]
     public async Task create_via_admin_then_find_by_entity_id_returns_model()
     {
-        var admin = BuildAdmin();
-        var store = BuildStore();
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var store = _fixture.SamlServiceProviderStore;
 
         var entityId = $"https://sp-{Guid.NewGuid():N}.example.com";
         var certBase64 = GenerateSelfSignedCertBase64();
@@ -112,7 +94,7 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_by_entity_id_for_nonexistent_returns_null()
     {
-        var store = BuildStore();
+        var store = _fixture.SamlServiceProviderStore;
         var sp = await store.FindByEntityIdAsync("https://nonexistent.example.com", _ct);
         sp.ShouldBeNull();
     }
@@ -120,8 +102,8 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
     [Fact]
     public async Task get_all_returns_all_created_service_providers()
     {
-        var admin = BuildAdmin();
-        var store = BuildStore();
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var store = _fixture.SamlServiceProviderStore;
 
         var entityId1 = $"https://sp1-{Guid.NewGuid():N}.example.com";
         var entityId2 = $"https://sp2-{Guid.NewGuid():N}.example.com";
@@ -173,13 +155,5 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
 
     public ValueTask InitializeAsync() => _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

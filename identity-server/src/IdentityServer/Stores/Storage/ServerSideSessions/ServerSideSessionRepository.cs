@@ -18,8 +18,10 @@ using IdentityServerModels = Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Stores.Storage.ServerSideSessions;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory, TimeProvider timeProvider)
+internal sealed class ServerSideSessionRepository(IPartitionedStorageFactory partitionedStorageFactory, TimeProvider timeProvider)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Operational, ct);
+
     internal enum Keys
     {
         SessionKey = 1
@@ -35,10 +37,10 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
 
     internal async Task<CreateResult> CreateAsync(IdentityServerModels.ServerSideSession session, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var id = UuidV7.New();
         var dso = ModelToDso(session);
-        return await storage.CreateAsync(
+        return await partitionedStorage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(SessionKeyDskV1.Create(session.Key))],
@@ -50,8 +52,8 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
 
     internal async Task<(Guid Id, int Version, ServerSideSessionDso.V1 Dso)?> TryReadByKeyAsync(string key, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(
             ServerSideSessionDso.EntityType,
             DataStorageKey.Create(SessionKeyDskV1.Create(key)),
             ct);
@@ -59,7 +61,7 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
     }
 
     internal async Task<UpdateResult> UpdateAsync(Guid id, int version, IdentityServerModels.ServerSideSession session, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).UpdateAsync(
+        await (await GetPartitionedStorage(ct)).UpdateAsync(
             UuidV7.From(id),
             ModelToDso(session),
             version,
@@ -70,7 +72,7 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
             ct);
 
     internal async Task<DeleteResult> DeleteByKeyAsync(string key, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).DeleteAsync(
+        await (await GetPartitionedStorage(ct)).DeleteAsync(
             ServerSideSessionDso.EntityType,
             DataStorageKey.Create(SessionKeyDskV1.Create(key)),
             [],
@@ -86,14 +88,14 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
         SessionFilter filter,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var filterExpr = BuildSessionFilterExpression(filter);
         var results = new List<(Guid, int, ServerSideSessionDso.V1)>();
         var page = 1;
 
         while (true)
         {
-            var result = await storage.QueryAsync<ServerSideSessionDso.V1>(
+            var result = await partitionedStorage.QueryAsync<ServerSideSessionDso.V1>(
                 ServerSideSessionDso.EntityType,
                 filterExpr,
                 SortParameter.Empty,
@@ -120,12 +122,12 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
             return;
         }
 
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var operations = ids
             .Select(id => (IStorageOperation)DeleteOperation.ById(ServerSideSessionDso.EntityType, UuidV7.From(id)))
             .ToArray();
 
-        await storage.ExecuteBatchAsync(operations, [], ct);
+        await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
     }
 
     internal async Task<IReadOnlyList<(Guid Id, ServerSideSessionDso.V1 Dso)>> QueryExpiredAsync(int count, Ct ct)
@@ -135,9 +137,9 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
             return [];
         }
 
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var size = Math.Min(count, DataRangeSize.MaxValue);
-        var result = await storage.QueryAsync<ServerSideSessionDso.V1>(
+        var result = await partitionedStorage.QueryAsync<ServerSideSessionDso.V1>(
             ServerSideSessionDso.EntityType,
             Fields.Expires.LessThan(timeProvider.GetUtcNow()),
             new SortParameter(SystemFields.CreatedAtField),
@@ -162,7 +164,7 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
         var countRequested = filter.CountRequested > 0 ? filter.CountRequested : 25;
         var pageSize = Math.Min(countRequested, DataRangeSize.MaxValue);
 
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var filterExpr = BuildSessionQueryExpression(filter);
 
         // Decode the ResultsToken: format is "nextToken|previousToken"
@@ -186,7 +188,7 @@ internal sealed class ServerSideSessionRepository(IStorageFactory storageFactory
             ? new SortParameter(SystemFields.CreatedAtField, SortDirection.Descending)
             : new SortParameter(SystemFields.CreatedAtField);
 
-        var result = await storage.QueryAsync<ServerSideSessionDso.V1>(
+        var result = await partitionedStorage.QueryAsync<ServerSideSessionDso.V1>(
             ServerSideSessionDso.EntityType,
             filterExpr,
             sort,

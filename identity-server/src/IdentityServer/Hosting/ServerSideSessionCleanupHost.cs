@@ -28,7 +28,7 @@ public class ServerSideSessionCleanupHost(
     /// <inheritdoc />
     protected override async Task ExecuteAsync(Ct stoppingToken)
     {
-        logger.LogDebug("Starting server-side session removal");
+        logger.StartingServerSideSessionRemoval();
 
         var removalFrequencySeconds = (int)options.ServerSideSessions.RemoveExpiredSessionsFrequency.TotalSeconds;
 
@@ -47,12 +47,12 @@ public class ServerSideSessionCleanupHost(
             }
             catch (TaskCanceledException)
             {
-                logger.LogDebug("TaskCanceledException. Exiting.");
+                logger.TaskCanceledExceptionExiting();
                 break;
             }
             catch (Exception ex)
             {
-                logger.LogError("Task.Delay exception: {ExceptionMessage}. Exiting.", ex.Message);
+                logger.TaskDelayExceptionExceptionMessageExiting(ex.Message);
                 break;
             }
 
@@ -66,7 +66,7 @@ public class ServerSideSessionCleanupHost(
             delay = options.ServerSideSessions.RemoveExpiredSessionsFrequency;
         }
 
-        logger.LogDebug("Stopping server-side session removal");
+        logger.StoppingServerSideSessionRemoval();
     }
 
     private async Task RunAsync(Ct ct)
@@ -105,7 +105,7 @@ public class ServerSideSessionCleanupHost(
                     continue;
                 }
 
-                scopedLogger.LogDebug("Processing expiration for {count} expired server-side sessions.", found);
+                scopedLogger.ProcessingExpirationForCountExpiredServerSideSessions(found);
 
                 foreach (var session in sessions)
                 {
@@ -115,7 +115,7 @@ public class ServerSideSessionCleanupHost(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Exception removing expired sessions");
+            logger.ExceptionRemovingExpiredSessions(ex);
         }
     }
 }

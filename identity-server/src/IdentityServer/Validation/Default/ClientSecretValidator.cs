@@ -44,7 +44,7 @@ public class ClientSecretValidator : IClientSecretValidator
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ClientSecretValidator.Validate");
 
-        _logger.LogDebug("Start client validation");
+        _logger.StartClientValidation();
 
         var fail = new ClientSecretValidationResult
         {
@@ -57,7 +57,7 @@ public class ClientSecretValidator : IClientSecretValidator
         {
             await RaiseFailureEventAsync("unknown", "No client id found", ct);
 
-            _logger.LogDebug("No client identifier found");
+            _logger.NoClientIdentifierFound();
 
             fail.Error = IdentityModel.OidcConstants.TokenErrors.InvalidRequest;
             return fail;
@@ -69,14 +69,14 @@ public class ClientSecretValidator : IClientSecretValidator
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Unknown client", ct);
 
-            _logger.LogDebug("No client with id '{clientId}' found. aborting", parsedSecret.Id);
+            _logger.NoClientWithIdFoundAborting(parsedSecret.Id);
             return fail;
         }
 
         SecretValidationResult secretValidationResult = null;
         if (!client.RequireClientSecret || client.IsImplicitOnly())
         {
-            _logger.LogDebug("Public Client - skipping secret validation success");
+            _logger.PublicClientSkippingSecretValidationSuccess();
         }
         else
         {
@@ -84,13 +84,13 @@ public class ClientSecretValidator : IClientSecretValidator
             if (secretValidationResult.Success == false)
             {
                 await RaiseFailureEventAsync(client.ClientId, "Invalid client secret", ct);
-                _logger.LogError("Client secret validation failed for client: {clientId}.", client.ClientId);
+                _logger.ClientSecretValidationFailedForClient(client.ClientId);
 
                 return fail;
             }
         }
 
-        _logger.LogDebug("Client validation success");
+        _logger.ClientValidationSuccess();
 
         var success = new ClientSecretValidationResult
         {

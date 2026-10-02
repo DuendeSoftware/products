@@ -183,7 +183,7 @@ public class ProfileService<TUser> : IProfileService
         var user = await UserManager.FindByIdAsync(subjectId);
         if (user == null)
         {
-            Logger?.LogWarning("No user found matching subject Id: {subjectId}", subjectId);
+            Logger?.UserNotFoundBySubjectId(subjectId);
         }
 
         return user;

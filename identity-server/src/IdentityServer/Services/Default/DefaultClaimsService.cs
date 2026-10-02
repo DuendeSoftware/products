@@ -43,9 +43,10 @@ public class DefaultClaimsService : IClaimsService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultClaimsService.GetIdentityTokenClaims");
 
-        Logger.LogDebug("Getting claims for identity token for subject: {subject} and client: {clientId}",
-            subject.GetSubjectId(),
-            request.Client.ClientId);
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            Logger.GettingClaimsForIdentityTokenForSubjectSubject(subject.GetSubjectId(), request.Client.ClientId);
+        }
 
         var outputClaims = new List<Claim>(GetStandardSubjectClaims(subject));
         outputClaims.AddRange(GetOptionalClaims(subject));
@@ -86,7 +87,7 @@ public class DefaultClaimsService : IClaimsService
         }
         else
         {
-            Logger.LogDebug("In addition to an id_token, an access_token was requested. No claims other than sub are included in the id_token. To obtain more user claims, either use the user info endpoint or set AlwaysIncludeUserClaimsInIdToken on the client configuration.");
+            Logger.InAdditionToAnIdTokenAnAccess();
         }
 
         return outputClaims;
@@ -97,7 +98,7 @@ public class DefaultClaimsService : IClaimsService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultClaimsService.GetAccessTokenClaims");
 
-        Logger.LogDebug("Getting claims for access token for client: {clientId}", request.Client.ClientId);
+        Logger.GettingClaimsForAccessTokenForClientClientId(request.Client.ClientId);
 
         var outputClaims = new List<Claim>
         {
@@ -107,7 +108,7 @@ public class DefaultClaimsService : IClaimsService
         // log if client ID is overwritten
         if (!string.Equals(request.ClientId, request.Client.ClientId, StringComparison.Ordinal))
         {
-            Logger.LogDebug("Client {clientId} is impersonating {impersonatedClientId}", request.Client.ClientId, request.ClientId);
+            Logger.ClientClientIdIsImpersonatingImpersonatedClientId(request.Client.ClientId, request.ClientId);
         }
 
         // check for client claims
@@ -145,7 +146,10 @@ public class DefaultClaimsService : IClaimsService
                 outputClaims.Add(new Claim(JwtClaimTypes.Scope, IdentityServerConstants.StandardScopes.OfflineAccess));
             }
 
-            Logger.LogDebug("Getting claims for access token for subject: {subject}", subject.GetSubjectId());
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.GettingClaimsForAccessTokenForSubjectSubject(subject.GetSubjectId());
+            }
 
             outputClaims.AddRange(GetStandardSubjectClaims(subject));
             outputClaims.AddRange(GetOptionalClaims(subject));
@@ -246,10 +250,10 @@ public class DefaultClaimsService : IClaimsService
     protected virtual IEnumerable<Claim> FilterProtocolClaims(IEnumerable<Claim> claims)
     {
         var claimsToFilter = claims.Where(x => Constants.Filters.ClaimsServiceFilterClaimTypes.Contains(x.Type));
-        if (claimsToFilter.Any())
+        if (Logger.IsEnabled(LogLevel.Debug) && claimsToFilter.Any())
         {
             var types = claimsToFilter.Select(x => x.Type);
-            Logger.LogDebug("Claim types from profile service that were filtered: {claimTypes}", types);
+            Logger.ClaimTypesFromProfileServiceThatWereFiltered(types);
         }
         return claims.Except(claimsToFilter);
     }

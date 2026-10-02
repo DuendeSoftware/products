@@ -77,13 +77,16 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessInteraction");
         activity?.SetTag(Tracing.Properties.ClientId, request.Client.ClientId);
 
-        Logger.LogTrace("ProcessInteractionAsync");
+        Logger.ProcessInteractionAsync();
 
         // handle the scenario where user choose to deny prior to even logging in
         if (consent != null && consent.Granted == false && consent.Error.HasValue)
         {
             // special case when anonymous user has issued an error prior to authenticating
-            Logger.LogInformation("Error: User consent result: {error}", consent.Error);
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.ErrorUserConsentResult("Error", consent.Error);
+            }
 
             var error = consent.Error switch
             {
@@ -119,7 +122,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         if ((result.ResponseType == InteractionResponseType.UserInteraction) && request.PromptModes.Contains(OidcConstants.PromptModes.None))
         {
             // prompt=none means do not show the UI
-            Logger.LogInformation("Changing response to LoginRequired: prompt=none was requested");
+            Logger.ChangingResponseToLoginRequiredPromptNoneWasRequested();
             result = new InteractionResponse
             {
                 Error = result.IsLogin ? OidcConstants.AuthorizeErrors.LoginRequired :
@@ -144,7 +147,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         // check prompt=create here, as we don't support it with any other combo
         if (request.PromptModes.Contains(OidcConstants.PromptModes.Create))
         {
-            Logger.LogInformation("Showing create account: request contains prompt=create");
+            Logger.ShowingCreateAccountRequestContainsPromptCreate();
             request.RemovePrompt();
             result = new InteractionResponse
             {
@@ -180,7 +183,10 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         if (request.PromptModes.Contains(OidcConstants.PromptModes.Login) ||
             request.PromptModes.Contains(OidcConstants.PromptModes.SelectAccount))
         {
-            Logger.LogInformation("Showing login: request contains prompt={PromptModes}", request.PromptModes.ToSpaceSeparatedString());
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.ShowingLoginRequestContainsPrompt(request.PromptModes.ToSpaceSeparatedString());
+            }
             // remove prompt so when we redirect back in from login page
             // we won't think we need to force a prompt again
             request.RemovePrompt();
@@ -188,7 +194,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         }
         if (request.MaxAge == 0)
         {
-            Logger.LogInformation("Showing login: request contains max_age=0.");
+            Logger.ShowingLoginRequestContainsMaxAge0();
             // remove max_age=0 so when we redirect back in from login page
             // we won't think we need to force a prompt again
             request.RemoveMaxAge();
@@ -217,11 +223,11 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         {
             if (!isAuthenticated)
             {
-                Logger.LogInformation("Showing login: User is not authenticated");
+                Logger.ShowingLoginUserIsNotAuthenticated();
             }
             else if (!isActive)
             {
-                Logger.LogInformation("Showing login: User is not active");
+                Logger.ShowingLoginUserIsNotActive();
             }
 
             return new InteractionResponse { IsLogin = true };
@@ -236,7 +242,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                 var currentTenant = request.Subject.GetTenant();
                 if (tenant != currentTenant)
                 {
-                    Logger.LogInformation("Showing login: Current tenant ({currentTenant}) is not the requested tenant ({tenant})", currentTenant, tenant);
+                    Logger.ShowingLoginCurrentTenantIsNotTheRequested(currentTenant, tenant);
                     return new InteractionResponse { IsLogin = true };
                 }
             }
@@ -251,7 +257,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         {
             if (idp != currentIdp)
             {
-                Logger.LogInformation("Showing login: Current IdP ({currentIdp}) is not the requested IdP ({idp})", currentIdp, idp);
+                Logger.ShowingLoginCurrentIdPIsNotTheRequested(currentIdp, idp);
                 return new InteractionResponse { IsLogin = true };
             }
         }
@@ -262,7 +268,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             var authTime = request.Subject.GetAuthenticationTime();
             if (TimeProvider.GetUtcNow().UtcDateTime > authTime.AddSeconds(request.MaxAge.Value))
             {
-                Logger.LogInformation("Showing login: Requested MaxAge exceeded.");
+                Logger.ShowingLoginRequestedMaxAgeExceeded();
 
                 return new InteractionResponse { IsLogin = true };
             }
@@ -273,7 +279,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         {
             if (!request.Client.EnableLocalLogin)
             {
-                Logger.LogInformation("Showing login: User logged in locally, but client does not allow local logins");
+                Logger.ShowingLoginUserLoggedInLocallyButClient();
                 return new InteractionResponse { IsLogin = true };
             }
         }
@@ -282,7 +288,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                  request.Client.IdentityProviderRestrictions.Count > 0 &&
                  !request.Client.IdentityProviderRestrictions.Contains(currentIdp))
         {
-            Logger.LogInformation("Showing login: User is logged in with idp: {idp}, but idp not in client restriction list.", currentIdp);
+            Logger.ShowingLoginUserIsLoggedInWithIdp(currentIdp);
             return new InteractionResponse { IsLogin = true };
         }
 
@@ -295,7 +301,10 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             var diff = nowEpoch - authTimeEpoch;
             if (diff > request.Client.UserSsoLifetime.Value)
             {
-                Logger.LogInformation("Showing login: User's auth session duration: {sessionDuration} exceeds client's user SSO lifetime: {userSsoLifetime}.", diff, request.Client.UserSsoLifetime);
+                if (Logger.IsEnabled(LogLevel.Information))
+                {
+                    Logger.ShowingLoginUserSAuthSessionDurationExceeds(diff, request.Client.UserSsoLifetime);
+                }
                 return new InteractionResponse { IsLogin = true };
             }
         }
@@ -322,7 +331,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             !request.PromptModes.Contains(OidcConstants.PromptModes.None) &&
             !request.PromptModes.Contains(OidcConstants.PromptModes.Consent))
         {
-            Logger.LogError("Invalid prompt mode: {promptMode}", request.PromptModes.ToSpaceSeparatedString());
+            Logger.InvalidPromptMode(request.PromptModes.ToSpaceSeparatedString());
             throw new ArgumentException("Invalid PromptMode");
         }
 
@@ -330,7 +339,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
 
         if (consentRequired && request.PromptModes.Contains(OidcConstants.PromptModes.None))
         {
-            Logger.LogInformation("Error: prompt=none requested, but consent is required.");
+            Logger.ErrorPromptNoneRequestedButConsentIsRequired("Error");
 
             return new InteractionResponse
             {
@@ -347,19 +356,22 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             {
                 // user was not yet shown consent screen
                 response.IsConsent = true;
-                Logger.LogInformation("Showing consent: User has not yet consented");
+                Logger.ShowingConsentUserHasNotYetConsented();
             }
             else
             {
                 request.WasConsentShown = true;
-                Logger.LogTrace("Consent was shown to user");
+                Logger.ConsentWasShownToUser();
 
                 // user was shown consent -- did they say yes or no
                 if (consent.Granted == false)
                 {
                     // no need to show consent screen again
                     // build error to return to client
-                    Logger.LogInformation("Error: User consent result: {error}", consent.Error);
+                    if (Logger.IsEnabled(LogLevel.Information))
+                    {
+                        Logger.ErrorUserConsentResultAuthorizeInteractionResponseGenerator("Error", consent.Error);
+                    }
 
                     var error = consent.Error switch
                     {
@@ -383,14 +395,14 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                     if (valid == false)
                     {
                         response.Error = OidcConstants.AuthorizeErrors.AccessDenied;
-                        Logger.LogInformation("Error: User denied consent to required scopes");
+                        Logger.ErrorUserDeniedConsentToRequiredScopes("Error");
                     }
                     else
                     {
                         // they said yes, set scopes they chose
                         request.Description = consent.Description;
                         request.ValidatedResources = request.ValidatedResources.Filter(consent.ScopesValuesConsented);
-                        Logger.LogInformation("User consented to scopes: {scopes}", consent.ScopesValuesConsented);
+                        Logger.UserConsentedToScopes(consent.ScopesValuesConsented);
 
                         if (request.Client.AllowRememberConsent)
                         {
@@ -400,7 +412,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                             {
                                 // remember what user actually selected
                                 parsedScopes = request.ValidatedResources.ParsedScopes;
-                                Logger.LogDebug("User indicated to remember consent for scopes: {scopes}", request.ValidatedResources.RawScopeValues);
+                                Logger.UserIndicatedToRememberConsentForScopes(request.ValidatedResources.RawScopeValues);
                             }
 
                             await Consent.UpdateConsentAsync(request.Subject, request.Client, parsedScopes, ct);

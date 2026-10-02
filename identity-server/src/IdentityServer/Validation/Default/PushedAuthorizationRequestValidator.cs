@@ -56,6 +56,20 @@ internal class PushedAuthorizationRequestValidator(
             return validatedRequest;
         }
 
+        // -- Client Binding Validation --
+        // RFC 9126 section 2.2 requires that a pushed authorization request
+        // be bound to the client that authenticated to the PAR endpoint. If
+        // the body client_id is present but does not match the authenticated
+        // client, reject the request. A missing or empty body client_id is
+        // left to the downstream authorize-request validator to reject.
+        var bodyClientId = context.RequestParameters.Get(OidcConstants.AuthorizeRequest.ClientId);
+        if (bodyClientId.IsPresent() && !string.Equals(bodyClientId, context.Client.ClientId, StringComparison.Ordinal))
+        {
+            return new PushedAuthorizationValidationResult(
+                OidcConstants.AuthorizeErrors.InvalidRequest,
+                "Pushed authorization client_id does not match the authenticated client");
+        }
+
         // -- DPoP Header Validation --
         // The client can send the public key of its DPoP proof key to us. We
         // then bind its authorization code to the proof key and check for a
@@ -78,7 +92,7 @@ internal class PushedAuthorizationRequestValidator(
             // bail out if unreasonably large
             if (context.DPoPProofToken.Length > options.InputLengthRestrictions.DPoPProofToken)
             {
-                logger.LogError("DPoP proof token is too long");
+                logger.DPoPProofTokenIsTooLongPushedAuthorizationRequestValidator();
                 return new PushedAuthorizationValidationResult(
                     "invalid_dpop_proof",
                     "DPoP proof token is too long");

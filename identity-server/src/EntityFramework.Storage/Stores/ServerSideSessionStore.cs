@@ -70,11 +70,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
         try
         {
             await Context.SaveChangesAsync(ct);
-            Logger.LogDebug("Created new server-side session {serverSideSessionKey} in database", session.Key);
+            Log.CreatedNewServerSideSessionValueInDatabase(Logger, session.Key);
         }
         catch (DbUpdateException ex)
         {
-            Logger.LogWarning("Exception creating new server-side session in database: {error}", ex.Message);
+            Log.ExceptionCreatingNewServerSideSessionInDatabase(Logger, ex.Message);
         }
     }
 
@@ -104,7 +104,8 @@ public class ServerSideSessionStore : IServerSideSessionStore
             };
         }
 
-        Logger.LogDebug("Found server-side session {serverSideSessionKey} in database: {serverSideSessionKeyFound}", key, model != null);
+        var found = model != null;
+        Log.FoundServerSideSessionValueInDatabaseValue(Logger, key, found);
 
         return model;
     }
@@ -120,7 +121,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         if (entity == null)
         {
-            Logger.LogDebug("No server-side session {serverSideSessionKey} found in database. Update failed.", session.Key);
+            Log.NoServerSideSessionValueFoundInDatabase(Logger, session.Key);
             return;
         }
 
@@ -136,11 +137,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
         try
         {
             await Context.SaveChangesAsync(ct);
-            Logger.LogDebug("Updated server-side session {serverSideSessionKey} in database", session.Key);
+            Log.UpdatedServerSideSessionValueInDatabase(Logger, session.Key);
         }
         catch (DbUpdateException ex)
         {
-            Logger.LogWarning("Exception updating existing server side session {serverSideSessionKey} in database: {error}", session.Key, ex.Message);
+            Log.ExceptionUpdatingExistingServerSideSessionValueIn(Logger, session.Key, ex.Message);
         }
     }
 
@@ -155,7 +156,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         if (entity == null)
         {
-            Logger.LogDebug("No server side session {serverSideSessionKey} found in database. Delete failed.", key);
+            Log.NoServerSideSessionValueFoundInDatabase2(Logger, key);
             return;
         }
 
@@ -164,11 +165,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
         try
         {
             await Context.SaveChangesAsync(ct);
-            Logger.LogDebug("Deleted server-side session {serverSideSessionKey} in database", key);
+            Log.DeletedServerSideSessionValueInDatabase(Logger, key);
         }
         catch (DbUpdateException ex)
         {
-            Logger.LogWarning("Exception deleting server-side session {serverSideSessionKey} in database: {error}", key, ex.Message);
+            Log.ExceptionDeletingServerSideSessionValueInDatabase(Logger, key, ex.Message);
         }
     }
 
@@ -198,7 +199,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             Ticket = entity.Data,
         }).ToArray();
 
-        Logger.LogDebug("Found {serverSideSessionCount} server-side sessions for {@filter}", results.Length, filter);
+        Log.FoundValueServerSideSessionsForValue(Logger, results.Length, filter);
 
         return results;
     }
@@ -219,11 +220,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
         try
         {
             await Context.SaveChangesAsync(ct);
-            Logger.LogDebug("Removed {serverSideSessionCount} server-side sessions from database for {@filter}", entities.Length, filter);
+            Log.RemovedValueServerSideSessionsFromDatabaseFor(Logger, entities.Length, filter);
         }
         catch (DbUpdateException ex)
         {
-            Logger.LogInformation("Error removing {serverSideSessionCount} server-side sessions from database for {@filter}: {error}", entities.Length, filter, ex.Message);
+            Log.ErrorRemovingValueServerSideSessionsFromDatabase(Logger, entities.Length, filter, ex.Message);
         }
     }
 
@@ -260,7 +261,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var list = await Context.SaveChangesWithConcurrencyCheckAsync<Entities.ServerSideSession>(Logger, ct);
             entities = entities.Except(list).ToArray();
 
-            Logger.LogDebug("Found and removed {serverSideSessionCount} expired server-side sessions", entities.Length);
+            Log.FoundAndRemovedValueExpiredServerSideSessions(Logger, entities.Length);
         }
 
         var results = entities.Select(entity => new ServerSideSession
@@ -364,7 +365,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             Results = models
         };
 
-        Logger.LogDebug("Found {serverSideSessionCount} server-side sessions in database", models.Length);
+        Log.FoundValueServerSideSessionsInDatabase(Logger, models.Length);
 
         return result;
     }

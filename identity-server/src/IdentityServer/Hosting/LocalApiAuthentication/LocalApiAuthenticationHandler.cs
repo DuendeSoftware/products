@@ -6,9 +6,11 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -58,7 +60,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
     /// <inheritdoc />
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        _logger.LogTrace("HandleAuthenticateAsync called");
+        _logger.HandleAuthenticateAsyncCalled();
 
         string token = null;
 
@@ -75,7 +77,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
         {
             if (Options.TokenMode == LocalApiTokenMode.DPoPOnly)
             {
-                _logger.LogTrace("Bearer token sent, but mode is DPoP only. Ignoring token.");
+                _logger.BearerTokenSentButModeIsDPoPOnly();
                 return AuthenticateResult.NoResult();
             }
 
@@ -85,7 +87,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
         {
             if (Options.TokenMode == LocalApiTokenMode.BearerOnly)
             {
-                _logger.LogTrace("DPoP token sent, but mode is Bearer only. Ignoring token.");
+                _logger.DPoPTokenSentButModeIsBearerOnly();
                 return AuthenticateResult.NoResult();
             }
 
@@ -98,12 +100,12 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             return AuthenticateResult.Fail("No Access Token is sent.");
         }
 
-        _logger.LogTrace("Token found: {token}", token);
+        _logger.TokenFoundToken(token);
 
         var tokenResult = await _tokenValidator.ValidateAccessTokenAsync(token, Options.ExpectedScope, Context.RequestAborted);
         if (tokenResult.IsError)
         {
-            _logger.LogTrace("Failed to validate the token");
+            _logger.FailedToValidateTheToken();
 
             return AuthenticateResult.Fail(tokenResult.Error);
         }
@@ -127,6 +129,18 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             }
 
             var proofToken = dpopHeader.FirstOrDefault();
+
+            // Reject an over-long proof before it reaches the JWT parser. The token and PAR
+            // endpoints apply the same restriction at their own call sites.
+            var identityServerOptions = Context.RequestServices.GetRequiredService<IdentityServerOptions>();
+            if (proofToken?.Length > identityServerOptions.InputLengthRestrictions.DPoPProofToken)
+            {
+                _logger.LocalApiDPoPProofTokenIsTooLong();
+                Context.Items["DPoP-Error"] = OidcConstants.TokenErrors.InvalidDPoPProof;
+                Context.Items["DPoP-ErrorDescription"] = "DPoP proof token is too long.";
+                return AuthenticateResult.Fail("DPoP proof token is too long.");
+            }
+
             var validationContext = new DPoPProofValidationContext
             {
                 ProofToken = proofToken,
@@ -170,7 +184,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             }
         }
 
-        _logger.LogTrace("Successfully validated the token.");
+        _logger.SuccessfullyValidatedTheToken();
 
         var claimsIdentity = new ClaimsIdentity(tokenResult.Claims, Scheme.Name, JwtClaimTypes.Name, JwtClaimTypes.Role);
         var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

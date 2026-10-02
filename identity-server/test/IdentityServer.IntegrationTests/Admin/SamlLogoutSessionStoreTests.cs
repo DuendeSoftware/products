@@ -4,15 +4,13 @@
 #nullable enable
 
 using Duende.IdentityServer.Saml;
-using Duende.IdentityServer.Stores.Storage.SamlLogoutSession;
 using Duende.Storage;
 using Duende.Storage.Internal;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
 /// <summary>
-/// Integration tests for the IStorage-backed ISamlLogoutSessionStore implementation.
+/// Integration tests for the IPartitionedStorage-backed ISamlLogoutSessionStore implementation.
 /// Tests cover all 4 interface methods against a real SQLite database.
 /// </summary>
 public sealed class SamlLogoutSessionStoreTests : IAsyncLifetime
@@ -267,8 +265,7 @@ public sealed class SamlLogoutSessionStoreTests : IAsyncLifetime
         await Store.StoreAsync(session, _ct);
 
         // Use the repository directly to bump the version (simulating a concurrent write)
-        using var scope = _fixture.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<SamlLogoutSessionRepository>();
+        var repository = _fixture.SamlLogoutSessionRepository;
         var entry = await repository.TryReadByLogoutIdAsync(session.LogoutId, _ct);
         entry.ShouldNotBeNull();
 

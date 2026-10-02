@@ -72,7 +72,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
         var subClaim = tokenResult.Claims?.SingleOrDefault(c => c.Type == JwtClaimTypes.Subject);
         if (subClaim == null)
         {
-            _logger.LogError("Token contains no sub claim");
+            _logger.TokenContainsNoSubClaim();
 
             return new UserInfoRequestValidationResult
             {
@@ -99,7 +99,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
 
                 if (sessions.Count == 1)
                 {
-                    _logger.LogDebug("Loading subject claims from server-side session store");
+                    _logger.LoadingSubjectClaimsFromServerSideSessionStore();
                     subject = sessions.First().AuthenticationTicket.Principal;
                 }
             }
@@ -107,7 +107,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
 
         if (subject == null)
         {
-            _logger.LogDebug("Loading subject claims from access token");
+            _logger.LoadingSubjectClaimsFromAccessToken();
             // this falls back to prior behavior which provides the best we can for the subject based on claims from the access token
             var claims = tokenResult.Claims.Where(x => !Constants.Filters.ProtocolClaimsFilter.Contains(x.Type));
             subject = Principal.Create("UserInfo", claims.ToArray());
@@ -119,7 +119,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
 
         if (isActiveContext.IsActive == false)
         {
-            _logger.LogError("User is not active: {sub}", subject.GetSubjectId());
+            _logger.UserIsNotActive(subject.GetSubjectId());
 
             return new UserInfoRequestValidationResult
             {

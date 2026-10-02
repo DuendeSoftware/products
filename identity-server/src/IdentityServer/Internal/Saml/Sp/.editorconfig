@@ -46,7 +46,6 @@ dotnet_diagnostic.CA1870.severity = none
 dotnet_diagnostic.CA2000.severity = none
 dotnet_diagnostic.CA2008.severity = none
 dotnet_diagnostic.CA2231.severity = none
-dotnet_diagnostic.CA2254.severity = none
 
 # CA security rules (older patterns in imported code)
 dotnet_diagnostic.CA5350.severity = none

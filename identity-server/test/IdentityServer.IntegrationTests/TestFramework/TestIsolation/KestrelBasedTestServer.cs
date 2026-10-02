@@ -20,7 +20,7 @@ namespace Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 /// during their own configuration.
 /// </para>
 /// </summary>
-public sealed class KestrelBasedTestServer : IAsyncDisposable
+public sealed partial class KestrelBasedTestServer : IAsyncDisposable
 {
     private readonly string _serverName;
     private readonly Action<IServiceCollection> _configureServices;
@@ -99,9 +99,9 @@ public sealed class KestrelBasedTestServer : IAsyncDisposable
                 }
                 catch (Exception e)
                 {
-#pragma warning disable CA1848
-                    c.RequestServices.GetRequiredService<ILogger<KestrelBasedTestServer>>().LogError(e, "An error occurred while processing the request.");
-#pragma warning restore CA1848
+                    LogRequestProcessingError(
+                        c.RequestServices.GetRequiredService<ILogger<KestrelBasedTestServer>>(),
+                        e);
                     throw;
                 }
             });
@@ -136,6 +136,9 @@ public sealed class KestrelBasedTestServer : IAsyncDisposable
     /// Available before <see cref="StartAsync"/> is called.
     /// </summary>
     public Uri BuildUrl(string path) => new(BaseAddress, path);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred while processing the request.")]
+    private static partial void LogRequestProcessingError(ILogger logger, Exception exception);
 
     /// <summary>
     /// Registers the server with the isolation service, building the DI container

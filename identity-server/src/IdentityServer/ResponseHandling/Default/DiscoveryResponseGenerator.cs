@@ -435,7 +435,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 if (entries.ContainsKey(key))
 #pragma warning restore CA1864
                 {
-                    Logger.LogError("Discovery custom entry {key} cannot be added, because it already exists.", key);
+                    Logger.DiscoveryCustomEntryCannotBeAddedBecauseIt(key);
                 }
                 else
                 {

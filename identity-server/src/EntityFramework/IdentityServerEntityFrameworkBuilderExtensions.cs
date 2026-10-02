@@ -40,8 +40,9 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         /// <param name="storeOptionsAction">An optional delegate to configure <see cref="ConfigurationStoreOptions"/>,
         /// such as the EF Core database provider and table name prefixes.</param>
         /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        [Obsolete("Use AddEntityFrameworkConfigurationStore instead.")]
         public IIdentityServerBuilder AddConfigurationStore(
-            Action<ConfigurationStoreOptions>? storeOptionsAction = null) => builder.AddConfigurationStore<ConfigurationDbContext>(storeOptionsAction);
+            Action<ConfigurationStoreOptions>? storeOptionsAction = null) => builder.AddEntityFrameworkConfigurationStore(storeOptionsAction);
 
         /// <summary>
         /// Registers Entity Framework Core implementations of <see cref="IClientStore"/>, <see cref="IResourceStore"/>,
@@ -53,7 +54,34 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         /// <param name="storeOptionsAction">An optional delegate to configure <see cref="ConfigurationStoreOptions"/>,
         /// such as the EF Core database provider and table name prefixes.</param>
         /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        [Obsolete("Use AddEntityFrameworkConfigurationStore<TContext> instead.")]
         public IIdentityServerBuilder AddConfigurationStore<TContext>(
+            Action<ConfigurationStoreOptions>? storeOptionsAction = null)
+            where TContext : DbContext, IConfigurationDbContext => builder.AddEntityFrameworkConfigurationStore<TContext>(storeOptionsAction);
+
+        /// <summary>
+        /// Registers Entity Framework Core implementations of <see cref="IClientStore"/>, <see cref="IResourceStore"/>,
+        /// <see cref="ICorsPolicyService"/>, <see cref="IIdentityProviderStore"/>, and the SAML service provider store
+        /// backed by the default <see cref="ConfigurationDbContext"/>. Use this to persist client, resource, and
+        /// identity provider configuration in a relational database.
+        /// </summary>
+        /// <param name="storeOptionsAction">An optional delegate to configure <see cref="ConfigurationStoreOptions"/>,
+        /// such as the EF Core database provider and table name prefixes.</param>
+        /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        public IIdentityServerBuilder AddEntityFrameworkConfigurationStore(
+            Action<ConfigurationStoreOptions>? storeOptionsAction = null) => builder.AddEntityFrameworkConfigurationStore<ConfigurationDbContext>(storeOptionsAction);
+
+        /// <summary>
+        /// Registers Entity Framework Core implementations of <see cref="IClientStore"/>, <see cref="IResourceStore"/>,
+        /// <see cref="ICorsPolicyService"/>, <see cref="IIdentityProviderStore"/>, and the SAML service provider store
+        /// backed by a custom <typeparamref name="TContext"/>. Use this to persist client, resource, and identity provider
+        /// configuration in a relational database with a custom DbContext.
+        /// </summary>
+        /// <typeparam name="TContext">The custom <see cref="IConfigurationDbContext"/> DbContext type to use.</typeparam>
+        /// <param name="storeOptionsAction">An optional delegate to configure <see cref="ConfigurationStoreOptions"/>,
+        /// such as the EF Core database provider and table name prefixes.</param>
+        /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        public IIdentityServerBuilder AddEntityFrameworkConfigurationStore<TContext>(
             Action<ConfigurationStoreOptions>? storeOptionsAction = null)
             where TContext : DbContext, IConfigurationDbContext
         {
@@ -82,7 +110,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         /// Registers caching decorators for the EF-backed <see cref="IClientStore"/>, <see cref="IResourceStore"/>,
         /// <see cref="ICorsPolicyService"/>, and <see cref="IIdentityProviderStore"/> implementations.
         /// Reduces database round-trips by caching configuration data in memory. Cache durations are
-        /// configurable via <c>IdentityServerOptions.Caching</c>. Call this after <see cref="AddConfigurationStore(IIdentityServerBuilder, Action{ConfigurationStoreOptions}?)"/>.
+        /// configurable via <c>IdentityServerOptions.Caching</c>. Call this after <see cref="AddEntityFrameworkConfigurationStore(IIdentityServerBuilder, Action{ConfigurationStoreOptions}?)"/>.
         /// </summary>
         /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
         public IIdentityServerBuilder AddConfigurationStoreCache()
@@ -107,8 +135,9 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         /// <param name="storeOptionsAction">An optional delegate to configure <see cref="OperationalStoreOptions"/>,
         /// such as the EF Core database provider, table name prefixes, and token cleanup settings.</param>
         /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        [Obsolete("Use AddEntityFrameworkOperationalStore instead.")]
         public IIdentityServerBuilder AddOperationalStore(
-            Action<OperationalStoreOptions>? storeOptionsAction = null) => builder.AddOperationalStore<PersistedGrantDbContext>(storeOptionsAction);
+            Action<OperationalStoreOptions>? storeOptionsAction = null) => builder.AddEntityFrameworkOperationalStore(storeOptionsAction);
 
         /// <summary>
         /// Registers Entity Framework Core implementations of <see cref="IPersistedGrantStore"/>, <see cref="ISigningKeyStore"/>,
@@ -120,7 +149,34 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         /// <param name="storeOptionsAction">An optional delegate to configure <see cref="OperationalStoreOptions"/>,
         /// such as the EF Core database provider, table name prefixes, and token cleanup settings.</param>
         /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        [Obsolete("Use AddEntityFrameworkOperationalStore<TContext> instead.")]
         public IIdentityServerBuilder AddOperationalStore<TContext>(
+            Action<OperationalStoreOptions>? storeOptionsAction = null)
+            where TContext : DbContext, IPersistedGrantDbContext => builder.AddEntityFrameworkOperationalStore<TContext>(storeOptionsAction);
+
+        /// <summary>
+        /// Registers Entity Framework Core implementations of <see cref="IPersistedGrantStore"/>, <see cref="ISigningKeyStore"/>,
+        /// <see cref="IDeviceFlowStore"/>, server-side session store, and pushed authorization request store backed by the
+        /// default <see cref="PersistedGrantDbContext"/>. Also registers a hosted service for automatic token cleanup.
+        /// Use this to persist grants, refresh tokens, and other operational data in a relational database.
+        /// </summary>
+        /// <param name="storeOptionsAction">An optional delegate to configure <see cref="OperationalStoreOptions"/>,
+        /// such as the EF Core database provider, table name prefixes, and token cleanup settings.</param>
+        /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        public IIdentityServerBuilder AddEntityFrameworkOperationalStore(
+            Action<OperationalStoreOptions>? storeOptionsAction = null) => builder.AddEntityFrameworkOperationalStore<PersistedGrantDbContext>(storeOptionsAction);
+
+        /// <summary>
+        /// Registers Entity Framework Core implementations of <see cref="IPersistedGrantStore"/>, <see cref="ISigningKeyStore"/>,
+        /// <see cref="IDeviceFlowStore"/>, server-side session store, and pushed authorization request store backed by a
+        /// custom <typeparamref name="TContext"/>. Also registers a hosted service for automatic token cleanup.
+        /// Use this to persist grants, refresh tokens, and other operational data in a relational database with a custom DbContext.
+        /// </summary>
+        /// <typeparam name="TContext">The custom <see cref="IPersistedGrantDbContext"/> DbContext type to use.</typeparam>
+        /// <param name="storeOptionsAction">An optional delegate to configure <see cref="OperationalStoreOptions"/>,
+        /// such as the EF Core database provider, table name prefixes, and token cleanup settings.</param>
+        /// <returns>The <see cref="IIdentityServerBuilder"/> for chaining.</returns>
+        public IIdentityServerBuilder AddEntityFrameworkOperationalStore<TContext>(
             Action<OperationalStoreOptions>? storeOptionsAction = null)
             where TContext : DbContext, IPersistedGrantDbContext
         {
@@ -152,5 +208,6 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             builder.Services.AddOperationalStoreNotification<T>();
             return builder;
         }
+
     }
 }

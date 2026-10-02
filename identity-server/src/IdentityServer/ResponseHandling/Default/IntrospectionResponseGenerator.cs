@@ -51,7 +51,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("IntrospectionResponseGenerator.Process");
 
-        Logger.LogTrace("Creating introspection response");
+        Logger.CreatingIntrospectionResponse();
 
         // standard response
         var response = new Dictionary<string, object>
@@ -64,7 +64,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         // token is invalid
         if (validationResult.IsActive == false)
         {
-            Logger.LogDebug("Creating introspection response for inactive token.");
+            Logger.CreatingIntrospectionResponseForInactiveToken();
             Telemetry.Metrics.Introspection(callerName, false);
             await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult), ct);
 
@@ -87,7 +87,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
             scopes = scopes.Where(x => allowedScopes.Contains(x));
         }
 
-        Logger.LogDebug("Creating introspection response for active token.");
+        Logger.CreatingIntrospectionResponseForActiveToken();
 
         // get all claims (without scopes)
         response = validationResult.Claims.Where(c => c.Type != JwtClaimTypes.Scope).ToClaimsDictionary();
@@ -126,7 +126,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         else
         {
             // no scopes for this API are found in the token
-            Logger.LogError("Expected scope {scopes} is missing in token", apiScopes);
+            Logger.ExpectedScopeIsMissingInToken(apiScopes);
 
             const string errorMessage = "Expected scopes are missing";
             var callerName = validationResult.Api?.Name ?? validationResult.Client.ClientId;

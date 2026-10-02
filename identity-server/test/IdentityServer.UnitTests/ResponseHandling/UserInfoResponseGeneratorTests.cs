@@ -9,6 +9,8 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.ResponseHandling;
@@ -55,6 +57,39 @@ public class UserInfoResponseGeneratorTests
         var resources = await _subject.GetRequestedResourcesAsync(null, _ct);
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
         claims.ShouldBe(new string[] { });
+    }
+
+    [Theory]
+    [InlineData(false, 2)]
+    [InlineData(true, 3)]
+    public async Task GetRequestedResourcesAsync_should_only_enumerate_scopes_for_logging_when_debug_is_enabled(bool debugEnabled, int expectedEnumerations)
+    {
+        var logger = new FakeLogger<UserInfoResponseGenerator>();
+        logger.ControlLevel(LogLevel.Debug, debugEnabled);
+        _subject = new UserInfoResponseGenerator(_mockProfileService, _resourceStore, logger);
+        _identityResources.Add(new IdentityResource("id1", ["c1"]));
+        var enumerations = 0;
+
+        IEnumerable<string> GetScopes()
+        {
+            enumerations++;
+            yield return "id1";
+            yield return "id2";
+        }
+
+        var resources = await _subject.GetRequestedResourcesAsync(GetScopes(), _ct);
+
+        resources.Resources.IdentityResources.Select(x => x.Name).ShouldBe(["id1"]);
+        // The empty check and resource lookup each enumerate once; only Debug logging needs another pass.
+        enumerations.ShouldBe(expectedEnumerations);
+        logger.Collector.Count.ShouldBe(debugEnabled ? 1 : 0);
+        if (debugEnabled)
+        {
+            var record = logger.Collector.LatestRecord;
+            record.Level.ShouldBe(LogLevel.Debug);
+            record.Message.ShouldBe("Scopes in access token: id1 id2");
+            record.GetStructuredStateValue("Scopes").ShouldBe("id1 id2");
+        }
     }
 
     [Fact]

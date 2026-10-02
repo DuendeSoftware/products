@@ -63,11 +63,11 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogWarning("exception storing SAML logout session {LogoutId} in database: {Error}", session.LogoutId, ex.Message);
+            Log.ExceptionStoringSamlLogoutSessionInDatabase(_logger, ex.Message);
             throw;
         }
 
-        _logger.LogDebug("stored SAML logout session {LogoutId} in database", session.LogoutId);
+        Log.StoredSamlLogoutSessionValueInDatabase(_logger, session.LogoutId);
     }
 
     /// <inheritdoc />
@@ -82,7 +82,7 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
             .SingleOrDefaultAsync(ct);
 
         var model = entity.ToModel();
-        _logger.LogDebug("SAML logout session {LogoutId} found in database: {Found}", logoutId, model != null);
+        Log.SamlLogoutSessionValueFoundInDatabaseValue(_logger, logoutId, model != null);
         return model;
     }
 
@@ -103,10 +103,10 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
                 return result == RecordResponseResult.Success;
             }
 
-            _logger.LogDebug("Concurrency conflict recording SAML logout response for requestId {RequestId}, retrying (attempt {Attempt})", requestId, attempt + 1);
+            Log.ConcurrencyConflictRecordingSamlLogoutResponseForRequestid(_logger, requestId, attempt + 1);
         }
 
-        _logger.LogWarning("Failed to record SAML logout response for requestId {RequestId} after {MaxRetries} attempts due to concurrency conflicts", requestId, maxRetries);
+        Log.FailedToRecordSamlLogoutResponseForRequestid(_logger, requestId, maxRetries);
         return false;
     }
 
@@ -129,7 +129,7 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
         var session = entity.ToModel();
         if (session is null)
         {
-            _logger.LogWarning("Failed to deserialize SAML logout session {LogoutId} — skipping", entity.LogoutId);
+            Log.FailedToDeserializeSamlLogoutSessionSkipping(_logger);
             return RecordResponseResult.NotFound;
         }
 
@@ -140,9 +140,7 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
 
         if (!string.Equals(expected.SpEntityId, issuer, StringComparison.Ordinal))
         {
-            _logger.LogWarning(
-                "SAML logout response issuer mismatch for requestId {RequestId}. Expected {ExpectedIssuer}, received {ActualIssuer}",
-                requestId, expected.SpEntityId, issuer);
+            Log.SamlLogoutResponseIssuerMismatchForRequestidValue(_logger, requestId, expected.SpEntityId, issuer);
             return RecordResponseResult.NotFound;
         }
 
@@ -164,7 +162,7 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
             return RecordResponseResult.ConcurrencyConflict;
         }
 
-        _logger.LogDebug("recorded SAML logout response for requestId {RequestId} (success={Success})", requestId, success);
+        Log.RecordedSamlLogoutResponseForRequestidValueSuccess(_logger, requestId, success);
         return RecordResponseResult.Success;
     }
 
@@ -185,6 +183,6 @@ public sealed class SamlLogoutSessionStore : ISamlLogoutSessionStore
             .Where(x => x.LogoutId == logoutId)
             .ExecuteDeleteAsync(ct);
 
-        _logger.LogDebug("removed SAML logout session {LogoutId} from database", logoutId);
+        Log.RemovedSamlLogoutSessionValueFromDatabase(_logger, logoutId);
     }
 }

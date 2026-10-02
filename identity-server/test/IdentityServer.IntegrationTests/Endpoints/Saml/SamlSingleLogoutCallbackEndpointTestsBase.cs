@@ -167,20 +167,24 @@ public abstract class SamlSingleLogoutCallbackEndpointTestsBase
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
-        // Store the logout message first to get the logoutId
+        // Store the logout message first to get the (unbounded) protected handle,
+        // with a bounded correlation id embedded as would happen in production.
+        var correlationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex);
         var logoutMessage = new LogoutMessage
         {
             SamlServiceProviderEntityId = sp.EntityId,
-            SamlLogoutRequestId = "_abc123"
+            SamlLogoutRequestId = "_abc123",
+            SamlLogoutCorrelationId = correlationId
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
         var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
 
-        // Store a logout session keyed by the actual logoutId, with one expected SP response recorded as success
+        // Store a logout session keyed by the correlation id (not the protected handle),
+        // with one expected SP response recorded as success
         var sessionStore = Fixture.Get<ISamlLogoutSessionStore>();
         var session = new SamlLogoutSession
         {
-            LogoutId = logoutId,
+            LogoutId = correlationId,
             ExpectedResponses = new Dictionary<string, ExpectedSpLogout>
             {
                 ["_req-sp2"] = new("https://sp2.example.com")
@@ -208,20 +212,23 @@ public abstract class SamlSingleLogoutCallbackEndpointTestsBase
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
-        // Store a logout message and get the logoutId
+        // Store a logout message and get the (unbounded) protected handle,
+        // with a bounded correlation id embedded as would happen in production.
+        var correlationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex);
         var logoutMessage = new LogoutMessage
         {
             SamlServiceProviderEntityId = sp.EntityId,
-            SamlLogoutRequestId = "_abc123"
+            SamlLogoutRequestId = "_abc123",
+            SamlLogoutCorrelationId = correlationId
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
         var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
 
-        // Store a logout session with a pending (unrecorded) SP response
+        // Store a logout session (keyed by correlation id) with a pending (unrecorded) SP response
         var sessionStore = Fixture.Get<ISamlLogoutSessionStore>();
         var session = new SamlLogoutSession
         {
-            LogoutId = logoutId,
+            LogoutId = correlationId,
             ExpectedResponses = new Dictionary<string, ExpectedSpLogout>
             {
                 ["_req-sp2"] = new("https://sp2.example.com")
@@ -250,10 +257,12 @@ public abstract class SamlSingleLogoutCallbackEndpointTestsBase
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var correlationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex);
         var logoutMessage = new LogoutMessage
         {
             SamlServiceProviderEntityId = sp.EntityId,
-            SamlLogoutRequestId = "_abc123"
+            SamlLogoutRequestId = "_abc123",
+            SamlLogoutCorrelationId = correlationId
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
         var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
@@ -261,7 +270,7 @@ public abstract class SamlSingleLogoutCallbackEndpointTestsBase
         var sessionStore = Fixture.Get<ISamlLogoutSessionStore>();
         var session = new SamlLogoutSession
         {
-            LogoutId = logoutId,
+            LogoutId = correlationId,
             ExpectedResponses = new Dictionary<string, ExpectedSpLogout>
             {
                 ["_req-sp2"] = new("https://sp2.example.com")
@@ -316,18 +325,26 @@ public abstract class SamlSingleLogoutCallbackEndpointTestsBase
         Fixture.ServiceProviders.Add(sp);
         await Fixture.InitializeAsync();
 
+        var correlationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex);
         var logoutMessage = new LogoutMessage
         {
             SamlServiceProviderEntityId = sp.EntityId,
-            SamlLogoutRequestId = "_abc123"
+            SamlLogoutRequestId = "_abc123",
+            SamlLogoutCorrelationId = correlationId
         };
         var messageStore = Fixture.Get<IMessageStore<LogoutMessage>>();
         var logoutId = await messageStore.WriteAsync(new Message<LogoutMessage>(logoutMessage, DateTime.UtcNow), _ct);
 
+        // The protected message-store handle is unbounded and, realistically, exceeds
+        // the SamlLogoutSession.LogoutId column width (200 chars), while the embedded
+        // correlation id used to key the session store is a bounded 32-char value.
+        logoutId.Length.ShouldBeGreaterThan(200);
+        correlationId.Length.ShouldBe(32);
+
         var sessionStore = Fixture.Get<ISamlLogoutSessionStore>();
         var session = new SamlLogoutSession
         {
-            LogoutId = logoutId,
+            LogoutId = correlationId,
             ExpectedResponses = new Dictionary<string, ExpectedSpLogout>
             {
                 ["_req-sp2"] = new("https://sp2.example.com")
@@ -341,8 +358,8 @@ public abstract class SamlSingleLogoutCallbackEndpointTestsBase
         // Act
         await Fixture.NonRedirectingClient.GetAsync($"/Saml2/SLO/Callback?logoutId={logoutId}", _ct);
 
-        // Assert — session should be removed from the store
-        var remaining = await sessionStore.GetByLogoutIdAsync(logoutId, _ct);
+        // Assert — session should be removed from the store, keyed by correlation id
+        var remaining = await sessionStore.GetByLogoutIdAsync(correlationId, _ct);
         remaining.ShouldBeNull();
     }
 

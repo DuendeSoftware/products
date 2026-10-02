@@ -7,7 +7,6 @@ using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
-using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -22,7 +21,7 @@ namespace Duende.IdentityServer.Hosting;
 public class IdentityServerMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly SanitizedLogger<IdentityServerMiddleware> _sanitizedLogger;
+    private readonly ILogger<IdentityServerMiddleware> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IdentityServerMiddleware"/> class.
@@ -34,7 +33,7 @@ public class IdentityServerMiddleware
         ILogger<IdentityServerMiddleware> logger)
     {
         _next = next;
-        _sanitizedLogger = new SanitizedLogger<IdentityServerMiddleware>(logger);
+        _logger = logger;
     }
 
     /// <summary>
@@ -70,7 +69,7 @@ public class IdentityServerMiddleware
             // for any session removal — including explicit logout, not just actual expiration.
             if (context.TryGetExpiredUserSession(out var expiredUserSession) && !context.GetBackChannelLogoutTriggered())
             {
-                _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
+                _logger.DetectedExpiredSessionRemovedProcessingPostExpirationCleanup();
 
                 await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession, context.RequestAborted);
             }
@@ -104,13 +103,18 @@ public class IdentityServerMiddleware
                     var licenseValidator = context.RequestServices.GetRequiredService<IdentityServerLicenseValidator>();
                     licenseValidator.ValidateIssuer(issuer);
 
-                    _sanitizedLogger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.InvokingIdentityServerEndpointEndpointTypeForUrl(
+                            endpointType,
+                            requestPath.SanitizeLogParameter());
+                    }
 
                     var result = await endpoint.ProcessAsync(context);
 
                     if (result != null)
                     {
-                        _sanitizedLogger.LogTrace("Invoking result: {type}", result.GetType().FullName);
+                        _logger.InvokingResultType(result.GetType().FullName);
                         await result.ExecuteAsync(context);
                     }
 
@@ -126,7 +130,10 @@ public class IdentityServerMiddleware
         {
             await events.RaiseAsync(new UnhandledExceptionEvent(ex), context.RequestAborted);
             Telemetry.Metrics.UnHandledException(ex);
-            _sanitizedLogger.LogCritical(ex, "Unhandled exception: {exception}", ex.Message);
+            if (_logger.IsEnabled(LogLevel.Critical))
+            {
+                _logger.UnhandledExceptionException(ex, ex.Message.SanitizeLogParameter());
+            }
 
             throw;
         }

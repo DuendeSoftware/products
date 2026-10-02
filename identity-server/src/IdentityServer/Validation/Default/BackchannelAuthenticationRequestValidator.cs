@@ -57,7 +57,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
         ArgumentNullException.ThrowIfNull(clientValidationResult);
 
-        _logger.LogDebug("Start backchannel authentication request validation");
+        _logger.StartBackchannelAuthenticationRequestValidation();
 
         _validatedRequest = new ValidatedBackchannelAuthenticationRequest
         {
@@ -71,7 +71,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         //////////////////////////////////////////////////////////
         if (!clientValidationResult.Client.AllowedGrantTypes.Contains(OidcConstants.GrantTypes.Ciba))
         {
-            LogError("Client {clientId} not configured with the CIBA grant type.", clientValidationResult.Client.ClientId);
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.ClientNotConfiguredWithCibaGrantType(clientValidationResult.Client.ClientId, CreateRequestDetails());
+            }
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.UnauthorizedClient, "Unauthorized client");
         }
 
@@ -265,7 +268,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 {
                     if (!_validatedRequest.Client.IdentityProviderRestrictions.Contains(idp))
                     {
-                        _logger.LogWarning("idp requested ({idp}) is not in client restriction list.", idp);
+                        _logger.IdpRequestedIsNotInClientRestrictionList(idp);
                         idp = null;
                     }
                 }
@@ -436,7 +439,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidBindingMessage, userResult.ErrorDescription);
             }
 
-            LogError("Unexpected error from IBackchannelAuthenticationUserValidator: {error}", userResult.Error);
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.UnexpectedBackchannelAuthenticationUserValidatorError(userResult.Error, CreateRequestDetails());
+            }
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.UnknownUserId);
         }
 
@@ -486,7 +492,12 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             var payloadClientId = jwtRequestValidationResult.Payload.SingleOrDefault(x => x.Type == JwtClaimTypes.ClientId)?.Value;
             if (payloadClientId.IsPresent() && _validatedRequest.Client.ClientId != payloadClientId)
             {
-                LogError("client_id found in the JWT request object does not match client_id used to authenticate, {@values}", new { invalidClientId = payloadClientId, clientId = _validatedRequest.Client.ClientId });
+                if (_logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.JwtRequestObjectClientIdMismatch(
+                        new { invalidClientId = payloadClientId, clientId = _validatedRequest.Client.ClientId },
+                        CreateRequestDetails());
+                }
                 return (false, Invalid(OidcConstants.AuthorizeErrors.InvalidRequestObject, "Invalid client_id in JWT request"));
             }
 
@@ -506,7 +517,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 {
                     if (_validatedRequest.Raw.AllKeys.Contains(claim.Type))
                     {
-                        LogError("Parameter from JWT request object also found in request body: {name}", claim.Type);
+                        if (_logger.IsEnabled(LogLevel.Error))
+                        {
+                            _logger.JwtRequestObjectParameterDuplicatedInRequestBody(claim.Type, CreateRequestDetails());
+                        }
                         return (false, Invalid(OidcConstants.AuthorizeErrors.InvalidRequestObject, "Parameter from JWT request object also found in request body"));
                     }
                     else if (claim.Type != JwtClaimTypes.JwtId)
@@ -526,11 +540,18 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
     private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null) => new BackchannelAuthenticationRequestValidationResult(_validatedRequest, error, errorDescription);
 
+    private BackchannelAuthenticationRequestValidationLog CreateRequestDetails() => new(_validatedRequest, _options.Logging.BackchannelAuthenticationRequestSensitiveValuesFilter);
+
     private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 
     private void LogWithRequestDetails(LogLevel logLevel, string message = null, object values = null)
     {
-        var details = new BackchannelAuthenticationRequestValidationLog(_validatedRequest, _options.Logging.BackchannelAuthenticationRequestSensitiveValuesFilter);
+        if (!_logger.IsEnabled(logLevel))
+        {
+            return;
+        }
+
+        var details = CreateRequestDetails();
 
         if (message.IsPresent())
         {
@@ -538,24 +559,61 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             {
                 if (values == null)
                 {
-                    _logger.Log(logLevel, "{Message}: {@details}", message, details);
+                    LogMessageWithDetails(logLevel, message, details);
                 }
                 else
                 {
-#pragma warning disable CA2254 // This cannot be static because the message parameter is a template to be used with values
-                    _logger.Log(logLevel, message + ", details: {@details}", values, details);
-#pragma warning restore CA2254
+                    LogMessageWithValuesAndDetails(logLevel, message, values, details);
                 }
 
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error logging {exception}, request details: {@details}", ex.Message, details);
+                _logger.ErrorLoggingRequestDetails(ex.Message, details);
             }
         }
         else
         {
-            _logger.Log(logLevel, "{@details}", details);
+            LogRequestDetails(logLevel, details);
+        }
+    }
+
+    private void LogMessageWithDetails(LogLevel logLevel, string message, object details)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Error:
+                _logger.RequestMessageWithDetailsError(message, details);
+                break;
+            case LogLevel.Information:
+                _logger.RequestMessageWithDetailsInformation(message, details);
+                break;
+        }
+    }
+
+    private void LogMessageWithValuesAndDetails(LogLevel logLevel, string message, object values, object details)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Error:
+                _logger.RequestMessageWithValuesAndDetailsError(message, values, details);
+                break;
+            case LogLevel.Information:
+                _logger.RequestMessageWithValuesAndDetailsInformation(message, values, details);
+                break;
+        }
+    }
+
+    private void LogRequestDetails(LogLevel logLevel, object details)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Error:
+                _logger.RequestDetailsError(details);
+                break;
+            case LogLevel.Information:
+                _logger.RequestDetailsInformation(details);
+                break;
         }
     }
 

@@ -45,12 +45,12 @@ internal sealed class OidcReturnUrlParser : IReturnUrlParser
             var result = await _validator.ValidateAsync(parameters, ct, user);
             if (!result.IsError)
             {
-                _logger.LogTrace("AuthorizationRequest being returned");
+                _logger.AuthorizationRequestBeingReturned2();
                 return new AuthorizationRequest(result.ValidatedRequest);
             }
         }
 
-        _logger.LogTrace("No AuthorizationRequest being returned");
+        _logger.NoAuthorizationRequestBeingReturned3();
         return null;
     }
 
@@ -87,12 +87,12 @@ internal sealed class OidcReturnUrlParser : IReturnUrlParser
             if (returnUrl.EndsWith(ProtocolRoutePaths.Authorize, StringComparison.Ordinal) ||
                 returnUrl.EndsWith(ProtocolRoutePaths.AuthorizeCallback, StringComparison.Ordinal))
             {
-                _logger.LogTrace("returnUrl is valid");
+                _logger.ReturnUrlIsValid();
                 return true;
             }
         }
 
-        _logger.LogTrace("returnUrl is not valid");
+        _logger.ReturnUrlIsNotValid();
         return false;
     }
 }

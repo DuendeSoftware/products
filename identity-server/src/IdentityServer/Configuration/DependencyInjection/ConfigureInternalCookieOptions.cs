@@ -109,21 +109,44 @@ internal class PostConfigureInternalCookieOptions : IPostConfigureOptions<Cookie
                      _authOptions.Value.DefaultAuthenticateScheme ??
                      _authOptions.Value.DefaultScheme;
 
+        // Decorate the cookie builder so that the effective Path is resolved per-request by
+        // IdentityServer, for both of its own built-in cookie schemes as well as whichever
+        // scheme is used as the main IdentityServer authentication cookie (explicit
+        // CookieAuthenticationScheme, default authenticate scheme, or default scheme -
+        // e.g. an application's own "Identity.Application" cookie).
+        // Wrap() is idempotent, so this is safe even if more than one of these conditions
+        // matches the same scheme name.
+        //
+        // Supported ordering: any custom IPostConfigureOptions<CookieAuthenticationOptions>
+        // (or CookieAuthenticationOptions.Cookie replacement) that must be observed by this
+        // decoration should be registered before AddIdentityServer() is called. IConfigureOptions
+        // registrations always run before IPostConfigureOptions registrations regardless of
+        // registration order, so ordinary Configure-based customization (the common case) is
+        // always retained. Only PostConfigure-based replacement of options.Cookie registered
+        // after AddIdentityServer() can override this decoration, since IPostConfigureOptions
+        // run in registration order.
+        if (name == IdentityServerConstants.DefaultCookieAuthenticationScheme ||
+            name == IdentityServerConstants.ExternalCookieAuthenticationScheme ||
+            name == scheme)
+        {
+            options.Cookie = IdentityServerCookieBuilder.Wrap(options.Cookie);
+        }
+
         if (name == scheme)
         {
             _idsrv.UserInteraction.LoginUrl = _idsrv.UserInteraction.LoginUrl ?? options.LoginPath;
             _idsrv.UserInteraction.LoginReturnUrlParameter = _idsrv.UserInteraction.LoginReturnUrlParameter ?? options.ReturnUrlParameter;
             _idsrv.UserInteraction.LogoutUrl = _idsrv.UserInteraction.LogoutUrl ?? options.LogoutPath;
 
-            _logger.LogDebug("Login Url: {url}", _idsrv.UserInteraction.LoginUrl);
-            _logger.LogDebug("Login Return Url Parameter: {param}", _idsrv.UserInteraction.LoginReturnUrlParameter);
-            _logger.LogDebug("Logout Url: {url}", _idsrv.UserInteraction.LogoutUrl);
+            _logger.LoginUrlUrl(_idsrv.UserInteraction.LoginUrl);
+            _logger.LoginReturnUrlParameterParam(_idsrv.UserInteraction.LoginReturnUrlParameter);
+            _logger.LogoutUrlUrl(_idsrv.UserInteraction.LogoutUrl);
 
-            _logger.LogDebug("ConsentUrl Url: {url}", _idsrv.UserInteraction.ConsentUrl);
-            _logger.LogDebug("Consent Return Url Parameter: {param}", _idsrv.UserInteraction.ConsentReturnUrlParameter);
+            _logger.ConsentUrlUrlUrl(_idsrv.UserInteraction.ConsentUrl);
+            _logger.ConsentReturnUrlParameterParam(_idsrv.UserInteraction.ConsentReturnUrlParameter);
 
-            _logger.LogDebug("Error Url: {url}", _idsrv.UserInteraction.ErrorUrl);
-            _logger.LogDebug("Error Id Parameter: {param}", _idsrv.UserInteraction.ErrorIdParameter);
+            _logger.ErrorUrlUrl(_idsrv.UserInteraction.ErrorUrl);
+            _logger.ErrorIdParameterParam(_idsrv.UserInteraction.ErrorIdParameter);
         }
     }
 }

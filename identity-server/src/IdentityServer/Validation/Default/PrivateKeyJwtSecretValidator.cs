@@ -66,7 +66,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
 
         if (!(parsedSecret.Credential is string jwtTokenString))
         {
-            _logger.LogError("ParsedSecret.Credential is not a string.");
+            _logger.ParsedSecretCredentialIsNotAString();
             return fail;
         }
 
@@ -77,13 +77,13 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Could not parse secrets");
+            _logger.CouldNotParseSecrets(e);
             return fail;
         }
 
         if (trustedKeys.Count == 0)
         {
-            _logger.LogError("There are no keys available to validate client assertion.");
+            _logger.ThereAreNoKeysAvailableToValidateClient();
             return fail;
         }
 
@@ -124,7 +124,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error reading JWT header.");
+            _logger.ErrorReadingJWTHeader(ex);
             return fail;
         }
 
@@ -174,34 +174,34 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
         var result = await handler.ValidateTokenAsync(jwtTokenString, tokenValidationParameters);
         if (!result.IsValid)
         {
-            _logger.LogError(result.Exception, "JWT token validation error");
+            _logger.JWTTokenValidationErrorPrivateKeyJwtSecretValidator(result.Exception);
             return fail;
         }
 
         var jwtToken = (JsonWebToken)result.SecurityToken;
         if (jwtToken.Subject != jwtToken.Issuer)
         {
-            _logger.LogError("Both 'sub' and 'iss' in the client assertion token must have a value of client_id.");
+            _logger.BothSubAndIssInTheClientAssertion();
             return fail;
         }
 
         var exp = jwtToken.ValidTo;
         if (exp == DateTime.MinValue)
         {
-            _logger.LogError("exp is missing.");
+            _logger.ExpIsMissing();
             return fail;
         }
 
         var jti = jwtToken.Id;
         if (jti.IsMissing())
         {
-            _logger.LogError("jti is missing.");
+            _logger.JtiIsMissing();
             return fail;
         }
 
         if (await _replayCache.ExistsAsync(Purpose, jti, ct))
         {
-            _logger.LogError("jti is found in replay cache. Possible replay attack.");
+            _logger.JtiIsFoundInReplayCachePossibleReplay();
             return fail;
         }
         else
@@ -250,7 +250,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
 
         if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
         {
-            _logger.LogInformation("Audience Validated.Audience: '{audience}'", tokenAudience);
+            _logger.AudienceValidatedAudience(tokenAudience);
 
             return true;
         }

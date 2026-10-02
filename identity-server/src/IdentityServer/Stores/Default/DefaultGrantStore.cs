@@ -113,9 +113,9 @@ public class DefaultGrantStore<T>
     {
         var hashedKey = GetHashedKey(key);
         var item = await GetItemByHashedKeyAsync(hashedKey, ct);
-        if (item == null)
+        if (item == null && Logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogDebug("{grantType} grant with value: {key} not found in store.", GrantType, key.SanitizeLogParameter());
+            Logger.GrantTypeGrantWithValueKeyNotFoundIn(GrantType, key.SanitizeLogParameter());
         }
         return item;
     }
@@ -137,7 +137,7 @@ public class DefaultGrantStore<T>
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to deserialize JSON from grant store.");
+                Logger.FailedToDeserializeJSONFromGrantStore(ex);
             }
         }
 

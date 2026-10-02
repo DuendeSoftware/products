@@ -64,7 +64,7 @@ public class KeyManager : IKeyManager
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("KeyManager.GetCurrentKeys");
 
-        _logger.LogTrace("Getting the current key.");
+        _logger.GettingTheCurrentKey();
 
         var (_, currentKeys) = await GetAllKeysInternalAsync(ct);
 
@@ -75,7 +75,7 @@ public class KeyManager : IKeyManager
                 var age = _timeProvider.GetAge(key.Created);
                 var expiresIn = _options.KeyManagement.RotationInterval.Subtract(age);
                 var retiresIn = _options.KeyManagement.KeyRetirementAge.Subtract(age);
-                _logger.LogInformation("Active signing key found with kid {kid} for alg {alg}. Expires in {KeyExpiration}. Retires in {KeyRetirement}", key.Id, key.Algorithm, expiresIn, retiresIn);
+                _logger.ActiveSigningKeyFoundWithKidKidFor(key.Id, key.Algorithm, expiresIn, retiresIn);
             }
         }
 
@@ -87,7 +87,7 @@ public class KeyManager : IKeyManager
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("KeyManager.GetAllKeys");
 
-        _logger.LogTrace("Getting all the keys.");
+        _logger.GettingAllTheKeys();
 
         var (keys, _) = await GetAllKeysInternalAsync(ct);
         return keys;
@@ -112,7 +112,7 @@ public class KeyManager : IKeyManager
         // if we loaded from cache, see if DB has updated key
         if (!signingKeysSuccess && cached)
         {
-            _logger.LogTrace("Not all signing keys current in cache, reloading keys from database.");
+            _logger.NotAllSigningKeysCurrentInCacheReloading();
         }
 
         var rotationRequired = false;
@@ -123,13 +123,13 @@ public class KeyManager : IKeyManager
             rotationRequired = IsKeyRotationRequired(keys);
             if (rotationRequired && cached)
             {
-                _logger.LogTrace("Key rotation required, reloading keys from database.");
+                _logger.KeyRotationRequiredReloadingKeysFromDatabase();
             }
         }
 
         if (!signingKeysSuccess || rotationRequired)
         {
-            _logger.LogTrace("Entering new key lock.");
+            _logger.EnteringNewKeyLock();
 
             // need to create new key, but another thread might have already so acquiring lock.
 #pragma warning disable CS0618 // CacheLockTimeout is obsolete but still used by KeyManager for IConcurrencyLock
@@ -171,11 +171,11 @@ public class KeyManager : IKeyManager
                     {
                         if (!signingKeysSuccess)
                         {
-                            _logger.LogTrace("No active keys; new key creation required.");
+                            _logger.NoActiveKeysNewKeyCreationRequired();
                         }
                         else
                         {
-                            _logger.LogTrace("Approaching key retirement; new key creation required.");
+                            _logger.ApproachingKeyRetirementNewKeyCreationRequired();
                         }
 
                         // now we know we need to create new keys
@@ -183,24 +183,24 @@ public class KeyManager : IKeyManager
                     }
                     else
                     {
-                        _logger.LogTrace("Another server created new key.");
+                        _logger.AnotherServerCreatedNewKey();
                     }
                 }
                 else
                 {
-                    _logger.LogTrace("Another thread created new key.");
+                    _logger.AnotherThreadCreatedNewKey();
                 }
             }
             finally
             {
-                _logger.LogTrace("Releasing new key lock.");
+                _logger.ReleasingNewKeyLock();
                 _newKeyLock.Unlock();
             }
         }
 
         if (signingKeys.Count == 0)
         {
-            _logger.LogError("Failed to create and then load new keys.");
+            _logger.FailedToCreateAndThenLoadNewKeys();
             throw new Exception("Failed to create and then load new keys.");
         }
 
@@ -255,11 +255,11 @@ public class KeyManager : IKeyManager
 
             if (!needed)
             {
-                _logger.LogTrace("Key rotation not required for alg {alg}; New key expected to be created in {KeyRotiation}", item.Key, diff.Subtract(_options.KeyManagement.PropagationTime));
+                _logger.KeyRotationNotRequiredForAlgAlgNew(item.Key, diff.Subtract(_options.KeyManagement.PropagationTime));
             }
             else
             {
-                _logger.LogTrace("Key rotation required now for alg {alg}.", item.Key);
+                _logger.KeyRotationRequiredNowForAlgAlg(item.Key);
                 return true;
             }
         }
@@ -269,7 +269,7 @@ public class KeyManager : IKeyManager
 
     internal async Task<KeyContainer> CreateAndStoreNewKeyAsync(SigningAlgorithmOptions alg, Ct ct)
     {
-        _logger.LogTrace("Creating new key.");
+        _logger.CreatingNewKey();
 
         var now = _timeProvider.GetUtcNow().UtcDateTime;
 
@@ -304,7 +304,7 @@ public class KeyManager : IKeyManager
         var key = _protector.Protect(container);
         await _store.StoreKeyAsync(key, ct);
 
-        _logger.LogDebug("Created and stored new key with kid {kid}.", container.Id);
+        _logger.CreatedAndStoredNewKeyWithKidKid(container.Id);
 
         return container;
     }
@@ -314,11 +314,11 @@ public class KeyManager : IKeyManager
         var cachedKeys = await _cache.GetKeysAsync(ct);
         if (cachedKeys != null)
         {
-            _logger.LogTrace("Cache hit when loading all keys.");
+            _logger.CacheHitWhenLoadingAllKeys();
             return cachedKeys;
         }
 
-        _logger.LogTrace("Cache miss when loading all keys.");
+        _logger.CacheMissWhenLoadingAllKeys();
         return Array.Empty<KeyContainer>();
     }
 
@@ -357,7 +357,7 @@ public class KeyManager : IKeyManager
             if (_logger.IsEnabled(LogLevel.Trace))
             {
                 var ids = retired.Select(x => x.Id).ToArray();
-                _logger.LogTrace("Filtered retired keys from store: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
+                _logger.FilteredRetiredKeysFromStoreKids(ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
             if (_options.KeyManagement.DeleteRetiredKeys)
@@ -365,7 +365,7 @@ public class KeyManager : IKeyManager
                 var ids = retired.Select(x => x.Id).ToArray();
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
-                    _logger.LogDebug("Deleting retired keys from store: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
+                    _logger.DeletingRetiredKeysFromStoreKids(ids.Aggregate((x, y) => $"{x},{y}"));
                 }
                 await DeleteKeysAsync(ids, ct);
             }
@@ -416,12 +416,12 @@ public class KeyManager : IKeyManager
                 duration = _options.KeyManagement.InitializationKeyCacheDuration;
                 if (duration > TimeSpan.Zero)
                 {
-                    _logger.LogTrace("Caching keys with InitializationKeyCacheDuration for {InitializationKeyCacheDuration}", _options.KeyManagement.InitializationKeyCacheDuration);
+                    _logger.CachingKeysWithInitializationKeyCacheDurationForInitializationKeyCacheDuration(_options.KeyManagement.InitializationKeyCacheDuration);
                 }
             }
             else if (_options.KeyManagement.KeyCacheDuration > TimeSpan.Zero)
             {
-                _logger.LogTrace("Caching keys with KeyCacheDuration for {KeyCacheDuration}", _options.KeyManagement.KeyCacheDuration);
+                _logger.CachingKeysWithKeyCacheDurationForKeyCacheDuration(_options.KeyManagement.KeyCacheDuration);
             }
 
             if (duration > TimeSpan.Zero)
@@ -433,7 +433,7 @@ public class KeyManager : IKeyManager
 
     internal async Task<IReadOnlyCollection<KeyContainer>> GetAllKeysFromStoreAsync(Ct ct, bool cache = true)
     {
-        _logger.LogTrace("Loading keys from store.");
+        _logger.LoadingKeysFromStore();
 
         var protectedKeys = await _store.LoadKeysAsync(ct);
         if (protectedKeys != null && protectedKeys.Count > 0)
@@ -448,17 +448,17 @@ public class KeyManager : IKeyManager
                         var key = _protector.Unprotect(x);
                         if (key == null)
                         {
-                            _logger.LogWarning("Key with kid {kid} failed to unprotect.", x.Id);
+                            _logger.KeyWithKidKidFailedToUnprotect(x.Id);
                         }
                         return key;
                     }
                     catch (CryptographicException ex)
                     {
-                        _logger.LogError(ex, "Error unprotecting the IdentityServer signing key with kid {kid}. This is likely due to the ASP.NET Core data protection key that was used to protect it is not available. This could occur because data protection has not been configured properly for your load balanced environment, or the IdentityServer signing key store was populated with keys from a different environment with different ASP.NET Core data protection keys. Once you have corrected the problem and if you keep getting this error then it is safe to delete the specific IdentityServer signing key with that kid.", x?.Id);
+                        _logger.ErrorUnprotectingTheIdentityServerSigningKeyWithKid(ex, x?.Id);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error loading key with kid {kid}.", x?.Id);
+                        _logger.ErrorLoadingKeyWithKidKid(ex, x?.Id);
                     }
                     return null;
                 })
@@ -468,14 +468,14 @@ public class KeyManager : IKeyManager
             if (_logger.IsEnabled(LogLevel.Trace) && keys.Length > 0)
             {
                 var ids = keys.Select(x => x.Id).ToArray();
-                _logger.LogTrace("Loaded keys from store: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
+                _logger.LoadedKeysFromStoreKids(ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
 
             if (_logger.IsEnabled(LogLevel.Trace) && keys.Length > 0)
             {
                 var ids = keys.Select(x => x.Id).ToArray();
-                _logger.LogTrace("Remaining keys after filter: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
+                _logger.RemainingKeysAfterFilterKids(ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
             // only use keys that are allowed
@@ -483,12 +483,12 @@ public class KeyManager : IKeyManager
             if (_logger.IsEnabled(LogLevel.Trace) && allowedKeys.Length > 0)
             {
                 var ids = allowedKeys.Select(x => x.Id).ToArray();
-                _logger.LogTrace("Keys with allowed alg from store: {kids}", ids.Aggregate((x, y) => $"{x},{y}"));
+                _logger.KeysWithAllowedAlgFromStoreKids(ids.Aggregate((x, y) => $"{x},{y}"));
             }
 
             if (allowedKeys.Length > 0)
             {
-                _logger.LogTrace("Keys successfully returned from store.");
+                _logger.KeysSuccessfullyReturnedFromStore();
 
                 if (cache)
                 {
@@ -499,7 +499,7 @@ public class KeyManager : IKeyManager
             }
         }
 
-        _logger.LogTrace("No keys returned from store.");
+        _logger.NoKeysReturnedFromStore();
 
         return Array.Empty<KeyContainer>();
     }
@@ -528,12 +528,12 @@ public class KeyManager : IKeyManager
             // we don't want server2 to only see server2's key, as it's newer.
             if (_options.KeyManagement.InitializationSynchronizationDelay > TimeSpan.Zero)
             {
-                _logger.LogTrace("All keys are new; delaying before reloading keys from store by InitializationSynchronizationDelay for {InitializationSynchronizationDelay}.", _options.KeyManagement.InitializationSynchronizationDelay);
+                _logger.AllKeysAreNewDelayingBeforeReloadingKeys(_options.KeyManagement.InitializationSynchronizationDelay);
                 await Task.Delay(_options.KeyManagement.InitializationSynchronizationDelay, ct);
             }
             else
             {
-                _logger.LogTrace("All keys are new; reloading keys from store.");
+                _logger.AllKeysAreNewReloadingKeysFromStore();
             }
 
             // reload in case other new keys were recently created
@@ -565,23 +565,23 @@ public class KeyManager : IKeyManager
             return Array.Empty<KeyContainer>();
         }
 
-        _logger.LogTrace("Looking for active signing keys.");
+        _logger.LookingForActiveSigningKeys();
 
         var list = new List<KeyContainer>();
         var groupedKeys = allKeys.GroupBy(x => x.Algorithm);
         foreach (var item in groupedKeys)
         {
-            _logger.LogTrace("Looking for an active signing key for alg {alg}.", item.Key);
+            _logger.LookingForAnActiveSigningKeyForAlg(item.Key);
 
             var activeKey = GetCurrentSigningKey(item);
             if (activeKey != null)
             {
-                _logger.LogTrace("Found active signing key for alg {alg} with kid {kid}.", item.Key, activeKey.Id);
+                _logger.FoundActiveSigningKeyForAlgAlgWith(item.Key, activeKey.Id);
                 list.Add(activeKey);
             }
             else
             {
-                _logger.LogTrace("Failed to find active signing key for alg {alg}.", item.Key);
+                _logger.FailedToFindActiveSigningKeyForAlg(item.Key);
             }
         }
 
@@ -601,21 +601,21 @@ public class KeyManager : IKeyManager
         if (activeKey == null)
         {
             ignoreActivation = true;
-            _logger.LogTrace("No active signing key found (respecting the activation delay).");
+            _logger.NoActiveSigningKeyFoundRespectingTheActivation();
 
             // none, so check if any of the keys were recently created
             activeKey = GetCurrentSigningKeyInternal(keys, ignoreActivation);
 
             if (activeKey == null)
             {
-                _logger.LogTrace("No active signing key found (ignoring the activation delay).");
+                _logger.NoActiveSigningKeyFoundIgnoringTheActivation();
             }
         }
 
         if (activeKey != null && _logger.IsEnabled(LogLevel.Debug))
         {
             var delay = ignoreActivation ? "(ignoring the activation delay)" : "(respecting the activation delay)";
-            _logger.LogTrace("Active signing key found " + delay + " with kid: {kid}.", activeKey.Id);
+            _logger.ActiveSigningKeyFoundDelayWithKidKid(delay, activeKey.Id);
         }
 
         return activeKey;
@@ -654,13 +654,13 @@ public class KeyManager : IKeyManager
         var alg = _options.KeyManagement.SigningAlgorithms.SingleOrDefault(x => x.Name == key.Algorithm);
         if (alg == null)
         {
-            _logger.LogTrace("Key {kid} signing algorithm {alg} not allowed by server options.", key.Id, key.Algorithm);
+            _logger.KeyKidSigningAlgorithmAlgNotAllowedBy(key.Id, key.Algorithm);
             return false;
         }
 
         if (alg.UseX509Certificate && !key.HasX509Certificate)
         {
-            _logger.LogTrace("Server configured to wrap keys in X509 certs, but key {kid} is not wrapped in cert.", key.Id);
+            _logger.ServerConfiguredToWrapKeysInX509Certs(key.Id);
             return false;
         }
 
@@ -678,17 +678,17 @@ public class KeyManager : IKeyManager
 
         if (!ignoreActiveDelay)
         {
-            _logger.LogTrace("Checking if key with kid {kid} is active (respecting activation delay).", key.Id);
+            _logger.CheckingIfKeyWithKidKidIsActive(key.Id);
             start = start.Add(_options.KeyManagement.PropagationTime);
         }
         else
         {
-            _logger.LogTrace("Checking if key with kid {kid} is active (ignoring activation delay).", key.Id);
+            _logger.CheckingIfKeyWithKidKidIsActive2(key.Id);
         }
 
         if (start > now)
         {
-            _logger.LogTrace("Key with kid {kid} is inactive: the current time is prior to its activation delay.", key.Id);
+            _logger.KeyWithKidKidIsInactiveTheCurrent(key.Id);
             return false;
         }
 
@@ -696,11 +696,11 @@ public class KeyManager : IKeyManager
         var end = key.Created.Add(_options.KeyManagement.RotationInterval);
         if (end < now)
         {
-            _logger.LogTrace("Key with kid {kid} is inactive: the current time is past its expiration.", key.Id);
+            _logger.KeyWithKidKidIsInactiveTheCurrent2(key.Id);
             return false;
         }
 
-        _logger.LogTrace("Key with kid {kid} is active.", key.Id);
+        _logger.KeyWithKidKidIsActive(key.Id);
 
         return true;
     }

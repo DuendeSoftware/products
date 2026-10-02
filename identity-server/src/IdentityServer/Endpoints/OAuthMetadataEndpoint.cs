@@ -5,11 +5,11 @@ using System.Net;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -19,7 +19,7 @@ internal class OAuthMetadataEndpoint(
     IServerUrls serverUrls,
     IIssuerNameService issuerNameService,
     IDiscoveryResponseGenerator discoveryResponseGenerator,
-    SanitizedLogger<OAuthMetadataEndpoint> logger) : BaseDiscoveryEndpoint(options, discoveryResponseGenerator), IEndpointHandler
+    ILogger<OAuthMetadataEndpoint> logger) : BaseDiscoveryEndpoint(options, discoveryResponseGenerator), IEndpointHandler
 {
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
@@ -27,33 +27,33 @@ internal class OAuthMetadataEndpoint(
             Tracing.BasicActivitySource.StartActivity(
                 IdentityServerConstants.EndpointNames.OAuthMetadata + "Endpoint");
 
-        logger.LogTrace("Processing OAuth discovery request.");
+        logger.ProcessingOAuthDiscoveryRequest();
 
         // validate HTTP
         if (!HttpMethods.IsGet(context.Request.Method))
         {
-            logger.LogWarning("OAuth Discovery endpoint only supports GET requests");
+            logger.OAuthDiscoveryEndpointOnlySupportsGETRequests();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        logger.LogDebug("Start OAuth discovery request");
+        logger.StartOAuthDiscoveryRequest();
 
         if (!Options.Endpoints.EnableOAuth2MetadataEndpoint)
         {
-            logger.LogInformation("OAuth Discovery endpoint disabled. 404.");
+            logger.OAuthDiscoveryEndpointDisabled404();
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
         if (context.Request.PathBase.HasValue)
         {
-            logger.LogDebug("Request for OAuth discovery document contains PathBase. Returning 404");
+            logger.RequestForOAuthDiscoveryDocumentContainsPathBaseReturning();
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
         context.Request.Path.StartsWithSegments("/.well-known/oauth-authorization-server", StringComparison.OrdinalIgnoreCase, out var issuerSubPath);
         if (!await issuerPathValidator.ValidateAsync(issuerSubPath, context.RequestAborted))
         {
-            logger.LogDebug("Request for OAuth discovery document contains invalid sub-path. Returning 404");
+            logger.RequestForOAuthDiscoveryDocumentContainsInvalidSub();
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
@@ -67,12 +67,21 @@ internal class OAuthMetadataEndpoint(
 
         if (!issuerUri.Equals($"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}", StringComparison.Ordinal))
         {
-            logger.LogDebug("Request for OAuth discovery document with a request URL that does not match the issuer URI. Returning 404. Issuer: {issuer}, Request: {request}", issuerUri, $"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}");
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                var requestUrl = $"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}";
+                logger.OAuthDiscoveryRequestUriMismatch(
+                    issuerUri.SanitizeLogParameter(),
+                    requestUrl.SanitizeLogParameter());
+            }
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
         // generate response
-        logger.LogTrace("Calling into discovery response generator: {type}", ResponseGenerator.GetType().FullName);
+        if (logger.IsEnabled(LogLevel.Trace))
+        {
+            logger.CallingIntoOAuthDiscoveryResponseGenerator(ResponseGenerator.GetType().FullName);
+        }
 
         return await GetDiscoveryDocument(context, baseUrl, issuerUri);
     }

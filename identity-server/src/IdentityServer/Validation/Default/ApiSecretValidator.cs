@@ -49,7 +49,7 @@ public class ApiSecretValidator : IApiSecretValidator
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ApiSecretValidator.Validate");
 
-        _logger.LogTrace("Start API validation");
+        _logger.StartAPIValidation();
 
         var fail = new ApiSecretValidationResult
         {
@@ -61,7 +61,7 @@ public class ApiSecretValidator : IApiSecretValidator
         {
             await RaiseFailureEventAsync("unknown", "No API id or secret found", ct);
 
-            _logger.LogDebug("No API secret found");
+            _logger.NoAPISecretFound();
             return fail;
         }
 
@@ -71,7 +71,7 @@ public class ApiSecretValidator : IApiSecretValidator
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Unknown API resource", ct);
 
-            _logger.LogDebug("No API resource with that name found. aborting");
+            _logger.NoAPIResourceWithThatNameFoundAborting();
             return fail;
         }
 
@@ -79,7 +79,7 @@ public class ApiSecretValidator : IApiSecretValidator
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Invalid API resource", ct);
 
-            _logger.LogError("More than one API resource with that name found. aborting");
+            _logger.MoreThanOneAPIResourceWithThatName();
             return fail;
         }
 
@@ -89,14 +89,14 @@ public class ApiSecretValidator : IApiSecretValidator
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "API resource not enabled", ct);
 
-            _logger.LogError("API resource not enabled. aborting.");
+            _logger.APIResourceNotEnabledAborting();
             return fail;
         }
 
         var result = await _validator.ValidateAsync(api.ApiSecrets, parsedSecret, ct);
         if (result.Success)
         {
-            _logger.LogDebug("API resource validation success");
+            _logger.APIResourceValidationSuccess();
 
             var success = new ApiSecretValidationResult
             {
@@ -109,7 +109,7 @@ public class ApiSecretValidator : IApiSecretValidator
         }
 
         await RaiseFailureEventAsync(api.Name, "Invalid API secret", ct);
-        _logger.LogError("API validation failed.");
+        _logger.APIValidationFailed();
 
         return fail;
     }

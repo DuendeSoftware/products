@@ -51,7 +51,7 @@ public class CorsPolicyService : ICorsPolicyService
 
         var isAllowed = await query.AnyAsync(ct);
 
-        Logger.LogDebug("Origin {origin} is allowed: {originAllowed}", origin, isAllowed);
+        Logger.OriginAllowed(origin, isAllowed);
 
         return isAllowed;
     }

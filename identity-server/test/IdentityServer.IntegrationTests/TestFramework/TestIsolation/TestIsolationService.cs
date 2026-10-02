@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -109,6 +110,13 @@ public sealed class TestIsolationService : IDisposable
                 ((IList<ServiceDescriptor>)testServices).Add(descriptor);
             }
             configureServices(testServices);
+
+            // Outgoing OIDC calls (discovery, token, userinfo) connect to loopback instead of
+            // resolving *.dev.localhost through DNS, which is unreliable on some machines.
+            // Registered as a configure step (not post-configure) so it runs before the
+            // OIDC handler builds its Backchannel; ??= keeps any handler a test sets itself.
+            _ = testServices.ConfigureAll<OpenIdConnectOptions>(options =>
+                options.BackchannelHttpHandler ??= CreateHandler());
 
             // Replace the EndpointDataSource singleton with a fresh instance per test.
             // AddRouting() captures an ObservableCollection<EndpointDataSource> by closure

@@ -23,8 +23,7 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "An error occurred while logging the diagnostic summary: {Message}",
-                        ex.Message);
+                    logger.AnErrorOccurredWhileLoggingTheDiagnosticSummary(ex, ex.Message);
                 }
             }
         }

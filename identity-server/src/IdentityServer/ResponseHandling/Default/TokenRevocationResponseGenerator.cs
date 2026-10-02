@@ -65,17 +65,17 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
         // revoke tokens
         if (validationResult.TokenTypeHint == Constants.TokenTypeHints.AccessToken)
         {
-            Logger.LogTrace("Hint was for access token");
+            Logger.HintWasForAccessToken();
             response.Success = await RevokeAccessTokenAsync(validationResult, ct);
         }
         else if (validationResult.TokenTypeHint == Constants.TokenTypeHints.RefreshToken)
         {
-            Logger.LogTrace("Hint was for refresh token");
+            Logger.HintWasForRefreshToken();
             response.Success = await RevokeRefreshTokenAsync(validationResult, ct);
         }
         else
         {
-            Logger.LogTrace("No hint for token type");
+            Logger.NoHintForTokenType();
 
             response.Success = await RevokeAccessTokenAsync(validationResult, ct);
 
@@ -104,12 +104,12 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
         {
             if (token.ClientId == validationResult.Client.ClientId)
             {
-                Logger.LogDebug("Access token revoked");
+                Logger.AccessTokenRevoked();
                 await ReferenceTokenStore.RemoveReferenceTokenAsync(validationResult.Token, ct);
             }
             else
             {
-                Logger.LogWarning("Client {clientId} denied from revoking access token belonging to Client {tokenClientId}", validationResult.Client.ClientId, token.ClientId);
+                Logger.ClientDeniedFromRevokingAccessTokenBelongingTo(validationResult.Client.ClientId, token.ClientId);
             }
 
             return true;
@@ -129,13 +129,13 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
         {
             if (token.ClientId == validationResult.Client.ClientId)
             {
-                Logger.LogDebug("Refresh token revoked");
+                Logger.RefreshTokenRevoked();
                 await RefreshTokenStore.RemoveRefreshTokenAsync(validationResult.Token, ct);
                 await ReferenceTokenStore.RemoveReferenceTokensAsync(token.SubjectId, token.ClientId, token.SessionId, ct);
             }
             else
             {
-                Logger.LogWarning("Client {clientId} denied from revoking a refresh token belonging to Client {tokenClientId}", validationResult.Client.ClientId, token.ClientId);
+                Logger.ClientDeniedFromRevokingARefreshTokenBelonging(validationResult.Client.ClientId, token.ClientId);
             }
 
             return true;

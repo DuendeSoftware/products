@@ -7,7 +7,7 @@
     <UseMicrosoftTestingPlatformRunner>false</UseMicrosoftTestingPlatformRunner>
     <RootNamespace>Duende.IdentityServer.Interaction</RootNamespace>
     <Nullable>enable</Nullable>
-    <NoWarn>$(NoWarn);CA1848;CS7022;CS0618;CS8602</NoWarn>
+    <NoWarn>$(NoWarn);CS7022;CS0618;CS8602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

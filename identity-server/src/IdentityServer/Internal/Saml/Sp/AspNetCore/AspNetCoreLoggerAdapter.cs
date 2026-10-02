@@ -23,19 +23,40 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
         /// <InheritDoc />
         public void WriteError(string message, Exception ex)
         {
-            logger.LogError(ex, message);
+            logger.AdapterError(message, ex);
         }
 
         /// <InheritDoc />
         public void WriteInformation(string message)
         {
-            logger.LogInformation(message);
+            logger.AdapterInformation(message);
         }
 
         /// <InheritDoc />
         public void WriteVerbose(string message)
         {
-            logger.LogDebug(message);
+            logger.AdapterVerbose(message);
         }
+    }
+
+    internal static partial class Log
+    {
+        [LoggerMessage(
+            EventName = nameof(AdapterError),
+            Level = LogLevel.Error,
+            Message = "{Message}")]
+        internal static partial void AdapterError(this ILogger logger, string message, Exception ex);
+
+        [LoggerMessage(
+            EventName = nameof(AdapterInformation),
+            Level = LogLevel.Information,
+            Message = "{Message}")]
+        internal static partial void AdapterInformation(this ILogger logger, string message);
+
+        [LoggerMessage(
+            EventName = nameof(AdapterVerbose),
+            Level = LogLevel.Debug,
+            Message = "{Message}")]
+        internal static partial void AdapterVerbose(this ILogger logger, string message);
     }
 }

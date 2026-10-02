@@ -19,11 +19,11 @@ internal sealed class StorageCorsPolicyService(ClientRepository repository, ILog
 
         if (isAllowed)
         {
-            logger.LogDebug("Client list checked and origin: {Origin} is allowed", origin);
+            logger.ClientListCheckedAndOriginOriginIsAllowed(origin);
         }
         else
         {
-            logger.LogDebug("Client list checked and origin: {Origin} is not allowed", origin);
+            logger.ClientListCheckedAndOriginOriginIsNot(origin);
         }
 
         return isAllowed;

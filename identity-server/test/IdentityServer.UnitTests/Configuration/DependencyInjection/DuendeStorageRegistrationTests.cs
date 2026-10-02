@@ -26,6 +26,7 @@ using Duende.IdentityServer.Stores.Storage.SamlServiceProviders;
 using Duende.IdentityServer.Stores.Storage.SamlSigninState;
 using Duende.IdentityServer.Stores.Storage.ServerSideSessions;
 using Duende.IdentityServer.Stores.Storage.SigningKeys;
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
@@ -41,9 +42,6 @@ public class DuendeStorageRegistrationTests
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        var dbName = $"duende_storage_registration_{Guid.NewGuid():N}";
-        services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt => opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         // AddIdentityServer() registers the full set of platform/core/validator services (client
         // configuration validator, identity provider configuration validator, event service, etc.)
@@ -57,8 +55,7 @@ public class DuendeStorageRegistrationTests
     private static ServiceProvider BuildAndMigrate(IServiceCollection services)
     {
         var sp = services.BuildServiceProvider();
-        var pooledStore = sp.GetRequiredService<IPooledStore>();
-        ((IDatabaseSchema)pooledStore).MigrateAsync(CancellationToken.None).GetAwaiter().GetResult();
+        sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None).GetAwaiter().GetResult();
         return sp;
     }
 
@@ -73,7 +70,7 @@ public class DuendeStorageRegistrationTests
     public void AddStorage_resolves_all_storage_backed_stores_with_intended_decorators()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         using var sp = BuildAndMigrate(services);
 
         sp.GetRequiredService<IClientStore>().ShouldBeOfType<ClientStore>();
@@ -93,7 +90,7 @@ public class DuendeStorageRegistrationTests
     public void AddStorage_resolves_all_six_admin_interfaces()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         using var sp = BuildAndMigrate(services);
         using var scope = sp.CreateScope();
 
@@ -106,31 +103,25 @@ public class DuendeStorageRegistrationTests
     }
 
     [Fact]
-    public void AddStorage_default_schema_store_is_in_memory_seeded_with_built_ins_and_has_no_admin()
+    public async Task With_IdentityServer_and_configuration_storage_the_OIDC_provider_schema_is_available()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
-        using var sp = BuildAndMigrate(services);
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
+        await using var sp = services.BuildServiceProvider();
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
 
         var schemaStore = sp.GetRequiredService<ISchemaStore>();
         schemaStore.ShouldBeOfType<InMemorySchemaStore>();
 
-        var oidcSchema = schemaStore.GetAsync(SchemaId.IdentityProvider("oidc"), CancellationToken.None)
-            .GetAwaiter().GetResult();
-        oidcSchema.ShouldNotBe(AttributeSchema.Empty);
-
-        var samlSchema = schemaStore.GetAsync(SchemaId.IdentityProvider("saml"), CancellationToken.None)
-            .GetAwaiter().GetResult();
-        samlSchema.ShouldNotBe(AttributeSchema.Empty);
-
-        sp.GetService<ISchemaAdmin>().ShouldBeNull();
+        var oidcSchema = await schemaStore.GetAsync(SchemaId.OidcIdentityProvider, Ct.None);
+        oidcSchema.AttributeDefinitions.ShouldContainKey(DefaultOidcProviderSchema.Authority.Code);
     }
 
     [Fact]
     public void AddStorage_without_server_side_sessions_marker_resolves_no_session_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         using var sp = BuildAndMigrate(services);
 
         // No IServerSideSessionsMarker registered (AddServerSideSessions() was never called), so the
@@ -143,33 +134,39 @@ public class DuendeStorageRegistrationTests
     {
         var (services, builder) = CreateBuilder();
         builder.AddServerSideSessions();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         using var sp = BuildAndMigrate(services);
 
         sp.GetRequiredService<IServerSideSessionStore>().ShouldBeOfType<ServerSideSessionStore>();
     }
 
     [Fact]
-    public void AddStorage_called_twice_leaves_one_hosted_service_per_type()
+    public void AddStorage_called_twice_throws()
+    {
+        var (_, builder) = CreateBuilder();
+
+        builder.AddStorage(_ => _.AddSqliteInMemory());
+
+        Should.Throw<InvalidOperationException>(() => builder.AddStorage(_ => _.AddSqliteInMemory()));
+    }
+
+    [Fact]
+    public void AddStorage_resolves_default_storage_factory()
     {
         var (services, builder) = CreateBuilder();
+        builder.AddStorage(_ => _.AddSqliteInMemory());
+        using var sp = BuildAndMigrate(services);
 
-        builder.AddStorage(_ => { });
-        builder.AddStorage(_ => { });
-
-        var hostedServiceImplementationTypes = services
-            .Where(x => x.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService))
-            .Select(x => x.ImplementationType)
-            .ToList();
-
-        hostedServiceImplementationTypes.Count.ShouldBe(hostedServiceImplementationTypes.Distinct().Count());
+        // IdentityServer registers no factory of its own; AddStorage() reaches Duende.Storage's
+        // default by way of AddStorageInternal().
+        sp.GetRequiredService<IPartitionedStorageFactory>().ShouldBeOfType<DefaultPartitionedStorageFactory>();
     }
 
     [Fact]
     public void AddInMemoryClients_after_AddStorage_disables_the_client_admin()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryClients(Array.Empty<Client>());
         using var sp = BuildAndMigrate(services);
 
@@ -180,7 +177,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryIdentityResources_after_AddStorage_disables_all_resource_admins()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryIdentityResources(Array.Empty<IdentityResource>());
         using var sp = BuildAndMigrate(services);
 
@@ -193,7 +190,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryApiResources_after_AddStorage_disables_all_resource_admins()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryApiResources(Array.Empty<ApiResource>());
         using var sp = BuildAndMigrate(services);
 
@@ -206,7 +203,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryApiScopes_after_AddStorage_disables_all_resource_admins()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryApiScopes(Array.Empty<ApiScope>());
         using var sp = BuildAndMigrate(services);
 
@@ -219,7 +216,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryIdentityProviders_after_AddStorage_disables_the_identity_provider_admin()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryIdentityProviders(Array.Empty<IdentityProvider>());
         using var sp = BuildAndMigrate(services);
 
@@ -230,7 +227,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemorySamlServiceProviders_after_AddStorage_disables_the_saml_service_provider_admin()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemorySamlServiceProviders(Array.Empty<SamlServiceProvider>());
         using var sp = BuildAndMigrate(services);
 
@@ -241,7 +238,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryClients_after_AddStorage_replaces_client_store_and_storage_cors_policy()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryClients(Array.Empty<Client>());
         using var sp = BuildAndMigrate(services);
 
@@ -268,7 +265,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryClients_does_not_replace_a_custom_cors_policy_service_registered_after_AddStorage()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddCorsPolicyService<CustomCorsPolicyService>();
 
         builder.AddInMemoryClients(Array.Empty<Client>());
@@ -280,7 +277,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryIdentityResources_after_AddStorage_replaces_the_whole_resource_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryIdentityResources([new IdentityResource("openid", ["sub"])]);
         using var sp = BuildAndMigrate(services);
 
@@ -292,7 +289,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryApiResources_after_AddStorage_replaces_the_whole_resource_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryApiResources([new ApiResource("api1")]);
         using var sp = BuildAndMigrate(services);
 
@@ -304,7 +301,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryApiScopes_after_AddStorage_replaces_the_whole_resource_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryApiScopes([new ApiScope("scope1")]);
         using var sp = BuildAndMigrate(services);
 
@@ -316,7 +313,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryApiResources_alone_does_not_provide_identity_resources_or_api_scopes()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryApiResources([new ApiResource("api1")]);
         using var sp = BuildAndMigrate(services);
 
@@ -332,7 +329,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryIdentityProviders_after_AddStorage_replaces_the_identity_provider_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryIdentityProviders(Array.Empty<IdentityProvider>());
         using var sp = BuildAndMigrate(services);
 
@@ -347,7 +344,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryOidcProviders_after_AddStorage_replaces_the_identity_provider_store_through_the_shared_path()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryOidcProviders(Array.Empty<OidcProvider>());
         using var sp = BuildAndMigrate(services);
 
@@ -362,7 +359,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemorySamlProviders_after_AddStorage_replaces_the_identity_provider_store_through_the_shared_path()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemorySamlProviders(Array.Empty<SamlProvider>());
         using var sp = BuildAndMigrate(services);
 
@@ -377,7 +374,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemorySamlServiceProviders_after_AddStorage_replaces_the_saml_service_provider_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemorySamlServiceProviders(Array.Empty<SamlServiceProvider>());
         using var sp = BuildAndMigrate(services);
 
@@ -392,7 +389,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryPersistedGrants_after_AddStorage_replaces_persisted_grant_and_device_flow_stores()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryPersistedGrants();
         using var sp = BuildAndMigrate(services);
 
@@ -406,7 +403,7 @@ public class DuendeStorageRegistrationTests
     public void AddInMemoryPushedAuthorizationRequests_after_AddStorage_replaces_the_par_store()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryPushedAuthorizationRequests();
         using var sp = BuildAndMigrate(services);
 
@@ -415,39 +412,66 @@ public class DuendeStorageRegistrationTests
     }
 
     [Fact]
-    public void AddInMemoryDataExtensionSchemas_after_AddStorage_replaces_the_schema_store_and_makes_admin_unresolvable()
+    public async Task A_customer_schema_registered_after_configuration_storage_is_available_alongside_the_OIDC_provider_schema()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
-
         var customSchemaId = SchemaId.Create("custom:widget");
+        var color = new TypedAttributeDefinition<string>(AttributeCode.Create("color"), new ScalarAttributeType(ScalarDataType.String));
+        builder.AddStorage(storage => storage.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddInMemoryDataExtensionSchemas([
-            new SchemaConfiguration { SchemaId = customSchemaId, DisplayName = "Widget" }
+            new SchemaConfiguration { SchemaId = customSchemaId, DisplayName = "Widget", AttributeDefinitions = [color] }
         ]);
-        using var sp = BuildAndMigrate(services);
-
-        AssertSingleDescriptor<ISchemaStore>(services, typeof(InMemorySchemaStore));
-
-        // In-memory schemas are immutable at runtime, so ISchemaAdmin is intentionally unsupported.
-        // Resolving it must throw a clear NotSupportedException rather than silently returning null,
-        // so callers using ISchemaAdmin against in-memory schemas fail loudly at the point of use.
-        Should.Throw<NotSupportedException>(sp.GetService<ISchemaAdmin>);
+        await using var sp = services.BuildServiceProvider();
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
 
         var schemaStore = sp.GetRequiredService<ISchemaStore>();
+        var customSchema = await schemaStore.GetAsync(customSchemaId, Ct.None);
+        var oidcSchema = await schemaStore.GetAsync(SchemaId.OidcIdentityProvider, Ct.None);
 
-        // Built-ins remain available alongside the caller-supplied schema.
-        schemaStore.GetAsync(SchemaId.IdentityProvider("oidc"), CancellationToken.None)
-            .GetAwaiter().GetResult().ShouldNotBe(AttributeSchema.Empty);
+        customSchema.AttributeDefinitions.ShouldContainKey(color.Code);
+        oidcSchema.AttributeDefinitions.ShouldContainKey(DefaultOidcProviderSchema.Authority.Code);
+    }
 
-        schemaStore.GetAsync(customSchemaId, CancellationToken.None)
-            .GetAwaiter().GetResult().ShouldNotBe(AttributeSchema.Empty);
+    [Fact]
+    public void AddDynamicSchemas_named_instance_between_AddStorage_and_AddConfigurationStorage_is_not_overwritten()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        var builder = services.AddIdentityServer();
+        var dbName = $"duende_storage_registration_{Guid.NewGuid():N}";
+        var namedStorageInstanceId = StorageInstanceId.Create("named");
+
+        builder.AddStorage(namedStorageInstanceId,
+            storage => storage.AddSqlite(opt => opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
+        builder.AddDynamicSchemas(namedStorageInstanceId);
+        builder.AddConfigurationStorage(namedStorageInstanceId);
+
+        using var sp = services.BuildServiceProvider();
+        var schema = sp.GetRequiredService<IStorageInstanceSchemaFactory>()
+            .GetStorageInstanceSchema(namedStorageInstanceId, Ct.None).GetAwaiter().GetResult();
+        schema.MigrateAsync(Ct.None).GetAwaiter().GetResult();
+
+        sp.GetRequiredService<ISchemaStore>().ShouldBeOfType<StorageSchemaAdmin>();
+        sp.GetRequiredService<ISchemaAdmin>().ShouldBeOfType<StorageSchemaAdmin>();
+    }
+
+    [Fact]
+    public void Custom_schema_store_registered_between_AddStorage_and_AddConfigurationStorage_is_preserved()
+    {
+        var (services, builder) = CreateBuilder();
+        builder.AddStorage(StorageInstanceId.Default, _ => _.AddSqliteInMemory());
+        services.AddSingleton<ISchemaStore>(new CustomSchemaStore());
+
+        builder.AddConfigurationStorage();
+
+        AssertSingleDescriptor<ISchemaStore>(services, typeof(CustomSchemaStore));
     }
 
     [Fact]
     public void AddPersistedGrantStore_after_AddStorage_replaces_the_storage_backed_implementation()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddPersistedGrantStore<CustomPersistedGrantStore>();
 
         AssertSingleDescriptor<IPersistedGrantStore>(services, typeof(CustomPersistedGrantStore));
@@ -457,7 +481,7 @@ public class DuendeStorageRegistrationTests
     public void AddSigningKeyStore_after_AddStorage_replaces_the_storage_backed_implementation()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddSigningKeyStore<CustomSigningKeyStore>();
 
         AssertSingleDescriptor<ISigningKeyStore>(services, typeof(CustomSigningKeyStore));
@@ -467,7 +491,7 @@ public class DuendeStorageRegistrationTests
     public void AddSamlSigninStateStore_after_AddStorage_replaces_the_storage_backed_implementation()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddSamlSigninStateStore<CustomSamlSigninStateStore>();
 
         AssertSingleDescriptor<ISamlSigninStateStore>(services, typeof(CustomSamlSigninStateStore));
@@ -477,7 +501,7 @@ public class DuendeStorageRegistrationTests
     public void AddSamlLogoutSessionStore_after_AddStorage_replaces_the_storage_backed_implementation()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddSamlLogoutSessionStore<CustomSamlLogoutSessionStore>();
 
         AssertSingleDescriptor<ISamlLogoutSessionStore>(services, typeof(CustomSamlLogoutSessionStore));
@@ -487,7 +511,7 @@ public class DuendeStorageRegistrationTests
     public void AddCorsPolicyService_after_AddStorage_replaces_the_storage_backed_implementation()
     {
         var (services, builder) = CreateBuilder();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         builder.AddCorsPolicyService<CustomCorsPolicyService>();
 
         AssertSingleDescriptor<ICorsPolicyService>(services, typeof(CustomCorsPolicyService));
@@ -499,7 +523,7 @@ public class DuendeStorageRegistrationTests
         var (services, builder) = CreateBuilder();
 
         builder.AddSaml();
-        builder.AddStorage(_ => { });
+        builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
 
         AssertSingleDescriptor<ISamlSigninStateStore>(
             services,
@@ -536,6 +560,11 @@ public class DuendeStorageRegistrationTests
         public Task RemoveSigninRequestStateAsync(Guid stateId, Ct ct = default) => Task.CompletedTask;
     }
 
+    private sealed class CustomSchemaStore : ISchemaStore
+    {
+        public Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, Ct ct) => Task.FromResult<IReadOnlyAttributeSchema>(AttributeSchema.Empty);
+    }
+
     private sealed class CustomSamlLogoutSessionStore : ISamlLogoutSessionStore
     {
         public Task StoreAsync(SamlLogoutSession session, Ct ct) => Task.CompletedTask;
@@ -544,3 +573,4 @@ public class DuendeStorageRegistrationTests
         public Task RemoveAsync(string logoutId, Ct ct) => Task.CompletedTask;
     }
 }
+

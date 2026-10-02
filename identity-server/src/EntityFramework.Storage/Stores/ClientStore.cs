@@ -75,7 +75,7 @@ public class ClientStore : IClientStore
 
         var model = client.ToModel();
 
-        Logger.LogDebug("{clientId} found in database: {clientIdFound}", clientId, model != null);
+        Log.ValueFoundInDatabaseValue(Logger, clientId, model != null);
 
         return model;
     }
@@ -105,7 +105,7 @@ public class ClientStore : IClientStore
             yield return client.ToModel();
         }
 
-        Logger.LogDebug("Retrieved {clientCount} clients for enumeration", clientCount);
+        Log.RetrievedValueClientsForEnumeration(Logger, clientCount);
     }
 }
 

@@ -36,7 +36,7 @@ public class EditModel(IdentityScopeRepository repository) : PageModel
     {
         if (Button == "delete")
         {
-            await repository.DeleteAsync(id);
+            await repository.DeleteAsync(id, ct);
             return RedirectToPage("/Admin/IdentityScopes/Index");
         }
 

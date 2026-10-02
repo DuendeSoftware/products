@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Conformance.Host;
 
-internal static class HostingExtensions
+internal static partial class HostingExtensions
 {
     internal static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
@@ -147,7 +147,7 @@ internal static class HostingExtensions
         // each module so container logs can be correlated to specific tests.
         app.MapGet("/conformance/log-marker", (string message, ILogger<Program> logger) =>
         {
-            logger.LogWarning("===== {Message} =====", message);
+            LogMarker(logger, message);
             return Results.Ok();
         }).AllowAnonymous();
 
@@ -159,4 +159,7 @@ internal static class HostingExtensions
 
         return app;
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "===== {Message} =====")]
+    private static partial void LogMarker(ILogger logger, string message);
 }

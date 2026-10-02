@@ -43,17 +43,17 @@ internal sealed class SpLogoutCompletionEndpoint(
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        var logoutId = context.Request.Query["logoutId"].ToString();
-        if (string.IsNullOrWhiteSpace(logoutId))
+        var logoutMessageHandle = context.Request.Query["logoutId"].ToString();
+        if (string.IsNullOrWhiteSpace(logoutMessageHandle))
         {
-            logger.LogWarning("SP logout completion request missing logoutId parameter");
+            logger.SpLogoutCompletionMissingLogoutIdParameter(LogLevel.Warning);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
 
-        var logoutMessage = await logoutMessageStore.ReadAsync(logoutId, context.RequestAborted);
+        var logoutMessage = await logoutMessageStore.ReadAsync(logoutMessageHandle, context.RequestAborted);
         if (logoutMessage?.Data == null)
         {
-            logger.LogWarning("SP logout completion: no message found for logoutId {LogoutId}", logoutId);
+            logger.SpLogoutCompletionNoMessageFound(LogLevel.Warning);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
 
@@ -61,7 +61,7 @@ internal sealed class SpLogoutCompletionEndpoint(
         var messageAge = timeProvider.GetUtcNow() - new DateTimeOffset(logoutMessage.Created, TimeSpan.Zero);
         if (messageAge > MaxLogoutAge)
         {
-            logger.LogWarning("SP logout completion: message expired for logoutId {LogoutId}", logoutId);
+            logger.SpLogoutCompletionMessageExpired(LogLevel.Information);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
 
@@ -72,14 +72,17 @@ internal sealed class SpLogoutCompletionEndpoint(
             string.IsNullOrWhiteSpace(data.ResponseBinding) ||
             string.IsNullOrWhiteSpace(data.ResponseDestination))
         {
-            logger.LogWarning("SP logout completion: message missing required SAML fields for logoutId {LogoutId}", logoutId);
+            logger.SpLogoutCompletionMessageMissingRequiredFields(LogLevel.Warning);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
 
         // Determine success/partial based on tracked SP responses.
         // If no logout session exists (no downstream SAML SPs), treat as success —
         // downstream OIDC clients were already notified via front-channel iframes.
-        var logoutSession = await samlLogoutSessionStore.GetByLogoutIdAsync(logoutId, context.RequestAborted);
+        var samlLogoutCorrelationId = data.SamlLogoutCorrelationId;
+        var logoutSession = !string.IsNullOrEmpty(samlLogoutCorrelationId)
+            ? await samlLogoutSessionStore.GetByLogoutIdAsync(samlLogoutCorrelationId, context.RequestAborted)
+            : null;
         var allSucceeded = logoutSession == null ||
             (logoutSession.SkippedSpCount == 0 &&
             logoutSession.ExpectedResponses.Values.All(e => e.Response is { Success: true }));
@@ -119,14 +122,14 @@ internal sealed class SpLogoutCompletionEndpoint(
             ? await responseGenerator.CreateSuccessResponse(validatedRequest, context.RequestAborted)
             : await responseGenerator.CreatePartialLogoutResponse(validatedRequest, context.RequestAborted);
 
-        if (logoutSession != null)
+        if (logoutSession != null && !string.IsNullOrEmpty(samlLogoutCorrelationId))
         {
-            await samlLogoutSessionStore.RemoveAsync(logoutId, context.RequestAborted);
+            await samlLogoutSessionStore.RemoveAsync(samlLogoutCorrelationId, context.RequestAborted);
         }
 
         if (response.Message == null)
         {
-            logger.LogError("SP logout completion: response generator returned null message for logoutId {LogoutId}", logoutId);
+            logger.SpLogoutCompletionResponseGeneratorReturnedNullMessage(LogLevel.Error);
             return new StatusCodeResult(HttpStatusCode.InternalServerError);
         }
 

@@ -16,8 +16,10 @@ using Duende.Storage.Pagination;
 namespace Duende.IdentityServer.Stores.Storage.PersistedGrants;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
+internal sealed class PersistedGrantRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Operational, ct);
+
     internal enum Keys
     {
         GrantKey = 1
@@ -35,11 +37,11 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
 
     internal async Task StoreAsync(PersistedGrantDso.V1 dso, int? existingVersion, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
 
         if (existingVersion.HasValue)
         {
-            await storage.UpdateAsync(
+            await partitionedStorage.UpdateAsync(
                 UuidV7.From(dso.Id),
                 dso,
                 existingVersion.Value,
@@ -51,7 +53,7 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
         }
         else
         {
-            var createResult = await storage.CreateAsync(
+            var createResult = await partitionedStorage.CreateAsync(
                 UuidV7.From(dso.Id),
                 dso,
                 [DataStorageKey.Create(PersistedGrantKeyDskV1.Create(dso.Key))],
@@ -73,8 +75,8 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
 
     internal async Task<(PersistedGrantDso.V1 Dso, int Version)?> TryReadByKeyAsync(string key, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(
             PersistedGrantDso.EntityType,
             DataStorageKey.Create(PersistedGrantKeyDskV1.Create(key)),
             ct);
@@ -84,7 +86,7 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
     // === DELETE ===
 
     internal async Task RemoveByKeyAsync(string key, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).DeleteAsync(
+        await (await GetPartitionedStorage(ct)).DeleteAsync(
             PersistedGrantDso.EntityType,
             DataStorageKey.Create(PersistedGrantKeyDskV1.Create(key)),
             [],
@@ -95,7 +97,7 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
     internal async Task<IReadOnlyList<PersistedGrantDso.V1>> QueryByFilterAsync(
         PersistedGrantFilter filter, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var filterExpr = BuildFilter(filter);
         var results = new List<PersistedGrantDso.V1>();
         var pageNumber = 1;
@@ -103,7 +105,7 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
         while (true)
         {
             var range = DataRange.FromPage(pageNumber, 200);
-            var result = await storage.QueryAsync<PersistedGrantDso.V1>(
+            var result = await partitionedStorage.QueryAsync<PersistedGrantDso.V1>(
                 PersistedGrantDso.EntityType, filterExpr, SortParameter.Empty, range, ct);
 
             results.AddRange(result.Items.Select(e => e.Value));
@@ -122,11 +124,11 @@ internal sealed class PersistedGrantRepository(IStorageFactory storageFactory)
     internal async Task RemoveByFilterAsync(PersistedGrantFilter filter, Ct ct)
     {
         var grants = await QueryByFilterAsync(filter, ct);
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
 
         foreach (var grant in grants)
         {
-            await storage.DeleteAsync(
+            await partitionedStorage.DeleteAsync(
                 PersistedGrantDso.EntityType,
                 UuidV7.From(grant.Id),
                 [],

@@ -540,6 +540,28 @@ public class DiscoveryEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task mtls_endpoint_aliases_preserve_non_default_path_base()
+    {
+        // IdentityServerPipeline.Initialize supports a non-default PathBase directly, which is
+        // sufficient to exercise the same BasePath-preservation behavior that a Spaces
+        // path-resolved tenant would rely on, without needing the Spaces fixture in this file.
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize("/tenant-a");
+
+        pipeline.Options.MutualTls.Enabled = true;
+        pipeline.Options.Endpoints.EnablePushedAuthorizationEndpoint = true;
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/tenant-a/.well-known/openid-configuration");
+
+        result.Issuer.ShouldBe("https://server/tenant-a");
+        result.MtlsEndpointAliases.ShouldNotBeNull();
+        result.MtlsEndpointAliases.TokenEndpoint.ShouldBe("https://server/tenant-a/connect/mtls/token");
+        result.MtlsEndpointAliases.IntrospectionEndpoint.ShouldBe("https://server/tenant-a/connect/mtls/introspect");
+        result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldBe("https://server/tenant-a/connect/mtls/par");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task registration_endpoint_should_be_custom_when_static_type_and_custom_endpoint_set()
     {
         var pipeline = new IdentityServerPipeline();

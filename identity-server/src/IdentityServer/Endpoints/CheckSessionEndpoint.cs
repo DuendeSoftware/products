@@ -24,12 +24,12 @@ internal class CheckSessionEndpoint : IEndpointHandler
 
         if (!HttpMethods.IsGet(context.Request.Method))
         {
-            _logger.LogWarning("Invalid HTTP method for check session endpoint");
+            _logger.InvalidHTTPMethodForCheckSessionEndpoint();
             result = new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
         else
         {
-            _logger.LogDebug("Rendering check session result");
+            _logger.RenderingCheckSessionResult();
             result = new CheckSessionResult();
         }
 

@@ -6,8 +6,6 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.DependencyInjection;
 using SecretHashAlgorithm = Duende.IdentityServer.Admin.SecretHashAlgorithm;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
@@ -18,28 +16,12 @@ public sealed class ClientStoreTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-
-    private IClientAdmin BuildClientAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IClientAdmin>();
-    }
-
-    private IClientStore BuildClientStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IClientStore>();
-    }
 
     [Fact]
     public async Task create_via_admin_then_find_by_client_id_returns_matching_client_model()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var config = new CreateClient
@@ -72,8 +54,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task create_with_all_properties_then_find_maps_all_fields_correctly()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var config = new CreateClient
@@ -116,8 +98,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task create_then_update_via_admin_then_find_reflects_changes()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var config = new CreateClient
@@ -156,8 +138,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task delete_via_admin_then_find_by_client_id_returns_null()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var config = new CreateClient
@@ -187,8 +169,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task create_multiple_clients_get_all_returns_all()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         // Use a common prefix to identify clients created in this test
         var prefix = $"batch_{Guid.NewGuid():N}_";
@@ -223,8 +205,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task get_all_clients_streams_all_via_async_enumerable()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var prefix = $"stream_{Guid.NewGuid():N}_";
         var clientIds = Enumerable.Range(1, 2)
@@ -263,8 +245,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_via_admin_then_client_store_exposes_hashed_value()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var storageId = await CreateClientAsync(admin, clientId);
@@ -298,8 +280,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task delete_secret_via_admin_then_client_store_shows_no_secrets()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var storageId = await CreateClientAsync(admin, clientId);
@@ -330,8 +312,8 @@ public sealed class ClientStoreTests : IAsyncLifetime
     [Fact]
     public async Task client_store_never_exposes_plaintext_secret()
     {
-        var admin = BuildClientAdmin();
-        var clientStore = BuildClientStore();
+        var admin = _fixture.ClientAdmin;
+        var clientStore = _fixture.ClientStore;
 
         var clientId = $"client_{Guid.NewGuid():N}";
         var storageId = await CreateClientAsync(admin, clientId);
@@ -375,15 +357,7 @@ public sealed class ClientStoreTests : IAsyncLifetime
         result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
         return result.Id;
     }
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 }

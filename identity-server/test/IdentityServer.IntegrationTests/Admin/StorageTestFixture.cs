@@ -4,6 +4,8 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.IntegrationTests.Admin.ApiResources;
 using Duende.IdentityServer.IntegrationTests.Admin.ApiScopes;
 using Duende.IdentityServer.IntegrationTests.Admin.Clients;
@@ -13,11 +15,14 @@ using Duende.IdentityServer.IntegrationTests.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Stores.Storage.SamlLogoutSession;
 using Duende.IdentityServer.Stores.Storage.SigningKeys;
 using Duende.IdentityServer.Validation;
+using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
 /// <summary>
@@ -52,6 +57,12 @@ public sealed class StorageTestFixture : IAsyncLifetime
     internal KeyRepository KeyRepository => _scope!.ServiceProvider.GetRequiredService<KeyRepository>();
     public ISamlLogoutSessionStore SamlLogoutSessionStore => _scope!.ServiceProvider.GetRequiredService<ISamlLogoutSessionStore>();
     public IConnectedApplicationStore ConnectedApplicationStore => _scope!.ServiceProvider.GetRequiredService<IConnectedApplicationStore>();
+    public IPartitionedStorageFactory PartitionedStorageFactory => _scope!.ServiceProvider.GetRequiredService<IPartitionedStorageFactory>();
+    internal IStorageInstanceRouter StorageInstanceRouter => _scope!.ServiceProvider.GetRequiredService<IStorageInstanceRouter>();
+    internal ICrossPartitionStorageFactory CrossPartitionStorageFactory => _scope!.ServiceProvider.GetRequiredService<ICrossPartitionStorageFactory>();
+    public IdentityServerOptions Options => _scope!.ServiceProvider.GetRequiredService<IdentityServerOptions>();
+    internal ILogger<StoragePurgeHost> StoragePurgeHostLogger => _scope!.ServiceProvider.GetRequiredService<ILogger<StoragePurgeHost>>();
+    internal SamlLogoutSessionRepository SamlLogoutSessionRepository => _scope!.ServiceProvider.GetRequiredService<SamlLogoutSessionRepository>();
 
     public async ValueTask InitializeAsync()
     {
@@ -60,13 +71,12 @@ public sealed class StorageTestFixture : IAsyncLifetime
         var services = new ServiceCollection();
         services.AddLogging();
 
-        // Unique in-memory DB per fixture instance for isolation
-        var dbName = $"integration_{Guid.NewGuid():N}";
-
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
-                    opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+                storage.AddSqliteInMemory())
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
+            .AddSamlDynamicProvider()
             .AddClientConfigurationValidator<NopClientConfigurationValidator>()
             .AddIdentityProviderConfigurationValidator<NopIdentityProviderConfigurationValidator>()
             .AddSamlServiceProviderConfigurationValidator<NopSamlServiceProviderConfigurationValidator>()
@@ -79,7 +89,7 @@ public sealed class StorageTestFixture : IAsyncLifetime
         _provider = services.BuildServiceProvider();
 
         // Run schema migration before any tests execute
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(ct);
 
         _scope = _provider.CreateScope();
@@ -96,12 +106,6 @@ public sealed class StorageTestFixture : IAsyncLifetime
             _provider = null;
         }
     }
-
-    /// <summary>
-    /// Creates a new service scope. Admin and Store services are scoped,
-    /// so callers that need isolation or multiple operations can create a fresh scope.
-    /// </summary>
-    public IServiceScope CreateScope() => _provider!.CreateScope();
 }
 
 /// <summary>

@@ -7,6 +7,7 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
+using Duende.IdentityServer.Stores.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Schema;
@@ -57,7 +58,55 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
         await using var server = await CreateServer(builder =>
             builder.AddInMemoryDataExtensionSchemas([TestClientAttributes.Schema]));
 
-        Should.Throw<NotSupportedException>(server.Services.GetService<ISchemaAdmin>);
+        server.Services.GetService<ISchemaAdmin>().ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task when_the_same_schema_id_is_registered_twice_only_the_later_schema_applies()
+    {
+        await using var server = await CreateServer(builder => builder
+            .AddInMemoryDataExtensionSchemas([new SchemaConfiguration
+            {
+                SchemaId = SchemaId.Client,
+                AttributeDefinitions = [TestClientAttributes.Department]
+            }])
+            .AddInMemoryDataExtensionSchemas([new SchemaConfiguration
+            {
+                SchemaId = SchemaId.Client,
+                AttributeDefinitions = [TestClientAttributes.CostCenter]
+            }]));
+
+        var admin = server.GetRequiredService<IClientAdmin>();
+        var laterSchemaClient = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
+        laterSchemaClient.ExtendedProperties.Set(TestClientAttributes.CostCenter, 7);
+        var earlierSchemaClient = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
+        earlierSchemaClient.ExtendedProperties.Set(TestClientAttributes.Department, "Engineering");
+
+        var laterSchemaResult = await admin.CreateAsync(laterSchemaClient, _ct);
+        var earlierSchemaResult = await admin.CreateAsync(earlierSchemaClient, _ct);
+
+        laterSchemaResult.IsSuccess.ShouldBeTrue($"Create failed: {laterSchemaResult}");
+        earlierSchemaResult.IsSuccess.ShouldBeFalse();
+        earlierSchemaResult.Errors.ShouldNotBeNull();
+        earlierSchemaResult.Errors.ShouldContain(e => e.Code == "validation_failed" && e.Message.Contains("department"));
+    }
+
+    [Fact]
+    public async Task in_memory_schemas_are_not_used_when_schemas_are_stored_in_the_database()
+    {
+        await using var server = await CreateServer(builder => builder
+            .AddInMemoryDataExtensionSchemas([TestClientAttributes.Schema])
+            .AddDynamicSchemas());
+
+        var admin = server.GetRequiredService<IClientAdmin>();
+        var client = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
+        client.ExtendedProperties.Set(TestClientAttributes.Department, "Engineering");
+
+        var result = await admin.CreateAsync(client, _ct);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.ShouldNotBeNull();
+        result.Errors.ShouldContain(e => e.Code == "validation_failed" && e.Message.Contains("department"));
     }
 
     [Fact]
@@ -118,8 +167,10 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
 
                 var isBuilder = services.AddIdentityServer()
                     .AddStorage(storage =>
-                        storage.AddSqliteStore(opt =>
+                        storage.AddSqlite(opt =>
                             opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+                    .AddConfigurationStorage()
+                    .AddOperationalStorage()
                     .AddClientConfigurationValidator<Validation.NopClientConfigurationValidator>();
 
                 configureSchemas(isBuilder);
@@ -128,7 +179,7 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
 
         await server.StartAsync();
 
-        var schema = server.GetRequiredService<IDatabaseSchema>();
+        var schema = server.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         return server;

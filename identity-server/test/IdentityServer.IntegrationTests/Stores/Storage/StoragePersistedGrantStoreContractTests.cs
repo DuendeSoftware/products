@@ -24,7 +24,7 @@ public class StoragePersistedGrantStoreContractTests : PersistedGrantStoreContra
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<PersistedGrantDso.V1>();
@@ -33,7 +33,7 @@ public class StoragePersistedGrantStoreContractTests : PersistedGrantStoreContra
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 
@@ -61,7 +61,7 @@ public class StoragePersistedGrantStoreContractTests : PersistedGrantStoreContra
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={isolatedDbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<PersistedGrantDso.V1>();
@@ -71,7 +71,7 @@ public class StoragePersistedGrantStoreContractTests : PersistedGrantStoreContra
         var provider = services.BuildServiceProvider();
         _isolatedProviders.Add(provider);
 
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
 
         var scope = provider.CreateScope();

@@ -704,6 +704,146 @@ internal static class SamlTestHelpers
         return (signature, algorithm);
     }
 
+    /// <summary>
+    /// Extracts the raw (still percent-encoded) value of a query string parameter from an
+    /// HTTP-Redirect binding query string, without decoding or re-encoding it. This is
+    /// necessary because HTTP-Redirect binding signatures are computed over the exact bytes
+    /// of the query string as originally transmitted.
+    /// </summary>
+    public static string? ExtractRawQueryParam(string query, string name)
+    {
+        foreach (var pair in query.TrimStart('?').Split('&'))
+        {
+            var idx = pair.IndexOf('=');
+            if (idx < 0)
+            {
+                continue;
+            }
+
+            if (string.Equals(pair[..idx], name, StringComparison.Ordinal))
+            {
+                return pair[(idx + 1)..];
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Extracts and decodes the SAMLRequest (or SAMLResponse) XML from an HTTP-POST binding
+    /// auto-submit form, without any assumption about which message name is present. Returns
+    /// the decoded XML alongside the ACS/destination URL and optional RelayState.
+    /// </summary>
+    public static async Task<(string xml, string? relayState, string destinationUrl)> ExtractSamlPostMessageAsync(
+        HttpResponseMessage response,
+        string messageFieldName,
+        Ct ct)
+    {
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
+
+        var html = await response.Content.ReadAsStringAsync(ct);
+
+        var messageMatch = System.Text.RegularExpressions.Regex.Match(
+            html,
+            $@"<input[^>]+name=""{messageFieldName}""[^>]+value=""([^""]+)""",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        messageMatch.Success.ShouldBeTrue($"{messageFieldName} input field not found in HTML");
+        var encodedMessage = messageMatch.Groups[1].Value;
+
+        string? relayState = null;
+        var relayStateMatch = System.Text.RegularExpressions.Regex.Match(
+            html,
+            @"<input[^>]+name=""RelayState""[^>]+value=""([^""]+)""",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (relayStateMatch.Success)
+        {
+            relayState = HttpUtility.HtmlDecode(relayStateMatch.Groups[1].Value);
+        }
+
+        var actionMatch = System.Text.RegularExpressions.Regex.Match(
+            html,
+            @"<form[^>]+action=""([^""]+)""",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        actionMatch.Success.ShouldBeTrue("Form action not found in HTML");
+        var destinationUrl = HttpUtility.HtmlDecode(actionMatch.Groups[1].Value);
+
+        var decodedBytes = Convert.FromBase64String(HttpUtility.HtmlDecode(encodedMessage));
+        var xml = Encoding.UTF8.GetString(decodedBytes);
+
+        return (xml, relayState, destinationUrl);
+    }
+
+    /// <summary>
+    /// Cryptographically verifies the enveloped XMLDSIG signature embedded in an HTTP-POST
+    /// binding SAML message (e.g. an AuthnRequest) against the given certificate, and asserts
+    /// that the SignatureMethod and DigestMethod match the expected algorithm URIs.
+    /// </summary>
+    public static bool VerifyPostBindingSignature(
+        string xml,
+        X509Certificate2 certificate,
+        string expectedSignatureMethod,
+        string expectedDigestMethod)
+    {
+        var doc = new XmlDocument { PreserveWhitespace = true, XmlResolver = null };
+        doc.LoadXml(xml);
+
+        var signatureNode = doc.DocumentElement!.GetElementsByTagName("Signature", SignedXml.XmlDsigNamespaceUrl)[0]
+            as XmlElement;
+        signatureNode.ShouldNotBeNull("Signed message must contain a ds:Signature element");
+
+        var signedXml = new SignedXml(doc);
+        signedXml.LoadXml(signatureNode!);
+
+        signedXml.SignedInfo!.SignatureMethod.ShouldBe(expectedSignatureMethod);
+        var reference = (Reference)signedXml.SignedInfo.References[0]!;
+        reference.DigestMethod.ShouldBe(expectedDigestMethod);
+
+        return signedXml.CheckSignature(certificate, true);
+    }
+
+    /// <summary>
+    /// Cryptographically verifies the signature on an HTTP-Redirect binding query string
+    /// (SAMLRequest/SAMLResponse, optional RelayState, SigAlg, Signature) using the exact
+    /// percent-encoded bytes of the signed parameters, matching the production
+    /// HttpRedirectBinding/Saml2RedirectBinding canonicalization.
+    /// </summary>
+    public static bool VerifyRedirectBindingSignature(Uri location, X509Certificate2 certificate, string messageParamName = "SAMLRequest")
+    {
+        var query = location.Query;
+
+        var messageRaw = ExtractRawQueryParam(query, messageParamName);
+        var relayStateRaw = ExtractRawQueryParam(query, "RelayState");
+        var sigAlgRaw = ExtractRawQueryParam(query, "SigAlg");
+        var signatureRaw = ExtractRawQueryParam(query, "Signature");
+
+        messageRaw.ShouldNotBeNull("Redirect location must contain the SAML message parameter");
+        sigAlgRaw.ShouldNotBeNull("Redirect location must contain SigAlg when signed");
+        signatureRaw.ShouldNotBeNull("Redirect location must contain Signature when signed");
+
+        var signedString = $"{messageParamName}={messageRaw}";
+        if (relayStateRaw != null)
+        {
+            signedString += $"&RelayState={relayStateRaw}";
+        }
+
+        signedString += $"&SigAlg={sigAlgRaw}";
+
+        var dataToVerify = Encoding.UTF8.GetBytes(signedString);
+        var signatureBytes = Convert.FromBase64String(Uri.UnescapeDataString(signatureRaw));
+        var sigAlg = Uri.UnescapeDataString(sigAlgRaw);
+
+        var hashAlgorithmName = sigAlg.Contains("sha512", StringComparison.OrdinalIgnoreCase) ? HashAlgorithmName.SHA512
+            : sigAlg.Contains("sha384", StringComparison.OrdinalIgnoreCase) ? HashAlgorithmName.SHA384
+            : HashAlgorithmName.SHA256;
+
+        using var rsaPublicKey = certificate.GetRSAPublicKey();
+        rsaPublicKey.ShouldNotBeNull("Certificate must have an RSA public key");
+        sigAlg.Contains("rsa", StringComparison.OrdinalIgnoreCase).ShouldBeTrue("SigAlg should reflect the RSA key type of the certificate");
+        return rsaPublicKey!.VerifyData(dataToVerify, signatureBytes, hashAlgorithmName, RSASignaturePadding.Pkcs1);
+    }
+
     public static X509Certificate2 CreateExpiredTestSigningCertificate(TimeProvider timeProvider, string subject = "CN=Expired Test SP Certificate")
     {
         using var rsa = RSA.Create(2048);

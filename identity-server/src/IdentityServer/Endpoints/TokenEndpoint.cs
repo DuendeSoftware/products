@@ -63,12 +63,12 @@ internal class TokenEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Token + "Endpoint");
 
-        _logger.LogTrace("Processing token request.");
+        _logger.ProcessingTokenRequest();
 
         // validate HTTP
         if (!HttpMethods.IsPost(context.Request.Method) || !context.Request.HasApplicationFormContentType())
         {
-            _logger.LogWarning("Invalid HTTP request for token endpoint");
+            _logger.InvalidHTTPRequestForTokenEndpoint();
             return Error(OidcConstants.TokenErrors.InvalidRequest);
         }
 
@@ -78,28 +78,28 @@ internal class TokenEndpoint : IEndpointHandler
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogWarning(ex, "Invalid HTTP request for token endpoint");
+            _logger.InvalidHTTPRequestForTokenEndpointTokenEndpoint(ex);
             return Error(OidcConstants.TokenErrors.InvalidRequest);
         }
     }
 
     private async Task<IEndpointResult> ProcessTokenRequestAsync(HttpContext context)
     {
-        _logger.LogDebug("Start token request.");
+        _logger.StartTokenRequest();
 
         // validate client
         var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var errorMsg = clientResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
-            _logger.LogWarning("Client validation failed for token endpoint: {error}", errorMsg);
+            _logger.ClientValidationFailedForTokenEndpoint(errorMsg);
             Telemetry.Metrics.TokenIssuedFailure(clientResult.Client?.ClientId, null, null, errorMsg);
             return Error(errorMsg);
         }
 
         // validate request
         var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
-        _logger.LogTrace("Calling into token request validator: {type}", _requestValidator.GetType().FullName);
+        _logger.CallingIntoTokenRequestValidator(_requestValidator.GetType().FullName);
 
         var requestContext = new TokenRequestValidationContext
         {
@@ -121,7 +121,7 @@ internal class TokenEndpoint : IEndpointHandler
             // Keeping a debug log to help with troubleshooting in the case of a buggy client.
             if (requestResult.Error == OidcConstants.TokenErrors.UseDPoPNonce)
             {
-                _logger.LogDebug("Token request returned an error with a server issued nonce. This is an expected event when using DPoP server nonces.");
+                _logger.TokenRequestReturnedAnErrorWithAServer();
             }
             else
             {
@@ -136,7 +136,7 @@ internal class TokenEndpoint : IEndpointHandler
         }
 
         // create response
-        _logger.LogTrace("Calling into token request response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoTokenRequestResponseGenerator(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult), context.RequestAborted);
@@ -147,7 +147,7 @@ internal class TokenEndpoint : IEndpointHandler
         LogTokens(response, requestResult);
 
         // return result
-        _logger.LogDebug("Token request success.");
+        _logger.TokenRequestSuccess();
         return new TokenResult(response);
     }
 
@@ -161,7 +161,7 @@ internal class TokenEndpoint : IEndpointHandler
         {
             if (dpopHeader.Count > 1)
             {
-                _logger.LogDebug("Too many DPoP headers provided.");
+                _logger.TooManyDPoPHeadersProvided();
                 return Error(OidcConstants.TokenErrors.InvalidRequest, "Too many DPoP headers provided.");
             }
 
@@ -190,15 +190,15 @@ internal class TokenEndpoint : IEndpointHandler
 
         if (response.IdentityToken != null)
         {
-            _logger.LogTrace("Identity token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.IdentityToken);
+            _logger.IdentityTokenIssuedForTokenEndpoint(clientId, subjectId, response.IdentityToken);
         }
         if (response.RefreshToken != null)
         {
-            _logger.LogTrace("Refresh token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.RefreshToken);
+            _logger.RefreshTokenIssuedFor(clientId, subjectId, response.RefreshToken);
         }
         if (response.AccessToken != null)
         {
-            _logger.LogTrace("Access token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.AccessToken);
+            _logger.AccessTokenIssuedForTokenEndpoint(clientId, subjectId, response.AccessToken);
         }
     }
 }

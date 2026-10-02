@@ -22,7 +22,7 @@ public class DefaultScopeParser(ILogger<DefaultScopeParser> logger) : IScopePars
 
         if (scopeValues is null)
         {
-            logger.LogError("A collection of scopes cannot be null.");
+            logger.ACollectionOfScopesCannotBeNull();
             result.Errors.Add(new ParsedScopeValidationError("null", "A collection of scopes cannot be null."));
             return result;
         }
@@ -46,7 +46,10 @@ public class DefaultScopeParser(ILogger<DefaultScopeParser> logger) : IScopePars
             }
             else
             {
-                logger.LogDebug("Scope parsing ignoring scope {scope}", scopeValue.SanitizeLogParameter());
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.ScopeParsingIgnoringScope(scopeValue.SanitizeLogParameter());
+                }
             }
         }
 

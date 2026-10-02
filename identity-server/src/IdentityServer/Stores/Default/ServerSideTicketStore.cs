@@ -77,7 +77,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
     private async Task CreateNewSessionAsync(string key, AuthenticationTicket ticket)
     {
-        _logger.LogDebug("Creating entry in store for AuthenticationTicket, key {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+        _logger.CreatingEntryInStoreForAuthenticationTicketKeyKey(key, ticket.GetExpiration());
 
         var session = new ServerSideSession
         {
@@ -102,24 +102,24 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(key);
 
-        _logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
+        _logger.RetrieveAuthenticationTicketForKeyKey(key);
 
         var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session == null)
         {
-            _logger.LogDebug("No ticket found in store for {key}", key);
+            _logger.NoTicketFoundInStoreForKey(key);
             return null;
         }
 
         var ticket = session.Deserialize(_protector, _logger);
         if (ticket != null)
         {
-            _logger.LogDebug("Ticket loaded for key: {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+            _logger.TicketLoadedForKeyKeyWithExpirationExpiration(key, ticket.GetExpiration());
             return ticket;
         }
 
         // if we failed to get a ticket, then remove DB record 
-        _logger.LogWarning("Failed to deserialize authentication ticket from store, deleting record for key {key}", key);
+        _logger.FailedToDeserializeAuthenticationTicketFromStoreDeleting(key);
         await RemoveAsync(key);
 
         return ticket;
@@ -140,7 +140,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             return;
         }
 
-        _logger.LogDebug("Renewing AuthenticationTicket for key {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+        _logger.RenewingAuthenticationTicketForKeyKeyWithExpirationExpiration(key, ticket.GetExpiration());
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
@@ -149,7 +149,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         if (isNew)
         {
-            _logger.LogDebug("Session overwrite detected for key {key}; revoking grants for prior subject id {subjectId} and session id {sessionId}", key, session.SubjectId, session.SessionId);
+            _logger.SessionOverwriteDetectedForKeyKeyRevokingGrants(key, session.SubjectId, session.SessionId);
 
             await _persistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -188,7 +188,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(key);
 
-        _logger.LogDebug("Removing AuthenticationTicket from store for key {key}", key);
+        _logger.RemovingAuthenticationTicketFromStoreForKeyKey(key);
 
         // There is a somewhat rare scenario where a session has expired and a request to IdentityServer happens prior
         // to the cleanup job running. When that happens, the session is removed but none of the processing to trigger

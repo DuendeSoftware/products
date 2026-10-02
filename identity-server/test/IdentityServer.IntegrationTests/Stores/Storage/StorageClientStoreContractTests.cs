@@ -27,18 +27,16 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<ClientDso.V1>();
-        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
-        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<ClientRepository>();
         services.AddScoped<IClientStore, ClientStore>();
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 
@@ -66,19 +64,17 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={isolatedDbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<ClientDso.V1>();
-        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
-        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<ClientRepository>();
         services.AddScoped<IClientStore, ClientStore>();
 
         var provider = services.BuildServiceProvider();
         _isolatedProviders.Add(provider);
 
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
 
         var scope = provider.CreateScope();

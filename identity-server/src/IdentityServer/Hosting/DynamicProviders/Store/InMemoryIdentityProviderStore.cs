@@ -9,15 +9,30 @@ namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
 internal class InMemoryIdentityProviderStore : IIdentityProviderStore
 {
-    private readonly IEnumerable<IdentityProvider> _providers;
+    private readonly IEnumerable<IEnumerable<IdentityProvider>> _providerCollections;
 
-    public InMemoryIdentityProviderStore(IEnumerable<IdentityProvider> providers) => _providers = providers;
+    // Each call to AddInMemoryIdentityProviders registers the caller's own IEnumerable<IdentityProvider>
+    // as a separate singleton. Resolving IEnumerable<IEnumerable<IdentityProvider>> yields every
+    // registered collection, so multiple registration calls accumulate instead of shadowing each other.
+    // Because each collection is stored by reference (not copied), callers can still mutate their own
+    // collection at runtime and have the changes observed here.
+    public InMemoryIdentityProviderStore(IEnumerable<IEnumerable<IdentityProvider>> providerCollections) =>
+        _providerCollections = providerCollections;
+
+    // Flatten every registered collection and de-duplicate by scheme, keeping the first occurrence.
+    // Enumeration order is registration order, so the first registered provider for a given scheme wins.
+    // DistinctBy is lazy: it streams providers and only tracks seen schemes, so GetBySchemeAsync can
+    // short-circuit on the first match instead of buffering every registered collection up front.
+    private IEnumerable<IdentityProvider> Providers =>
+        _providerCollections
+            .SelectMany(x => x)
+            .DistinctBy(x => x.Scheme);
 
     public Task<IReadOnlyCollection<IdentityProviderName>> GetAllSchemeNamesAsync(Ct ct)
     {
-        using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryOidcProviderStore.GetAllSchemeNames");
+        using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryIdentityProviderStore.GetAllSchemeNames");
 
-        var items = _providers.Select(x => new IdentityProviderName
+        var items = Providers.Select(x => new IdentityProviderName
         {
             Enabled = x.Enabled,
             DisplayName = x.DisplayName,
@@ -29,9 +44,9 @@ internal class InMemoryIdentityProviderStore : IIdentityProviderStore
 
     public Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)
     {
-        using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryOidcProviderStore.GetByScheme");
+        using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryIdentityProviderStore.GetByScheme");
 
-        var item = _providers.FirstOrDefault(x => x.Scheme == scheme);
+        var item = Providers.FirstOrDefault(x => x.Scheme == scheme);
         return Task.FromResult<IdentityProvider>(item);
     }
 }

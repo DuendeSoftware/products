@@ -26,7 +26,11 @@ public interface ISamlLogoutSessionStore
     /// Retrieves a logout session by its logout ID. Returns <see langword="null"/>
     /// if not found or expired.
     /// </summary>
-    /// <param name="logoutId">The logout ID.</param>
+    /// <param name="logoutId">
+    /// The opaque SAML logout correlation ID, as stored on <see cref="SamlLogoutSession.LogoutId"/>.
+    /// This is not the protected handle used to reference the <c>LogoutMessage</c>.
+    /// Store implementations may impose their own length or format constraints on this value.
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     Task<SamlLogoutSession?> GetByLogoutIdAsync(string logoutId, Ct ct);
 
@@ -47,7 +51,10 @@ public interface ISamlLogoutSessionStore
     /// Removes a logout session. Idempotent — does not throw if the session
     /// does not exist.
     /// </summary>
-    /// <param name="logoutId">The logout ID.</param>
+    /// <param name="logoutId">
+    /// The opaque SAML logout correlation ID, as stored on <see cref="SamlLogoutSession.LogoutId"/>.
+    /// This is not the protected handle used to reference the <c>LogoutMessage</c>.
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     Task RemoveAsync(string logoutId, Ct ct);
 }

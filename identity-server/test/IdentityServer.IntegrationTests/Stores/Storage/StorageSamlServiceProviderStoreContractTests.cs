@@ -28,7 +28,7 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<SamlServiceProviderDso.V1>();
@@ -37,7 +37,7 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
     }
 
@@ -65,7 +65,7 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={isolatedDbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<SamlServiceProviderDso.V1>();
@@ -75,7 +75,7 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
         var provider = services.BuildServiceProvider();
         _isolatedProviders.Add(provider);
 
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         var scope = provider.CreateScope();

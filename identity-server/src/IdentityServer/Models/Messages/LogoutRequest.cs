@@ -51,6 +51,13 @@ public class LogoutMessage
             UiLocales = request.UiLocales;
             RequiresConfirmation = request.RequiresConfirmation;
 
+            // Assign a correlation ID at creation time for ordinary OIDC-initiated logouts that have
+            // downstream SAML sessions to notify, so the SAML logout session store can track SP responses.
+            if (SamlSessions?.Count > 0)
+            {
+                SamlLogoutCorrelationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex);
+            }
+
             if (request.PostLogOutUri != null)
             {
                 PostLogoutRedirectUri = request.PostLogOutUri;
@@ -127,6 +134,14 @@ public class LogoutMessage
     /// <see cref="Duende.IdentityServer.Validation.EndSessionHintValidationOutcome.RequiresConfirmation"/>.
     /// </summary>
     public bool RequiresConfirmation { get; set; }
+
+    /// <summary>
+    /// Gets or sets an opaque, framework-generated value used to correlate SAML logout tracking.
+    /// Custom message stores must preserve this value unchanged when persisting and retrieving the message.
+    /// Applications should not generate, interpret, or expose this value. Set whenever the message has
+    /// downstream <see cref="SamlSessions"/> to notify; null otherwise.
+    /// </summary>
+    public string? SamlLogoutCorrelationId { get; set; }
 
     /// <summary>
     /// Gets the entire parameter collection.

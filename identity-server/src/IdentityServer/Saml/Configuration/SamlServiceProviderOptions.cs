@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Models;
+
 namespace Duende.IdentityServer.Saml.Configuration;
 
 /// <summary>
@@ -110,4 +112,12 @@ public sealed class SamlServiceProviderOptions
     /// Optional password for the PKCS#12 SP signing certificate.
     /// </summary>
     public string? SpSigningCertificatePassword { get; set; }
+
+    /// <summary>
+    /// Controls whether outbound AuthnRequests sent to the identity provider are signed.
+    /// Defaults to <see cref="AuthnRequestSigningBehavior.Never"/>. When set to
+    /// <see cref="AuthnRequestSigningBehavior.Always"/>, <see cref="SpSigningCertificateBase64"/>
+    /// must be configured.
+    /// </summary>
+    public AuthnRequestSigningBehavior AuthnRequestSigningBehavior { get; set; } = AuthnRequestSigningBehavior.Never;
 }

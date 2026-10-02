@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Stores.Storage.IdentityProviders;
 using Duende.Storage.EntityAttributeValue;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -16,27 +15,26 @@ public static class DataExtensionSchemaBuilderExtensions
     extension(IIdentityServerBuilder builder)
     {
         /// <summary>
-        ///     Registers a fixed set of data extension schemas using an in-memory store.
-        ///     Schemas are immutable at runtime. <see cref="ISchemaAdmin"/> is NOT registered;
-        ///     attempting to resolve it will fail.
-        ///     <para>
-        ///         Built-in identity provider schemas (e.g. <c>idp:oidc</c>) are always included
-        ///         alongside the caller-supplied schemas so that standard providers continue to work.
-        ///     </para>
+        ///     Registers data extension schemas that are defined in code.
         /// </summary>
+        /// <remarks>
+        ///     A schema with the same id as a built-in schema (for example <c>BuiltInSchemas.OidcProvider</c>) replaces it,
+        ///     whichever order the calls are made in. To add attributes to a built-in instead, pass
+        ///     <c>BuiltInSchemas.OidcProvider.Extend(...)</c>. If the same id is registered twice, the later schema wins.
+        ///     Has no effect when <c>AddDynamicSchemas()</c> is used.
+        /// </remarks>
         /// <param name="schemas">The schema definitions to make available.</param>
         /// <returns>The builder for chaining.</returns>
         public IIdentityServerBuilder AddInMemoryDataExtensionSchemas(
             IEnumerable<SchemaConfiguration> schemas)
         {
-            // Built-ins come first so that caller-supplied schemas with the same SchemaId override
-            // them (InMemorySchemaStore uses last-wins semantics for duplicate IDs).
-            var allSchemas = BuiltInSchemas.All.Concat(schemas);
-            var store = new InMemorySchemaStore(allSchemas);
-            builder.Services.AddTransient<ISchemaAdmin>(_
-                => throw new NotSupportedException(
-                    $"{nameof(ISchemaAdmin)} is not supported when using In Memory Schemas"));
-            builder.Services.AddSingleton<ISchemaStore>(store);
+            ArgumentNullException.ThrowIfNull(schemas);
+
+            foreach (var schema in schemas)
+            {
+                builder.Services.AddSingleton(schema);
+            }
+
             return builder;
         }
     }

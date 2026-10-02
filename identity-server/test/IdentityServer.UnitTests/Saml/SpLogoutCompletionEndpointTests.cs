@@ -76,7 +76,8 @@ public sealed class SpLogoutCompletionEndpointTests
         LogoutRequestId = "_req-123",
         ResponseBinding = SamlConstants.Bindings.HttpPost,
         ResponseDestination = ResponseDestination,
-        RelayState = "some-relay-state"
+        RelayState = "some-relay-state",
+        SamlLogoutCorrelationId = "test-logout-id"
     };
 
     [Fact]
@@ -339,6 +340,44 @@ public sealed class SpLogoutCompletionEndpointTests
         await endpoint.ProcessAsync(context);
 
         responseGenerator.LastCalledMethod.ShouldBe(nameof(StubSloResponseGenerator.CreateSuccessResponse));
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task returns_success_when_saml_logout_correlation_id_missing_even_if_session_exists_under_handle()
+    {
+        // Legacy-safe: never fall back to the protected handle for session lookup.
+        var sessionStore = new InMemorySamlLogoutSessionStore(_timeProvider, NullLogger<InMemorySamlLogoutSessionStore>.Instance);
+        var session = new SamlLogoutSession
+        {
+            LogoutId = "test-logout-id",
+            ExpectedResponses = new Dictionary<string, ExpectedSpLogout>
+            {
+                ["req-sp2"] = new("https://sp2.example.com")
+            },
+            CreatedUtc = DateTimeOffset.UtcNow,
+            ExpiresAtUtc = DateTime.UtcNow.AddMinutes(5)
+        };
+        await sessionStore.StoreAsync(session, _ct);
+        await sessionStore.TryRecordResponseAsync("req-sp2", "https://sp2.example.com", false, _ct);
+
+        var message = CreateValidLogoutMessage() with { SamlLogoutCorrelationId = null };
+        var store = CreateMessageStoreWithMessage(message);
+        var responseGenerator = new StubSloResponseGenerator();
+        var context = CreateGetContext(logoutId: "test-logout-id");
+        var endpoint = CreateEndpoint(
+            messageStore: store,
+            responseGenerator: responseGenerator,
+            logoutSessionStore: sessionStore);
+
+        await endpoint.ProcessAsync(context);
+
+        // No correlation id means no session lookup, so treated as success (legacy semantics).
+        responseGenerator.LastCalledMethod.ShouldBe(nameof(StubSloResponseGenerator.CreateSuccessResponse));
+
+        // Session must not have been removed, since it was never looked up by correlation id.
+        var remaining = await sessionStore.GetByLogoutIdAsync("test-logout-id", _ct);
+        remaining.ShouldNotBeNull();
     }
 
     private sealed class StubIssuerNameService(string entityId) : ISaml2IssuerNameService

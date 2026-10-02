@@ -199,6 +199,11 @@ public class DefaultIdentityServerInteractionServiceTests
         message.Data.SamlSessions.ShouldNotBeNull();
         message.Data.SamlSessions.Select(s => s.EntityId).ShouldContain("https://sp1.example.com");
         message.Data.ClientIds.ShouldBeEmpty();
+        message.Data.SamlLogoutCorrelationId.ShouldNotBeNullOrEmpty();
+        message.Data.SamlLogoutCorrelationId!.Length.ShouldBe(32);
+
+        // The returned handle is the store's protected handle, not the SAML logout correlation ID.
+        context.ShouldNotBe(message.Data.SamlLogoutCorrelationId);
     }
 
     [Fact]
@@ -236,6 +241,8 @@ public class DefaultIdentityServerInteractionServiceTests
         message.Data.SamlSessions.Count().ShouldBe(2);
         message.Data.SamlSessions.Select(s => s.EntityId).ShouldContain("https://sp1.example.com");
         message.Data.SamlSessions.Select(s => s.EntityId).ShouldContain("https://sp2.example.com");
+        message.Data.SamlLogoutCorrelationId.ShouldNotBeNullOrEmpty();
+        message.Data.SamlLogoutCorrelationId!.Length.ShouldBe(32);
     }
 
     [Fact]
@@ -253,6 +260,7 @@ public class DefaultIdentityServerInteractionServiceTests
         message.Data.ClientIds?.ShouldContain("client1");
 
         message.Data.SamlSessions.ShouldBeEmpty();
+        message.Data.SamlLogoutCorrelationId.ShouldBeNull();
     }
 
     [Fact]

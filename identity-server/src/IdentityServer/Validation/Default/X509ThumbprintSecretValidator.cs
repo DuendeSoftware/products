@@ -30,7 +30,7 @@ public class X509ThumbprintSecretValidator : ISecretValidator
 
         if (parsedSecret.Type != IdentityServerConstants.ParsedSecretTypes.X509Certificate)
         {
-            _logger.LogDebug("X509 thumbprint secret validator cannot process {type}", parsedSecret.Type ?? "null");
+            _logger.X509ThumbprintSecretValidatorCannotProcess(parsedSecret.Type ?? "null");
             return fail;
         }
 
@@ -42,14 +42,14 @@ public class X509ThumbprintSecretValidator : ISecretValidator
         var thumbprint = cert.Thumbprint;
         if (thumbprint == null)
         {
-            _logger.LogWarning("No thumbprint found in X509 certificate.");
+            _logger.NoThumbprintFoundInX509Certificate();
             return fail;
         }
 
         var thumbprintSecrets = secrets.Where(s => s.Type == IdentityServerConstants.SecretTypes.X509CertificateThumbprint);
         if (!thumbprintSecrets.Any())
         {
-            _logger.LogDebug("No thumbprint secrets configured for client.");
+            _logger.NoThumbprintSecretsConfiguredForClient();
             return fail;
         }
 
@@ -67,7 +67,7 @@ public class X509ThumbprintSecretValidator : ISecretValidator
             }
         }
 
-        _logger.LogDebug("No matching x509 thumbprint secret found.");
+        _logger.NoMatchingX509ThumbprintSecretFound();
         return fail;
     }
 }

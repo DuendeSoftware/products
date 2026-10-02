@@ -270,4 +270,5 @@ public sealed class SamlFederatedSignoutTests
         html.ShouldNotContain("signout-frame");
         html.ShouldNotContain("/saml/slo/sp-complete");
     }
+
 }

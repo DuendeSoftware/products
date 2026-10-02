@@ -4,17 +4,18 @@
 #nullable enable
 
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiResources;
 using Duende.IdentityServer.Admin.ApiScopes;
-using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.Storage;
-using Duende.Storage.Internal;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -22,37 +23,19 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private IApiResourceAdmin NewAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IApiResourceAdmin>();
-    }
-
-    private IApiScopeAdmin NewScopeAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IApiScopeAdmin>();
-    }
-
-    private IResourceStore NewResourceStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IResourceStore>();
-    }
 
     private async Task<ApiScopeDso.V1?> ReadScopeDsoAsync(ApiScopeId scopeId)
     {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        var storageFactory = scope.ServiceProvider.GetRequiredService<IStorageFactory>();
-        var storage = await storageFactory.GetStorage(_ct);
-        var result = await storage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeId.Value), _ct);
+        var partitionedStorage = await _fixture.PartitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Configuration, _ct);
+        var result = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeId.Value), _ct);
         return result.Found ? (ApiScopeDso.V1)result.Dso : null;
+    }
+
+    private async Task<ApiResourceDso.V1?> ReadResourceDsoAsync(ApiResourceId resourceId)
+    {
+        var partitionedStorage = await _fixture.PartitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Configuration, _ct);
+        var result = await partitionedStorage.TryReadAsync(ApiResourceDso.EntityType, UuidV7.From(resourceId.Value), _ct);
+        return result.Found ? (ApiResourceDso.V1)result.Dso : null;
     }
 
     private async Task<ApiResourceId> CreateResourceAsync(IApiResourceAdmin admin, string? name = null, Ct ct = default)
@@ -67,13 +50,13 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_id_round_trips_all_fields()
     {
-        var scopeAdmin = NewScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var readScopeName = $"api1_read_{Guid.NewGuid():N}";
         var writeScopeName = $"api1_write_{Guid.NewGuid():N}";
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = readScopeName }, _ct)).IsSuccess.ShouldBeTrue();
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = writeScopeName }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource = new CreateApiResource
         {
             Name = $"api_{Guid.NewGuid():N}",
@@ -111,7 +94,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_name_round_trips()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var name = $"api_{Guid.NewGuid():N}";
         var resource = new CreateApiResource
         {
@@ -131,7 +114,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_returns_storage_id_and_version()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
 
         var result = await admin.CreateAsync(resource, _ct);
@@ -145,7 +128,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_duplicate_name_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var name = $"api_{Guid.NewGuid():N}";
 
         var first = await admin.CreateAsync(new CreateApiResource { Name = name }, _ct);
@@ -160,7 +143,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_changes_applied_on_read()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource = new CreateApiResource
         {
             Name = $"api_{Guid.NewGuid():N}",
@@ -192,7 +175,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_with_wrong_version_returns_version_conflict()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
@@ -212,7 +195,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_nonexistent_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         ApiResourceId nonExistentId = UuidV7.New().Value;
         var resource = new UpdateApiResource { Name = $"api_{Guid.NewGuid():N}" };
 
@@ -226,7 +209,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_rename_to_existing_name_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var nameA = $"api_{Guid.NewGuid():N}";
         var nameB = $"api_{Guid.NewGuid():N}";
 
@@ -246,7 +229,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_then_get_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource = new CreateApiResource { Name = $"api_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(resource, _ct);
@@ -262,7 +245,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_empty_name_returns_required_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource = new CreateApiResource { Name = "" };
 
         var result = await admin.CreateAsync(resource, _ct);
@@ -276,7 +259,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     public async Task query_by_name_filter_returns_matching()
     {
         var uniquePart = $"q_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
 
         await admin.CreateAsync(new CreateApiResource { Name = uniquePart + "_match1" }, _ct);
         await admin.CreateAsync(new CreateApiResource { Name = uniquePart + "_match2" }, _ct);
@@ -294,7 +277,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task query_by_enabled_filter_returns_matching()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var enabledName = $"q_enabled_{Guid.NewGuid():N}";
         var disabledName = $"q_disabled_{Guid.NewGuid():N}";
 
@@ -313,7 +296,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task query_by_scope_filter_returns_matching()
     {
-        var scopeAdmin = NewScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var uniqueScope = $"scope_{Guid.NewGuid():N}";
         var otherScope = $"scope_other_{Guid.NewGuid():N}";
         var otherScope1 = $"scope_other1_{Guid.NewGuid():N}";
@@ -323,7 +306,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = otherScope1 }, _ct)).IsSuccess.ShouldBeTrue();
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = otherScope2 }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var withScopeName = $"q_withscope_{Guid.NewGuid():N}";
         var withoutScopeName = $"q_noscope_{Guid.NewGuid():N}";
 
@@ -343,7 +326,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     public async Task query_with_pagination_returns_correct_page()
     {
         var prefix = $"q_page_{Guid.NewGuid():N}_";
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
 
         for (var i = 0; i < 5; i++)
         {
@@ -374,7 +357,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_hashes_value_sha256()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         const string plaintext = "my-api-secret";
@@ -385,7 +368,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
 
         var expectedHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintext)));
 
-        var resourceStore = NewResourceStore();
+        var resourceStore = _fixture.ResourceStore;
         var getResult = await admin.GetAsync(resourceId, _ct);
         getResult.Found.ShouldBeTrue();
 
@@ -398,7 +381,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_hashes_value_sha512()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         const string plaintext = "sha512-api-secret";
@@ -413,7 +396,160 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
         var getResult = await admin.GetAsync(resourceId, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var resourceStore = NewResourceStore();
+        var resourceStore = _fixture.ResourceStore;
+        var resources = await resourceStore.FindApiResourcesByNameAsync([getResult.Item.Name], _ct);
+        resources.ShouldHaveSingleItem();
+        resources.First().ApiSecrets.ShouldHaveSingleItem();
+        resources.First().ApiSecrets.First().Value.ShouldBe(expectedHash);
+    }
+
+    [Fact]
+    public async Task create_secret_stores_x509_thumbprint_verbatim()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        using var cert = TestCert.Load();
+        var plaintext = cert.Thumbprint;
+        plaintext.ShouldNotBeNullOrEmpty();
+
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext!, null, null, null, IdentityServerConstants.SecretTypes.X509CertificateThumbprint, _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var dso = await ReadResourceDsoAsync(resourceId);
+        dso.ShouldNotBeNull();
+        dso.ApiSecrets.ShouldHaveSingleItem();
+        var secret = dso.ApiSecrets[0];
+        secret.Value.ShouldBe(plaintext);
+        secret.HashAlgorithm.ShouldBe(string.Empty);
+    }
+
+    [Fact]
+    public async Task create_secret_stores_x509_name_verbatim()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        using var cert = TestCert.Load();
+        var plaintext = cert.Subject;
+        plaintext.ShouldNotBeNullOrEmpty();
+
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext, null, null, null, IdentityServerConstants.SecretTypes.X509CertificateName, _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var dso = await ReadResourceDsoAsync(resourceId);
+        dso.ShouldNotBeNull();
+        dso.ApiSecrets.ShouldHaveSingleItem();
+        var secret = dso.ApiSecrets[0];
+        secret.Value.ShouldBe(plaintext);
+        secret.HashAlgorithm.ShouldBe(string.Empty);
+    }
+
+    [Fact]
+    public async Task create_secret_stores_x509_certificate_base64_verbatim()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        var plaintext = CreateBase64Certificate();
+
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext, null, null, null, IdentityServerConstants.SecretTypes.X509CertificateBase64, _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var dso = await ReadResourceDsoAsync(resourceId);
+        dso.ShouldNotBeNull();
+        dso.ApiSecrets.ShouldHaveSingleItem();
+        var secret = dso.ApiSecrets[0];
+        secret.Value.ShouldBe(plaintext);
+        secret.HashAlgorithm.ShouldBe(string.Empty);
+    }
+
+    [Fact]
+    public async Task create_secret_stores_jwk_verbatim()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        var plaintext = CreatePublicJwkJson();
+
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext, null, null, null, IdentityServerConstants.SecretTypes.JsonWebKey, _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var dso = await ReadResourceDsoAsync(resourceId);
+        dso.ShouldNotBeNull();
+        dso.ApiSecrets.ShouldHaveSingleItem();
+        var secret = dso.ApiSecrets[0];
+        secret.Value.ShouldBe(plaintext);
+        secret.HashAlgorithm.ShouldBe(string.Empty);
+    }
+
+    [Fact]
+    public async Task create_secret_hashes_shared_secret_type()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        const string plaintext = "shared-secret-value";
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext, null, null, null, IdentityServerConstants.SecretTypes.SharedSecret, _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var expectedHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintext)));
+
+        var resourceStore = _fixture.ResourceStore;
+        var getResult = await admin.GetAsync(resourceId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var resources = await resourceStore.FindApiResourcesByNameAsync([getResult.Item.Name], _ct);
+        resources.ShouldHaveSingleItem();
+        resources.First().ApiSecrets.ShouldHaveSingleItem();
+        resources.First().ApiSecrets.First().Value.ShouldBe(expectedHash);
+    }
+
+    [Fact]
+    public async Task create_secret_hashes_null_type()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        const string plaintext = "null-type-secret-value";
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext, null, null, null, null, _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var expectedHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintext)));
+
+        var resourceStore = _fixture.ResourceStore;
+        var getResult = await admin.GetAsync(resourceId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var resources = await resourceStore.FindApiResourcesByNameAsync([getResult.Item.Name], _ct);
+        resources.ShouldHaveSingleItem();
+        resources.First().ApiSecrets.ShouldHaveSingleItem();
+        resources.First().ApiSecrets.First().Value.ShouldBe(expectedHash);
+    }
+
+    [Fact]
+    public async Task create_secret_hashes_custom_type()
+    {
+        var admin = _fixture.ApiResourceAdmin;
+        var resourceId = await CreateResourceAsync(admin);
+
+        const string plaintext = "custom-type-secret-value";
+        var secretResult = await admin.CreateSecretAsync(
+            resourceId, plaintext, null, null, null, "my-custom-type", _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var expectedHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintext)));
+
+        var resourceStore = _fixture.ResourceStore;
+        var getResult = await admin.GetAsync(resourceId, _ct);
+        getResult.Found.ShouldBeTrue();
+
         var resources = await resourceStore.FindApiResourcesByNameAsync([getResult.Item.Name], _ct);
         resources.ShouldHaveSingleItem();
         resources.First().ApiSecrets.ShouldHaveSingleItem();
@@ -423,7 +559,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task get_does_not_expose_secret_value()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         await admin.CreateSecretAsync(resourceId, "super-secret", SecretHashAlgorithm.Sha256, null, null, null, _ct);
@@ -443,7 +579,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_with_empty_value_returns_required_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         var result = await admin.CreateSecretAsync(resourceId, "", null, null, null, null, _ct);
@@ -456,7 +592,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_secret_removes_it()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         var secretResult = await admin.CreateSecretAsync(resourceId, "delete-me", SecretHashAlgorithm.Sha256, null, null, null, _ct);
@@ -475,7 +611,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_nonexistent_secret_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         var result = await admin.DeleteSecretAsync(resourceId, ApiResourceSecretId.New(), _ct);
@@ -494,7 +630,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_preserves_existing_secrets()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceId = await CreateResourceAsync(admin);
 
         var secretResult = await admin.CreateSecretAsync(
@@ -523,7 +659,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     {
         // A rename takes the UpdateWithScopeChangesAsync branch in ApiResourceAdmin.UpdateAsync,
         // which is a different repository call than the non-rename path. Cover it explicitly.
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var originalName = $"api_{Guid.NewGuid():N}";
         var resourceId = await CreateResourceAsync(admin, originalName);
 
@@ -551,13 +687,13 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_scopes_updates_scope_back_references()
     {
-        var scopeAdmin = NewScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var scopeName = $"scope_{Guid.NewGuid():N}";
         var createScopeResult = await scopeAdmin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct);
         createScopeResult.IsSuccess.ShouldBeTrue();
         var scopeId = createScopeResult.Id;
 
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceName = $"api_{Guid.NewGuid():N}";
         var createResult = await admin.CreateAsync(new CreateApiResource { Name = resourceName, Scopes = [scopeName] }, _ct);
         createResult.IsSuccess.ShouldBeTrue();
@@ -570,7 +706,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_scope_changes_updates_back_references()
     {
-        var scopeAdmin = NewScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var scopeNameA = $"scope_a_{Guid.NewGuid():N}";
         var scopeNameB = $"scope_b_{Guid.NewGuid():N}";
         var scopeNameC = $"scope_c_{Guid.NewGuid():N}";
@@ -584,7 +720,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
         var scopeIdB = createB.Id;
         var scopeIdC = createC.Id;
 
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceName = $"api_{Guid.NewGuid():N}";
         var createResult = await admin.CreateAsync(
             new CreateApiResource { Name = resourceName, Scopes = [scopeNameA, scopeNameB] },
@@ -615,13 +751,13 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_resource_cleans_up_scope_back_references()
     {
-        var scopeAdmin = NewScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var scopeName = $"scope_{Guid.NewGuid():N}";
         var createScopeResult = await scopeAdmin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct);
         createScopeResult.IsSuccess.ShouldBeTrue();
         var scopeId = createScopeResult.Id;
 
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceName = $"api_{Guid.NewGuid():N}";
         var createResult = await admin.CreateAsync(
             new CreateApiResource { Name = resourceName, Scopes = [scopeName] },
@@ -643,7 +779,7 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_nonexistent_scope_returns_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var nonExistentScopeName = $"scope_does_not_exist_{Guid.NewGuid():N}";
 
         var result = await admin.CreateAsync(
@@ -659,13 +795,13 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
     [Fact]
     public async Task rename_resource_updates_back_reference_names()
     {
-        var scopeAdmin = NewScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var scopeName = $"scope_{Guid.NewGuid():N}";
         var createScopeResult = await scopeAdmin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct);
         createScopeResult.IsSuccess.ShouldBeTrue();
         var scopeId = createScopeResult.Id;
 
-        var admin = NewAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var originalName = $"api_{Guid.NewGuid():N}";
         var createResult = await admin.CreateAsync(
             new CreateApiResource { Name = originalName, Scopes = [scopeName] },
@@ -687,15 +823,30 @@ public sealed class ApiResourceAdminTests : IAsyncLifetime
         scopeDso.ReferencedByApiResources.ShouldContain(r => r.Name == newName);
     }
 
+    private static string CreateBase64Certificate()
+    {
+        using var cert = TestCert.Load();
+        return Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+    }
+
+    private static string CreatePublicJwkJson()
+    {
+        using var rsa = RSA.Create(2048);
+        using var publicRsa = RSA.Create();
+        publicRsa.ImportParameters(rsa.ExportParameters(false));
+        var securityKey = new RsaSecurityKey(publicRsa);
+        var publicJwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(securityKey);
+        publicJwk.Alg = SecurityAlgorithms.RsaSha256;
+        publicJwk.D.ShouldBeNullOrEmpty();
+        publicJwk.P.ShouldBeNullOrEmpty();
+        publicJwk.Q.ShouldBeNullOrEmpty();
+        publicJwk.DP.ShouldBeNullOrEmpty();
+        publicJwk.DQ.ShouldBeNullOrEmpty();
+        publicJwk.QI.ShouldBeNullOrEmpty();
+        return JsonSerializer.Serialize(publicJwk);
+    }
+
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

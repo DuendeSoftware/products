@@ -22,6 +22,7 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
     private readonly LicenseUsageTracker _licenseUsageTracker;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<DynamicAuthenticationSchemeProvider> _logger;
+    private readonly IdentityProviderOptionsMonitorCache _optionsMonitorCache;
 
     public DynamicAuthenticationSchemeProvider(
         Decorator<IAuthenticationSchemeProvider> inner,
@@ -29,7 +30,8 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
         IdentityServerLicenseValidator licenseValidator,
         LicenseUsageTracker licenseUsageTracker,
         IHttpContextAccessor httpContextAccessor,
-        ILogger<DynamicAuthenticationSchemeProvider> logger)
+        ILogger<DynamicAuthenticationSchemeProvider> logger,
+        IdentityProviderOptionsMonitorCache optionsMonitorCache)
     {
         _inner = inner.Instance;
         _options = options;
@@ -37,6 +39,7 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
         _licenseUsageTracker = licenseUsageTracker;
+        _optionsMonitorCache = optionsMonitorCache;
     }
 
     public void AddScheme(AuthenticationScheme scheme) => _inner.AddScheme(scheme);
@@ -74,7 +77,7 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
     {
         if (_httpContextAccessor.HttpContext == null)
         {
-            _logger.LogDebug("IAuthenticationSchemeProvider being used outside HTTP request, therefore dynamic provider feature can't be used for loading scheme: {scheme}.", name);
+            _logger.IAuthenticationSchemeProviderBeingUsedOutsideHTTPRequestThereforeDynamic(name);
             return null;
         }
 
@@ -88,21 +91,27 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
         if (dynamicScheme == null)
         {
             var idp = await store.GetBySchemeAsync(name, _httpContextAccessor.HttpContext.RequestAborted);
-            if (idp != null && idp.Enabled)
-            {
-                var providerType = _options.FindProviderType(idp.Type);
-                if (providerType != null)
-                {
-                    if (!_licenseValidator.ValidateDynamicProviders())
-                    {
-                        IdentityServerLicenseValidator.ThrowInvalidLicenseException(
-                            "Your license does not include the Dynamic Identity Providers feature.");
-                    }
 
-                    _licenseUsageTracker.DynamicProvidersUsed();
-                    dynamicScheme = new DynamicAuthenticationScheme(idp, providerType.HandlerType);
-                    cache.Add(name, dynamicScheme);
+            if (idp == null || !idp.Enabled)
+            {
+                _optionsMonitorCache.Remove(name);
+                return null;
+            }
+
+            _optionsMonitorCache.EnsureCacheUpdated(idp);
+
+            var providerType = _options.FindProviderType(idp.Type);
+            if (providerType != null)
+            {
+                if (!_licenseValidator.ValidateDynamicProviders())
+                {
+                    IdentityServerLicenseValidator.ThrowInvalidLicenseException(
+                        "Your license does not include the Dynamic Identity Providers feature.");
                 }
+
+                _licenseUsageTracker.DynamicProvidersUsed();
+                dynamicScheme = new DynamicAuthenticationScheme(idp, providerType.HandlerType);
+                cache.Add(name, dynamicScheme);
             }
         }
 

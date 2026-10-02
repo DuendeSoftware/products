@@ -30,6 +30,7 @@ internal sealed class SamlAuthenticationConfigureOptions : ConfigureAuthenticati
         options.SpEntityId = provider.SpEntityId;
         options.OutboundSigningAlgorithm = provider.OutboundSigningAlgorithm;
         options.WantAssertionsSigned = provider.WantAssertionsSigned;
+        options.AuthnRequestSigningBehavior = provider.AuthnRequestSigningBehavior;
         options.SignInScheme = context.DynamicProviderOptions.SignInScheme;
         options.SignOutScheme = context.DynamicProviderOptions.SignOutScheme;
     }

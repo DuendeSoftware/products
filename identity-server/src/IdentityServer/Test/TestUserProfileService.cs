@@ -69,11 +69,19 @@ public class TestUserProfileService : IProfileService
     /// <returns></returns>
     public virtual Task IsActiveAsync(IsActiveContext context, Ct ct)
     {
-        Logger.LogDebug("IsActive called from: {caller}", context.Caller);
+        Logger.IsActiveCalled(context.Caller);
 
         var user = Users.FindBySubjectId(context.Subject.GetSubjectId());
         context.IsActive = user?.IsActive == true;
 
         return Task.CompletedTask;
     }
+}
+
+internal static partial class TestUserProfileServiceLog
+{
+    [LoggerMessage(
+        Level = LogLevel.Debug,
+        Message = "IsActive called from: {Caller}")]
+    internal static partial void IsActiveCalled(this ILogger logger, string caller);
 }

@@ -1,12 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
+
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Stores;
+using Duende.Spaces;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
@@ -30,7 +32,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
     /// Ctor
     /// </summary>
     /// <param name="inner"></param>
-    /// <param name="cache"></param>
+    /// <param name="cacheFactory">The factory used to resolve the configuration store cache.</param>
     /// <param name="options"></param>
     /// <param name="identityProviderCachePolicy"></param>
     /// <param name="identityProviderNameCachePolicy"></param>
@@ -38,7 +40,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
     /// <param name="logger"></param>
     public CachingIdentityProviderStore(
         T inner,
-        [FromKeyedServices(ServiceProviderKeys.ConfigurationStoreCache)] HybridCache cache,
+        IHybridCacheFactory cacheFactory,
         IdentityServerOptions options,
         CachePolicy<IdentityProvider> identityProviderCachePolicy,
         CachePolicy<IdentityProviderName> identityProviderNameCachePolicy,
@@ -46,7 +48,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
         ILogger<CachingIdentityProviderStore<T>> logger)
     {
         _inner = inner;
-        _cache = cache;
+        _cache = cacheFactory.GetCache(ServiceProviderKeys.ConfigurationStoreCache);
         _options = options;
         _identityProviderCachePolicy = identityProviderCachePolicy;
         _identityProviderNameCachePolicy = identityProviderNameCachePolicy;
@@ -64,14 +66,14 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
             (inner: _inner, unused: 0),
             static async (state, cancel) => await state.inner.GetAllSchemeNamesAsync(cancel),
             _identityProviderNameCachePolicy.WriteOptions(_options.Caching.IdentityProviderCacheDuration),
-            tags: _identityProviderNameCachePolicy.Tags,
-            cancellationToken: ct);
+            _identityProviderNameCachePolicy.Tags,
+            ct);
 
         return result;
     }
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, Ct ct)
+    public async Task<IdentityProvider?> GetBySchemeAsync(string scheme, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingIdentityProviderStore.GetByScheme");
 
@@ -86,8 +88,8 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
                     return result ?? throw new NotCachedException();
                 },
                 _identityProviderCachePolicy.WriteOptions(_options.Caching.IdentityProviderCacheDuration),
-                tags: _identityProviderCachePolicy.Tags,
-                cancellationToken: ct);
+                _identityProviderCachePolicy.Tags,
+                ct);
 
             _optionsMonitorCache.EnsureCacheUpdated(item);
 

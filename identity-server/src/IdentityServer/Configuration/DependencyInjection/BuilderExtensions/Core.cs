@@ -20,7 +20,6 @@ using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
-using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Saml;
@@ -36,8 +35,8 @@ using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
-using Duende.Spaces;
 using Duende.Private.Licencing.V2;
+using Duende.Spaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -229,8 +228,6 @@ public static class IdentityServerBuilderExtensionsCore
 
             builder.Services.AddScoped<IUserSession, DefaultUserSession>();
             builder.Services.AddTransient(typeof(MessageCookie<>));
-            builder.Services.AddTransient(typeof(SanitizedLogger<>));
-
             builder.Services.AddCors();
             builder.Services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
@@ -432,8 +429,10 @@ public static class IdentityServerBuilderExtensionsCore
             builder.Services.TryAddSingleton<IIdentityProviderFactory, DynamicIdentityProviderFactory>();
             // the per-request cache is to ensure that a scheme loaded from the cache is still available later in the
             // request and made available anywhere else during this request (in case the static cache times out across
-            // 2 calls within the same request)
-            builder.Services.AddScoped<DynamicAuthenticationSchemeCache>();
+            // 2 calls within the same request). Resolved via a factory (rather than plain AddScoped<T>) so the
+            // internal, space-aware constructor can be used: the built-in DI container only activates public
+            // constructors, and ISpaceContextAccessor may not be registered when Spaces isn't in use.
+            builder.Services.AddScoped(sp => new DynamicAuthenticationSchemeCache(sp.GetService<ISpaceContextAccessor>()));
 
             return builder;
         }

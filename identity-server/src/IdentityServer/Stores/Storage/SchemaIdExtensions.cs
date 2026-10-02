@@ -16,6 +16,8 @@ public static class SchemaIdExtensions
     private static readonly SchemaId ApiScopeSchemaId = SchemaId.Create("api-scope");
     private static readonly SchemaId IdentityResourceSchemaId = SchemaId.Create("identity-resource");
     private static readonly SchemaId SamlServiceProviderSchemaId = SchemaId.Create("saml-service-provider");
+    private static readonly SchemaId OidcIdentityProviderSchemaId = SchemaId.Create("idp:oidc");
+    private static readonly SchemaId SamlIdentityProviderSchemaId = SchemaId.Create("idp:saml");
 
     extension(SchemaId)
     {
@@ -34,10 +36,20 @@ public static class SchemaIdExtensions
         /// <summary>The well-known schema ID for SAML service provider extended properties.</summary>
         public static SchemaId SamlServiceProvider => SamlServiceProviderSchemaId;
 
+        /// <summary>The well-known schema ID for OIDC identity provider extended properties.</summary>
+        public static SchemaId OidcIdentityProvider => OidcIdentityProviderSchemaId;
+
+        /// <summary>The well-known schema ID for SAML identity provider extended properties.</summary>
+        public static SchemaId SamlIdentityProvider => SamlIdentityProviderSchemaId;
+
         /// <summary>
-        /// Creates a per-type schema ID for identity provider extended properties.
-        /// The schema ID is derived from the provider's <c>Type</c> field (e.g. <c>"oidc"</c> → <c>"idp:oidc"</c>).
+        /// Builds a per-type schema ID for identity provider extended properties.
+        /// The schema ID is derived from the provider's <c>Type</c> field (for example, <c>"oidc"</c> produces <c>"idp:oidc"</c>).
         /// </summary>
-        public static SchemaId IdentityProvider(string type) => SchemaId.Create($"idp:{type}");
+        public static SchemaId BuildIdentityProviderId(string type)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(type);
+            return SchemaId.Create($"idp:{type}");
+        }
     }
 }

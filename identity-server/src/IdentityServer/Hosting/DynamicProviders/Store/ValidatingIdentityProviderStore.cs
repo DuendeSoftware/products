@@ -47,19 +47,19 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
 
         if (idp != null)
         {
-            _logger.LogTrace("Calling into identity provider configuration validator: {validatorType}", _validatorType);
+            _logger.CallingIntoIdentityProviderConfigurationValidatorValidatorType(_validatorType);
 
             var context = new IdentityProviderConfigurationValidationContext(idp);
             await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {
-                _logger.LogDebug("IdentityProvider validation for scheme {scheme} succeeded.", scheme);
+                _logger.IdentityProviderValidationForSchemeSchemeSucceeded(scheme);
                 Telemetry.Metrics.DynamicIdentityProviderValidation(scheme);
                 return idp;
             }
 
-            _logger.LogError("Invalid IdentityProvider configuration for scheme {scheme}: {errorMessage}", scheme, context.ErrorMessage);
+            _logger.InvalidIdentityProviderConfigurationForSchemeSchemeErrorMessage(scheme, context.ErrorMessage);
             Telemetry.Metrics.DynamicIdentityProviderValidationFailure(scheme, context.ErrorMessage);
             await _events.RaiseAsync(new InvalidIdentityProviderConfiguration(idp, context.ErrorMessage), ct);
 

@@ -123,7 +123,7 @@ public static class TokenExtensions
             }
             catch (Exception ex)
             {
-                logger.LogCritical(ex, "Error creating the JWT payload");
+                logger.ErrorCreatingTheJWTPayload(ex);
                 throw;
             }
         }

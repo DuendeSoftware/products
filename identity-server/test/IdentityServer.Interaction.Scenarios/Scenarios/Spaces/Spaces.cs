@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Interaction.Scenarios.Spaces;
 
-internal class Spaces : IScenario
+internal partial class Spaces : IScenario
 {
     private static readonly ActivitySource Source = new("Duende.IdentityServer.Interaction.Scenarios");
     private IdentityServerTestHost? _identityServer;
@@ -29,7 +29,7 @@ internal class Spaces : IScenario
         _identityServer = new IdentityServerTestHost(configurator, "identity-server",
             idsrv =>
             {
-                idsrv.AddStorage(opt => opt.AddSqliteInMemoryStore());
+                idsrv.AddStorage(opt => opt.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
                 idsrv.Services.AddSpaces();
 
             }, configureApp: (app, next) =>
@@ -41,15 +41,15 @@ internal class Spaces : IScenario
                     using (Source.StartActivity("some operation"))
                     {
                         await Task.Delay(100);
-                        logger.LogInformation("some message");
-                        logger.LogWarning("some warning");
+                        LogMessage(logger);
+                        LogWarning(logger);
                     }
 
                     using (Source.StartActivity("some other operation"))
                     {
                         await Task.Delay(100);
-                        logger.LogInformation("some message");
-                        logger.LogWarning("some warning");
+                        LogMessage(logger);
+                        LogWarning(logger);
                     }
 
                     return "Hello World! " + spaceContextAccessor.GetSpaceId();
@@ -58,10 +58,10 @@ internal class Spaces : IScenario
             ;
         _identityServer.AddDefaultUsers();
         _identityServer.AddDefaultResources();
-        
+
         await _identityServer.StartAsync(ct);
 
-        await _identityServer.App.Services.GetRequiredService<IDatabaseSchema>().MigrateAsync(ct);
+        await _identityServer.App.Services.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(ct);
 
         var spaceAdmin = _identityServer.App.Services.GetRequiredService<ISpaceAdmin>();
         await spaceAdmin.CreateAsync(new CreateSpaceConfiguration()
@@ -96,4 +96,10 @@ internal class Spaces : IScenario
         }
     }
     public Command[] GetCommands() => [];
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "some message")]
+    private static partial void LogMessage(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "some warning")]
+    private static partial void LogWarning(ILogger logger);
 }

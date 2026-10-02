@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer;
+using Duende.IdentityServer.Stores;
+using Duende.Spaces;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,6 +43,8 @@ internal static class TestHybridCacheHelper
             };
         });
 
+        services.AddTransient<IHybridCacheFactory, DefaultHybridCacheFactory>();
+
         return services.BuildServiceProvider();
     }
 
@@ -49,4 +53,10 @@ internal static class TestHybridCacheHelper
     /// </summary>
     public static HybridCache GetCache(ServiceProvider serviceProvider) =>
         serviceProvider.GetRequiredKeyedService<HybridCache>(ServiceProviderKeys.ConfigurationStoreCache);
+
+    /// <summary>
+    /// Resolves the <see cref="IHybridCacheFactory"/> from a ServiceProvider built by <see cref="BuildServiceProvider"/>.
+    /// </summary>
+    public static IHybridCacheFactory GetCacheFactory(ServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<IHybridCacheFactory>();
 }

@@ -51,7 +51,7 @@ public class TokenCleanupService : ITokenCleanupService
     {
         try
         {
-            _logger.LogTrace("Querying for expired grants to remove");
+            Log.QueryingForExpiredGrantsToRemove(_logger);
 
             await RemoveGrantsAsync(ct);
             await RemoveDeviceCodesAsync(ct);
@@ -61,7 +61,7 @@ public class TokenCleanupService : ITokenCleanupService
         }
         catch (Exception ex)
         {
-            _logger.LogError("Exception removing expired grants: {exception}", ex.Message);
+            Log.ExceptionRemovingExpiredGrantsValue(_logger, ex.Message);
         }
     }
 
@@ -101,7 +101,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removed {grantCount} expired grants", found);
+                    Log.RemovedValueExpiredGrants(_logger, found);
                 }
             }
         }
@@ -125,7 +125,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removing {grantCount} expired grants", found);
+                    Log.RemovingValueExpiredGrants(_logger, found);
 
                     var foundIds = expiredGrants.Select(pg => pg.Id).ToArray();
 
@@ -145,10 +145,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                     if (deleteCount != found)
                     {
-                        _logger.LogWarning("Tried to remove {grantCount} expired grants, but only {deleteCount} " +
-                            "was deleted. This indicates that another process has already removed the items. Duplicate " +
-                            "notifications may be sent to the registered IOperationalStoreNotification.",
-                            found, deleteCount);
+                        Log.TriedToRemoveValueExpiredGrantsButOnly(_logger, found, deleteCount);
                     }
 
                     await _operationalStoreNotification.PersistedGrantsRemovedAsync(expiredGrants, ct);
@@ -182,7 +179,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removed {grantCount} consumed grants", found);
+                    Log.RemovedValueConsumedGrants(_logger, found);
                 }
             }
         }
@@ -203,7 +200,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removing {grantCount} consumed grants", found);
+                    Log.RemovingValueConsumedGrants(_logger, found);
 
                     var foundIds = consumedGrants.Select(pg => pg.Id).ToArray();
 
@@ -216,10 +213,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                     if (deleteCount != found)
                     {
-                        _logger.LogWarning("Tried to remove {grantCount} consumed grants, but only {deleteCount} " +
-                            "was deleted. This indicates that another process has already removed the items. Duplicate " +
-                            "notifications may be sent to the registered IOperationalStoreNotification.",
-                            found, deleteCount);
+                        Log.TriedToRemoveValueConsumedGrantsButOnly(_logger, found, deleteCount);
                     }
 
                     await _operationalStoreNotification.PersistedGrantsRemovedAsync(consumedGrants, ct);
@@ -252,7 +246,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removed {deviceCodeCount} device flow codes", found);
+                    Log.RemovedValueDeviceFlowCodes(_logger, found);
                 }
             }
         }
@@ -273,7 +267,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removing {deviceCodeCount} device flow codes", found);
+                    Log.RemovingValueDeviceFlowCodes(_logger, found);
 
                     var foundCodes = expiredCodes.Select(c => c.DeviceCode).ToArray();
 
@@ -284,10 +278,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                     if (deleteCount != found)
                     {
-                        _logger.LogWarning("Tried to remove {grantCount} expired device codes, but only {deleteCount} " +
-                            "was deleted. This indicates that another process has already removed the items. Duplicate " +
-                            "notifications may be sent to the registered IOperationalStoreNotification.",
-                            found, deleteCount);
+                        Log.TriedToRemoveValueExpiredDeviceCodesBut(_logger, found, deleteCount);
                     }
 
                     await _operationalStoreNotification.DeviceCodesRemovedAsync(expiredCodes, ct);
@@ -321,7 +312,7 @@ public class TokenCleanupService : ITokenCleanupService
 
             if (found > 0)
             {
-                _logger.LogInformation("Removing {parCount} stale pushed authorization requests", found);
+                Log.RemovingValueStalePushedAuthorizationRequests(_logger, found);
 
                 var foundIds = expiredPars.Select(par => par.Id).ToArray();
 
@@ -332,9 +323,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (deleteCount != found)
                 {
-                    _logger.LogWarning("Tried to remove {parCount} stale pushed authorization requests, but only {deleteCount} " +
-                        "items were deleted. This indicates that another process has already removed the items.",
-                        found, deleteCount);
+                    Log.TriedToRemoveValueStalePushedAuthorizationRequests(_logger, found, deleteCount);
                 }
             }
         }
@@ -362,7 +351,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removed {count} stale SAML signin states", found);
+                    Log.RemovedValueStaleSamlSigninStates(_logger, found);
                 }
             }
         }
@@ -383,7 +372,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removing {count} stale SAML signin states", found);
+                    Log.RemovingValueStaleSamlSigninStates(_logger, found);
 
                     var foundIds = expiredStates.Select(s => s.Id).ToArray();
 
@@ -394,10 +383,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                     if (deleteCount != found)
                     {
-                        _logger.LogWarning("Tried to remove {count} stale SAML signin states, but only {deleteCount} " +
-                            "was deleted. This indicates that another process has already removed the items. Duplicate " +
-                            "notifications may be sent to the registered IOperationalStoreNotification.",
-                            found, deleteCount);
+                        Log.TriedToRemoveValueStaleSamlSigninStates(_logger, found, deleteCount);
                     }
 
                     await _operationalStoreNotification.SamlSigninStatesRemovedAsync(expiredStates, ct);
@@ -428,7 +414,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removed {count} expired SAML logout sessions", found);
+                    Log.RemovedValueExpiredSamlLogoutSessions(_logger, found);
                 }
             }
         }
@@ -449,7 +435,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (found > 0)
                 {
-                    _logger.LogInformation("Removing {count} expired SAML logout sessions", found);
+                    Log.RemovingValueExpiredSamlLogoutSessions(_logger, found);
 
                     var foundIds = expiredSessions.Select(s => s.Id).ToArray();
 
@@ -460,10 +446,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                     if (deleteCount != found)
                     {
-                        _logger.LogWarning("Tried to remove {count} expired SAML logout sessions, but only {deleteCount} " +
-                            "was deleted. This indicates that another process has already removed the items. Duplicate " +
-                            "notifications may be sent to the registered IOperationalStoreNotification.",
-                            found, deleteCount);
+                        Log.TriedToRemoveValueExpiredSamlLogoutSessions(_logger, found, deleteCount);
                     }
 
                     await _operationalStoreNotification.SamlLogoutSessionsRemovedAsync(expiredSessions, ct);

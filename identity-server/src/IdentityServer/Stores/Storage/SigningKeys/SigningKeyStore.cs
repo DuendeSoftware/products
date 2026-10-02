@@ -34,7 +34,7 @@ internal sealed class SigningKeyStore(
 
         if (result != CreateResult.Success)
         {
-            logger.LogError("Failed to store signing key {KeyId}: {Result}", key.Id, result);
+            logger.FailedToStoreSigningKeyKeyIdResult(key.Id, result);
             throw new InvalidOperationException($"Could not store signing key '{key.Id}': {result}");
         }
     }

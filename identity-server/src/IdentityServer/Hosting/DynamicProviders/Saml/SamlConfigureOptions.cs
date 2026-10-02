@@ -77,6 +77,16 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         options.SPOptions.WantAssertionsSigned = publicOptions?.WantAssertionsSigned
             ?? provider.WantAssertionsSigned;
 
+        // AuthnRequestSigningBehavior: customer override > provider config
+        var effectiveBehavior = publicOptions?.AuthnRequestSigningBehavior ?? provider.AuthnRequestSigningBehavior;
+        options.SPOptions.AuthenticateRequestSigningBehavior = AuthnRequestSigningBehaviorMapper.Map(effectiveBehavior);
+        if (effectiveBehavior == AuthnRequestSigningBehavior.Always
+            && string.IsNullOrWhiteSpace(provider.SpSigningCertificateBase64))
+        {
+            throw new InvalidOperationException(
+                $"AuthnRequestSigningBehavior is set to Always for provider '{provider.Scheme}', but no SpSigningCertificateBase64 is configured.");
+        }
+
         // IdpInitiatedCallbackUrl: customer override > provider config
         var idpInitiatedCallbackUrl = publicOptions?.IdpInitiatedCallbackUrl
             ?? provider.IdpInitiatedCallbackUrl;

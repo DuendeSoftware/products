@@ -53,7 +53,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.PushedAuthorization);
 
-        _logger.LogDebug("Start pushed authorization request");
+        _logger.StartPushedAuthorizationRequest();
 
         if (!_licenseValidator.ValidatePar())
         {
@@ -144,22 +144,20 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
     {
         if (logError)
         {
-#pragma warning disable CA2254 // Structured logging is not needed for this message
-            _logger.LogError(logMessage);
-#pragma warning restore CA2254
+            _logger.EndpointError(logMessage);
         }
 
         if (request != null)
         {
             var details = new AuthorizeRequestValidationLog(request, _options.Logging.PushedAuthorizationSensitiveValuesFilter);
-            _logger.LogInformation("{@validationDetails}", details);
+            _logger.LogMessagePushedAuthorizationEndpoint(details);
         }
 
         // Note: this is an expected case in the normal DPoP flow and is not a real failure event.
         // Keeping a debug log to help with troubleshooting in the case of a buggy client.
         if (serverNonce != null)
         {
-            _logger.LogDebug("Pushed authorization request returned an error with a server issued nonce. This is an expected event when using DPoP server nonces.");
+            _logger.PushedAuthorizationRequestReturnedAnErrorWithA();
         }
         else
         {

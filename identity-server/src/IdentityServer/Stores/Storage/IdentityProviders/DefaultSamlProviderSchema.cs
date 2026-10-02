@@ -9,10 +9,10 @@ namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
 
 /// <summary>
 /// Built-in attribute definitions for SAML 2.0 identity providers.
-/// These correspond to the properties used by <see cref="Models.SamlProvider"/> and are
-/// automatically registered in the schema store so that SAML providers work out-of-the-box.
+/// These correspond to the properties used by <see cref="Models.SamlProvider"/> and back the
+/// schema that <c>AddSamlDynamicProvider()</c> registers so that SAML providers work out-of-the-box.
 /// </summary>
-internal static class DefaultSamlProviderSchema
+public static class DefaultSamlProviderSchema
 {
     /// <summary>The entity ID of the remote SAML identity provider.</summary>
     public static readonly TypedAttributeDefinition<string> IdpEntityId =
@@ -53,9 +53,8 @@ internal static class DefaultSamlProviderSchema
     /// Stored as <c>"true"</c> or <c>"false"</c>. Defaults to <c>false</c>.
     /// </summary>
     /// <remarks>
-    /// Defined as <c>string</c> (not <c>bool</c>) because <see cref="Models.SamlProvider"/> reads these
-    /// values from the Properties dictionary via string comparison, and
-    /// <see cref="EavPropertyMapper.ExtractStringProperties"/> must round-trip them as strings.
+    /// Defined as <c>string</c> rather than <c>bool</c> because <see cref="Models.SamlProvider"/> reads
+    /// these values from the properties dictionary using string comparison.
     /// </remarks>
     public static readonly TypedAttributeDefinition<string> AllowUnsolicitedAuthnResponse =
         new(AttributeCode.Create("AllowUnsolicitedAuthnResponse"), new ScalarAttributeType(ScalarDataType.String));
@@ -65,9 +64,8 @@ internal static class DefaultSamlProviderSchema
     /// Stored as <c>"true"</c> or <c>"false"</c>. Defaults to <c>true</c>.
     /// </summary>
     /// <remarks>
-    /// Defined as <c>string</c> (not <c>bool</c>) because <see cref="Models.SamlProvider"/> reads these
-    /// values from the Properties dictionary via string comparison, and
-    /// <see cref="EavPropertyMapper.ExtractStringProperties"/> must round-trip them as strings.
+    /// Defined as <c>string</c> rather than <c>bool</c> because <see cref="Models.SamlProvider"/> reads
+    /// these values from the properties dictionary using string comparison.
     /// </remarks>
     public static readonly TypedAttributeDefinition<string> WantAssertionsSigned =
         new(AttributeCode.Create("WantAssertionsSigned"), new ScalarAttributeType(ScalarDataType.String));
@@ -77,26 +75,41 @@ internal static class DefaultSamlProviderSchema
         new(AttributeCode.Create("OutboundSigningAlgorithm"), new ScalarAttributeType(ScalarDataType.String));
 
     /// <summary>
-    /// The built-in schema for SAML identity providers, registered with schema ID <c>idp:saml</c>.
+    /// Controls whether outbound SAML AuthnRequest messages are signed.
+    /// Stored as the string name of <see cref="Models.AuthnRequestSigningBehavior" /> (e.g. <c>"Never"</c> or <c>"Always"</c>). Defaults to <c>"Never"</c>.
     /// </summary>
-    public static readonly SchemaConfiguration Schema = new()
-    {
-        SchemaId = SchemaId.IdentityProvider("saml"),
-        DisplayName = "SAML Identity Provider",
-        Description = "Built-in schema for SAML 2.0 identity providers.",
-        AttributeDefinitions =
-        [
-            IdpEntityId,
-            SingleSignOnServiceUrl,
-            SingleLogoutServiceUrl,
-            SigningCertificateBase64,
-            SpSigningCertificateBase64,
-            SpSigningCertificatePassword,
-            BindingType,
-            SpEntityId,
-            AllowUnsolicitedAuthnResponse,
-            WantAssertionsSigned,
-            OutboundSigningAlgorithm
-        ]
-    };
+    /// <remarks>
+    /// Defined as <c>string</c> (not the enum type) because <see cref="Models.SamlProvider"/> reads this
+    /// value from the Properties dictionary by parsing the enum name, and
+    /// <see cref="EavPropertyMapper.ExtractStringProperties"/> must round-trip it as a string.
+    /// </remarks>
+    public static readonly TypedAttributeDefinition<string> AuthnRequestSigningBehavior =
+        new(AttributeCode.Create("AuthnRequestSigningBehavior"), new ScalarAttributeType(ScalarDataType.String));
+
+    /// <summary>
+    /// Creates the built-in schema for SAML identity providers, registered with schema ID <c>idp:saml</c>.
+    /// </summary>
+    /// <returns>A new schema configuration.</returns>
+    public static SchemaConfiguration CreateSchema() =>
+        new()
+        {
+            SchemaId = SchemaId.SamlIdentityProvider,
+            DisplayName = "SAML Identity Provider",
+            Description = "Built-in schema for SAML 2.0 identity providers.",
+            AttributeDefinitions =
+            [
+                IdpEntityId,
+                SingleSignOnServiceUrl,
+                SingleLogoutServiceUrl,
+                SigningCertificateBase64,
+                SpSigningCertificateBase64,
+                SpSigningCertificatePassword,
+                BindingType,
+                SpEntityId,
+                AllowUnsolicitedAuthnResponse,
+                WantAssertionsSigned,
+                OutboundSigningAlgorithm,
+                AuthnRequestSigningBehavior
+            ]
+        };
 }

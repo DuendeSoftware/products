@@ -64,18 +64,18 @@ internal class IntrospectionEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Introspection + "Endpoint");
 
-        _logger.LogTrace("Processing introspection request.");
+        _logger.ProcessingIntrospectionRequest();
 
         // validate HTTP
         if (!HttpMethods.IsPost(context.Request.Method))
         {
-            _logger.LogWarning("Introspection endpoint only supports POST requests");
+            _logger.IntrospectionEndpointOnlySupportsPOSTRequests();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
         if (!context.Request.HasApplicationFormContentType())
         {
-            _logger.LogWarning("Invalid media type for introspection endpoint");
+            _logger.InvalidMediaTypeForIntrospectionEndpoint();
             return new StatusCodeResult(HttpStatusCode.UnsupportedMediaType);
         }
 
@@ -85,14 +85,14 @@ internal class IntrospectionEndpoint : IEndpointHandler
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogWarning(ex, "Invalid HTTP request for introspection endpoint");
+            _logger.InvalidHTTPRequestForIntrospectionEndpoint(ex);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
     }
 
     private async Task<IEndpointResult> ProcessIntrospectionRequestAsync(HttpContext context)
     {
-        _logger.LogDebug("Starting introspection request.");
+        _logger.StartingIntrospectionRequest();
 
         // caller validation
         ClientSecretValidationResult clientResult;
@@ -106,19 +106,19 @@ internal class IntrospectionEndpoint : IEndpointHandler
             clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
             if (clientResult.IsError)
             {
-                _logger.LogError("Unauthorized call introspection endpoint. aborting.");
+                _logger.UnauthorizedCallIntrospectionEndpointAborting();
                 return new StatusCodeResult(HttpStatusCode.Unauthorized);
             }
             else
             {
                 client = clientResult.Client;
-                _logger.LogDebug("Client making introspection request: {clientId}", client.ClientId);
+                _logger.ClientMakingIntrospectionRequest(client.ClientId);
             }
         }
         else
         {
             api = apiResult.Resource;
-            _logger.LogDebug("ApiResource making introspection request: {apiId}", api.Name);
+            _logger.ApiResourceMakingIntrospectionRequest(api.Name);
         }
 
         var callerName = api?.Name ?? client.ClientId;
@@ -126,7 +126,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         var body = await context.Request.ReadFormAsync(context.RequestAborted);
         if (body == null)
         {
-            _logger.LogError("Malformed request body. aborting.");
+            _logger.MalformedRequestBodyAborting();
             const string error = "Malformed request body";
             await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, error), context.RequestAborted);
             Telemetry.Metrics.IntrospectionFailure(callerName, error);
@@ -134,7 +134,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         }
 
         // request validation
-        _logger.LogTrace("Calling into introspection request validator: {type}", _requestValidator.GetType().FullName);
+        _logger.CallingIntoIntrospectionRequestValidator(_requestValidator.GetType().FullName);
         var validationRequest = new IntrospectionRequestValidationContext
         {
             Parameters = body.AsNameValueCollection(),
@@ -151,7 +151,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         }
 
         // response generation
-        _logger.LogTrace("Calling into introspection response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoIntrospectionResponseGenerator(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(validationResult, context.RequestAborted);
 
         // render result
@@ -160,7 +160,13 @@ internal class IntrospectionEndpoint : IEndpointHandler
             string.Equals(context.Request.Headers.Accept, $"application/{JwtClaimTypes.JwtTypes.IntrospectionJwtResponse}", StringComparison.OrdinalIgnoreCase));
     }
 
-    private void LogSuccess(bool tokenActive, string callerName) => _logger.LogInformation("Success token introspection. Token active: {tokenActive}, for caller: {callerName}", tokenActive, callerName);
+    private void LogSuccess(bool tokenActive, string callerName)
+    {
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.SuccessTokenIntrospectionTokenActiveForCaller(tokenActive, callerName);
+        }
+    }
 
-    private void LogFailure(string error, string callerName) => _logger.LogError("Failed token introspection: {error}, for caller: {callerName}", error, callerName);
+    private void LogFailure(string error, string callerName) => _logger.FailedTokenIntrospectionForCaller(error, callerName);
 }

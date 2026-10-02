@@ -32,10 +32,7 @@ internal sealed class ServerSideSessionStore(
 
         if (result != CreateResult.Success)
         {
-            logger.LogWarning(
-                "Failed to create session with key '{Key}'. Result: {Result}.",
-                session.Key,
-                result);
+            logger.FailedToCreateSessionWithKeyKeyResult(session.Key, result);
         }
     }
 
@@ -47,9 +44,7 @@ internal sealed class ServerSideSessionStore(
         var current = await repository.TryReadByKeyAsync(session.Key, ct);
         if (current is null)
         {
-            logger.LogDebug(
-                "No server-side session '{Key}' found. Update skipped.",
-                session.Key);
+            logger.NoServerSideSessionKeyFoundUpdateSkipped(session.Key);
             return;
         }
 
@@ -58,11 +53,7 @@ internal sealed class ServerSideSessionStore(
 
         if (result is UpdateResult.DoesNotExist or UpdateResult.UnexpectedVersion or UpdateResult.KeyConflict)
         {
-            logger.LogWarning(
-                "Session with key '{Key}' could not be updated. Result: {Result}. " +
-                "The session may have been concurrently modified or deleted.",
-                session.Key,
-                result);
+            logger.SessionWithKeyKeyCouldNotBeUpdated(session.Key, result);
         }
     }
 

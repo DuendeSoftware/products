@@ -97,7 +97,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         var user = await _session.GetUserAsync(ct);
         if (user != null)
         {
-            _logger.LogDebug("Getting pending login requests for user");
+            _logger.GettingPendingLoginRequestsForUser();
 
             var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId(), ct);
             foreach (var item in items)
@@ -172,6 +172,6 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
 
         await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request, ct);
 
-        _logger.LogDebug("Successful update for backchannel authentication request id {id}", completionRequest.InternalId);
+        _logger.SuccessfulUpdateForBackchannelAuthenticationRequestIdId(completionRequest.InternalId);
     }
 }

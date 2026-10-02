@@ -46,4 +46,10 @@ internal sealed record SamlSpLogoutMessage
     /// The session ID of the user being logged out.
     /// </summary>
     public string? SessionId { get; init; }
+
+    /// <summary>
+    /// A correlation ID used to associate the downstream client sign-out notification
+    /// (rendered in the end-session iframe) with this SAML logout flow.
+    /// </summary>
+    public string? SamlLogoutCorrelationId { get; init; }
 }

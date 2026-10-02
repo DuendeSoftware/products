@@ -43,13 +43,7 @@ public static class IdentityServerBuilderExtensionsInMemory
         /// <returns></returns>
         public IIdentityServerBuilder AddInMemoryCaching()
         {
-            if (!builder.Services.Any(d =>
-                    d.ServiceType == typeof(HybridCache) &&
-                    d.IsKeyedService &&
-                    ServiceProviderKeys.ConfigurationStoreCache.Equals(d.ServiceKey)))
-            {
-                builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ConfigurationStoreCache);
-            }
+            builder.EnsureConfigurationStoreHybridCache();
 
             if (!builder.Services.Any(d =>
                     d.ServiceType == typeof(HybridCache) &&

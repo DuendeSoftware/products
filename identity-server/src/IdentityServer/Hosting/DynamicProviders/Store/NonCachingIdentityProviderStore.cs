@@ -43,7 +43,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
         {
             if (_optionsMonitorCache.EnsureCacheUpdated(item))
             {
-                _logger.LogDebug("The authentication handler options for scheme {scheme} were evicted because the identity provider configuration changed. Consider enabling caching for the IIdentityProviderStore with AddIdentityProviderStoreCache<T>() on IdentityServer if you do not want the options to be reinitialized on each request.", scheme);
+                _logger.TheAuthenticationHandlerOptionsForSchemeSchemeWere(scheme);
             }
         }
         return item;

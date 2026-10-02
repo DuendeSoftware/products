@@ -29,14 +29,12 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
         services.AddLogging();
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<ApiResourceDso.V1>();
         services.AddDsoRegistration<ApiScopeDso.V1>();
         services.AddDsoRegistration<IdentityResourceDso.V1>();
-        services.AddSingleton<IPoolContextAccessor, PoolContextAccessor>();
-        services.AddSingleton<IStorageFactory, DefaultStorageFactory>();
         services.AddScoped<ApiResourceRepository>();
         services.AddScoped<ApiScopeRepository>();
         services.AddScoped<IdentityResourceRepository>();
@@ -44,7 +42,7 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
 
         _provider = services.BuildServiceProvider();
 
-        var schema = _provider.GetRequiredService<IDatabaseSchema>();
+        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 

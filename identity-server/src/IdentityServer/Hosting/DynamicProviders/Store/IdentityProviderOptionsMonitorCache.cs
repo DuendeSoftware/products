@@ -5,7 +5,10 @@
 
 using System.Collections.Concurrent;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Hosting.DynamicProviders.Store;
 using Duende.IdentityServer.Models;
+using Duende.Spaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
@@ -19,7 +22,7 @@ namespace Duende.IdentityServer.Hosting.DynamicProviders;
 /// </summary>
 public sealed class IdentityProviderOptionsMonitorCache
 {
-    private readonly ConcurrentDictionary<string, IdentityProvider> _identityProviders = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<(SpaceId Space, string Scheme), IdentityProvider> _identityProviders = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly IdentityServerOptions _options;
 
@@ -49,11 +52,13 @@ public sealed class IdentityProviderOptionsMonitorCache
             return false;
         }
 
+        var key = CurrentSpaceKey(identityProvider.Scheme);
+
         while (true)
         {
-            if (!_identityProviders.TryGetValue(identityProvider.Scheme, out var currentValue))
+            if (!_identityProviders.TryGetValue(key, out var currentValue))
             {
-                if (_identityProviders.TryAdd(identityProvider.Scheme, identityProvider))
+                if (_identityProviders.TryAdd(key, identityProvider))
                 {
                     return false;
                 }
@@ -66,13 +71,30 @@ public sealed class IdentityProviderOptionsMonitorCache
                 return false;
             }
 
-            if (_identityProviders.TryUpdate(identityProvider.Scheme, identityProvider, currentValue))
+            if (_identityProviders.TryUpdate(key, identityProvider, currentValue))
             {
                 RemoveCacheEntry(identityProvider);
                 return true;
             }
         }
     }
+
+    /// <summary>
+    /// Evicts the current space's tracker and options entries for a deleted or disabled provider.
+    /// Probes every registered provider type since the provider's type is unknown.
+    /// </summary>
+    internal void Remove(string scheme)
+    {
+        _identityProviders.TryRemove(CurrentSpaceKey(scheme), out _);
+
+        foreach (var providerType in _options.DynamicProviders.ProviderTypes.Values)
+        {
+            RemoveDynamicOptionsEntry(providerType.OptionsType, scheme);
+        }
+    }
+
+    private (SpaceId Space, string Scheme) CurrentSpaceKey(string scheme) =>
+        (_serviceProvider.GetService<ISpaceContextAccessor>()?.GetSpaceIdOrDefault() ?? SpaceId.Default, scheme);
 
     private void RemoveCacheEntry(IdentityProvider identityProvider)
     {
@@ -82,13 +104,24 @@ public sealed class IdentityProviderOptionsMonitorCache
             return;
         }
 
-        var optionsMonitorType = typeof(IOptionsMonitorCache<>).MakeGenericType(provider.OptionsType);
-        var optionsCache = _serviceProvider.GetService(optionsMonitorType);
-        var tryRemove = optionsMonitorType.GetMethod(nameof(IOptionsMonitorCache<object>.TryRemove));
+        RemoveDynamicOptionsEntry(provider.OptionsType, identityProvider.Scheme);
+    }
 
+    private void RemoveDynamicOptionsEntry(Type optionsType, string scheme)
+    {
+        var optionsMonitorType = typeof(IOptionsMonitorCache<>).MakeGenericType(optionsType);
+        var optionsCache = _serviceProvider.GetService(optionsMonitorType);
+
+        if (optionsCache is ISpaceAwareDynamicOptionsCache spaceAware)
+        {
+            spaceAware.TryRemoveDynamic(scheme);
+            return;
+        }
+
+        var tryRemove = optionsMonitorType.GetMethod(nameof(IOptionsMonitorCache<object>.TryRemove));
         if (optionsCache != null && tryRemove != null)
         {
-            tryRemove.Invoke(optionsCache, [identityProvider.Scheme]);
+            tryRemove.Invoke(optionsCache, [scheme]);
         }
     }
 }

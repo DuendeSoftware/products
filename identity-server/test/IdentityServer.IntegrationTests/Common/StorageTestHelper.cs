@@ -24,7 +24,7 @@ using Microsoft.Extensions.Hosting;
 namespace Duende.IdentityServer.IntegrationTests.Common;
 
 /// <summary>
-/// Shared helper for configuring IStorage-backed operational stores in
+/// Shared helper for configuring IPartitionedStorage-backed operational stores in
 /// protocol-level integration tests. Registers only the operational
 /// Duende.Storage-backed stores (persisted grants, device flow, pushed
 /// authorization requests, server-side sessions, signing keys, SAML signin
@@ -55,17 +55,10 @@ internal static class StorageTestHelper
         var dbName = $"protocol_{Guid.NewGuid():N}";
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         var builder = services.AddIdentityServerBuilder();
-
-        // Pool context accessor: required by PoolAwareOutboxHandler (used by the session
-        // expiration keyed handler below) to resolve the storage pool for the current scope.
-        // Not registered by AddStorageInternal(), and AddStorage()'s private
-        // AddStorageInfrastructure() helper isn't reachable from this test-only registration
-        // path, so it must be registered explicitly here.
-        services.TryAddSingleton<IPoolContextAccessor, PoolContextAccessor>();
 
         // DSO type registrations (required for deserialization by the storage layer)
         services.AddDsoRegistration<PersistedGrantDso.V1>();
@@ -98,11 +91,9 @@ internal static class StorageTestHelper
         builder.AddSamlLogoutSessionStore<SamlLogoutSessionStore>();
 
         services.TryAddSingleton<IStorageBackedSessionsMarker, StorageBackedSessionsMarker>();
-        services.TryAddSingleton<IOutboxSubscriber, SessionExpirationSubscriber>();
-        services.TryAddKeyedTransient<IOutboxSubscriberHandler>(SessionExpirationSubscriber.Name.Value,
-            (sp, _) => new PoolAwareOutboxHandler(
-                ActivatorUtilities.CreateInstance<SessionExpirationHandler>(sp),
-                sp.GetRequiredService<IPoolContextAccessor>()));
+        services.TryAddSingleton<IOutboxSubscription, SessionExpirationSubscription>();
+        services.TryAddKeyedTransient<IOutboxSubscriptionHandler, SessionExpirationHandler>(
+            SessionExpirationSubscription.Name.Value);
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, OutboxProcessorHost>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, Duende.IdentityServer.Hosting.StoragePurgeHost>());
@@ -111,13 +102,13 @@ internal static class StorageTestHelper
     }
 
     /// <summary>
-    /// Creates a scoped <see cref="IDatabaseSchema"/> from the pipeline and
+    /// Creates a scoped <see cref="IStorageInstanceSchema"/> from the pipeline and
     /// runs schema migration. Call after <see cref="IdentityServerPipeline.Initialize"/>.
     /// </summary>
     public static async Task MigrateStorageSchemaAsync(this IdentityServerPipeline pipeline)
     {
         await using var scope = pipeline.ApplicationServices.CreateAsyncScope();
-        var schema = scope.ServiceProvider.GetRequiredService<IDatabaseSchema>();
+        var schema = scope.ServiceProvider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(TestContext.Current.CancellationToken);
     }
 }

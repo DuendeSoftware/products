@@ -10,8 +10,9 @@ namespace Duende.IdentityServer.Saml.Services;
 
 internal static class LogParameters
 {
-    public const string EntityId = "entityId";
-    public const string Count = "count";
+    public const string EntityId = "EntityId";
+    public const string Count = "Count";
+    public const string Binding = "Binding";
     public const string StateIdParam = "StateIdParam";
     public const string StateId = "StateId";
 }
@@ -35,7 +36,7 @@ internal static partial class Log
 
     [LoggerMessage(
         EventName = nameof(SkippingLogoutUrlGenerationForUnsupportedBinding),
-        Message = $"Skipping SAML logout for SP with unsupported binding (only HTTP-Redirect is supported for front-channel): {{{LogParameters.EntityId}}}, Binding: {{binding}}")]
+        Message = $"Skipping SAML logout for SP with unsupported binding (only HTTP-Redirect is supported for front-channel): {{{LogParameters.EntityId}}}, Binding: {{{LogParameters.Binding}}}")]
     internal static partial void SkippingLogoutUrlGenerationForUnsupportedBinding(this ILogger logger, LogLevel logLevel, string entityId, SamlBinding binding);
 
     [LoggerMessage(

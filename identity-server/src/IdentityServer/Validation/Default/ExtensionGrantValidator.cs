@@ -52,13 +52,13 @@ public class ExtensionGrantValidator
 
         if (validator == null)
         {
-            _logger.LogError("No validator found for grant type");
+            _logger.NoValidatorFoundForGrantType();
             return new GrantValidationResult(TokenRequestErrors.UnsupportedGrantType);
         }
 
         try
         {
-            _logger.LogTrace("Calling into custom grant validator: {type}", validator.GetType().FullName);
+            _logger.CallingIntoCustomGrantValidator(validator.GetType().FullName);
 
             var context = new ExtensionGrantValidationContext
             {
@@ -70,7 +70,7 @@ public class ExtensionGrantValidator
         }
         catch (Exception e)
         {
-            _logger.LogError(1, e, "Grant validation error: {message}", e.Message);
+            _logger.GrantValidationError(e, e.Message);
             return new GrantValidationResult(TokenRequestErrors.InvalidGrant);
         }
     }

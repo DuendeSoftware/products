@@ -71,11 +71,15 @@ public class ResourceStore : IResourceStore
 
         if (result.Length > 0)
         {
-            Logger.LogDebug("Found {apis} API resource in database", result.Select(x => x.Name));
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                var apiNames = result.Select(x => x.Name);
+                Log.FoundValueApiResourceInDatabase(Logger, apiNames);
+            }
         }
         else
         {
-            Logger.LogDebug("Did not find {apis} API resource in database", apiResourceNames);
+            Log.DidNotFindValueApiResourceInDatabase(Logger, apiResourceNames);
         }
 
         return result;
@@ -110,7 +114,11 @@ public class ResourceStore : IResourceStore
             .Where(api => api.Scopes.Any(x => names.Contains(x.Scope)));
         var models = results.Select(x => x.ToModel()).ToArray();
 
-        Logger.LogDebug("Found {apis} API resources in database", models.Select(x => x.Name));
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            var apiNames = models.Select(x => x.Name);
+            Log.FoundValueApiResourcesInDatabase(Logger, apiNames);
+        }
 
         return models;
     }
@@ -141,7 +149,11 @@ public class ResourceStore : IResourceStore
         var results = (await resources.ToArrayAsync(ct))
             .Where(x => scopes.Contains(x.Name));
 
-        Logger.LogDebug("Found {scopes} identity scopes in database", results.Select(x => x.Name));
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            var identityScopeNames = results.Select(x => x.Name);
+            Log.FoundValueIdentityScopesInDatabase(Logger, identityScopeNames);
+        }
 
         return results.Select(x => x.ToModel()).ToArray();
     }
@@ -172,7 +184,11 @@ public class ResourceStore : IResourceStore
         var results = (await resources.ToArrayAsync(ct))
             .Where(x => scopes.Contains(x.Name));
 
-        Logger.LogDebug("Found {scopes} scopes in database", results.Select(x => x.Name));
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            var apiScopeNames = results.Select(x => x.Name);
+            Log.FoundValueScopesInDatabase(Logger, apiScopeNames);
+        }
 
         return results.Select(x => x.ToModel()).ToArray();
     }
@@ -208,9 +224,16 @@ public class ResourceStore : IResourceStore
             (await scopes.ToArrayAsync(ct)).Select(x => x.ToModel())
         );
 
-        Logger.LogDebug("Found {scopes} as all scopes, and {apis} as API resources",
-            result.IdentityResources.Select(x => x.Name).Union(result.ApiScopes.Select(x => x.Name)),
-            result.ApiResources.Select(x => x.Name));
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            var allScopeNames = result.IdentityResources.Select(x => x.Name)
+                .Union(result.ApiScopes.Select(x => x.Name));
+            var apiResourceNames = result.ApiResources.Select(x => x.Name);
+            Log.FoundValueAsAllScopesAndValueAs(
+                Logger,
+                allScopeNames,
+                apiResourceNames);
+        }
 
         return result;
     }

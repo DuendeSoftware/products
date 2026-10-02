@@ -34,10 +34,7 @@ internal sealed class PushedAuthorizationStore(
 
         if (result != CreateResult.Success)
         {
-            logger.LogError(
-                "Failed to store pushed authorization request {Hash}: {Result}",
-                pushedAuthorizationRequest.ReferenceValueHash,
-                result);
+            logger.FailedToStorePushedAuthorizationRequestHashResult(pushedAuthorizationRequest.ReferenceValueHash, result);
             throw new InvalidOperationException(
                 $"Could not store pushed authorization request: {result}");
         }
@@ -51,7 +48,7 @@ internal sealed class PushedAuthorizationStore(
         var dso = await repository.TryReadByHashAsync(referenceValueHash, ct);
         if (dso is null)
         {
-            logger.LogDebug("Pushed authorization request {Hash} not found in store", referenceValueHash);
+            logger.PushedAuthorizationRequestHashNotFoundInStore(referenceValueHash);
             return null;
         }
 
@@ -68,7 +65,7 @@ internal sealed class PushedAuthorizationStore(
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationStore.Consume");
 
-        logger.LogDebug("Consuming pushed authorization request {Hash}", referenceValueHash);
+        logger.ConsumingPushedAuthorizationRequestHash(referenceValueHash);
 
         await repository.DeleteByHashAsync(referenceValueHash, ct);
     }

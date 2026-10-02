@@ -44,16 +44,25 @@ public static class ProfileDataRequestContextExtensions
         /// Logs the profile request.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        public void LogProfileRequest(ILogger logger) => logger.LogDebug("Get profile called for subject {subject} from application {application} with claim types {claimTypes} via {caller}",
-                context.Subject.GetSubjectId(),
-                context.Application?.DisplayName ?? context.Application?.Identifier,
-                context.RequestedClaimTypes,
-                context.Caller);
+        public void LogProfileRequest(ILogger logger)
+        {
+            var subjectId = context.Subject.GetSubjectId();
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.GetProfileCalledForSubjectSubjectFromApplication(subjectId, context.Application?.DisplayName ?? context.Application?.Identifier, context.RequestedClaimTypes, context.Caller);
+            }
+        }
 
         /// <summary>
         /// Logs the issued claims.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        public void LogIssuedClaims(ILogger logger) => logger.LogDebug("Issued claims: {claims}", context.IssuedClaims.Select(c => c.Type));
+        public void LogIssuedClaims(ILogger logger)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.IssuedClaimsClaims(context.IssuedClaims.Select(c => c.Type));
+            }
+        }
     }
 }

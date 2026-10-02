@@ -59,17 +59,17 @@ internal class TokenRevocationEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Revocation + "Endpoint");
 
-        _logger.LogTrace("Processing revocation request.");
+        _logger.ProcessingRevocationRequest();
 
         if (!HttpMethods.IsPost(context.Request.Method))
         {
-            _logger.LogWarning("Invalid HTTP method");
+            _logger.InvalidHTTPMethod();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
         if (!context.Request.HasApplicationFormContentType())
         {
-            _logger.LogWarning("Invalid media type");
+            _logger.InvalidMediaType();
             return new StatusCodeResult(HttpStatusCode.UnsupportedMediaType);
         }
 
@@ -79,31 +79,31 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogWarning(ex, "Invalid HTTP request for revocation endpoint");
+            _logger.InvalidHTTPRequestForRevocationEndpoint(ex);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
     }
 
     private async Task<IEndpointResult> ProcessRevocationRequestAsync(HttpContext context)
     {
-        _logger.LogDebug("Start revocation request.");
+        _logger.StartRevocationRequest();
 
         // validate client
         var clientValidationResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientValidationResult.IsError)
         {
             var error = clientValidationResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
-            _logger.LogWarning("Client validation failed for revocation endpoint: {error}", error);
+            _logger.ClientValidationFailedForRevocationEndpoint(error);
             Telemetry.Metrics.RevocationFailure(clientValidationResult.Client?.ClientId, error);
             return new TokenRevocationErrorResult(error);
         }
 
-        _logger.LogTrace("Client validation successful");
+        _logger.ClientValidationSuccessful();
 
         // validate the token request
         var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
 
-        _logger.LogTrace("Calling into token revocation request validator: {type}", _requestValidator.GetType().FullName);
+        _logger.CallingIntoTokenRevocationRequestValidator(_requestValidator.GetType().FullName);
         var requestValidationResult = await _requestValidator.ValidateRequestAsync(form, clientValidationResult.Client, context.RequestAborted);
 
         if (requestValidationResult.IsError)
@@ -112,18 +112,18 @@ internal class TokenRevocationEndpoint : IEndpointHandler
             return new TokenRevocationErrorResult(requestValidationResult.Error);
         }
 
-        _logger.LogTrace("Calling into token revocation response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoTokenRevocationResponseGenerator(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestValidationResult, context.RequestAborted);
 
         if (response.Success)
         {
-            _logger.LogInformation("Token revocation complete");
+            _logger.TokenRevocationComplete();
             Telemetry.Metrics.Revocation(clientValidationResult.Client.ClientId);
             await _events.RaiseAsync(new TokenRevokedSuccessEvent(requestValidationResult, requestValidationResult.Client), context.RequestAborted);
         }
         else
         {
-            _logger.LogInformation("No matching token found");
+            _logger.NoMatchingTokenFound();
         }
 
         if (response.Error.IsPresent())

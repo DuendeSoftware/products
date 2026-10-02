@@ -17,60 +17,68 @@ using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Outbox;
 using Duende.Storage.Internal.Querying.SearchFields;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using UnitTests.Common;
 using UnitTests.Endpoints.EndSession;
+
+// This file's own namespace is also named OutboxProcessor, which shadows the Storage type of the
+// same name, so it is aliased here.
+using StorageOutboxProcessor = Duende.Storage.Internal.Outbox.OutboxProcessor;
 
 namespace UnitTests.Hosting.OutboxProcessor;
 
 /// <summary>
-/// End-to-end integration smoke test: writes an outbox event to the subscriber queue via
-/// the store's fanout mechanism, runs <see cref="OutboxProcessorHost.RunProcessorAsync"/>, and verifies
-/// the event was consumed and the coordination service was called.
+/// End-to-end integration smoke test: writes an outbox event to the subscription queue via
+/// the store's fanout mechanism, runs Storage's <see cref="StorageOutboxProcessor"/> the way
+/// <see cref="OutboxProcessorHost"/> drives it, and verifies the event was consumed and the
+/// coordination service was called.
 /// </summary>
 public class OutboxProcessorIntegrationTests
 {
     private readonly IdentityServerOptions _options = new();
-    private readonly ILogger<OutboxProcessorHost> _hostLogger = TestLogger.Create<OutboxProcessorHost>();
 
     [Fact]
     public async Task run_processor_processes_outbox_event_end_to_end()
     {
-        // Arrange build SQLite store with outbox subscriber registered in DI
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddDataProtection();
         var dbName = $"processor_integration_{Guid.NewGuid():N}";
-        var subscriberName = SubscriberName.Create("SessionExpiration");
-
-        var subscriber = new TestSubscriber(subscriberName);
+        var subscriptionName = SubscriberName.Create("SessionExpiration");
         var coordinationService = new StubSessionCoordinationService();
 
-        // Register subscriber in DI before building the store so OutboxSubscribers picks it up
-        services.AddSingleton<IOutboxSubscriber>(subscriber);
+        // Register subscription in DI before building the store so OutboxSubscriptions picks it up
+        services.AddSingleton<IOutboxSubscription>(new TestSubscription(subscriptionName));
 
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
 
         services.AddDsoRegistration<ServerSideSessionDso.V1>();
 
-        var sp = services.BuildServiceProvider();
-        var pooledStore = sp.GetRequiredService<IPooledStore>();
-        await ((Duende.Storage.Schema.IDatabaseSchema)pooledStore).MigrateAsync(CancellationToken.None);
+        // The handler stack, registered in the same container the processor resolves scopes from.
+        services.AddSingleton(_options);
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<ISessionCoordinationService>(coordinationService);
+        services.AddKeyedTransient<IOutboxSubscriptionHandler, SessionExpirationHandler>(
+            subscriptionName.Value);
 
-        var storage = pooledStore.OpenPool(0);
-        var storageFactory = new SimpleStorageFactory(storage);
+        var sp = services.BuildServiceProvider();
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
+
+        var partitionedStorage = await sp.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Operational, CancellationToken.None);
+        var crossPartitionStorage = await sp.GetRequiredService<ICrossPartitionStorageFactory>()
+            .GetCrossPartitionStorageAsync(StorageInstanceId.Default, CancellationToken.None);
         var dataProtectionProvider = sp.GetRequiredService<IDataProtectionProvider>();
 
         // Create a valid serialized session payload
         var payload = CreateValidSessionPayload(dataProtectionProvider, "sub_e2e", "sid_e2e");
 
-        // Write an outbox event via CreateAsync so the store's fanout routes it to subscriber queue.
+        // Write an outbox event via CreateAsync so the store's fanout routes it to subscription queue.
         // We create a dummy entity and attach the outbox event to the same transaction.
         var entityId = UuidV7.New();
         var dso = new ServerSideSessionDso.V1
@@ -95,7 +103,7 @@ public class OutboxProcessorIntegrationTests
             DsoTypeSchemaVersion = 1,
             Payload = payload
         };
-        await storage.CreateAsync(
+        await partitionedStorage.CreateAsync(
             entityId,
             dso,
             [],
@@ -105,43 +113,14 @@ public class OutboxProcessorIntegrationTests
             CancellationToken.None);
 
         // Verify event exists before processor run
-        var pageBefore = await storage.GetOutboxEventsForSubscriberAsync(subscriberName, 100, CancellationToken.None);
+        var pageBefore = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, CancellationToken.None);
         pageBefore.Events.Count.ShouldBeGreaterThan(0);
 
-        // Build a second service provider for the handler scope, reusing the same
-        // IDataProtectionProvider so ticket encryption/decryption uses the same key ring.
-        var handlerServices = new ServiceCollection();
-        handlerServices.AddLogging();
-        handlerServices.AddSingleton(dataProtectionProvider);
-        handlerServices.AddSingleton(_options);
-        handlerServices.AddSingleton(TimeProvider.System);
-        handlerServices.AddSingleton<ISessionCoordinationService>(coordinationService);
-        handlerServices.AddKeyedTransient<IOutboxSubscriberHandler>(
-            subscriberName.Value,
-            (svcProvider, _) => new SessionExpirationHandler(
-                svcProvider.GetRequiredService<IDataProtectionProvider>(),
-                svcProvider.GetRequiredService<ISessionCoordinationService>(),
-                svcProvider.GetRequiredService<IdentityServerOptions>(),
-                svcProvider.GetRequiredService<TimeProvider>(),
-                TestLogger.Create<SessionExpirationHandler>()));
-
-        var handlerSp = handlerServices.BuildServiceProvider();
-        var scopeFactory = handlerSp.GetRequiredService<IServiceScopeFactory>();
-
-        // Act run processor
-        IEnumerable<IOutboxSubscriber> subscribers = [subscriber];
-        var host = new OutboxProcessorHost(
-            storageFactory,
-            subscribers,
-            scopeFactory,
-            _options,
-            TimeProvider.System,
-            _hostLogger);
-
-        await host.RunProcessorAsync(CancellationToken.None);
+        // Act: drive the processor exactly as OutboxProcessorHost does.
+        await sp.GetRequiredService<StorageOutboxProcessor>().RunProcessorAsync(CancellationToken.None);
 
         // Assert event consumed (re-query outbox returns empty)
-        var pageAfter = await storage.GetOutboxEventsForSubscriberAsync(subscriberName, 100, CancellationToken.None);
+        var pageAfter = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, CancellationToken.None);
         pageAfter.Events.Count.ShouldBe(0);
 
         // Coordination service was called
@@ -184,55 +163,62 @@ public class OutboxProcessorIntegrationTests
     }
 
     /// <summary>
-    /// End-to-end pool-isolation regression test.
+    /// End-to-end session expiration test driven through the registered outbox processor.
     ///
-    /// Scenario: a tenant's session and its persisted grants live in pool 1. A
-    /// client with CoordinateLifetimeWithUserSession=true also lives only in pool 1.
-    /// The outbox event that records the session expiration is therefore also
-    /// written in pool 1.
+    /// Unlike the smoke test above, which stubs the coordination service, this wires the real
+    /// IdentityServer handler stack: ClientStore, PersistedGrantStore and
+    /// DefaultSessionCoordinationService, all resolved from the same container that Duende.Storage
+    /// registers the processor in. It asserts that expiring a session actually removes the
+    /// persisted grants of a client that coordinates its lifetime with the user session.
     ///
-    /// Without pool-aware handler execution, every repository call goes to pool 0.
-    /// When OutboxProcessorHost fires SessionExpirationHandler for the pool-1 event:
-    ///   - ClientStore.FindClientByIdAsync queries pool 0 and the pool-1 client is invisible.
-    ///   - Because no client is found, DefaultSessionCoordinationService skips RemoveAllAsync.
-    ///   - The pool-1 persisted grants are NEVER cleaned up.
-    ///
-    /// The PoolAwareOutboxHandler decorator establishes the event's pool context before
-    /// handler execution, so downstream stores resolve the correct pool.
+    /// Everything here is resolved from registered infrastructure: the storage factory, the
+    /// ambient outbox processing context and the OutboxProcessor itself all come from
+    /// AddStorageInternal(), so the test exercises the same composition the product ships.
     /// </summary>
     [Fact]
-    public async Task session_expiration_in_non_default_pool_removes_grants_from_event_pool()
+    public async Task session_expiration_removes_grants_for_a_client_that_coordinates_lifetime()
     {
-        // Single SQLite in-memory DB shared across pools.
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddDataProtection();
-        var dbName = $"pool_gap_{Guid.NewGuid():N}";
-        var subscriberName = SubscriberName.Create("SessionExpiration");
+        var dbName = $"session_expiration_{Guid.NewGuid():N}";
+        var subscriptionName = SubscriberName.Create("SessionExpiration");
 
-        // Register DSOs and the subscriber (mirrors production wiring).
-        services.AddSingleton<IOutboxSubscriber>(new TestSubscriber(subscriberName));
+        services.AddSingleton<IOutboxSubscription>(new TestSubscription(subscriptionName));
         services.AddStorageInternal(storage =>
-            storage.AddSqliteStore(opt =>
+            storage.AddSqlite(opt =>
                 opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"));
         services.AddDsoRegistration<ServerSideSessionDso.V1>();
         services.AddDsoRegistration<ClientDso.V1>();
         services.AddDsoRegistration<PersistedGrantDso.V1>();
 
+        // The IdentityServer handler stack, registered the same way AddStorage() registers it so
+        // the processor's own scope factory resolves it.
+        services.AddSingleton(_options);
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<ClientRepository>();
+        services.AddScoped<PersistedGrantRepository>();
+        services.AddScoped<IClientStore, ClientStore>();
+        services.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
+        services.AddSingleton<IBackChannelLogoutService>(new StubBackChannelLogoutClient());
+        services.AddScoped<ISessionCoordinationService, DefaultSessionCoordinationService>();
+        services.AddKeyedTransient<IOutboxSubscriptionHandler, SessionExpirationHandler>(
+            subscriptionName.Value);
+
         var sp = services.BuildServiceProvider();
-        var pooledStore = sp.GetRequiredService<IPooledStore>();
-        await pooledStore.MigrateAsync(Ct.None);
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
 
-        // Seed pool 1 with a client and a persisted grant for the same session.
-        var pool1Storage = pooledStore.OpenPool(1);
+        var partitionedStorage = await sp.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Operational, Ct.None);
+        var crossPartitionStorage = await sp.GetRequiredService<ICrossPartitionStorageFactory>()
+            .GetCrossPartitionStorageAsync(StorageInstanceId.Default, Ct.None);
+
         const string clientId = "coordinated_client";
-        const string subjectId = "sub_pool1_gap";
-        const string sessionId = "sid_pool1_gap";
-        const string grantKey = "grant_pool1_gap";
+        const string subjectId = "sub_expiring";
+        const string sessionId = "sid_expiring";
+        const string grantKey = "grant_expiring";
 
-        // Write the client to pool 1 only.
         var clientDso = BuildMinimalClientDso(clientId, coordinateLifetime: true);
-        await pool1Storage.CreateAsync(
+        await partitionedStorage.CreateAsync(
             UuidV7.New(),
             clientDso,
             [DataStorageKey.Create(ClientIdDskV1.Create(clientId))],
@@ -241,7 +227,6 @@ public class OutboxProcessorIntegrationTests
             [],
             Ct.None);
 
-        // Write a refresh-token grant to pool 1 only.
         var grantId = UuidV7.New();
         var grantDso = new PersistedGrantDso.V1
         {
@@ -255,7 +240,7 @@ public class OutboxProcessorIntegrationTests
             ExpirationTicks = DateTime.UtcNow.AddHours(1).Ticks,
             Data = "{}"
         };
-        await pool1Storage.CreateAsync(
+        await partitionedStorage.CreateAsync(
             grantId,
             grantDso,
             [DataStorageKey.Create(PersistedGrantKeyDskV1.Create(grantKey))],
@@ -264,7 +249,6 @@ public class OutboxProcessorIntegrationTests
             [],
             Ct.None);
 
-        // Write an outbox event in pool 1 for the session expiration.
         var dataProtectionProvider = sp.GetRequiredService<IDataProtectionProvider>();
         var sessionPayload = CreateValidSessionPayloadWithClients(
             dataProtectionProvider, subjectId, sessionId, [clientId]);
@@ -292,7 +276,7 @@ public class OutboxProcessorIntegrationTests
             DsoTypeSchemaVersion = 1,
             Payload = sessionPayload
         };
-        await pool1Storage.CreateAsync(
+        await partitionedStorage.CreateAsync(
             sessionEntityId,
             sessionDso,
             [],
@@ -301,89 +285,26 @@ public class OutboxProcessorIntegrationTests
             [outboxEvent],
             Ct.None);
 
-        // Confirm the event is queued in pool 1.
-        var queuedBefore = await pool1Storage.GetOutboxEventsForSubscriberAsync(subscriberName, 100, Ct.None);
+        var queuedBefore = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, Ct.None);
         queuedBefore.Events.Count.ShouldBe(1);
-        queuedBefore.Events[0].PoolId.Value.ShouldBe(1, "event was written in pool 1");
 
-        // Build handler DI with pool-aware store factory (our fix).
-        var poolContextAccessor = new PoolContextAccessor();
-        var poolAwareStoreFactory = new DefaultStorageFactory(pooledStore, poolContextAccessor);
+        // Act: drive the processor exactly as OutboxProcessorHost does.
+        await sp.GetRequiredService<StorageOutboxProcessor>().RunProcessorAsync(Ct.None);
 
-        var handlerServices = new ServiceCollection();
-        handlerServices.AddLogging();
-        handlerServices.AddSingleton(dataProtectionProvider);
-        handlerServices.AddSingleton(_options);
-        handlerServices.AddSingleton(TimeProvider.System);
-
-        // Pool-aware store factory so repositories resolve the correct pool.
-        handlerServices.AddSingleton<IStorageFactory>(poolAwareStoreFactory);
-
-        // Real repositories backed by the pool-aware factory.
-        handlerServices.AddScoped<ClientRepository>();
-        handlerServices.AddScoped<PersistedGrantRepository>();
-
-        // Real stores backed by those repositories.
-        handlerServices.AddScoped<IClientStore, ClientStore>();
-        handlerServices.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
-
-        // Null back-channel logout service as we only care about grant removal.
-        handlerServices.AddSingleton<IBackChannelLogoutService>(new StubBackChannelLogoutClient());
-
-        // Real DefaultSessionCoordinationService with real stores.
-        handlerServices.AddScoped<ISessionCoordinationService>(svc =>
-            new DefaultSessionCoordinationService(
-                svc.GetRequiredService<IdentityServerOptions>(),
-                svc.GetRequiredService<IPersistedGrantStore>(),
-                svc.GetRequiredService<IClientStore>(),
-                svc.GetRequiredService<IBackChannelLogoutService>(),
-                TestLogger.Create<DefaultSessionCoordinationService>(),
-                svc.GetRequiredService<TimeProvider>()));
-
-        // Real SessionExpirationHandler, wrapped with PoolAwareOutboxHandler.
-        handlerServices.AddSingleton<IPoolContextAccessor>(poolContextAccessor);
-        handlerServices.AddKeyedTransient<IOutboxSubscriberHandler>(
-            subscriberName.Value,
-            (svc, _) => new PoolAwareOutboxHandler(
-                new SessionExpirationHandler(
-                    svc.GetRequiredService<IDataProtectionProvider>(),
-                    svc.GetRequiredService<ISessionCoordinationService>(),
-                    svc.GetRequiredService<IdentityServerOptions>(),
-                    svc.GetRequiredService<TimeProvider>(),
-                    TestLogger.Create<SessionExpirationHandler>()),
-                svc.GetRequiredService<IPoolContextAccessor>()));
-
-        var handlersServiceProvider = handlerServices.BuildServiceProvider();
-        var scopeFactory = handlersServiceProvider.GetRequiredService<IServiceScopeFactory>();
-
-        // The processor host reads outbox events from pool 1 (where we wrote them).
-        var subscriber = sp.GetRequiredService<IOutboxSubscriber>();
-        var host = new OutboxProcessorHost(
-            new SimpleStorageFactory(pool1Storage),
-            [subscriber],
-            scopeFactory,
-            _options,
-            TimeProvider.System,
-            _hostLogger);
-
-        // Act
-        await host.RunProcessorAsync(Ct.None);
-
-        // Assert event consumed
-        var queuedAfter = await pool1Storage.GetOutboxEventsForSubscriberAsync(subscriberName, 100, Ct.None);
+        var queuedAfter = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, Ct.None);
         queuedAfter.Events.Count.ShouldBe(0, "event was consumed by the processor");
 
-        // The grant in pool 1 should be removed because:
+        // The grant should be removed because:
         //   - SessionExpirationHandler called DefaultSessionCoordinationService.ProcessExpirationAsync
-        //   - ProcessExpirationAsync found the pool-1 client (via pool-aware store)
+        //   - ProcessExpirationAsync found the client
         //   - The client coordinates lifetime with user sessions
-        //   - PersistedGrantStore.RemoveAllAsync removed the pool-1 grant
-        var grantResult = await pool1Storage.TryReadAsync(
+        //   - PersistedGrantStore.RemoveAllAsync removed the grant
+        var grantResult = await partitionedStorage.TryReadAsync(
             PersistedGrantDso.EntityType,
             DataStorageKey.Create(PersistedGrantKeyDskV1.Create(grantKey)),
             Ct.None);
         grantResult.Found.ShouldBeFalse(
-            "the pool-1 persisted grant should be removed when processing a pool-1 session expiration event");
+            "the persisted grant should be removed when processing the session expiration event");
     }
 
     private static string CreateValidSessionPayloadWithClients(
@@ -509,7 +430,7 @@ public class OutboxProcessorIntegrationTests
         return builder.Build();
     }
 
-    private sealed class TestSubscriber(SubscriberName name) : IOutboxSubscriber
+    private sealed class TestSubscription(SubscriberName name) : IOutboxSubscription
     {
         public SubscriberName SubscriberName => name;
         public bool IsEnabled => true;
@@ -518,3 +439,4 @@ public class OutboxProcessorIntegrationTests
         public IReadOnlySet<int> EntityTypeIds { get; } = new HashSet<int> { 2107 };
     }
 }
+

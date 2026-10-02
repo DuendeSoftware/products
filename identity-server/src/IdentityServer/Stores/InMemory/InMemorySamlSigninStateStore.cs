@@ -60,7 +60,7 @@ public sealed class InMemorySamlSigninStateStore(
     {
         if (!_store.TryGetValue(stateId, out var existing))
         {
-            logger.LogWarning("SAML signin state {StateId} not found for update", stateId);
+            logger.SAMLSigninStateStateIdNotFoundForUpdate(stateId);
             return Task.CompletedTask;
         }
 
@@ -68,7 +68,7 @@ public sealed class InMemorySamlSigninStateStore(
         if (timeProvider.GetUtcNow().UtcDateTime > existing.ExpiresAtUtc)
         {
             _store.TryRemove(stateId, out _);
-            logger.LogWarning("SAML signin state {StateId} expired, cannot update", stateId);
+            logger.SAMLSigninStateStateIdExpiredCannotUpdate(stateId);
             return Task.CompletedTask;
         }
 

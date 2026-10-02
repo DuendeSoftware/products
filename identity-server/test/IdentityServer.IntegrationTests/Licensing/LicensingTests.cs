@@ -60,13 +60,13 @@ public class LicensingTests(WebServerFixture webApp)
         fixture => { fixture.ConfigureIdentityServer += idsrv => idsrv.AddServerSideSessions(); }, "PLT-021");
 
     [Fact]
-    public async Task AddConfigurationStore_does_not_require_dynamic_providers_entitlement()
+    public async Task AddEntityFrameworkConfigurationStore_does_not_require_dynamic_providers_entitlement()
     {
-        // Regression test: AddConfigurationStore registers an EF IIdentityProviderStore,
+        // Regression test: AddEntityFrameworkConfigurationStore registers an EF IIdentityProviderStore,
         // which previously triggered the dynamic providers license check at startup even
         // when dynamic providers were not actually in use.
         await using var fixture = new LicensingFixture(webApp);
-        fixture.ConfigureIdentityServer += idsrv => idsrv.AddConfigurationStore(options =>
+        fixture.ConfigureIdentityServer += idsrv => idsrv.AddEntityFrameworkConfigurationStore(options =>
             options.ConfigureDbContext = b => b.UseInMemoryDatabase(Guid.NewGuid().ToString()));
         fixture.Licenses = TestLicense.GetAllSkus()
             .Except(["PLT-005"])

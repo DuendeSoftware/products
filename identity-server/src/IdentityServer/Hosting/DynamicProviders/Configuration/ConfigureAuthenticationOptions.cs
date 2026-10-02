@@ -42,7 +42,7 @@ public abstract class ConfigureAuthenticationOptions<TAuthenticationOptions, TId
     {
         if (_httpContextAccessor.HttpContext == null)
         {
-            _logger.LogDebug("Failed to configure the dynamic authentication scheme \"{scheme}\" because there is no current HTTP request.", name);
+            _logger.FailedToConfigureTheDynamicAuthenticationSchemeScheme(name);
             return;
         }
 

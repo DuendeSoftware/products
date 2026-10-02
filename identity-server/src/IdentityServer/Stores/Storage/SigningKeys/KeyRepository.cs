@@ -15,8 +15,10 @@ using Duende.Storage.Pagination;
 namespace Duende.IdentityServer.Stores.Storage.SigningKeys;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class KeyRepository(IStorageFactory storageFactory)
+internal sealed class KeyRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Operational, ct);
+
     internal enum Keys
     {
         KeyId = 1
@@ -29,13 +31,13 @@ internal sealed class KeyRepository(IStorageFactory storageFactory)
 
     internal async Task<IReadOnlyCollection<SerializedKey>> LoadByUseAsync(string use, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var results = new List<SerializedKey>();
         var page = 1;
 
         while (true)
         {
-            var result = await storage.QueryAsync<KeyDso.V1>(
+            var result = await partitionedStorage.QueryAsync<KeyDso.V1>(
                 KeyDso.EntityType,
                 Fields.Use.Equals(use),
                 SortParameter.Empty,
@@ -57,9 +59,9 @@ internal sealed class KeyRepository(IStorageFactory storageFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, SerializedKey key, string use, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var dso = ModelToDso(key, use);
-        return await storage.CreateAsync(
+        return await partitionedStorage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(KeyIdDskV1.Create(key.Id))],
@@ -70,7 +72,7 @@ internal sealed class KeyRepository(IStorageFactory storageFactory)
     }
 
     internal async Task<DeleteResult> DeleteByIdAsync(string keyId, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).DeleteAsync(
+        await (await GetPartitionedStorage(ct)).DeleteAsync(
             KeyDso.EntityType,
             DataStorageKey.Create(KeyIdDskV1.Create(keyId)),
             [],

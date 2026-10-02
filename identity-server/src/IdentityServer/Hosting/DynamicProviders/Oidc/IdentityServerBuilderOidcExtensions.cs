@@ -5,6 +5,9 @@
 
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores.Storage.IdentityProviders;
+using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -30,14 +33,22 @@ public static class IdentityServerBuilderOidcExtensions
             // AddOpenIdConnect helper that we'd normally use statically on the AddAuthentication.
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
 
+            builder.Services.TryAddSchema(BuiltInSchemas.OidcProvider);
+
             return builder;
         }
 
         /// <summary>
         /// Adds the in memory OIDC provider store.
         /// </summary>
-        /// <param name="providers"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// Providers registered by multiple calls to any in-memory identity provider
+        /// registration method are accumulated rather than replacing one another. The supplied
+        /// collection is retained by reference, so callers may mutate their own collection at
+        /// runtime and have the changes observed by the store.
+        /// </remarks>
+        /// <param name="providers">The OIDC providers to register.</param>
+        /// <returns>The <see cref="IIdentityServerBuilder"/>.</returns>
         public IIdentityServerBuilder AddInMemoryOidcProviders(IEnumerable<OidcProvider> providers) => builder.AddInMemoryIdentityProviders(providers);
     }
 }

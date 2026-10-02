@@ -34,7 +34,8 @@ internal sealed class ResourceLoggerProvider(ILogger resourceLogger) : ILoggerPr
             }
 
             var message = formatter(state, exception);
-            resourceLogger.Log(logLevel, eventId, $"[{categoryName}] {message}", exception, (s, _) => s);
+            var prefixedMessage = $"[{categoryName}] {message}";
+            resourceLogger.Log(logLevel, eventId, prefixedMessage, exception, (s, _) => s);
         }
     }
 }

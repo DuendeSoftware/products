@@ -43,11 +43,11 @@ public class MutualTlsSecretParser : ISecretParser
     /// <inheritdoc/>
     public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
-        _logger.LogDebug("Start parsing for client id in post body");
+        _logger.StartParsingForClientIdInPostBody();
 
         if (!context.Request.HasApplicationFormContentType())
         {
-            _logger.LogDebug("Content type is not a form");
+            _logger.ContentTypeIsNotAFormMutualTlsSecretParser();
             return null;
         }
 
@@ -62,7 +62,7 @@ public class MutualTlsSecretParser : ISecretParser
             {
                 if (id.Length > _options.InputLengthRestrictions.ClientId)
                 {
-                    _logger.LogError("Client ID exceeds maximum length.");
+                    _logger.ClientIDExceedsMaximumLengthMutualTlsSecretParser();
                     return null;
                 }
 
@@ -70,7 +70,7 @@ public class MutualTlsSecretParser : ISecretParser
 
                 if (clientCertificate is null)
                 {
-                    _logger.LogDebug("Client certificate not present");
+                    _logger.ClientCertificateNotPresent();
                     return null;
                 }
 
@@ -83,7 +83,7 @@ public class MutualTlsSecretParser : ISecretParser
             }
         }
 
-        _logger.LogDebug("No post body found");
+        _logger.NoPostBodyFound();
         return null;
     }
 }

@@ -19,7 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Validation;
 
-internal class TokenValidator(
+internal partial class TokenValidator(
     IdentityServerOptions options,
     IIssuerNameService issuerNameService,
     IClientStore clients,
@@ -39,11 +39,11 @@ internal class TokenValidator(
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateIdentityToken");
 
-        _logger.LogDebug("Start identity token validation");
+        _logger.StartIdentityTokenValidation();
 
         if (token.Length > options.InputLengthRestrictions.Jwt)
         {
-            _logger.LogError("JWT too long");
+            _logger.JWTTooLong();
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
@@ -53,7 +53,7 @@ internal class TokenValidator(
 
             if (clientId.IsMissing())
             {
-                _logger.LogError("No clientId supplied, can't find id in identity token.");
+                _logger.NoClientIdSuppliedCanTFindIdIn();
                 return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
             }
         }
@@ -64,12 +64,12 @@ internal class TokenValidator(
         var client = await clients.FindEnabledClientByIdAsync(clientId, ct);
         if (client == null)
         {
-            _logger.LogError("Unknown or disabled client: {clientId}.", clientId);
+            _logger.UnknownOrDisabledClient(clientId);
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
         _log.ClientName = client.ClientName;
-        _logger.LogDebug("Client found: {clientId} / {clientName}", client.ClientId, client.ClientName);
+        _logger.ClientFoundForTokenValidation(client.ClientId, client.ClientName);
 
         var keys1 = await keys.GetValidationKeysAsync(ct);
         var result = await ValidateJwtAsync(token, keys1, ct, validateLifetime: validateLifetime, audience: clientId);
@@ -78,16 +78,16 @@ internal class TokenValidator(
 
         if (result.IsError)
         {
-            LogError("Error validating JWT");
+            LogInformation("Error validating JWT");
             return result;
         }
 
-        _logger.LogDebug("Calling into custom token validator: {type}", customValidator.GetType().FullName);
+        _logger.CallingIntoCustomTokenValidator(customValidator.GetType().FullName);
         var customResult = await customValidator.ValidateIdentityTokenAsync(result, ct);
 
         if (customResult.IsError)
         {
-            LogError("Custom validator failed: " + (customResult.Error ?? "unknown"));
+            LogInformation("Custom validator failed: " + (customResult.Error ?? "unknown"));
             return customResult;
         }
 
@@ -101,27 +101,52 @@ internal class TokenValidator(
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateAccessToken");
 
-        _logger.LogTrace("Start access token validation");
+        _logger.StartAccessTokenValidation();
 
         _log.ExpectedScope = expectedScope;
         _log.ValidateLifetime = true;
 
         TokenValidationResult result;
 
-        if (token.Contains('.', StringComparison.InvariantCulture))
-        {
-            if (token.Length > options.InputLengthRestrictions.Jwt)
-            {
-                _logger.LogError("JWT too long");
+        // Distinguish JWTs from reference tokens by looking for '.', but bound the scan.
+        // Scanning the whole string would let an attacker send an arbitrarily long token with
+        // no '.' and force a full scan before any length check could reject it.
+        //
+        // Scanning only the first maxLength characters is safe: if the token is longer than
+        // that it exceeds *both* limits, so it is rejected below whichever way we classify it.
+        // Within maxLength the window is the entire token, so classification is exact.
+        var restrictions = options.InputLengthRestrictions;
+        var maxLength = Math.Max(restrictions.Jwt, restrictions.TokenHandle);
+        // Clamp to >= 0 so a misconfigured negative restriction cannot make AsSpan throw
+        // before the length check below rejects the token.
+        var scanLength = Math.Clamp(maxLength, 0, token.Length);
+        var isJwt = token.AsSpan(0, scanLength).Contains('.');
 
-                return new TokenValidationResult
-                {
-                    IsError = true,
-                    Error = OidcConstants.ProtectedResourceErrors.InvalidToken,
-                    ErrorDescription = "Token too long"
-                };
+        if (token.Length > (isJwt ? restrictions.Jwt : restrictions.TokenHandle))
+        {
+            // These two messages are the only externally observable difference between the
+            // JWT and reference-token rejection paths (Error and ErrorDescription are
+            // identical for both), so a test asserts on them to prove the scan above stays
+            // within maxLength. Changing the wording will break that test.
+            if (isJwt)
+            {
+                LogJwtTooLong();
+            }
+            else
+            {
+                LogTokenHandleTooLong();
             }
 
+            return new TokenValidationResult
+            {
+                IsError = true,
+                Error = OidcConstants.ProtectedResourceErrors.InvalidToken,
+                ErrorDescription = "Token too long"
+            };
+        }
+
+        if (isJwt)
+        {
             _log.AccessTokenType = nameof(AccessTokenType.Jwt);
             result = await ValidateJwtAsync(
                 token,
@@ -130,18 +155,6 @@ internal class TokenValidator(
         }
         else
         {
-            if (token.Length > options.InputLengthRestrictions.TokenHandle)
-            {
-                _logger.LogError("token handle too long");
-
-                return new TokenValidationResult
-                {
-                    IsError = true,
-                    Error = OidcConstants.ProtectedResourceErrors.InvalidToken,
-                    ErrorDescription = "Token too long"
-                };
-            }
-
             _log.AccessTokenType = nameof(AccessTokenType.Reference);
             result = await ValidateReferenceAccessTokenAsync(token, ct);
         }
@@ -161,7 +174,7 @@ internal class TokenValidator(
             var client = await clients.FindEnabledClientByIdAsync(clientClaim.Value, ct);
             if (client == null)
             {
-                _logger.LogError("Client deleted or disabled: {clientId}", clientClaim.Value);
+                _logger.ClientDeletedOrDisabled(clientClaim.Value);
 
                 result.IsError = true;
                 result.Error = OidcConstants.ProtectedResourceErrors.InvalidToken;
@@ -183,14 +196,20 @@ internal class TokenValidator(
                     .AddClaim(new Claim(JwtClaimTypes.ReferenceTokenId, result.ReferenceTokenId));
             }
 
-            var resultClient = result.Client ?? throw new NullReferenceException("result.Client is null");
+            if (result.Client == null)
+            {
+                LogInformation("Access token has no associated client");
+                return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
+            }
+
+            var resultClient = result.Client;
             var isActiveCtx = new IsActiveContext(principal, resultClient,
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
             await profile.IsActiveAsync(isActiveCtx, ct);
 
             if (isActiveCtx.IsActive == false)
             {
-                _logger.LogError("User marked as not active: {subject}", subClaim.Value);
+                _logger.UserMarkedAsNotActive(subClaim.Value);
 
                 result.IsError = true;
                 result.Error = OidcConstants.ProtectedResourceErrors.InvalidToken;
@@ -213,7 +232,7 @@ internal class TokenValidator(
 
                 if (!sessionResult)
                 {
-                    _logger.LogError("Server-side session invalid for subject Id {subjectId} and session Id {sessionId}.", sub, sid);
+                    _logger.ServerSideSessionInvalidForSubjectIdAnd(sub, sid);
                     return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
                 }
             }
@@ -226,17 +245,17 @@ internal class TokenValidator(
                 c.Type == JwtClaimTypes.Scope && c.Value == expectedScope);
             if (scope == null)
             {
-                LogError($"Checking for expected scope {expectedScope} failed");
+                LogInformation($"Checking for expected scope {expectedScope} failed");
                 return Invalid(OidcConstants.ProtectedResourceErrors.InsufficientScope);
             }
         }
 
-        _logger.LogDebug("Calling into custom token validator: {type}", customValidator.GetType().FullName);
+        _logger.CallingIntoCustomTokenValidatorTokenValidator(customValidator.GetType().FullName);
         var customResult = await customValidator.ValidateAccessTokenAsync(result, ct);
 
         if (customResult.IsError)
         {
-            LogError("Custom validator failed: " + (customResult.Error ?? "unknown"));
+            LogInformation("Custom validator failed: " + (customResult.Error ?? "unknown"));
             return customResult;
         }
 
@@ -284,14 +303,12 @@ internal class TokenValidator(
         {
             if (result.Exception is SecurityTokenExpiredException expiredException)
             {
-                _logger.LogInformation(expiredException, "JWT token validation error: {exception}",
-                    expiredException.Message);
+                _logger.JWTTokenValidationErrorTokenValidator(expiredException, expiredException.Message);
                 return Invalid(OidcConstants.ProtectedResourceErrors.ExpiredToken);
             }
             else
             {
-                _logger.LogError(result.Exception, "JWT token validation error: {exception}",
-                    result.Exception.Message);
+                _logger.JWTTokenValidationErrorTokenValidator2(result.Exception, result.Exception.Message);
                 return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
             }
         }
@@ -313,7 +330,7 @@ internal class TokenValidator(
             client = await clients.FindEnabledClientByIdAsync(clientId.Value, ct);
             if (client == null)
             {
-                LogError($"Client deleted or disabled: {clientId}");
+                LogInformation($"Client deleted or disabled: {clientId}");
                 return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
             }
         }
@@ -354,13 +371,13 @@ internal class TokenValidator(
 
         if (token == null)
         {
-            LogError("Invalid reference token.");
+            LogInformation("Invalid reference token.");
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
         if (token.CreationTime.HasExceeded(token.Lifetime, timeProvider.GetUtcNow().UtcDateTime))
         {
-            LogError("Token expired.");
+            LogInformation("Token expired.");
 
             await referenceTokenStore.RemoveReferenceTokenAsync(tokenHandle, ct);
             return Invalid(OidcConstants.ProtectedResourceErrors.ExpiredToken);
@@ -375,7 +392,7 @@ internal class TokenValidator(
 
         if (client == null)
         {
-            LogError($"Client deleted or disabled: {token.ClientId}");
+            LogInformation($"Client deleted or disabled: {token.ClientId}");
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
@@ -434,7 +451,7 @@ internal class TokenValidator(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Malformed JWT token: {exception}", ex.Message);
+            _logger.MalformedJWTToken(ex, ex.Message);
             return null;
         }
     }
@@ -445,7 +462,13 @@ internal class TokenValidator(
         Error = error
     };
 
-    private void LogError(string message) => _logger.LogError("{Message}:{@logMessage}", message, _log);
+    private void LogInformation(string message) => _logger.LogMessageTokenValidator(message, _log);
 
-    private void LogSuccess() => _logger.LogDebug("Token validation success:{@logMessage}", _log);
+    private void LogSuccess() => _logger.TokenValidationSuccess(_log);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "JWT too long")]
+    private partial void LogJwtTooLong();
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "token handle too long")]
+    private partial void LogTokenHandleTooLong();
 }

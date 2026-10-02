@@ -110,13 +110,13 @@ public class DynamicClientRegistrationEndpoint
             var document = await request.ReadFromJsonAsync<DynamicClientRegistrationRequest>();
             if (document == null)
             {
-                _logger.LogDebug("Dynamic client registration request body cannot be null");
+                _logger.DynamicClientRegistrationRequestBodyNull();
             }
             return document;
         }
         catch (JsonException ex)
         {
-            _logger.LogDebug(ex, "Failed to parse dynamic client registration request body");
+            _logger.DynamicClientRegistrationRequestBodyParseFailed(ex);
             return default;
         }
     }

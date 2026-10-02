@@ -4,12 +4,13 @@
 #nullable enable
 
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.IntegrationTests.Admin.Clients;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
@@ -18,6 +19,8 @@ using Duende.Storage.Querying;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -25,22 +28,6 @@ public sealed class ClientAdminTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-
-    private IClientAdmin NewAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IClientAdmin>();
-    }
-
-    private IClientStore NewClientStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IClientStore>();
-    }
 
     private async Task<ClientId> CreateClientAsync(IClientAdmin admin, Ct ct)
     {
@@ -54,7 +41,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_client_and_get_by_id_round_trips_all_fields()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient
         {
             ClientId = $"client_{Guid.NewGuid():N}",
@@ -142,7 +129,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_client_and_get_by_client_id_round_trips()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = $"client_{Guid.NewGuid():N}";
         var client = new CreateClient
         {
@@ -162,7 +149,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_client_returns_storage_id_and_version()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
 
         var result = await admin.CreateAsync(client, _ct);
@@ -176,7 +163,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_duplicate_client_id_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = $"client_{Guid.NewGuid():N}";
         var client = new CreateClient { ClientId = clientId };
 
@@ -192,7 +179,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_client_changes_applied_on_read()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = $"client_{Guid.NewGuid():N}";
         var client = new CreateClient
         {
@@ -225,7 +212,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_client_increments_version()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(client, _ct);
@@ -243,7 +230,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_with_wrong_version_returns_version_conflict()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(client, _ct);
@@ -263,7 +250,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_nonexistent_client_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var nonExistentId = ClientId.New();
         var client = new UpdateClient { ClientId = $"client_{Guid.NewGuid():N}" };
 
@@ -313,7 +300,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         // request bodies. If the JSON contains explicit nulls for list properties,
         // System.Text.Json overwrites the C# default initializers with null.
         // The mapping code must handle this gracefully via null coalescing.
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = $"client_{Guid.NewGuid():N}";
         var createResult = await admin.CreateAsync(
             new CreateClient
@@ -395,7 +382,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     {
         // Same scenario as the update test: a CreateClient deserialized from JSON
         // with explicit null list properties should be handled gracefully.
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = $"client_{Guid.NewGuid():N}";
         var json = $$"""
             {
@@ -431,7 +418,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_client_then_get_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(client, _ct);
@@ -447,7 +434,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_nonexistent_client_is_idempotent()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var nonExistentId = ClientId.New();
 
         var result = await admin.DeleteAsync(nonExistentId, _ct);
@@ -458,7 +445,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_empty_client_id_returns_required_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient { ClientId = "" };
 
         var result = await admin.CreateAsync(client, _ct);
@@ -473,7 +460,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [InlineData("   ")]
     public async Task create_with_empty_client_name_returns_validation_error(string clientName)
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient
         {
             ClientId = $"client_{Guid.NewGuid():N}",
@@ -490,7 +477,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_grant_type_containing_spaces_returns_validation_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient
         {
             ClientId = $"client_{Guid.NewGuid():N}",
@@ -507,7 +494,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_duplicate_grant_types_returns_validation_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient
         {
             ClientId = $"client_{Guid.NewGuid():N}",
@@ -527,7 +514,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [InlineData(GrantType.AuthorizationCode, GrantType.Hybrid)]
     public async Task create_with_invalid_grant_type_combo_returns_error(string grantType1, string grantType2)
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient
         {
             ClientId = $"client_{Guid.NewGuid():N}",
@@ -547,7 +534,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_client_preserves_existing_secrets()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var client = new CreateClient
         {
             ClientId = $"client_{Guid.NewGuid():N}",
@@ -591,14 +578,16 @@ public sealed class ClientAdminTests : IAsyncLifetime
 
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
+                storage.AddSqlite(opt =>
                     opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddInMemoryDataExtensionSchemas([])
             .AddClientConfigurationValidator<RejectAllClientsValidator>();
 
         await using var provider = services.BuildServiceProvider();
 
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         using var scope = provider.CreateScope();
@@ -614,7 +603,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_hashes_value_sha256()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = await CreateClientAsync(admin, _ct);
 
         const string plaintext = "my-secret-value";
@@ -635,7 +624,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         var getResult = await admin.GetAsync(clientId, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var clientStore = NewClientStore();
+        var clientStore = _fixture.ClientStore;
         var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
         client.ShouldNotBeNull();
         client.ClientSecrets.ShouldHaveSingleItem();
@@ -645,7 +634,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_hashes_value_sha512()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = await CreateClientAsync(admin, _ct);
 
         const string plaintext = "sha512-secret";
@@ -668,7 +657,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         var getResult = await admin.GetAsync(clientId, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var clientStore = NewClientStore();
+        var clientStore = _fixture.ClientStore;
         var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
         client.ShouldNotBeNull();
         client.ClientSecrets.ShouldHaveSingleItem();
@@ -676,9 +665,463 @@ public sealed class ClientAdminTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task create_secret_with_custom_type_hashes_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        const string plaintext = "custom-type-secret-value";
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = plaintext,
+                Type = "CustomFoo"
+            },
+            _ct);
+
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var expectedHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintext)));
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        client.ClientSecrets.First().Value.ShouldBe(expectedHash);
+    }
+
+    [Fact]
+    public async Task create_client_with_x509_thumbprint_secret_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        const string thumbprint = "E1F2A3B4C5D6E7F8091A2B3C4D5E6F708192A3B4";
+
+        var result = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = $"client_{Guid.NewGuid():N}",
+                ClientSecrets =
+                [
+                    new CreateClientSecret
+                    {
+                        PlaintextValue = thumbprint,
+                        Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint
+                    }
+                ]
+            },
+            _ct);
+        result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
+
+        var getResult = await admin.GetAsync(result.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(thumbprint);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(thumbprint))));
+    }
+
+    [Fact]
+    public async Task create_secret_with_x509_thumbprint_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        const string thumbprint = "E1F2A3B4C5D6E7F8091A2B3C4D5E6F708192A3B4";
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = thumbprint,
+                Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint
+            },
+            _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(thumbprint);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(thumbprint))));
+    }
+
+    [Fact]
+    public async Task create_client_with_x509_name_secret_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        const string subjectName = "CN=test.example.com";
+
+        var result = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = $"client_{Guid.NewGuid():N}",
+                ClientSecrets =
+                [
+                    new CreateClientSecret
+                    {
+                        PlaintextValue = subjectName,
+                        Type = IdentityServerConstants.SecretTypes.X509CertificateName
+                    }
+                ]
+            },
+            _ct);
+        result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
+
+        var getResult = await admin.GetAsync(result.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(subjectName);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(subjectName))));
+    }
+
+    [Fact]
+    public async Task create_secret_with_x509_name_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        const string subjectName = "CN=test.example.com";
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = subjectName,
+                Type = IdentityServerConstants.SecretTypes.X509CertificateName
+            },
+            _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(subjectName);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(subjectName))));
+    }
+
+    [Fact]
+    public async Task create_client_with_jwk_secret_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        using var rsa = RSA.Create(2048);
+        using var publicRsa = RSA.Create();
+        publicRsa.ImportParameters(rsa.ExportParameters(false));
+        var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(new RsaSecurityKey(publicRsa));
+        jwk.D.ShouldBeNullOrEmpty();
+        var material = System.Text.Json.JsonSerializer.Serialize(jwk);
+
+        var result = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = $"client_{Guid.NewGuid():N}",
+                ClientSecrets =
+                [
+                    new CreateClientSecret
+                    {
+                        PlaintextValue = material,
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey
+                    }
+                ]
+            },
+            _ct);
+        result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
+
+        var getResult = await admin.GetAsync(result.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(material);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(material))));
+    }
+
+    [Fact]
+    public async Task create_secret_with_jwk_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        using var rsa = RSA.Create(2048);
+        using var publicRsa = RSA.Create();
+        publicRsa.ImportParameters(rsa.ExportParameters(false));
+        var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(new RsaSecurityKey(publicRsa));
+        jwk.D.ShouldBeNullOrEmpty();
+        var material = System.Text.Json.JsonSerializer.Serialize(jwk);
+
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = material,
+                Type = IdentityServerConstants.SecretTypes.JsonWebKey
+            },
+            _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(material);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(material))));
+    }
+
+    [Fact]
+    public async Task create_client_with_x509_base64_secret_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        using var cert = TestCert.Load();
+        var material = Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+
+        var result = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = $"client_{Guid.NewGuid():N}",
+                ClientSecrets =
+                [
+                    new CreateClientSecret
+                    {
+                        PlaintextValue = material,
+                        Type = IdentityServerConstants.SecretTypes.X509CertificateBase64
+                    }
+                ]
+            },
+            _ct);
+        result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
+
+        var getResult = await admin.GetAsync(result.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(material);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(material))));
+    }
+
+    [Fact]
+    public async Task create_secret_with_x509_base64_stores_raw_value()
+    {
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        using var cert = TestCert.Load();
+        var material = Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = material,
+                Type = IdentityServerConstants.SecretTypes.X509CertificateBase64
+            },
+            _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+        client.ClientSecrets.ShouldHaveSingleItem();
+        var value = client.ClientSecrets.First().Value;
+        value.ShouldBe(material);
+        value.ShouldNotBe(Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(material))));
+    }
+
+    [Fact]
+    public async Task x509_thumbprint_secret_created_with_client_validates_successfully()
+    {
+        using var cert = TestCert.Load();
+        var admin = _fixture.ClientAdmin;
+
+        var result = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = $"client_{Guid.NewGuid():N}",
+                ClientSecrets =
+                [
+                    new CreateClientSecret
+                    {
+                        PlaintextValue = cert.Thumbprint,
+                        Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint
+                    }
+                ]
+            },
+            _ct);
+        result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
+
+        var getResult = await admin.GetAsync(result.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+
+        var validator = new X509ThumbprintSecretValidator(new Logger<X509ThumbprintSecretValidator>(new LoggerFactory()));
+        var parsedSecret = new ParsedSecret
+        {
+            Id = client.ClientId,
+            Credential = cert,
+            Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
+        };
+
+        var validationResult = await validator.ValidateAsync(client.ClientSecrets, parsedSecret, _ct);
+
+        validationResult.Success.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task x509_thumbprint_secret_added_to_client_validates_successfully()
+    {
+        using var cert = TestCert.Load();
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = cert.Thumbprint,
+                Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint
+            },
+            _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+
+        var validator = new X509ThumbprintSecretValidator(new Logger<X509ThumbprintSecretValidator>(new LoggerFactory()));
+        var parsedSecret = new ParsedSecret
+        {
+            Id = client.ClientId,
+            Credential = cert,
+            Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
+        };
+
+        var validationResult = await validator.ValidateAsync(client.ClientSecrets, parsedSecret, _ct);
+
+        validationResult.Success.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task x509_name_secret_created_with_client_validates_successfully()
+    {
+        using var cert = TestCert.Load();
+        var admin = _fixture.ClientAdmin;
+
+        var result = await admin.CreateAsync(
+            new CreateClient
+            {
+                ClientId = $"client_{Guid.NewGuid():N}",
+                ClientSecrets =
+                [
+                    new CreateClientSecret
+                    {
+                        PlaintextValue = cert.Subject,
+                        Type = IdentityServerConstants.SecretTypes.X509CertificateName
+                    }
+                ]
+            },
+            _ct);
+        result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
+
+        var getResult = await admin.GetAsync(result.Id, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+
+        var validator = new X509NameSecretValidator(new Logger<X509NameSecretValidator>(new LoggerFactory()));
+        var parsedSecret = new ParsedSecret
+        {
+            Id = client.ClientId,
+            Credential = cert,
+            Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
+        };
+
+        var validationResult = await validator.ValidateAsync(client.ClientSecrets, parsedSecret, _ct);
+
+        validationResult.Success.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task x509_name_secret_added_to_client_validates_successfully()
+    {
+        using var cert = TestCert.Load();
+        var admin = _fixture.ClientAdmin;
+        var clientId = await CreateClientAsync(admin, _ct);
+
+        var secretResult = await admin.CreateSecretAsync(
+            clientId,
+            new CreateClientSecret
+            {
+                PlaintextValue = cert.Subject,
+                Type = IdentityServerConstants.SecretTypes.X509CertificateName
+            },
+            _ct);
+        secretResult.IsSuccess.ShouldBeTrue($"CreateSecret failed: {secretResult}");
+
+        var getResult = await admin.GetAsync(clientId, _ct);
+        getResult.Found.ShouldBeTrue();
+
+        var clientStore = _fixture.ClientStore;
+        var client = await clientStore.FindClientByIdAsync(getResult.Item.ClientId, _ct);
+        client.ShouldNotBeNull();
+
+        var validator = new X509NameSecretValidator(new Logger<X509NameSecretValidator>(new LoggerFactory()));
+        var parsedSecret = new ParsedSecret
+        {
+            Id = client.ClientId,
+            Credential = cert,
+            Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
+        };
+
+        var validationResult = await validator.ValidateAsync(client.ClientSecrets, parsedSecret, _ct);
+
+        validationResult.Success.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task get_client_does_not_expose_secret_value()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = await CreateClientAsync(admin, _ct);
 
         await admin.CreateSecretAsync(
@@ -705,7 +1148,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_with_empty_value_returns_required_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = await CreateClientAsync(admin, _ct);
 
         var result = await admin.CreateSecretAsync(clientId, new CreateClientSecret { PlaintextValue = "" }, _ct);
@@ -718,7 +1161,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_secret_for_nonexistent_client_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var nonExistentId = UuidV7.New().Value;
 
         var result = await admin.CreateSecretAsync(
@@ -738,7 +1181,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_secret_removes_it_from_client()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = await CreateClientAsync(admin, _ct);
 
         var secretResult = await admin.CreateSecretAsync(
@@ -764,7 +1207,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_nonexistent_secret_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
         var clientId = await CreateClientAsync(admin, _ct);
 
         var result = await admin.DeleteSecretAsync(clientId, SecretId.New(), _ct);
@@ -778,7 +1221,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     public async Task query_with_no_filter_returns_all()
     {
         var prefix = $"q_{Guid.NewGuid():N}_";
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
 
         await CreateQueryClient(admin, prefix + "a");
         await CreateQueryClient(admin, prefix + "b");
@@ -798,7 +1241,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     public async Task query_by_client_id_filter_returns_matching()
     {
         var uniquePart = $"q_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
 
         await CreateQueryClient(admin, uniquePart + "_match1");
         await CreateQueryClient(admin, uniquePart + "_match2");
@@ -818,7 +1261,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     {
         var enabledId = $"q_enabled_{Guid.NewGuid():N}";
         var disabledId = $"q_disabled_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
 
         await CreateQueryClient(admin, enabledId, enabled: true);
         await CreateQueryClient(admin, disabledId, enabled: false);
@@ -845,7 +1288,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     {
         var withCodeId = $"q_code_{Guid.NewGuid():N}";
         var withCcId = $"q_cc_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
 
         await CreateQueryClient(admin, withCodeId, grantTypes: [GrantType.AuthorizationCode]);
         await CreateQueryClient(admin, withCcId, grantTypes: [GrantType.ClientCredentials]);
@@ -865,7 +1308,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
         var uniqueScope = $"scope_{Guid.NewGuid():N}";
         var withScopeId = $"q_withscope_{Guid.NewGuid():N}";
         var withoutScopeId = $"q_noscope_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
 
         await CreateQueryClient(admin, withScopeId, scopes: [uniqueScope, "api1"]);
         await CreateQueryClient(admin, withoutScopeId, scopes: ["api1", "api2"]);
@@ -883,7 +1326,7 @@ public sealed class ClientAdminTests : IAsyncLifetime
     public async Task query_with_pagination_returns_correct_page()
     {
         var paginationPrefix = $"q_page_{Guid.NewGuid():N}_";
-        var admin = NewAdmin();
+        var admin = _fixture.ClientAdmin;
 
         for (var i = 0; i < 5; i++)
         {
@@ -946,13 +1389,5 @@ public sealed class ClientAdminTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

@@ -67,8 +67,10 @@ public sealed class StorageBasedIdentityServerFixture : IAsyncLifetime
                         ConfigureIdentityServerOptions(options);
                     })
                     .AddStorage(storage =>
-                        storage.AddSqliteStore(opt =>
+                        storage.AddSqlite(opt =>
                             opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"))
+                    .AddConfigurationStorage()
+                    .AddOperationalStorage()
                     .AddInMemoryDataExtensionSchemas([])
 
                     // Overriding the storage-backed IResourceStore with an in-memory one is an
@@ -77,7 +79,8 @@ public sealed class StorageBasedIdentityServerFixture : IAsyncLifetime
                     // supplied together so the in-memory IResourceStore has everything this
                     // fixture's tests need.
                     .AddInMemoryApiScopes([new ApiScope("scope1", "Scope 1")])
-                    .AddInMemoryIdentityResources([new Models.IdentityResources.OpenId()]);
+                    .AddInMemoryIdentityResources([new Models.IdentityResources.OpenId()])
+                    .AddJwtBearerClientAuthentication();
 
                 ConfigureIdentityServer(identityServer);
             },
@@ -90,7 +93,7 @@ public sealed class StorageBasedIdentityServerFixture : IAsyncLifetime
         await _server.StartAsync();
 
         // Run schema migration
-        var schema = _server.GetRequiredService<IDatabaseSchema>();
+        var schema = _server.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(ct);
 
         // Create a persistent admin scope for this fixture's lifetime

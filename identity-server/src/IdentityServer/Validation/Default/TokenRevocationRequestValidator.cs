@@ -41,17 +41,17 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationRequestValidator.ValidateRequest");
 
-        _logger.LogTrace("ValidateRequestAsync called");
+        _logger.ValidateRequestAsyncCalled();
 
         if (parameters == null)
         {
-            _logger.LogError("no parameters passed");
+            _logger.NoParametersPassed();
             throw new ArgumentNullException(nameof(parameters));
         }
 
         if (client == null)
         {
-            _logger.LogError("no client passed");
+            _logger.NoClientPassed();
             throw new ArgumentNullException(nameof(client));
         }
 
@@ -61,7 +61,7 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
         var token = parameters.Get("token");
         if (token.IsMissing())
         {
-            _logger.LogError("No token found in request");
+            _logger.NoTokenFoundInRequest();
             return Task.FromResult(new TokenRevocationRequestValidationResult
             {
                 IsError = true,
@@ -84,18 +84,18 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
         {
             if (Constants.SupportedTokenTypeHints.Contains(hint))
             {
-                _logger.LogDebug("Token type hint found in request: {tokenTypeHint}", hint);
+                _logger.TokenTypeHintFoundInRequestTokenRevocationRequestValidator(hint);
                 result.TokenTypeHint = hint;
             }
             else
             {
-                _logger.LogError("Invalid token type hint: {tokenTypeHint}", hint);
+                _logger.InvalidTokenTypeHint(hint);
                 result.IsError = true;
                 result.Error = Constants.RevocationErrors.UnsupportedTokenType;
             }
         }
 
-        _logger.LogDebug("ValidateRequestAsync result: {validateRequestResult}", result);
+        _logger.ValidateRequestAsyncResult(result);
 
         return Task.FromResult(result);
     }

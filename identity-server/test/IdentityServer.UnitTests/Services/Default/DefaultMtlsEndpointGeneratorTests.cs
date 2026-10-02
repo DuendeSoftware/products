@@ -62,4 +62,41 @@ public class DefaultMtlsEndpointGeneratorTests
 
         result.ShouldBe("https://mtls.identity.example.com/connect/token");
     }
+
+    [Theory]
+    [MemberData(nameof(MtlsCapableRoutes))]
+    public void GetMtlsEndpointPath_PathBased_WithNonEmptyBasePath_ReturnsPathBasedMtlsUrlUnderBasePath(string route, string endpointName)
+    {
+        var serverUrls = new MockServerUrls { Origin = Origin, BasePath = "/t/space-a" };
+        var options = CreateOptions(""); // path-based
+
+        var generator = new DefaultMtlsEndpointGenerator(serverUrls, options);
+
+        var result = generator.GetMtlsEndpointPath(route);
+
+        result.ShouldBe($"https://identity.example.com/t/space-a/connect/mtls/{endpointName}");
+    }
+
+    [Theory]
+    [MemberData(nameof(MtlsCapableRoutes))]
+    public void GetMtlsEndpointPath_SubDomainBased_WithNonEmptyBasePath_ReturnsSubDomainBasedMtlsUrlUnderBasePath(string route, string endpointName)
+    {
+        var serverUrls = new MockServerUrls { Origin = Origin, BasePath = "/t/space-a" };
+        var options = CreateOptions("mtls"); // sub-domain based
+
+        var generator = new DefaultMtlsEndpointGenerator(serverUrls, options);
+
+        var result = generator.GetMtlsEndpointPath(route);
+
+        result.ShouldBe($"https://mtls.identity.example.com/t/space-a/connect/{endpointName}");
+    }
+
+    public static TheoryData<string, string> MtlsCapableRoutes() => new()
+    {
+        { IdentityServerConstants.ProtocolRoutePaths.Token, "token" },
+        { IdentityServerConstants.ProtocolRoutePaths.Revocation, "revocation" },
+        { IdentityServerConstants.ProtocolRoutePaths.Introspection, "introspect" },
+        { IdentityServerConstants.ProtocolRoutePaths.DeviceAuthorization, "deviceauthorization" },
+        { IdentityServerConstants.ProtocolRoutePaths.PushedAuthorization, "par" },
+    };
 }

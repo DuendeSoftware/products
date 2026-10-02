@@ -64,12 +64,12 @@ internal static class IdentityServerExtensions
         })
             .AddTestUsers(TestUsers.Users)
             // this adds the config data from DB (clients, resources, CORS)
-            .AddConfigurationStore(options =>
+            .AddEntityFrameworkConfigurationStore(options =>
             {
                 options.ConfigureDbContext = builder => builder.UseSqlServer(connectionString);
             })
             // this adds the operational data from DB (codes, tokens, consents)
-            .AddOperationalStore(options =>
+            .AddEntityFrameworkOperationalStore(options =>
             {
                 options.ConfigureDbContext = builder => builder.UseSqlServer(connectionString);
 

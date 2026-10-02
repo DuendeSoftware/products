@@ -123,7 +123,7 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
                 var message = requestContext.Message;
                 if (message.Binding != SamlConstants.Bindings.HttpRedirect)
                 {
-                    _logger.LogDebug("Unsupported SAML Binding: {Binding}", message.Binding);
+                    _logger.UnsupportedSAMLBinding(message.Binding);
                     continue;
                 }
 

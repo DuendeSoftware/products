@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="Duende.Extensions.Caching.Memory" />
+    <PackageReference Include="Duende.Spaces" />
+    <PackageReference Include="Duende.Storage.PostgreSql" />
     <PackageReference Include="Duende.Storage.Sqlite" />
     <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />

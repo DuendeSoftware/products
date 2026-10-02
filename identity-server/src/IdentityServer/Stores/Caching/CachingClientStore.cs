@@ -4,8 +4,8 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.Default;
+using Duende.Spaces;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -28,17 +28,17 @@ public class CachingClientStore<T> : IClientStore
     /// <param name="policy">The cache policy.</param>
     /// <param name="options">The options.</param>
     /// <param name="inner">The inner.</param>
-    /// <param name="cache">The cache.</param>
+    /// <param name="cacheFactory">The factory used to resolve the configuration store cache.</param>
     public CachingClientStore(
         CachePolicy<Client> policy,
         IdentityServerOptions options,
         T inner,
-        [FromKeyedServices(ServiceProviderKeys.ConfigurationStoreCache)] HybridCache cache)
+        IHybridCacheFactory cacheFactory)
     {
         _policy = policy;
         _options = options;
         _inner = inner;
-        _cache = cache;
+        _cache = cacheFactory.GetCache(ServiceProviderKeys.ConfigurationStoreCache);
     }
 
     /// <summary>

@@ -3,6 +3,8 @@
 
 
 using System.Text;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Http;
 using UnitTests.Validation.Setup;
 
@@ -86,7 +88,7 @@ public class ClientSecretValidation
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task implicit_client_and_client_creds_without_secret_should_not_be_able_to_authenticate()
+    public async Task implicit_and_client_credentials_client_without_secret_should_fail_validation()
     {
         var validator = Factory.CreateClientSecretValidator();
 
@@ -99,5 +101,50 @@ public class ClientSecretValidation
         var result = await validator.ValidateAsync(context, default);
 
         result.IsError.ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_and_client_credentials_client_with_invalid_secret_should_fail_validation()
+    {
+        var client = new Client
+        {
+            ClientId = "implicit_and_client_credentials",
+            AllowedGrantTypes = GrantTypes.ImplicitAndClientCredentials,
+            RequireClientSecret = true,
+            ClientSecrets = { new Secret("secret".Sha256()) }
+        };
+        var validator = Factory.CreateClientSecretValidator(new InMemoryClientStore([client]));
+        var context = new DefaultHttpContext();
+        var body = "client_id=implicit_and_client_credentials&client_secret=invalid";
+        context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+        context.Request.ContentType = "application/x-www-form-urlencoded";
+
+        var result = await validator.ValidateAsync(context, default);
+
+        result.IsError.ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_and_client_credentials_client_with_valid_secret_should_pass_validation()
+    {
+        var client = new Client
+        {
+            ClientId = "implicit_and_client_credentials",
+            AllowedGrantTypes = GrantTypes.ImplicitAndClientCredentials,
+            RequireClientSecret = true,
+            ClientSecrets = { new Secret("secret".Sha256()) }
+        };
+        var validator = Factory.CreateClientSecretValidator(new InMemoryClientStore([client]));
+        var context = new DefaultHttpContext();
+        var body = "client_id=implicit_and_client_credentials&client_secret=secret";
+        context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+        context.Request.ContentType = "application/x-www-form-urlencoded";
+
+        var result = await validator.ValidateAsync(context, default);
+
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("implicit_and_client_credentials");
     }
 }

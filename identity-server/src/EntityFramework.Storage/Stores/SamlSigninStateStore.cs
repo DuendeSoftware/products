@@ -75,11 +75,11 @@ public class SamlSigninStateStore : ISamlSigninStateStore
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            Logger.LogWarning("exception storing SAML signin state {stateId} in database: {error}", stateId, ex.Message);
+            Log.ExceptionStoringSamlSigninStateValueInDatabase(Logger, stateId, ex.Message);
             throw;
         }
 
-        Logger.LogDebug("stored SAML signin state {stateId} in database", stateId);
+        Log.StoredSamlSigninStateValueInDatabase(Logger, stateId);
         return stateId;
     }
 
@@ -95,7 +95,8 @@ public class SamlSigninStateStore : ISamlSigninStateStore
             .SingleOrDefaultAsync(ct);
 
         var model = entity.ToModel(Serializer);
-        Logger.LogDebug("SAML signin state {stateId} found in database: {found}", stateId, model != null);
+        var found = model != null;
+        Log.SamlSigninStateValueFoundInDatabaseValue(Logger, stateId, found);
         return model;
     }
 
@@ -108,7 +109,7 @@ public class SamlSigninStateStore : ISamlSigninStateStore
             .Where(x => x.StateId == stateId)
             .ExecuteDeleteAsync(ct);
 
-        Logger.LogDebug("removed SAML signin state {stateId} from database", stateId);
+        Log.RemovedSamlSigninStateValueFromDatabase(Logger, stateId);
     }
 
     /// <inheritdoc />
@@ -125,11 +126,11 @@ public class SamlSigninStateStore : ISamlSigninStateStore
 
         if (updated == 0)
         {
-            Logger.LogWarning("SAML signin state {stateId} not found or expired for update", stateId);
+            Log.SamlSigninStateValueNotFoundOrExpired(Logger, stateId);
         }
         else
         {
-            Logger.LogDebug("updated SAML signin state {stateId} in database", stateId);
+            Log.UpdatedSamlSigninStateValueInDatabase(Logger, stateId);
         }
     }
 }

@@ -4,6 +4,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
@@ -67,7 +68,7 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
 
     private async Task HandleSamlIdpInitiatedLogoutAsync(SamlSpLogoutContext samlContext)
     {
-        _logger?.LogDebug("Processing SAML2 IdP-initiated federated signout");
+        _logger?.ProcessingSAML2IdPInitiatedFederatedSignout();
 
         // The SAML handler has already written a response (303 redirect or POST form).
         // We need to intercept it. Since we set up the notification before the binding
@@ -81,6 +82,8 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
         var userSession = _context.RequestServices.GetRequiredService<IUserSession>();
         var user = await userSession.GetUserAsync(_context.RequestAborted);
 
+        var samlLogoutCorrelationId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex);
+
         var logoutMessage = new SamlSpLogoutMessage
         {
             IdpEntityId = samlContext.IdpEntityId,
@@ -89,31 +92,34 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
             ResponseBinding = samlContext.ResponseBinding,
             ResponseDestination = samlContext.ResponseDestination,
             SubjectId = user?.GetSubjectId(),
-            SessionId = user != null ? await userSession.GetSessionIdAsync(_context.RequestAborted) : null
+            SessionId = user != null ? await userSession.GetSessionIdAsync(_context.RequestAborted) : null,
+            SamlLogoutCorrelationId = samlLogoutCorrelationId
         };
 
         var messageStore = _context.RequestServices.GetRequiredService<IMessageStore<SamlSpLogoutMessage>>();
         var timeProvider = _context.RequestServices.GetRequiredService<TimeProvider>();
-        var logoutId = await messageStore.WriteAsync(new Message<SamlSpLogoutMessage>(logoutMessage, timeProvider.GetUtcNow().UtcDateTime), _context.RequestAborted);
+        var logoutMessageHandle = await messageStore.WriteAsync(new Message<SamlSpLogoutMessage>(logoutMessage, timeProvider.GetUtcNow().UtcDateTime), _context.RequestAborted);
 
         // Check if downstream clients need notification.
-        // Pass logoutId so the end-session-callback can track SAML SP responses.
-        var iframeUrl = await _context.GetIdentityServerSignoutFrameCallbackUrlAsync(logoutId: logoutId);
+        // Pass the SAML logout correlation ID so the end-session-callback can track SAML SP responses.
+        var iframeUrl = await _context.GetIdentityServerSignoutFrameCallbackUrlAsync(samlLogoutCorrelationId: samlLogoutCorrelationId);
 
-        // Build the completion endpoint URL (needed for both paths below)
+        // Build the completion endpoint URL (needed for both paths below).
+        // The protected message store handle is passed as logoutId so the completion
+        // endpoint can look up the stored SamlSpLogoutMessage.
         var serverUrls = _context.RequestServices.GetRequiredService<IServerUrls>();
-        var completionUrl = serverUrls.BaseUrl.EnsureTrailingSlash() + SamlConstants.Defaults.SpLogoutCompletionPath.TrimStart('/') + "?logoutId=" + Uri.EscapeDataString(logoutId);
+        var completionUrl = serverUrls.BaseUrl.EnsureTrailingSlash() + SamlConstants.Defaults.SpLogoutCompletionPath.TrimStart('/') + "?logoutId=" + Uri.EscapeDataString(logoutMessageHandle);
 
         if (iframeUrl == null)
         {
             // No downstream clients — redirect to completion endpoint to send
             // the LogoutResponse back to the upstream IdP immediately.
-            _logger?.LogDebug("No downstream clients to notify, redirecting to completion endpoint");
+            _logger?.NoDownstreamClientsToNotifyRedirectingToCompletion();
             _context.Response.Redirect(completionUrl);
             return;
         }
 
-        _logger?.LogDebug("Stored SAML logout context with logoutId {LogoutId}, rendering combined page", logoutId);
+        _logger?.StoredSAMLLogoutContextRenderingCombinedPage();
 
         // Reset the response to render our combined HTML page.
         // Guard against the (unlikely) case where the SAML handler already started
@@ -122,16 +128,14 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
         // status code and Location header without writing to the body.
         if (_context.Response.HasStarted)
         {
-            _logger?.LogError("Cannot render combined logout page: response has already started. " +
-                "The upstream IdP will not receive a LogoutResponse for this session");
+            _logger?.CannotRenderCombinedLogoutPageResponseHasAlready();
             return;
         }
 
         // Validate the response destination before mutating the HTTP response.
         if (!Uri.TryCreate(samlContext.ResponseDestination, UriKind.Absolute, out var responseUri))
         {
-            _logger?.LogError("Cannot render combined logout page: ResponseDestination is not a valid URI: {Destination}",
-                samlContext.ResponseDestination);
+            _logger?.CannotRenderCombinedLogoutPageResponseDestinationIsNot(samlContext.ResponseDestination);
             return;
         }
 
@@ -202,17 +206,17 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
 
     private async Task ProcessFederatedSignOutRequestAsync()
     {
-        _logger?.LogDebug("Processing federated signout");
+        _logger?.ProcessingFederatedSignout();
 
         var iframeUrl = await _context.GetIdentityServerSignoutFrameCallbackUrlAsync();
         if (iframeUrl != null)
         {
-            _logger?.LogDebug("Rendering signout callback iframe");
+            _logger?.RenderingSignoutCallbackIframe();
             await RenderResponseAsync(iframeUrl);
         }
         else
         {
-            _logger?.LogDebug("No signout callback iframe to render");
+            _logger?.NoSignoutCallbackIframeToRender();
         }
     }
 

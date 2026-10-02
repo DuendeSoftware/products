@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Saml.Configuration;
@@ -79,6 +80,19 @@ internal sealed class SamlServiceProviderOptionsValidator : IValidateOptions<Sam
         {
             return ValidateOptionsResult.Fail(
                 $"SamlServiceProviderOptions.BindingType has an invalid value '{options.BindingType}' for scheme '{_scheme}'.");
+        }
+
+        if (!Enum.IsDefined(options.AuthnRequestSigningBehavior))
+        {
+            return ValidateOptionsResult.Fail(
+                $"SamlServiceProviderOptions.AuthnRequestSigningBehavior has an invalid value '{options.AuthnRequestSigningBehavior}' for scheme '{_scheme}'.");
+        }
+
+        if (options.AuthnRequestSigningBehavior == AuthnRequestSigningBehavior.Always &&
+            string.IsNullOrWhiteSpace(options.SpSigningCertificateBase64))
+        {
+            return ValidateOptionsResult.Fail(
+                $"SamlServiceProviderOptions.SpSigningCertificateBase64 is required when AuthnRequestSigningBehavior is Always for scheme '{_scheme}'.");
         }
 
         if (!string.IsNullOrWhiteSpace(options.IdpInitiatedCallbackUrl))

@@ -7,6 +7,7 @@ using Duende.IdentityServer.Interaction.Scenarios.ConsoleFlows;
 using Duende.IdentityServer.Interaction.Scenarios.DPoP;
 using Duende.IdentityServer.Interaction.Scenarios.MvcCode;
 using Duende.IdentityServer.Interaction.Scenarios.MvcSaml;
+using Duende.IdentityServer.Interaction.Scenarios.SamlFederatedLogout;
 using Duende.IdentityServer.Interaction.Scenarios.SamlSp;
 using Duende.IdentityServer.Interaction.Scenarios.Spaces;
 using Duende.IdentityServer.Interaction.Scenarios.TokenManagement;
@@ -38,6 +39,8 @@ builder.AddScenario(new JarJwt());
 builder.AddScenario(new JarUriJwt());
 builder.AddScenario(new MvcSamlFlow());
 builder.AddScenario(new SamlSpPostBindingFlow());
+builder.AddScenario(new SamlFederatedLogoutFlow());
+builder.AddScenario(new MixedProtocolLogoutFlow());
 builder.AddScenario(new WebSecurityBaseline());
 builder.AddScenario(new Spaces());
 

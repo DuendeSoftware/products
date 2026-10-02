@@ -6,8 +6,11 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.DynamicProviders;
+using Duende.IdentityServer.Hosting.DynamicProviders.Store;
 using Duende.IdentityServer.Models;
+using Duende.Spaces;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -47,6 +50,14 @@ public static class IdentityServerBuilderDynamicProviderExtensions
 
             builder.Services.AddSingleton<IConfigureOptions<TProviderOptions>, TConfigureOptions>();
             builder.Services.TryAddTransient<THandler>();
+
+            // IdentityServer owns the options cache for dynamic provider option types. Replacing it
+            // (registering another IOptionsMonitorCache<TProviderOptions> afterwards) disables
+            // per-space isolation of dynamic provider options.
+            builder.Services.AddSingleton<IOptionsMonitorCache<TProviderOptions>>(sp =>
+                new SpaceAwareDynamicOptionsMonitorCache<TProviderOptions>(
+                    sp.GetService<ISpaceContextAccessor>(),
+                    sp.GetRequiredService<IHttpContextAccessor>()));
 
             return builder;
         }

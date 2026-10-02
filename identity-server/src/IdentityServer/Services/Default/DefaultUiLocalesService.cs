@@ -17,7 +17,7 @@ public class DefaultUiLocalesService(IHttpContextAccessor httpContextAccessor, I
     {
         if (httpContextAccessor.HttpContext is null)
         {
-            logger.LogDebug("HttpContext is null, cannot store ui_locales for redirect.");
+            logger.HttpContextIsNullCannotStoreUiLocalesFor();
 
             return Task.CompletedTask;
         }
@@ -25,7 +25,7 @@ public class DefaultUiLocalesService(IHttpContextAccessor httpContextAccessor, I
         var cookieRequestCultureProvider = requestLocalizationOptions.Value.RequestCultureProviders.OfType<CookieRequestCultureProvider>().FirstOrDefault();
         if (cookieRequestCultureProvider is null)
         {
-            logger.LogDebug("No CookieRequestCultureProvider found, cannot store ui_locales for redirect.");
+            logger.NoCookieRequestCultureProviderFoundCannotStoreUiLocalesFor();
             return Task.CompletedTask;
         }
 
@@ -33,7 +33,7 @@ public class DefaultUiLocalesService(IHttpContextAccessor httpContextAccessor, I
         var firstSupportedCulture = GetFirstSupportedCulture(uiLocales);
         if (firstSupportedCulture is null)
         {
-            logger.LogDebug("No supported culture found based on values in ui_locales of {ui_locales}, not storing cookie.", uiLocales);
+            logger.NoSupportedCultureFoundBasedOnValuesIn(uiLocales);
             return Task.CompletedTask;
         }
 

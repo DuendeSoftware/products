@@ -41,7 +41,10 @@ internal sealed class StorageResourceStore(
         var dsos = await identityResourceRepository.FindByNamesAsync(names, ct);
         var results = dsos.Select(MapToIdentityResource).ToList();
 
-        logger.IdentityResourcesFound(LogLevel.Debug, results.Select(x => x.Name));
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.IdentityResourcesFound(LogLevel.Debug, results.Select(x => x.Name));
+        }
 
         return results;
     }
@@ -61,7 +64,10 @@ internal sealed class StorageResourceStore(
         var dsos = await apiScopeRepository.FindByNamesAsync(names, ct);
         var results = dsos.Select(MapToApiScope).ToList();
 
-        logger.ApiScopesFound(LogLevel.Debug, results.Select(x => x.Name));
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.ApiScopesFound(LogLevel.Debug, results.Select(x => x.Name));
+        }
 
         return results;
     }
@@ -81,7 +87,10 @@ internal sealed class StorageResourceStore(
         var dsos = await apiResourceRepository.FindByScopeNamesAsync(names, ct);
         var results = dsos.Select(MapToApiResource).ToList();
 
-        logger.ApiResourcesFound(LogLevel.Debug, results.Select(x => x.Name));
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.ApiResourcesFound(LogLevel.Debug, results.Select(x => x.Name));
+        }
 
         return results;
     }
@@ -103,7 +112,10 @@ internal sealed class StorageResourceStore(
 
         if (results.Count > 0)
         {
-            logger.ApiResourcesFound(LogLevel.Debug, results.Select(x => x.Name));
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.ApiResourcesFound(LogLevel.Debug, results.Select(x => x.Name));
+            }
         }
         else
         {
@@ -123,9 +135,12 @@ internal sealed class StorageResourceStore(
 
         var result = new Models.Resources(identityResources, apiResources, apiScopes);
 
-        logger.AllResourcesFound(LogLevel.Debug,
-            result.IdentityResources.Select(x => x.Name).Union(result.ApiScopes.Select(x => x.Name)),
-            result.ApiResources.Select(x => x.Name));
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.AllResourcesFound(LogLevel.Debug,
+                result.IdentityResources.Select(x => x.Name).Union(result.ApiScopes.Select(x => x.Name)),
+                result.ApiResources.Select(x => x.Name));
+        }
 
         return result;
     }

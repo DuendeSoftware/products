@@ -236,14 +236,12 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
 
         var (dso, version) = existing.Value;
 
-        var algorithm = hashAlgorithm ?? SecretHashAlgorithm.Sha256;
-        var hashedValue = HashSecret(plaintextValue, algorithm);
-        var algorithmName = algorithm == SecretHashAlgorithm.Sha512 ? "SHA512" : "SHA256";
+        var (value, algorithmName) = ShapeSecret(plaintextValue, hashAlgorithm, type);
 
         var secretId = UuidV7.New().Value;
         var newSecret = new ApiResourceDso.SecretDso(
             Id: secretId,
-            Value: hashedValue,
+            Value: value,
             Description: description,
             Expiration: expiration,
             Type: type ?? IdentityServerConstants.SecretTypes.SharedSecret,
@@ -470,5 +468,19 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             SecretHashAlgorithm.Sha512 => Convert.ToBase64String(SHA512.HashData(bytes)),
             _ => Convert.ToBase64String(SHA256.HashData(bytes))
         };
+    }
+
+    private static (string Value, string HashAlgorithm) ShapeSecret(string plaintextValue, SecretHashAlgorithm? hashAlgorithm, string? type)
+    {
+        if (type is IdentityServerConstants.SecretTypes.X509CertificateThumbprint
+            or IdentityServerConstants.SecretTypes.X509CertificateName
+            or IdentityServerConstants.SecretTypes.X509CertificateBase64
+            or IdentityServerConstants.SecretTypes.JsonWebKey)
+        {
+            return (plaintextValue, string.Empty);
+        }
+
+        var algorithm = hashAlgorithm ?? SecretHashAlgorithm.Sha256;
+        return (HashSecret(plaintextValue, algorithm), algorithm == SecretHashAlgorithm.Sha512 ? "SHA512" : "SHA256");
     }
 }

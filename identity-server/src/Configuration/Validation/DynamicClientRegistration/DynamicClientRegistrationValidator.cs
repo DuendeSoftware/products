@@ -284,7 +284,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
             if (scopes.Contains("offline_access"))
             {
                 scopes = scopes.Where(s => s != "offline_access").ToArray();
-                Logger.LogDebug("offline_access should not be passed as a scope to dynamic client registration. Use the refresh_token grant_type instead.");
+                Logger.OfflineAccessScopeIgnored();
             }
 
             foreach (var scope in scopes)
@@ -308,7 +308,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// represents that this step succeeded or failed.</returns>
     protected virtual Task<IStepResult> SetDefaultScopes(DynamicClientRegistrationContext context, Ct ct)
     {
-        Logger.LogDebug("No scopes requested for dynamic client registration, and no default scope behavior implemented. To set default scopes, extend the DynamicClientRegistrationValidator and override the SetDefaultScopes method.");
+        Logger.NoDefaultDynamicClientRegistrationScopes();
         return StepResult.Success();
     }
 
@@ -370,12 +370,12 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
                 }
                 catch (InvalidOperationException ex)
                 {
-                    Logger.LogError(ex, "Failed to parse jwk");
+                    Logger.JwkParseFailed(ex);
                     return StepResult.Failure("malformed jwk");
                 }
                 catch (JsonException ex)
                 {
-                    Logger.LogError(ex, "Failed to parse jwk");
+                    Logger.JwkParseFailed(ex);
                     return StepResult.Failure("malformed jwk");
                 }
 

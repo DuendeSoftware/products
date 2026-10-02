@@ -58,7 +58,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("UserInfoResponseGenerator.Process");
 
-        Logger.LogDebug("Creating userinfo response");
+        Logger.CreatingUserinfoResponse();
 
         // extract scopes and turn into requested claim types
         var scopes = validationResult.TokenValidationResult.Claims.Where(c => c.Type == JwtClaimTypes.Scope).Select(c => c.Value);
@@ -66,7 +66,10 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
         var validatedResources = await GetRequestedResourcesAsync(scopes, ct);
         var requestedClaimTypes = await GetRequestedClaimTypesAsync(validatedResources);
 
-        Logger.LogDebug("Requested claim types: {claimTypes}", requestedClaimTypes.ToSpaceSeparatedString());
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            Logger.RequestedClaimTypes(requestedClaimTypes.ToSpaceSeparatedString());
+        }
 
         // call profile service
         var context = new ProfileDataRequestContext(
@@ -84,12 +87,15 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
 
         if (profileClaims == null)
         {
-            Logger.LogInformation("Profile service returned no claims (null)");
+            Logger.ProfileServiceReturnedNoClaimsNull();
         }
         else
         {
             outgoingClaims.AddRange(profileClaims);
-            Logger.LogInformation("Profile service returned the following claim types: {types}", profileClaims.Select(c => c.Type).ToSpaceSeparatedString());
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.ProfileServiceReturnedTheFollowingClaimTypes(profileClaims.Select(c => c.Type).ToSpaceSeparatedString());
+            }
         }
 
         var subClaim = outgoingClaims.SingleOrDefault(x => x.Type == JwtClaimTypes.Subject);
@@ -99,7 +105,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
         }
         else if (subClaim.Value != validationResult.Subject.GetSubjectId())
         {
-            Logger.LogError("Profile service returned incorrect subject value: {sub}", subClaim);
+            Logger.ProfileServiceReturnedIncorrectSubjectValue(subClaim);
             throw new InvalidOperationException("Profile service returned incorrect subject value");
         }
 
@@ -119,8 +125,11 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
             return null;
         }
 
-        var scopeString = string.Join(' ', scopes);
-        Logger.LogDebug("Scopes in access token: {scopes}", scopeString);
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            var scopeString = string.Join(' ', scopes);
+            Logger.ScopesInAccessToken(scopeString);
+        }
 
         // if we ever parameterized identity scopes, then we would need to invoke the resource validator's parse API here
         var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes, ct);

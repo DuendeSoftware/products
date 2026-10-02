@@ -106,13 +106,13 @@ public class JwtRequestValidator : IJwtRequestValidator
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Could not parse client secrets");
+            Logger.CouldNotParseClientSecrets(e);
             return fail;
         }
 
         if (trustedKeys.Count == 0)
         {
-            Logger.LogError("There are no keys available to validate JWT.");
+            Logger.ThereAreNoKeysAvailableToValidateJWT();
             return fail;
         }
 
@@ -123,14 +123,14 @@ public class JwtRequestValidator : IJwtRequestValidator
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "JWT token validation error");
+            Logger.JWTTokenValidationError(e);
             return fail;
         }
 
         if (jwtSecurityToken.TryGetPayloadValue<string>(OidcConstants.AuthorizeRequest.Request, out _) ||
             jwtSecurityToken.TryGetPayloadValue<string>(OidcConstants.AuthorizeRequest.RequestUri, out _))
         {
-            Logger.LogError("JWT payload must not contain request or request_uri");
+            Logger.JWTPayloadMustNotContainRequestOrRequest();
             return fail;
         }
 
@@ -142,7 +142,7 @@ public class JwtRequestValidator : IJwtRequestValidator
             Payload = payload
         };
 
-        Logger.LogDebug("JWT request object validation success.");
+        Logger.JWTRequestObjectValidationSuccess();
         return result;
     }
 

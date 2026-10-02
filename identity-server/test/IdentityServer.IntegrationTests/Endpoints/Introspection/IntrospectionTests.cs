@@ -932,19 +932,27 @@ public class IntrospectionTests
     [Trait("Category", Category)]
     public async Task valid_active_token_should_increment_telemetry()
     {
-        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, out var measurements);
+        // Uses a caller identity dedicated to this test (see Setup/Scopes.cs) because telemetry
+        // measurements are captured via a process-wide Meter: a caller value shared with other
+        // (possibly parallel) tests would make the measurement count non-deterministic. The caller
+        // also has its own dedicated scope (rather than reusing "api1"): the introspection response
+        // generator only reports a token as active to an API caller when the caller's resource scopes
+        // intersect with the token's scopes, and reusing "api1" would add this resource to the "aud"
+        // claim of every "api1"-scoped token, breaking unrelated tests that assert on "aud".
+        const string caller = "introspection-telemetry-valid-active-token";
+        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, expectedCaller: caller, out var measurements);
         var tokenResponse = await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
         {
             Address = TokenEndpoint,
             ClientId = "client1",
             ClientSecret = "secret",
-            Scope = "api1"
+            Scope = caller
         });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
             Address = IntrospectionEndpoint,
-            ClientId = "api1",
+            ClientId = caller,
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
@@ -962,12 +970,16 @@ public class IntrospectionTests
     [Trait("Category", Category)]
     public async Task token_that_fails_validation_should_increment_telemetry()
     {
-        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, out var measurements);
+        // Uses a caller identity dedicated to this test (see Setup/Clients.cs) because telemetry
+        // measurements are captured via a process-wide Meter: a caller value shared with other
+        // (possibly parallel) tests would make the measurement count non-deterministic.
+        const string caller = "introspection.telemetry.fails-validation";
+        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, expectedCaller: caller, out var measurements);
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
             Address = IntrospectionEndpoint,
-            ClientId = "client1",
+            ClientId = caller,
             ClientSecret = "secret",
 
             Token = "invalid"
@@ -985,11 +997,15 @@ public class IntrospectionTests
     [Trait("Category", Category)]
     public async Task token_that_results_in_validation_error_should_increment_telemetry()
     {
-        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, out var measurements);
+        // Uses a caller identity dedicated to this test (see Setup/Scopes.cs) because telemetry
+        // measurements are captured via a process-wide Meter: a caller value shared with other
+        // (possibly parallel) tests would make the measurement count non-deterministic.
+        const string caller = "introspection.telemetry.validation-error";
+        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, expectedCaller: caller, out var measurements);
 
         var requestContent = new FormUrlEncodedContent(new Dictionary<string, string>
         {
-            { "client_id", "api1" },
+            { "client_id", caller },
             { "client_secret", "secret" },
             { "token", "" }
         });
@@ -1006,7 +1022,7 @@ public class IntrospectionTests
 
     private Dictionary<string, JsonElement> GetFields(TokenIntrospectionResponse response) => response.Raw.GetFields();
 
-    private static MeterListener StartListeningForMeasurements(string meterName,
+    private static MeterListener StartListeningForMeasurements(string meterName, string expectedCaller,
         out List<(string Name, long Value, KeyValuePair<string, object>[] Tags)> results)
     {
         var listener = new MeterListener();
@@ -1014,7 +1030,12 @@ public class IntrospectionTests
 
         listener.SetMeasurementEventCallback<long>((instrument, measurement, tags, _) =>
         {
-            measurements.Add((instrument.Name, measurement, tags.ToArray()));
+            var tagArray = tags.ToArray();
+            var callerTag = tagArray.FirstOrDefault(tag => tag.Key == Telemetry.Metrics.Tags.Caller);
+            if (Equals(callerTag.Value, expectedCaller))
+            {
+                measurements.Add((instrument.Name, measurement, tagArray));
+            }
         });
 
         listener.InstrumentPublished = (instrument, meterListener) =>

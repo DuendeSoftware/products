@@ -40,17 +40,17 @@ internal sealed class SingleLogoutCallbackEndpoint(
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        var logoutId = context.Request.Query[options.UserInteraction.LogoutIdParameter].ToString();
-        if (string.IsNullOrWhiteSpace(logoutId))
+        var logoutMessageHandle = context.Request.Query[options.UserInteraction.LogoutIdParameter].ToString();
+        if (string.IsNullOrWhiteSpace(logoutMessageHandle))
         {
             logger.MissingLogoutIdParameter(LogLevel.Warning);
             return new Saml2FrontChannelResult { Error = "Missing or invalid SAML logout state identifier" };
         }
 
-        var logoutMessage = await logoutMessageStore.ReadAsync(logoutId, context.RequestAborted);
+        var logoutMessage = await logoutMessageStore.ReadAsync(logoutMessageHandle, context.RequestAborted);
         if (logoutMessage?.Data == null)
         {
-            logger.NoLogoutMessageFound(LogLevel.Warning, logoutId);
+            logger.NoLogoutMessageFound(LogLevel.Warning);
             return new Saml2FrontChannelResult { Error = "SAML logout state not found or expired" };
         }
 
@@ -113,14 +113,17 @@ internal sealed class SingleLogoutCallbackEndpoint(
 
         // Determine success/partial based on tracked SP responses.
         // Note: if ExpectedResponses is empty (no other SPs needed notification), All() returns true → Success.
-        var logoutSession = await samlLogoutSessionStore.GetByLogoutIdAsync(logoutId, context.RequestAborted);
+        var samlLogoutCorrelationId = data.SamlLogoutCorrelationId;
+        var logoutSession = !string.IsNullOrEmpty(samlLogoutCorrelationId)
+            ? await samlLogoutSessionStore.GetByLogoutIdAsync(samlLogoutCorrelationId, context.RequestAborted)
+            : null;
         var allSucceeded = logoutSession != null &&
             logoutSession.SkippedSpCount == 0 &&
             logoutSession.ExpectedResponses.Values.All(e => e.Response is { Success: true });
 
         if (logoutSession == null)
         {
-            logger.NoLogoutSessionFound(LogLevel.Debug, logoutId);
+            logger.NoLogoutSessionFound(LogLevel.Debug, samlLogoutCorrelationId ?? string.Empty);
         }
         else
         {
@@ -128,7 +131,7 @@ internal sealed class SingleLogoutCallbackEndpoint(
             var received = logoutSession.ExpectedResponses.Values.Count(e => e.Response != null);
             var succeeded = logoutSession.ExpectedResponses.Values.Count(e => e.Response is { Success: true });
 
-            logger.LogoutSessionStatus(LogLevel.Debug, logoutId, received, total, succeeded, logoutSession.SkippedSpCount, allSucceeded ? "Success" : "PartialLogout");
+            logger.LogoutSessionStatus(LogLevel.Debug, samlLogoutCorrelationId ?? string.Empty, received, total, succeeded, logoutSession.SkippedSpCount, allSucceeded ? "Success" : "PartialLogout");
         }
 
         var response = allSucceeded
@@ -146,9 +149,9 @@ internal sealed class SingleLogoutCallbackEndpoint(
             Telemetry.Metrics.SamlSloFailure(sp.EntityId, "partial_logout");
         }
 
-        if (logoutSession != null)
+        if (logoutSession != null && !string.IsNullOrEmpty(samlLogoutCorrelationId))
         {
-            await samlLogoutSessionStore.RemoveAsync(logoutId, context.RequestAborted);
+            await samlLogoutSessionStore.RemoveAsync(samlLogoutCorrelationId, context.RequestAborted);
         }
 
         return response;

@@ -45,7 +45,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         if (request == null)
         {
-            _logger.LogError("Invalid authentication request id");
+            _logger.InvalidAuthenticationRequestId();
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
@@ -53,14 +53,14 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
         // validate client binding
         if (request.ClientId != context.Request.Client.ClientId)
         {
-            _logger.LogError("Client {ClientId} is trying to use a authentication request id from client {RequestClientId}", context.Request.Client.ClientId, request.ClientId);
+            _logger.ClientIsTryingToUseAAuthenticationRequest(context.Request.Client.ClientId, request.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
 
         if (await _throttlingService.ShouldSlowDown(context.AuthenticationRequestId, request, ct))
         {
-            _logger.LogError("Client {ClientId} is polling too fast", request.ClientId);
+            _logger.ClientIsPollingTooFast(request.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);
             return;
         }
@@ -68,7 +68,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
         // validate lifetime
         if (request.CreationTime.AddSeconds(request.Lifetime) < _systemClock.GetUtcNow().UtcDateTime)
         {
-            _logger.LogError("Expired authentication request id");
+            _logger.ExpiredAuthenticationRequestId();
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.ExpiredToken);
             return;
         }
@@ -77,7 +77,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
         if (request.IsComplete
             && (request.AuthorizedScopes == null || request.AuthorizedScopes.Any() == false))
         {
-            _logger.LogError("No scopes authorized for backchannel authentication request. Access denied");
+            _logger.NoScopesAuthorizedForBackchannelAuthenticationRequestAccess();
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.AccessDenied);
             await _backchannelAuthenticationStore.RemoveByInternalIdAsync(request.InternalId, ct);
             return;
@@ -96,7 +96,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         if (isActiveCtx.IsActive == false)
         {
-            _logger.LogError("User has been disabled: {subjectId}", request.Subject.GetSubjectId());
+            _logger.UserHasBeenDisabled(request.Subject.GetSubjectId());
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
@@ -109,6 +109,6 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         await _backchannelAuthenticationStore.RemoveByInternalIdAsync(request.InternalId, ct);
 
-        _logger.LogDebug("Success validating backchannel authentication request id.");
+        _logger.SuccessValidatingBackchannelAuthenticationRequestId();
     }
 }

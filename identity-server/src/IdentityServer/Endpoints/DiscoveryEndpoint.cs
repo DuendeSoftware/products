@@ -38,20 +38,20 @@ internal class DiscoveryEndpoint : BaseDiscoveryEndpoint, IEndpointHandler
         using var activity =
             Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
 
-        _logger.LogTrace("Processing discovery request.");
+        _logger.ProcessingDiscoveryRequest();
 
         // validate HTTP
         if (!HttpMethods.IsGet(context.Request.Method))
         {
-            _logger.LogWarning("Discovery endpoint only supports GET requests");
+            _logger.DiscoveryEndpointOnlySupportsGETRequests();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        _logger.LogDebug("Start discovery request");
+        _logger.StartDiscoveryRequest();
 
         if (!Options.Endpoints.EnableDiscoveryEndpoint)
         {
-            _logger.LogInformation("Discovery endpoint disabled. 404.");
+            _logger.DiscoveryEndpointDisabled404();
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
@@ -59,7 +59,7 @@ internal class DiscoveryEndpoint : BaseDiscoveryEndpoint, IEndpointHandler
         var issuerUri = await _issuerNameService.GetCurrentAsync(context.RequestAborted);
 
         // generate response
-        _logger.LogTrace("Calling into discovery response generator: {type}", ResponseGenerator.GetType().FullName);
+        _logger.CallingIntoDiscoveryResponseGenerator(ResponseGenerator.GetType().FullName);
 
         return await GetDiscoveryDocument(context, baseUrl, issuerUri);
     }

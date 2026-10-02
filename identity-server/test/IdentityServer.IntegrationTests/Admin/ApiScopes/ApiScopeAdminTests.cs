@@ -3,12 +3,10 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiScopes;
 using Duende.Storage;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -16,19 +14,11 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private IApiScopeAdmin NewAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IApiScopeAdmin>();
-    }
 
     [Fact]
     public async Task create_and_get_by_id_round_trips_all_fields()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var apiScope = new CreateApiScope
         {
             Name = $"scope_{Guid.NewGuid():N}",
@@ -62,7 +52,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_and_get_by_name_round_trips()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var name = $"scope_{Guid.NewGuid():N}";
         var apiScope = new CreateApiScope
         {
@@ -82,7 +72,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_returns_storage_id_and_version()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var apiScope = new CreateApiScope { Name = $"scope_{Guid.NewGuid():N}" };
 
         var result = await admin.CreateAsync(apiScope, _ct);
@@ -96,7 +86,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_duplicate_name_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var name = $"scope_{Guid.NewGuid():N}";
 
         var first = await admin.CreateAsync(new CreateApiScope { Name = name }, _ct);
@@ -111,7 +101,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_changes_applied_on_read()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var apiScope = new CreateApiScope
         {
             Name = $"scope_{Guid.NewGuid():N}",
@@ -143,7 +133,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_with_wrong_version_returns_version_conflict()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var apiScope = new CreateApiScope { Name = $"scope_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(apiScope, _ct);
@@ -163,7 +153,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_nonexistent_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         ApiScopeId nonExistentId = UuidV7.New().Value;
         var apiScope = new UpdateApiScope { Name = $"scope_{Guid.NewGuid():N}" };
 
@@ -177,7 +167,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task update_rename_to_existing_name_returns_already_exists()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var nameA = $"scope_{Guid.NewGuid():N}";
         var nameB = $"scope_{Guid.NewGuid():N}";
 
@@ -198,7 +188,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task delete_then_get_returns_not_found()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var apiScope = new CreateApiScope { Name = $"scope_{Guid.NewGuid():N}" };
 
         var createResult = await admin.CreateAsync(apiScope, _ct);
@@ -214,7 +204,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task create_with_empty_name_returns_required_error()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var apiScope = new CreateApiScope { Name = "" };
 
         var result = await admin.CreateAsync(apiScope, _ct);
@@ -228,7 +218,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     public async Task query_by_name_filter_returns_matching()
     {
         var uniquePart = $"q_{Guid.NewGuid():N}";
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
 
         await admin.CreateAsync(new CreateApiScope { Name = uniquePart + "_match1" }, _ct);
         await admin.CreateAsync(new CreateApiScope { Name = uniquePart + "_match2" }, _ct);
@@ -246,7 +236,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     [Fact]
     public async Task query_by_enabled_filter_returns_matching()
     {
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var enabledName = $"q_enabled_{Guid.NewGuid():N}";
         var disabledName = $"q_disabled_{Guid.NewGuid():N}";
 
@@ -266,7 +256,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
     public async Task query_with_pagination_returns_correct_page()
     {
         var prefix = $"q_page_{Guid.NewGuid():N}_";
-        var admin = NewAdmin();
+        var admin = _fixture.ApiScopeAdmin;
 
         for (var i = 0; i < 5; i++)
         {
@@ -296,13 +286,5 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

@@ -4,7 +4,6 @@
 
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +16,15 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
 {
     private readonly HttpClient _client;
     private readonly IdentityServerOptions _options;
-    private readonly SanitizedLogger<DefaultJwtRequestUriHttpClient> _sanitizedLogger;
+    private readonly ILogger<DefaultJwtRequestUriHttpClient> _logger;
+
+    internal DefaultJwtRequestUriHttpClient(HttpClient client, IdentityServerOptions options,
+        ILogger<DefaultJwtRequestUriHttpClient> logger)
+    {
+        _client = client;
+        _options = options;
+        _logger = logger;
+    }
 
     /// <summary>
     /// ctor
@@ -27,10 +34,8 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
     /// <param name="loggerFactory">The logger factory</param>
     public DefaultJwtRequestUriHttpClient(HttpClient client, IdentityServerOptions options,
         ILoggerFactory loggerFactory)
+        : this(client, options, loggerFactory.CreateLogger<DefaultJwtRequestUriHttpClient>())
     {
-        _client = client;
-        _options = options;
-        _sanitizedLogger = new SanitizedLogger<DefaultJwtRequestUriHttpClient>(loggerFactory.CreateLogger<DefaultJwtRequestUriHttpClient>());
     }
 
 
@@ -50,19 +55,31 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
                 if (!string.Equals(response.Content.Headers.ContentType.MediaType,
                         $"application/{JwtClaimTypes.JwtTypes.AuthorizationRequest}", StringComparison.Ordinal))
                 {
-                    _sanitizedLogger.LogError("Invalid content type {type} from jwt url {url}",
-                        response.Content.Headers.ContentType.MediaType, url.ReplaceLineEndings(string.Empty));
+                    if (_logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.InvalidContentTypeTypeFromJwtUrlUrl(
+                            response.Content.Headers.ContentType.MediaType.SanitizeLogParameter(),
+                            url.SanitizeLogParameter());
+                    }
                     return null;
                 }
             }
 
-            _sanitizedLogger.LogDebug("Success http response from jwt url {url}", url);
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.SuccessHttpResponseFromJwtUrlUrl(url.SanitizeLogParameter());
+            }
 
             var json = await response.Content.ReadAsStringAsync(ct);
             return json;
         }
 
-        _sanitizedLogger.LogError("Invalid http status code {status} from jwt url {url}", response.StatusCode, url);
+        if (_logger.IsEnabled(LogLevel.Error))
+        {
+            _logger.InvalidHttpStatusCodeStatusFromJwtUrl(
+                response.StatusCode,
+                url.SanitizeLogParameter());
+        }
         return null;
     }
 }

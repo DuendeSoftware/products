@@ -42,7 +42,7 @@ internal sealed class SamlLogoutSessionStore(
 
         if (result != CreateResult.Success)
         {
-            logger.SamlLogoutSessionStoreFailed(LogLevel.Error, session.LogoutId, result.ToString());
+            logger.SamlLogoutSessionStoreFailed(LogLevel.Error, result.ToString());
             throw new InvalidOperationException($"Could not store SAML logout session {session.LogoutId}: {result}");
         }
 
@@ -74,7 +74,7 @@ internal sealed class SamlLogoutSessionStore(
 
         if (session is null)
         {
-            logger.SamlLogoutSessionDeserializationFailed(LogLevel.Warning, logoutId);
+            logger.SamlLogoutSessionDeserializationFailed(LogLevel.Warning);
             return null;
         }
 

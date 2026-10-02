@@ -18,7 +18,7 @@ public class DeleteModel(IdentityScopeRepository repository) : PageModel
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-        await repository.DeleteAsync(Id);
+        await repository.DeleteAsync(Id, ct);
         return RedirectToPage("/Admin/IdentityScopes/Index");
     }
 }

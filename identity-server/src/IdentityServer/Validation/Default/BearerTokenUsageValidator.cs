@@ -32,7 +32,7 @@ internal class BearerTokenUsageValidator
         var result = ValidateAuthorizationHeader(context);
         if (result.TokenFound)
         {
-            _logger.LogDebug("Bearer token found in header");
+            _logger.BearerTokenFoundInHeader();
             return result;
         }
 
@@ -41,12 +41,12 @@ internal class BearerTokenUsageValidator
             result = await ValidatePostBodyAsync(context, context.RequestAborted);
             if (result.TokenFound)
             {
-                _logger.LogDebug("Bearer token found in body");
+                _logger.BearerTokenFoundInBody();
                 return result;
             }
         }
 
-        _logger.LogDebug("Bearer token not found");
+        _logger.BearerTokenNotFound();
         return new BearerTokenUsageValidationResult();
     }
 
@@ -76,7 +76,7 @@ internal class BearerTokenUsageValidator
             }
             else
             {
-                _logger.LogTrace("Unexpected header format: {header}", header);
+                _logger.UnexpectedHeaderFormat(header);
             }
         }
 

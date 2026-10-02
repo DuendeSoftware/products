@@ -33,8 +33,8 @@ internal static partial class Log
 
     [LoggerMessage(
         EventName = nameof(NoLogoutMessageFound),
-        Message = $"No logout message found for logoutId: {{{LogParameters.LogoutId}}}")]
-    internal static partial void NoLogoutMessageFound(this ILogger logger, LogLevel logLevel, string logoutId);
+        Message = "No logout message found for the supplied logout state identifier")]
+    internal static partial void NoLogoutMessageFound(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
         EventName = nameof(LogoutMessageMissingEntityId),
@@ -66,7 +66,7 @@ internal static partial class Log
 
     [LoggerMessage(
         EventName = nameof(NoLogoutSessionFound),
-        Message = $"No logout session found for logoutId {{{LogParameters.LogoutId}}} — returning PartialLogout")]
+        Message = $"No logout session found for correlation id {{{LogParameters.LogoutId}}} — returning PartialLogout")]
     internal static partial void NoLogoutSessionFound(this ILogger logger, LogLevel logLevel, string logoutId);
 
     [LoggerMessage(
@@ -122,4 +122,31 @@ internal static partial class Log
         EventName = nameof(FailedToRecordSamlLogoutResponse),
         Message = $"Failed to record SAML LogoutResponse for InResponseTo {{{LogParameters.InResponseTo}}} from {{{LogParameters.Issuer}}}. The request ID may not be tracked or the issuer may not match")]
     internal static partial void FailedToRecordSamlLogoutResponse(this ILogger logger, LogLevel logLevel, string inResponseTo, string issuer);
+
+    // SpLogoutCompletionEndpoint
+
+    [LoggerMessage(
+        EventName = nameof(SpLogoutCompletionMissingLogoutIdParameter),
+        Message = "SP logout completion request missing logoutId parameter")]
+    internal static partial void SpLogoutCompletionMissingLogoutIdParameter(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(SpLogoutCompletionNoMessageFound),
+        Message = "SP logout completion: no message found for the supplied logout state identifier")]
+    internal static partial void SpLogoutCompletionNoMessageFound(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(SpLogoutCompletionMessageExpired),
+        Message = "SP logout completion: message expired")]
+    internal static partial void SpLogoutCompletionMessageExpired(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(SpLogoutCompletionMessageMissingRequiredFields),
+        Message = "SP logout completion: message missing required SAML fields")]
+    internal static partial void SpLogoutCompletionMessageMissingRequiredFields(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(SpLogoutCompletionResponseGeneratorReturnedNullMessage),
+        Message = "SP logout completion: response generator returned null message")]
+    internal static partial void SpLogoutCompletionResponseGeneratorReturnedNullMessage(this ILogger logger, LogLevel logLevel);
 }

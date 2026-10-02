@@ -6,7 +6,6 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Licensing;
-using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Http;
 using UnitTests.Common;
 
@@ -25,7 +24,7 @@ public class EndpointRouterTests
         _endpoints = new List<Duende.IdentityServer.Hosting.Endpoint>();
         _options = new IdentityServerOptions();
         var licenseValidator = IdentityServerLicenseValidator.CreateForTests();
-        _subject = new EndpointRouter(_endpoints, licenseValidator, _options, new SanitizedLogger<EndpointRouter>(TestLogger.Create<EndpointRouter>()));
+        _subject = new EndpointRouter(_endpoints, licenseValidator, _options, TestLogger.Create<EndpointRouter>());
     }
 
     [Fact]

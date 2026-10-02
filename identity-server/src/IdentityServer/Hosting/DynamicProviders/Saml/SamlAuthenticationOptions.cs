@@ -63,4 +63,15 @@ public class SamlAuthenticationOptions : AuthenticationSchemeOptions
     /// in authentication properties. Null means use the value from <see cref="Models.SamlProvider"/>.
     /// </summary>
     public int? MaxRelayStateLength { get; set; }
+
+    /// <summary>
+    /// The AuthnRequest signing behavior for this provider.
+    /// Null means use the value from <see cref="Models.SamlProvider"/>.
+    /// This callback overrides the signing policy only; selecting
+    /// <see cref="Models.AuthnRequestSigningBehavior.Always"/> requires that the
+    /// stored <see cref="Models.SamlProvider"/> also has
+    /// <see cref="Models.SamlProvider.SpSigningCertificateBase64"/> configured, since
+    /// the certificate itself cannot be supplied via this callback.
+    /// </summary>
+    public Models.AuthnRequestSigningBehavior? AuthnRequestSigningBehavior { get; set; }
 }

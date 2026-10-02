@@ -69,25 +69,25 @@ public class DefaultConsentService : IConsentService
 
         if (!client.RequireConsent)
         {
-            Logger.LogDebug("Client is configured to not require consent, no consent is required");
+            Logger.ClientIsConfiguredToNotRequireConsentNo();
             return false;
         }
 
         if (parsedScopes == null || !parsedScopes.Any())
         {
-            Logger.LogDebug("No scopes being requested, no consent is required");
+            Logger.NoScopesBeingRequestedNoConsentIsRequired();
             return false;
         }
 
         if (!client.AllowRememberConsent)
         {
-            Logger.LogDebug("Client is configured to not allow remembering consent, consent is required");
+            Logger.ClientIsConfiguredToNotAllowRememberingConsent();
             return true;
         }
 
         if (parsedScopes.Any(x => x.ParsedName != x.RawValue))
         {
-            Logger.LogDebug("Scopes contains parameterized values, consent is required");
+            Logger.ScopesContainsParameterizedValuesConsentIsRequired();
             return true;
         }
 
@@ -97,7 +97,7 @@ public class DefaultConsentService : IConsentService
         // the client has not disabled RequireConsent
         if (scopes.Contains(IdentityServerConstants.StandardScopes.OfflineAccess))
         {
-            Logger.LogDebug("Scopes contains offline_access, consent is required");
+            Logger.ScopesContainsOfflineAccessConsentIsRequired();
             return true;
         }
 
@@ -105,13 +105,13 @@ public class DefaultConsentService : IConsentService
 
         if (consent == null)
         {
-            Logger.LogDebug("Found no prior consent from consent store, consent is required");
+            Logger.FoundNoPriorConsentFromConsentStoreConsent();
             return true;
         }
 
         if (consent.Expiration.HasExpired(TimeProvider.GetUtcNow().UtcDateTime))
         {
-            Logger.LogDebug("Consent found in consent store is expired, consent is required");
+            Logger.ConsentFoundInConsentStoreIsExpiredConsent();
             await UserConsentStore.RemoveUserConsentAsync(consent.SubjectId, consent.ClientId, ct);
             return true;
         }
@@ -123,17 +123,17 @@ public class DefaultConsentService : IConsentService
 
             if (different)
             {
-                Logger.LogDebug("Consent found in consent store is different than current request, consent is required");
+                Logger.ConsentFoundInConsentStoreIsDifferentThan();
             }
             else
             {
-                Logger.LogDebug("Consent found in consent store is same as current request, consent is not required");
+                Logger.ConsentFoundInConsentStoreIsSameAs();
             }
 
             return different;
         }
 
-        Logger.LogDebug("Consent found in consent store has no scopes, consent is required");
+        Logger.ConsentFoundInConsentStoreHasNoScopes();
 
         return true;
     }
@@ -166,7 +166,7 @@ public class DefaultConsentService : IConsentService
             var scopes = parsedScopes?.Select(x => x.RawValue).ToArray();
             if (scopes != null && scopes.Length > 0)
             {
-                Logger.LogDebug("Client allows remembering consent, and consent given. Updating consent store for subject: {subject}", subject.GetSubjectId());
+                Logger.ClientAllowsRememberingConsentAndConsentGivenUpdating(subject.GetSubjectId());
 
                 var consent = new Consent
                 {
@@ -185,7 +185,7 @@ public class DefaultConsentService : IConsentService
             }
             else
             {
-                Logger.LogDebug("Client allows remembering consent, and no scopes provided. Removing consent from consent store for subject: {subject}", subject.GetSubjectId());
+                Logger.ClientAllowsRememberingConsentAndNoScopesProvided(subject.GetSubjectId());
 
                 await UserConsentStore.RemoveUserConsentAsync(subjectId, clientId, ct);
             }

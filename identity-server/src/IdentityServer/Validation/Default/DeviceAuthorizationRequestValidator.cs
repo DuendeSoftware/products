@@ -32,7 +32,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationRequestValidator.Validate");
 
-        _logger.LogDebug("Start device authorization request validation");
+        _logger.StartDeviceAuthorizationRequestValidation();
 
         var request = new ValidatedDeviceAuthorizationRequest
         {
@@ -52,7 +52,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
             return scopeResult;
         }
 
-        _logger.LogDebug("{clientId} device authorization request validation success", request.Client.ClientId);
+        _logger.DeviceAuthorizationRequestValidationSuccess(request.Client.ClientId);
         return Valid(request);
     }
 
@@ -63,13 +63,13 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
     private void LogError(string message, ValidatedDeviceAuthorizationRequest request)
     {
         var requestDetails = new DeviceAuthorizationRequestValidationLog(request);
-        _logger.LogError("{Message}:{RequestDetails}", message, requestDetails);
+        _logger.DeviceAuthorizationRequestValidationFailure(message, requestDetails);
     }
 
     private void LogError(string message, string detail, ValidatedDeviceAuthorizationRequest request)
     {
         var requestDetails = new DeviceAuthorizationRequestValidationLog(request);
-        _logger.LogError("{Message}: {Detail}:{RequestDetails}", message, detail, requestDetails);
+        _logger.LogMessageDeviceAuthorizationRequestValidator(message, detail, requestDetails);
     }
 
     private DeviceAuthorizationRequestValidationResult ValidateClient(ValidatedDeviceAuthorizationRequest request, ClientSecretValidationResult clientValidationResult)
@@ -109,7 +109,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         var scope = request.Raw.Get(OidcConstants.AuthorizeRequest.Scope);
         if (scope.IsMissing())
         {
-            _logger.LogTrace("Client provided no scopes - checking allowed scopes list");
+            _logger.ClientProvidedNoScopesCheckingAllowedScopesList();
 
             if (!IEnumerableExtensions.IsNullOrEmpty(request.Client.AllowedScopes))
             {
@@ -119,7 +119,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
                     clientAllowedScopes.Add(IdentityServerConstants.StandardScopes.OfflineAccess);
                 }
                 scope = clientAllowedScopes.ToSpaceSeparatedString();
-                _logger.LogTrace("Defaulting to: {scopes}", scope);
+                _logger.DefaultingTo(scope);
             }
             else
             {

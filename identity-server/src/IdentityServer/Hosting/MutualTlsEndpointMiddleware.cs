@@ -4,7 +4,6 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -19,7 +18,7 @@ public class MutualTlsEndpointMiddleware
 {
     public const string OriginalPath = "Duende.IdentityServer.MutualTlsEndpointMiddleware.OriginalPath";
 
-    private readonly SanitizedLogger<MutualTlsEndpointMiddleware> _sanitizedLogger;
+    private readonly ILogger<MutualTlsEndpointMiddleware> _logger;
     private readonly RequestDelegate _next;
     private readonly IdentityServerOptions _options;
 
@@ -34,7 +33,7 @@ public class MutualTlsEndpointMiddleware
     {
         _next = next;
         _options = options;
-        _sanitizedLogger = new SanitizedLogger<MutualTlsEndpointMiddleware>(logger);
+        _logger = logger;
     }
 
     internal enum MtlsEndpointType
@@ -62,7 +61,7 @@ public class MutualTlsEndpointMiddleware
                 // Separate domain
                 if (RequestedHostMatches(context.Request.Host, _options.MutualTls.DomainName))
                 {
-                    _sanitizedLogger.LogDebug("Requiring mTLS because the request's domain matches the configured mTLS domain name.");
+                    _logger.RequiringMTLSBecauseTheRequestSDomainMatches();
                     return MtlsEndpointType.SeparateDomain;
                 }
             }
@@ -71,12 +70,12 @@ public class MutualTlsEndpointMiddleware
                 // Subdomain
                 if (context.Request.Host.Host.StartsWith(_options.MutualTls.DomainName + ".", StringComparison.OrdinalIgnoreCase))
                 {
-                    _sanitizedLogger.LogDebug("Requiring mTLS because the request's subdomain matches the configured mTLS domain name.");
+                    _logger.RequiringMTLSBecauseTheRequestSSubdomainMatches();
                     return MtlsEndpointType.Subdomain;
                 }
             }
 
-            _sanitizedLogger.LogDebug("Not requiring mTLS because this request's domain does not match the configured mTLS domain name.");
+            _logger.NotRequiringMTLSBecauseThisRequestSDomain();
             return MtlsEndpointType.None;
         }
 
@@ -84,7 +83,7 @@ public class MutualTlsEndpointMiddleware
         if (context.Request.Path.StartsWithSegments(
             ProtocolRoutePaths.MtlsPathPrefix.EnsureLeadingSlash(), out var path))
         {
-            _sanitizedLogger.LogDebug("Requiring mTLS because the request's path begins with the configured mTLS path prefix.");
+            _logger.RequiringMTLSBecauseTheRequestSPathBegins();
             subPath = path;
             return MtlsEndpointType.PathBased;
         }
@@ -111,8 +110,12 @@ public class MutualTlsEndpointMiddleware
                 var path = ProtocolRoutePaths.ConnectPathPrefix + subPath.Value.ToString().EnsureLeadingSlash();
                 path = path.EnsureLeadingSlash();
 
-                _sanitizedLogger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
-                    context.Request.Path.ToString(), path);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.RewritingMTLSRequestFromOldPathToNewPath(
+                        context.Request.Path.ToString().SanitizeLogParameter(),
+                        path.SanitizeLogParameter());
+                }
 
                 // Capture the original path before any modifications. This is useful in other parts of the
                 // pipeline, that may want to include this context.
@@ -158,7 +161,11 @@ public class MutualTlsEndpointMiddleware
 
         if (!x509AuthResult.Succeeded)
         {
-            _sanitizedLogger.LogDebug("MTLS authentication failed, error: {error}.", x509AuthResult.Failure?.Message);
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.MTLSAuthenticationFailedErrorError(
+                    x509AuthResult.Failure?.Message.SanitizeLogParameter());
+            }
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteJsonAsync(new MtlsErrorResponse
             {

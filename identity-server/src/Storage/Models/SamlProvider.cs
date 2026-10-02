@@ -154,4 +154,27 @@ public record SamlProvider : IdentityProvider
         get => this["OutboundSigningAlgorithm"] ?? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
         set => this["OutboundSigningAlgorithm"] = value;
     }
+
+    /// <summary>
+    /// Controls whether outbound SAML AuthnRequest messages are signed.
+    /// Defaults to <see cref="AuthnRequestSigningBehavior.Never" />. When set to
+    /// <see cref="AuthnRequestSigningBehavior.Always" />, <see cref="SpSigningCertificateBase64" />
+    /// must be configured.
+    /// </summary>
+    public AuthnRequestSigningBehavior AuthnRequestSigningBehavior
+    {
+        get
+        {
+            var value = this["AuthnRequestSigningBehavior"];
+            if (!string.IsNullOrEmpty(value)
+                && Enum.TryParse<AuthnRequestSigningBehavior>(value, out var parsed)
+                && Enum.IsDefined(parsed))
+            {
+                return parsed;
+            }
+
+            return AuthnRequestSigningBehavior.Never;
+        }
+        set => this["AuthnRequestSigningBehavior"] = Enum.GetName(value);
+    }
 }

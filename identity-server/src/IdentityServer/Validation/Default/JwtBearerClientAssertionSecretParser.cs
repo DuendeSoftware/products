@@ -51,11 +51,11 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
     /// <inheritdoc/>
     public async Task<ParsedSecret> ParseAsync(HttpContext context, Ct ct)
     {
-        _logger.LogDebug("Start parsing for JWT client assertion in post body");
+        _logger.StartParsingForJWTClientAssertionInPost();
 
         if (!context.Request.HasApplicationFormContentType())
         {
-            _logger.LogDebug("Content type is not a form");
+            _logger.ContentTypeIsNotAForm();
             return null;
         }
 
@@ -71,7 +71,7 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
             {
                 if (clientAssertion.Length > _options.InputLengthRestrictions.Jwt)
                 {
-                    _logger.LogError("Client assertion token exceeds maximum length.");
+                    _logger.ClientAssertionTokenExceedsMaximumLength();
                     return null;
                 }
 
@@ -83,7 +83,7 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
 
                 if (clientId.Length > _options.InputLengthRestrictions.ClientId)
                 {
-                    _logger.LogError("Client ID exceeds maximum length.");
+                    _logger.ClientIDExceedsMaximumLengthJwtBearerClientAssertionSecretParser();
                     return null;
                 }
 
@@ -98,7 +98,7 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
             }
         }
 
-        _logger.LogDebug("No JWT client assertion found in post body");
+        _logger.NoJWTClientAssertionFoundInPostBody();
         return null;
     }
 
@@ -111,7 +111,7 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Could not parse client assertion");
+            _logger.CouldNotParseClientAssertion(e);
             return null;
         }
     }

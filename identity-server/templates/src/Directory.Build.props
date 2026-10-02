@@ -5,7 +5,8 @@
     <IsPackable>false</IsPackable>
     <IsIdSrvProject>true</IsIdSrvProject>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <AnalysisMode>None</AnalysisMode>
+    <!-- Opt into logging rules via the parent .editorconfig without enabling unrelated analyzer rules. -->
+    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 

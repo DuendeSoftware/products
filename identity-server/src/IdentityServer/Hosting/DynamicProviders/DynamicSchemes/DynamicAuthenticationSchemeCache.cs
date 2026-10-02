@@ -4,6 +4,7 @@
 
 using System.Collections.Concurrent;
 using Duende.IdentityServer.Models;
+using Duende.Spaces;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 // this is designed as a per-request cache is to ensure that a scheme loaded from the cache is still available later in the
@@ -14,26 +15,38 @@ namespace Duende.IdentityServer.Hosting.DynamicProviders;
 /// <summary>
 /// Cache for DynamicAuthenticationScheme.
 /// </summary>
+/// <remarks>
+/// Entries are partitioned by the current space, so options built after a space switch use the
+/// new space's provider. This does not isolate a handler already created earlier in the same
+/// request: ASP.NET Core's per-request handler provider reuses it by scheme name, with the options
+/// it was created with.
+/// </remarks>
 public class DynamicAuthenticationSchemeCache
 {
-    private readonly ConcurrentDictionary<string, DynamicAuthenticationScheme> _cache = new();
+    private readonly ConcurrentDictionary<(SpaceId Space, string Scheme), DynamicAuthenticationScheme> _cache = new();
+    private readonly ISpaceContextAccessor _spaceContextAccessor;
+
+    /// <summary>
+    /// Ctor
+    /// </summary>
+    public DynamicAuthenticationSchemeCache()
+        : this(null)
+    {
+    }
+
+    internal DynamicAuthenticationSchemeCache(ISpaceContextAccessor spaceContextAccessor) => _spaceContextAccessor = spaceContextAccessor;
 
     /// <summary>
     /// Adds the scheme.
     /// </summary>
-    public void Add(string name, DynamicAuthenticationScheme item)
-    {
-        name = name ?? string.Empty;
-        _cache.TryAdd(name, item);
-    }
+    public void Add(string name, DynamicAuthenticationScheme item) => _cache.TryAdd(Key(name), item);
 
     /// <summary>
     /// Gets the scheme.
     /// </summary>
     public DynamicAuthenticationScheme Get(string name)
     {
-        name = name ?? string.Empty;
-        _cache.TryGetValue(name, out var item);
+        _cache.TryGetValue(Key(name), out var item);
         return item;
     }
 
@@ -45,4 +58,7 @@ public class DynamicAuthenticationSchemeCache
     /// <returns></returns>
     public T GetIdentityProvider<T>(string name)
         where T : IdentityProvider => Get(name)?.IdentityProvider as T;
+
+    private (SpaceId Space, string Scheme) Key(string name) =>
+        (_spaceContextAccessor?.GetSpaceIdOrDefault() ?? SpaceId.Default, name ?? string.Empty);
 }

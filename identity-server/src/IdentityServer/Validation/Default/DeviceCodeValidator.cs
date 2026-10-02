@@ -57,7 +57,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
 
         if (deviceCode == null)
         {
-            _logger.LogError("Invalid device code");
+            _logger.InvalidDeviceCode();
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
@@ -65,14 +65,14 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         // validate client binding
         if (deviceCode.ClientId != context.Request.Client.ClientId)
         {
-            _logger.LogError("Client {ClientId} is trying to use a device code from client {DeviceCodeClientId}", context.Request.Client.ClientId, deviceCode.ClientId);
+            _logger.ClientIsTryingToUseADeviceCode(context.Request.Client.ClientId, deviceCode.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
 
         if (await _throttlingService.ShouldSlowDown(context.DeviceCode, deviceCode, ct))
         {
-            _logger.LogError("Client {ClientId} is polling too fast", deviceCode.ClientId);
+            _logger.ClientIsPollingTooFastDeviceCodeValidator(deviceCode.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);
             return;
         }
@@ -80,7 +80,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         // validate lifetime
         if (deviceCode.CreationTime.AddSeconds(deviceCode.Lifetime) < _systemClock.GetUtcNow().UtcDateTime)
         {
-            _logger.LogError("Expired device code");
+            _logger.ExpiredDeviceCode();
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.ExpiredToken);
             return;
         }
@@ -89,7 +89,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         if (deviceCode.IsAuthorized
             && (deviceCode.AuthorizedScopes == null || deviceCode.AuthorizedScopes.Any() == false))
         {
-            _logger.LogError("No scopes authorized for device authorization. Access denied");
+            _logger.NoScopesAuthorizedForDeviceAuthorizationAccessDenied();
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.AccessDenied);
             return;
         }
@@ -107,7 +107,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
 
         if (isActiveCtx.IsActive == false)
         {
-            _logger.LogError("User has been disabled: {subjectId}", deviceCode.Subject.GetSubjectId());
+            _logger.UserHasBeenDisabledDeviceCodeValidator(deviceCode.Subject.GetSubjectId());
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }

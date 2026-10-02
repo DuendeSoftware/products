@@ -40,7 +40,7 @@ internal class MessageCookie<TModel>
     private string Protect(Message<TModel> message)
     {
         var json = ObjectSerializer.ToString(message);
-        _logger.LogTrace("Protecting message: {0}", json);
+        _logger.ProtectingMessageValue(json);
 
         return _protector.Protect(json);
     }
@@ -116,7 +116,7 @@ internal class MessageCookie<TModel>
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error unprotecting message cookie");
+                _logger.ErrorUnprotectingMessageCookie(ex);
                 ClearByCookieName(name);
             }
         }
@@ -158,7 +158,7 @@ internal class MessageCookie<TModel>
         catch (CryptographicException e)
         {
             // cookie was protected with a different key/algorithm
-            _logger.LogDebug(e, "Unable to unprotect cookie {CookieName}", name);
+            _logger.UnableToUnprotectCookieCookieName(e, name);
         }
 
         return rank;
@@ -180,7 +180,7 @@ internal class MessageCookie<TModel>
             var purge = rankedCookieNames.Skip(Math.Max(0, toKeep - 1));
             foreach (var name in purge)
             {
-                _logger.LogTrace("Purging stale cookie: {cookieName}", name);
+                _logger.PurgingStaleCookieCookieName(name);
                 ClearByCookieName(name);
             }
         }

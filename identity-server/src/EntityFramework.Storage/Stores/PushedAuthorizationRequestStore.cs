@@ -38,13 +38,13 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     public async Task ConsumeByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Remove");
-        Logger.LogDebug("removing {referenceValueHash} pushed authorization from database", referenceValueHash);
+        Log.RemovingValuePushedAuthorizationFromDatabase(Logger, referenceValueHash);
         var numDeleted = await Context.PushedAuthorizationRequests
             .Where(par => par.ReferenceValueHash == referenceValueHash)
             .ExecuteDeleteAsync(ct);
         if (numDeleted != 1)
         {
-            Logger.LogWarning("attempted to remove {referenceValueHash} pushed authorization request because it was consumed, but no records were actually deleted.", referenceValueHash);
+            Log.AttemptedToRemoveValuePushedAuthorizationRequestBecause(Logger, referenceValueHash);
         }
     }
 
@@ -59,7 +59,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
                 .SingleOrDefault(x => x.ReferenceValueHash == referenceValueHash);
         var model = par?.ToModel();
 
-        Logger.LogDebug("{referenceValueHash} pushed authorization found in database: {requestUriFound}", referenceValueHash, model != null);
+        Log.ValuePushedAuthorizationFoundInDatabaseValue(Logger, referenceValueHash, model != null);
 
         return model;
     }
@@ -79,7 +79,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
         // I think it isn't, but what happens if we somehow two calls to StoreAsync with the same PAR are made?
         catch (DbUpdateConcurrencyException ex)
         {
-            Logger.LogWarning("exception updating {referenceValueHash} pushed authorization in database: {error}", par.ReferenceValueHash, ex.Message);
+            Log.ExceptionUpdatingValuePushedAuthorizationInDatabaseValue(Logger, par.ReferenceValueHash, ex.Message);
         }
     }
 }

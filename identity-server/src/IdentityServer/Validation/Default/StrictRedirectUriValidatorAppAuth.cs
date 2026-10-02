@@ -79,12 +79,12 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
     /// </returns>
     internal bool IsLoopback(string requestedUri)
     {
-        _logger.LogDebug("Checking for 127.0.0.1 redirect URI");
+        _logger.CheckingFor127001RedirectURI();
 
         // Validate that the requestedUri is not null or empty.
         if (string.IsNullOrEmpty(requestedUri))
         {
-            _logger.LogDebug("'requestedUri' is null or empty");
+            _logger.RequestedUriIsNullOrEmpty();
             return false;
         }
 
@@ -92,14 +92,14 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
 
         if (parts.Length != 3)
         {
-            _logger.LogDebug("invalid format - http://127.0.0.1:port is required.");
+            _logger.InvalidFormatHttp127001Port();
             return false;
         }
 
         if (!string.Equals(parts[0], "http", StringComparison.Ordinal) ||
             !string.Equals(parts[1], "//127.0.0.1", StringComparison.Ordinal))
         {
-            _logger.LogDebug("invalid format - http://127.0.0.1:port is required.");
+            _logger.InvalidFormatHttp127001PortStrictRedirectUriValidatorAppAuth();
             return false;
         }
 
@@ -123,7 +123,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
             }
         }
 
-        _logger.LogDebug("invalid port");
+        _logger.InvalidPort();
         return false;
     }
 }

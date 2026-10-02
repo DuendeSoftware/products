@@ -6,6 +6,9 @@
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Internal.Saml.Sp.AspNetCore;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores.Storage.IdentityProviders;
+using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -34,15 +37,23 @@ public static class IdentityServerBuilderSamlDynamicProviderExtensions
             builder.Services.TryAddEnumerable(
                 ServiceDescriptor.Singleton<IPostConfigureOptions<Saml2Options>, PostConfigureSaml2OptionsForDynamic>());
 
+            builder.Services.TryAddSchema(BuiltInSchemas.SamlProvider);
+
             return builder;
         }
 
         /// <summary>
         /// Adds the in-memory SAML provider store.
         /// </summary>
+        /// <remarks>
+        /// Providers registered by multiple calls to any in-memory identity provider
+        /// registration method are accumulated rather than replacing one another. The supplied
+        /// collection is retained by reference, so callers may mutate their own collection at
+        /// runtime and have the changes observed by the store.
+        /// </remarks>
         /// <param name="providers">The SAML providers to register.</param>
-        /// <returns></returns>
+        /// <returns>The <see cref="IIdentityServerBuilder"/>.</returns>
         public IIdentityServerBuilder AddInMemorySamlProviders(IEnumerable<SamlProvider> providers) =>
-            builder.AddInMemoryIdentityProviders(providers.Cast<IdentityProvider>().ToList());
+            builder.AddInMemoryIdentityProviders(providers);
     }
 }

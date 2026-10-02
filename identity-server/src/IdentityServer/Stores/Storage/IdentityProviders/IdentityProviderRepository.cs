@@ -19,8 +19,10 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class IdentityProviderRepository(IStorageFactory storageFactory)
+internal sealed class IdentityProviderRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
+    private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Configuration, ct);
+
     internal enum Keys
     {
         Scheme = 1
@@ -36,8 +38,8 @@ internal sealed class IdentityProviderRepository(IStorageFactory storageFactory)
 
     internal async Task<CreateResult> CreateAsync(UuidV7 id, IdentityProviderDso.V1 dso, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        return await partitionedStorage.CreateAsync(
             id,
             dso,
             [DataStorageKey.Create(IdentityProviderSchemeDskV1.Create(dso.Scheme))],
@@ -49,15 +51,15 @@ internal sealed class IdentityProviderRepository(IStorageFactory storageFactory)
 
     internal async Task<(IdentityProviderDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(IdentityProviderDso.EntityType, UuidV7.From(id), ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(IdentityProviderDso.EntityType, UuidV7.From(id), ct);
         return result.Found ? ((IdentityProviderDso.V1)result.Dso, result.Version.Value) : null;
     }
 
     internal async Task<(IdentityProviderDso.V1 Dso, int Version)?> TryReadBySchemeAsync(string scheme, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var result = await partitionedStorage.TryReadAsync(
             IdentityProviderDso.EntityType,
             DataStorageKey.Create(IdentityProviderSchemeDskV1.Create(scheme)),
             ct);
@@ -65,7 +67,7 @@ internal sealed class IdentityProviderRepository(IStorageFactory storageFactory)
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, IdentityProviderDso.V1 dso, int expectedVersion, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).UpdateAsync(
+        await (await GetPartitionedStorage(ct)).UpdateAsync(
             id,
             dso,
             expectedVersion,
@@ -76,18 +78,18 @@ internal sealed class IdentityProviderRepository(IStorageFactory storageFactory)
             ct);
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
-        await (await storageFactory.GetStorage(ct)).DeleteAsync(IdentityProviderDso.EntityType, UuidV7.From(id), [], ct);
+        await (await GetPartitionedStorage(ct)).DeleteAsync(IdentityProviderDso.EntityType, UuidV7.From(id), [], ct);
 
     internal async Task<QueryResult<IdentityProviderDso.V1>> QueryAsync(
         QueryRequest<IdentityProviderFilter, IdentityProviderSortField> request,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await GetPartitionedStorage(ct);
         var filter = BuildFilter(request.Filter?.FilterValue);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await storage.QueryAsync<IdentityProviderDso.V1>(
+        var result = await partitionedStorage.QueryAsync<IdentityProviderDso.V1>(
             IdentityProviderDso.EntityType,
             filter,
             sort,

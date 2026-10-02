@@ -45,12 +45,12 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.BackchannelAuthentication + "Endpoint");
 
-        _logger.LogTrace("Processing backchannel authentication request.");
+        _logger.ProcessingBackchannelAuthenticationRequest();
 
         // validate HTTP
         if (!HttpMethods.IsPost(context.Request.Method) || !context.Request.HasApplicationFormContentType())
         {
-            _logger.LogWarning("Invalid HTTP request for backchannel authentication endpoint");
+            _logger.InvalidHTTPRequestForBackchannelAuthenticationEndpoint();
             return Error(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest);
         }
 
@@ -60,21 +60,21 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         }
         catch (InvalidDataException ex)
         {
-            _logger.LogWarning(ex, "Invalid HTTP request for backchannel authentication endpoint");
+            _logger.InvalidHTTPRequestForBackchannelAuthenticationEndpointBackchannelAuthenticationEndpoint(ex);
             return Error(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest);
         }
     }
 
     private async Task<IEndpointResult> ProcessAuthenticationRequestAsync(HttpContext context)
     {
-        _logger.LogDebug("Start backchannel authentication request.");
+        _logger.StartBackchannelAuthenticationRequest();
 
         // validate client
         var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var error = clientResult.Error ?? OidcConstants.BackchannelAuthenticationRequestErrors.InvalidClient;
-            _logger.LogWarning("Client validation failed for backchannel authentication endpoint: {error}", error);
+            _logger.ClientValidationFailedForBackchannelAuthenticationEndpoint(error);
             Telemetry.Metrics.BackChannelAuthenticationFailure(
                 clientResult.Client?.ClientId, error);
             return Error(error);
@@ -82,7 +82,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
 
         // validate request
         var form = (await context.Request.ReadFormAsync(context.RequestAborted)).AsNameValueCollection();
-        _logger.LogTrace("Calling into backchannel authentication request validator: {type}", _requestValidator.GetType().FullName);
+        _logger.CallingIntoBackchannelAuthenticationRequestValidator(_requestValidator.GetType().FullName);
         var requestResult = await _requestValidator.ValidateRequestAsync(form, clientResult, context.RequestAborted);
 
         if (requestResult.IsError)
@@ -93,7 +93,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         }
 
         // create response
-        _logger.LogTrace("Calling into backchannel authentication request response generator: {type}", _responseGenerator.GetType().FullName);
+        _logger.CallingIntoBackchannelAuthenticationRequestResponseGenerator(_responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
         await _events.RaiseAsync(new BackchannelAuthenticationSuccessEvent(requestResult), context.RequestAborted);
@@ -101,11 +101,18 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         LogResponse(response, requestResult);
 
         // return result
-        _logger.LogDebug("Backchannel authentication request success.");
+        _logger.BackchannelAuthenticationRequestSuccess();
         return new BackchannelAuthenticationResult(response);
     }
 
-    private void LogResponse(BackchannelAuthenticationResponse response, BackchannelAuthenticationRequestValidationResult requestResult) => _logger.LogTrace("BackchannelAuthenticationResponse: {@response} for subject {subjectId}", response, requestResult.ValidatedRequest.Subject.GetSubjectId());
+    private void LogResponse(BackchannelAuthenticationResponse response, BackchannelAuthenticationRequestValidationResult requestResult)
+    {
+        var subjectId = requestResult.ValidatedRequest.Subject.GetSubjectId();
+        if (_logger.IsEnabled(LogLevel.Trace))
+        {
+            _logger.BackchannelAuthenticationResponseForSubject(response, subjectId);
+        }
+    }
 
     private static BackchannelAuthenticationResult Error(string error, string errorDescription = null) => new BackchannelAuthenticationResult(new BackchannelAuthenticationResponse(error, errorDescription));
 }

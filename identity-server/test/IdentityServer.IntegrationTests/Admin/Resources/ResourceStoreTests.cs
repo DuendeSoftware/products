@@ -3,12 +3,9 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiResources;
 using Duende.IdentityServer.Admin.ApiScopes;
 using Duende.IdentityServer.Admin.IdentityResources;
-using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -16,40 +13,11 @@ public sealed class ResourceStoreTests : IAsyncLifetime
 {
     private readonly StorageTestFixture _fixture = new();
     private readonly Ct _ct = TestContext.Current.CancellationToken;
-    private readonly List<IServiceScope> _scopes = [];
-
-    private IApiResourceAdmin NewApiResourceAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IApiResourceAdmin>();
-    }
-
-    private IApiScopeAdmin NewApiScopeAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IApiScopeAdmin>();
-    }
-
-    private IIdentityResourceAdmin NewIdentityResourceAdmin()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IIdentityResourceAdmin>();
-    }
-
-    private IResourceStore NewResourceStore()
-    {
-        var scope = _fixture.CreateScope();
-        _scopes.Add(scope);
-        return scope.ServiceProvider.GetRequiredService<IResourceStore>();
-    }
 
     [Fact]
     public async Task find_identity_resources_by_scope_name_returns_matching()
     {
-        var admin = NewIdentityResourceAdmin();
+        var admin = _fixture.IdentityResourceAdmin;
         var name = $"identity_{Guid.NewGuid():N}";
 
         var createResult = await admin.CreateAsync(new CreateIdentityResource
@@ -59,7 +27,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         }, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindIdentityResourcesByScopeNameAsync([name], _ct);
 
         results.ShouldHaveSingleItem();
@@ -69,7 +37,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_identity_resources_by_scope_name_returns_empty_for_nonexistent()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindIdentityResourcesByScopeNameAsync([$"nonexistent_{Guid.NewGuid():N}"], _ct);
         results.ShouldBeEmpty();
     }
@@ -77,7 +45,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_identity_resources_with_empty_input_returns_empty()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindIdentityResourcesByScopeNameAsync([], _ct);
         results.ShouldBeEmpty();
     }
@@ -85,7 +53,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_scopes_by_name_returns_matching()
     {
-        var admin = NewApiScopeAdmin();
+        var admin = _fixture.ApiScopeAdmin;
         var name = $"scope_{Guid.NewGuid():N}";
 
         var createResult = await admin.CreateAsync(new CreateApiScope
@@ -95,7 +63,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         }, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiScopesByNameAsync([name], _ct);
 
         results.ShouldHaveSingleItem();
@@ -105,7 +73,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_scopes_by_name_returns_empty_for_nonexistent()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiScopesByNameAsync([$"nonexistent_{Guid.NewGuid():N}"], _ct);
         results.ShouldBeEmpty();
     }
@@ -113,7 +81,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_scopes_with_empty_input_returns_empty()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiScopesByNameAsync([], _ct);
         results.ShouldBeEmpty();
     }
@@ -121,11 +89,11 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_by_name_returns_matching()
     {
-        var scopeAdmin = NewApiScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var scopeName = $"scope_{Guid.NewGuid():N}";
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewApiResourceAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var name = $"api_{Guid.NewGuid():N}";
 
         var createResult = await admin.CreateAsync(new CreateApiResource
@@ -135,7 +103,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         }, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByNameAsync([name], _ct);
 
         results.ShouldHaveSingleItem();
@@ -145,7 +113,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_by_name_returns_empty_for_nonexistent()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByNameAsync([$"nonexistent_{Guid.NewGuid():N}"], _ct);
         results.ShouldBeEmpty();
     }
@@ -153,7 +121,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_with_empty_input_returns_empty()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByNameAsync([], _ct);
         results.ShouldBeEmpty();
     }
@@ -161,13 +129,13 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_by_scope_name_returns_matching()
     {
-        var scopeAdmin = NewApiScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var uniqueScope = $"scope_{Guid.NewGuid():N}";
         var otherScope = $"scope_other_{Guid.NewGuid():N}";
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = uniqueScope }, _ct)).IsSuccess.ShouldBeTrue();
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = otherScope }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewApiResourceAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resourceName = $"api_{Guid.NewGuid():N}";
 
         var createResult = await admin.CreateAsync(new CreateApiResource
@@ -177,7 +145,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         }, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByScopeNameAsync([uniqueScope], _ct);
 
         results.ShouldContain(r => r.Name == resourceName);
@@ -186,13 +154,13 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_by_scope_name_excludes_non_matching()
     {
-        var scopeAdmin = NewApiScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var uniqueScope = $"scope_{Guid.NewGuid():N}";
         var differentScope = $"scope_diff_{Guid.NewGuid():N}";
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = uniqueScope }, _ct)).IsSuccess.ShouldBeTrue();
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = differentScope }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewApiResourceAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var matchingName = $"api_match_{Guid.NewGuid():N}";
         var nonMatchingName = $"api_nomatch_{Guid.NewGuid():N}";
 
@@ -208,7 +176,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
             Scopes = [differentScope]
         }, _ct);
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByScopeNameAsync([uniqueScope], _ct);
 
         results.ShouldContain(r => r.Name == matchingName);
@@ -218,7 +186,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_by_scope_name_with_empty_input_returns_empty()
     {
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByScopeNameAsync([], _ct);
         results.ShouldBeEmpty();
     }
@@ -226,9 +194,9 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task get_all_resources_returns_all_types()
     {
-        var apiResourceAdmin = NewApiResourceAdmin();
-        var apiScopeAdmin = NewApiScopeAdmin();
-        var identityResourceAdmin = NewIdentityResourceAdmin();
+        var apiResourceAdmin = _fixture.ApiResourceAdmin;
+        var apiScopeAdmin = _fixture.ApiScopeAdmin;
+        var identityResourceAdmin = _fixture.IdentityResourceAdmin;
 
         var apiResourceName = $"api_{Guid.NewGuid():N}";
         var apiScopeName = $"scope_{Guid.NewGuid():N}";
@@ -240,7 +208,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
         await apiScopeAdmin.CreateAsync(new CreateApiScope { Name = apiScopeName }, _ct);
         await identityResourceAdmin.CreateAsync(new CreateIdentityResource { Name = identityResourceName }, _ct);
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var resources = await store.GetAllResourcesAsync(_ct);
 
         resources.ApiResources.ShouldContain(r => r.Name == apiResourceName);
@@ -251,11 +219,11 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task resource_store_does_not_filter_on_enabled()
     {
-        var scopeAdmin = NewApiScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var someScope = $"scope_{Guid.NewGuid():N}";
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = someScope }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewApiResourceAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var disabledName = $"api_disabled_{Guid.NewGuid():N}";
 
         await admin.CreateAsync(new CreateApiResource
@@ -265,7 +233,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
             Scopes = [someScope]
         }, _ct);
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByNameAsync([disabledName], _ct);
 
         results.ShouldHaveSingleItem();
@@ -276,13 +244,13 @@ public sealed class ResourceStoreTests : IAsyncLifetime
     [Fact]
     public async Task find_api_resources_by_scope_name_with_multiple_scopes()
     {
-        var scopeAdmin = NewApiScopeAdmin();
+        var scopeAdmin = _fixture.ApiScopeAdmin;
         var scope1 = $"scope1_{Guid.NewGuid():N}";
         var scope2 = $"scope2_{Guid.NewGuid():N}";
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = scope1 }, _ct)).IsSuccess.ShouldBeTrue();
         (await scopeAdmin.CreateAsync(new CreateApiScope { Name = scope2 }, _ct)).IsSuccess.ShouldBeTrue();
 
-        var admin = NewApiResourceAdmin();
+        var admin = _fixture.ApiResourceAdmin;
         var resource1Name = $"api1_{Guid.NewGuid():N}";
         var resource2Name = $"api2_{Guid.NewGuid():N}";
 
@@ -298,7 +266,7 @@ public sealed class ResourceStoreTests : IAsyncLifetime
             Scopes = [scope2]
         }, _ct);
 
-        var store = NewResourceStore();
+        var store = _fixture.ResourceStore;
         var results = await store.FindApiResourcesByScopeNameAsync([scope1, scope2], _ct);
 
         results.ShouldContain(r => r.Name == resource1Name);
@@ -307,13 +275,5 @@ public sealed class ResourceStoreTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
 
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var scope in _scopes)
-        {
-            scope.Dispose();
-        }
-
-        await _fixture.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

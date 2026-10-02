@@ -9,7 +9,7 @@ namespace MtlsApi.Controllers;
 #pragma warning restore IDE0130
 
 [Route("identity")]
-public class IdentityController(ILogger<IdentityController> logger) : ControllerBase
+public partial class IdentityController(ILogger<IdentityController> logger) : ControllerBase
 {
     private readonly ILogger<IdentityController> _logger = logger;
 
@@ -17,9 +17,15 @@ public class IdentityController(ILogger<IdentityController> logger) : Controller
     [HttpGet]
     public ActionResult Get()
     {
-        var claims = User.Claims.Select(c => new { c.Type, c.Value });
-        _logger.LogInformation("claims: {claims}", claims);
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToArray();
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            LogClaims(_logger, claims);
+        }
 
         return new JsonResult(claims);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "claims: {Claims}")]
+    private static partial void LogClaims(ILogger logger, IEnumerable<object> claims);
 }

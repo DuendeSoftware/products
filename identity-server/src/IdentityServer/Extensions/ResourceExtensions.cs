@@ -148,13 +148,13 @@ public static class ResourceExtensions
                 {
                     if (!item.IsUri())
                     {
-                        logger.LogDebug("Resource indicator {resource} is not a valid URI.", item);
+                        logger.ResourceIndicatorResourceIsNotAValidURI(item);
                         return false;
                     }
 
                     if (item.Contains('#', StringComparison.InvariantCulture))
                     {
-                        logger.LogDebug("Resource indicator {resource} must not contain a fragment component.", item);
+                        logger.ResourceIndicatorResourceMustNotContainAFragment(item);
                         return false;
                     }
                 }

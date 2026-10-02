@@ -64,11 +64,15 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
     {
         if (user != null)
         {
-            Logger.LogDebug("User in authorize request: {subjectId}", user.GetSubjectId());
+            var subjectId = user.GetSubjectId();
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                Logger.UserInAuthorizeRequest(subjectId);
+            }
         }
         else
         {
-            Logger.LogDebug("No user present in authorize request");
+            Logger.NoUserPresentInAuthorizeRequest();
         }
 
         // validate request
@@ -159,15 +163,13 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
     {
         if (logError)
         {
-#pragma warning disable CA2254 // Structured logging is not needed for this message
-            Logger.LogError(logMessage);
-#pragma warning restore CA2254
+            Logger.EndpointError(logMessage);
         }
 
         if (request != null)
         {
             var details = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
-            Logger.LogInformation("{@validationDetails}", details);
+            Logger.AuthorizeRequestValidationErrorDetails(details);
         }
 
         // TODO: should we raise a token failure event for all errors to the authorize endpoint?
@@ -184,14 +186,24 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
     private void LogRequest(ValidatedAuthorizeRequest request)
     {
+        if (!Logger.IsEnabled(LogLevel.Debug))
+        {
+            return;
+        }
+
         var details = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
-        Logger.LogDebug(nameof(ValidatedAuthorizeRequest) + Environment.NewLine + "{@validationDetails}", details);
+        Logger.ValidatedAuthorizeRequestDetails(details);
     }
 
     private void LogResponse(AuthorizeResponse response)
     {
+        if (!Logger.IsEnabled(LogLevel.Debug))
+        {
+            return;
+        }
+
         var details = new AuthorizeResponseLog(response);
-        Logger.LogDebug("Authorize endpoint response" + Environment.NewLine + "{@details}", details);
+        Logger.AuthorizeEndpointResponseDetails(details);
     }
 
     private void LogTokens(AuthorizeResponse response)
@@ -201,15 +213,15 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
         if (response.IdentityToken != null)
         {
-            Logger.LogTrace("Identity token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.IdentityToken);
+            Logger.IdentityTokenIssuedFor(clientId, subjectId, response.IdentityToken);
         }
         if (response.Code != null)
         {
-            Logger.LogTrace("Code issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.Code);
+            Logger.CodeIssuedFor(clientId, subjectId, response.Code);
         }
         if (response.AccessToken != null)
         {
-            Logger.LogTrace("Access token issued for {clientId} / {subjectId}: {token}", clientId, subjectId, response.AccessToken);
+            Logger.AccessTokenIssuedFor(clientId, subjectId, response.AccessToken);
         }
     }
 

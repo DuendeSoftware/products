@@ -127,14 +127,16 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         // with no OIDC schema registered.
         services.AddIdentityServer()
             .AddStorage(storage =>
-                storage.AddSqliteStore(opt =>
+                storage.AddSqlite(opt =>
                     opt.ConnectionString = $"Data Source={dbName};Mode=Memory;Cache=Shared"))
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddIdentityProviderConfigurationValidator<NopIdentityProviderConfigurationValidator>();
 
         services.AddSingleton<ISchemaStore>(new InMemorySchemaStore([]));
 
         await using var provider = services.BuildServiceProvider();
-        var schema = provider.GetRequiredService<IDatabaseSchema>();
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
         await schema.MigrateAsync(_ct);
 
         using var serviceScope = provider.CreateScope();
@@ -364,8 +366,7 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         loaded.ShouldNotBeNull();
 
         // The store populates Properties from EAV - verify the dict values that
-        // SamlProvider typed accessors would read. The test fixture may not register
-        // the SAML dynamic provider type, so we verify via the Properties dict directly.
+        // SamlProvider typed accessors would read.
         loaded.Properties.ShouldContainKeyAndValue("IdpEntityId", "https://idp.example.com/saml");
         loaded.Properties.ShouldContainKeyAndValue("SingleSignOnServiceUrl", "https://idp.example.com/sso");
         loaded.Properties.ShouldContainKeyAndValue("AllowUnsolicitedAuthnResponse", "true");
@@ -377,6 +378,38 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         saml.SingleSignOnServiceUrl.ShouldBe("https://idp.example.com/sso");
         saml.AllowUnsolicitedAuthnResponse.ShouldBeTrue();
         saml.WantAssertionsSigned.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task saml_provider_authn_request_signing_behavior_round_trips_through_create_and_update()
+    {
+        var admin = _fixture.IdentityProviderAdmin;
+
+        var provider = new CreateIdentityProvider
+        {
+            Scheme = $"provider_{Guid.NewGuid():N}",
+            Type = "saml"
+        };
+        provider.ExtendedProperties.Set(AttributeCode.Create("AuthnRequestSigningBehavior"), "Always");
+
+        var createResult = await admin.CreateAsync(provider, _ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var afterCreate = await admin.GetAsync(createResult.Id, _ct);
+        afterCreate.Found.ShouldBeTrue();
+        afterCreate.Item.ExtendedProperties.TryGet(AttributeCode.Create("AuthnRequestSigningBehavior"), out var createdAttr).ShouldBeTrue();
+        createdAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Always");
+
+        var toUpdate = afterCreate.Item.ToUpdate();
+        toUpdate.ExtendedProperties.Set(AttributeCode.Create("AuthnRequestSigningBehavior"), "Never");
+
+        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, afterCreate.Version!, _ct);
+        updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
+
+        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        afterUpdate.Found.ShouldBeTrue();
+        afterUpdate.Item.ExtendedProperties.TryGet(AttributeCode.Create("AuthnRequestSigningBehavior"), out var updatedAttr).ShouldBeTrue();
+        updatedAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Never");
     }
 
     [Fact]

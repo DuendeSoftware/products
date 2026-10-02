@@ -76,6 +76,8 @@ internal sealed class ConfigureSaml2OptionsFromServiceProvider : IConfigureNamed
 
         options.SPOptions.MaxRelayStateLength = spOptions.MaxRelayStateLength;
 
+        options.SPOptions.AuthenticateRequestSigningBehavior = AuthnRequestSigningBehaviorMapper.Map(spOptions.AuthnRequestSigningBehavior);
+
         // Add SP signing certificate if configured
         if (!string.IsNullOrWhiteSpace(spOptions.SpSigningCertificateBase64))
         {

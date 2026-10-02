@@ -37,18 +37,21 @@ internal sealed class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
 
         if (!HttpMethods.IsGet(context.Request.Method))
         {
-            Logger.LogWarning("Invalid HTTP method for authorize endpoint.");
+            Logger.InvalidHTTPMethodForAuthorizeEndpoint();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        Logger.LogDebug("Start authorize callback request");
+        Logger.StartAuthorizeCallbackRequest();
 
         var parameters = context.Request.Query.AsNameValueCollection();
         var user = await UserSession.GetUserAsync(context.RequestAborted);
 
         var result = await ProcessAuthorizeRequestAsync(parameters, user, context.RequestAborted, true);
 
-        Logger.LogTrace("End Authorize Request. Result type: {0}", result?.GetType().ToString() ?? "-none-");
+        if (Logger.IsEnabled(LogLevel.Trace))
+        {
+            Logger.EndAuthorizeRequestResultType(result?.GetType().ToString() ?? "-none-");
+        }
 
         return result;
     }

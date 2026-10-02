@@ -83,7 +83,7 @@ public class IdentityProviderStore : IIdentityProviderStore
         var result = MapIdp(idp);
         if (result == null)
         {
-            Logger.LogError("Identity provider record found in database, but mapping failed for scheme {scheme} and protocol type {protocol}", idp.Scheme, idp.Type);
+            Log.IdentityProviderRecordFoundInDatabaseButMapping(Logger, idp.Scheme, idp.Type);
         }
 
         return result;

@@ -154,6 +154,13 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
             }
         }
 
+        if (context.IdentityProvider.AuthnRequestSigningBehavior == AuthnRequestSigningBehavior.Always &&
+            string.IsNullOrWhiteSpace(context.IdentityProvider.SpSigningCertificateBase64))
+        {
+            context.SetError("SpSigningCertificateBase64 is required when AuthnRequestSigningBehavior is Always.");
+            return Task.CompletedTask;
+        }
+
         var binding = context.IdentityProvider.BindingType;
         if (!binding.Equals("redirect", StringComparison.OrdinalIgnoreCase) &&
             !binding.Equals("post", StringComparison.OrdinalIgnoreCase))
@@ -164,4 +171,3 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
         return Task.CompletedTask;
     }
 }
-

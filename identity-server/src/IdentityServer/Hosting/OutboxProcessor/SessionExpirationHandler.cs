@@ -24,7 +24,7 @@ internal sealed class SessionExpirationHandler(
     ISessionCoordinationService sessionCoordinationService,
     IdentityServerOptions options,
     TimeProvider timeProvider,
-    ILogger<SessionExpirationHandler> logger) : IOutboxSubscriberHandler
+    ILogger<SessionExpirationHandler> logger) : IOutboxSubscriptionHandler
 {
     private readonly IDataProtector _protector =
         dataProtectionProvider.CreateProtector("Duende.SessionManagement.ServerSideTicketStore");

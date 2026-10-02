@@ -28,7 +28,7 @@ public class DefaultEventSink : IEventSink
     {
         ArgumentNullException.ThrowIfNull(evt);
 
-        _logger.LogInformation("{@event}", evt);
+        _logger.Event(evt);
 
         return Task.CompletedTask;
     }

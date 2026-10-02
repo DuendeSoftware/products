@@ -56,19 +56,19 @@ public class ValidatingClientStore<T> : IClientStore
 
         if (client != null)
         {
-            _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
+            _logger.CallingIntoClientConfigurationValidatorValidatorType(_validatorType);
 
             var context = new ClientConfigurationValidationContext(client);
             await _validator.ValidateAsync(context, ct);
 
             if (context.IsValid)
             {
-                _logger.LogDebug("client configuration validation for client {clientId} succeeded.", client.ClientId);
+                _logger.ClientConfigurationValidationForClientClientIdSucceeded(client.ClientId);
                 Telemetry.Metrics.ClientValidation(clientId);
                 return client;
             }
 
-            _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
+            _logger.InvalidClientConfigurationForClientClientIdErrorMessage(client.ClientId, context.ErrorMessage);
             Telemetry.Metrics.ClientValidationFailure(clientId, context.ErrorMessage);
             await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage), ct);
 
@@ -86,18 +86,18 @@ public class ValidatingClientStore<T> : IClientStore
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.GetAllClients");
         await foreach (var client in _inner.GetAllClientsAsync(ct))
         {
-            _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
+            _logger.CallingIntoClientConfigurationValidatorValidatorType2(_validatorType);
             var context = new ClientConfigurationValidationContext(client);
             await _validator.ValidateAsync(context, ct);
             if (context.IsValid)
             {
-                _logger.LogDebug("client configuration validation for client {clientId} succeeded.", client.ClientId);
+                _logger.ClientConfigurationValidationForClientClientIdSucceeded2(client.ClientId);
                 Telemetry.Metrics.ClientValidation(client.ClientId);
                 yield return client;
             }
             else
             {
-                _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
+                _logger.InvalidClientConfigurationForClientClientIdErrorMessage2(client.ClientId, context.ErrorMessage);
                 Telemetry.Metrics.ClientValidationFailure(client.ClientId, context.ErrorMessage);
                 await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage), ct);
                 // Skip invalid clients - do not yield

@@ -1349,6 +1349,59 @@ public class AuthorizeTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task prompt_too_long_should_error()
+    {
+        // Repeats a *valid* prompt value. An over-long string of nonsense would be rejected as
+        // an unsupported prompt mode regardless, and so could not show whether a length
+        // restriction is applied.
+        var longPrompt = RepeatedValidPrompt();
+
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client3",
+            responseType: "id_token",
+            scope: "openid profile",
+            redirectUri: "https://client3/callback",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new { prompt = longPrompt }
+        );
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task processed_prompt_too_long_should_error()
+    {
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client3",
+            responseType: "id_token",
+            scope: "openid profile",
+            redirectUri: "https://client3/callback",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new Dictionary<string, string> { { "suppressed_prompt", RepeatedValidPrompt() } }
+        );
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// A prompt value that is over the length restriction but made up entirely of supported
+    /// prompt modes, so that only the length restriction can reject it.
+    /// </summary>
+    private string RepeatedValidPrompt()
+    {
+        var restriction = _mockPipeline.Options.InputLengthRestrictions.Prompt;
+        var prompt = string.Join(" ", Enumerable.Repeat("login", (restriction / "login ".Length) + 1));
+        prompt.Length.ShouldBeGreaterThan(restriction);
+        return prompt;
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task unknown_prompt_should_error()
     {
         var url = _mockPipeline.CreateAuthorizeUrl(

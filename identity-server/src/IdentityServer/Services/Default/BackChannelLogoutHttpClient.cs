@@ -43,7 +43,7 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
             var response = await _client.PostAsync(url, formEncodedContent, ct);
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogDebug("Response from back-channel logout endpoint: {url} status code: {status}", url, (int)response.StatusCode);
+                _logger.ResponseFromBackChannelLogoutEndpointUrlStatus(url, (int)response.StatusCode);
             }
             else
             {
@@ -58,17 +58,17 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
 
                 if (err == null)
                 {
-                    _logger.LogWarning("Response from back-channel logout endpoint: {url} status code: {status}", url, (int)response.StatusCode);
+                    _logger.ResponseFromBackChannelLogoutEndpointUrlStatus2(url, (int)response.StatusCode);
                 }
                 else
                 {
-                    _logger.LogWarning("Response from back-channel logout endpoint: {url} status code: {status}, error: {error}, error_description: {error_description}", url, (int)response.StatusCode, err.error, err.error_description);
+                    _logger.ResponseFromBackChannelLogoutEndpointUrlStatus3(url, (int)response.StatusCode, err.error, err.error_description);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception invoking back-channel logout for url: {url}", url);
+            _logger.ExceptionInvokingBackChannelLogoutForUrlUrl(ex, url);
         }
     }
 

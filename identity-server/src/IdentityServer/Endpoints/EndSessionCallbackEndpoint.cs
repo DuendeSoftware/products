@@ -31,22 +31,22 @@ internal class EndSessionCallbackEndpoint : IEndpointHandler
 
         if (!HttpMethods.IsGet(context.Request.Method))
         {
-            _logger.LogWarning("Invalid HTTP method for end session callback endpoint.");
+            _logger.InvalidHTTPMethodForEndSessionCallbackEndpoint();
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        _logger.LogDebug("Processing signout callback request");
+        _logger.ProcessingSignoutCallbackRequest();
 
         var parameters = context.Request.Query.AsNameValueCollection();
         var result = await _endSessionRequestValidator.ValidateCallbackAsync(parameters, context.RequestAborted);
 
         if (!result.IsError)
         {
-            _logger.LogInformation("Successful signout callback.");
+            _logger.SuccessfulSignoutCallback();
         }
         else
         {
-            _logger.LogError("Error validating signout callback: {error}", result.Error);
+            _logger.ErrorValidatingSignoutCallback(result.Error);
         }
 
         return new EndSessionCallbackResult(result);
