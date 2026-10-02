@@ -47,6 +47,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
         var user = await _admin.TryAddAsync(UserSubjectId.New(), attributes.Validate(), _ct);
 
         _ = user.ShouldNotBeNull();
+        user.Schema.AttributeDefinitions.Keys.ShouldBe(schema.AttributeDefinitions.Keys, ignoreOrder: true);
         user.Attributes.Values.ShouldBe(attributes, ignoreOrder: true);
     }
 
@@ -73,6 +74,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
 
         var user = await _admin.TryGetAsync(subjectId, _ct);
 
+        user.ShouldNotBeNull().Schema.AttributeDefinitions.Keys.ShouldBe(schema.AttributeDefinitions.Keys, ignoreOrder: true);
         user.ShouldNotBeNull().Attributes.Values.ShouldBe(attributes, ignoreOrder: true);
     }
 
@@ -115,6 +117,7 @@ public sealed class UserProfileAdministration : IAsyncLifetime
         var result = await _admin.QueryAsync(QueryRequest.Create(), _ct);
 
         result.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
+        result.Items.ShouldAllBe(user => user.Schema.AttributeDefinitions.ContainsKey(AttributeCode.Create("name")));
         result.Items.ShouldContain(u => u.SubjectId == subjectId1);
         result.Items.ShouldContain(u => u.SubjectId == subjectId2);
     }

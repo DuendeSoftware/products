@@ -3,9 +3,13 @@
 
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.UserManagement;
+using Duende.Storage;
+using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Scim;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -23,16 +27,24 @@ public static class IdentityServerBuilderExtensions
         /// <summary>
         /// Configures IdentityServer to use Duende UserManagement for user profiles, authentication, and membership.
         /// </summary>
+        /// <param name="storageInstanceId">
+        /// The storage instance that stores User Management data. A database provider must be
+        /// registered for this instance, for example with <c>AddStorage(storageInstanceId, ...)</c>.
+        /// </param>
         /// <param name="configure">A delegate to configure the user management builder, including storage.</param>
         /// <returns>The same builder instance.</returns>
-        public IIdentityServerBuilder AddUserManagement(
+        public IIdentityServerBuilder AddUserManagement(StorageInstanceId storageInstanceId,
             Action<IUserManagementBuilder> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
 
             builder.Services.TryAddScoped<IPasskeySignInHandler, IdentityServerPasskeySignInHandler>();
-            _ = builder.Services.AddUserManagementInternal(configure);
+            _ = builder.Services.AddUserManagementInternal(storageInstanceId, configure);
+
+            // Default user profile schema. Customers replace or extend it with AddInMemoryDataExtensionSchemas,
+            // in either order. The profile stays OIDC-shaped even with SCIM (deferred).
+            builder.Services.TryAddSchema(BuiltInSchemas.UserProfile);
 
             // Replace the default IdentityServer profile service with ours, but preserve
             // any custom registration the user may have added.
@@ -48,10 +60,20 @@ public static class IdentityServerBuilderExtensions
 
             // Register SCIM authority auto-resolution from IdentityServerOptions.IssuerUri
 #pragma warning disable duende_experimental
-            builder.Services.TryAddSingleton<IPostConfigureOptions<ScimOAuthOptions>, ScimAuthorityPostConfigureOptions>();
+            builder.Services
+                .TryAddSingleton<IPostConfigureOptions<ScimOAuthOptions>, ScimAuthorityPostConfigureOptions>();
 #pragma warning restore duende_experimental
 
             return builder;
         }
+
+        /// <summary>
+        /// Configures IdentityServer to use Duende UserManagement for user profiles, authentication, and membership,
+        /// using the default storage instance.
+        /// </summary>
+        /// <param name="configure">A delegate to configure the user management builder, including storage.</param>
+        /// <returns>The same builder instance.</returns>
+        public IIdentityServerBuilder AddUserManagement(
+            Action<IUserManagementBuilder> configure) => builder.AddUserManagement(StorageInstanceId.Default, configure);
     }
 }

@@ -5,8 +5,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Duende.Platform.UserManagement.Scim.Groups;
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
@@ -72,7 +75,10 @@ public sealed class ScimFixture : IAsyncDisposable
             {
                 ConfigureServices(services);
                 _ = services.AddAuthentication();
-                var builder = services.AddUserManagementInternal(users =>
+                _ = services.AddStorageInternal(x => x.AddSqliteInMemory());
+                // These tests create their profile schema at runtime through ISchemaAdmin.
+                services.AddDynamicSchemaStorage();
+                _ = services.AddUserManagementInternal(StorageInstanceId.Default, users =>
                 {
                     // modules registered unconditionally by AddUserManagementInternal
 
@@ -87,7 +93,6 @@ public sealed class ScimFixture : IAsyncDisposable
 #pragma warning restore duende_experimental
 
                     ConfigurePlatform(users);
-                    _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
                 });
 
                 // Post-configure the JWT bearer handler to use a symmetric key (no OIDC discovery)
@@ -118,7 +123,7 @@ public sealed class ScimFixture : IAsyncDisposable
 
         await _server.StartAsync();
 
-        await _server.GetRequiredService<IPooledStore>().MigrateAsync(TestContext.Current.CancellationToken);
+        await _server.Services.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(TestContext.Current.CancellationToken);
 
         UserProfileAdmin = _server.Services.GetRequiredService<IUserProfileAdmin>();
         UserSchemaAdmin = _server.Services.GetRequiredService<ISchemaAdmin>();
@@ -324,79 +329,41 @@ public sealed class ScimFixture : IAsyncDisposable
     }
 
     /// <summary>
-    /// Registers the RFC 7643 §4.1 User schema attributes:
-    /// <list type="bullet">
-    ///   <item><c>name</c> — complex with givenname, familyname, formatted, middlename, honorificprefix, honorificsuffix</item>
-    ///   <item><c>emails</c> — list of complex with value, type, primary, display</item>
-    ///   <item><c>phonenumbers</c> — list of complex with value, type, primary, display</item>
-    ///   <item><c>addresses</c> — list of complex with streetaddress, locality, region, postalcode, country, formatted, type, primary</item>
-    ///   <item>Scalar: displayname, nickname, title, active, profileurl, usertype, preferredlanguage, locale, timezone, externalid</item>
-    /// </list>
+    /// Registers the default RFC 7643 User schema.
     /// Must be called after <see cref="InitializeAsync"/>.
     /// </summary>
     public async Task RegisterScimUserSchemaAsync()
     {
-        // name — complex
-        var nameType = new ComplexAttributeType(
-            new Dictionary<AttributeCode, ComplexAttributeProperty>
-            {
-                [AttributeCode.Create("givenName")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("familyName")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("formatted")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("middleName")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("honorificPrefix")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("honorificSuffix")] = ComplexAttributeProperty.Of(ScalarDataType.String)
-            });
-        await RegisterComplexAttributeDefinitionAsync("name", nameType, "Full name of the User");
+        var ct = TestContext.Current.CancellationToken;
+        var getResult = await UserSchemaAdmin.GetAsync(SchemaId.UserProfile, ct);
+        var schema = getResult.Found
+            ? getResult.Item!
+            : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
 
-        // emails — list of complex
-        var emailElementType = new ComplexAttributeType(
-            new Dictionary<AttributeCode, ComplexAttributeProperty>
+        foreach (var group in DefaultScimUserSchema.Groups)
+        {
+            var existing = schema.Groups.SingleOrDefault(candidate => candidate.Code == group.Code);
+            if (existing is not null)
             {
-                [AttributeCode.Create("value")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean),
-                [AttributeCode.Create("display")] = ComplexAttributeProperty.Of(ScalarDataType.String)
-            });
-        await RegisterComplexAttributeDefinitionAsync("emails", new ListAttributeType(emailElementType), "Email addresses");
+                _ = schema.Groups.Remove(existing);
+            }
+            schema.Groups.Add(group);
+        }
 
-        // phonenumbers — list of complex
-        var phoneElementType = new ComplexAttributeType(
-            new Dictionary<AttributeCode, ComplexAttributeProperty>
+        foreach (var definition in DefaultScimUserSchema.AttributeDefinitions)
+        {
+            var existing = schema.AttributeDefinitions.SingleOrDefault(candidate => candidate.Code == definition.Code);
+            if (existing is not null)
             {
-                [AttributeCode.Create("value")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean),
-                [AttributeCode.Create("display")] = ComplexAttributeProperty.Of(ScalarDataType.String)
-            });
-        await RegisterComplexAttributeDefinitionAsync("phoneNumbers", new ListAttributeType(phoneElementType), "Phone numbers");
+                _ = schema.AttributeDefinitions.Remove(existing);
+            }
+            schema.AttributeDefinitions.Add(definition);
+        }
 
-        // addresses — list of complex
-        var addressElementType = new ComplexAttributeType(
-            new Dictionary<AttributeCode, ComplexAttributeProperty>
-            {
-                [AttributeCode.Create("streetAddress")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("locality")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("region")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("postalCode")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("country")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("formatted")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("type")] = ComplexAttributeProperty.Of(ScalarDataType.String),
-                [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
-            });
-        await RegisterComplexAttributeDefinitionAsync("addresses", new ListAttributeType(addressElementType), "Physical addresses");
-
-        // Scalar attributes
-        await RegisterAttributeDefinitionAsync("displayName", ScalarDataType.String, "Display name");
-        await RegisterAttributeDefinitionAsync("nickName", ScalarDataType.String, "Casual name");
-        await RegisterAttributeDefinitionAsync("title", ScalarDataType.String, "Job title");
-        await RegisterAttributeDefinitionAsync("active", ScalarDataType.Boolean, "Account status");
-        await RegisterAttributeDefinitionAsync("profileUrl", ScalarDataType.String, "Profile URL");
-        await RegisterAttributeDefinitionAsync("userType", ScalarDataType.String, "User type");
-        await RegisterAttributeDefinitionAsync("preferredLanguage", ScalarDataType.String, "Preferred language");
-        await RegisterAttributeDefinitionAsync("locale", ScalarDataType.String, "Locale");
-        await RegisterAttributeDefinitionAsync("timezone", ScalarDataType.String, "Time zone");
-        await RegisterAttributeDefinitionAsync("externalId", ScalarDataType.String, "External ID");
+        var saveResult = getResult.Found
+            ? await UserSchemaAdmin.UpdateAsync(SchemaId.UserProfile, schema, getResult.Version!.Value, ct)
+            : await UserSchemaAdmin.CreateAsync(schema, ct);
+        saveResult.IsSuccess.ShouldBeTrue();
     }
 
     public async ValueTask DisposeAsync()

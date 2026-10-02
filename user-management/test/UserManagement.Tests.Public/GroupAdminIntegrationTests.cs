@@ -5,6 +5,7 @@ using Duende.Storage;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Duende.UserManagement;
+using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Membership;
 using Microsoft.Extensions.DependencyInjection;
 using SortDirection = Duende.Storage.Querying.SortDirection;
@@ -327,6 +328,21 @@ public sealed class GroupAdminIntegrationTests : IAsyncLifetime
 
         result.Items.Count.ShouldBe(1);
         result.Items[0].Name.ShouldBe(matchingDto.Name);
+    }
+
+    [Fact]
+    public async Task Membership_uses_correct_storage_category()
+    {
+        var dto = new Group { Name = UniqueName() };
+
+        var result = await _admin.CreateAsync(dto, _ct);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var recorded = _serviceProvider.GetRequiredService<DataCategoryNameRecorder>().RequestedCategories;
+        recorded.ShouldNotBeEmpty();
+        recorded.Distinct().ShouldBe([DataCategoryName.UserManagement]);
+
     }
 
 }

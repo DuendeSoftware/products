@@ -17,4 +17,10 @@ public sealed class AuthenticatorAttestationResponse
     /// The attestation object (base64url-encoded CBOR).
     /// </summary>
     public required string AttestationObject { get; init; }
+
+    /// <summary>
+    /// Optional transport hints reported by the client via getTransports().
+    /// These values guide browser UI and are not verified authenticator properties.
+    /// </summary>
+    public IReadOnlyList<string>? Transports { get; init; }
 }

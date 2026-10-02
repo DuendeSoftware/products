@@ -51,7 +51,9 @@ public sealed class ScimOptions
 
     /// <summary>
     /// Maximum payload size (in bytes) allowed for a single bulk request.
-    /// If the <c>Content-Length</c> header exceeds this value, the service provider returns HTTP 413.
+    /// The limit applies to the request body bytes whether or not a
+    /// <c>Content-Length</c> header is present. If exceeded, the service provider
+    /// returns HTTP 413.
     /// Defaults to 1,048,576 (1 MB).
     /// </summary>
     public int MaxBulkPayloadSize { get; set; } = 1_048_576;

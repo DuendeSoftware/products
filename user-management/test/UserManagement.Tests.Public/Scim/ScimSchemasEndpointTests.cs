@@ -5,6 +5,8 @@ using System.Net;
 using System.Text.Json;
 using Duende.Storage.EntityAttributeValue;
 using Duende.UserManagement;
+using Duende.UserManagement.Scim;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Platform.UserManagement.Scim;
 
@@ -124,6 +126,50 @@ public sealed class ScimSchemasEndpointTests(ITestOutputHelper output, WebServer
     }
 
     [Fact]
+    public async Task get_User_schema_returns_complete_default_schema_without_duplicates()
+    {
+        Fixture.ConfigureScimCapabilities += options => options.ChangePassword = true;
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterScimUserSchemaAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var attributes = body.RootElement.GetProperty("attributes").EnumerateArray().ToList();
+        // ChangePassword is enabled, so the endpoint injects the capability-driven
+        // "password" attribute on top of the default schema's attributes.
+        attributes.Count.ShouldBe(DefaultScimUserSchema.AttributeDefinitions.Count + 1);
+        attributes.Select(attribute => attribute.GetProperty("name").GetString())
+            .Distinct(StringComparer.OrdinalIgnoreCase).Count().ShouldBe(attributes.Count);
+
+        var name = attributes.Single(attribute => attribute.GetProperty("name").GetString() == "name");
+        name.GetProperty("type").GetString().ShouldBe("complex");
+        name.GetProperty("subAttributes").GetArrayLength().ShouldBe(6);
+
+        var profileUrl = attributes.Single(attribute => attribute.GetProperty("name").GetString() == "profileUrl");
+        profileUrl.GetProperty("type").GetString().ShouldBe("string");
+    }
+
+    [Fact]
+    public async Task get_User_schema_preserves_custom_mapper_metadata_for_userName()
+    {
+        Fixture.ConfigureServices += services =>
+            services.AddSingleton<IScimSchemaMapper, CustomScimSchemaMapper>();
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var userName = body.RootElement.GetProperty("attributes").EnumerateArray()
+            .Single(attribute => attribute.GetProperty("name").GetString() == "userName");
+        userName.GetProperty("description").GetString().ShouldBe("Mapped by the custom mapper.");
+        userName.GetProperty("required").GetBoolean().ShouldBeTrue();
+        userName.GetProperty("uniqueness").GetString().ShouldBe("server");
+    }
+
+    [Fact]
     public async Task get_unknown_schema_returns_404()
     {
         await Fixture.InitializeAsync();
@@ -137,5 +183,16 @@ public sealed class ScimSchemasEndpointTests(ITestOutputHelper output, WebServer
     {
         await Fixture.DisposeAsync();
         GC.SuppressFinalize(this);
+    }
+
+    private sealed class CustomScimSchemaMapper : IScimSchemaMapper
+    {
+        public ScimSchemaAttributeModel Map(Duende.Storage.EntityAttributeValue.AttributeDefinition definition) =>
+            new()
+            {
+                Name = definition.Code.Value,
+                Type = "string",
+                Description = "Mapped by the custom mapper."
+            };
     }
 }

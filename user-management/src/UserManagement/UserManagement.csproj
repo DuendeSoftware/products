@@ -20,9 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+
     <PackageReference Include="Duende.IdentityModel"/>
     <PackageReference Include="Duende.Private.Licensing"/>
-    <PackageReference Include="Duende.Storage"/>
+    <PackageReference Include="Duende.Storage" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"/>
   </ItemGroup>
 

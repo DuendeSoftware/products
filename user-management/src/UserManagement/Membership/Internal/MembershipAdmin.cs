@@ -16,7 +16,7 @@ namespace Duende.UserManagement.Membership.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class MembershipAdmin(
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     MembershipRepository membershipRepo,
     RoleRepository roleRepo,
     GroupRepository groupRepo,
@@ -41,8 +41,8 @@ internal sealed class MembershipAdmin(
         }
 
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var storage = await storageFactory.GetStorage(ct);
-        _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, roleResult.Value.Role.StoreId, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        _ = await partitionedStorage.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, roleResult.Value.Role.StoreId, [], ct);
 
         logger.AssignRoleSucceeded(LogLevel.Information, roleId, subjectId);
         return SaveResult.Success(roleId, 0);
@@ -69,8 +69,8 @@ internal sealed class MembershipAdmin(
             return SaveResult.Success(roleId, 0);
         }
 
-        var storage = await storageFactory.GetStorage(ct);
-        _ = await storage.UnlinkAsync(MembershipLinkDefinitions.MembershipRole, existing.Resolved[subjectId], roleResult.Value.Role.StoreId, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        _ = await partitionedStorage.UnlinkAsync(MembershipLinkDefinitions.MembershipRole, existing.Resolved[subjectId], roleResult.Value.Role.StoreId, [], ct);
 
         logger.RemoveRoleSucceeded(LogLevel.Information, roleId, subjectId);
         return SaveResult.Success(roleId, 0);
@@ -96,8 +96,8 @@ internal sealed class MembershipAdmin(
             return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Group), groupId.ToString()));
         }
 
-        var storage = await storageFactory.GetStorage(ct);
-        _ = await storage.LinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        _ = await partitionedStorage.LinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
 
         logger.AssignRoleToGroupSucceeded(LogLevel.Information, roleId, groupId);
         return SaveResult.Success(roleId, 0);
@@ -123,8 +123,8 @@ internal sealed class MembershipAdmin(
             return SaveResult.Failure<RoleId>(StorageError.NotFound(nameof(Group), groupId.ToString()));
         }
 
-        var storage = await storageFactory.GetStorage(ct);
-        _ = await storage.UnlinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        _ = await partitionedStorage.UnlinkAsync(MembershipLinkDefinitions.GroupRole, groupResult.Value.Group.StoreId, roleResult.Value.Role.StoreId, [], ct);
 
         logger.RemoveRoleFromGroupSucceeded(LogLevel.Information, roleId, groupId);
         return SaveResult.Success(roleId, 0);
@@ -145,8 +145,8 @@ internal sealed class MembershipAdmin(
         }
 
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var storage = await storageFactory.GetStorage(ct);
-        _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, groupResult.Value.Group.StoreId, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        _ = await partitionedStorage.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, groupResult.Value.Group.StoreId, [], ct);
 
         logger.AssignGroupSucceeded(LogLevel.Information, groupId, subjectId);
         return SaveResult.Success(groupId, 0);
@@ -173,8 +173,8 @@ internal sealed class MembershipAdmin(
             return SaveResult.Success(groupId, 0);
         }
 
-        var storage = await storageFactory.GetStorage(ct);
-        _ = await storage.UnlinkAsync(MembershipLinkDefinitions.MembershipGroup, existing.Resolved[subjectId], groupResult.Value.Group.StoreId, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        _ = await partitionedStorage.UnlinkAsync(MembershipLinkDefinitions.MembershipGroup, existing.Resolved[subjectId], groupResult.Value.Group.StoreId, [], ct);
 
         logger.RemoveGroupSucceeded(LogLevel.Information, groupId, subjectId);
         return SaveResult.Success(groupId, 0);
@@ -189,7 +189,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var query = LinkQuery
             .From(RoleDso.EntityType)
@@ -197,7 +197,7 @@ internal sealed class MembershipAdmin(
             .Where(UserDso.EntityType, existing.Resolved[subjectId])
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipQueryExecuted(LogLevel.Debug, subjectId);
         return ToRoleQueryResult(result);
@@ -212,7 +212,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         // Multi-hop: Role ← GroupRole ← Group ← MembershipGroup ← User
         var query = LinkQuery
@@ -222,7 +222,7 @@ internal sealed class MembershipAdmin(
             .Where(UserDso.EntityType, existing.Resolved[subjectId])
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipQueryExecuted(LogLevel.Debug, subjectId);
         return ToRoleQueryResult(result);
@@ -236,7 +236,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var query = LinkQuery
             .From(RoleDso.EntityType)
@@ -244,7 +244,7 @@ internal sealed class MembershipAdmin(
             .Where(GroupDso.EntityType, groupResult.Value.Group.StoreId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<RoleDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipGroupQueryExecuted(LogLevel.Debug, groupId);
         return ToRoleQueryResult(result);
@@ -259,7 +259,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<GroupListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var query = LinkQuery
             .From(GroupDso.EntityType)
@@ -267,7 +267,7 @@ internal sealed class MembershipAdmin(
             .Where(UserDso.EntityType, existing.Resolved[subjectId])
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipQueryExecuted(LogLevel.Debug, subjectId);
         return new QueryResult<GroupListItem>
@@ -294,7 +294,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<MembershipRoleMemberListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var query = LinkQuery
             .From(UserDso.EntityType)
@@ -302,7 +302,7 @@ internal sealed class MembershipAdmin(
             .Where(RoleDso.EntityType, roleResult.Value.Role.StoreId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipRoleQueryExecuted(LogLevel.Debug, roleId);
         return new QueryResult<MembershipRoleMemberListItem>
@@ -327,7 +327,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<RoleGroupMemberListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var query = LinkQuery
             .From(GroupDso.EntityType)
@@ -335,7 +335,7 @@ internal sealed class MembershipAdmin(
             .Where(RoleDso.EntityType, roleResult.Value.Role.StoreId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<GroupDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipRoleQueryExecuted(LogLevel.Debug, roleId);
         return new QueryResult<RoleGroupMemberListItem>
@@ -361,7 +361,7 @@ internal sealed class MembershipAdmin(
             return EmptyResult<MembershipGroupMemberListItem>();
         }
 
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var query = LinkQuery
             .From(UserDso.EntityType)
@@ -369,7 +369,7 @@ internal sealed class MembershipAdmin(
             .Where(GroupDso.EntityType, groupResult.Value.Group.StoreId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
+        var result = await queryPartitionedStorage.QueryLinksAsync<UserDso.V1>(query, range ?? DefaultRange, ct);
 
         logger.MembershipGroupQueryExecuted(LogLevel.Debug, groupId);
         return new QueryResult<MembershipGroupMemberListItem>

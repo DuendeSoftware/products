@@ -103,9 +103,9 @@ internal sealed class SchemasEndpoint
     private async Task<ScimSchemaDefinition> BuildUserSchemaAsync(string baseUrl, string metadataRoute, Ct ct)
     {
         // Fixed SCIM User attributes (RFC 7643 §4.1)
-        var attributes = new List<ScimSchemaAttribute>
+        var attributes = new Dictionary<string, ScimSchemaAttribute>(StringComparer.OrdinalIgnoreCase)
         {
-            new()
+            [ScimConstants.Attributes.UserName] = new()
             {
                 Name = ScimConstants.Attributes.UserName,
                 Type = ScimConstants.DataTypes.String,
@@ -122,7 +122,7 @@ internal sealed class SchemasEndpoint
         // Only include the password attribute if changePassword is supported
         if (_capabilities.ChangePasswordSupported)
         {
-            attributes.Add(new ScimSchemaAttribute
+            attributes[ScimConstants.Attributes.Password] = new ScimSchemaAttribute
             {
                 Name = ScimConstants.Attributes.Password,
                 Type = ScimConstants.DataTypes.String,
@@ -133,7 +133,7 @@ internal sealed class SchemasEndpoint
                 Mutability = ScimConstants.MutabilityValues.WriteOnly,
                 Returned = ScimConstants.ReturnedValues.Never,
                 Uniqueness = ScimConstants.UniquenessValues.None
-            });
+            };
         }
 
         // Dynamic attributes from the user profile schema
@@ -142,19 +142,21 @@ internal sealed class SchemasEndpoint
             var schema = await _profileAdmin.GetSchemaAsync(ct);
             foreach (var definition in schema.AttributeDefinitions.Values)
             {
-                var mapped = _schemaMapper.Map(definition);
-                attributes.Add(new ScimSchemaAttribute
+                if (definition.Code.Value.Equals(ScimConstants.Attributes.Password, StringComparison.OrdinalIgnoreCase)
+                    && !_capabilities.ChangePasswordSupported)
                 {
-                    Name = mapped.Name,
-                    Type = mapped.Type,
-                    MultiValued = mapped.MultiValued,
-                    Description = mapped.Description,
-                    Required = mapped.Required,
-                    CaseExact = mapped.CaseExact,
-                    Mutability = mapped.Mutability,
-                    Returned = mapped.Returned,
-                    Uniqueness = mapped.Uniqueness
-                });
+                    continue;
+                }
+
+                var mapped = _schemaMapper.Map(definition);
+                if (mapped.Name.Equals(ScimConstants.Attributes.Password, StringComparison.OrdinalIgnoreCase)
+                    && !_capabilities.ChangePasswordSupported)
+                {
+                    continue;
+                }
+
+                attributes[mapped.Name] = ApplyFixedAttributeRequirements(MapAttribute(mapped));
+
             }
         }
 
@@ -163,7 +165,7 @@ internal sealed class SchemasEndpoint
             Id = ScimConstants.UserSchemaUrn,
             Name = ScimConstants.ResourceTypes.User,
             Description = "User account.",
-            Attributes = attributes,
+            Attributes = attributes.Values.ToArray(),
             Meta = new ScimMeta
             {
                 ResourceType = ScimConstants.ResourceTypes.Schema,
@@ -171,6 +173,38 @@ internal sealed class SchemasEndpoint
             }
         };
     }
+
+    private static ScimSchemaAttribute MapAttribute(ScimSchemaAttributeModel mapped) =>
+        new()
+        {
+            Name = mapped.Name,
+            Type = mapped.Type,
+            MultiValued = mapped.MultiValued,
+            Description = mapped.Description,
+            Required = mapped.Required,
+            CaseExact = mapped.CaseExact,
+            Mutability = mapped.Mutability,
+            Returned = mapped.Returned,
+            Uniqueness = mapped.Uniqueness,
+            SubAttributes = mapped.SubAttributes?.Select(MapAttribute).ToArray()
+        };
+
+    private static ScimSchemaAttribute ApplyFixedAttributeRequirements(ScimSchemaAttribute attribute) =>
+        attribute.Name.Equals(ScimConstants.Attributes.UserName, StringComparison.OrdinalIgnoreCase)
+            ? attribute with
+            {
+                Name = ScimConstants.Attributes.UserName,
+                Required = true,
+                Uniqueness = ScimConstants.UniquenessValues.Server
+            }
+            : attribute.Name.Equals(ScimConstants.Attributes.Password, StringComparison.OrdinalIgnoreCase)
+                ? attribute with
+                {
+                    Name = ScimConstants.Attributes.Password,
+                    Mutability = ScimConstants.MutabilityValues.WriteOnly,
+                    Returned = ScimConstants.ReturnedValues.Never
+                }
+                : attribute;
 
     private static ScimSchemaDefinition BuildGroupSchema(string baseUrl, string metadataRoute) =>
         new()

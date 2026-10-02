@@ -12,6 +12,7 @@ using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
+using Duende.UserManagement.Internal.Storage;
 using QueryBuilder = Duende.Storage.Internal.Querying.Query;
 using SearchFieldsBuilder = Duende.Storage.Internal.Querying.SearchFields.SearchFieldsBuilder;
 using StorageSortDirection = Duende.Storage.Querying.SortDirection;
@@ -19,7 +20,7 @@ using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 namespace Duende.UserManagement.Membership.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class GroupRepository(IStorageFactory storageFactory)
+internal sealed class GroupRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
     internal enum Keys
     {
@@ -35,8 +36,8 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
 
     internal async Task<CreateResult> CreateAsync(Group group, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.CreateAsync(
             group.StoreId,
             ToDso(group),
             GetKeys(group),
@@ -48,8 +49,8 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
 
     internal async Task<(Group Group, int Version)?> TryReadAsync(GroupId id, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(
             GroupDso.EntityType,
             DataStorageKey.Create(GroupIdDskV1.Create(id)),
             ct);
@@ -60,8 +61,8 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
 
     internal async Task<(Group Group, int Version)?> TryReadAsync(GroupName name, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(
             GroupDso.EntityType,
             DataStorageKey.Create(GroupNameDskV1.Create(name)),
             ct);
@@ -72,8 +73,8 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
 
     internal async Task<UpdateResult> UpdateAsync(Group group, int expectedVersion, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.UpdateAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.UpdateAsync(
             group.StoreId,
             ToDso(group),
             expectedVersion,
@@ -86,8 +87,8 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
 
     internal async Task<DeleteResult> DeleteAsync(GroupId id, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.DeleteAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.DeleteAsync(
             GroupDso.EntityType,
             DataStorageKey.Create(GroupIdDskV1.Create(id)),
             [],
@@ -103,7 +104,7 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
         IReadOnlyList<UuidV7> userUuids,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var groupUuid = group.StoreId;
 
         var ops = new List<IStorageOperation>
@@ -116,7 +117,7 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
             ops.Add(LinkOperation.For(MembershipLinkDefinitions.MembershipGroup, userUuid, groupUuid));
         }
 
-        return await storage.ExecuteBatchAsync(ops, [], ct);
+        return await partitionedStorage.ExecuteBatchAsync(ops, [], ct);
     }
 
     /// <summary>
@@ -131,7 +132,7 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
         IReadOnlyList<UuidV7> linksToRemove,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var groupUuid = group.StoreId;
 
         var ops = new List<IStorageOperation>
@@ -149,7 +150,7 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
             ops.Add(LinkOperation.For(MembershipLinkDefinitions.MembershipGroup, userUuid, groupUuid));
         }
 
-        return await storage.ExecuteBatchAsync(ops, [], ct);
+        return await partitionedStorage.ExecuteBatchAsync(ops, [], ct);
     }
 
     /// <summary>
@@ -161,7 +162,7 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
         IReadOnlyList<UuidV7> linksToRemove,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         var ops = new List<IStorageOperation>();
 
@@ -180,7 +181,7 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
             return BatchResult.Successful(0);
         }
 
-        return await storage.ExecuteBatchAsync(ops, [], ct);
+        return await partitionedStorage.ExecuteBatchAsync(ops, [], ct);
     }
 
     internal async Task<QueryResult<Group>> QueryAsync(
@@ -189,12 +190,12 @@ internal sealed class GroupRepository(IStorageFactory storageFactory)
         DataRange? range,
         Ct ct)
     {
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var queryFilter = BuildFilter(filter);
         var sortParam = BuildSort(sort);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await queryStorage.QueryAsync<GroupDso.V1>(
+        var result = await queryPartitionedStorage.QueryAsync<GroupDso.V1>(
             GroupDso.EntityType,
             queryFilter,
             sortParam,

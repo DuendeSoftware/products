@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Querying.Fields;
@@ -8,6 +9,7 @@ using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Duende.UserManagement;
+using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Profiles.Internal.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -578,12 +580,12 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         _ = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
 
         // Resolve the store directly to verify search-index behaviour
-        var storageFactory = _serviceProvider.GetRequiredService<IStorageFactory>();
-        var storage = await storageFactory.GetStorage(_ct);
+        var partitionedStorageFactory = _serviceProvider.GetRequiredService<IPartitionedStorageFactory>();
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, _ct);
 
         // Assert 1: filtering by the indexed attribute finds the user
         var searchableField = new StringField("searchable");
-        var indexedResult = await storage.QueryFieldsAsync(
+        var indexedResult = await partitionedStorage.QueryFieldsAsync(
             UserProfileDso.EntityType,
             [searchableField],
             StoreQuery.Where(searchableField.Equals("findme")),
@@ -596,7 +598,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
         // Assert 2: filtering by the non-indexed attribute returns no results because
         // the value was never written to the search index
         var hiddenField = new StringField("hidden");
-        var nonIndexedFilterResult = await storage.QueryFieldsAsync(
+        var nonIndexedFilterResult = await partitionedStorage.QueryFieldsAsync(
             UserProfileDso.EntityType,
             [hiddenField],
             StoreQuery.Where(hiddenField.Equals("secret")),
@@ -608,7 +610,7 @@ public sealed class UserProfileReaderIntegrationTests : IAsyncLifetime
 
         // Assert 3: projecting the non-indexed field returns no data for it —
         // the field was never written to the search index so it cannot be projected
-        var projectionResult = await storage.QueryFieldsAsync(
+        var projectionResult = await partitionedStorage.QueryFieldsAsync(
             UserProfileDso.EntityType,
             [hiddenField],
             StoreQuery.All(),

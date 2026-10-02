@@ -227,7 +227,8 @@ internal sealed class UserAuthenticatorsSelfService(
             credential.BackupEligible,
             credential.BackedUp,
             credential.Aaguid,
-            credential.Name);
+            credential.Name,
+            credential.Transports?.ToArray());
 
         var added = record.UserAuthenticators.TryAdd(passkeyCredential);
         if (!added)

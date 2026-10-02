@@ -60,7 +60,7 @@ public sealed class SigninTests(WebServerFixture testServer) : IAsyncDisposable
         await _identityServer.StartAsync();
         await _clientApp.StartAsync();
 
-        await _identityServer.GetRequiredService<IDatabaseSchema>().MigrateAsync(Ct);
+        await _identityServer.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct);
 
         var client = _clientApp.CreateClient(allowAutoRedirect: true);
 
@@ -157,7 +157,7 @@ public sealed class SigninTests(WebServerFixture testServer) : IAsyncDisposable
 
         await _clientApp.StartAsync();
 
-        await _identityServer.GetRequiredService<IDatabaseSchema>().MigrateAsync(Ct);
+        await _identityServer.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct);
 
         var client = _clientApp.CreateClient(allowAutoRedirect: true);
 
@@ -176,9 +176,11 @@ public sealed class SigninTests(WebServerFixture testServer) : IAsyncDisposable
             {
                 _ = services.AddLogging(logging => logging.AddXUnit(TestContext.Current.TestOutputHelper!));
                 _ = services.AddIdentityServer(opt => { opt.UserInteraction.LoginUrl = "/account/login"; })
+                    .AddStorage(x => x.AddSqliteInMemory())
+                    .AddConfigurationStorage()
+                    .AddOperationalStorage()
                     .AddUserManagement(users =>
                     {
-                        _ = users.AddSqliteInMemoryStore();
                         _ = users.Authentication(auth => auth.UseOtpDispatcher<FakeOtpDispatcher>());
                     })
                     .AddInMemoryIdentityResources([

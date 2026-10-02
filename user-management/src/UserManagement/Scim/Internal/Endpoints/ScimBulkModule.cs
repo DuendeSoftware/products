@@ -30,7 +30,7 @@ internal sealed class ScimBulkModule : IHttpModule
         var group = app.MapGroup(options.BulkRoute);
         _ = group.AddEndpointFilter<ScimContentTypeFilter>();
 
-        _ = group.MapPost("", (
+        var endpoint = group.MapPost("", (
                 [FromServices] ScimBulkEndpoint endpoint,
                 ScimBulkRequest? body,
                 HttpContext ctx,
@@ -38,6 +38,8 @@ internal sealed class ScimBulkModule : IHttpModule
             endpoint.HandleAsync(body, ctx, ct))
             .WithName("SCIM Bulk")
             .RequireAuthorization(writePolicy);
+
+        ScimBulkPayloadLimit.Apply(endpoint);
     }
 }
 

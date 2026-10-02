@@ -53,4 +53,7 @@ public sealed class ScimSchemaAttributeModel
 
     /// <summary>The uniqueness constraint (e.g. "none", "server", "global").</summary>
     public string Uniqueness { get; init; } = ScimConstants.UniquenessValues.None;
+
+    /// <summary>The subattributes of a complex attribute.</summary>
+    public IReadOnlyList<ScimSchemaAttributeModel>? SubAttributes { get; init; }
 }

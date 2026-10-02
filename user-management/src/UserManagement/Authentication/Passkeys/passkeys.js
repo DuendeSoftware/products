@@ -168,7 +168,8 @@ async function authenticateWithPasskey(callbacks = {}) {
       ...(options.rpId && {rpId: options.rpId}),
       allowCredentials: options.allowCredentials.map(cred => ({
         type: 'public-key',
-        id: base64UrlToArrayBuffer(cred.id)
+        id: base64UrlToArrayBuffer(cred.id),
+        ...(cred.transports?.length && {transports: cred.transports})
       })),
       userVerification: options.userVerification || 'preferred'
     };

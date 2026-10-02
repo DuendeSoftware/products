@@ -34,12 +34,12 @@ internal sealed class InMemoryStorageFixture
     /// </summary>
     public InMemoryStorageFixture(TimeProvider timeProvider) => TimeProvider = timeProvider;
 
-    public static IStorage Build()
+    public static IPartitionedStorage Build()
     {
         var dbId = Guid.NewGuid();
         return new ServiceCollection()
-                .AddStorageInternal(storage => storage.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared"))
+                .AddStorageInternal(storage => storage.AddSqlite(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared"))
                 .BuildServiceProvider()
-                .GetRequiredService<IStorage>();
+                .GetRequiredService<IPartitionedStorage>();
     }
 }

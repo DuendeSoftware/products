@@ -8,6 +8,13 @@ namespace Duende.UserManagement.Authentication.Otp.Internal;
 
 internal sealed class OtpWorkflow
 {
+    // Five is a product-selected per-code submission threshold; even a correct fifth submission is rejected.
+    // NIST SP 800-63B-4 section 3.2.2 caps consecutive failures using a specific authenticator on a
+    // subscriber account at 100 by disabling that authenticator. Lower limits are permitted, not prescribed:
+    // https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#throttle
+    // This counter alone does not meet that requirement: issuing a new code resets it, while section
+    // 3.1.3.2 requires the failed-authentication count to persist across new secrets:
+    // https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#oobver
     private const int MaxAttempts = 5;
 
     // https://pages.nist.gov/800-63-4/sp800-63b.html#issued-recovery-codes

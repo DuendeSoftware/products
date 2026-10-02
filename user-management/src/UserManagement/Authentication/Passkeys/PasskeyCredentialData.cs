@@ -15,4 +15,7 @@ public sealed record PasskeyCredentialData(
     bool BackedUp,
     Guid Aaguid,
     DateTimeOffset CreatedAt,
-    string Name);
+    string Name,
+    // Optional client-reported transport hints for browser authentication UI.
+    // These values are not used to validate authentication.
+    IReadOnlyList<string>? Transports);

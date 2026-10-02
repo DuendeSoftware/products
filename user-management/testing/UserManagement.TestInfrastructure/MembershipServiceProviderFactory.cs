@@ -1,7 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Platform.UserManagement;
+using Duende.Storage;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement.Internal;
 using Microsoft.Extensions.Configuration;
@@ -19,14 +22,18 @@ public sealed class MembershipServiceProviderFactory
         _ = services
             .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
             .AddLogging();
-        _ = services.AddUserManagementInternal(users =>
-        {
-            _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
-            // modules registered unconditionally by AddUserManagementInternal
-        });
+
+        _ = services.AddStorageInternal(storage => storage.AddSqliteInMemory(dbId.ToString()));
+
+        _ = services.AddSingleton<DataCategoryNameRecorder>();
+
+        _ = services
+            .AddUserManagementInternal(StorageInstanceId.Default, c => { });
+
+        _ = services.Decorate<IPartitionedStorageFactory>((partitionedStorageFactory, sp) => new RecordingPartitionedStorageFactory(partitionedStorageFactory, sp.GetRequiredService<DataCategoryNameRecorder>()));
 
         var sp = services.BuildServiceProvider();
-        await sp.GetRequiredService<IPooledStore>().MigrateAsync(CancellationToken.None);
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
         return sp;
     }
 }

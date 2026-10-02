@@ -417,7 +417,10 @@ public sealed class UserManagementProfileServiceTests : IAsyncLifetime
         _ = services.AddLogging();
         _ = services
             .AddIdentityServer()
-            .AddUserManagement(u => u.AddSqliteInMemoryStore());
+            .AddStorage(x => x.AddSqliteInMemory())
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
+            .AddUserManagement(_ => { });
 
         using var sp = services.BuildServiceProvider();
 

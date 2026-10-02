@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying.Expressions;
@@ -24,7 +25,7 @@ using Microsoft.Extensions.Options;
 namespace Duende.UserManagement.Authentication.Internal.Storage;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserAuthenticatorsRepository(
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     IOptions<UserAuthenticatorsRepository.Options> options,
     IDataProtectionProvider dataProtectionProvider,
     UserRepository userRepository)
@@ -42,9 +43,9 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<CreateResult> CreateAsync(UserAuthenticators authenticators, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var operations = await BuildCreateOperationsAsync(authenticators, ct);
-        var result = await storage.ExecuteBatchAsync(operations, [], ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return CreateResult.Success;
@@ -81,15 +82,15 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(OtpAddress otpAddress, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(OtpAddressDskV1.Create(otpAddress)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(OtpAddressDskV1.Create(otpAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
@@ -97,16 +98,16 @@ internal sealed class UserAuthenticatorsRepository(
         ExternalAuthenticatorAddress externalAuthenticatorAddress,
         Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(
         PasskeyCredentialId credentialId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(credentialId)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(credentialId)), ct);
         return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
     }
 
@@ -119,9 +120,9 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<UpdateResult> UpdateAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var operations = await BuildUpdateOperationsAsync(authenticators, expectedVersion, ct);
-        var result = await storage.ExecuteBatchAsync(operations, [], ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return UpdateResult.Success;
@@ -157,14 +158,14 @@ internal sealed class UserAuthenticatorsRepository(
 
     internal async Task<QueryResult<UserAuthenticators>> QueryAsync(DataRange? range, Ct ct)
     {
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
         if (dataRange.TokenValue is not null)
         {
             throw new NotSupportedException("User authenticator queries do not support continuation-token pagination.");
         }
 
-        var result = await queryStorage.QueryAsync<UserAuthenticatorsDso.V1>(
+        var result = await queryPartitionedStorage.QueryAsync<UserAuthenticatorsDso.V1>(
             UserAuthenticatorsDso.EntityType,
             AllExpression.Instance,
             SortParameter.Empty,
@@ -239,7 +240,10 @@ internal sealed class UserAuthenticatorsRepository(
             c.BackedUp,
             c.Aaguid,
             c.CreatedAt,
-            c.Name))],
+            c.Name)
+        {
+            Transports = c.Transports?.ToArray()
+        })],
         [.. entity.FailureStates.Select(ToDso)],
         entity.PasswordHistory.Count > 0
             ? [.. entity.PasswordHistory.Select(h => h.ToDso())]
@@ -264,7 +268,8 @@ internal sealed class UserAuthenticatorsRepository(
             c.BackedUp,
             c.Aaguid,
             c.CreatedAt,
-            c.Name)),
+            c.Name,
+            c.Transports?.ToArray())),
         (dso.FailureStates ?? []).Select(ToFailureState),
         (dso.PasswordHistory ?? []).Select(h => h.ToValueObject()),
         dso.PasswordSetAtUtc);

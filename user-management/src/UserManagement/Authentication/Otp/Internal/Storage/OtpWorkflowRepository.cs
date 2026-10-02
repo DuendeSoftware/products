@@ -1,14 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal.Storage;
+using Duende.UserManagement.Internal.Storage;
 
 namespace Duende.UserManagement.Authentication.Otp.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class OtpWorkflowRepository(IStorageFactory storageFactory)
+internal sealed class OtpWorkflowRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
     internal enum Keys
     {
@@ -18,8 +20,8 @@ internal sealed class OtpWorkflowRepository(IStorageFactory storageFactory)
 
     internal async Task<CreateResult> CreateAsync(OtpWorkflow workflow, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.CreateAsync(
             workflow.Id.Uuid,
             ToDso(workflow),
             [
@@ -34,8 +36,8 @@ internal sealed class OtpWorkflowRepository(IStorageFactory storageFactory)
 
     internal async Task<UpdateResult> UpdateAsync(OtpWorkflow workflow, int expectedVersion, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.UpdateAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.UpdateAsync(
             workflow.Id.Uuid,
             ToDso(workflow),
             expectedVersion,
@@ -51,8 +53,8 @@ internal sealed class OtpWorkflowRepository(IStorageFactory storageFactory)
 
     internal async Task<(OtpWorkflow OtpWorkflow, int Version)?> TryReadAsync(OtpAddress address, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(address)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowAddressDskV1.Create(address)), ct);
         return result.Found
             ? (ToEntity(result.Dso), result.Version.Value)
             : null;
@@ -60,8 +62,8 @@ internal sealed class OtpWorkflowRepository(IStorageFactory storageFactory)
 
     internal async Task<(OtpWorkflow OtpWorkflow, int Version)?> TryReadAsync(OtpToken token, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(token)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(OtpWorkflowDso.EntityType, DataStorageKey.Create(OtpWorkflowTokenDskV1.Create(token)), ct);
         return result.Found
             ? (ToEntity(result.Dso), result.Version.Value)
             : null;

@@ -19,7 +19,7 @@ internal static class UserAuthenticatorsDso
         List<OtpAddressDso.V1> OtpAddresses,
         List<ExternalAuthenticatorAddressDso.V1> ExternalAuthenticatorAddresses,
         List<TotpDeviceDso.V1> TotpDevices,
-        List<Pbkdf2HashedPasswordDso.V1> RecoveryCodes,
+        List<Pbkdf2HashedRecoveryCodeDso.V1> RecoveryCodes,
         HashedPasswordDso.V1? HashedPassword,
         List<PasskeyCredentialDso.V1> PasskeyCredentials,
         List<AuthenticatorFailureStateDso.V1>? FailureStates,

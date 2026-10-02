@@ -292,6 +292,53 @@ public sealed class ScimCreateUserEndpointTests(ITestOutputHelper output, WebSer
     }
 
     [Fact]
+    public async Task Create_user_with_string_encoded_boolean_attributes()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterScimUserSchemaAsync();
+
+        var (response, body) = await Fixture.Client.CreateUserAsync(
+            "isabel",
+            new
+            {
+                active = "true",
+                emails = new[]
+                {
+                    new { value = "isabel@example.com", type = "work", primary = "true" }
+                }
+            });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var user = body.RootElement.Deserialize<ScimUserFull>();
+        _ = user.ShouldNotBeNull();
+        user.Active.ShouldBe(true);
+        user.Emails.ShouldBeEquivalentTo(new[]
+        {
+            new ScimEmail { Value = "isabel@example.com", Type = "work", Primary = true }
+        });
+    }
+
+    [Fact]
+    public async Task Create_user_with_non_boolean_string_value_returns_400()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterScimUserSchemaAsync();
+
+        var payload = new
+        {
+            schemas = new[] { ScimHttpClient.UserSchemaUrn },
+            userName = "isabel",
+            active = "maybe"
+        };
+        var response = await Fixture.Client.PostAsync(
+            ScimHttpClient.UsersRoute, ScimHttpClient.ScimJsonContent(payload));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
+    }
+
+    [Fact]
     public async Task Create_user_with_invalid_complex_subattribute_returns_400()
     {
         await Fixture.InitializeAsync();

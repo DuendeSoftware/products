@@ -41,16 +41,6 @@ internal sealed class ScimBulkEndpoint(
 
         var options = scimOptions.Value;
 
-        // Enforce maxPayloadSize: check Content-Length header against the
-        // configured limit. This rejects oversized requests before processing
-        // any operations.
-        var contentLength = context.Request.ContentLength;
-        if (contentLength.HasValue && contentLength.Value > options.MaxBulkPayloadSize)
-        {
-            return ScimResults.Error(413,
-                $"The size of the bulk operation exceeds the maxPayloadSize ({options.MaxBulkPayloadSize}).");
-        }
-
         // Enforce maxOperations
         if (body.Operations.Count > options.MaxBulkOperations)
         {

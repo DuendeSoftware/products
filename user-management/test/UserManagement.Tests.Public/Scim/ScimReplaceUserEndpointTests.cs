@@ -324,6 +324,64 @@ public sealed class ScimReplaceUserEndpointTests(ITestOutputHelper output, WebSe
         });
     }
 
+    [Fact]
+    public async Task Replace_user_with_string_encoded_boolean_attributes()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterScimUserSchemaAsync();
+
+        var (createResponse, createBody) = await Fixture.Client.CreateUserAsync("isabel");
+        createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var id = ScimHttpClient.GetUserId(createBody);
+
+        var replacePayload = new
+        {
+            schemas = new[] { ScimHttpClient.UserSchemaUrn },
+            userName = "isabel",
+            active = "false",
+            emails = new[]
+            {
+                new { value = "isabel@example.com", type = "work", primary = "true" }
+            }
+        };
+        var response = await Fixture.Client.PutAsync(
+            $"{ScimHttpClient.UsersRoute}/{id}", ScimHttpClient.ScimJsonContent(replacePayload));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("active").GetBoolean().ShouldBe(false);
+        var user = body.RootElement.Deserialize<ScimUserWithEmails>();
+        _ = user.ShouldNotBeNull();
+        user.Emails.ShouldBeEquivalentTo(new[]
+        {
+            new ScimEmail { Value = "isabel@example.com", Type = "work", Primary = true }
+        });
+    }
+
+    [Fact]
+    public async Task Replace_user_with_non_boolean_string_value_returns_400()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterScimUserSchemaAsync();
+
+        var (createResponse, createBody) = await Fixture.Client.CreateUserAsync("isabel");
+        createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var id = ScimHttpClient.GetUserId(createBody);
+
+        var replacePayload = new
+        {
+            schemas = new[] { ScimHttpClient.UserSchemaUrn },
+            userName = "isabel",
+            active = "maybe"
+        };
+        var response = await Fixture.Client.PutAsync(
+            $"{ScimHttpClient.UsersRoute}/{id}", ScimHttpClient.ScimJsonContent(replacePayload));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
+    }
+
     public async ValueTask DisposeAsync()
     {
         await Fixture.DisposeAsync();

@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Text.Json.Serialization;
+
 namespace Duende.UserManagement.Authentication.Passkeys;
 
 /// <summary>
@@ -18,4 +20,11 @@ public sealed record PublicKeyCredentialDescriptor
     /// The credential ID (base64url-encoded).
     /// </summary>
     public required string Id { get; init; }
+
+    /// <summary>
+    /// Optional transport hints used by the browser to locate this credential.
+    /// These values do not restrict which transports may authenticate.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<string>? Transports { get; init; }
 }

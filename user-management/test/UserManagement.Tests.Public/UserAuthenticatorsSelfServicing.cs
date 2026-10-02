@@ -2,8 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Platform.UserManagement.Fixtures;
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
@@ -558,11 +561,10 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
             .AddSingleton(new FakeOtpDispatcher())
             .AddSingleton<IOtpDispatcher>(provider => provider.GetRequiredService<FakeOtpDispatcher>());
 
-        _ = services.AddUserManagementInternal(users =>
-        {
-            // modules registered unconditionally by AddUserManagementInternal
-            _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
-        });
+        _ = services.AddStorageInternal(x => x.AddSqliteInMemory(dbId.ToString()));
+        // These tests create their profile schema at runtime through ISchemaAdmin.
+        services.AddDynamicSchemaStorage();
+        _ = services.AddUserManagementInternal(StorageInstanceId.Default, _ => { });
 
         _ = services.Configure<UserAuthenticationOptions>(options =>
         {
@@ -578,7 +580,7 @@ public sealed class UserAuthenticatorsSelfServicing : IAsyncLifetime
         _ = services.AddDataProtection();
 
         var sp = services.BuildServiceProvider();
-        await sp.GetRequiredService<IPooledStore>().MigrateAsync(CancellationToken.None);
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
         return sp;
     }
 }

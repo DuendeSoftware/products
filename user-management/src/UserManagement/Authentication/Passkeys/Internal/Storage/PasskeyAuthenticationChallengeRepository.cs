@@ -1,23 +1,25 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
+using Duende.UserManagement.Internal.Storage;
 using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication.Passkeys.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class PasskeyAuthenticationChallengeRepository(
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     IOptions<UserAuthenticationOptions> options) : IPasskeyAuthenticationChallengeStore
 {
     public async Task<CreateResult> CreateAsync(PasskeyAuthenticationChallenge challenge, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var expiration = Expiration.InRelative(options.Value.Passkeys.ChallengeTimeout);
 
-        return await storage.CreateAsync(
+        return await partitionedStorage.CreateAsync(
             challenge.Id.Uuid.Value,
             ToDso(challenge),
             [],
@@ -30,8 +32,8 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
     public async Task<PasskeyAuthenticationChallenge?> TryReadAsync(
         PasskeyAuthenticationChallengeId challengeId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(
             PasskeyAuthenticationChallengeDso.EntityType,
             challengeId.Uuid.Value,
             ct);
@@ -48,8 +50,8 @@ internal sealed class PasskeyAuthenticationChallengeRepository(
 
     public async Task<DeleteResult> DeleteAsync(PasskeyAuthenticationChallengeId challengeId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.DeleteAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.DeleteAsync(
             PasskeyAuthenticationChallengeDso.EntityType,
             challengeId.Uuid.Value,
             [],

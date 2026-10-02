@@ -1,8 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
+using Duende.Storage.Internal;
 using Duende.UserManagement.Authentication.Internal;
 using Duende.UserManagement.Internal.Modules;
+using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Membership.Internal;
 using Duende.UserManagement.Profiles.Internal;
 using Duende.UserManagement.Scim.Internal;
@@ -20,9 +23,12 @@ public static class UserManagementServiceCollectionExtensions
         /// <summary>
         /// Adds user management services to the service collection using the provided configuration delegate.
         /// </summary>
+        /// <param name="storageInstanceId">The storage instance to use for user management data.</param>
         /// <param name="configure">A delegate to configure the user management builder.</param>
         /// <returns>The service collection for chaining.</returns>
-        public IServiceCollection AddUserManagementInternal(Action<IUserManagementBuilder> configure)
+        public IServiceCollection AddUserManagementInternal(
+            StorageInstanceId storageInstanceId,
+            Action<IUserManagementBuilder> configure)
         {
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(configure);
@@ -32,6 +38,8 @@ public static class UserManagementServiceCollectionExtensions
             services.RegisterModule<UserAuthenticationModule>();
             services.RegisterModule<UserMembershipModule>();
             services.RegisterModule<ScimModule>();
+
+            services.GetOrAddStorageInstanceRouter().AddMapping(DataCategoryName.UserManagement, storageInstanceId);
 
             return services;
         }

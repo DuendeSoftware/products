@@ -11,13 +11,14 @@ using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
+using Duende.UserManagement.Internal.Storage;
 using SearchFieldsBuilder = Duende.Storage.Internal.Querying.SearchFields.SearchFieldsBuilder;
 using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 
 namespace Duende.UserManagement.Membership.Internal.Storage;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class RoleRepository(IStorageFactory storageFactory)
+internal sealed class RoleRepository(IPartitionedStorageFactory partitionedStorageFactory)
 {
     internal enum Keys
     {
@@ -34,8 +35,8 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
     // Create
     internal async Task<CreateResult> CreateAsync(Role role, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.CreateAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.CreateAsync(
             role.StoreId,
             ToDso(role),
             GetKeys(role),
@@ -48,8 +49,8 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
     // Read by RoleId (DSK lookup)
     internal async Task<(Role Role, int Version)?> TryReadAsync(RoleId id, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleIdDskV1.Create(id)),
             ct);
@@ -61,8 +62,8 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
     // Read by Name
     internal async Task<(Role Role, int Version)?> TryReadAsync(RoleName name, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleNameDskV1.Create(name)),
             ct);
@@ -74,8 +75,8 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
     // Update
     internal async Task<UpdateResult> UpdateAsync(Role role, int expectedVersion, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.UpdateAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.UpdateAsync(
             role.StoreId,
             ToDso(role),
             expectedVersion,
@@ -89,8 +90,8 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
     // Delete by RoleId (DSK-based)
     internal async Task<DeleteResult> DeleteAsync(RoleId id, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        return await storage.DeleteAsync(
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.DeleteAsync(
             RoleDso.EntityType,
             DataStorageKey.Create(RoleIdDskV1.Create(id)),
             [],
@@ -104,12 +105,12 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
         DataRange? range,
         Ct ct)
     {
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var queryFilter = BuildFilter(filter);
         var sortParam = BuildSort(sort);
         var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await queryStorage.QueryAsync<RoleDso.V1>(
+        var result = await queryPartitionedStorage.QueryAsync<RoleDso.V1>(
             RoleDso.EntityType,
             queryFilter,
             sortParam,
@@ -156,7 +157,7 @@ internal sealed class RoleRepository(IStorageFactory storageFactory)
             RoleName.Load(dso.Name),
             dso.Description is not null ? RoleDescription.Load(dso.Description) : (RoleDescription?)null);
 
-    // Storage helpers
+    // partitionedStorage helpers
     private static IReadOnlyList<DataStorageKey> GetKeys(Role entity) =>
     [
         DataStorageKey.Create(RoleNameDskV1.Create(entity.Name)),

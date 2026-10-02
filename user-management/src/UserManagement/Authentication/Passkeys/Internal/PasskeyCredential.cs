@@ -15,7 +15,8 @@ internal sealed record PasskeyCredential(
     bool BackedUp,
     Guid Aaguid,
     DateTimeOffset CreatedAt,
-    string Name)
+    string Name,
+    IReadOnlyList<string>? Transports)
 {
     internal static PasskeyCredential Create(
         TimeProvider timeProvider,
@@ -26,7 +27,8 @@ internal sealed record PasskeyCredential(
         bool backupEligible,
         bool backedUp,
         Guid aaguid,
-        string name) => new(
+        string name,
+        IReadOnlyList<string>? transports) => new(
         credentialId,
         publicKeyCose,
         algorithm,
@@ -35,7 +37,8 @@ internal sealed record PasskeyCredential(
         backedUp,
         aaguid,
         timeProvider.GetUtcNow(),
-        name);
+        name,
+        transports);
 
     internal PasskeyCredential WithUpdatedSignCount(uint newSignCount) => this with { SignCount = newSignCount };
 

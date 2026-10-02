@@ -113,6 +113,7 @@ internal static class ScimConstants
     internal static class DataTypes
     {
         internal const string String = "string";
+        internal const string Binary = "binary";
         internal const string Boolean = "boolean";
         internal const string Integer = "integer";
         internal const string Decimal = "decimal";

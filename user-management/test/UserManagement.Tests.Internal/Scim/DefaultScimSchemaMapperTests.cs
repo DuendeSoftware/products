@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.EntityAttributeValue;
+using Duende.UserManagement.Scim;
 using Duende.UserManagement.Scim.Internal;
 
 namespace Duende.Platform.UserManagement.Scim;
@@ -46,7 +47,7 @@ public sealed class DefaultScimSchemaMapperTests
         var result = _mapper.Map(definition);
 
         result.Type.ShouldBe("boolean");
-        result.CaseExact.ShouldBeTrue();
+        result.CaseExact.ShouldBeFalse();
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public sealed class DefaultScimSchemaMapperTests
         var result = _mapper.Map(definition);
 
         result.Type.ShouldBe("integer");
-        result.CaseExact.ShouldBeTrue();
+        result.CaseExact.ShouldBeFalse();
     }
 
     [Fact]
@@ -78,7 +79,7 @@ public sealed class DefaultScimSchemaMapperTests
         var result = _mapper.Map(definition);
 
         result.Type.ShouldBe("decimal");
-        result.CaseExact.ShouldBeTrue();
+        result.CaseExact.ShouldBeFalse();
     }
 
     [Fact]
@@ -170,4 +171,61 @@ public sealed class DefaultScimSchemaMapperTests
     [InlineData(ScalarDataType.String, "string")]
     public void MapDataTypeReturnsCorrectScimType(ScalarDataType dataType, string expectedScimType) =>
         DefaultScimSchemaMapper.MapDataType(dataType).ShouldBe(expectedScimType);
+
+    [Fact]
+    public void map_uses_required_flag_and_maps_complex_subattributes()
+    {
+        var definition = DefaultScimUserSchema.AttributeDefinitions.Single(candidate =>
+            candidate.Code == AttributeCode.Create("emails"));
+
+        var result = _mapper.Map(definition);
+
+        result.Type.ShouldBe("complex");
+        result.MultiValued.ShouldBeTrue();
+        _ = result.SubAttributes.ShouldNotBeNull();
+        result.SubAttributes.Select(attribute => attribute.Name).ShouldBe(
+            ["value", "display", "type", "primary"],
+            ignoreOrder: true);
+        result.SubAttributes.Single(attribute => attribute.Name == "primary").Type.ShouldBe("boolean");
+    }
+
+    [Theory]
+    [InlineData("profileUrl", "string", "readWrite", "default")]
+    public void map_applies_standard_scim_metadata(
+        string attributeName,
+        string expectedType,
+        string expectedMutability,
+        string expectedReturned)
+    {
+        var definition = DefaultScimUserSchema.AttributeDefinitions.Single(candidate =>
+            candidate.Code == AttributeCode.Create(attributeName));
+
+        var result = _mapper.Map(definition);
+
+        result.Type.ShouldBe(expectedType);
+        result.Mutability.ShouldBe(expectedMutability);
+        result.Returned.ShouldBe(expectedReturned);
+    }
+
+    [Fact]
+    public void map_uses_definition_required_flag()
+    {
+        var definition = DefaultScimUserSchema.AttributeDefinitions.Single(candidate =>
+            candidate.Code == AttributeCode.Create("userName"));
+
+        _mapper.Map(definition).Required.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void map_maps_x509_certificate_value_as_binary()
+    {
+        var definition = DefaultScimUserSchema.AttributeDefinitions.Single(candidate =>
+            candidate.Code == AttributeCode.Create("x509Certificates"));
+
+        var result = _mapper.Map(definition);
+        var value = result.SubAttributes.ShouldNotBeNull().Single(attribute => attribute.Name == "value");
+
+        value.Type.ShouldBe("binary");
+        value.CaseExact.ShouldBeFalse();
+    }
 }

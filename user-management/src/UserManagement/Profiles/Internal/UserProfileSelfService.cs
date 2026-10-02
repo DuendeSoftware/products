@@ -23,7 +23,7 @@ internal sealed class UserProfileSelfService(UserProfileRepository repo, ISchema
             UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
         }
 
-        var profile = new UserProfile(subjectId, attributes);
+        var profile = new UserProfile(subjectId, await GetSchemaAsync(ct), attributes);
         if (await repo.CreateAsync(profile, ct) is CreateResult.Success)
         {
             licenseValidator.ValidateUserCount();

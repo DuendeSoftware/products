@@ -208,10 +208,11 @@ internal sealed class PasskeyCeremonies(
                 "No passkey registered.");
         }
 
-        var allowCredentials = passkeyCredentials.Keys
-            .Select(id => new PublicKeyCredentialDescriptor
+        var allowCredentials = passkeyCredentials.Values
+            .Select(credential => new PublicKeyCredentialDescriptor
             {
-                Id = Base64Url.EncodeToString(id.ToBytes())
+                Id = Base64Url.EncodeToString(credential.CredentialId.ToBytes()),
+                Transports = credential.Transports is { Count: > 0 } transports ? [.. transports] : null
             })
             .ToList();
 

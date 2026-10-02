@@ -18,7 +18,7 @@ using Duende.UserManagement.Internal.Storage;
 namespace Duende.UserManagement.Profiles.Internal.Storage;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserProfileRepository(
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     ISchemaStore schemaStore,
     UserRepository userRepository)
 {
@@ -31,9 +31,9 @@ internal sealed class UserProfileRepository(
 
     internal async Task<CreateResult> CreateAsync(UserProfile profile, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var operations = await BuildCreateOperationsAsync(profile, ct);
-        var result = await storage.ExecuteBatchAsync(operations, [], ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return CreateResult.Success;
@@ -50,8 +50,8 @@ internal sealed class UserProfileRepository(
 
     internal async Task<(UserProfile UserProfile, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
         return result.Found
             ? (ToEntity(result.Dso, await GetSchemaAsync(ct)), result.Version.Value)
             : null;
@@ -65,13 +65,13 @@ internal sealed class UserProfileRepository(
     internal async Task<(Dictionary<UserSubjectId, UuidV7> Resolved, List<UserSubjectId> NotFound)>
         ResolveProfileUuidsAsync(IReadOnlyList<UserSubjectId> subjectIds, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var resolved = new Dictionary<UserSubjectId, UuidV7>(subjectIds.Count);
         var notFound = new List<UserSubjectId>();
 
         foreach (var subjectId in subjectIds)
         {
-            var result = await storage.TryReadAsync(
+            var result = await partitionedStorage.TryReadAsync(
                 UserProfileDso.EntityType,
                 DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)),
                 ct);
@@ -91,14 +91,14 @@ internal sealed class UserProfileRepository(
 
     internal async Task<(UserProfile UserProfile, int Version)?> TryReadAsync(AttributeCode code, object value, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(AttributeValueDskV1.Create(code, value)), ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserProfileDso.EntityType, DataStorageKey.Create(AttributeValueDskV1.Create(code, value)), ct);
         return result.Found
             ? (ToEntity(result.Dso, await GetSchemaAsync(ct)), result.Version.Value)
             : null;
     }
 
-    private static UserProfile ToEntity(IDataStorageObject value, IReadOnlyAttributeSchema? schema) =>
+    private static UserProfile ToEntity(IDataStorageObject value, IReadOnlyAttributeSchema schema) =>
         value switch
         {
             UserProfileDso.V1 v1 => ToEntity(v1, schema),
@@ -107,9 +107,9 @@ internal sealed class UserProfileRepository(
 
     internal async Task<UpdateResult> UpdateAsync(UserProfile profile, int expectedVersion, Ct ct)
     {
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var operations = await BuildUpdateOperationsAsync(profile, expectedVersion, ct);
-        var result = await storage.ExecuteBatchAsync(operations, [], ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
         if (result.Success)
         {
             return UpdateResult.Success;
@@ -128,17 +128,16 @@ internal sealed class UserProfileRepository(
     internal async Task<IReadOnlyList<IStorageOperation>> CreateBatchOperationAsync(UserProfile profile, Ct ct) =>
         await BuildCreateOperationsAsync(profile, ct);
 
-    internal async Task<(CreateOperation AspectOp, UserDso.AspectRef AspectRef)> CreateAspectBatchOperationAsync(UserProfile profile, Ct ct)
+    internal static (CreateOperation AspectOp, UserDso.AspectRef AspectRef) CreateAspectBatchOperation(UserProfile profile)
     {
-        var schema = await GetSchemaAsync(ct);
         var aspectOp = CreateOperation.For(
             profile.Id.Uuid,
             ToDso(profile),
             [
                 DataStorageKey.Create(UserSubjectIdDskV1.Create(profile.SubjectId)),
-                .. GetJsonKeys(profile, schema)
+                .. GetJsonKeys(profile)
             ],
-            GetSearchFields(profile, schema),
+            GetSearchFields(profile),
             Expiration.NoExpiration);
         var aspectRef = new UserDso.AspectRef(profile.Id.Uuid.Value, 1, UserProfileDso.EntityType.Id);
         return (aspectOp, aspectRef);
@@ -150,20 +149,17 @@ internal sealed class UserProfileRepository(
     internal async Task<IReadOnlyList<IStorageOperation>> UpdateBatchOperationAsync(UserProfile profile, int expectedVersion, Ct ct) =>
         await BuildUpdateOperationsAsync(profile, expectedVersion, ct);
 
-    internal async Task<UpdateOperation> UpdateAspectOnlyBatchOperationAsync(UserProfile profile, int expectedVersion, Ct ct)
-    {
-        var schema = await GetSchemaAsync(ct);
-        return UpdateOperation.For(
+    internal static UpdateOperation UpdateAspectOnlyBatchOperation(UserProfile profile, int expectedVersion) =>
+        UpdateOperation.For(
             profile.Id.Uuid,
             ToDso(profile),
             expectedVersion,
             [
                 DataStorageKey.Create(UserSubjectIdDskV1.Create(profile.SubjectId)),
-                .. GetJsonKeys(profile, schema)
+                .. GetJsonKeys(profile)
             ],
-            GetSearchFields(profile, schema),
+            GetSearchFields(profile),
             Expiration.NoExpiration);
-    }
 
     internal static DeleteOperation DeleteBatchOperation(UserSubjectId subjectId) =>
         DeleteOperation.ByKey(UserProfileDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)));
@@ -171,10 +167,9 @@ internal sealed class UserProfileRepository(
     internal async Task<QueryResult<UserProfile>> QueryAsync(
         FilterBy? filter, SortBy? sort, DataRange? range, Ct ct)
     {
-        var queryStorage = await storageFactory.GetStorage(ct);
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
         var schema = await GetSchemaAsync(ct);
-        var attributeDefinitions = schema?.AttributeDefinitions ??
-                                   new Dictionary<AttributeCode, AttributeDefinition>();
+        var attributeDefinitions = schema.AttributeDefinitions;
 
         var queryFilter = BuildFilter(filter, attributeDefinitions);
         var sortParam = BuildSort(sort, attributeDefinitions);
@@ -184,7 +179,7 @@ internal sealed class UserProfileRepository(
             throw new NotSupportedException("User profile continuation-token pagination requires a valid sort.");
         }
 
-        var result = await queryStorage.QueryAsync<UserProfileDso.V1>(
+        var result = await queryPartitionedStorage.QueryAsync<UserProfileDso.V1>(
             UserProfileDso.EntityType,
             queryFilter,
             sortParam,
@@ -196,20 +191,8 @@ internal sealed class UserProfileRepository(
 
     private async Task<List<IStorageOperation>> BuildCreateOperationsAsync(UserProfile profile, Ct ct)
     {
-        var schema = await GetSchemaAsync(ct);
-
-        var aspectRef = new UserDso.AspectRef(profile.Id.Uuid.Value, 1, UserProfileDso.EntityType.Id);
         var existingUser = await userRepository.TryReadAsync(profile.SubjectId, ct);
-
-        var aspectOp = CreateOperation.For(
-            profile.Id.Uuid,
-            ToDso(profile),
-            [
-                DataStorageKey.Create(UserSubjectIdDskV1.Create(profile.SubjectId)),
-                .. GetJsonKeys(profile, schema)
-            ],
-            GetSearchFields(profile, schema),
-            Expiration.NoExpiration);
+        var (aspectOp, aspectRef) = CreateAspectBatchOperation(profile);
 
         IStorageOperation userOp = existingUser is var (user, userVersion)
             ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
@@ -220,19 +203,9 @@ internal sealed class UserProfileRepository(
 
     private async Task<List<IStorageOperation>> BuildUpdateOperationsAsync(UserProfile profile, int expectedVersion, Ct ct)
     {
-        var schema = await GetSchemaAsync(ct);
-        var aspectOp = UpdateOperation.For(
-            profile.Id.Uuid,
-            ToDso(profile),
-            expectedVersion,
-            [
-                DataStorageKey.Create(UserSubjectIdDskV1.Create(profile.SubjectId)),
-                .. GetJsonKeys(profile, schema)
-            ],
-            GetSearchFields(profile, schema),
-            Expiration.NoExpiration);
+        var aspectOp = UpdateAspectOnlyBatchOperation(profile, expectedVersion);
 
-        var aspectRef = new UserDso.AspectRef(profile.Id.Uuid.Value, expectedVersion + 1, UserProfileDso.EntityType.Id);
+        var aspectRef = GetAspectRef(profile, expectedVersion + 1);
         var existingUser = await userRepository.TryReadAsync(profile.SubjectId, ct);
 
         IStorageOperation userOp = existingUser is var (user, userVersion)
@@ -292,49 +265,42 @@ internal sealed class UserProfileRepository(
         entity.SubjectId.Value,
         EavMapper.ToDsoList(entity.Attributes.Values));
 
-    private static UserProfile ToEntity(UserProfileDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
+    private static UserProfile ToEntity(UserProfileDso.V1 dso, IReadOnlyAttributeSchema schema) =>
         UserProfile.Load(
             UserProfileId.Load(dso.Id),
             UserSubjectId.Load(dso.SubjectId),
+            schema,
             EavMapper.ToAttributeValues(dso.Attributes, schema));
 
-    private static List<DataStorageKey> GetJsonKeys(UserProfile profile, IReadOnlyAttributeSchema? schema)
+    private static List<DataStorageKey> GetJsonKeys(UserProfile profile)
     {
         List<DataStorageKey> keys = [];
 
-        if (schema is not null)
+        foreach (var attribute in profile.Attributes.Values)
         {
-            foreach (var attribute in profile.Attributes.Values)
+            if (!profile.Schema.AttributeDefinitions.TryGetValue(attribute.Code, out var definition))
             {
-                if (!schema.AttributeDefinitions.TryGetValue(attribute.Code, out var definition))
-                {
-                    continue;
-                }
-
-                if (!definition.IsUnique)
-                {
-                    continue;
-                }
-
-                keys.Add(DataStorageKey.Create(AttributeValueDskV1.Create(attribute)));
+                continue;
             }
+
+            if (!definition.IsUnique)
+            {
+                continue;
+            }
+
+            keys.Add(DataStorageKey.Create(AttributeValueDskV1.Create(attribute)));
         }
 
         return keys;
     }
 
-    private static SearchFieldCollection GetSearchFields(UserProfile profile, IReadOnlyAttributeSchema? schema)
+    private static SearchFieldCollection GetSearchFields(UserProfile profile)
     {
         var builder = new SearchFieldsBuilder();
 
-        if (schema is null)
-        {
-            return builder.Build();
-        }
-
         foreach (var attribute in profile.Attributes.Values)
         {
-            if (!schema.AttributeDefinitions.TryGetValue(attribute.Code, out var definition))
+            if (!profile.Schema.AttributeDefinitions.TryGetValue(attribute.Code, out var definition))
             {
                 continue;
             }

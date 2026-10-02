@@ -4,6 +4,7 @@
 using System.Buffers.Text;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Duende.Platform.UserManagement.Fixtures;
 using Duende.UserManagement;
@@ -105,6 +106,59 @@ public class PasskeySecondFactorEndpointTests(WebServerFixture webServerFixture)
     }
 
     [Fact]
+    public async Task Authenticate_begin_returns_registered_transports_for_each_credential()
+    {
+        // Arrange: register credentials through HTTP, including a future transport value.
+        UserSubjectId? resolvedSubjectId = null;
+        ConfigureSecondFactorResolver(() => resolvedSubjectId);
+        await _fixture.InitializeAsync();
+
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
+        resolvedSubjectId = subjectId;
+        await UserAuthenticationFixture.SignInClientAsync(_fixture.NonRedirectingClient, subjectId.ToString());
+
+        var transportsByCredentialId = new Dictionary<string, string[]>();
+        var transportLists = new[]
+        {
+            new[] { "internal" },
+            new[] { "nfc", "usb" },
+            new[] { "future-transport", "hybrid" }
+        };
+
+        foreach (var transports in transportLists)
+        {
+            var credentialId = await RegisterPasskeyWithTransportsAsync(
+                name: $"Passkey {transportsByCredentialId.Count}",
+                transports
+            );
+
+            transportsByCredentialId.Add(credentialId, transports);
+        }
+
+        // Act: request authentication options for the persisted credentials.
+        var authenticationResponse = await _fixture.NonRedirectingClient.PostAsync(
+            "/passkeys/authenticate/begin", null, _ct);
+
+        authenticationResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var authenticationJson = await authenticationResponse.Content.ReadFromJsonAsync<JsonElement>(_ct);
+        var allowCredentials = authenticationJson.GetProperty("options").GetProperty("allowCredentials");
+
+        // Assert: every registered credential is present with its own unchanged hints.
+        allowCredentials.EnumerateArray()
+            .Select(credential => credential.GetProperty("id").GetString())
+            .ShouldBe(transportsByCredentialId.Keys, ignoreOrder: true);
+
+        foreach (var credential in allowCredentials.EnumerateArray())
+        {
+            var credentialId = credential.GetProperty("id").GetString()!;
+            credential.GetProperty("transports").EnumerateArray()
+                .Select(transport => transport.GetString())
+                .ShouldBe(transportsByCredentialId[credentialId], ignoreOrder: false);
+        }
+    }
+
+    [Fact]
     public async Task Authenticate_authentication_flow_succeeds_for_resolved_user()
     {
         UserSubjectId? resolvedSubjectId = null;
@@ -158,6 +212,49 @@ public class PasskeySecondFactorEndpointTests(WebServerFixture webServerFixture)
         completeJson.GetProperty("userVerified").GetBoolean().ShouldBeFalse();
         completeJson.GetProperty("backedUp").GetBoolean().ShouldBeFalse();
         completeResponse.Headers.Contains("Set-Cookie").ShouldBeTrue();
+    }
+
+    private async Task<string> RegisterPasskeyWithTransportsAsync(string name, string[] transports)
+    {
+        var beginResponse = await _fixture.NonRedirectingClient.PostAsync("/passkeys/register/begin", null, _ct);
+        beginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var beginJson = await beginResponse.Content.ReadFromJsonAsync<JsonElement>(_ct);
+        var challengeId = beginJson.GetProperty("challengeId").GetGuid();
+        var challenge = beginJson.GetProperty("options").GetProperty("challenge").GetString()!;
+
+        var credentialId = challengeId.ToByteArray();
+        var encodedCredentialId = Base64Url.EncodeToString(credentialId);
+
+        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // 0x45 = user present (0x01) | user verified (0x04) | attested credential data (0x40).
+        var attestationObject = WebAuthnFixtures.CreateAttestationObjectWithEcdsa(
+            PasskeyConstants.AttestationFormat.None, _fixture.RelyingPartyId, credentialId, ecdsa, flags: 0x45);
+
+        var clientData = WebAuthnFixtures.CreateClientDataJson(
+            PasskeyConstants.ClientDataType.Create, challenge, _fixture.Origin);
+
+        var completeBody = new
+        {
+            challengeId,
+            id = encodedCredentialId,
+            rawId = encodedCredentialId,
+            type = PasskeyConstants.CredentialType.PublicKey,
+            response = new
+            {
+                clientDataJSON = clientData,
+                attestationObject = Base64Url.EncodeToString(attestationObject),
+                transports
+            },
+            name
+        };
+
+        var completeResponse = await _fixture.NonRedirectingClient.PostAsJsonAsync(
+            "/passkeys/register/complete", completeBody, _ct);
+
+        completeResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        return encodedCredentialId;
     }
 }
 

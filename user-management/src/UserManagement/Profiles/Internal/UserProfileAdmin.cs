@@ -24,7 +24,7 @@ internal sealed class UserProfileAdmin(UserProfileRepository repo, ISchemaStore 
             UserManagementLicenseValidator.ThrowInvalidLicenseException("Your license does not include the Profiles feature.");
         }
 
-        var profile = new UserProfile(subjectId, attributes);
+        var profile = new UserProfile(subjectId, await GetSchemaAsync(ct), attributes);
         if (await repo.CreateAsync(profile, ct) is CreateResult.Success)
         {
             licenseValidator.ValidateUserCount();
@@ -76,16 +76,15 @@ internal sealed class UserProfileAdmin(UserProfileRepository repo, ISchemaStore 
         ArgumentNullException.ThrowIfNull(attributes);
 
         var result = await repo.QueryAsync(request.Filter, request.Sort, request.Range, ct);
-        var schema = await GetSchemaAsync(ct);
-        return result.ConvertTo(profile => ProjectAttributes(profile, attributes, schema));
+        return result.ConvertTo(profile => ProjectAttributes(profile, attributes));
     }
 
-    private static UserProfileAttributeProjection ProjectAttributes(UserProfile profile, HashSet<AttributeCode> attributes, IReadOnlyAttributeSchema schema)
+    private static UserProfileAttributeProjection ProjectAttributes(UserProfile profile, HashSet<AttributeCode> attributes)
     {
         var values = profile.Attributes
-            .Where(kvp => attributes.Contains(kvp.Key) && schema.AttributeDefinitions.ContainsKey(kvp.Key))
+            .Where(kvp => attributes.Contains(kvp.Key) && profile.Schema.AttributeDefinitions.ContainsKey(kvp.Key))
             .Select(kvp => kvp.Value);
-        var collection = new AttributeValueCollection(schema, values);
+        var collection = new AttributeValueCollection(profile.Schema, values);
         return new UserProfileAttributeProjection(profile.SubjectId, collection);
     }
 }

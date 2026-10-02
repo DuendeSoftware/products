@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.UserManagement;
@@ -9,14 +8,9 @@ namespace Duende.UserManagement;
 /// <summary>
 /// Builder interface for configuring Duende User Management services.
 /// </summary>
-public interface IUserManagementBuilder : IStorageBuilder
+public interface IUserManagementBuilder
 {
-
-    internal new IServiceCollection Services { get; }
-
-#pragma warning disable CA1033 // Interface methods should be callable by child types
-    IServiceCollection IStorageBuilder.Services => Services;
-#pragma warning restore CA1033
+    internal IServiceCollection Services { get; }
 
     internal class Builder(IServiceCollection services) : IUserManagementBuilder
     {

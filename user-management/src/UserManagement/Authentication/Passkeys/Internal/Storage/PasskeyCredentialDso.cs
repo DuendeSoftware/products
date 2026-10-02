@@ -22,5 +22,8 @@ internal static class PasskeyCredentialDso
         bool BackedUp,
         Guid Aaguid,
         DateTimeOffset CreatedAt,
-        string Name);
+        string Name)
+    {
+        public string[]? Transports { get; init; }
+    }
 }

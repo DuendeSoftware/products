@@ -6,6 +6,7 @@ using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.External;
 using Duende.UserManagement.Authentication.RecoveryCodes;
+using Duende.UserManagement.Import;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Platform.UserManagement;
@@ -102,6 +103,35 @@ public sealed class RecoveryCodeAuthentication : IAsyncLifetime
         var codes = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
 
         codes.Count.ShouldBe(10);
+    }
+
+    [Fact]
+    public async Task Generated_codes_have_13_characters()
+    {
+        var subjectId = await _externalAuthenticator.CreateUserAsync(TestData.CreateExternalAuthenticatorAddress(), _ct);
+        var codes = (await _selfService.TryCreateRecoveryCodesAsync(subjectId, _ct)).ShouldNotBeNull();
+
+        codes.ShouldAllBe(code => code.Value.Length == 13);
+    }
+
+    [Fact]
+    public async Task Can_authenticate_with_an_imported_legacy_10_character_code()
+    {
+        var importer = _serviceProvider.GetRequiredService<IUserImporter>();
+        var subjectId = UserSubjectId.New();
+        var legacyCode = PlainTextRecoveryCode.Create("ABCDE12345");
+        var batch = await importer.ImportAsync(
+            [new UserImportRecord
+            {
+                SubjectId = subjectId,
+                Authenticators = new AuthenticatorImport { RecoveryCodes = [legacyCode] }
+            }],
+            _ct);
+        batch.Results.ShouldHaveSingleItem().Status.ShouldBe(UserImportStatus.Created);
+
+        var authenticated = await _auth.TryAuthenticateAsync(subjectId, legacyCode, _ct);
+
+        authenticated.ShouldBeTrue();
     }
 
     [Fact]

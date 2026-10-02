@@ -85,6 +85,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     }
 
     [Theory]
+    [InlineData(15)]
     [InlineData(16)]
     [InlineData(32)]
     [InlineData(64)]
@@ -95,6 +96,14 @@ public sealed class PasskeyRegistration : IAsyncLifetime
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var userSubjectId = UserSubjectId.New();
+
+        if (challengeSize < 16)
+        {
+            _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(() =>
+                passkeyAuth.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct));
+
+            return;
+        }
 
         var result = await passkeyAuth.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);

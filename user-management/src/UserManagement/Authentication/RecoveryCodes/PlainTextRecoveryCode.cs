@@ -11,7 +11,12 @@ namespace Duende.UserManagement.Authentication.RecoveryCodes;
 [StringValue]
 public partial record PlainTextRecoveryCode
 {
-    private const int NewLength = 10;
+    // Each Crockford Base32 character carries 5 bits, so 13 characters provide 65 bits of entropy.
+    // NIST SP 800-63B-4 section 4.2.1.1 requires saved recovery codes to include at least 64 bits from an
+    // approved random bit generator: https://pages.nist.gov/800-63-4/sp800-63b/events/#savedrecovery
+    // Section 3.1.2 covers look-up secrets more generally; the shorter issued-recovery-code minimum does not apply.
+    // Only generation length is governed here. Existing shorter codes are still accepted.
+    private const int NewLength = 13;
 
     private static readonly byte MaxLength = Pbkdf2MaxPasswordLength.For(new Pbkdf2Inputs().PseudorandomFunctionName);
 

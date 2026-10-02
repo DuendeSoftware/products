@@ -3,6 +3,7 @@
 
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.Passwords;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Platform.UserManagement;
@@ -54,5 +55,38 @@ public sealed class PasswordCreation : IAsyncLifetime
         var exception = await Record.ExceptionAsync(async () => _ = await _factory.ValidatePasswordAsync(UserSubjectId.New(), password, _ct));
 
         _ = exception.ShouldBeOfType<FormatException>();
+    }
+}
+
+public sealed class DefaultPasswordPolicy : IAsyncLifetime
+{
+    private readonly Ct _ct = TestContext.Current.CancellationToken;
+    private IUserAuthenticatorsSelfService _selfService = null!;
+    private ServiceProvider _provider = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        _provider = await UsersServiceProviderFactory.CreateAsync();
+        _selfService = _provider.GetRequiredService<IUserAuthenticatorsSelfService>();
+    }
+
+    public ValueTask DisposeAsync() => _provider.DisposeAsync();
+
+    [Fact]
+    public async Task Rejects_14_character_password()
+    {
+        var result = await _selfService.TryValidatePasswordAsync(UserSubjectId.New(), "correcthorsebt", _ct);
+
+        _ = result.ShouldBeOfType<PasswordCreationResult.Failed>();
+    }
+
+    [Theory]
+    [InlineData("lowercase only", "correcthorsebat")]
+    [InlineData("uppercase only", "CORRECTHORSEBAT")]
+    public async Task Accepts_15_character_password_without_composition_rules(string description, string password)
+    {
+        var result = await _selfService.TryValidatePasswordAsync(UserSubjectId.New(), password, _ct);
+
+        _ = result.ShouldBeOfType<PasswordCreationResult.Success>(description);
     }
 }

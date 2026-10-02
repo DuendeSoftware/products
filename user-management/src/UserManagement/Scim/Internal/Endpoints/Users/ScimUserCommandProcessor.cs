@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
@@ -37,13 +38,13 @@ internal sealed class ScimUserCommandProcessor(
     ILogger<ScimUserCommandProcessor> logger,
     TimeProvider timeProvider,
     UserManagementLicenseValidator licenseValidator,
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     UserRepository userRepository,
     UserAuthenticatorsRepository? authenticatorsRepo = null,
     ValidatedPlainTextPasswordFactory? passwordFactory = null,
     PasswordHashAlgorithms? passwordHashAlgorithms = null)
 {
-    private readonly IStorageFactory _storageFactory = storageFactory;
+    private readonly IPartitionedStorageFactory _partitionedStorageFactory = partitionedStorageFactory;
     private readonly UserRepository _userRepository = userRepository;
 
     private bool IsAuthenticationEnabled => features.OfType<UserAuthenticationFeature>().Any();
@@ -122,7 +123,6 @@ internal sealed class ScimUserCommandProcessor(
     ///   <item>Loads existing profile and UserDso to confirm the user exists</item>
     ///   <item>Enforces the If-Match ETag precondition</item>
     ///   <item>Maps the SCIM request body to internal attribute values</item>
-    ///   <item>Verifies the attribute schema version hasn't drifted</item>
     /// </list>
     /// </summary>
     private async Task<ReplaceValidationResult> ValidateReplaceAsync(
@@ -157,7 +157,7 @@ internal sealed class ScimUserCommandProcessor(
             return ReplaceValidationResult.Fail(preconditionError);
         }
 
-        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
+        var schema = profileExistingResult?.UserProfile.Schema ?? await schemaStore.GetAsync(SchemaId.UserProfile, ct);
 
         if (string.IsNullOrWhiteSpace(body.UserName))
         {
@@ -181,7 +181,7 @@ internal sealed class ScimUserCommandProcessor(
                     "password is not supported when user authentication is not enabled."));
         }
 
-        return new ReplaceValidationResult(subjectId, mapping, profileExistingResult, userExistingResult);
+        return new ReplaceValidationResult(subjectId, schema, mapping, profileExistingResult, userExistingResult);
     }
 
     /// <summary>
@@ -205,14 +205,14 @@ internal sealed class ScimUserCommandProcessor(
         {
             var (existingProfile, existingVersion) = validated.ProfileExistingResult.Value;
             existingProfile.ReplaceAttributes(validated.Mapping!.Attributes!);
-            profileAspectOp = await profileRepo.UpdateAspectOnlyBatchOperationAsync(existingProfile, existingVersion, ct);
+            profileAspectOp = UserProfileRepository.UpdateAspectOnlyBatchOperation(existingProfile, existingVersion);
             newProfileVersion = existingVersion + 1;
             updatedProfile = existingProfile;
         }
         else
         {
-            var newProfile = new UserProfile(validated.SubjectId!, validated.Mapping!.Attributes!);
-            var (createOp, _) = await profileRepo.CreateAspectBatchOperationAsync(newProfile, ct);
+            var newProfile = new UserProfile(validated.SubjectId!, validated.Schema!, validated.Mapping!.Attributes!);
+            var (createOp, _) = UserProfileRepository.CreateAspectBatchOperation(newProfile);
             profileAspectOp = createOp;
             newProfileVersion = 1;
             updatedProfile = newProfile;
@@ -300,7 +300,7 @@ internal sealed class ScimUserCommandProcessor(
         int newUserDsoVersion,
         Ct ct)
     {
-        var batchResult = await (await _storageFactory.GetStorage(ct)).ExecuteBatchAsync(operations, [], ct);
+        var batchResult = await (await _partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct)).ExecuteBatchAsync(operations, [], ct);
         if (!batchResult.Success)
         {
             var mapError = MapBatchError(batchResult);
@@ -320,6 +320,7 @@ internal sealed class ScimUserCommandProcessor(
 
     private sealed record ReplaceValidationResult(
         UserSubjectId? SubjectId = default,
+        IReadOnlyAttributeSchema? Schema = null,
         ScimRequestMapper.MappingResult? Mapping = null,
         (UserProfile UserProfile, int Version)? ProfileExistingResult = null,
         (UserDso.V1 User, int Version)? UserExistingResult = null)
@@ -415,8 +416,8 @@ internal sealed class ScimUserCommandProcessor(
             return preconditionError;
         }
 
-        var schema = await schemaStore.GetAsync(SchemaId.UserProfile, ct);
         var profile = profileExistingResult.Value.UserProfile;
+        var schema = profile.Schema;
 
         // Read authenticators if authentication is enabled
         UserAuthenticators? authenticators = null;
@@ -562,7 +563,7 @@ internal sealed class ScimUserCommandProcessor(
 
         // Build profile aspect operation
         var profileCurrentVersion = profileExistingResult.Value.Version;
-        var profileAspectOp = await profileRepo.UpdateAspectOnlyBatchOperationAsync(profile, profileCurrentVersion, ct);
+        var profileAspectOp = UserProfileRepository.UpdateAspectOnlyBatchOperation(profile, profileCurrentVersion);
         var newProfileVersion = profileCurrentVersion + 1;
         var profileAspectRef = UserProfileRepository.GetAspectRef(profile, newProfileVersion);
 
@@ -642,7 +643,7 @@ internal sealed class ScimUserCommandProcessor(
         orderedOperations.AddRange(operations);
         orderedOperations.Add(profileAspectOp);
 
-        var batchResult = await (await _storageFactory.GetStorage(ct)).ExecuteBatchAsync(orderedOperations, [], ct);
+        var batchResult = await (await _partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct)).ExecuteBatchAsync(orderedOperations, [], ct);
         if (!batchResult.Success)
         {
             var mapError = MapBatchError(batchResult);
@@ -749,12 +750,12 @@ internal sealed class ScimUserCommandProcessor(
         }
 
         var subjectId = UserSubjectId.New();
-        var profile = new UserProfile(subjectId, mapping.Attributes!);
+        var profile = new UserProfile(subjectId, schema, mapping.Attributes!);
 
         List<IStorageOperation> operations = [];
         List<UserDso.AspectRef> aspectReferences = [];
 
-        var (profileAspectOp, profileAspectRef) = await profileRepo.CreateAspectBatchOperationAsync(profile, ct);
+        var (profileAspectOp, profileAspectRef) = UserProfileRepository.CreateAspectBatchOperation(profile);
         aspectReferences.Add(profileAspectRef);
 
         if (IsAuthenticationEnabled && mapping.Password != null)
@@ -781,7 +782,7 @@ internal sealed class ScimUserCommandProcessor(
         orderedOps.AddRange(operations);
         orderedOps.Add(profileAspectOp);
 
-        var batchResult = await (await _storageFactory.GetStorage(ct)).ExecuteBatchAsync(orderedOps, [], ct);
+        var batchResult = await (await _partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct)).ExecuteBatchAsync(orderedOps, [], ct);
         if (batchResult.Success)
         {
             licenseValidator.ValidateUserCount();
@@ -1389,8 +1390,7 @@ internal sealed class ScimUserCommandProcessor(
     private static object? ConvertScalarSubValue(JsonElement element, ScalarDataType dataType) =>
         dataType switch
         {
-            ScalarDataType.Boolean when element.ValueKind == JsonValueKind.True => (object)true,
-            ScalarDataType.Boolean when element.ValueKind == JsonValueKind.False => false,
+            ScalarDataType.Boolean when ScimRequestMapper.TryParseLenientBoolean(element, out var boolValue) => (object)boolValue,
             ScalarDataType.Integer when element.ValueKind == JsonValueKind.Number => element.TryGetInt32(out var i) ? (object)i : null,
             ScalarDataType.Decimal when element.ValueKind == JsonValueKind.Number => element.TryGetDecimal(out var dec) ? (object)dec : null,
             ScalarDataType.String when element.ValueKind == JsonValueKind.String => element.GetString()!,

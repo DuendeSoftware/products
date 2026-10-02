@@ -3,7 +3,6 @@
 
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication.Internal;
@@ -25,7 +24,7 @@ namespace Duende.UserManagement.Import.Internal;
 internal sealed class UserImporter(
     IUserImportConflictResolver conflictResolver,
     TimeProvider timeProvider,
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     ILogger<UserImporter> logger,
     UserManagementLicenseValidator licenseValidator,
     UserProfileRepository profileRepo,
@@ -73,7 +72,7 @@ internal sealed class UserImporter(
 
     private async Task<UserImportResult> ImportRecordAsync(
         UserImportRecord record,
-        IReadOnlyAttributeSchema? schema,
+        IReadOnlyAttributeSchema schema,
         Ct ct)
     {
         using var scope = logger.BeginSubjectScope(record.SubjectId);
@@ -92,19 +91,19 @@ internal sealed class UserImporter(
         return await TryBatchCreateWithConflictResolutionAsync(record, schema, ct);
     }
 
-    private async Task<UserImportResult> TryBatchCreateWithConflictResolutionAsync(UserImportRecord record, IReadOnlyAttributeSchema? schema, Ct ct)
+    private async Task<UserImportResult> TryBatchCreateWithConflictResolutionAsync(UserImportRecord record, IReadOnlyAttributeSchema schema, Ct ct)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
-            var (operations, userDsoIndex, profileIndex, authIndex, _) = await BuildBatchOperationsAsync(record, ct);
+            var (operations, userDsoIndex, profileIndex, authIndex, _) = await BuildBatchOperationsAsync(record, schema, ct);
 
             if (operations.Count == 0)
             {
                 return new UserImportResult { SubjectId = record.SubjectId, Status = UserImportStatus.Skipped };
             }
 
-            var storage = await storageFactory.GetStorage(ct);
-            var result = await storage.ExecuteBatchAsync(operations, [], ct);
+            var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+            var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
 
             if (result.Success)
             {
@@ -124,7 +123,7 @@ internal sealed class UserImporter(
 
                 case UserImportConflictResolution.Overwrite overwrite:
                     logger.ConflictResolutionApplied(LogLevel.Debug, "Overwrite");
-                    return await OverwriteExistingUserAsync(record, overwrite.TargetSubjectId, schema, ct);
+                    return await OverwriteExistingUserAsync(record, overwrite.TargetSubjectId, ct);
 
                 case UserImportConflictResolution.Retry:
                     logger.RetryTriggered(LogLevel.Debug, attempt + 1, MaxAttempts);
@@ -136,7 +135,7 @@ internal sealed class UserImporter(
     }
 
     private async Task<(List<IStorageOperation> Operations, int UserDsoIndex, int ProfileIndex, int AuthIndex, int MembershipLinkStartIndex)> BuildBatchOperationsAsync(
-        UserImportRecord record, Ct ct)
+        UserImportRecord record, IReadOnlyAttributeSchema schema, Ct ct)
     {
         List<IStorageOperation> operations = [];
         var profileIndex = -1;
@@ -153,9 +152,9 @@ internal sealed class UserImporter(
 
         if (record.ProfileAttributes is not null)
         {
-            var profile = new Profiles.Internal.UserProfile(record.SubjectId, record.ProfileAttributes);
+            var profile = new Profiles.Internal.UserProfile(record.SubjectId, schema, record.ProfileAttributes);
 
-            var (aspectOp, aspectRef) = await profileRepo.CreateAspectBatchOperationAsync(profile, ct);
+            var (aspectOp, aspectRef) = UserProfileRepository.CreateAspectBatchOperation(profile);
             profileOp = aspectOp;
             aspectRefs.Add(aspectRef);
         }
@@ -292,12 +291,11 @@ internal sealed class UserImporter(
     private async Task<UserImportResult> OverwriteExistingUserAsync(
         UserImportRecord record,
         UserSubjectId targetSubjectId,
-        IReadOnlyAttributeSchema? schema,
         Ct ct)
     {
         if (record.ProfileAttributes is not null)
         {
-            var mergeError = await MergeProfileAsync(targetSubjectId, record.ProfileAttributes, schema, ct);
+            var mergeError = await MergeProfileAsync(targetSubjectId, record.ProfileAttributes, ct);
             if (mergeError is not null)
             {
                 return Fail(record.SubjectId, mergeError);
@@ -325,7 +323,7 @@ internal sealed class UserImporter(
         return new UserImportResult { SubjectId = record.SubjectId, Status = UserImportStatus.Updated };
     }
 
-    private async Task<string?> MergeProfileAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection? attributes, IReadOnlyAttributeSchema? schema, Ct ct)
+    private async Task<string?> MergeProfileAsync(UserSubjectId subjectId, ValidatedAttributeValueCollection? attributes, Ct ct)
     {
         for (var attempt = 0; attempt < MaxAttempts; attempt++)
         {
@@ -337,11 +335,11 @@ internal sealed class UserImporter(
 
             if (attributes is not null)
             {
-                var effectiveSchema = schema ?? AttributeSchema.Empty;
-                var merged = new AttributeValueCollection(effectiveSchema);
+                var schema = profile.Schema;
+                var merged = new AttributeValueCollection();
                 foreach (var attr in profile.Attributes.Values)
                 {
-                    if (effectiveSchema.AttributeDefinitions.ContainsKey(attr.Code))
+                    if (schema.AttributeDefinitions.ContainsKey(attr.Code))
                     {
                         merged.Set(attr);
                     }
@@ -352,7 +350,14 @@ internal sealed class UserImporter(
                     merged.Set(attr);
                 }
 
-                profile.ReplaceAttributes(merged.Validate());
+                if (!merged.TryValidateAgainst(schema, out var errors))
+                {
+                    var error = string.Join("; ", errors);
+                    logger.RecordValidationFailed(LogLevel.Debug, error);
+                    return error;
+                }
+
+                profile.ReplaceAttributes(new AttributeValueCollection(schema, merged).Validate());
             }
 
             var updateResult = await profileRepo.UpdateAsync(profile, version, ct);
@@ -418,7 +423,8 @@ internal sealed class UserImporter(
                         passkey.BackupEligible,
                         passkey.BackedUp,
                         passkey.Aaguid,
-                        passkey.Name);
+                        passkey.Name,
+                        transports: null);
 
                     _ = authenticators.TryAdd(credential);
                 }
@@ -480,7 +486,8 @@ internal sealed class UserImporter(
                     passkey.BackupEligible,
                     passkey.BackedUp,
                     passkey.Aaguid,
-                    passkey.Name);
+                    passkey.Name,
+                    transports: null);
 
                 _ = authenticators.TryAdd(credential);
             }
@@ -535,7 +542,7 @@ internal sealed class UserImporter(
     private async Task<string?> MergeMembershipsAsync(UserSubjectId subjectId, MembershipImport import, Ct ct)
     {
         var userUuid = await membershipRepo.GetOrCreateUserUuidAsync(subjectId, ct);
-        var storage = await storageFactory.GetStorage(ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
 
         if (import.Groups is not null)
         {
@@ -543,7 +550,7 @@ internal sealed class UserImporter(
             {
                 var (resolvedGroup, _) = await groupRepo.TryReadAsync(groupId, ct)
                     ?? throw new InvalidOperationException($"Group '{groupId}' not found during import.");
-                _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, resolvedGroup.StoreId, [], ct);
+                _ = await partitionedStorage.LinkAsync(MembershipLinkDefinitions.MembershipGroup, userUuid, resolvedGroup.StoreId, [], ct);
             }
         }
 
@@ -553,7 +560,7 @@ internal sealed class UserImporter(
             {
                 var (resolvedRole, _) = await roleRepo.TryReadAsync(roleId, ct)
                     ?? throw new InvalidOperationException($"Role '{roleId}' not found during import.");
-                _ = await storage.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, resolvedRole.StoreId, [], ct);
+                _ = await partitionedStorage.LinkAsync(MembershipLinkDefinitions.MembershipRole, userUuid, resolvedRole.StoreId, [], ct);
             }
         }
 

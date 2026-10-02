@@ -20,7 +20,7 @@ internal sealed class UserAuthenticators
     private readonly Dictionary<TotpDeviceName, TotpDevice> _totpDevices;
     private readonly Dictionary<PasskeyCredentialId, PasskeyCredential> _passkeyCredentials;
     private readonly Dictionary<AuthenticatorKey, AuthenticatorFailureState> _failureStates;
-    private List<Pbkdf2HashedPassword> _recoveryCodes;
+    private List<Pbkdf2HashedRecoveryCode> _recoveryCodes;
     private List<HashedPassword> _passwordHistory;
 
     private UserAuthenticators(
@@ -29,7 +29,7 @@ internal sealed class UserAuthenticators
         IEnumerable<OtpAddress> otpAddresses,
         IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses,
         IEnumerable<TotpDevice> totpDevices,
-        IEnumerable<Pbkdf2HashedPassword> recoveryCodes,
+        IEnumerable<Pbkdf2HashedRecoveryCode> recoveryCodes,
         HashedPassword? hashedPassword,
         IEnumerable<PasskeyCredential> passkeyCredentials,
         IEnumerable<KeyValuePair<AuthenticatorKey, AuthenticatorFailureState>> failureStates,
@@ -79,7 +79,7 @@ internal sealed class UserAuthenticators
     internal IReadOnlyCollection<ExternalAuthenticatorAddress> ExternalAuthenticatorAddresses =>
         _externalAuthenticatorAddresses;
 
-    internal IReadOnlyCollection<Pbkdf2HashedPassword> RecoveryCodes => _recoveryCodes;
+    internal IReadOnlyCollection<Pbkdf2HashedRecoveryCode> RecoveryCodes => _recoveryCodes;
 
     internal HashedPassword? HashedPassword { get; private set; }
 
@@ -126,7 +126,7 @@ internal sealed class UserAuthenticators
         _totpDevices.TryAdd(name, TotpDevice.Load(name, key, 0));
 
     internal void LoadRecoveryCodes(IEnumerable<PlainTextRecoveryCode> codes) =>
-        _recoveryCodes = codes.Select(code => Pbkdf2HashedPassword.From(code.Text)).ToList();
+        _recoveryCodes = codes.Select(code => Pbkdf2HashedRecoveryCode.From(code.Text)).ToList();
 
     internal void Remove(IEnumerable<TotpDeviceName> totpDeviceNames)
     {
@@ -141,7 +141,7 @@ internal sealed class UserAuthenticators
     {
         count = Math.Clamp(count, 1, 50);
         var codes = Enumerable.Range(0, count).Select(_ => PlainTextRecoveryCode.New()).ToList();
-        _recoveryCodes = codes.Select(code => Pbkdf2HashedPassword.From(code.Text)).ToList();
+        _recoveryCodes = codes.Select(code => Pbkdf2HashedRecoveryCode.From(code.Text)).ToList();
         return codes;
     }
 
@@ -413,7 +413,7 @@ internal sealed class UserAuthenticators
         IEnumerable<OtpAddress> otpAddresses,
         IEnumerable<ExternalAuthenticatorAddress> externalAuthenticatorAddresses,
         IEnumerable<TotpDevice> totpDevices,
-        IEnumerable<Pbkdf2HashedPassword> recoveryCodes,
+        IEnumerable<Pbkdf2HashedRecoveryCode> recoveryCodes,
         HashedPassword? hashedPassword,
         IEnumerable<PasskeyCredential> passkeyCredentials,
         IEnumerable<KeyValuePair<AuthenticatorKey, AuthenticatorFailureState>> failureStates,

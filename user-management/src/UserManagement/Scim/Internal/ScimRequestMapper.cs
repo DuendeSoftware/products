@@ -231,11 +231,8 @@ internal static class ScimRequestMapper
     {
         switch (dataType)
         {
-            case ScalarDataType.Boolean when element.ValueKind == JsonValueKind.True:
-                collection.Set(attrCode, true);
-                return true;
-            case ScalarDataType.Boolean when element.ValueKind == JsonValueKind.False:
-                collection.Set(attrCode, false);
+            case ScalarDataType.Boolean when TryParseLenientBoolean(element, out var boolValue):
+                collection.Set(attrCode, boolValue);
                 return true;
             case ScalarDataType.Integer when element.ValueKind == JsonValueKind.Number:
                 if (!element.TryGetInt32(out var i))
@@ -348,8 +345,7 @@ internal static class ScimRequestMapper
     private static object? ConvertScalarJsonValue(JsonElement element, ScalarDataType dataType) =>
         dataType switch
         {
-            ScalarDataType.Boolean when element.ValueKind == JsonValueKind.True => (object)true,
-            ScalarDataType.Boolean when element.ValueKind == JsonValueKind.False => false,
+            ScalarDataType.Boolean when TryParseLenientBoolean(element, out var boolValue) => (object)boolValue,
             ScalarDataType.Integer when element.ValueKind == JsonValueKind.Number =>
                 element.TryGetInt32(out var i) ? (object)i : null,
             ScalarDataType.Decimal when element.ValueKind == JsonValueKind.Number =>
@@ -361,4 +357,31 @@ internal static class ScimRequestMapper
                 DateTimeOffset.TryParse(element.GetString(), out var dt) ? (object)dt : null,
             _ => null
         };
+
+    /// <summary>
+    /// Parses a boolean value from a <see cref="JsonElement"/>, accepting both a native JSON
+    /// boolean and a JSON string containing "true"/"false". Some SCIM clients serialize boolean
+    /// sub-attributes such as "primary" as JSON strings rather than JSON literals. String parsing
+    /// delegates to <see cref="bool.TryParse(string?, out bool)"/>, so it is deliberately as
+    /// lenient as that method: it accepts any casing (e.g. "TRUE") and leading/trailing whitespace
+    /// (e.g. " true "). Any other string is rejected.
+    /// </summary>
+    internal static bool TryParseLenientBoolean(JsonElement element, out bool value)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.True:
+                value = true;
+                return true;
+            case JsonValueKind.False:
+                value = false;
+                return true;
+            case JsonValueKind.String when bool.TryParse(element.GetString(), out var parsed):
+                value = parsed;
+                return true;
+            default:
+                value = false;
+                return false;
+        }
+    }
 }

@@ -98,6 +98,108 @@ public sealed class ScimRequestMapperTests : IAsyncLifetime
         attr!.UntypedValue.ShouldBe(true);
     }
 
+    [Theory]
+    [InlineData("\"true\"", true)]
+    [InlineData("\"false\"", false)]
+    [InlineData("\"TRUE\"", true)]
+    [InlineData("\"False\"", false)]
+    [InlineData("\" true \"", true)]
+    [InlineData("\"\\tfalse\\n\"", false)]
+    public async Task BooleanAttributeAcceptsStringEncodedValue(string json, bool expected)
+    {
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("active"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+            Description = AttributeDescription.Create("Active flag")
+        });
+        var schema = await GetSchemaAsync();
+
+        var request = new ScimUserRequest
+        {
+            Schemas = [ScimConstants.UserSchemaUrn],
+            AdditionalAttributes = new Dictionary<string, JsonElement>
+            {
+                ["active"] = JsonDocument.Parse(json).RootElement
+            }
+        };
+
+        var result = ScimRequestMapper.Map(request, schema);
+
+        result.IsSuccess.ShouldBeTrue();
+        _ = result.Attributes.ShouldNotBeNull();
+        result.Attributes.TryGet(AttributeCode.Create("active"), out var attr).ShouldBeTrue();
+        _ = attr.ShouldNotBeNull();
+        attr!.UntypedValue.ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task BooleanAttributeRejectsNonBooleanStringValue()
+    {
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("active"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.Boolean),
+            Description = AttributeDescription.Create("Active flag")
+        });
+        var schema = await GetSchemaAsync();
+
+        var request = new ScimUserRequest
+        {
+            Schemas = [ScimConstants.UserSchemaUrn],
+            AdditionalAttributes = new Dictionary<string, JsonElement>
+            {
+                ["active"] = JsonDocument.Parse("\"yes\"").RootElement
+            }
+        };
+
+        var result = ScimRequestMapper.Map(request, schema);
+
+        result.IsSuccess.ShouldBeFalse();
+        _ = result.ErrorDetail.ShouldNotBeNull();
+        result.ErrorScimType.ShouldBe(ScimConstants.ErrorTypes.InvalidValue);
+    }
+
+    [Theory]
+    [InlineData("\"true\"", true)]
+    [InlineData("\"false\"", false)]
+    public async Task ListOfComplexBooleanSubAttributeAcceptsStringEncodedValue(string primaryJson, bool expected)
+    {
+        var emailsCode = AttributeCode.Create("emails");
+        var complexType = new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+        {
+            [AttributeCode.Create("value")] = ComplexAttributeProperty.Of(ScalarDataType.String),
+            [AttributeCode.Create("primary")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
+        });
+        await AddDefinitionAsync(new AttributeDefinition
+        {
+            Code = emailsCode,
+            AttributeType = new ListAttributeType(complexType),
+            Description = AttributeDescription.Create("Emails")
+        });
+        var schema = await GetSchemaAsync();
+
+        var json = $$"""[{"value":"alice@example.com","primary":{{primaryJson}}}]""";
+        var request = new ScimUserRequest
+        {
+            Schemas = [ScimConstants.UserSchemaUrn],
+            AdditionalAttributes = new Dictionary<string, JsonElement>
+            {
+                ["emails"] = JsonDocument.Parse(json).RootElement
+            }
+        };
+
+        var result = ScimRequestMapper.Map(request, schema);
+
+        result.IsSuccess.ShouldBeTrue();
+        _ = result.Attributes.ShouldNotBeNull();
+        result.Attributes.TryGet(emailsCode, out var attr).ShouldBeTrue();
+        _ = attr.ShouldNotBeNull();
+        var list = attr!.UntypedValue.ShouldBeAssignableTo<IReadOnlyList<object>>();
+        var email = list!.ShouldHaveSingleItem().ShouldBeAssignableTo<IReadOnlyDictionary<string, object>>();
+        email!["primary"].ShouldBe(expected);
+    }
+
     [Fact]
     public async Task IntegerAttributeMapsToAttributeValueWithIntValue()
     {

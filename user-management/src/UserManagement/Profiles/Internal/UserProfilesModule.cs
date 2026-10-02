@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.UserManagement.Import.Internal;
 using Duende.UserManagement.Internal;
@@ -25,7 +24,6 @@ internal sealed class UserProfilesModule : IDuendeModule
 
         // 1. Register DSO types
         services.AddDsoRegistration<UserProfileDso.V1>();
-        services.AddDynamicSchemaStorage();
 
         // 2. Register self-service
         _ = services.AddTransient<IUserProfileSelfService, UserProfileSelfService>();

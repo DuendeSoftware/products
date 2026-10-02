@@ -1,7 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Platform.UserManagement;
+using Duende.Storage;
+using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement.Authentication;
 using Duende.UserManagement.Authentication.Otp;
@@ -39,7 +43,7 @@ public sealed class UsersServiceProviderFactory
         var services = CreateUsersBuilder(configureOptions, addDataProtection, dbId: dbId);
         configureServices?.Invoke(services);
         var sp = services.BuildServiceProvider();
-        await sp.GetRequiredService<IPooledStore>().MigrateAsync(CancellationToken.None);
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
         return sp;
     }
 
@@ -57,9 +61,11 @@ public sealed class UsersServiceProviderFactory
             .AddSingleton(new FakeOtpDispatcher())
             .AddSingleton<IOtpDispatcher>(provider => provider.GetRequiredService<FakeOtpDispatcher>());
 
-        _ = services.AddUserManagementInternal(users =>
+        _ = services.AddStorageInternal(storage => storage.AddSqliteInMemory(dbId.Value.ToString()));
+        // These tests create their profile schema at runtime through ISchemaAdmin.
+        services.AddDynamicSchemaStorage();
+        _ = services.AddUserManagementInternal(StorageInstanceId.Default, users =>
         {
-            _ = users.AddSqliteStore(opt => opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
             configureBuilder?.Invoke(users);
 
             // modules registered unconditionally by AddUserManagementInternal
@@ -70,6 +76,9 @@ public sealed class UsersServiceProviderFactory
             options.Passkeys.ServerDomain = "example.com";
             options.Passkeys.AllowedOrigins = ["https://example.com"];
         });
+
+        _ = services.AddSingleton<DataCategoryNameRecorder>();
+        _ = services.Decorate<IPartitionedStorageFactory>((partitionedStorageFactory, sp) => new RecordingPartitionedStorageFactory(partitionedStorageFactory, sp.GetRequiredService<DataCategoryNameRecorder>()));
 
         if (configureOptions != null)
         {

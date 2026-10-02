@@ -23,10 +23,12 @@ public sealed class ScimAuthorityAutoResolutionTests
         _ = services.AddLogging();
         _ = services.Configure<IdentityServerOptions>(o => o.IssuerUri = "https://identity.example.com");
         _ = services.AddIdentityServer()
+            .AddStorage(x => x.AddSqliteInMemory())
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddUserManagement(um =>
             {
                 _ = um.EnableScim(_ => { });
-                _ = um.AddSqliteInMemoryStore();
             });
 
         using var sp = services.BuildServiceProvider();
@@ -47,10 +49,12 @@ public sealed class ScimAuthorityAutoResolutionTests
         _ = services.Configure<IdentityServerOptions>(o => o.IssuerUri = "https://identity.example.com");
         _ = services.Configure<ScimOAuthOptions>(o => o.Authority = "https://custom.example.com");
         _ = services.AddIdentityServer()
+            .AddStorage(x => x.AddSqliteInMemory())
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddUserManagement(um =>
             {
                 _ = um.EnableScim(_ => { });
-                _ = um.AddSqliteInMemoryStore();
             });
 
         using var sp = services.BuildServiceProvider();
@@ -70,10 +74,12 @@ public sealed class ScimAuthorityAutoResolutionTests
         _ = services.AddLogging();
         _ = services.Configure<IdentityServerOptions>(o => o.IssuerUri = null);
         _ = services.AddIdentityServer()
+            .AddStorage(x => x.AddSqliteInMemory())
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddUserManagement(um =>
             {
                 _ = um.EnableScim(_ => { });
-                _ = um.AddSqliteInMemoryStore();
             });
 
         using var sp = services.BuildServiceProvider();
@@ -92,10 +98,12 @@ public sealed class ScimAuthorityAutoResolutionTests
         _ = services.AddLogging();
         _ = services.Configure<IdentityServerOptions>(o => o.IssuerUri = "");
         _ = services.AddIdentityServer()
+            .AddStorage(x => x.AddSqliteInMemory())
+            .AddConfigurationStorage()
+            .AddOperationalStorage()
             .AddUserManagement(um =>
             {
                 _ = um.EnableScim(_ => { });
-                _ = um.AddSqliteInMemoryStore();
             });
 
         using var sp = services.BuildServiceProvider();

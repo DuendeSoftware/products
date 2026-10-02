@@ -11,6 +11,14 @@ namespace Duende.UserManagement.Authentication.Otp;
 [StringValue]
 public partial record PlainTextOtp
 {
+    // Eight Crockford Base32 characters provide 40 bits of entropy, a product choice above the minimum
+    // for verifier-generated out-of-band secrets (not authenticator-generated OTPs such as TOTP).
+    // NIST SP 800-63B-4 section 3.1.3.2 requires at least six decimal digits (or equivalent) and
+    // rate limiting for secrets below 64 bits:
+    // https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#oobver
+    // This comparison does not establish flow compliance: section 3.1.3.1 prohibits email for
+    // out-of-band authentication; email-address confirmation and issued recovery codes are separate:
+    // https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#ooba
     private const int NewLength = 8;
     private const bool NumericOnly = false;
 

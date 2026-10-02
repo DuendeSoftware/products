@@ -20,7 +20,7 @@ public sealed class PasskeyOptions
     public string RelyingPartyName { get; set; } = typeof(PasskeyOptions).Assembly.GetName().Name!;
 
     /// <summary>
-    /// Size of the challenge in bytes. Default is 32 bytes (256 bits).
+    /// Size of the challenge in bytes. Must be at least 16 bytes. Default is 32 bytes (256 bits).
     /// </summary>
     public int ChallengeSize { get; set; } = 32;
 

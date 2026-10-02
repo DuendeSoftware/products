@@ -387,6 +387,7 @@ public sealed class ScimPatchUserEndpointTests(ITestOutputHelper output, WebServ
         body.RootElement.GetProperty("scimType").GetString().ShouldBe("mutability");
     }
 
+
     [Fact]
     public async Task Patch_add_without_path_and_non_object_value_returns_400()
     {
@@ -691,6 +692,74 @@ public sealed class ScimPatchUserEndpointTests(ITestOutputHelper output, WebServ
         _ = user.ShouldNotBeNull();
         // givenname updated, familyname preserved due to merge semantics
         user.Name.ShouldBeEquivalentTo(new ScimName { GivenName = "Updated", FamilyName = "Wong" });
+    }
+
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    [InlineData("\"true\"", true)]
+    [InlineData("\"false\"", false)]
+    public async Task Patch_dot_notation_boolean_subattribute_accepts_string_encoded_value(string valueJson, bool expected)
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterComplexAttributeDefinitionAsync(
+            "profile",
+            new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            {
+                [AttributeCode.Create("verified")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
+            }),
+            "Profile");
+
+        var (createResponse, createBody) = await Fixture.Client.CreateUserAsync("judy");
+        createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var id = ScimHttpClient.GetUserId(createBody);
+
+        var payload = new
+        {
+            schemas = new[] { ScimHttpClient.PatchOpSchemaUrn },
+            Operations = new[]
+            {
+                new { op = "replace", path = "profile.verified", value = JsonDocument.Parse(valueJson).RootElement }
+            }
+        };
+        var patchResponse = await Fixture.Client.PatchAsync(
+            $"{ScimHttpClient.UsersRoute}/{id}", ScimHttpClient.ScimJsonContent(payload));
+
+        patchResponse.StatusCode.ShouldBe(HttpStatusCode.OK, await patchResponse.Content.ReadAsStringAsync());
+        using var body = await JsonDocument.ParseAsync(await patchResponse.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("profile").GetProperty("verified").GetBoolean().ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task Patch_dot_notation_boolean_subattribute_rejects_non_boolean_string_value()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterComplexAttributeDefinitionAsync(
+            "profile",
+            new ComplexAttributeType(new Dictionary<AttributeCode, ComplexAttributeProperty>
+            {
+                [AttributeCode.Create("verified")] = ComplexAttributeProperty.Of(ScalarDataType.Boolean)
+            }),
+            "Profile");
+
+        var (createResponse, createBody) = await Fixture.Client.CreateUserAsync("kevin");
+        createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var id = ScimHttpClient.GetUserId(createBody);
+
+        var payload = new
+        {
+            schemas = new[] { ScimHttpClient.PatchOpSchemaUrn },
+            Operations = new[]
+            {
+                new { op = "replace", path = "profile.verified", value = "maybe" }
+            }
+        };
+        var patchResponse = await Fixture.Client.PatchAsync(
+            $"{ScimHttpClient.UsersRoute}/{id}", ScimHttpClient.ScimJsonContent(payload));
+
+        patchResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        using var body = await JsonDocument.ParseAsync(await patchResponse.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
     }
 
     public async ValueTask DisposeAsync()

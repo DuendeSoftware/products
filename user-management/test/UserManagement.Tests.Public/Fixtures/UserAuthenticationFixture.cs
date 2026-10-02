@@ -5,7 +5,9 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Duende.IdentityModel;
+using Duende.Storage;
 using Duende.Storage.Internal;
+using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
@@ -69,21 +71,17 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
                         };
                     });
                 _ = services.AddSingleton(_runtimePasskeyOriginOptions);
-                _ = services.AddOptions<UserAuthenticationOptions>().Configure<RuntimePasskeyOriginOptions>((options, runtimeOptions) =>
-                {
-                    if (runtimeOptions.Origin is not null)
+                _ = services.AddOptions<UserAuthenticationOptions>()
+                    .Configure<RuntimePasskeyOriginOptions>((options, runtimeOptions) =>
                     {
-                        options.Passkeys.AllowedOrigins = [runtimeOptions.Origin];
-                    }
-                });
+                        if (runtimeOptions.Origin is not null)
+                        {
+                            options.Passkeys.AllowedOrigins = [runtimeOptions.Origin];
+                        }
+                    });
 
-                var dbId = Guid.NewGuid();
-                _ = services.AddUserManagementInternal(users =>
-                {
-                    _ = users.Authentication(ConfigureBuilder);
-                    _ = users.AddSqliteStore(opt =>
-                        opt.ConnectionString = $"Data Source=MySharedDb_{dbId};Mode=Memory;Cache=Shared");
-                });
+                _ = services.AddStorageInternal(x => x.AddSqliteInMemory());
+                _ = services.AddUserManagementInternal(StorageInstanceId.Default, users => { _ = users.Authentication(ConfigureBuilder); });
 
                 ConfigureServices(services);
             },
@@ -97,7 +95,8 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
                     }
                     catch (Exception ex)
                     {
-                        LogUnhandledException(context.RequestServices.GetRequiredService<ILogger<UserAuthenticationFixture>>(), ex);
+                        LogUnhandledException(
+                            context.RequestServices.GetRequiredService<ILogger<UserAuthenticationFixture>>(), ex);
                         throw;
                     }
                 });
@@ -107,7 +106,8 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
                 _ = app.MapGet("/test-signin/{subjectId}", async (string subjectId, HttpContext ctx) =>
                 {
                     var claims = new List<Claim> { new(JwtClaimTypes.Subject, subjectId) };
-                    var identity = new ClaimsIdentity(claims, "Duende.IdentityServer", JwtClaimTypes.Name, JwtClaimTypes.Role);
+                    var identity = new ClaimsIdentity(claims, "Duende.IdentityServer", JwtClaimTypes.Name,
+                        JwtClaimTypes.Role);
                     var principal = new ClaimsPrincipal(identity);
                     await ctx.SignInAsync(principal, new AuthenticationProperties { IsPersistent = true });
                     return Results.Ok();
@@ -116,7 +116,7 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
 
         await App.StartAsync();
 
-        await App.GetRequiredService<IPooledStore>().MigrateAsync(TestContext.Current.CancellationToken);
+        await App.Services.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(TestContext.Current.CancellationToken);
 
         var baseUri = App.BaseAddress;
         Origin = $"{baseUri.Scheme}://{baseUri.Host}:{baseUri.Port}";
@@ -129,7 +129,8 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
 
     public async ValueTask DisposeAsync() => await App.DisposeAsync();
 
-    public async Task<(UserSubjectId SubjectId, ExternalAuthenticatorAddress ExternalAuthenticatorAddress)> SeedAuthenticatorsAsync()
+    public async Task<(UserSubjectId SubjectId, ExternalAuthenticatorAddress ExternalAuthenticatorAddress)>
+        SeedAuthenticatorsAsync()
     {
         using var scope = App.Services.CreateScope();
         var externalAuthenticator = scope.ServiceProvider.GetRequiredService<IExternalAuthenticator>();
@@ -153,7 +154,8 @@ internal sealed partial class UserAuthenticationFixture(WebServerFixture webserv
         var clientData = WebAuthnFixtures.CreateClientDataJson(PasskeyConstants.ClientDataType.Create,
             session.Options.Challenge, Origin);
         var attestationObject =
-            WebAuthnFixtures.CreateAttestationObjectWithEcdsa(PasskeyConstants.AttestationFormat.None, RelyingPartyId, credentialId, ecdsa, flags: 0x45);
+            WebAuthnFixtures.CreateAttestationObjectWithEcdsa(PasskeyConstants.AttestationFormat.None, RelyingPartyId,
+                credentialId, ecdsa, flags: 0x45);
 
         var request = WebAuthnFixtures.CreateCompleteRegistrationRequest(
             session.ChallengeId, clientData, attestationObject, credentialId, name);

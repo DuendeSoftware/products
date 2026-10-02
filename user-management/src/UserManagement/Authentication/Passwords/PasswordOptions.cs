@@ -18,29 +18,40 @@ public sealed class PasswordOptions
         Pbkdf2MaxPasswordLength.For(new Pbkdf2Inputs().PseudorandomFunctionName);
 
     /// <summary>
-    /// Minimum required password length. Defaults to 8 characters.
+    /// Minimum required password length. Defaults to 15 characters.
     /// </summary>
-    public int MinLength { get; set; } = 8;
+    /// <remarks>
+    /// NIST SP 800-63B-4 section 3.1.1.2 (item 1) requires at least 15 characters for passwords used as a
+    /// single-factor authenticator. A minimum of 8 is permitted only for passwords used exclusively as part of
+    /// multi-factor authentication. Because password-only authentication is supported, the default is 15.
+    /// See https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#passwordver.
+    /// </remarks>
+    public int MinLength { get; set; } = 15;
+
+    // NIST SP 800-63B-4 section 3.1.1.2 (item 5) prohibits composition rules such as requiring a mixture of
+    // character types, so the composition minimums below default to 0. Nonzero values remain configurable for
+    // hosts with their own requirements, but do not follow this guidance.
+    // https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#passwordver
 
     /// <summary>
-    /// Minimum required lowercase characters. Defaults to 2.
+    /// Minimum required lowercase characters. Defaults to 0.
     /// </summary>
-    public int MinLower { get; set; } = 2;
+    public int MinLower { get; set; }
 
     /// <summary>
-    /// Minimum required uppercase characters. Defaults to 2.
+    /// Minimum required uppercase characters. Defaults to 0.
     /// </summary>
-    public int MinUpper { get; set; } = 2;
+    public int MinUpper { get; set; }
 
     /// <summary>
-    /// Minimum required numeric digit characters. Defaults to 2.
+    /// Minimum required numeric digit characters. Defaults to 0.
     /// </summary>
-    public int MinDigits { get; set; } = 2;
+    public int MinDigits { get; set; }
 
     /// <summary>
-    /// Minimum required symbol characters. Defaults to 2.
+    /// Minimum required symbol characters. Defaults to 0.
     /// </summary>
-    public int MinSymbols { get; set; } = 2;
+    public int MinSymbols { get; set; }
 
     /// <summary>
     /// The algorithm ID of the preferred password hash algorithm used for new hashes and re-hashing.

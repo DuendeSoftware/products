@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
 using Duende.UserManagement.Authentication;
@@ -16,7 +17,7 @@ namespace Duende.UserManagement.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class UserAdmin(
-    IStorageFactory storageFactory,
+    IPartitionedStorageFactory partitionedStorageFactory,
     ILogger<UserAdmin> logger,
     IUserProfileAdmin profileAdmin,
     IMembershipAdmin membershipAdmin,
@@ -72,8 +73,8 @@ internal sealed class UserAdmin(
             return false;
         }
 
-        var storage = await storageFactory.GetStorage(ct);
-        var result = await storage.ExecuteBatchAsync(operations, [], ct);
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
         return result.Success;
     }
 }

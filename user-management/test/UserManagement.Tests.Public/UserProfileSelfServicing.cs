@@ -35,6 +35,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         var user = await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct);
 
         _ = user.ShouldNotBeNull();
+        user.Schema.AttributeDefinitions.Keys.ShouldBe(schema.AttributeDefinitions.Keys, ignoreOrder: true);
         user.Attributes.Values.ShouldBe(attributes, ignoreOrder: true);
     }
 
@@ -59,6 +60,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         var actual = await _selfService.TryGetAsync(user.SubjectId, _ct);
 
         actual.ShouldNotBeNull().SubjectId.ShouldBe(user.SubjectId);
+        actual.Schema.AttributeDefinitions.ShouldBeEmpty();
     }
 
     [Theory]
@@ -102,7 +104,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Attribute_replacement_removes_previously_existing_attributes()
+    public async Task can_replace_attributes_using_the_profile_schema()
     {
         // arrange
         await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
@@ -122,8 +124,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
         initialUser.Attributes.Values.ShouldContain(stringAttribute);
         initialUser.Attributes.Values.ShouldContain(intAttribute);
 
-        var currentSchema = await _selfService.GetSchemaAsync(_ct);
-        var userUpdate = new AttributeValueCollection(currentSchema, initialUser.Attributes.Values);
+        var userUpdate = initialUser.ToUpdate();
         userUpdate.Remove(intAttribute.Code).ShouldBeTrue();
 
         // act
@@ -131,6 +132,104 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
 
         // assert
         updatedUser.ShouldNotBeNull().Attributes.Values.ShouldHaveSingleItem().ShouldBe(stringAttribute);
+    }
+
+    [Fact]
+    public async Task ToUpdate_returns_a_copy_independent_of_the_profile()
+    {
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _selfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var update = user.ToUpdate();
+
+        update.ShouldBe(user.Attributes.Values, ignoreOrder: true);
+
+        var someAttribute = user.Attributes.Values.First();
+        var otherCode = user.Attributes.Values.Select(a => a.Code).First(c => c != someAttribute.Code);
+
+        _ = update.Remove(someAttribute.Code);
+        _ = update.Remove(otherCode);
+
+        user.Attributes.Values.ShouldContain(someAttribute);
+        user.Attributes.Count.ShouldBe(attributes.Count());
+    }
+
+    [Fact]
+    public async Task ToUpdate_edits_can_be_validated_and_persisted()
+    {
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _selfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var stringAttribute = attributes.Single(a => a.UntypedValue is string);
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var update = user.ToUpdate();
+        var replacement = AttributeValue.Load(stringAttribute.Code, $"{stringAttribute.UntypedValue}-edited");
+        update.Set(replacement);
+
+        var updatedUser = await _selfService.TryUpdateAsync(user.SubjectId, update.Validate(), _ct);
+
+        updatedUser.ShouldNotBeNull().Attributes.Values.ShouldContain(replacement);
+    }
+
+    [Fact]
+    public async Task ToUpdate_enforces_schema_when_setting_an_undefined_code()
+    {
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _selfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var update = user.ToUpdate();
+
+        _ = Should.Throw<ArgumentException>(() => update.Set(AttributeValue.Load(AttributeCode.Create("undefined_attribute"), "value")));
+    }
+
+    [Fact]
+    public async Task ToUpdate_enforces_schema_when_setting_the_wrong_type()
+    {
+        await TestData.AddAttributeDefinitions(_schemaAdmin, _ct);
+        var schema = await _selfService.GetSchemaAsync(_ct);
+        var attributes = TestData.CreateAttributes(schema);
+        var stringAttribute = attributes.Single(a => a.UntypedValue is string);
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var update = user.ToUpdate();
+
+        _ = Should.Throw<ArgumentException>(() => update.Set(AttributeValue.Load(stringAttribute.Code, 123)));
+    }
+
+    [Fact]
+    public async Task ToUpdate_throws_when_removing_a_required_attribute()
+    {
+        var getResult = await _schemaAdmin.GetAsync(SchemaId.UserProfile, _ct);
+        var schemaConfiguration = getResult.Found
+            ? getResult.Item!
+            : new SchemaConfiguration { SchemaId = SchemaId.UserProfile };
+        var requiredCode = AttributeCode.Create("required_attribute");
+        schemaConfiguration.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = requiredCode,
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+            Description = AttributeDescription.Create("required attribute"),
+            IsRequired = true
+        });
+        var saveResult = getResult.Found
+            ? await _schemaAdmin.UpdateAsync(SchemaId.UserProfile, schemaConfiguration, getResult.Version!.Value, _ct)
+            : await _schemaAdmin.CreateAsync(schemaConfiguration, _ct);
+        saveResult.IsSuccess.ShouldBeTrue();
+
+        var schema = await _selfService.GetSchemaAsync(_ct);
+        var requiredAttribute = AttributeValue.Load(requiredCode, "required-value");
+        var attributes = new AttributeValueCollection(schema);
+        attributes.Set(requiredAttribute);
+        var user = (await _selfService.TryCreateAsync(UserSubjectId.New(), attributes.Validate(), _ct)).ShouldNotBeNull();
+
+        var update = user.ToUpdate();
+
+        _ = Should.Throw<InvalidOperationException>(() => update.Remove(requiredCode));
     }
 
     private async Task<UserProfile?> TrySetAttribute(UserSubjectId subjectId, AttributeValue attribute)
@@ -141,8 +240,7 @@ public sealed class UserProfileSelfServicing : IAsyncLifetime
             return null;
         }
 
-        var schema = await _selfService.GetSchemaAsync(_ct);
-        var userUpdate = new AttributeValueCollection(schema, user.Attributes.Values);
+        var userUpdate = user.ToUpdate();
         userUpdate.Set(attribute);
 
         return await _selfService.TryUpdateAsync(subjectId, userUpdate.Validate(), _ct);

@@ -98,11 +98,11 @@ internal static class TestData
         CreateExternalAuthenticatorAddress(SubjectIdTypes.First());
 
     internal static async Task<ValidatedPlainTextPassword> CreatePasswordAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default) =>
-        await selfService.ValidatePasswordAsync(userId ?? UserSubjectId.New(), $"ABcd12!@{Count()}", ct);
+        await selfService.ValidatePasswordAsync(userId ?? UserSubjectId.New(), $"ABcd12!@long-pass-{Count()}", ct);
 
     internal static async Task<(ValidatedPlainTextPassword Password, NonValidatedPassword Supplied)> CreatePasswordPairAsync(IUserAuthenticatorsSelfService selfService, UserSubjectId? userId = null, Ct ct = default)
     {
-        var raw = $"ABcd12!@{Count()}";
+        var raw = $"ABcd12!@long-pass-{Count()}";
         var password = await selfService.ValidatePasswordAsync(userId ?? UserSubjectId.New(), raw, ct);
         return (password, NonValidatedPassword.Create(raw));
     }
@@ -266,7 +266,8 @@ internal static class TestData
             BackedUp: false,
             Aaguid: Guid.Empty,
             CreatedAt: DateTimeOffset.UtcNow,
-            Name: name);
+            Name: name,
+            Transports: null);
 
     private static int Count() => Interlocked.Increment(ref _counter);
 }

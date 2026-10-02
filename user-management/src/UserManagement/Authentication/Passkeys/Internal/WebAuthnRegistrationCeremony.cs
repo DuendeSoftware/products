@@ -250,7 +250,8 @@ internal sealed class WebAuthnRegistrationCeremony(
             authenticatorData.Flags.HasFlag(AuthenticatorDataFlags.BackedUp),
             attestationCredential.Aaguid,
             now,
-            request.Name);
+            request.Name,
+            request.Response.Transports?.ToArray());
 
         return new PasskeyRegistrationCompleteResult.Success(credentialData);
     }

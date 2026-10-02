@@ -11,9 +11,9 @@ namespace Duende.Platform.UserManagement.Scim;
 public sealed class ScimPasswordTests(ITestOutputHelper output, WebServerFixture serverFixture)
     : IAsyncDisposable
 {
-    // Satisfies default PasswordOptions: 2+ upper, 2+ lower, 2+ digits, 2+ symbols, 8+ length
-    private const string ValidPassword = "ABcd12!@";
-    private const string AltPassword = "XYzw34#$";
+    // Satisfies default PasswordOptions: 15+ length, no composition requirements
+    private const string ValidPassword = "ABcd12!@long-password";
+    private const string AltPassword = "XYzw34#$other-password";
     private const string WeakPassword = "short";
 
     private readonly ScimFixture Fixture = new(output, serverFixture);
@@ -66,7 +66,7 @@ public sealed class ScimPasswordTests(ITestOutputHelper output, WebServerFixture
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
-        ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "password");
+        ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "at least 15 characters");
     }
 
     [Fact]
@@ -194,7 +194,7 @@ public sealed class ScimPasswordTests(ITestOutputHelper output, WebServerFixture
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
-        ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "password");
+        ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "at least 15 characters");
     }
 
     // ── PATCH password tests ──────────────────────────────────────────────────
@@ -370,7 +370,7 @@ public sealed class ScimPasswordTests(ITestOutputHelper output, WebServerFixture
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         body.RootElement.GetProperty("scimType").GetString().ShouldBe("invalidValue");
-        ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "password");
+        ShouldlyExtensions.ShouldContain(body.RootElement.GetProperty("detail").GetString()!, "at least 15 characters");
     }
 
     public async ValueTask DisposeAsync()

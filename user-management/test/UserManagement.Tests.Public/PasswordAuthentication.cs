@@ -83,8 +83,8 @@ public sealed class PasswordAuthentication : IAsyncLifetime
     public async Task Can_authenticate_with_password_that_violates_current_policy()
     {
         // Arrange: import a user with a password that violates the current policy.
-        // "weak" has no uppercase, no digits, no symbols, and is below MinLength — the
-        // factory would reject it. Import bypasses validation and stores the hash directly.
+        // "weak" is below the default MinLength of 15, so the factory would reject it.
+        // Import bypasses validation and stores the hash directly.
         const string rawPassword = "weak";
         (await _authenticatorsSelfService.TryValidatePasswordAsync(UserSubjectId.New(), rawPassword, _ct) is PasswordCreationResult.Failed).ShouldBeTrue("password should violate the current policy");
 

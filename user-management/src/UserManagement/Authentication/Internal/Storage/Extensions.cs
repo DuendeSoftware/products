@@ -39,6 +39,22 @@ internal static class Extensions
         vo.Inputs.HashFunctionDigestSize.Number,
         Convert.ToBase64String(vo.MasterKey.Bytes.ToArray()));
 
+    internal static Pbkdf2HashedRecoveryCode ToValueObject(this Pbkdf2HashedRecoveryCodeDso.V1 dso) =>
+        Pbkdf2HashedRecoveryCode.Load(
+            Pbkdf2Inputs.Load(
+                Pbkdf2Salt.Load(Convert.FromBase64String(dso.Salt)),
+                Pbkdf2PseudorandomFunctionName.Load(dso.PseudorandomFunction),
+                Pbkdf2IterationCount.Load(dso.IterationCount),
+                Pbkdf2HashFunctionDigestSize.Load(dso.HashFunctionDigestSize)),
+            Pbkdf2MasterKey.Load(Convert.FromBase64String(dso.MasterKey)));
+
+    internal static Pbkdf2HashedRecoveryCodeDso.V1 ToDso(this Pbkdf2HashedRecoveryCode vo) => new(
+        Convert.ToBase64String(vo.Inputs.Salt.Bytes.ToArray()),
+        vo.Inputs.PseudorandomFunctionName.Value,
+        vo.Inputs.IterationCount.Number,
+        vo.Inputs.HashFunctionDigestSize.Number,
+        Convert.ToBase64String(vo.MasterKey.Bytes.ToArray()));
+
     internal static HashedPassword ToValueObject(this HashedPasswordDso.V1 dso) =>
         HashedPassword.Load(new HashedPasswordData(
             dso.AlgorithmId,
