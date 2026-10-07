@@ -1,0 +1,11 @@
+<Solution>
+  <!--
+    Pack target for the release workflow (release.yml packs bff/bff.slnx for libs/bff).
+    Contains only the shipped packages; the full solution is ../Duende.Bff.sln.
+  -->
+  <Folder Name="/src/">
+    <Project Path="../src/Duende.Bff/Duende.Bff.csproj" />
+    <Project Path="../src/Duende.Bff.EntityFramework/Duende.Bff.EntityFramework.csproj" />
+    <Project Path="../src/Duende.Bff.Yarp/Duende.Bff.Yarp.csproj" />
+  </Folder>
+</Solution>

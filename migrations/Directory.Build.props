@@ -1,0 +1,11 @@
+<Project>
+    <!-- Non-shipping projects: inherit the repository settings, then add NuGet audit suppressions. -->
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+    <Import Project="$(MSBuildThisFileDirectory)../NuGetAudit.NonShipping.props" />
+
+    <PropertyGroup>
+        <!-- Only the projects under src/ ship as NuGet packages. Without this, packing Duende.Bff.sln
+             also packs class libraries such as samples/Blazor6/Shared (and fails with NU5019). -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+</Project>

@@ -27,5 +27,8 @@
 
     <PropertyGroup>
         <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+        <!-- Releases are tagged bff-X.Y.Z in the monorepo (DuendeSoftware/products-private and DuendeSoftware/products). -->
+        <MinVerTagPrefix>bff-</MinVerTagPrefix>
+        <MinVerMinimumMajorMinor>2.2</MinVerMinimumMajorMinor>
     </PropertyGroup>
 </Project>

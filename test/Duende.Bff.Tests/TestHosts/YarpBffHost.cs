@@ -34,6 +34,12 @@ namespace Duende.Bff.Tests.TestHosts
 
         public BffOptions BffOptions { get; private set; }
 
+        /// <summary>
+        /// Optional callback to further configure the reverse proxy after AddBffExtensions and the
+        /// in-memory routes are registered. Must be set before the host is initialized.
+        /// </summary>
+        public Action<IReverseProxyBuilder> ConfigureReverseProxy { get; set; }
+
         public YarpBffHost(IdentityServerHost identityServerHost, ApiHost apiHost, string clientId,
             string baseAddress = "https://app", bool useForwardedHeaders = false)
             : base(baseAddress)
@@ -86,6 +92,28 @@ namespace Duende.Bff.Tests.TestHosts
                         Match = new()
                         {
                             Path = "/api_anon/{**catch-all}"
+                        }
+                    }.WithAntiforgeryCheck(),
+                    
+                    // Route whose YARP configuration sets a Cookie header. The BFF Cookie removal
+                    // runs after route-configured transforms, so the header must still be removed.
+                    new RouteConfig()
+                    {
+                        RouteId = "api_cookie_transform",
+                        ClusterId = "cluster1",
+
+                        Match = new()
+                        {
+                            Path = "/api_cookie_transform/{**catch-all}"
+                        },
+
+                        Transforms = new[]
+                        {
+                            new Dictionary<string, string>
+                            {
+                                ["RequestHeader"] = "Cookie",
+                                ["Set"] = "from-route-config=1",
+                            }
                         }
                     }.WithAntiforgeryCheck(),
                     
@@ -166,6 +194,8 @@ namespace Duende.Bff.Tests.TestHosts
                         }
                     }
                 });
+
+            ConfigureReverseProxy?.Invoke(yarpBuilder);
 
             // todo: need YARP equivalent
             // services.AddSingleton<IHttpMessageInvokerFactory>(

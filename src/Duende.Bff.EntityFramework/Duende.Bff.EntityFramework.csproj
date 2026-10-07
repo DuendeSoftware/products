@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <LangVersion>latest</LangVersion>
+    <!-- C# 12 = what BFF 2.2.0 shipped with (SDK 8); global.json now selects SDK 10, where latest = C# 14. -->
+    <LangVersion>12</LangVersion>
 
     <AssemblyName>Duende.BFF.EntityFramework</AssemblyName>
     <Description>Entity Framework Core support for backend for frontend (BFF) host for ASP.NET Core</Description>
@@ -11,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
     
     <ProjectReference Include="..\Duende.Bff\Duende.Bff.csproj" />
   </ItemGroup>

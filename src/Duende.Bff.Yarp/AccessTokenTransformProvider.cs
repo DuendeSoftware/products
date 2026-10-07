@@ -79,6 +79,18 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
+        // Always registered (before any early return below), so the Cookie header is removed on
+        // every route, with or without token metadata.
+        transformBuildContext.AddRequestTransform(transformContext =>
+        {
+            if (_options.RemoveCookieHeaderFromYarpRequests)
+            {
+                transformContext.ProxyRequest.Headers.Remove("Cookie");
+            }
+
+            return ValueTask.CompletedTask;
+        });
+
         TokenType tokenType;
         bool optional;
         if(GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))

@@ -5,6 +5,7 @@
         <FrameworkVersionTesting>6.0.11</FrameworkVersionTesting>
         <YarpVersion>2.0.1</YarpVersion>
         <IdentityServerVersion>6.3.6</IdentityServerVersion>
+        <CachingMemoryVersion>6.0.2</CachingMemoryVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0'">
@@ -19,6 +20,7 @@
         <FrameworkVersionTesting>8.0.0</FrameworkVersionTesting>
         <YarpVersion>2.1.0</YarpVersion>
         <IdentityServerVersion>7.0.0-preview.2</IdentityServerVersion>
+        <CachingMemoryVersion>8.0.1</CachingMemoryVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,7 +30,12 @@
 
         <!-- runtime -->
         <PackageReference Update="IdentityModel" Version="6.1.0" />
-        <PackageReference Update="Duende.AccessTokenManagement.OpenIdConnect" Version="2.1.0" />
+        <!-- 2.1.2 is the first ATM release whose System.IdentityModel.Tokens.Jwt dependency (6.35.0 / 7.1.2)
+             is patched for GHSA-59j7-ghrg-fj52. GHSA-qxj7-2x7w-3mpp is only fixed in ATM 3.2.0, which
+             drops net6.0 and is not compatible with this release line. -->
+        <PackageReference Update="Duende.AccessTokenManagement.OpenIdConnect" Version="2.1.2" />
+        <!-- Pinned above the version EF Core pulls in transitively to patch GHSA-qj66-m88j-hmgj. -->
+        <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Relational" Version="$(FrameworkVersionRuntime)" />
         <PackageReference Update="Yarp.ReverseProxy" Version="$(YarpVersion)" />
 

@@ -23,6 +23,11 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
 
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Condition=" '$(TargetFramework)' == 'net8.0'" />
+
+    <!-- On net7.0 the ASP.NET Core 7.0.0 packages keep Microsoft.IdentityModel.Protocols* at 6.15.1, while
+         Duende.AccessTokenManagement 2.1.2 brings Microsoft.IdentityModel.Tokens 6.35.0. Align them so the
+         IdentityModel assemblies match (mixed versions break client credentials token requests). -->
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.35.0" Condition=" '$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,8 @@
     <PropertyGroup>
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <LangVersion>latest</LangVersion>
+        <!-- C# 12 = what BFF 2.2.0 shipped with (SDK 8); global.json now selects SDK 10, where latest = C# 14. -->
+        <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
 
         <AssemblyName>Duende.BFF</AssemblyName>
