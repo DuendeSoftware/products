@@ -79,6 +79,18 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
+        // Applies to every route, with or without token metadata (including the invalid
+        // optional + required token configuration below, which returns early).
+        transformBuildContext.AddRequestTransform(transformContext =>
+        {
+            if (_options.RemoveCookieHeaderFromYarpRequests)
+            {
+                transformContext.ProxyRequest.Headers.Remove("Cookie");
+            }
+
+            return ValueTask.CompletedTask;
+        });
+
         TokenType tokenType;
         bool optional;
         if(GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))

@@ -8,6 +8,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Duende.Bff.Tests.TestFramework;
+using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy.Transforms;
 using Xunit;
 
 namespace Duende.Bff.Tests.Endpoints
@@ -220,6 +222,80 @@ namespace Duende.Bff.Tests.Endpoints
             var response = await BffHost.BrowserClient.SendAsync(req);
         
             response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        }
+
+        [Fact]
+        public async Task authenticated_call_to_route_with_token_metadata_should_not_forward_cookie_header_to_api()
+        {
+            await BffHost.BffLoginAsync("alice");
+
+            var apiResult = await CallApi(BffHost, "/api_user/test");
+
+            apiResult.RequestHeaders.Keys.Should().NotContain("Cookie");
+        }
+
+        [Fact]
+        public async Task authenticated_call_to_route_without_token_metadata_should_not_forward_cookie_header_to_api()
+        {
+            await BffHost.BffLoginAsync("alice");
+
+            var apiResult = await CallApi(BffHost, "/api_anon/test");
+
+            apiResult.RequestHeaders.Keys.Should().NotContain("Cookie");
+        }
+
+        [Fact]
+        public async Task when_opted_out_cookie_header_is_forwarded_to_api()
+        {
+            var bffHost = new YarpBffHost(IdentityServerHost, ApiHost, "spa");
+            bffHost.OnConfigureServices += services =>
+                services.Configure<BffOptions>(options => options.RemoveCookieHeaderFromYarpRequests = false);
+            await bffHost.InitializeAsync();
+            await bffHost.BffLoginAsync("alice");
+
+            var apiResult = await CallApi(bffHost, "/api_anon/test");
+
+            apiResult.RequestHeaders.Keys.Should().Contain("Cookie");
+        }
+
+        [Fact]
+        public async Task route_config_transform_setting_cookie_header_is_still_removed()
+        {
+            await BffHost.BffLoginAsync("alice");
+
+            var apiResult = await CallApi(BffHost, "/api_cookie_transform/test");
+
+            apiResult.RequestHeaders.Keys.Should().NotContain("Cookie");
+        }
+
+        [Fact]
+        public async Task transform_registered_after_add_bff_extensions_can_reintroduce_cookie_header()
+        {
+            var bffHost = new YarpBffHost(IdentityServerHost, ApiHost, "spa")
+            {
+                OnConfigureReverseProxy = yarp => yarp.AddTransforms(context => context.AddRequestTransform(transformContext =>
+                {
+                    transformContext.ProxyRequest.Headers.Add("Cookie", "from-later-transform=1");
+                    return default;
+                }))
+            };
+            await bffHost.InitializeAsync();
+            await bffHost.BffLoginAsync("alice");
+
+            var apiResult = await CallApi(bffHost, "/api_anon/test");
+
+            apiResult.RequestHeaders.Keys.Should().Contain("Cookie");
+        }
+
+        private static async Task<ApiResponse> CallApi(YarpBffHost host, string path)
+        {
+            var req = new HttpRequestMessage(HttpMethod.Get, host.Url(path));
+            req.Headers.Add("x-csrf", "1");
+            var response = await host.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse>(json);
         }
     }
 }

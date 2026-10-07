@@ -17,4 +17,9 @@
     <ProjectReference Include="..\..\src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Non-shipped sample: SQLitePCLRaw.lib.e_sqlite3 (via EF Core Sqlite) has no patched 2.1.x release. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+
 </Project>

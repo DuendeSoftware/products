@@ -26,6 +26,14 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+        <MinVerAutoIncrement>patch</MinVerAutoIncrement>
+        <!-- Releases are tagged bff-X.Y.Z in products-private and DuendeSoftware/products. -->
+        <MinVerTagPrefix>bff-</MinVerTagPrefix>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- Audit transitive packages too and fail the build on any known vulnerability. -->
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <WarningsAsErrors>$(WarningsAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
     </PropertyGroup>
 </Project>

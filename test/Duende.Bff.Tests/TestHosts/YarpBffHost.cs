@@ -34,6 +34,11 @@ namespace Duende.Bff.Tests.TestHosts
 
         public BffOptions BffOptions { get; private set; }
 
+        /// <summary>
+        /// Called after AddBffExtensions, so transforms registered here run after the BFF's.
+        /// </summary>
+        public Action<IReverseProxyBuilder> OnConfigureReverseProxy { get; set; } = _ => { };
+
         public YarpBffHost(IdentityServerHost identityServerHost, ApiHost apiHost, string clientId,
             string baseAddress = "https://app", bool useForwardedHeaders = false)
             : base(baseAddress)
@@ -63,6 +68,8 @@ namespace Duende.Bff.Tests.TestHosts
 
             var yarpBuilder = services.AddReverseProxy()
                 .AddBffExtensions();
+
+            OnConfigureReverseProxy(yarpBuilder);
             
             yarpBuilder.LoadFromMemory(
                 new[]
@@ -77,6 +84,26 @@ namespace Duende.Bff.Tests.TestHosts
                             Path = "/api_anon_no_csrf/{**catch-all}"
                         }
                     },
+
+                    // Route-config transform that sets a Cookie header; the BFF must still remove it.
+                    new RouteConfig()
+                    {
+                        RouteId = "api_cookie_transform",
+                        ClusterId = "cluster1",
+
+                        Match = new()
+                        {
+                            Path = "/api_cookie_transform/{**catch-all}"
+                        },
+                        Transforms = new[]
+                        {
+                            new Dictionary<string, string>
+                            {
+                                ["RequestHeader"] = "Cookie",
+                                ["Set"] = "from-route-config=1",
+                            }
+                        }
+                    }.WithAntiforgeryCheck(),
                     
                     new RouteConfig()
                     {

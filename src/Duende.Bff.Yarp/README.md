@@ -10,6 +10,17 @@ This package integrates the BFF with Microsoft's YARP (Yet Another Reverse Proxy
 ## Getting Started
 For in-depth documentation, please see the Duende.BFF.Yarp [documentation page](https://docs.duendesoftware.com/identityserver/v7/bff/apis/yarp/).
 
+## Behavior change in 2.3.1: the Cookie request header is removed on all YARP routes
+This changes a default in a patch release. It makes the YARP integration behave the same as the direct forwarder (`MapRemoteBffApiEndpoint`), which already removed the `Cookie` header.
+
+Previously, when using `services.AddReverseProxy().AddBffExtensions()` with `MapReverseProxy`, the inbound `Cookie` header (including the BFF authentication cookie) was forwarded unchanged to upstream APIs on every route, with or without `Duende.Bff.Yarp.TokenType` metadata. Routes configured with an access token (for example `WithAccessToken(...)` or `WithOptionalUserAccessToken()`) forwarded the cookie as well.
+
+Now, the `Cookie` request header is removed by default from every route proxied through the BFF YARP integration. This is controlled by `BffOptions.RemoveCookieHeaderFromYarpRequests`, which defaults to `true`.
+
+If you relied on the previous behavior, set `RemoveCookieHeaderFromYarpRequests` to `false`, for example with `services.Configure<BffOptions>(o => o.RemoveCookieHeaderFromYarpRequests = false)` or in `AddBff(o => ...)`. This setting applies to every YARP route: turning it off forwards the browser's cookies, including the BFF authentication cookie, to every upstream API. Remove the header yourself on each route that doesn't need cookies, using a standard YARP transform such as `.AddTransforms(ctx => ctx.AddRequestHeaderRemove("Cookie"))` or a configuration-based `RequestHeaderRemove: Cookie` transform.
+
+The `Cookie` header is removed after the request headers are copied and after the transforms configured on the route. Transform providers or transforms registered after calling `AddBffExtensions` (for example additional calls to `.AddTransforms(...)` on the `IReverseProxyBuilder`) run later and can still modify the request, including setting a `Cookie` header.
+
 ## Licensing
 Duende.BFF.Yarp is source-available, but requires a paid [license](https://duendesoftware.com/products/bff) for production use.
 
