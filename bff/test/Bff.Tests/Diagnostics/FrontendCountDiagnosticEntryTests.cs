@@ -1,12 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
 namespace Duende.Bff.Tests.Diagnostics;
 
 public class FrontendCountDiagnosticEntryTests : BffTestBase
 {
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(50);
+
     [Fact]
     public async Task Should_print_the_number_of_frontends_during_defined_interval()
     {
@@ -17,12 +21,7 @@ public class FrontendCountDiagnosticEntryTests : BffTestBase
 
         await InitializeAsync();
 
-        AdvanceClock(TimeSpan.FromHours(1));
-
-        await Task.Delay(100);
-
-        var bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"));
-        bffLogMessages.ShouldContain(x => x.Contains("\"FrontendCount\":0"));
+        await WaitForBffLogMessageByAdvancingClock("\"FrontendCount\":0");
 
         AddOrUpdateFrontend(new BffFrontend
         {
@@ -33,11 +32,32 @@ public class FrontendCountDiagnosticEntryTests : BffTestBase
             Name = BffFrontendName.Parse("frontend2"),
         });
 
-        AdvanceClock(TimeSpan.FromHours(1));
+        await WaitForBffLogMessageByAdvancingClock("\"FrontendCount\":2");
+    }
 
-        await Task.Delay(100);
+    private async Task WaitForBffLogMessageByAdvancingClock(string message)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        while (stopwatch.Elapsed < Timeout)
+        {
+            AdvanceClock(TimeSpan.FromHours(1));
+            await Task.Delay(PollInterval);
 
-        bffLogMessages = Context.LogMessages.ToString().Split(Environment.NewLine).Where(x => x.StartsWith("bff"));
-        bffLogMessages.ShouldContain(x => x.Contains("\"FrontendCount\":2"));
+            var bffLogMessages = Context.LogMessages
+                .ToString()
+                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+                .Where(x => x.StartsWith("bff", StringComparison.Ordinal));
+
+            if (bffLogMessages.Any(x => x.Contains(message, StringComparison.Ordinal)))
+            {
+                return;
+            }
+        }
+
+        var finalBffLogMessages = Context.LogMessages
+            .ToString()
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .Where(x => x.StartsWith("bff", StringComparison.Ordinal));
+        finalBffLogMessages.ShouldContain(x => x.Contains(message, StringComparison.Ordinal));
     }
 }

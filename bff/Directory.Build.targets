@@ -4,4 +4,31 @@
       <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.g', '.cs'))</DependentUpon>
     </Compile>
   </ItemGroup>
+
+  <!--
+    Release-branch NuGet audit suppressions for NON-SHIPPED projects only
+    (tests, hosts, samples, benchmarks, tools, migrations; i.e. IsPackable != true).
+    These advisories come in transitively via Aspire / test / EF Sqlite tooling and
+    never reach a published package. Shipped (packable) projects are intentionally
+    NOT covered here: vulnerable dependencies there must be fixed by bumping the
+    package to a patched version, never suppressed.
+  -->
+  <ItemGroup Condition="'$(IsPackable)' != 'true'">
+    <!-- AngleSharp 1.4.0 (via test tooling) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
+    <!-- MessagePack 2.5.192 (via Aspire hosting / test tooling) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2f33-pr97-265q" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2x83-8g95-xh59" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-cj9g-3mj2-g8vv" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-cxmj-83gh-fp49" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-hv8m-jj95-wg3x" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-q2h6-ghwm-5qm8" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhmf-xw27-6rqr" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-v72x-2h86-7f8m" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-vh6j-jc39-fggf" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w567-gjr2-hm5j" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wfr3-xj75-pfwh" />
+    <!-- SQLitePCLRaw.lib.e_sqlite3 2.1.11 (via Microsoft.EntityFrameworkCore.Sqlite in tests/hosts/migrations) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>

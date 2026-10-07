@@ -5,7 +5,10 @@ using System.Collections.Concurrent;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
+using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms.Builder;
@@ -26,15 +29,21 @@ internal class RemoteRouteHandler : IDisposable
     private readonly CurrentFrontendAccessor _currentFrontendAccessor;
     private readonly IHttpForwarder _httpForwarder;
     private readonly ITransformBuilder _transformBuilder;
+    private readonly IOptions<BffOptions> _options;
+    private readonly ILogger<RemoteRouteHandler> _logger;
 
     public RemoteRouteHandler(CurrentFrontendAccessor currentFrontendAccessor,
         IHttpForwarder httpForwarder,
         ITransformBuilder transformBuilder,
         FrontendCollection frontendCollection,
+        IOptions<BffOptions> options,
+        ILogger<RemoteRouteHandler> logger,
         IForwarderHttpClientFactory? forwarderHttpClientFactory = null,
         BffYarpTransformBuilder? customBffYarpTransformBuilder = null)
     {
         _currentFrontendAccessor = currentFrontendAccessor;
+        _options = options;
+        _logger = logger;
         forwarderHttpClientFactory ??= new ForwarderHttpClientFactory();
         _httpForwarder = httpForwarder;
         _transformBuilder = transformBuilder;
@@ -86,6 +95,17 @@ internal class RemoteRouteHandler : IDisposable
             // Path matching must be case insensitive
             if (context.Request.Path.StartsWithSegments(remoteApi.PathMatch.ToString(), StringComparison.OrdinalIgnoreCase))
             {
+                // The BffAntiForgeryMiddleware runs before this handler and cannot see the endpoint,
+                // because it is only selected here at request time. So the anti-forgery check
+                // has to be enforced here, before any access token is attached and the request is forwarded.
+                if (!_options.Value.DisableAntiForgeryCheck(context) &&
+                    !context.CheckAntiForgeryHeader(_options.Value))
+                {
+                    _logger.AntiForgeryValidationFailed(LogLevel.Warning, context.Request.Path.Sanitize());
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return true;
+                }
+
                 var bffRemoteApiEndpointMetadata = new BffRemoteApiEndpointMetadata()
                 {
                     TokenType = remoteApi.RequiredTokenType,

@@ -184,4 +184,24 @@ public sealed class BffOptions
     /// </summary>
     public DiagnosticsOptions Diagnostics { get; set; } = new();
 
+    /// <summary>
+    /// Specifies if the <c>Cookie</c> request header is removed from requests proxied through the
+    /// YARP integration (<c>AddYarpConfig</c> / <c>AddBffExtensions</c>), for all routes, regardless
+    /// of whether a <c>Duende.Bff.Yarp.TokenType</c> route or cluster metadata value is present.
+    /// Defaults to true.
+    ///
+    /// This setting applies to every YARP route. Disabling it forwards the browser's cookies, including
+    /// the BFF authentication cookie, to every upstream API proxied through the YARP integration, unless
+    /// you remove the header yourself on each route. To do that, use a YARP transform such as
+    /// <c>.AddTransforms(ctx => ctx.AddRequestHeaderRemove("Cookie"))</c>, or a YARP configuration-based
+    /// transform such as <c>RequestHeaderRemove: Cookie</c>.
+    /// </summary>
+    /// <remarks>
+    /// The <c>Cookie</c> header is removed after the request headers are copied and after the
+    /// transforms configured on the route. Transform providers or transforms registered after calling
+    /// <c>AddBffExtensions</c> run later in the pipeline and can still modify the request, including
+    /// setting a <c>Cookie</c> header.
+    /// </remarks>
+    public bool RemoveCookieHeaderFromYarpRequests { get; set; } = true;
+
 }
