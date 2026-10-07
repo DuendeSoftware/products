@@ -120,6 +120,31 @@ public class BffRemoteApiTests : BffTestBase
     }
 
     [Fact]
+    public async Task When_logged_in_and_antiforgery_header_is_missing_then_request_is_rejected()
+    {
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend()
+            .WithRemoteApis(
+                new RemoteApi()
+                {
+                    PathMatch = The.Path,
+                    TargetUri = Api.Url(),
+                    RequiredTokenType = RequiredTokenType.User
+                })
+        );
+
+        _ = await Bff.BrowserClient.Login();
+
+        // Deliberately not adding the anti-forgery (x-csrf) header, simulating a cross-site request.
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.PathAndSubPath));
+        var response = await Bff.BrowserClient.SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized,
+            "Remote APIs configured via WithRemoteApis must require the anti-forgery header, just like MapRemoteBffApiEndpoint does.");
+    }
+
+    [Fact]
     public async Task When_not_logged_in_cannot_get_required_user_token()
     {
         await InitializeAsync();

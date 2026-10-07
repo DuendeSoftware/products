@@ -18,6 +18,11 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid"/>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">
+    <!-- Lift transitive Microsoft.Bcl.Memory (via Duende.IdentityModel) to a version patched for GHSA-73j8-2gch-69rq. -->
+    <PackageReference Include="Microsoft.Bcl.Memory"/>
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Bff.Benchmarks"/>
     <InternalsVisibleTo Include="Duende.Bff.Blazor"/>

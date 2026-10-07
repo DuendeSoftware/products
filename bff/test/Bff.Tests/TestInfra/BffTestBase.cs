@@ -251,6 +251,6 @@ public abstract class BffTestBase : IAsyncDisposable
             return Task.CompletedTask;
         };
 
-    protected void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
+    protected void AdvanceClock(TimeSpan by) => The.Clock.Advance(by);
 }
 

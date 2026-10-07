@@ -45,12 +45,12 @@ internal class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogge
         var values = new HashSet<string>();
         if (!string.IsNullOrEmpty(routeValue))
         {
-            values.Add(routeValue);
+            _ = values.Add(routeValue);
         }
 
         if (!string.IsNullOrEmpty(clusterValue))
         {
-            values.Add(clusterValue);
+            _ = values.Add(clusterValue);
         }
 
         if (values.Count > 1)
@@ -66,19 +66,27 @@ internal class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogge
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
-        if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
+        _ = transformBuildContext.AddRequestTransform(transformContext =>
         {
-            if (!Enum.TryParse<RequiredTokenType>(tokenTypeMetadata, true, out _))
+            if (_options.RemoveCookieHeaderFromYarpRequests)
             {
-                throw new ArgumentException("Invalid value for Duende.Bff.Yarp.TokenType metadata");
+                _ = transformContext.ProxyRequest.Headers.Remove("Cookie");
             }
-        }
-        else
+
+            return default;
+        });
+
+        if (!GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
         {
             return;
         }
 
-        transformBuildContext.AddRequestTransform(async transformContext =>
+        if (!Enum.TryParse<RequiredTokenType>(tokenTypeMetadata, true, out _))
+        {
+            throw new ArgumentException("Invalid value for Duende.Bff.Yarp.TokenType metadata");
+        }
+
+        _ = transformBuildContext.AddRequestTransform(async transformContext =>
         {
             transformContext.HttpContext.CheckForBffMiddleware(_options);
 

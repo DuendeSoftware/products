@@ -23,5 +23,9 @@
     <TargetFramework>net8.0</TargetFramework>
 
   </PropertyGroup>
-  <Import Project="../../hosts_and_clients.props" />
+  <Import Project="../hosts_and_clients.props" />
+  <!-- Migrations tooling project (not shipped): SQLitePCLRaw.lib.e_sqlite3 GHSA-2m69-gcr7-jv3q has no patched 2.x release. -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>
