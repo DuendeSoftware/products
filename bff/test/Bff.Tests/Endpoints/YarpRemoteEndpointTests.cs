@@ -206,4 +206,66 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
             expectedStatusCode: HttpStatusCode.InternalServerError
         );
     }
+
+    [Fact]
+    public async Task authenticated_call_to_route_with_token_metadata_should_not_forward_cookie_header_to_api()
+    {
+        await YarpBasedBffHost.BffLoginAsync("alice");
+
+        ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+            url: YarpBasedBffHost.Url("/api_user/test")
+        );
+
+        apiResult.Sub.ShouldBe("alice");
+        apiResult.RequestHeaders.Keys.ShouldNotContain("Cookie");
+    }
+
+    [Fact]
+    public async Task authenticated_call_to_route_without_token_metadata_should_not_forward_cookie_header_to_api()
+    {
+        await YarpBasedBffHost.BffLoginAsync("alice");
+
+        ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+            url: YarpBasedBffHost.Url("/api_anon/test")
+        );
+
+        apiResult.RequestHeaders.Keys.ShouldNotContain("Cookie");
+    }
+
+    [Fact]
+    public async Task when_opted_out_cookie_header_is_forwarded_to_api()
+    {
+        YarpBasedBffHost.BffOptions.RemoveCookieHeaderFromYarpRequests = false;
+        await YarpBasedBffHost.BffLoginAsync("alice");
+
+        ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+            url: YarpBasedBffHost.Url("/api_anon/test")
+        );
+
+        apiResult.RequestHeaders.Keys.ShouldContain("Cookie");
+    }
+
+    [Fact]
+    public async Task route_config_transform_setting_cookie_header_is_still_removed()
+    {
+        await YarpBasedBffHost.BffLoginAsync("alice");
+
+        ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+            url: YarpBasedBffHost.Url("/api_cookie_route_transform/test")
+        );
+
+        apiResult.RequestHeaders.Keys.ShouldNotContain("Cookie");
+    }
+
+    [Fact]
+    public async Task transform_registered_after_add_bff_extensions_can_reintroduce_cookie_header()
+    {
+        await YarpBasedBffHost.BffLoginAsync("alice");
+
+        ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+            url: YarpBasedBffHost.Url("/api_cookie_later_transform/test")
+        );
+
+        apiResult.RequestHeaders.Keys.ShouldContain("Cookie");
+    }
 }

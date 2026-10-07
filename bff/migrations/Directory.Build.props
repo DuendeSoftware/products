@@ -3,5 +3,9 @@
   <PropertyGroup>
 	  <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
-  <Import Project="../../hosts_and_clients.props" />
+  <Import Project="../hosts_and_clients.props" />
+  <!-- Non-shipped projects only: suppress advisories in transitive dependencies of samples/tests (Aspire 13.0.0: MessagePack; OpenTelemetry 1.12.0; SQLitePCLRaw 2.1.11; AngleSharp 1.1.2). Shipped packages under src/ must bump instead. -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>

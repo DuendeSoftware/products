@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Forwarder;
+using Yarp.ReverseProxy.Transforms;
 
 namespace Duende.Bff.Tests.TestHosts;
 
@@ -60,11 +61,54 @@ public class YarpBffHost : GenericHost
                 context => new HttpMessageInvoker(_apiHost.Server.CreateHandler())));
 
         var yarpBuilder = services.AddReverseProxy()
-            .AddBffExtensions();
+            .AddBffExtensions()
+            // Registered after AddBffExtensions, so it runs after the BFF transforms (including the
+            // Cookie header removal). Only applies to one route, used to verify that ordering.
+            .AddTransforms(context =>
+            {
+                if (context.Route.RouteId == "api_cookie_later_transform")
+                {
+                    context.AddRequestTransform(transformContext =>
+                    {
+                        transformContext.ProxyRequest.Headers.Add("Cookie", "from-later-transform=1");
+                        return default;
+                    });
+                }
+            });
 
         yarpBuilder.LoadFromMemory(
             new[]
             {
+                new RouteConfig
+                {
+                    RouteId = "api_cookie_route_transform",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_cookie_route_transform/{**catch-all}"
+                    },
+                    Transforms = new[]
+                    {
+                        new Dictionary<string, string>
+                        {
+                            ["RequestHeader"] = "Cookie",
+                            ["Set"] = "from-route-config=1",
+                        }
+                    }
+                },
+
+                new RouteConfig
+                {
+                    RouteId = "api_cookie_later_transform",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_cookie_later_transform/{**catch-all}"
+                    }
+                },
+
                 new RouteConfig
                 {
                     RouteId = "api_anon_no_csrf",

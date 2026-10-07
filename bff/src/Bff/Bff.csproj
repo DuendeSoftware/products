@@ -11,6 +11,11 @@
     <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != 'net10.0'">
+    <!-- Lifts the transitive Microsoft.Bcl.Memory 10.0.0 (via Duende.IdentityModel) to the lowest version patched for GHSA-73j8-2gch-69rq -->
+    <PackageReference Include="Microsoft.Bcl.Memory" VersionOverride="10.0.4" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.Bff.Blazor" />
   </ItemGroup>

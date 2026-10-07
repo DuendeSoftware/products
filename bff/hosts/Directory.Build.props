@@ -4,5 +4,22 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsBffProject>true</IsBffProject>
   </PropertyGroup>
-  <Import Project="../../hosts_and_clients.props" />
+  <Import Project="../hosts_and_clients.props" />
+  <!-- Non-shipped projects only: suppress advisories in transitive dependencies of samples/tests (Aspire 13.0.0: MessagePack; OpenTelemetry 1.12.0; SQLitePCLRaw 2.1.11; AngleSharp 1.1.2). Shipped packages under src/ must bump instead. -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2f33-pr97-265q" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2x83-8g95-xh59" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-cj9g-3mj2-g8vv" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-cxmj-83gh-fp49" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-hv8m-jj95-wg3x" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-q2h6-ghwm-5qm8" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhmf-xw27-6rqr" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-v72x-2h86-7f8m" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-vh6j-jc39-fggf" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w567-gjr2-hm5j" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wfr3-xj75-pfwh" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g94r-2vxg-569j" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>
