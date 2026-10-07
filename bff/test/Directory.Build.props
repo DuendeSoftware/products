@@ -4,5 +4,5 @@
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
   </PropertyGroup>
-  <Import Project="../../test.props" />
+  <Import Project="../test.props" />
 </Project>

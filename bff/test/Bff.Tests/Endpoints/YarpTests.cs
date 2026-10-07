@@ -3,12 +3,14 @@
 
 using System.Net;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Xunit.Abstractions;
 using Yarp.ReverseProxy.Configuration;
+using Yarp.ReverseProxy.Transforms;
 
 namespace Duende.Bff.Tests.Endpoints;
 
@@ -323,5 +325,106 @@ public class YarpTests : BffTestBase
             path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Forbidden
         );
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_call_to_route_with_token_metadata_should_not_forward_cookie_header_to_api(BffSetupType setup)
+    {
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath
+        );
+
+        apiResult.ApiResponse.RequestHeaders.Keys.ShouldNotContain("Cookie");
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_call_to_route_without_token_metadata_should_not_forward_cookie_header_to_api(BffSetupType setup)
+    {
+        ConfigureYarp(Some.RouteConfig());
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath
+        );
+
+        apiResult.ApiResponse.RequestHeaders.Keys.ShouldNotContain("Cookie");
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task when_opted_out_cookie_header_is_forwarded_to_api(BffSetupType setup)
+    {
+        ConfigureYarp(Some.RouteConfig());
+        Bff.OnConfigureServices += services =>
+            services.Configure<BffOptions>(options => options.RemoveCookieHeaderFromYarpRequests = false);
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath
+        );
+
+        apiResult.ApiResponse.RequestHeaders.Keys.ShouldContain("Cookie");
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task route_config_transform_setting_cookie_header_is_still_removed(BffSetupType setup)
+    {
+        var routeConfig = Some.RouteConfig() with
+        {
+            Transforms = new[]
+            {
+                new Dictionary<string, string>
+                {
+                    ["RequestHeader"] = "Cookie",
+                    ["Set"] = "from-route-config=1",
+                }
+            }
+        };
+        ConfigureYarp(routeConfig);
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath
+        );
+
+        apiResult.ApiResponse.RequestHeaders.Keys.ShouldNotContain("Cookie");
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task transform_registered_after_add_bff_extensions_can_reintroduce_cookie_header(BffSetupType setup)
+    {
+        Bff.OnConfigureBff += bff =>
+        {
+            _ = bff.AddYarpConfig([Some.RouteConfig()], [Some.ClusterConfig(Api)])
+                .AddTransforms(context => context.AddRequestTransform(transformContext =>
+                {
+                    transformContext.ProxyRequest.Headers.Add("Cookie", "from-later-transform=1");
+                    return default;
+                }));
+        };
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.PathAndSubPath
+        );
+
+        apiResult.ApiResponse.RequestHeaders.Keys.ShouldContain("Cookie");
     }
 }

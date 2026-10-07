@@ -330,6 +330,7 @@ namespace Duende.Bff.Configuration
         public Microsoft.AspNetCore.Http.PathString LoginPath { get; }
         public Microsoft.AspNetCore.Http.PathString LogoutPath { get; }
         public Microsoft.AspNetCore.Http.PathString ManagementBasePath { get; set; }
+        public bool RemoveCookieHeaderFromYarpRequests { get; set; }
         public bool RemoveSessionAfterRefreshTokenExpiration { get; set; }
         public bool RequireLogoutSessionId { get; set; }
         public bool RevokeRefreshTokenOnLogout { get; set; }
