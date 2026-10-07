@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="../../test.props" />
+  <Import Project="../test.props" />
+  <ItemGroup>
+    <!-- Test projects are not shipped. -->
+    <!-- AngleSharp 1.1.2 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
+    <!-- KubernetesClient 15.0.1 (via Aspire.Hosting.Testing) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w7r3-mgwf-4mqq" />
+    <!-- OpenTelemetry.Exporter.OpenTelemetryProtocol 1.11.0 (via host project references) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+  </ItemGroup>
 </Project>

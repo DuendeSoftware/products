@@ -75,6 +75,18 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
+        // Applies to every route, with or without token metadata, matching the direct forwarder
+        // (MapRemoteBffApiEndpoint), which already removes the Cookie header.
+        transformBuildContext.AddRequestTransform(transformContext =>
+        {
+            if (_options.RemoveCookieHeaderFromYarpRequests)
+            {
+                transformContext.ProxyRequest.Headers.Remove("Cookie");
+            }
+
+            return ValueTask.CompletedTask;
+        });
+
         if (GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))
         {
             if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))

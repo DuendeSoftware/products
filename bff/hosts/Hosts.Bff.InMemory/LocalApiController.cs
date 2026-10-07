@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Host8;
+
 [Route("local")]
 public class LocalApiController : ControllerBase
 {

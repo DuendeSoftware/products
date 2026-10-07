@@ -76,6 +76,27 @@ public class YarpBffHost : GenericHost
                     }
                 },
 
+                // Route whose configuration-based transform sets a Cookie header. The BFF
+                // removes it afterwards (RemoveCookieHeaderFromYarpRequests).
+                new RouteConfig
+                {
+                    RouteId = "api_cookie_transform",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_cookie_transform/{**catch-all}"
+                    },
+                    Transforms = new[]
+                    {
+                        new Dictionary<string, string>
+                        {
+                            ["RequestHeader"] = "Cookie",
+                            ["Set"] = "from-route-config=1",
+                        }
+                    }
+                },
+
                 new RouteConfig
                 {
                     RouteId = "api_anon",

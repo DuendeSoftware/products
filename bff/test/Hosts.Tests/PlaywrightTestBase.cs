@@ -40,6 +40,9 @@ public class PlaywrightTestBase : PageTest, IDisposable
     {
         await base.InitializeAsync();
         Context.SetDefaultTimeout(10_000);
+        // Generous timeout for assertions. The Blazor WebAssembly host downloads ~16 MB of runtime
+        // before its first render, which took 5-12s on loaded CI runners (exceeding the 5s default).
+        SetDefaultExpectTimeout(30_000);
         await Context.Tracing.StartAsync(new()
         {
             Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",

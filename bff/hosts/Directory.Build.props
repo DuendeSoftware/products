@@ -19,5 +19,15 @@
       -->
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
-  <Import Project="../../samples.props" />
+  <ItemGroup>
+    <!-- Sample hosts are not shipped. Suppress known advisories in their (transitive) dependencies
+         so that NuGet audit warnings (treated as errors in Release) don't break the build. -->
+    <!-- OpenTelemetry.Exporter.OpenTelemetryProtocol 1.11.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+    <!-- SQLitePCLRaw.lib.e_sqlite3 2.1.10 (via Microsoft.EntityFrameworkCore.Sqlite) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+    <!-- KubernetesClient 15.0.1 (via Aspire.Hosting.AppHost) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w7r3-mgwf-4mqq" />
+  </ItemGroup>
+  <Import Project="../samples.props" />
 </Project>

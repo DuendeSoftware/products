@@ -3,5 +3,10 @@
   <PropertyGroup>
 	  <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
-  <Import Project="../../samples.props" />
+  <ItemGroup>
+    <!-- Migration helper projects are not shipped. -->
+    <!-- SQLitePCLRaw.lib.e_sqlite3 2.1.10 (via Microsoft.EntityFrameworkCore.Sqlite) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+  <Import Project="../samples.props" />
 </Project>
