@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Solution>
+  <Folder Name="/shared/">
+    <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ConformanceReport/ConformanceReport.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/ConformanceReport.Tests/ConformanceReport.Tests.csproj" />
+  </Folder>
+</Solution>

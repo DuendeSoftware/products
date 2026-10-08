@@ -1,6 +1,6 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
-  <Import Project="../../src.props" />
+  <Import Project="../src.props" />
   <PropertyGroup>
     <AssemblyName>Duende.ConformanceReport.$(MSBuildProjectName)</AssemblyName>
     <PackageId>Duende.ConformanceReport.$(MSBuildProjectName)</PackageId>
@@ -9,5 +9,7 @@
     <MinVerTagPrefix>cr-</MinVerTagPrefix>
     <PackageTags>OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;Conformance</PackageTags>
     <Product>Duende Conformance Report</Product>
+    <!-- CS1591: Missing XML comment - not yet enforced for ConformanceReport -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 </Project>

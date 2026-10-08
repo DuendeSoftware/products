@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.ConformanceReport.Models;
+using Duende.ConformanceReport.Internal.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -14,18 +14,22 @@ public class ConformanceAssessmentServiceTests
         bool parRequired = true,
         bool mtlsEnabled = true,
         IReadOnlyCollection<string>? signingAlgorithms = null,
-        bool emitIssuer = true,
-        bool useHttp303Redirects = true) =>
+        bool emitIssuer = true) =>
         new()
         {
             PushedAuthorizationEndpointEnabled = parEnabled,
             PushedAuthorizationRequired = parRequired,
             PushedAuthorizationLifetime = 600,
+            AllowUnregisteredPushedRedirectUris = false,
+            LoopbackRedirectUrisEnabled = false,
+            DiscoveryEndpointEnabled = true,
             MutualTlsEnabled = mtlsEnabled,
-            SupportedSigningAlgorithms = signingAlgorithms ?? ["PS256", "ES256"],
+            SupportedClientAssertionSigningAlgorithms = signingAlgorithms ?? ["PS256", "ES256"],
+            SupportedRequestObjectSigningAlgorithms = ["PS256", "ES256"],
+            DPoPSigningAlgorithms = ["PS256", "ES256"],
+            TokenSigningAlgorithms = ["PS256", "ES256"],
             JwtValidationClockSkew = TimeSpan.FromMinutes(5),
-            EmitIssuerIdentificationResponseParameter = emitIssuer,
-            UseHttp303Redirects = useHttp303Redirects
+            EmitIssuerIdentificationResponseParameter = emitIssuer
         };
 
     private static ConformanceReportClient CreateCompliantClient(string clientId = "compliant-client") =>
@@ -104,7 +108,7 @@ public class ConformanceAssessmentServiceTests
 
     private sealed class InMemoryClientStore(IEnumerable<ConformanceReportClient> clients) : IConformanceReportClientStore
     {
-        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CancellationToken ct) => Task.FromResult(clients);
+        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(Ct ct) => Task.FromResult(clients);
     }
 
     private sealed class TestHttpContextAccessor : IHttpContextAccessor
@@ -123,9 +127,9 @@ public class ConformanceAssessmentServiceTests
 
     public class ReportGenerationTests
     {
-        private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+        private readonly Ct _ct = TestContext.Current.CancellationToken;
         [Fact]
-        public async Task GenerateReportWithBothProfilesEnabledReturnsCompleteReport()
+        public async Task generate_report_with_both_profiles_enabled_returns_complete_report()
         {
             var service = CreateService();
 
@@ -138,7 +142,7 @@ public class ConformanceAssessmentServiceTests
         }
 
         [Fact]
-        public async Task GenerateReportWithOnlyOAuth21EnabledReturnsOAuth21Only()
+        public async Task generate_report_with_only_OAuth21_enabled_returns_OAuth21_only()
         {
             var options = CreateDefaultOptions(enableOAuth21: true, enableFapi2: false);
             var service = CreateService(options: options);
@@ -150,7 +154,7 @@ public class ConformanceAssessmentServiceTests
         }
 
         [Fact]
-        public async Task GenerateReportWithOnlyFapi2EnabledReturnsFapi2Only()
+        public async Task generate_report_with_only_FAPI2_enabled_returns_FAPI2_only()
         {
             var options = CreateDefaultOptions(enableOAuth21: false, enableFapi2: true);
             var service = CreateService(options: options);
@@ -162,7 +166,7 @@ public class ConformanceAssessmentServiceTests
         }
 
         [Fact]
-        public async Task GenerateReportSetsAssessedAtTimestamp()
+        public async Task generate_report_sets_assessed_at_timestamp()
         {
             var service = CreateService();
             var beforeTime = DateTimeOffset.UtcNow;
@@ -175,7 +179,17 @@ public class ConformanceAssessmentServiceTests
         }
 
         [Fact]
-        public async Task GenerateReportWithMixedClientsCalculatesCorrectSummary()
+        public async Task generate_report_uses_draft16_spec_version_for_oauth21()
+        {
+            var service = CreateService();
+
+            var report = await service.GenerateReportAsync(_ct);
+
+            report.Profiles.OAuth21!.SpecVersion.ShouldBe("draft-16");
+        }
+
+        [Fact]
+        public async Task generate_report_with_mixed_clients_calculates_correct_summary()
         {
             var clients = new[]
             {

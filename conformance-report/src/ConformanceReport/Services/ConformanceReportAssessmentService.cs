@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Reflection;
-using Duende.ConformanceReport.Models;
+using Duende.ConformanceReport.Internal.Models;
 using Microsoft.Extensions.Options;
 
 namespace Duende.ConformanceReport.Services;
@@ -132,7 +132,7 @@ internal class ConformanceReportAssessmentService
 
     private ProfileResult AssessOAuth21Profile(List<ConformanceReportClient> clients)
     {
-        var serverFindings = _oauth21Assessor.AssessServer();
+        var serverFindings = _oauth21Assessor.AssessServer(clients);
         var clientResults = clients.Select(c => AssessClient(ConformanceReportProfile.OAuth21, c)).ToList();
 
         var serverStatus = DetermineStatusFromFindings(serverFindings);
@@ -141,7 +141,7 @@ internal class ConformanceReportAssessmentService
         return new ProfileResult
         {
             Name = "OAuth 2.1",
-            SpecVersion = "draft-14",
+            SpecVersion = "draft-16",
             SpecStatus = "draft",
             Note = "OAuth 2.1 is currently a draft specification. Assessment rules may change as the specification evolves.",
             Status = overallStatus,

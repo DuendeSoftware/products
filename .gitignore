@@ -264,3 +264,6 @@ adminstudio-data/
 
 # VS Code C# Dev Kit language service cache
 *.lscache
+
+# Local and CI output of the security audit (.github/security-audit)
+.security-audit/

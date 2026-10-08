@@ -3,7 +3,9 @@
 
 using Duende.ConformanceReport.Configuration;
 using Duende.ConformanceReport.Endpoints;
+using Duende.ConformanceReport.Licensing;
 using Duende.ConformanceReport.Services;
+using Duende.Private.Licencing.V2;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -13,12 +15,12 @@ namespace Duende.ConformanceReport;
 /// <summary>
 /// Extension methods for adding conformance services to the DI container.
 /// </summary>
-public static class ConformanceReportServiceCollectionExtensions
+internal static class ConformanceReportServiceCollectionExtensions
 {
     /// <summary>
     /// Adds core conformance services to the service collection.
     /// </summary>
-    public static IServiceCollection AddConformanceReport(
+    internal static IServiceCollection AddConformanceReport(
         this IServiceCollection services,
         Action<ConformanceReportOptions>? configure = null)
     {
@@ -31,6 +33,15 @@ public static class ConformanceReportServiceCollectionExtensions
 
         // Register HTTP context accessor if not already registered
         services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+        services.TryAddSingleton(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<V2LicenseAccessor>>();
+            var accessor = new V2LicenseAccessor(() => null, logger);
+            return accessor.Current;
+        });
+        services.TryAddSingleton<LicenseValidator>();
+        services.TryAddSingleton<ConformanceReportLicenseValidator>();
 
         // Register assessment service
         _ = services.AddTransient<ConformanceReportAssessmentService>();

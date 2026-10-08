@@ -3,8 +3,11 @@
 
 #nullable enable
 
+using Duende.ConformanceReport.Internal.Models;
+using Duende.ConformanceReport.Licensing;
 using Duende.ConformanceReport.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
@@ -18,11 +21,16 @@ public class ConformanceReportEndpointTests
             PushedAuthorizationEndpointEnabled = true,
             PushedAuthorizationRequired = true,
             PushedAuthorizationLifetime = 600,
+            AllowUnregisteredPushedRedirectUris = false,
+            LoopbackRedirectUrisEnabled = false,
+            DiscoveryEndpointEnabled = true,
             MutualTlsEnabled = true,
-            SupportedSigningAlgorithms = ["PS256", "ES256"],
+            SupportedClientAssertionSigningAlgorithms = ["PS256", "ES256"],
+            SupportedRequestObjectSigningAlgorithms = ["PS256", "ES256"],
+            DPoPSigningAlgorithms = ["PS256", "ES256"],
+            TokenSigningAlgorithms = ["PS256", "ES256"],
             JwtValidationClockSkew = TimeSpan.FromMinutes(5),
-            EmitIssuerIdentificationResponseParameter = true,
-            UseHttp303Redirects = true
+            EmitIssuerIdentificationResponseParameter = true
         };
 
     private static ConformanceReportClient CreateTestClient(string clientId = "test-client") =>
@@ -77,29 +85,16 @@ public class ConformanceReportEndpointTests
 
         var endpoint = new ConformanceReportEndpoint(
             assessmentService,
+            ConformanceReportLicenseValidator.CreateForTests(),
             Options.Create(options),
             NullLogger<ConformanceReportEndpoint>.Instance);
 
         return endpoint;
     }
 
-    private static DefaultHttpContext CreateHttpContext()
-    {
-        var context = new DefaultHttpContext
-        {
-            Request =
-            {
-                Scheme = "https",
-                Host = new HostString("localhost"),
-                Path = "/_duende/conformance/v1"
-            }
-        };
-        return context;
-    }
-
     private sealed class InMemoryClientStore(IEnumerable<ConformanceReportClient> clients) : IConformanceReportClientStore
     {
-        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(CancellationToken ct)
+        public Task<IEnumerable<ConformanceReportClient>> GetAllClientsAsync(Ct ct)
             => Task.FromResult(clients);
     }
 
@@ -124,14 +119,14 @@ public class ConformanceReportEndpointTests
 
     public class HtmlEndpointTests
     {
-        private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+        private readonly Ct _ct = TestContext.Current.CancellationToken;
+
         [Fact]
-        public async Task GetHtmlReportWhenEnabledReturnsHtmlContent()
+        public async Task get_html_report_when_enabled_returns_html_content()
         {
             var endpoint = CreateEndpoint();
-            var context = CreateHttpContext();
 
-            var result = await endpoint.GetHtmlReportAsync(context, _ct);
+            var result = await endpoint.GetHtmlReportAsync(_ct);
 
             _ = result.ShouldNotBeNull();
             _ = result.ShouldBeOfType<Microsoft.AspNetCore.Http.HttpResults.ContentHttpResult>();
@@ -140,19 +135,18 @@ public class ConformanceReportEndpointTests
         }
 
         [Fact]
-        public async Task GetHtmlReportWhenDisabledReturnsNotFound()
+        public async Task get_html_report_when_disabled_returns_not_found()
         {
             var options = CreateDefaultOptions(enabled: false);
             var endpoint = CreateEndpoint(options: options);
-            var context = CreateHttpContext();
 
-            var result = await endpoint.GetHtmlReportAsync(context, _ct);
+            var result = await endpoint.GetHtmlReportAsync(_ct);
 
             _ = result.ShouldBeOfType<Microsoft.AspNetCore.Http.HttpResults.NotFound>();
         }
 
         [Fact]
-        public async Task GetHtmlReportWithLicenseDoesNotBleedIntoUrl()
+        public async Task get_html_report_with_license_does_not_bleed_into_url()
         {
             var licenseInfo = new ConformanceReportLicenseInfo
             {
@@ -162,11 +156,10 @@ public class ConformanceReportEndpointTests
                 Expiration = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Utc)
             };
             var endpoint = CreateEndpoint(licenseInfo: licenseInfo);
-            var context = CreateHttpContext();
 
-            var result = await endpoint.GetHtmlReportAsync(context, _ct);
+            var result = await endpoint.GetHtmlReportAsync(_ct);
 
-            var contentResult = (Microsoft.AspNetCore.Http.HttpResults.ContentHttpResult)result;
+            var contentResult = (ContentHttpResult)result;
             var html = contentResult.ResponseContent!;
 
             // The license info should be present

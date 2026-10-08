@@ -17,3 +17,5 @@
 # Binary files
 *.pfx binary
 *.snk binary
+
+.github/workflows/*.lock.yml linguist-generated=true

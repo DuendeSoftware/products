@@ -1,0 +1,44 @@
+<Project>
+  <PropertyGroup>
+    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath><!-- TODO: move to Directory.Build.props -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles><!-- TODO: move to Directory.Build.props -->
+    <IsPackable>true</IsPackable>
+    <MinVerBuildMetadata>build.$(BUILD_NUMBER)</MinVerBuildMetadata>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile><!-- TODO: verify license is included in packages -->
+    <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmePath>../../README.md</PackageReadmePath>
+    <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <!-- TODO: check which of these properties are actually required -->
+  <PropertyGroup Label="SourceLink">
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);RS0016</NoWarn><!-- Add public types and members to the declared API -->
+    <NoWarn>$(NoWarn);RS0037</NoWarn><!-- Enable tracking of nullability of reference types in the declared API -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="All" />
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)\..\..\tools\PublicApi\PublicApi.csproj')">
+    <InternalsVisibleTo Include="Duende.PublicApi" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>

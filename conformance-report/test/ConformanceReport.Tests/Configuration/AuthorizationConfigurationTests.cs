@@ -11,7 +11,7 @@ namespace Duende.ConformanceReport.Configuration;
 public class AuthorizationConfigurationTests
 {
     [Fact]
-    public void DefaultConfigurationRequiresAuthenticatedUser()
+    public void default_configuration_requires_authenticated_user()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -31,7 +31,7 @@ public class AuthorizationConfigurationTests
     }
 
     [Fact]
-    public void CustomAuthorizationIsApplied()
+    public void custom_authorization_is_applied()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -57,7 +57,7 @@ public class AuthorizationConfigurationTests
     }
 
     [Fact]
-    public void NullConfigurationDoesNotRegisterPolicy()
+    public void null_configuration_does_not_register_policy()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -79,7 +79,7 @@ public class AuthorizationConfigurationTests
     }
 
     [Fact]
-    public void MultipleRequirementsCanBeConfigured()
+    public void multiple_requirements_can_be_configured()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -114,7 +114,7 @@ public class AuthorizationConfigurationTests
     }
 
     [Fact]
-    public void EmptyConfigurationAllowsAnonymous()
+    public void empty_configuration_allows_anonymous()
     {
         // Arrange
         var services = new ServiceCollection();

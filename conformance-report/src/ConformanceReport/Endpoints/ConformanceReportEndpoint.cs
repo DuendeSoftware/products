@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text;
+using Duende.ConformanceReport.Licensing;
 using Duende.ConformanceReport.Services;
 using Microsoft.Extensions.Options;
 
@@ -10,24 +11,16 @@ namespace Duende.ConformanceReport.Endpoints;
 /// <summary>
 /// Endpoint for generating conformance assessment reports.
 /// </summary>
-internal sealed partial class ConformanceReportEndpoint
+/// <remarks>
+/// Initializes a new instance of the <see cref="ConformanceReportEndpoint"/> class.
+/// </remarks>
+internal sealed partial class ConformanceReportEndpoint(
+    ConformanceReportAssessmentService assessmentService,
+    ConformanceReportLicenseValidator licenseValidator,
+    IOptions<ConformanceReportOptions> options,
+    ILogger<ConformanceReportEndpoint> logger)
 {
-    private readonly ConformanceReportAssessmentService _assessmentService;
-    private readonly ConformanceReportOptions _options;
-    private readonly ILogger<ConformanceReportEndpoint> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ConformanceReportEndpoint"/> class.
-    /// </summary>
-    public ConformanceReportEndpoint(
-        ConformanceReportAssessmentService assessmentService,
-        IOptions<ConformanceReportOptions> options,
-        ILogger<ConformanceReportEndpoint> logger)
-    {
-        _assessmentService = assessmentService;
-        _options = options.Value;
-        _logger = logger;
-    }
+    private readonly ConformanceReportOptions _options = options.Value;
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Processing conformance HTML report request")]
     private partial void LogProcessingRequest();
@@ -41,7 +34,7 @@ internal sealed partial class ConformanceReportEndpoint
     /// <summary>
     /// Processes requests for the HTML conformance report.
     /// </summary>
-    public async Task<IResult> GetHtmlReportAsync(HttpContext context, Ct ct)
+    public async Task<IResult> GetHtmlReportAsync(Ct ct)
     {
         LogProcessingRequest();
 
@@ -51,16 +44,19 @@ internal sealed partial class ConformanceReportEndpoint
             return Results.NotFound();
         }
 
+        if (!licenseValidator.ValidateConformanceReport())
+        {
+            return Results.NotFound();
+        }
+
         try
         {
-            var report = await _assessmentService.GenerateReportAsync(ct);
+            var report = await assessmentService.GenerateReportAsync(ct);
 
-            using var slice = Duende.ConformanceReport.Slices.ConformanceReport.Create(report);
+            using var slice = Internal.Slices.ConformanceReport.Create(report);
             var sb = new StringBuilder();
-            await using var writer = new System.IO.StringWriter(sb);
-#pragma warning disable CA2016 // RenderAsync overload for TextWriter doesn't accept CancellationToken
-            await slice.RenderAsync(writer);
-#pragma warning restore CA2016
+            await using var writer = new StringWriter(sb);
+            await slice.RenderAsync(writer, cancellationToken: ct);
 
             return Results.Content(sb.ToString(), "text/html");
         }
