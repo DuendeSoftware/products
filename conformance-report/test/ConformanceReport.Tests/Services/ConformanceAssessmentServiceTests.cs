@@ -101,7 +101,7 @@ public class ConformanceAssessmentServiceTests
 
         return new ConformanceReportAssessmentService(
             Options.Create(options),
-            () => serverOptions,
+            new TestConformanceReportServerOptionsProvider(serverOptions),
             clientStore,
             httpContextAccessor);
     }
@@ -123,6 +123,59 @@ public class ConformanceAssessmentServiceTests
             context.Request.Path = "/__duende/conformance/v1";
             return context;
         }
+    }
+
+    public class ServerOptionsProviderTests
+    {
+        private readonly Ct _ct = TestContext.Current.CancellationToken;
+
+        private static ConformanceReportAssessmentService CreateServiceWithProvider(TestConformanceReportServerOptionsProvider provider) =>
+            new(
+                Options.Create(CreateDefaultOptions()),
+                provider,
+                new InMemoryClientStore([CreateCompliantClient()]),
+                new TestHttpContextAccessor());
+
+        [Fact]
+        public async Task server_options_are_read_on_each_report()
+        {
+            var provider = new TestConformanceReportServerOptionsProvider(CreateDefaultServerOptions());
+            var service = CreateServiceWithProvider(provider);
+
+            _ = await service.GenerateReportAsync(_ct);
+            _ = await service.GenerateReportAsync(_ct);
+
+            provider.CallCount.ShouldBe(2);
+        }
+
+        [Fact]
+        public async Task report_reflects_server_options_changed_between_reports()
+        {
+            var provider = new TestConformanceReportServerOptionsProvider(CreateDefaultServerOptions());
+            var service = CreateServiceWithProvider(provider);
+
+            var before = await service.GenerateReportAsync(_ct);
+            provider.Options = CreateDefaultServerOptions(parEnabled: false, parRequired: false);
+            var after = await service.GenerateReportAsync(_ct);
+
+            GetParFinding(before).Status.ShouldNotBe(FindingStatus.Fail);
+            GetParFinding(after).Status.ShouldBe(FindingStatus.Fail);
+        }
+
+        [Fact]
+        public async Task cancellation_token_is_passed_to_server_options_provider()
+        {
+            var provider = new TestConformanceReportServerOptionsProvider(CreateDefaultServerOptions());
+            var service = CreateServiceWithProvider(provider);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_ct);
+
+            _ = await service.GenerateReportAsync(cts.Token);
+
+            provider.LastCancellationToken.ShouldBe(cts.Token);
+        }
+
+        private static Finding GetParFinding(ConformanceReportResult report) =>
+            report.Profiles.Fapi2Security.ShouldNotBeNull().Server.Findings.First(f => f.RuleId == "FS01");
     }
 
     public class ReportGenerationTests

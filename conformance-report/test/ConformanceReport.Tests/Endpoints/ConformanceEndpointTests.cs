@@ -78,7 +78,7 @@ public class ConformanceReportEndpointTests
 
         var assessmentService = new ConformanceReportAssessmentService(
             Options.Create(options),
-            () => serverOptions,
+            new TestConformanceReportServerOptionsProvider(serverOptions),
             clientStore,
             httpContextAccessor,
             licenseInfo);

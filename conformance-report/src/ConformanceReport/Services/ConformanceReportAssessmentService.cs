@@ -12,40 +12,46 @@ namespace Duende.ConformanceReport.Services;
 /// </summary>
 internal class ConformanceReportAssessmentService
 {
+    private readonly IConformanceReportServerOptionsProvider _serverOptionsProvider;
     private readonly ConformanceReportOptions _conformanceOptions;
     private readonly IConformanceReportClientStore _clientStore;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ConformanceReportLicenseInfo? _licenseInfo;
-    private readonly OAuth21Assessor _oauth21Assessor;
-    private readonly Fapi2SecurityAssessor _fapi2SecurityAssessor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConformanceReportAssessmentService"/> class.
     /// </summary>
+    /// <param name="conformanceOptions">The conformance report options.</param>
+    /// <param name="serverOptionsProvider">Supplies the server options to assess. Called once per report.</param>
+    /// <param name="clientStore">The store that supplies the clients to assess.</param>
+    /// <param name="httpContextAccessor">The accessor used to build the report URL.</param>
+    /// <param name="licenseInfo">Optional license information to include in the report.</param>
     public ConformanceReportAssessmentService(
         IOptions<ConformanceReportOptions> conformanceOptions,
-        Func<ConformanceReportServerOptions> serverOptionsProvider,
+        IConformanceReportServerOptionsProvider serverOptionsProvider,
         IConformanceReportClientStore clientStore,
         IHttpContextAccessor httpContextAccessor,
         ConformanceReportLicenseInfo? licenseInfo = null)
     {
         _conformanceOptions = conformanceOptions.Value;
+        _serverOptionsProvider = serverOptionsProvider;
         _clientStore = clientStore;
         _httpContextAccessor = httpContextAccessor;
         _licenseInfo = licenseInfo;
-
-        var serverOptions = serverOptionsProvider();
-        _oauth21Assessor = new OAuth21Assessor(serverOptions);
-        _fapi2SecurityAssessor = new Fapi2SecurityAssessor(serverOptions);
     }
 
     /// <summary>
     /// Generates a complete conformance assessment report.
     /// </summary>
+    /// <remarks>
+    /// Server options are fetched from the <see cref="IConformanceReportServerOptionsProvider"/>
+    /// on each call, so the report reflects the current configuration.
+    /// </remarks>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A conformance report containing the assessment results.</returns>
     public async Task<ConformanceReportResult> GenerateReportAsync(Ct ct)
     {
+        var serverOptions = await _serverOptionsProvider.GetServerOptionsAsync(ct);
         var clients = await _clientStore.GetAllClientsAsync(ct);
         var clientList = clients.ToList();
 
@@ -54,12 +60,12 @@ internal class ConformanceReportAssessmentService
 
         if (_conformanceOptions.EnableOAuth21Assessment)
         {
-            oauth21Result = AssessOAuth21Profile(clientList);
+            oauth21Result = AssessOAuth21Profile(new OAuth21Assessor(serverOptions), clientList);
         }
 
         if (_conformanceOptions.EnableFapi2SecurityAssessment)
         {
-            fapi2Result = AssessFapi2SecurityProfile(clientList);
+            fapi2Result = AssessFapi2SecurityProfile(new Fapi2SecurityAssessor(serverOptions), clientList);
         }
 
         var overallStatus = DetermineOverallStatus(oauth21Result, fapi2Result);
@@ -83,57 +89,19 @@ internal class ConformanceReportAssessmentService
         };
     }
 
-    /// <summary>
-    /// Generates a conformance assessment report for a specific profile.
-    /// </summary>
-    /// <param name="profile">The profile to assess.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A profile result containing the assessment findings.</returns>
-    public async Task<ProfileResult> AssessProfileAsync(
-        ConformanceReportProfile profile,
-        Ct ct)
-    {
-        var clients = await _clientStore.GetAllClientsAsync(ct);
-        var clientList = clients.ToList();
-
-        return profile switch
-        {
-            ConformanceReportProfile.OAuth21 => AssessOAuth21Profile(clientList),
-            ConformanceReportProfile.Fapi2Security => AssessFapi2SecurityProfile(clientList),
-            _ => throw new ArgumentOutOfRangeException(nameof(profile), profile, "Unknown conformance profile")
-        };
-    }
-
-    /// <summary>
-    /// Assesses a single client against a specific profile.
-    /// </summary>
-    /// <param name="profile">The profile to assess against.</param>
-    /// <param name="client">The client to assess.</param>
-    /// <returns>A client result containing the assessment findings.</returns>
-    public ClientResult AssessClient(ConformanceReportProfile profile, ConformanceReportClient client)
-    {
-        var findings = profile switch
-        {
-            ConformanceReportProfile.OAuth21 => _oauth21Assessor.AssessClient(client),
-            ConformanceReportProfile.Fapi2Security => _fapi2SecurityAssessor.AssessClient(client),
-            _ => throw new ArgumentOutOfRangeException(nameof(profile), profile, "Unknown conformance profile")
-        };
-
-        var status = DetermineStatusFromFindings(findings);
-
-        return new ClientResult
+    private static ClientResult BuildClientResult(ConformanceReportClient client, IReadOnlyList<Finding> findings) =>
+        new()
         {
             ClientId = client.ClientId,
             ClientName = client.ClientName,
-            Status = status,
+            Status = DetermineStatusFromFindings(findings),
             Findings = findings
         };
-    }
 
-    private ProfileResult AssessOAuth21Profile(List<ConformanceReportClient> clients)
+    private static ProfileResult AssessOAuth21Profile(OAuth21Assessor assessor, List<ConformanceReportClient> clients)
     {
-        var serverFindings = _oauth21Assessor.AssessServer(clients);
-        var clientResults = clients.Select(c => AssessClient(ConformanceReportProfile.OAuth21, c)).ToList();
+        var serverFindings = assessor.AssessServer(clients);
+        var clientResults = clients.Select(c => BuildClientResult(c, assessor.AssessClient(c))).ToList();
 
         var serverStatus = DetermineStatusFromFindings(serverFindings);
         var overallStatus = DetermineProfileStatus(serverStatus, clientResults);
@@ -155,10 +123,10 @@ internal class ConformanceReportAssessmentService
         };
     }
 
-    private ProfileResult AssessFapi2SecurityProfile(List<ConformanceReportClient> clients)
+    private static ProfileResult AssessFapi2SecurityProfile(Fapi2SecurityAssessor assessor, List<ConformanceReportClient> clients)
     {
-        var serverFindings = _fapi2SecurityAssessor.AssessServer();
-        var clientResults = clients.Select(c => AssessClient(ConformanceReportProfile.Fapi2Security, c)).ToList();
+        var serverFindings = assessor.AssessServer();
+        var clientResults = clients.Select(c => BuildClientResult(c, assessor.AssessClient(c))).ToList();
 
         var serverStatus = DetermineStatusFromFindings(serverFindings);
         var overallStatus = DetermineProfileStatus(serverStatus, clientResults);
