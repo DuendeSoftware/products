@@ -269,14 +269,47 @@ public class Fapi2SecurityAssessorTests
         }
 
         [Fact]
-        public void FS09_empty_algorithms_falls_back_to_RS256_fails()
+        public void FS09_empty_algorithms_reports_no_signing_credentials_fails()
         {
             var finding = AssessAlgorithmRule(FS09, []);
 
             finding.Status.ShouldBe(FindingStatus.Fail);
-            finding.Message.ShouldContain("default RS256");
+            finding.Message.ShouldContain("No signing credentials were found, so IdentityServer can't sign issued tokens.");
+            finding.Message.ShouldNotContain("RS256");
             finding.Message.ShouldNotContain("any algorithm is accepted");
-            finding.Recommendation.ShouldNotBeNull().ShouldContain(FS09.RecommendedOption);
+            var recommendation = finding.Recommendation.ShouldNotBeNull();
+            recommendation.ShouldContain("Enable automatic key management");
+            recommendation.ShouldContain(FS09.RecommendedOption);
+            recommendation.ShouldContain("AddSigningCredential");
+            recommendation.ShouldNotContain("If you use automatic key management");
+        }
+
+        [Fact]
+        public void FS09_only_non_fapi_algorithms_recommendation_covers_automatic_and_static_keys()
+        {
+            var finding = AssessAlgorithmRule(FS09, ["RS256"]);
+
+            finding.Status.ShouldBe(FindingStatus.Fail);
+            finding.Message.ShouldContain("No FAPI 2.0 compliant algorithms are configured");
+            AssertFs09RecommendationCoversAutomaticAndStaticKeys(finding);
+        }
+
+        [Fact]
+        public void FS09_mixed_fapi_and_non_fapi_algorithms_recommendation_covers_automatic_and_static_keys()
+        {
+            var finding = AssessAlgorithmRule(FS09, ["PS256", "RS256"]);
+
+            finding.Status.ShouldBe(FindingStatus.Fail);
+            finding.Message.ShouldContain("Non-FAPI 2.0 algorithms are configured");
+            AssertFs09RecommendationCoversAutomaticAndStaticKeys(finding);
+        }
+
+        private static void AssertFs09RecommendationCoversAutomaticAndStaticKeys(Finding finding)
+        {
+            var recommendation = finding.Recommendation.ShouldNotBeNull();
+            recommendation.ShouldContain("Use only PS256 or ES256 key");
+            recommendation.ShouldContain("automatic key management");
+            recommendation.ShouldContain("AddSigningCredential");
         }
 
         [Fact]

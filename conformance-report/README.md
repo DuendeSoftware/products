@@ -57,7 +57,7 @@ FAPI 2.0 Security Profile defines security requirements for high-risk scenarios 
 | FS06 | Issuer Identification | Issuer identification response parameter required |
 | FS07 | HTTP 303 Redirects | The authorization server must not use HTTP 307 and should use 303 for redirects (§5.3.2.2). IdentityServer always uses 303. |
 | FS08 | PKCE Support | The authorization server must require PKCE with S256 (§5.3.2.2). IdentityServer always supports S256; per-client enforcement is FC03. |
-| FS09 | Token Signing Algorithms | `KeyManagement.SigningAlgorithms` must use only PS256 or ES256 |
+| FS09 | Token Signing Algorithms | Signing keys for issued tokens must use only PS256 or ES256. Keys come from automatic key management (`KeyManagement.SigningAlgorithms`) or static signing credentials (`AddSigningCredential`). Fails if no signing credentials are found |
 | FS10 | DPoP Proof Algorithms | `DPoP.SupportedDPoPSigningAlgorithms` must allow only PS256 or ES256; not applicable when DPoP is disabled (empty) and mTLS is enabled |
 | FS11 | Discovery Endpoint | Discovery endpoint must be enabled |
 | FS12 | Issuer URI Scheme | `IssuerUri`, if set, must use https |

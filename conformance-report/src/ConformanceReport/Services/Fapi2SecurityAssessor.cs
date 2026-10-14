@@ -132,7 +132,7 @@ internal class Fapi2SecurityAssessor(ConformanceReportServerOptions options)
             "FS03",
             "Client Assertion Signing Algorithms",
             "private_key_jwt client assertions",
-            "IdentityServerOptions.SupportedClientAssertionSigningAlgorithms",
+            OnlyAllowedAlgorithmsRecommendation("IdentityServerOptions.SupportedClientAssertionSigningAlgorithms"),
             options.SupportedClientAssertionSigningAlgorithms,
             "No algorithms are configured for private_key_jwt client assertions, so any algorithm is accepted.");
 
@@ -140,7 +140,7 @@ internal class Fapi2SecurityAssessor(ConformanceReportServerOptions options)
             "FS13",
             "Request Object Signing Algorithms",
             "JAR request objects",
-            "IdentityServerOptions.SupportedRequestObjectSigningAlgorithms",
+            OnlyAllowedAlgorithmsRecommendation("IdentityServerOptions.SupportedRequestObjectSigningAlgorithms"),
             options.SupportedRequestObjectSigningAlgorithms,
             "No algorithms are configured for JAR request objects, so any algorithm is accepted.");
 
@@ -148,9 +148,11 @@ internal class Fapi2SecurityAssessor(ConformanceReportServerOptions options)
             "FS09",
             "Token Signing Algorithms",
             "signing issued tokens",
-            "IdentityServerOptions.KeyManagement.SigningAlgorithms",
+            $"Use only {AllowedAlgorithmsDescription} keys: set IdentityServerOptions.KeyManagement.SigningAlgorithms for automatic key management, or register such keys with AddSigningCredential.",
             options.TokenSigningAlgorithms,
-            "No signing algorithms are configured for issued tokens, so tokens are signed with the default RS256.");
+            "No signing credentials were found, so IdentityServer can't sign issued tokens.",
+            $"Enable automatic key management with IdentityServerOptions.KeyManagement.SigningAlgorithms set to only {AllowedAlgorithmsDescription}, " +
+            $"or register a {AllowedAlgorithmsDescription} key with AddSigningCredential.");
 
     private Finding AssessDpopSigningAlgorithms()
     {
@@ -187,18 +189,22 @@ internal class Fapi2SecurityAssessor(ConformanceReportServerOptions options)
             ruleId,
             ruleName,
             "DPoP proofs",
-            optionName,
+            OnlyAllowedAlgorithmsRecommendation(optionName),
             options.DPoPSigningAlgorithms,
             emptyMessage: null);
     }
+
+    private static string OnlyAllowedAlgorithmsRecommendation(string optionName) =>
+        $"Set {optionName} to only {AllowedAlgorithmsDescription}.";
 
     private static Finding AssessAlgorithms(
         string ruleId,
         string ruleName,
         string usage,
-        string optionName,
+        string recommendation,
         IReadOnlyCollection<string> algorithms,
-        string? emptyMessage)
+        string? emptyMessage,
+        string? emptyRecommendation = null)
     {
         if (algorithms.Count == 0)
         {
@@ -208,7 +214,7 @@ internal class Fapi2SecurityAssessor(ConformanceReportServerOptions options)
                 RuleName = ruleName,
                 Status = FindingStatus.Fail,
                 Message = $"{emptyMessage ?? $"No algorithms are configured for {usage}."} FAPI 2.0 Section 5.4.1 requires {AllowedAlgorithmsDescription}.",
-                Recommendation = $"Set {optionName} to only {AllowedAlgorithmsDescription}."
+                Recommendation = emptyRecommendation ?? recommendation
             };
         }
 
@@ -237,7 +243,7 @@ internal class Fapi2SecurityAssessor(ConformanceReportServerOptions options)
             Message = hasFapiAlgorithm
                 ? $"Non-FAPI 2.0 algorithms are configured for {usage}: {string.Join(", ", nonFapiAlgorithms)}. FAPI 2.0 Section 5.4.1 allows {AllowedAlgorithmsDescription}."
                 : $"No FAPI 2.0 compliant algorithms are configured for {usage}. Found: {string.Join(", ", algorithms)}. FAPI 2.0 Section 5.4.1 allows {AllowedAlgorithmsDescription}.",
-            Recommendation = $"Set {optionName} to only {AllowedAlgorithmsDescription}."
+            Recommendation = recommendation
         };
     }
 
