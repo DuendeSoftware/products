@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="MessagePack" />
     <ProjectReference Include="..\..\src\Storage.MsSql\Storage.MsSql.csproj" />
     <ProjectReference Include="..\..\testing\TestAppHost\TestAppHost.csproj" />
   </ItemGroup>
