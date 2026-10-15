@@ -4,9 +4,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/.github/">
-    <Project Path=".github/workflow-gen/workflow-gen.csproj" />
-  </Folder>
   <Folder Name="/aspnetcore-authentication-jwtbearer/" />
   <Folder Name="/aspnetcore-authentication-jwtbearer/src/">
     <Project Path="aspnetcore-authentication-jwtbearer/src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj" />
@@ -187,10 +184,6 @@
   <Folder Name="/identity-server/_solution-items/">
     <File Path="identity-server/README.md" />
     <File Path="identity-server\CHANGELOG.md" />
-  </Folder>
-  <Folder Name="/identity-server/_solution-items/.github/">
-    <File Path=".github/workflows/identity-server-ci.yml" />
-    <File Path=".github/workflows/identity-server-release.yml" />
   </Folder>
   <Folder Name="/identity-server/_solution-items/props/">
     <File Path="Directory.Packages.props" />

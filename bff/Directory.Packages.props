@@ -28,6 +28,19 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <AuthenticationCertificateVersion>10.0.0</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
   </PropertyGroup>
+  <!-- BFF only (IsBffProject): .NET October 2026 security patches (CVE-2026-70183 and others).
+       These live here rather than in bff/Directory.Packages.props because the public snapshot of
+       this legacy branch publishes this root file as bff/Directory.Packages.props.
+       The other products on this branch keep their versions. -->
+  <PropertyGroup Condition=" '$(IsBffProject)' == 'true' and '$(TargetFramework)' == 'net8.0'">
+    <FrameworkVersion>8.0.32</FrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(IsBffProject)' == 'true' and '$(TargetFramework)' == 'net9.0'">
+    <FrameworkVersion>9.0.21</FrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(IsBffProject)' == 'true' and '$(TargetFramework)' == 'net10.0'">
+    <FrameworkVersion>10.0.13</FrameworkVersion>
+  </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.0" />
@@ -137,5 +150,25 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Verify.Xunit" Version="28.9.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="2.1.0" />
+  </ItemGroup>
+  <!-- BFF only: see the IsBffProject FrameworkVersion overrides above. -->
+  <ItemGroup Condition=" '$(IsBffProject)' == 'true'">
+    <PackageVersion Update="Microsoft.AspNetCore.DataProtection.Abstractions" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Caching.Abstractions" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Caching.Memory" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Hosting" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Http" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Http.Polly" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Logging" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Logging.Console" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Options" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.13" />
+    <PackageVersion Update="Microsoft.Extensions.Primitives" Version="10.0.13" />
+    <PackageVersion Update="System.Text.Json" Version="10.0.13" />
+    <!-- Lifts the vulnerable transitive Pkcs 9.0.4 (via Microsoft.Data.SqlClient / Microsoft.Build.Tasks.Core) -->
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(FrameworkVersion)" />
   </ItemGroup>
 </Project>

@@ -21,4 +21,8 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
   </ItemGroup>
+  <PropertyGroup>
+    <!-- Pin C# 13: with SDK 10.0.4xx, `latest` is C# 14, whose first-class spans change array.Contains binding in EF expression trees. -->
+    <LangVersion>13</LangVersion>
+  </PropertyGroup>
 </Project>
