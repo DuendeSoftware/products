@@ -3,6 +3,7 @@
 
 
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
@@ -170,6 +171,85 @@ public class AccessTokenValidation
         var result = await validator.ValidateAccessTokenAsync(jwt);
 
         result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task JWT_without_client_id_claim_should_be_rejected()
+    {
+        var signer = Factory.CreateDefaultTokenCreator();
+        var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "openid");
+        token.Claims.Remove(token.Claims.Single(claim => claim.Type == "client_id"));
+        var jwt = await signer.CreateTokenAsync(token);
+
+        var validator = Factory.CreateTokenValidator(null);
+        var result = await validator.ValidateAccessTokenAsync(jwt, "openid");
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
+    }
+
+    [Theory]
+    [InlineData("JWT")]
+    [InlineData("")]
+    [Trait("Category", Category)]
+    public async Task ID_token_should_be_rejected_as_access_token_when_typ_check_is_relaxed(string accessTokenJwtType)
+    {
+        var options = TestIdentityServerOptions.Create();
+        options.AccessTokenJwtType = accessTokenJwtType;
+        var signer = Factory.CreateDefaultTokenCreator(options);
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
+
+        var validator = Factory.CreateTokenValidator(options: options);
+        var result = await validator.ValidateAccessTokenAsync(jwt, "openid");
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
+    }
+
+    [Theory]
+    [InlineData("openid")]
+    [InlineData(null)]
+    [Trait("Category", Category)]
+    public async Task JWT_with_sub_minted_without_client_id_should_be_rejected(string expectedScope)
+    {
+        var signer = Factory.CreateDefaultTokenCreator();
+        var token = new Token(OidcConstants.TokenTypes.AccessToken)
+        {
+            CreationTime = DateTime.UtcNow,
+            Issuer = "https://idsvr.com",
+            Lifetime = 600,
+            Claims = [new Claim(JwtClaimTypes.Subject, "valid"), new Claim(JwtClaimTypes.Scope, "openid")]
+        };
+        var jwt = await signer.CreateTokenAsync(token);
+
+        var validator = Factory.CreateTokenValidator();
+        var result = await validator.ValidateAccessTokenAsync(jwt, expectedScope);
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task JWT_without_sub_or_client_id_should_remain_valid()
+    {
+        var signer = Factory.CreateDefaultTokenCreator();
+        var token = new Token(OidcConstants.TokenTypes.AccessToken)
+        {
+            CreationTime = DateTime.UtcNow,
+            Issuer = "https://idsvr.com",
+            Lifetime = 600,
+            Claims = [new Claim(JwtClaimTypes.Scope, "api1")]
+        };
+        var jwt = await signer.CreateTokenAsync(token);
+
+        var validator = Factory.CreateTokenValidator();
+        var result = await validator.ValidateAccessTokenAsync(jwt, null);
+
+        result.IsError.ShouldBeFalse();
+        result.Client.ShouldBeNull();
+        result.Claims.ShouldContain(claim => claim.Type == JwtClaimTypes.Scope && claim.Value == "api1");
     }
 
     [Theory]

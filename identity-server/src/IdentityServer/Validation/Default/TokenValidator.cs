@@ -205,6 +205,12 @@ internal class TokenValidator : ITokenValidator
                     .AddClaim(new Claim(JwtClaimTypes.ReferenceTokenId, result.ReferenceTokenId));
             }
 
+            if (result.Client == null)
+            {
+                LogInformation("Access token has no associated client");
+                return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
+            }
+
             var isActiveCtx = new IsActiveContext(principal, result.Client,
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
             await _profile.IsActiveAsync(isActiveCtx);

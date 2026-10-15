@@ -17,7 +17,7 @@
 
     <!-- TODO - we want to enable nullable everywhere eventually -->
     <!-- <Nullable>enable</Nullable> -->
-    <LangVersion>latest</LangVersion>
+    <LangVersion>13</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>

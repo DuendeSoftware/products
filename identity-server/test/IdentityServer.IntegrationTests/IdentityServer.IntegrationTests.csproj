@@ -17,6 +17,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="AngleSharp" />
+    <!-- Overrides the vulnerable System.Security.Cryptography.Pkcs that Microsoft.Data.SqlClient brings in on net10.0 -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Condition="'$(TargetFramework)' == 'net10.0'" />
 
   </ItemGroup>
 
