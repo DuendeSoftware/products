@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
     <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
   <ItemGroup>

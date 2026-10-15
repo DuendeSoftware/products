@@ -183,7 +183,13 @@ internal class TokenValidator(
                     .AddClaim(new Claim(JwtClaimTypes.ReferenceTokenId, result.ReferenceTokenId));
             }
 
-            var resultClient = result.Client ?? throw new NullReferenceException("result.Client is null");
+            if (result.Client == null)
+            {
+                LogInformation("Access token has no associated client");
+                return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
+            }
+
+            var resultClient = result.Client;
             var isActiveCtx = new IsActiveContext(principal, resultClient,
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
             await profile.IsActiveAsync(isActiveCtx, ct);
