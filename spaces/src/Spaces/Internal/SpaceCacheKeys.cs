@@ -17,4 +17,16 @@ internal static class SpaceCacheKeys
     public static string ForPoolId(PoolId poolId) => $"Duende.Spaces:pool:{poolId.Value}";
 
     public static string ForSpaceIdRouting(SpaceId spaceId) => $"Duende.Spaces:rs:{spaceId.Value}";
+
+    /// <summary>
+    /// Partitions a caller-supplied <see cref="SpaceAwareHybridCache"/> key by space, so entries
+    /// cached from different spaces never collide, without the caller needing to do so itself.
+    /// </summary>
+    public static string ForCacheEntry(SpaceId spaceId, string key) => $"{spaceId.Value}:{key}";
+
+    /// <summary>
+    /// The tag <see cref="SpaceAwareHybridCache"/> adds to every entry it writes, so all entries
+    /// for a space can be evicted together with <c>RemoveByTagAsync</c>.
+    /// </summary>
+    public static string ForSpaceTag(SpaceId spaceId) => $"space:{spaceId.Value}";
 }

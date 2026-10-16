@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Spaces.Internal;
 using Duende.Spaces.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Schema;
@@ -25,7 +26,7 @@ public sealed class SpaceRepositoryCountTests : IAsyncLifetime
     {
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         sc.AddStorageInternal(b => b.AddSqliteInMemory());
         _services = sc.BuildServiceProvider();

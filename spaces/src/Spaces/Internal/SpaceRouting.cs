@@ -4,6 +4,7 @@
 using Duende.Spaces.Internal.Storage;
 using Duende.Storage;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Spaces.Internal;
@@ -12,7 +13,10 @@ namespace Duende.Spaces.Internal;
 /// Resolves a space's pool from the raw space record, without a schema, so the partitioned
 /// storage factory doesn't depend on the schema store (which may itself route through it).
 /// </summary>
-internal sealed class SpaceRouting(ManagementStorageAccessor storageAccessor, HybridCache cache, IOptions<SpacesOptions> options)
+internal sealed class SpaceRouting(
+    ManagementStorageAccessor storageAccessor,
+    [FromKeyedServices(SpacesServiceProviderKeys.SpacesCache)] HybridCache cache,
+    IOptions<SpacesOptions> options)
 {
     public async Task<PoolId?> TryGetPoolIdAsync(SpaceId spaceId, Ct ct)
     {

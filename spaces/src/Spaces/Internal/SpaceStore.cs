@@ -5,13 +5,14 @@ using Duende.Spaces.Internal.Storage;
 using Duende.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Spaces.Internal;
 
 internal sealed class SpaceStore(
     SpaceRepository spaceRepository,
-    HybridCache cache,
+    [FromKeyedServices(SpacesServiceProviderKeys.SpacesCache)] HybridCache cache,
     IOptions<SpacesOptions> options) : ISpaceStore
 {
     private readonly HybridCacheEntryOptions CacheEntryOptions = new()

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Spaces.Internal;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +24,9 @@ public sealed class SpaceAwareHybridCacheTests : IDisposable
     {
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
+        // Spaces registers only its keyed cache, so the unkeyed default these tests wrap must be added explicitly.
+        sc.AddHybridCache();
         TestSpacesLicense.RegisterEntitled(sc);
         _services = sc.BuildServiceProvider();
         _accessor = _services.GetRequiredService<ISpaceContextAccessor>();
@@ -342,6 +345,65 @@ public sealed class SpaceAwareHybridCacheTests : IDisposable
     }
 
     [Fact]
+    public async Task GetOrCreateAsync_throws_ArgumentNullException_when_key_is_null()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+
+        var act = async () => await cache.GetOrCreateAsync(null!, state: 0, factory: static (s, _) => ValueTask.FromResult(s));
+
+        await act.ShouldThrowAsync<ArgumentNullException>();
+        inner.GetOrCreateCalls.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task SetAsync_throws_ArgumentNullException_when_key_is_null()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+
+        var act = async () => await cache.SetAsync(null!, "value");
+
+        await act.ShouldThrowAsync<ArgumentNullException>();
+        inner.SetAsyncCalls.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_single_key_throws_ArgumentNullException_when_key_is_null()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+
+        var act = async () => await cache.RemoveAsync((string)null!);
+
+        await act.ShouldThrowAsync<ArgumentNullException>();
+        inner.RemoveAsyncSingleCalls.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_multiple_keys_treats_null_keys_as_empty()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+
+        await cache.RemoveAsync((IEnumerable<string>)null!);
+
+        inner.RemoveAsyncMultiCalls.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_multiple_keys_throws_ArgumentNullException_when_an_element_is_null()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+
+        var act = async () => await cache.RemoveAsync(["key1", null!, "key2"]);
+
+        await act.ShouldThrowAsync<ArgumentNullException>();
+        inner.RemoveAsyncMultiCalls.ShouldBe(0);
+    }
+
+    [Fact]
     public async Task SetAsync_reaches_the_inner_cache()
     {
         var inner = new RecordingFakeHybridCache();
@@ -372,6 +434,219 @@ public sealed class SpaceAwareHybridCacheTests : IDisposable
         await cache.RemoveAsync(["key1", "key2"]);
 
         inner.RemoveAsyncMultiCalls.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task entry_cached_in_one_space_is_not_visible_in_another_space_for_the_same_key()
+    {
+        var key = NewKey();
+        var spaceA = SpaceId.New();
+        var spaceB = SpaceId.New();
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            _ = await _cache.GetOrCreateAsync(key, state: "from-a", factory: static (s, _) => ValueTask.FromResult(s));
+        }
+
+        using (_accessor.SetSpace(spaceB))
+        {
+            var observedInB = await _cache.GetOrCreateAsync(key, state: "from-b", factory: static (s, _) => ValueTask.FromResult(s));
+            observedInB.ShouldBe("from-b");
+        }
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            var observedBackInA = await _cache.GetOrCreateAsync(key, state: "should-not-be-used", factory: static (s, _) => ValueTask.FromResult(s));
+            observedBackInA.ShouldBe("from-a");
+        }
+    }
+
+    [Fact]
+    public async Task entry_set_in_one_space_is_not_visible_in_another_space_for_the_same_key()
+    {
+        var key = NewKey();
+        var spaceA = SpaceId.New();
+        var spaceB = SpaceId.New();
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            await _cache.SetAsync(key, "from-a");
+        }
+
+        using (_accessor.SetSpace(spaceB))
+        {
+            var observedInB = await _cache.GetOrCreateAsync(key, state: "from-b", factory: static (s, _) => ValueTask.FromResult(s));
+            observedInB.ShouldBe("from-b");
+        }
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            var observedBackInA = await _cache.GetOrCreateAsync(key, state: "should-not-be-used", factory: static (s, _) => ValueTask.FromResult(s));
+            observedBackInA.ShouldBe("from-a");
+        }
+    }
+
+    [Fact]
+    public async Task no_space_configured_and_explicit_default_space_share_the_same_entry()
+    {
+        var key = NewKey();
+
+        var observedWithNoSpace = await _cache.GetOrCreateAsync(key, state: "no-space-value", factory: static (s, _) => ValueTask.FromResult(s));
+
+        using (_accessor.SetSpace(SpaceId.Default))
+        {
+            var observedWithDefaultSpace = await _cache.GetOrCreateAsync(key, state: "should-not-be-used", factory: static (s, _) => ValueTask.FromResult(s));
+            observedWithDefaultSpace.ShouldBe(observedWithNoSpace);
+        }
+    }
+
+    [Fact]
+    public async Task RemoveAsync_single_key_only_removes_the_entry_in_the_current_space()
+    {
+        var key = NewKey();
+        var spaceA = SpaceId.New();
+        var spaceB = SpaceId.New();
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            _ = await _cache.GetOrCreateAsync(key, state: "a", factory: static (s, _) => ValueTask.FromResult(s));
+        }
+
+        using (_accessor.SetSpace(spaceB))
+        {
+            _ = await _cache.GetOrCreateAsync(key, state: "b", factory: static (s, _) => ValueTask.FromResult(s));
+        }
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            await _cache.RemoveAsync(key);
+
+            var observedAfterRemoveInA = await _cache.GetOrCreateAsync(key, state: "a-recreated", factory: static (s, _) => ValueTask.FromResult(s));
+            observedAfterRemoveInA.ShouldBe("a-recreated");
+        }
+
+        using (_accessor.SetSpace(spaceB))
+        {
+            var observedInB = await _cache.GetOrCreateAsync(key, state: "should-not-be-used", factory: static (s, _) => ValueTask.FromResult(s));
+            observedInB.ShouldBe("b");
+        }
+    }
+
+    [Fact]
+    public async Task RemoveAsync_multiple_keys_only_removes_the_entries_in_the_current_space()
+    {
+        var key1 = NewKey();
+        var key2 = NewKey();
+        var spaceA = SpaceId.New();
+        var spaceB = SpaceId.New();
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            _ = await _cache.GetOrCreateAsync(key1, state: "a1", factory: static (s, _) => ValueTask.FromResult(s));
+            _ = await _cache.GetOrCreateAsync(key2, state: "a2", factory: static (s, _) => ValueTask.FromResult(s));
+        }
+
+        using (_accessor.SetSpace(spaceB))
+        {
+            _ = await _cache.GetOrCreateAsync(key1, state: "b1", factory: static (s, _) => ValueTask.FromResult(s));
+            _ = await _cache.GetOrCreateAsync(key2, state: "b2", factory: static (s, _) => ValueTask.FromResult(s));
+        }
+
+        using (_accessor.SetSpace(spaceA))
+        {
+            await _cache.RemoveAsync([key1, key2]);
+
+            var observed1 = await _cache.GetOrCreateAsync(key1, state: "a1-recreated", factory: static (s, _) => ValueTask.FromResult(s));
+            var observed2 = await _cache.GetOrCreateAsync(key2, state: "a2-recreated", factory: static (s, _) => ValueTask.FromResult(s));
+            observed1.ShouldBe("a1-recreated");
+            observed2.ShouldBe("a2-recreated");
+        }
+
+        using (_accessor.SetSpace(spaceB))
+        {
+            var observed1 = await _cache.GetOrCreateAsync(key1, state: "should-not-be-used", factory: static (s, _) => ValueTask.FromResult(s));
+            var observed2 = await _cache.GetOrCreateAsync(key2, state: "should-not-be-used", factory: static (s, _) => ValueTask.FromResult(s));
+            observed1.ShouldBe("b1");
+            observed2.ShouldBe("b2");
+        }
+    }
+
+    [Fact]
+    public async Task GetOrCreateAsync_tags_the_entry_with_the_space_and_keeps_caller_supplied_tags()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+        var spaceId = SpaceId.New();
+        using var scope = _accessor.SetSpace(spaceId);
+
+        _ = await cache.GetOrCreateAsync("key", state: 0, factory: static (s, _) => ValueTask.FromResult(s), tags: ["caller-tag"]);
+
+        inner.GetOrCreateLastTags.ShouldNotBeNull();
+        inner.GetOrCreateLastTags.ShouldContain($"space:{spaceId.Value}");
+        inner.GetOrCreateLastTags.ShouldContain("caller-tag");
+        inner.GetOrCreateLastTags!.Length.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task GetOrCreateAsync_adds_the_space_tag_when_caller_supplies_no_tags()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+        var spaceId = SpaceId.New();
+        using var scope = _accessor.SetSpace(spaceId);
+
+        _ = await cache.GetOrCreateAsync("key", state: 0, factory: static (s, _) => ValueTask.FromResult(s));
+
+        inner.GetOrCreateLastTags.ShouldNotBeNull();
+        inner.GetOrCreateLastTags!.ShouldBe([$"space:{spaceId.Value}"]);
+    }
+
+    [Fact]
+    public async Task GetOrCreateAsync_does_not_duplicate_the_space_tag_when_caller_supplies_it()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+        var spaceId = SpaceId.New();
+        using var scope = _accessor.SetSpace(spaceId);
+        var spaceTag = $"space:{spaceId.Value}";
+
+        _ = await cache.GetOrCreateAsync("key", state: 0, factory: static (s, _) => ValueTask.FromResult(s), tags: [spaceTag, "caller-tag"]);
+
+        inner.GetOrCreateLastTags.ShouldNotBeNull();
+        inner.GetOrCreateLastTags!.Count(tag => tag == spaceTag).ShouldBe(1);
+        inner.GetOrCreateLastTags.Length.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task RemoveByTagAsync_with_space_tag_evicts_entry_whose_caller_tags_match_it_only_case_insensitively()
+    {
+        var spaceId = SpaceId.New();
+        using var scope = _accessor.SetSpace(spaceId);
+        var key = NewKey();
+        var spaceTag = $"space:{spaceId.Value}";
+        var callerTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { spaceTag.ToUpperInvariant() };
+
+        await _cache.SetAsync(key, "cached", tags: callerTags);
+        await _cache.RemoveByTagAsync(spaceTag);
+
+        var observed = await _cache.GetOrCreateAsync(key, state: "recreated", factory: static (s, _) => ValueTask.FromResult(s));
+        observed.ShouldBe("recreated");
+    }
+
+    [Fact]
+    public async Task SetAsync_tags_the_entry_with_the_space_and_keeps_caller_supplied_tags()
+    {
+        var inner = new RecordingFakeHybridCache();
+        var cache = new SpaceAwareHybridCache(inner, _accessor);
+        var spaceId = SpaceId.New();
+        using var scope = _accessor.SetSpace(spaceId);
+
+        await cache.SetAsync("key", "value", tags: ["caller-tag"]);
+
+        inner.SetAsyncLastTags.ShouldNotBeNull();
+        inner.SetAsyncLastTags.ShouldContain($"space:{spaceId.Value}");
+        inner.SetAsyncLastTags.ShouldContain("caller-tag");
+        inner.SetAsyncLastTags!.Length.ShouldBe(2);
     }
 
     [Fact]
@@ -428,6 +703,8 @@ public sealed class SpaceAwareHybridCacheTests : IDisposable
     {
         public int SetAsyncCalls { get; private set; }
 
+        public int GetOrCreateCalls { get; private set; }
+
         public int RemoveAsyncSingleCalls { get; private set; }
 
         public int RemoveAsyncMultiCalls { get; private set; }
@@ -436,13 +713,22 @@ public sealed class SpaceAwareHybridCacheTests : IDisposable
 
         public int RemoveByTagAsyncMultiCalls { get; private set; }
 
+        public string[]? GetOrCreateLastTags { get; private set; }
+
+        public string[]? SetAsyncLastTags { get; private set; }
+
         public override ValueTask<T> GetOrCreateAsync<TState, T>(
             string key,
             TState state,
             Func<TState, CancellationToken, ValueTask<T>> factory,
             HybridCacheEntryOptions? options = null,
             IEnumerable<string>? tags = null,
-            CancellationToken cancellationToken = default) => factory(state, cancellationToken);
+            CancellationToken cancellationToken = default)
+        {
+            GetOrCreateLastTags = tags?.ToArray();
+            GetOrCreateCalls++;
+            return factory(state, cancellationToken);
+        }
 
         public override ValueTask SetAsync<T>(
             string key,
@@ -452,6 +738,7 @@ public sealed class SpaceAwareHybridCacheTests : IDisposable
             CancellationToken cancellationToken = default)
         {
             SetAsyncCalls++;
+            SetAsyncLastTags = tags?.ToArray();
             return ValueTask.CompletedTask;
         }
 

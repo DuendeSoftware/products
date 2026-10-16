@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Duende.Spaces.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +22,7 @@ public class SpaceContextAccessorTelemetryTests : IDisposable
 
         var sc = new ServiceCollection();
         sc.AddLogging(b => b.AddProvider(_logProvider));
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         var sp = sc.BuildServiceProvider();
         _sut = sp.GetRequiredService<ISpaceContextAccessor>();

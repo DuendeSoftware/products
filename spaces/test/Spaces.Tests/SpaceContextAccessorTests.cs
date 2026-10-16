@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Spaces.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Spaces;
@@ -13,7 +14,7 @@ public class SpaceContextAccessorTests
     {
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         var sp = sc.BuildServiceProvider();
         _sut = sp.GetRequiredService<ISpaceContextAccessor>();

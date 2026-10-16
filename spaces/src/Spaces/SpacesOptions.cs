@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
@@ -34,4 +34,16 @@ public sealed class SpacesOptions
     /// When <c>false</c> (default), unmatched requests receive a 404 response.
     /// </summary>
     public bool FallbackToDefault { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the app's data protection is partitioned by space. Defaults to <c>true</c>.
+    /// </summary>
+    /// <remarks>
+    /// When <c>true</c>, protectors from the app's non-keyed <c>IDataProtectionProvider</c> are bound to
+    /// the resolved space, and using them without a resolved space throws. Turning this off after
+    /// running with it on is unsupported. Use <c>GetUnpartitioned()</c> (see
+    /// <see cref="SpacesDataProtectionExtensions"/>) for data shared across spaces. Keyed providers and
+    /// providers set on authentication scheme options are not partitioned.
+    /// </remarks>
+    public bool PartitionDataProtection { get; set; } = true;
 }

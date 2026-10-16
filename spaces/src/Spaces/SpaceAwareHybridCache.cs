@@ -1,18 +1,22 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Spaces.Internal;
 using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Duende.Spaces;
 
 /// <summary>
-/// A <see cref="HybridCache"/> decorator that re-establishes the ambient space inside the cache factory delegate.
+/// A <see cref="HybridCache"/> decorator that re-establishes the ambient space inside the cache factory delegate,
+/// and partitions cache entries by space.
 /// </summary>
 /// <remarks>
 /// <c>DefaultHybridCache</c> can run the factory via <c>ThreadPool.UnsafeQueueUserWorkItem</c> when the token is
 /// cancellable, which does not flow <see cref="ExecutionContext"/>, so the <see cref="AsyncLocal{T}"/>-backed space
-/// is lost; this decorator re-captures and re-establishes it. Because stampede protection shares one factory run
-/// between callers, the cache key must also be space-partitioned by the caller.
+/// is lost; this decorator re-captures and re-establishes it. It also prefixes every key with the caller's current
+/// space (or <see cref="SpaceId.Default"/> when none is set) and tags every write with that space, so callers never
+/// need to build space-aware keys themselves, and entries for a space can be evicted together. Tags are not
+/// partitioned, so <see cref="RemoveByTagAsync(string, CancellationToken)"/> reaches entries in every space.
 /// </remarks>
 public sealed class SpaceAwareHybridCache : HybridCache
 {
@@ -37,7 +41,8 @@ public sealed class SpaceAwareHybridCache : HybridCache
 
     /// <summary>
     /// Calls <c>HybridCache.GetOrCreateAsync</c>, ensuring the factory observes the caller's space
-    /// even if it's queued to the thread pool.
+    /// even if it's queued to the thread pool. The key is partitioned by space and the entry is tagged with its
+    /// space; caller-supplied tags are not partitioned.
     /// </summary>
     public override ValueTask<T> GetOrCreateAsync<TState, T>(
         string key,
@@ -47,14 +52,16 @@ public sealed class SpaceAwareHybridCache : HybridCache
         IEnumerable<string>? tags = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(factory);
 
+        var spaceId = _spaceContextAccessor.GetSpaceIdOrDefault();
         var expectedSpace = _spaceContextAccessor.IsSpaceIdConfigured() ? _spaceContextAccessor.GetSpaceId() : (SpaceId?)null;
 
         var wrappedState = (spaceContextAccessor: _spaceContextAccessor, expectedSpace, innerState: state, factory);
 
         return _inner.GetOrCreateAsync(
-            key,
+            SpaceCacheKeys.ForCacheEntry(spaceId, key),
             wrappedState,
             static (wrapped, innerToken) => RunFactoryInExpectedSpaceAsync(
                 wrapped.spaceContextAccessor,
@@ -63,7 +70,7 @@ public sealed class SpaceAwareHybridCache : HybridCache
                 wrapped.factory,
                 innerToken),
             options,
-            tags,
+            WithSpaceTag(tags, spaceId),
             cancellationToken);
     }
 
@@ -73,23 +80,62 @@ public sealed class SpaceAwareHybridCache : HybridCache
         T value,
         HybridCacheEntryOptions? options = null,
         IEnumerable<string>? tags = null,
-        CancellationToken cancellationToken = default) =>
-        _inner.SetAsync(key, value, options, tags, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        var spaceId = _spaceContextAccessor.GetSpaceIdOrDefault();
+        return _inner.SetAsync(SpaceCacheKeys.ForCacheEntry(spaceId, key), value, options, WithSpaceTag(tags, spaceId), cancellationToken);
+    }
 
 #pragma warning disable RS0026 // preserves HybridCache's optional-parameter signatures
     /// <inheritdoc/>
-    public override ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default) =>
-        _inner.RemoveAsync(key, cancellationToken);
+    public override ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        return _inner.RemoveAsync(SpaceCacheKeys.ForCacheEntry(_spaceContextAccessor.GetSpaceIdOrDefault(), key), cancellationToken);
+    }
 
     /// <inheritdoc/>
-    public override ValueTask RemoveAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default) =>
-        _inner.RemoveAsync(keys, cancellationToken);
+    public override ValueTask RemoveAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default)
+    {
+        // HybridCache's contract says implementors treat a null sequence as empty.
+        if (keys is null)
+        {
+            return ValueTask.CompletedTask;
+        }
 
-    /// <inheritdoc/>
+        var spaceId = _spaceContextAccessor.GetSpaceIdOrDefault();
+
+        // Materialized eagerly so a null element throws here, at the call site, rather than lazily inside the inner cache.
+        var prefixedKeys = new List<string>(keys is ICollection<string> collection ? collection.Count : 4);
+        foreach (var key in keys)
+        {
+            ArgumentNullException.ThrowIfNull(key, nameof(keys));
+            prefixedKeys.Add(SpaceCacheKeys.ForCacheEntry(spaceId, key));
+        }
+
+        return _inner.RemoveAsync(prefixedKeys, cancellationToken);
+    }
+
+    /// <summary>
+    /// Removes all entries with <paramref name="tag"/>, in every space.
+    /// </summary>
+    /// <remarks>
+    /// Tags are not partitioned by space, so this is intended for trusted host code, for example to evict a whole
+    /// space with its <c>space:{id}</c> tag. Don't pass tags that come from untrusted input.
+    /// </remarks>
     public override ValueTask RemoveByTagAsync(string tag, CancellationToken cancellationToken = default) =>
         _inner.RemoveByTagAsync(tag, cancellationToken);
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Removes all entries with any of <paramref name="tags"/>, in every space.
+    /// </summary>
+    /// <remarks>
+    /// Tags are not partitioned by space, so this is intended for trusted host code, for example to evict a whole
+    /// space with its <c>space:{id}</c> tag. Don't pass tags that come from untrusted input.
+    /// </remarks>
     public override ValueTask RemoveByTagAsync(IEnumerable<string> tags, CancellationToken cancellationToken = default) =>
         _inner.RemoveByTagAsync(tags, cancellationToken);
 #pragma warning restore RS0026
@@ -136,5 +182,19 @@ public sealed class SpaceAwareHybridCache : HybridCache
         {
             return await factory(state, cancellationToken);
         }
+    }
+
+    private static IReadOnlyCollection<string> WithSpaceTag(IEnumerable<string>? tags, SpaceId spaceId)
+    {
+        var spaceTag = SpaceCacheKeys.ForSpaceTag(spaceId);
+
+        if (tags is null)
+        {
+            return [spaceTag];
+        }
+
+        var materialized = tags as IReadOnlyCollection<string> ?? tags.ToArray();
+        // HybridCache compares tags ordinally, so don't let the caller's collection comparer decide whether the tag is present.
+        return materialized.Contains(spaceTag, StringComparer.Ordinal) ? materialized : [.. materialized, spaceTag];
     }
 }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net.Http.Json;
+using Duende.Spaces.Internal;
 using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
@@ -26,7 +27,7 @@ public sealed class SpaceResolutionWithoutPrefixTests : IAsyncLifetime
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
 
-        builder.Services.AddSpaces();
+        builder.Services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.Configure<SpacesOptions>(opt =>
         {

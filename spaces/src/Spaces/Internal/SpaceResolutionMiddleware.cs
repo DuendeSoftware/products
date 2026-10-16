@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -49,7 +50,7 @@ internal sealed partial class SpaceResolutionMiddleware
         if (accessor.IsSpaceIdConfigured())
         {
             LogSpaceIdIsAlreadyConfiguredSoSkippingResolution(_logger, LogLevel.Debug);
-            await _next(context);
+            await InvokeNextWithSpaceScopedCallbacksAsync(context, accessor);
             return;
         }
 
@@ -78,7 +79,21 @@ internal sealed partial class SpaceResolutionMiddleware
 
         using (accessor.SetSpace(resolvedSpaceId))
         {
+            await InvokeNextWithSpaceScopedCallbacksAsync(context, accessor);
+        }
+    }
+
+    private async Task InvokeNextWithSpaceScopedCallbacksAsync(HttpContext context, ISpaceContextAccessor accessor)
+    {
+        var responseFeature = context.Features.GetRequiredFeature<IHttpResponseFeature>();
+        context.Features.Set<IHttpResponseFeature>(new SpaceScopedResponseFeature(responseFeature, accessor));
+        try
+        {
             await _next(context);
+        }
+        finally
+        {
+            context.Features.Set(responseFeature);
         }
     }
 

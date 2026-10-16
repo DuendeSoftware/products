@@ -6,6 +6,7 @@ using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
+using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
@@ -13,18 +14,22 @@ using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Pagination;
 using Duende.Storage.Querying;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
+using StorageSortDirection = Duende.Storage.Querying.SortDirection;
 
 namespace Duende.Spaces.Internal.Storage;
 
 internal sealed class SpaceRepository(
     ManagementStorageAccessor storageAccessor,
     DefaultPartitionedStorageFactory storageFactory,
-    HybridCache cache,
+    [FromKeyedServices(SpacesServiceProviderKeys.SpacesCache)] HybridCache cache,
     ISchemaStore schemaStore)
 {
     private const int MaxPoolIdRetries = 3;
 
     private static readonly NumberField PoolIdField = new("poolId");
+    private static readonly StringField NameField = new("name");
+    private static readonly BooleanField EnabledField = new("enabled");
     private static readonly BooleanField IsDeletedField = new("isDeleted");
 
     internal async Task<SaveResult<SpaceId>> CreateAsync(
@@ -89,7 +94,7 @@ internal sealed class SpaceRepository(
             UuidV7.From(spaceGuid),
             dso,
             keys,
-            BuildSearchFields(poolId, isDeleted: false, schema, extendedProperties),
+            BuildSearchFields(name, enabled: true, poolId, isDeleted: false, schema, extendedProperties),
             Expiration.NoExpiration,
             [],
             ct);
@@ -265,10 +270,10 @@ internal sealed class SpaceRepository(
 
         var dso = ToDso(space.Id, space.Name, space.Enabled, space.PoolId.Value, space.MatchPatterns, currentDso.IsDeleted, extendedProperties);
 
-        // A logically deleted space keeps its EAV unique keys and search fields dropped (see
-        // DeleteAsync), so its attribute values stay reusable by other spaces even if the caller
-        // updates ExtendedProperties as part of a non-operational metadata edit. Rebuilding those
-        // keys here would silently re-claim values that DeleteAsync intentionally released.
+        // A logically deleted space keeps its EAV unique keys and attribute search fields dropped
+        // (see DeleteAsync), so its attribute values stay reusable by other spaces even if the
+        // caller updates ExtendedProperties as part of a non-operational metadata edit. Rebuilding
+        // those keys here would silently re-claim values that DeleteAsync intentionally released.
         var schema = currentDso.IsDeleted ? null : await GetSpaceSchemaAsync(ct);
         var eavAttributes = currentDso.IsDeleted ? null : extendedProperties;
         var keys = BuildKeys(space.MatchPatterns, space.PoolId.Value, schema, eavAttributes);
@@ -278,7 +283,7 @@ internal sealed class SpaceRepository(
             dso,
             current.Version.Value,
             keys,
-            BuildSearchFields(space.PoolId.Value, currentDso.IsDeleted, schema, eavAttributes),
+            BuildSearchFields(space.Name, space.Enabled, space.PoolId.Value, currentDso.IsDeleted, schema, eavAttributes),
             expiration: null,
             [],
             ct);
@@ -343,7 +348,7 @@ internal sealed class SpaceRepository(
             dso,
             current.Version.Value,
             keys,
-            BuildSearchFields(currentDso.PoolId, isDeleted: true, schema: null, attributes: null),
+            BuildSearchFields(currentDso.Name, currentDso.Enabled, currentDso.PoolId, isDeleted: true, schema: null, attributes: null),
             expiration: null,
             [],
             ct);
@@ -406,7 +411,7 @@ internal sealed class SpaceRepository(
             dso,
             current.Version.Value,
             keys,
-            BuildSearchFields(currentDso.PoolId, isDeleted: false, schema, extendedProperties),
+            BuildSearchFields(currentDso.Name, currentDso.Enabled, currentDso.PoolId, isDeleted: false, schema, extendedProperties),
             expiration: null,
             [],
             ct);
@@ -561,36 +566,38 @@ internal sealed class SpaceRepository(
         CancellationToken ct)
     {
         var partitionedStorage = storageAccessor.GetManagementStorage();
-        var result = await partitionedStorage.QueryAsync<SpaceDso.V1>(
-            SpaceDso.EntityType,
-            AllExpression.Instance,
-            SortParameter.Empty,
-            DataRange.FromOffset(null, null),
-            ct);
-
-        var items = result.Items
-            .Select(e => e.Value);
-
-        // Apply filter
-        if (request.Filter?.FilterValue is { } filter)
+        var filter = request.Filter?.FilterValue;
+        var filterExpressions = new List<IQueryFilterExpression>();
+        if (filter?.Name is { } nameFilter)
         {
-            if (filter.Name is { } nameFilter)
-            {
-                items = items.Where(d => d.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (filter.Enabled is { } enabledFilter)
-            {
-                items = items.Where(d => d.Enabled == enabledFilter);
-            }
-
-            if (filter.IsDeleted is { } isDeletedFilter)
-            {
-                items = items.Where(d => d.IsDeleted == isDeletedFilter);
-            }
+            filterExpressions.Add(NameField.Contains(nameFilter));
         }
 
-        var listItems = items.Select(d => new SpaceListItem
+        if (filter?.Enabled is { } enabledFilter)
+        {
+            filterExpressions.Add(EnabledField.Equals(enabledFilter));
+        }
+
+        if (filter?.IsDeleted is { } isDeletedFilter)
+        {
+            filterExpressions.Add(IsDeletedField.Equals(isDeletedFilter));
+        }
+
+        var storageFilter = filterExpressions.Count switch
+        {
+            0 => AllExpression.Instance,
+            1 => filterExpressions[0],
+            _ => new AndExpression(filterExpressions)
+        };
+
+        var result = await partitionedStorage.QueryAsync<SpaceDso.V1>(
+            SpaceDso.EntityType,
+            storageFilter,
+            BuildSort(request.Sort),
+            request.Range ?? DataRange.FromContinuationToken(ContinuationToken.Beginning),
+            ct);
+
+        var listItems = result.Items.Select(e => e.Value).Select(d => new SpaceListItem
         {
             Id = d.SpaceId,
             Name = d.Name,
@@ -603,13 +610,44 @@ internal sealed class SpaceRepository(
         return new QueryResult<SpaceListItem>
         {
             Items = listItems,
-            HasMoreData = false,
-            TotalCount = listItems.Count
+            HasMoreData = result.HasMoreData,
+            NextToken = result.NextToken,
+            // The default pool-ID sort cannot be requested in reverse through SpaceSortField.
+            PreviousToken = request.Sort is null ? null : result.PreviousToken,
+            TotalCount = result.TotalCount,
+            TotalPages = result.TotalPages
         };
     }
 
-    // Pool IDs of deleted spaces are deliberately not recycled by auto-assign.
-    // Reuse requires explicit pool ID specification via CreateWithPoolIdAsync after purge.
+    private static SortParameter BuildSort(SortBy.SortByField<SpaceSortField>? sort)
+    {
+        if (sort is null)
+        {
+            return new SortParameter(PoolIdField, StorageSortDirection.Ascending);
+        }
+
+        Field field = sort.Field switch
+        {
+            SpaceSortField.Name => NameField,
+            SpaceSortField.Enabled => EnabledField,
+            _ => throw new ArgumentOutOfRangeException(nameof(sort), sort.Field, "Unknown sort field")
+        };
+
+        var direction = sort.Direction switch
+        {
+            StorageSortDirection.Ascending => StorageSortDirection.Ascending,
+            StorageSortDirection.Descending => StorageSortDirection.Descending,
+            _ => throw new ArgumentOutOfRangeException(nameof(sort), sort.Direction, "Unknown sort direction")
+        };
+
+        return new SortParameter(field, direction);
+    }
+
+    // Auto-assign uses the highest existing pool ID plus one. Logically deleted spaces
+    // keep their record, so their pool IDs aren't reused while they exist. Purge removes
+    // the record (after deleting the pool's data in the Spaces storage instance only; a
+    // product's own data in a different storage instance isn't touched), so a purged
+    // pool ID can be reused.
     internal async Task<int> GetMaxPoolIdAsync(CancellationToken ct)
     {
         var partitionedStorage = storageAccessor.GetManagementStorage();
@@ -777,12 +815,16 @@ internal sealed class SpaceRepository(
     }
 
     private static SearchFieldCollection BuildSearchFields(
+        string name,
+        bool enabled,
         int poolId,
         bool isDeleted,
         IReadOnlyAttributeSchema? schema,
         AttributeValueCollection? attributes)
     {
         var builder = new SearchFieldsBuilder()
+            .Add("name", name)
+            .Add("enabled", enabled)
             .Add("poolId", poolId)
             .Add("isDeleted", isDeleted);
 

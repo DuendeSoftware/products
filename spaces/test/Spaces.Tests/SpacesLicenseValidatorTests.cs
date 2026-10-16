@@ -144,7 +144,7 @@ public class SpacesLicenseValidatorTests
     public void use_space_resolution_throws_when_unentitled()
     {
         var builder = WebApplication.CreateBuilder();
-        builder.Services.AddSpaces();
+        builder.Services.AddSpacesInternal();
         TestSpacesLicense.RegisterUnentitled(builder.Services);
         builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
 
@@ -159,7 +159,7 @@ public class SpacesLicenseValidatorTests
     public void use_space_resolution_succeeds_when_entitled()
     {
         var builder = WebApplication.CreateBuilder();
-        builder.Services.AddSpaces();
+        builder.Services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
 
@@ -239,7 +239,7 @@ public class SpacesLicenseValidatorTests
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSpaces();
+        services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitledWithSpaceLimit(services, spaceLimit: 1, out _);
         await using var serviceProvider = services.BuildServiceProvider();
 
@@ -265,7 +265,7 @@ public class SpacesLicenseValidatorTests
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSpaces();
+        services.AddSpacesInternal();
         if (entitled)
         {
             TestSpacesLicense.RegisterEntitled(services);
@@ -294,7 +294,7 @@ public class SpacesLicenseValidatorTests
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSpaces();
+        services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitledWithSpaceLimit(services, spaceLimit, out var logs);
         services.AddStorageInternal(b => b.AddSqliteInMemory());
         var serviceProvider = services.BuildServiceProvider();

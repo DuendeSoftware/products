@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Duende.Storage;
@@ -15,6 +15,7 @@ public sealed class SpaceConfiguration
     public required Guid Id { get; init; }
 
     /// <summary>Gets or sets the display name for this space.</summary>
+    /// <remarks>Must not be empty or whitespace and must not exceed 500 characters.</remarks>
     public required string Name { get; set; }
 
     /// <summary>Gets or sets whether this space is enabled.</summary>

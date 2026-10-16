@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Duende.Storage;
@@ -12,6 +12,7 @@ namespace Duende.Spaces;
 public sealed record CreateSpaceConfiguration
 {
     /// <summary>Gets the display name for the space.</summary>
+    /// <remarks>Must not be empty or whitespace and must not exceed 500 characters.</remarks>
     public required string Name { get; init; }
 
     /// <summary>Gets the match patterns used to route requests to this space.</summary>

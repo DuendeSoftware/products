@@ -24,7 +24,7 @@ public sealed class StorageFactoryTests : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        _services = BuildServiceProvider(s => s.AddSpaces());
+        _services = BuildServiceProvider(s => s.AddSpacesInternal());
 
         var storageInstanceSchema = _services.GetRequiredService<IStorageInstanceSchema>();
         await storageInstanceSchema.MigrateAsync(_ct);
@@ -169,6 +169,26 @@ public sealed class StorageFactoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task data_written_with_no_space_set_lands_in_pool_0_and_is_visible_from_the_default_space()
+    {
+        var id = UuidV7.New();
+
+        // No SetSpace scope is active here, so GetSpaceIdOrDefault() resolves to SpaceId.Default,
+        // which the factory short-circuits straight to pool 0.
+        var storage = await _services.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Spaces, _ct);
+        var result = await storage.CreateAsync(id, new TestDso("written with no space set"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], _ct);
+        result.ShouldBe(CreateResult.Success);
+
+        using (_spaceContext.SetSpace(SpaceId.Default))
+        {
+            var readBack = await _services.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Spaces, _ct);
+            var readResult = await readBack.TryReadAsync(TestDso.DsoVersion.EntityType, id, _ct);
+            readResult.Found.ShouldBeTrue();
+            readResult.Dso.ShouldBeOfType<TestDso>().Value.ShouldBe("written with no space set");
+        }
+    }
+
+    [Fact]
     public async Task existing_data_in_default_pool_remains_accessible_after_enabling_multi_space()
     {
         var id = UuidV7.New();
@@ -181,7 +201,7 @@ public sealed class StorageFactoryTests : IAsyncLifetime
 
         // Now access the same data through SpacesPartitionedStorageFactory with SpaceId.Default.
         // This proves that enabling Spaces does not move, hide, or break existing data.
-        var spacesServiceProvider = BuildServiceProvider(s => s.AddSpaces());
+        var spacesServiceProvider = BuildServiceProvider(s => s.AddSpacesInternal());
         var spacesContext = spacesServiceProvider.GetRequiredService<ISpaceContextAccessor>();
 
         using (spacesContext.SetSpace(SpaceId.Default))
@@ -378,14 +398,15 @@ public sealed class StorageFactoryTests : IAsyncLifetime
         resolved.ShouldNotBeNull();
 
         var readFromStorage = false;
-        var cachedPoolId = await _services.GetRequiredService<HybridCache>().GetOrCreateAsync<int?>(
-            SpaceCacheKeys.ForSpaceIdRouting(space.Id!),
-            _ =>
-            {
-                readFromStorage = true;
-                return ValueTask.FromResult<int?>(null);
-            },
-            cancellationToken: _ct);
+        var cachedPoolId = await _services.GetRequiredKeyedService<HybridCache>(SpacesServiceProviderKeys.SpacesCache)
+            .GetOrCreateAsync<int?>(
+                SpaceCacheKeys.ForSpaceIdRouting(space.Id!),
+                _ =>
+                {
+                    readFromStorage = true;
+                    return ValueTask.FromResult<int?>(null);
+                },
+                cancellationToken: _ct);
 
         readFromStorage.ShouldBeFalse("resolving the space should already have cached its pool for routing");
         cachedPoolId.ShouldBe(poolId.Value);

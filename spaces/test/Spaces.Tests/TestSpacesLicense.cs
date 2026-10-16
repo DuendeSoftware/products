@@ -177,7 +177,7 @@ public sealed class EntitledLicenseTests : IAsyncLifetime
     {
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         sc.AddStorageInternal(b => b.AddSqliteInMemory());
         _services = sc.BuildServiceProvider();

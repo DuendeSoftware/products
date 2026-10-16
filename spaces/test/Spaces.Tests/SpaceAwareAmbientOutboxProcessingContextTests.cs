@@ -29,7 +29,7 @@ public sealed class SpaceAwareAmbientOutboxProcessingContextTests : IAsyncLifeti
     {
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         sc.AddStorageInternal(b => b.AddSqliteInMemory());
         _services = sc.BuildServiceProvider();
@@ -281,7 +281,7 @@ public sealed class SpaceAwareAmbientOutboxProcessingContextTests : IAsyncLifeti
         // Strongest feasible integration coverage: everything below - OutboxProcessor, the
         // space-aware ambient context provider, real SQLite storage, and the events themselves -
         // comes from a single DI container wired through the normal/public product registration
-        // surface (AddSpaces/AddStorageInternal), not hand-constructed. Both events are persisted
+        // surface (AddSpacesInternal/AddStorageInternal), not hand-constructed. Both events are persisted
         // through the real DSO write path (IPartitionedStorageFactory -> IPartitionedStorage.CreateAsync), so
         // OutboxProcessor discovers them via a genuine SQLite read, and each event's space
         // resolution goes through the real HybridCache-backed SpaceStore/SpaceRepository, so the
@@ -312,7 +312,7 @@ public sealed class SpaceAwareAmbientOutboxProcessingContextTests : IAsyncLifeti
 
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSpaces();
+        services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(services);
         services.AddStorageInternal(b => b.AddSqliteInMemory());
         services.AddDsoRegistration<TestDso>();
@@ -391,6 +391,85 @@ public sealed class SpaceAwareAmbientOutboxProcessingContextTests : IAsyncLifeti
         var readStorage = await provider.GetRequiredService<ICrossPartitionStorageFactory>().GetCrossPartitionStorageAsync(StorageInstanceId.Default, Ct);
         var remainingPage = await readStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, Ct);
         remainingPage.Events.ShouldBeEmpty("both events must have been processed successfully and deleted");
+    }
+
+    [Fact]
+    public async Task real_outbox_processor_does_not_invoke_the_handler_for_an_event_whose_space_was_deleted_before_processing()
+    {
+        // Complements real_outbox_processor_resolves_the_correct_space_for_each_of_two_real_persisted_events_without_cross_event_leakage
+        // above: that test proves the happy path end to end through a real OutboxProcessor, this
+        // one proves the failure path the same way. deleted_space_throws_and_never_invokes_the_handler
+        // already covers the failure at the ExecuteWithContextAsync level directly; this is the one
+        // thing it doesn't show, that OutboxProcessor itself never invokes the handler for such an
+        // event when it discovers it through a real SQLite read.
+        var subscriptionName = SubscriberName.Create("processor-integration-deleted-space-subscription");
+        var handler = new RecordingHandler();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSpacesInternal();
+        TestSpacesLicense.RegisterEntitled(services);
+        services.AddStorageInternal(b => b.AddSqliteInMemory());
+        services.AddDsoRegistration<TestDso>();
+        services.AddSingleton<IOutboxSubscription>(new TestSubscription(subscriptionName));
+        services.AddKeyedTransient<IOutboxSubscriptionHandler>(subscriptionName.Value, (sp, _) =>
+        {
+            handler.Bind(sp.GetRequiredService<ISpaceContextAccessor>());
+            return handler;
+        });
+
+        await using var provider = services.BuildServiceProvider();
+
+        var storageInstanceSchema = provider.GetRequiredService<IStorageInstanceSchema>();
+        await storageInstanceSchema.MigrateAsync(Ct);
+
+        var admin = provider.GetRequiredService<ISpaceAdmin>();
+        var spaceContext = provider.GetRequiredService<ISpaceContextAccessor>();
+
+        var spaceId = (await admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "Processor Integration Space To Delete",
+                MatchPatterns = [new SpaceMatchPattern { Origin = $"https://{Guid.NewGuid()}.example.com" }],
+            },
+            Ct)).Id!;
+
+        var evt = new OutboxEvent
+        {
+            Id = OutboxEventId.New(),
+            Timestamp = DateTimeOffset.UtcNow,
+            EventName = OutboxEventName.Create("SpaceAwareContextTestEvent"),
+            SubjectId = UuidV7.New(),
+            EntityTypeName = nameof(TestDso),
+            EntityTypeId = (int)TestDso.DsoVersion.EntityType.Id,
+            Payload = "{}",
+            DsoTypeSchemaVersion = 1,
+        };
+
+        using (spaceContext.SetSpace(spaceId))
+        {
+            var writeStorage = await provider.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Spaces, Ct);
+            var createStorageResult = await writeStorage.CreateAsync(
+                evt.SubjectId,
+                new TestDso("outbox-processor-integration-deleted-space"),
+                [],
+                SearchFieldCollection.Empty,
+                Expiration.NoExpiration,
+                [evt],
+                Ct);
+            createStorageResult.ShouldBe(CreateResult.Success);
+        }
+
+        (await admin.DeleteAsync(spaceId, Ct)).IsSuccess.ShouldBeTrue();
+
+        var processor = provider.GetRequiredService<OutboxProcessor>();
+
+        // The outbox processor logs this failure and leaves the event queued for retry on the
+        // next pass; it does not throw out of RunProcessorAsync itself. What matters here is
+        // that the handler never saw the event, because its space could no longer be resolved.
+        await processor.RunProcessorAsync(Ct);
+
+        handler.ObservedSpaceIds.ShouldBeEmpty();
     }
 
     private async Task<(int PoolId, SpaceId SpaceId)> CreateSpaceAsync(string name)

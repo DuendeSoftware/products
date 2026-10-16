@@ -107,7 +107,7 @@ public sealed class SpaceAdminTests : IAsyncLifetime
     {
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         sc.AddStorageInternal(b => b.AddSqliteInMemory());
         sc.AddSingleton<ISchemaStore>(new InMemorySchemaStore([SpaceSchema]));
@@ -187,6 +187,278 @@ public sealed class SpaceAdminTests : IAsyncLifetime
         all.Items.Count.ShouldBe(2);
         all.Items.ShouldContain(s => s.Name == "Space 1");
         all.Items.ShouldContain(s => s.Name == "Space 2");
+    }
+
+    [Fact]
+    public async Task can_query_spaces_across_continuation_pages()
+    {
+        for (var i = 1; i <= 27; i++)
+        {
+            await _admin.CreateAsync(
+                new CreateSpaceConfiguration
+                {
+                    Name = $"Space {i:D2}",
+                    MatchPatterns = [new SpaceMatchPattern { Origin = $"https://space{i}.example.com" }]
+                },
+                _ct);
+        }
+
+        var spaces = new List<SpaceListItem>();
+        DataRange? range = null;
+        var pageCount = 0;
+
+        do
+        {
+            var request = new QueryRequest<SpaceFilter, SpaceSortField> { Range = range };
+            var page = await _admin.QueryAsync(request, _ct);
+
+            spaces.AddRange(page.Items);
+            pageCount++;
+            page.PreviousToken.ShouldBeNull();
+
+            range = page.HasMoreData && page.NextToken is { } nextToken
+                ? DataRange.FromContinuationToken(nextToken)
+                : null;
+        }
+        while (range is not null);
+
+        spaces.Count.ShouldBe(27);
+        spaces.Select(space => space.Id).Distinct().Count().ShouldBe(27);
+        pageCount.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task can_sort_spaces_and_navigate_back_with_reversed_sort()
+    {
+        foreach (var name in new[] { "Space C", "Space A", "Space B" })
+        {
+            await _admin.CreateAsync(
+                new CreateSpaceConfiguration
+                {
+                    Name = name,
+                    MatchPatterns = [new SpaceMatchPattern { Origin = $"https://{name.Replace(" ", "-")}.example.com" }]
+                },
+                _ct);
+        }
+
+        var ascendingSort = SortBy.Field(SpaceSortField.Name);
+        var firstPage = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                (SpaceFilter?)null,
+                ascendingSort,
+                DataRange.FromContinuationToken(ContinuationToken.Beginning, (DataRangeSize)2)),
+            _ct);
+
+        firstPage.Items.Select(space => space.Name).ShouldBe(["Space A", "Space B"]);
+        firstPage.HasMoreData.ShouldBeTrue();
+
+        var secondPage = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                (SpaceFilter?)null,
+                ascendingSort,
+                DataRange.FromContinuationToken(firstPage.NextToken, (DataRangeSize)2)),
+            _ct);
+
+        secondPage.Items.Select(space => space.Name).ShouldBe(["Space C"]);
+        secondPage.PreviousToken.ShouldNotBeNull();
+
+        var previousPage = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                (SpaceFilter?)null,
+                SortBy.Field(SpaceSortField.Name, Duende.Storage.Querying.SortDirection.Descending),
+                DataRange.FromContinuationToken(secondPage.PreviousToken, (DataRangeSize)2)),
+            _ct);
+
+        previousPage.Items.Select(space => space.Name).ShouldBe(["Space B", "Space A"]);
+    }
+
+    [Fact]
+    public async Task can_sort_spaces_by_enabled_status()
+    {
+        var names = new[] { "Enabled A", "Disabled B", "Enabled C" };
+        foreach (var name in names)
+        {
+            var created = await _admin.CreateAsync(
+                new CreateSpaceConfiguration
+                {
+                    Name = name,
+                    MatchPatterns = [new SpaceMatchPattern { Origin = $"https://{name.Replace(" ", "-")}.example.com" }]
+                },
+                _ct);
+
+            var retrieved = await _admin.GetAsync(created.Id!, _ct);
+            if (name == "Disabled B")
+            {
+                retrieved.Item!.Enabled = false;
+                var updated = await _admin.UpdateAsync(created.Id!, retrieved.Item, retrieved.Version!, _ct);
+                updated.IsSuccess.ShouldBeTrue();
+            }
+        }
+
+        var result = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                (SpaceFilter?)null,
+                SortBy.Field(SpaceSortField.Enabled)),
+            _ct);
+
+        result.Items.Select(space => space.Enabled).ShouldBe([false, true, true]);
+    }
+
+    [Fact]
+    public async Task space_admin_rejects_empty_and_whitespace_names()
+    {
+        var createResult = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "",
+                MatchPatterns = [new SpaceMatchPattern { Origin = "https://empty-space-name.example.com" }]
+            },
+            _ct);
+
+        createResult.IsSuccess.ShouldBeFalse();
+        createResult.Errors.ShouldContain(error => error.Code == "validation_failed");
+
+        var created = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "Valid Space",
+                MatchPatterns = [new SpaceMatchPattern { Origin = "https://valid-space-name.example.com" }]
+            },
+            _ct);
+        var retrieved = await _admin.GetAsync(created.Id!, _ct);
+        retrieved.Item!.Name = "   ";
+
+        var updateResult = await _admin.UpdateAsync(created.Id!, retrieved.Item, retrieved.Version!, _ct);
+
+        updateResult.IsSuccess.ShouldBeFalse();
+        updateResult.Errors.ShouldContain(error => error.Code == "validation_failed");
+        (await _admin.GetAsync(created.Id!, _ct)).Item!.Name.ShouldBe("Valid Space");
+    }
+
+    [Theory]
+    [InlineData(500, true)]
+    [InlineData(501, false)]
+    public async Task space_name_length_limit_is_enforced_on_create_and_update(int length, bool expectedSuccess)
+    {
+        // Arrange
+        var name = new string('a', length);
+        var created = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "Original Space",
+                MatchPatterns = [new SpaceMatchPattern { Origin = "https://name-length-update.example.com" }]
+            },
+            _ct);
+
+        var retrieved = await _admin.GetAsync(created.Id!, _ct);
+        retrieved.Item!.Name = name;
+
+        // Act
+        var createResult = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = name,
+                MatchPatterns = [new SpaceMatchPattern { Origin = "https://name-length-create.example.com" }]
+            },
+            _ct);
+
+        var updateResult = await _admin.UpdateAsync(created.Id!, retrieved.Item, retrieved.Version!, _ct);
+        var afterUpdate = await _admin.GetAsync(created.Id!, _ct);
+
+        // Assert
+        createResult.IsSuccess.ShouldBe(expectedSuccess);
+        updateResult.IsSuccess.ShouldBe(expectedSuccess);
+        afterUpdate.Item!.Name.ShouldBe(expectedSuccess ? name : "Original Space");
+        if (!expectedSuccess)
+        {
+            createResult.Errors.ShouldNotBeNull().ShouldContain(error => error.Code == "validation_failed");
+            updateResult.Errors.ShouldNotBeNull().ShouldContain(error => error.Code == "validation_failed");
+        }
+    }
+
+    [Fact]
+    public async Task filtered_space_query_filters_before_pagination()
+    {
+        for (var i = 1; i <= 6; i++)
+        {
+            var isMatch = i % 2 != 0;
+            await _admin.CreateAsync(
+                new CreateSpaceConfiguration
+                {
+                    Name = isMatch ? $"Target Space {i}" : $"Other Space {i}",
+                    MatchPatterns = [new SpaceMatchPattern { Origin = $"https://filtered-space{i}.example.com" }]
+                },
+                _ct);
+        }
+
+        var result = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                new SpaceFilter { Name = "tArGeT" },
+                DataRange.FromOffset(null, (DataRangeSize)2)),
+            _ct);
+
+        result.Items.Count.ShouldBe(2);
+        result.Items.ShouldAllBe(space => space.Name.StartsWith("Target", StringComparison.Ordinal));
+        result.HasMoreData.ShouldBeTrue();
+        result.TotalCount.ShouldBe(3);
+        result.TotalPages.ShouldBe(2);
+
+        var secondPage = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                new SpaceFilter { Name = "tArGeT" },
+                DataRange.FromOffset((OffsetSkip)2, (DataRangeSize)2)),
+            _ct);
+
+        secondPage.Items.Count.ShouldBe(1);
+        secondPage.Items[0].Name.ShouldBe("Target Space 5");
+        secondPage.HasMoreData.ShouldBeFalse();
+        secondPage.TotalCount.ShouldBe(3);
+        secondPage.TotalPages.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task space_name_and_enabled_search_fields_follow_lifecycle_updates()
+    {
+        var created = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = "Original Space",
+                MatchPatterns = [new SpaceMatchPattern { Origin = "https://space-search-update.example.com" }]
+            },
+            _ct);
+        var getResult = await _admin.GetAsync(created.Id!, _ct);
+        var configuration = getResult.Item!;
+        configuration.Name = "Renamed Space";
+        configuration.Enabled = false;
+        await _admin.UpdateAsync(created.Id!, configuration, getResult.Version!, _ct);
+
+        var afterUpdate = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                new SpaceFilter { Name = "renamed", Enabled = false }),
+            _ct);
+        afterUpdate.Items.Count.ShouldBe(1);
+        afterUpdate.Items[0].Name.ShouldBe("Renamed Space");
+
+        var oldName = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(new SpaceFilter { Name = "Original" }),
+            _ct);
+        oldName.Items.ShouldBeEmpty();
+
+        await _admin.DeleteAsync(created.Id!, _ct);
+        var afterDelete = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                new SpaceFilter { Name = "renamed", Enabled = false, IsDeleted = true }),
+            _ct);
+        afterDelete.Items.Count.ShouldBe(1);
+        afterDelete.Items[0].IsDeleted.ShouldBeTrue();
+
+        await _admin.UndeleteAsync(created.Id!, _ct);
+        var afterUndelete = await _admin.QueryAsync(
+            QueryRequest.Create<SpaceFilter, SpaceSortField>(
+                new SpaceFilter { Name = "renamed", Enabled = false, IsDeleted = false }),
+            _ct);
+        afterUndelete.Items.Count.ShouldBe(1);
+        afterUndelete.Items[0].IsDeleted.ShouldBeFalse();
     }
 
     [Fact]
@@ -283,7 +555,7 @@ public sealed class SpaceAdminTests : IAsyncLifetime
         afterFirstDelete.Item!.IsDeleted.ShouldBeTrue();
         var versionAfterFirstDelete = afterFirstDelete.Version;
 
-        var cache = _services.GetRequiredService<HybridCache>();
+        var cache = _services.GetRequiredKeyedService<HybridCache>(SpacesServiceProviderKeys.SpacesCache);
         await cache.SetAsync(SpaceCacheKeys.ForSpaceId(created.Id!), afterFirstDelete.Item, cancellationToken: _ct);
         await cache.SetAsync(SpaceCacheKeys.ForPattern(origin, null), afterFirstDelete.Item, cancellationToken: _ct);
         await cache.SetAsync(SpaceCacheKeys.ForOriginClaim(origin), true, cancellationToken: _ct);
@@ -701,7 +973,7 @@ public sealed class SpaceAdminTests : IAsyncLifetime
         // Use an isolated service provider with no ISchemaStore registered
         var sc = new ServiceCollection();
         sc.AddLogging();
-        sc.AddSpaces();
+        sc.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(sc);
         sc.AddStorageInternal(b => b.AddSqliteInMemory());
         await using var services = sc.BuildServiceProvider();
@@ -2063,7 +2335,7 @@ public sealed class SpaceAdminTests : IAsyncLifetime
 
         var originalSchemaCollection = new ServiceCollection()
             .AddLogging()
-            .AddSpaces()
+            .AddSpacesInternal()
             .AddStorageInternal(builder => builder.AddSqliteInMemory(dataSourceName: sharedDatabase))
             .AddSingleton<ISchemaStore>(new InMemorySchemaStore([schemaWithBothAttributes]));
         TestSpacesLicense.RegisterEntitled(originalSchemaCollection);
@@ -2098,7 +2370,7 @@ public sealed class SpaceAdminTests : IAsyncLifetime
 
         var reducedSchemaCollection = new ServiceCollection()
             .AddLogging()
-            .AddSpaces()
+            .AddSpacesInternal()
             .AddStorageInternal(builder => builder.AddSqliteInMemory(dataSourceName: sharedDatabase))
             .AddSingleton<ISchemaStore>(new InMemorySchemaStore([schemaMissingCompanyId]));
         TestSpacesLicense.RegisterEntitled(reducedSchemaCollection);

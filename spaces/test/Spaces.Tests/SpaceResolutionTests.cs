@@ -1,11 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using Duende.Spaces.Internal;
 using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,10 +20,14 @@ namespace Duende.Spaces;
 
 public sealed class SpaceResolutionTests : IAsyncLifetime
 {
+    private static Ct Ct => TestContext.Current.CancellationToken;
+
     private WebApplication _app = null!;
     private HttpClient _client = null!;
     private ISpaceAdmin _admin = null!;
     private FakeTimeProvider _timeProvider = null!;
+    private SpaceId _spaceB = null!;
+    private readonly TaskCompletionSource<SpaceId?> _completedInSpace = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public async ValueTask InitializeAsync()
     {
@@ -29,7 +39,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         // Register FakeTimeProvider before storage registration so TryAddSingleton won't overwrite it
         builder.Services.AddSingleton<TimeProvider>(_timeProvider);
 
-        builder.Services.AddSpaces();
+        builder.Services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.Configure<SpacesOptions>(opt =>
         {
@@ -38,6 +48,12 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
             opt.FallbackToDefault = true;
         });
         builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.SlidingExpiration = true;
+            });
 
         _app = builder.Build();
 
@@ -48,8 +64,46 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
 
         // UseSpacesResolution must come before UseRouting so that path rewrites
         // (for path-based space matching) happen before route matching occurs.
+        _app.UseExceptionHandler("/error");
         _app.UseSpaceResolution();
         _app.UseRouting();
+        _app.UseAuthentication();
+        _app.MapGet("/signin", async (HttpContext httpContext) =>
+        {
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, "alice")], "test");
+            await httpContext.SignInAsync(new ClaimsPrincipal(identity));
+            return Results.Ok();
+        });
+        _app.MapGet("/whoami", (HttpContext httpContext) => Results.Text(httpContext.User.Identity?.Name ?? "anonymous"));
+        _app.MapGet("/redirect", () => Results.Redirect("/elsewhere"));
+        _app.MapGet("/throw", () => ThrowAfterAuthentication());
+        _app.MapGet("/throw-with-body", () => ThrowAfterAuthentication());
+        _app.MapGet("/error", (HttpContext httpContext) =>
+            httpContext.Features.Get<IExceptionHandlerPathFeature>()!.Path.EndsWith("-with-body", StringComparison.Ordinal)
+                ? Results.Text("error page", statusCode: StatusCodes.Status500InternalServerError)
+                : Results.StatusCode(StatusCodes.Status500InternalServerError));
+        _app.MapGet("/completed-in-explicit-scope", (HttpContext httpContext, ISpaceContextAccessor spaceContext) =>
+        {
+            using (spaceContext.SetSpace(_spaceB))
+            {
+                httpContext.Response.OnCompleted(() =>
+                {
+                    _completedInSpace.TrySetResult(spaceContext.GetSpaceId());
+                    return Task.CompletedTask;
+                });
+            }
+
+            return Results.Ok();
+        });
+        _app.MapGet("/completed", (HttpContext httpContext, ISpaceContextAccessor spaceContext) =>
+        {
+            httpContext.Response.OnCompleted(() =>
+            {
+                _completedInSpace.TrySetResult(spaceContext.IsSpaceIdConfigured() ? spaceContext.GetSpaceId() : null);
+                return Task.CompletedTask;
+            });
+            return Results.Ok();
+        });
         _app.MapGet("/api/info", (HttpContext httpContext, ISpaceContextAccessor spaceContext) =>
             Results.Ok(new SpaceInfoResponse
             {
@@ -402,7 +456,7 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         // Build a separate app with FallbackToDefault = false
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
-        builder.Services.AddSpaces();
+        builder.Services.AddSpacesInternal();
         TestSpacesLicense.RegisterEntitled(builder.Services);
         builder.Services.Configure<SpacesOptions>(opt => opt.FallbackToDefault = false);
         builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
@@ -652,5 +706,177 @@ public sealed class SpaceResolutionTests : IAsyncLifetime
         var result = await response.Content.ReadFromJsonAsync<SpaceInfoResponse>();
         result.ShouldNotBeNull();
         result.SpaceId.ShouldBe(spaceB.Id!.ToString());
+    }
+
+    [Fact]
+    public async Task sliding_cookie_renewed_by_a_redirect_is_valid_in_the_space_of_the_request()
+    {
+        var cookie = await SignInToSpaceAAndAdvancePastRenewalMidpointAsync();
+
+        var response = await GetWithCookieAsync("/t/space-a/redirect", cookie);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        var renewedCookie = AuthenticationCookie(response);
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(6));
+        var whoami = await GetWithCookieAsync("/t/space-a/whoami", renewedCookie);
+
+        var user = await whoami.Content.ReadAsStringAsync(Ct);
+        user.ShouldBe("alice");
+    }
+
+    [Fact]
+    public async Task sliding_cookie_renewed_by_a_redirect_is_valid_in_a_space_set_before_space_resolution()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddSingleton<TimeProvider>(_timeProvider);
+        builder.Services.AddSpacesInternal();
+        TestSpacesLicense.RegisterEntitled(builder.Services);
+        builder.Services.AddStorageInternal(b => b.AddSqliteInMemory());
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.SlidingExpiration = true;
+            });
+
+        await using var app = builder.Build();
+        await app.Services.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct);
+        var spaceA = await app.Services.GetRequiredService<ISpaceAdmin>().CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space A", MatchPatterns = [new SpaceMatchPattern { Path = "/space-a" }] },
+            Ct);
+
+        app.Use(async (context, next) =>
+        {
+            var spaceContext = context.RequestServices.GetRequiredService<ISpaceContextAccessor>();
+            using (spaceContext.SetSpace(spaceA.Id!))
+            {
+                await next(context);
+            }
+        });
+        app.UseSpaceResolution();
+        app.UseRouting();
+        app.UseAuthentication();
+        app.MapGet("/signin", async (HttpContext httpContext) =>
+        {
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, "alice")], "test");
+            await httpContext.SignInAsync(new ClaimsPrincipal(identity));
+            return Results.Ok();
+        });
+        app.MapGet("/redirect", () => Results.Redirect("/elsewhere"));
+        app.MapGet("/whoami", (HttpContext httpContext) => Results.Text(httpContext.User.Identity?.Name ?? "anonymous"));
+        await app.StartAsync(Ct);
+        using var client = app.GetTestClient();
+
+        var signIn = await client.GetAsync("/signin", Ct);
+        _timeProvider.Advance(TimeSpan.FromMinutes(6));
+        using var redirectRequest = new HttpRequestMessage(HttpMethod.Get, "/redirect");
+        redirectRequest.Headers.Add("Cookie", AuthenticationCookie(signIn));
+        var response = await client.SendAsync(redirectRequest, Ct);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        var renewedCookie = AuthenticationCookie(response);
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(6));
+        using var whoamiRequest = new HttpRequestMessage(HttpMethod.Get, "/whoami");
+        whoamiRequest.Headers.Add("Cookie", renewedCookie);
+        var whoami = await client.SendAsync(whoamiRequest, Ct);
+
+        var user = await whoami.Content.ReadAsStringAsync(Ct);
+        user.ShouldBe("alice");
+    }
+
+    [Fact]
+    public async Task sliding_cookie_renewed_before_a_global_error_page_stays_valid_in_the_space_of_the_request()
+    {
+        var cookie = await SignInToSpaceAAndAdvancePastRenewalMidpointAsync();
+
+        var response = await GetWithCookieAsync("/t/space-a/throw", cookie);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        var renewedCookie = AuthenticationCookie(response);
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(6));
+        var whoami = await GetWithCookieAsync("/t/space-a/whoami", renewedCookie);
+
+        var user = await whoami.Content.ReadAsStringAsync(Ct);
+        user.ShouldBe("alice");
+    }
+
+    [Fact]
+    public async Task sliding_cookie_renewed_before_a_global_error_page_with_a_body_stays_valid_in_the_space_of_the_request()
+    {
+        var cookie = await SignInToSpaceAAndAdvancePastRenewalMidpointAsync();
+
+        var response = await GetWithCookieAsync("/t/space-a/throw-with-body", cookie);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        var renewedCookie = AuthenticationCookie(response);
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(6));
+        var whoami = await GetWithCookieAsync("/t/space-a/whoami", renewedCookie);
+
+        var user = await whoami.Content.ReadAsStringAsync(Ct);
+        user.ShouldBe("alice");
+    }
+
+    [Fact]
+    public async Task completion_callback_runs_in_the_space_of_the_request()
+    {
+        var spaceA = await CreateSpaceAsync("Space A", "/space-a");
+        var response = await _client.GetAsync("/t/space-a/completed", Ct);
+
+        response.EnsureSuccessStatusCode();
+        var spaceInCallback = await _completedInSpace.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+        spaceInCallback.ShouldBe(spaceA);
+    }
+
+    [Fact]
+    public async Task completion_callback_registered_in_an_explicit_space_scope_runs_in_that_space()
+    {
+        await CreateSpaceAsync("Space A", "/space-a");
+        _spaceB = await CreateSpaceAsync("Space B", "/space-b");
+
+        var response = await _client.GetAsync("/t/space-a/completed-in-explicit-scope", Ct);
+
+        response.EnsureSuccessStatusCode();
+        var spaceInCallback = await _completedInSpace.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+        spaceInCallback.ShouldBe(_spaceB);
+    }
+
+    private static IResult ThrowAfterAuthentication() => throw new InvalidOperationException("The endpoint failed after authentication.");
+
+    private async Task<SpaceId> CreateSpaceAsync(string name, string path)
+    {
+        var space = await _admin.CreateAsync(
+            new CreateSpaceConfiguration
+            {
+                Name = name,
+                MatchPatterns = [new SpaceMatchPattern { Path = path }]
+            },
+            Ct.None);
+        return space.Id!;
+    }
+
+    private async Task<string> SignInToSpaceAAndAdvancePastRenewalMidpointAsync()
+    {
+        await CreateSpaceAsync("Space A", "/space-a");
+
+        var signIn = await _client.GetAsync("/t/space-a/signin", Ct);
+        _timeProvider.Advance(TimeSpan.FromMinutes(6));
+        return AuthenticationCookie(signIn);
+    }
+
+    private static string AuthenticationCookie(HttpResponseMessage response) =>
+        response.Headers.GetValues("Set-Cookie")
+            .Single(value => value.StartsWith(".AspNetCore.Cookies=", StringComparison.Ordinal))
+            .Split(';')[0];
+
+    private async Task<HttpResponseMessage> GetWithCookieAsync(string path, string cookie)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, path);
+        request.Headers.Add("Cookie", cookie);
+        return await _client.SendAsync(request, Ct);
     }
 }

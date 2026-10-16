@@ -24,6 +24,12 @@ internal sealed class SpaceAdmin(
     {
         EnsureLicensed();
 
+        var nameError = ValidateName(configuration.Name);
+        if (nameError is not null)
+        {
+            return SaveResult.Failure<SpaceId>(nameError);
+        }
+
         if (configuration.PoolId is { } poolId && poolId.Value <= 0)
         {
             return SaveResult.Failure<SpaceId>(StorageError.ValidationFailed(
@@ -71,6 +77,12 @@ internal sealed class SpaceAdmin(
         DataVersion expectedVersion, Ct ct)
     {
         EnsureLicensed();
+
+        var nameError = ValidateName(space.Name);
+        if (nameError is not null)
+        {
+            return SaveResult.Failure<SpaceId>(nameError);
+        }
 
         var validationError = ValidatePatterns(space.MatchPatterns);
         if (validationError is not null)
@@ -248,6 +260,18 @@ internal sealed class SpaceAdmin(
         }
 
         return null;
+    }
+
+    private static StorageError? ValidateName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return StorageError.ValidationFailed("Space name must not be empty or whitespace.", "Name");
+        }
+
+        return name.Length > 500
+            ? StorageError.ValidationFailed("Space name must not exceed 500 characters.", "Name")
+            : null;
     }
 
     private async Task<StorageError?> CheckPatternUniquenessAsync(
