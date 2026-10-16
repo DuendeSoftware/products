@@ -57,7 +57,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     public async Task creating_profile_also_creates_user_dso()
     {
         var subjectId = UserSubjectId.New();
-        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchemaFactory.Empty).Validate(), _ct)).ShouldNotBeNull();
 
         var user = await _userRepository.TryReadAsync(subjectId, _ct);
 
@@ -80,7 +80,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     public async Task creating_profile_records_aspect_ref_in_user_dso()
     {
         var subjectId = UserSubjectId.New();
-        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchemaFactory.Empty).Validate(), _ct)).ShouldNotBeNull();
 
         var user = await _userRepository.TryReadAsync(subjectId, _ct);
 
@@ -92,7 +92,7 @@ public sealed class UserDsoIntegrationTests : IAsyncDisposable
     public async Task deleting_user_also_deletes_user_dso()
     {
         var subjectId = UserSubjectId.New();
-        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchema.Empty).Validate(), _ct)).ShouldNotBeNull();
+        _ = (await _profileSelfService.TryCreateAsync(subjectId, new AttributeValueCollection(AttributeSchemaFactory.Empty).Validate(), _ct)).ShouldNotBeNull();
 
         (await _userAdmin.TryRemoveAsync(subjectId, _ct)).ShouldBeTrue();
 

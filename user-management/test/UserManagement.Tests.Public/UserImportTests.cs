@@ -624,10 +624,12 @@ public sealed class UserImportTests : IAsyncLifetime
         }
     }
     private static async Task<ServiceProvider> CreateProviderWithResolver(IUserImportConflictResolver resolver) =>
-        await UsersServiceProviderFactory.CreateAsync(builder =>
-        {
-            _ = builder.Services.AddSingleton(resolver);
-        });
+        await UsersServiceProviderFactory.CreateAsync(
+            configureServices: services =>
+            {
+                _ = services.AddSingleton(resolver);
+            },
+            configureBuilder: _ => { });
 
     private static async Task<ServiceProvider> CreateProviderWithFakeAlgorithm(bool preferFake, Guid? dbId = null) =>
         await UsersServiceProviderFactory.CreateUsersBuilderAsync(

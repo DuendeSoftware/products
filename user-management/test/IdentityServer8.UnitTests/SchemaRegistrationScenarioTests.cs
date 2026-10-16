@@ -12,6 +12,7 @@ using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.Spaces;
+using Duende.Spaces.Internal;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Schema;
@@ -206,7 +207,7 @@ public sealed class SchemaRegistrationScenarioTests
             .AddConfigurationStorage()
             .AddOperationalStorage()
             .AddUserManagement(_ => { });
-        _ = builder.Services.AddSpaces();
+        _ = builder.Services.AddSpacesInternal();
 
         await using var app = builder.Build();
         await app.Services.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct);
@@ -225,7 +226,7 @@ public sealed class SchemaRegistrationScenarioTests
             .AddConfigurationStorage()
             .AddOperationalStorage()
             .AddDynamicSchemas();
-        _ = builder.Services.AddSpaces();
+        _ = builder.Services.AddSpacesInternal();
 
         await using var app = builder.Build();
         await app.Services.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct);
@@ -279,7 +280,7 @@ public sealed class SchemaRegistrationScenarioTests
                     }
                 ]
             }]);
-        _ = services.AddSpaces();
+        _ = services.AddSpacesInternal();
         await using var sp = services.BuildServiceProvider();
         await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct);
         var spaceAdmin = sp.GetRequiredService<ISpaceAdmin>();

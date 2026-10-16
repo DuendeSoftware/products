@@ -4,6 +4,7 @@
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 
 namespace Duende.Platform.UserManagement.Passkeys;

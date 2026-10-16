@@ -33,9 +33,9 @@ public sealed class UserProfileSchemaConsistencyTests : IAsyncLifetime
     private static readonly AttributeCode Department = AttributeCode.Create("department");
     private static readonly AttributeCode Retained = AttributeCode.Create("retained");
 
-    private readonly AttributeSchema _schema = AttributeSchema.Load(
+    private readonly IReadOnlyAttributeSchema _schema = AttributeSchemaFactory.Create(
         [Definition(UserName, true), Definition(Department, false)]);
-    private readonly IReadOnlyAttributeSchema _nextSchema = AttributeSchema.Load(
+    private readonly IReadOnlyAttributeSchema _nextSchema = AttributeSchemaFactory.Create(
         [Definition(UserName, false), Definition(Department, true)]);
     private readonly SwitchingSchemaStore _schemaStore = new();
     private readonly OverwriteConflictResolver _conflictResolver = new();
@@ -234,7 +234,7 @@ public sealed class UserProfileSchemaConsistencyTests : IAsyncLifetime
     [InlineData(true)]
     public async Task import_merge_uses_the_profile_read_schema_instead_of_the_batch_schema_on_each_attempt(bool retry)
     {
-        var profileSchema = AttributeSchema.Load(
+        var profileSchema = AttributeSchemaFactory.Create(
         [
             .. _schema.AttributeDefinitions.Values,
             Definition(Retained, true) with { IsRequired = true }
@@ -288,16 +288,16 @@ public sealed class UserProfileSchemaConsistencyTests : IAsyncLifetime
     [InlineData("required", "Required attribute 'required' is missing.")]
     public async Task import_merge_schema_mismatch_fails_only_that_record(string change, string expectedError)
     {
-        var incomingSchema = AttributeSchema.Load([.. _schema.AttributeDefinitions.Values, Definition(Retained, false)]);
+        var incomingSchema = AttributeSchemaFactory.Create([.. _schema.AttributeDefinitions.Values, Definition(Retained, false)]);
         var profileSchema = change switch
         {
             "removed" => _schema,
-            "type_changed" => AttributeSchema.Load(
+            "type_changed" => AttributeSchemaFactory.Create(
             [
                 .. _schema.AttributeDefinitions.Values,
                 Definition(Retained, false) with { AttributeType = new ScalarAttributeType(ScalarDataType.Integer) }
             ]),
-            "required" => AttributeSchema.Load(
+            "required" => AttributeSchemaFactory.Create(
             [
                 .. incomingSchema.AttributeDefinitions.Values,
                 Definition(AttributeCode.Create("required"), false) with { IsRequired = true }

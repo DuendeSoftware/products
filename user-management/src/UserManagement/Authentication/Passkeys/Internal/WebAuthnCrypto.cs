@@ -10,7 +10,7 @@ internal static class WebAuthnCrypto
 {
     internal static string GenerateChallenge(int size)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(size, 16);
+        ArgumentOutOfRangeException.ThrowIfLessThan(size, WebAuthnConstants.MinimumChallengeSize);
 
         var challengeBytes = new byte[size];
         RandomNumberGenerator.Fill(challengeBytes);

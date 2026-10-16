@@ -4,10 +4,15 @@
 namespace Duende.UserManagement.Authentication.Passkeys.Internal;
 
 /// <summary>
-/// Constants for WebAuthn authenticator data layout and well-known OIDs.
+/// Constants for WebAuthn challenges, authenticator data layout, and well-known OIDs.
 /// </summary>
 internal static class WebAuthnConstants
 {
+    /// <summary>
+    /// Minimum size of a WebAuthn challenge in bytes.
+    /// </summary>
+    internal const int MinimumChallengeSize = 16;
+
     /// <summary>
     /// Byte layout of the authenticator data structure.
     /// See: https://www.w3.org/TR/webauthn-3/#sctn-authenticator-data (§6.5.1)

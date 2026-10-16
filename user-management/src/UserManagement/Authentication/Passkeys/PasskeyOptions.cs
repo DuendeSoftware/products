@@ -94,6 +94,19 @@ public sealed class PasskeyOptions
     ///
     /// See <see href="https://www.iana.org/assignments/cose/cose.xhtml#algorithms"/>.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When empty (the default), passkey registration offers the built-in algorithms first, in
+    /// their default preference order, followed by any additionally registered
+    /// <see cref="ISignatureVerifier"/> instances in DI registration order.
+    /// Registering multiple verifiers for the same algorithm causes options validation to fail at host startup,
+    /// whether registered through the authentication builder or directly through DI.
+    /// </para>
+    /// <para>
+    /// When non-empty, registration offers only the listed algorithms with registered verifiers,
+    /// in the configured order, with duplicates removed. Registering a verifier does not modify this list.
+    /// </para>
+    /// </remarks>
     /// <example>
     /// <code>
     /// // Prefer RS256 over ES256

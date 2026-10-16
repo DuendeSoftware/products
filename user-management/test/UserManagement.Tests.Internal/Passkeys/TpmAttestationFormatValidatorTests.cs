@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 
 namespace Duende.Platform.UserManagement.Passkeys;
@@ -19,7 +20,6 @@ public sealed class TpmAttestationFormatValidatorTests
     private const string TpmManufacturerOid = "2.23.133.2.1";
     private const string TpmModelOid = "2.23.133.2.2";
     private const string TpmVersionOid = "2.23.133.2.3";
-    private const int UnknownKeyType = 0;
     private const int MinimumAuthDataLength = 37; // rpIdHash(32) + flags(1) + signCounter(4)
     private const int AaguidOffsetInAuthData = MinimumAuthDataLength;
     private const int AuthDataWithAttestedCredentialLength = 53; // header + AAGUID
@@ -35,7 +35,7 @@ public sealed class TpmAttestationFormatValidatorTests
             AttStmt: new Dictionary<string, object?>(),
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(UnknownKeyType, CoseAlgorithms.Rs256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -55,7 +55,7 @@ public sealed class TpmAttestationFormatValidatorTests
             },
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(UnknownKeyType, CoseAlgorithms.Rs256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -74,7 +74,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var validator = CreateValidator();
         var attStmt = CloneAttStmtWithout(fixture.Context.AttStmt, "certInfo");
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -103,7 +103,7 @@ public sealed class TpmAttestationFormatValidatorTests
             fixture.AttestedName,
             []);
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -132,7 +132,7 @@ public sealed class TpmAttestationFormatValidatorTests
             fixture.AttestedName,
             []);
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -148,7 +148,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var validator = CreateValidator();
         var attStmt = CloneAttStmtWithout(fixture.Context.AttStmt, "pubArea");
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -181,7 +181,7 @@ public sealed class TpmAttestationFormatValidatorTests
             fixture.AttestedName,
             []);
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -215,7 +215,7 @@ public sealed class TpmAttestationFormatValidatorTests
             wrongName,
             []);
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -268,7 +268,7 @@ public sealed class TpmAttestationFormatValidatorTests
             pubArea.ComputeName(pubAreaBytes),
             []);
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -289,7 +289,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var validator = CreateValidator();
         var attStmt = CloneAttStmtWithout(fixture.Context.AttStmt, "sig");
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -308,7 +308,7 @@ public sealed class TpmAttestationFormatValidatorTests
         signature[0] = (byte)~signature[0];
         attStmt["sig"] = signature;
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -328,7 +328,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var validator = CreateValidator();
         var attStmt = CloneAttStmtWithout(fixture.Context.AttStmt, "x5c");
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -491,7 +491,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var aikCertBytes = ((object?[])attStmt["x5c"]!)[0];
         attStmt["x5c"] = new object?[] { aikCertBytes, new byte[] { 0x00, 0x01, 0x02 } };
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -514,7 +514,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var aikCertBytes = ((object?[])attStmt["x5c"]!)[0];
         attStmt["x5c"] = new object?[] { aikCertBytes, expiredChainCert.Export(X509ContentType.Cert) };
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -532,7 +532,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var aikCertBytes = ((object?[])attStmt["x5c"]!)[0];
         attStmt["x5c"] = new object?[] { aikCertBytes, "not a byte array" };
         var context = CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
 
         var result = await validator.ValidateAsync(context, _ct);
 
@@ -564,14 +564,14 @@ public sealed class TpmAttestationFormatValidatorTests
     }
 
     private static TpmAttestationFormatValidator CreateValidator() =>
-        new([new Rs256SignatureVerifier(), new Es256SignatureVerifier()],
+        new(SignatureVerifiers.Create(new Rs256SignatureVerifier(), new Es256SignatureVerifier()),
             new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero)));
 
     private static AttestationContext CreateContext(
         IReadOnlyDictionary<string, object?> attStmt,
         IReadOnlyCollection<byte> authData,
         IReadOnlyCollection<byte> clientDataHash,
-        CoseKey credentialPublicKey) =>
+        IReadOnlyCollection<byte> credentialPublicKey) =>
         new(attStmt, authData, clientDataHash, credentialPublicKey);
 
     private static AttestationContext CreateContextWithCertificate(
@@ -581,7 +581,7 @@ public sealed class TpmAttestationFormatValidatorTests
         var attStmt = CloneAttStmt(fixture.Context.AttStmt);
         attStmt["x5c"] = new object?[] { certificate.Export(X509ContentType.Cert) };
         return CreateContext(attStmt, fixture.Context.AuthData, fixture.Context.ClientDataHash,
-            fixture.Context.CredentialPublicKey);
+            fixture.Context.CredentialPublicKeyCbor);
     }
 
     private static Dictionary<string, object?> CloneAttStmt(IReadOnlyDictionary<string, object?> attStmt) =>
@@ -874,7 +874,7 @@ public sealed class TpmAttestationFormatValidatorTests
         return writer.Encode();
     }
 
-    private static CoseKey CreateRsaCoseKey(RSAParameters parameters)
+    private static byte[] CreateRsaCoseKey(RSAParameters parameters)
     {
         var writer = new CborWriter();
         writer.WriteStartMap(4);
@@ -892,12 +892,10 @@ public sealed class TpmAttestationFormatValidatorTests
         writer.WriteByteString(parameters.Exponent!);
 
         writer.WriteEndMap();
-        var rsaCbor = writer.Encode();
-        _ = CoseKey.TryParse(rsaCbor, out var rsaKey);
-        return rsaKey!;
+        return writer.Encode();
     }
 
-    private static CoseKey CreateEcCoseKey(ECParameters parameters)
+    private static byte[] CreateEcCoseKey(ECParameters parameters)
     {
         var writer = new CborWriter();
         writer.WriteStartMap(5);
@@ -918,9 +916,7 @@ public sealed class TpmAttestationFormatValidatorTests
         writer.WriteByteString(parameters.Q.Y!);
 
         writer.WriteEndMap();
-        var ecCbor = writer.Encode();
-        _ = CoseKey.TryParse(ecCbor, out var ecKey);
-        return ecKey!;
+        return writer.Encode();
     }
 
     private static byte[] CreateRsaTpmtPublicBytes(RSAParameters parameters) =>
@@ -1065,7 +1061,7 @@ public sealed class TpmAttestationFormatValidatorTests
                 },
                 AuthData: AuthData,
                 ClientDataHash: ClientDataHash,
-                CredentialPublicKey: CredentialPublicKey);
+                CredentialPublicKeyCbor: CredentialPublicKey);
         }
 
         public byte[] Aaguid { get; }
@@ -1077,7 +1073,7 @@ public sealed class TpmAttestationFormatValidatorTests
         private byte[] ClientDataHash { get; }
         public AttestationContext Context { get; }
         public RSA CredentialKey { get; }
-        private CoseKey CredentialPublicKey { get; }
+        private byte[] CredentialPublicKey { get; }
         public byte[] ExpectedExtraData { get; }
         private byte[] PubAreaBytes { get; }
         public byte[] RawSignature { get; }
@@ -1137,7 +1133,7 @@ public sealed class TpmAttestationFormatValidatorTests
                 },
                 AuthData: AuthData,
                 ClientDataHash: ClientDataHash,
-                CredentialPublicKey: CredentialPublicKey);
+                CredentialPublicKeyCbor: CredentialPublicKey);
         }
 
         private byte[] Aaguid { get; }
@@ -1149,7 +1145,7 @@ public sealed class TpmAttestationFormatValidatorTests
         private byte[] ClientDataHash { get; }
         public AttestationContext Context { get; }
         private ECDsa CredentialKey { get; }
-        private CoseKey CredentialPublicKey { get; }
+        private byte[] CredentialPublicKey { get; }
         private byte[] ExpectedExtraData { get; }
         private byte[] PubAreaBytes { get; }
         private byte[] RawSignature { get; }

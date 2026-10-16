@@ -12,8 +12,12 @@
     <NoWarn>$(NoWarn);IDE0106</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer8\IdentityServer8.csproj" />
     <ProjectReference Include="..\..\src\UserManagement\UserManagement.csproj" />
     <ProjectReference Include="..\..\testing\UserManagement.TestInfrastructure\UserManagement.TestInfrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Duende.Spaces" />
   </ItemGroup>
   <ItemGroup>
     <!-- MimeKit is a direct dependency to override netDumbster's transitive MimeKit 3.1.1,
@@ -21,6 +25,7 @@
     <PackageReference Include="MimeKit" />
     <PackageReference Include="netDumbster" />
     <PackageReference Include="System.Drawing.Common" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
   <ItemGroup>

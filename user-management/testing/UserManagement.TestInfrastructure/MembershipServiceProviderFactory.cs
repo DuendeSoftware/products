@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Platform.UserManagement;
 using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Schema;
@@ -25,12 +24,9 @@ public sealed class MembershipServiceProviderFactory
 
         _ = services.AddStorageInternal(storage => storage.AddSqliteInMemory(dbId.ToString()));
 
-        _ = services.AddSingleton<DataCategoryNameRecorder>();
-
         _ = services
             .AddUserManagementInternal(StorageInstanceId.Default, c => { });
-
-        _ = services.Decorate<IPartitionedStorageFactory>((partitionedStorageFactory, sp) => new RecordingPartitionedStorageFactory(partitionedStorageFactory, sp.GetRequiredService<DataCategoryNameRecorder>()));
+        _ = DataCategoryNameRecorder.RegisterAsSpy(services);
 
         var sp = services.BuildServiceProvider();
         await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);

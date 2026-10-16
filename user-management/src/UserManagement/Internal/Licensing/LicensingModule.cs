@@ -21,6 +21,7 @@ internal sealed class LicensingModule : IDuendeModule
         });
 
         services.TryAddSingleton<LicenseValidator>();
+        services.TryAddScoped<IUserCountProvider, StorageUserCountProvider>();
         services.TryAddSingleton<UserManagementLicenseValidator>();
     }
 }

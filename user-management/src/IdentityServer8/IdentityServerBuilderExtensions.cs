@@ -3,12 +3,15 @@
 
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.UserManagement;
+using Duende.Spaces;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Internal;
+using Duende.UserManagement.Internal.Licensing;
+using Duende.UserManagement.Internal.Storage;
 using Duende.UserManagement.Profiles;
 using Duende.UserManagement.Scim;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +43,29 @@ public static class IdentityServerBuilderExtensions
             ArgumentNullException.ThrowIfNull(configure);
 
             builder.Services.TryAddScoped<IPasskeySignInHandler, IdentityServerPasskeySignInHandler>();
+
+            // Select the appropriate provider after the host has finished registering services.
+            // The scoped provider can safely inject Space services and the scoped user repository.
+            builder.Services.TryAddScoped<IUserCountProvider>(sp =>
+            {
+                var serviceAvailability = sp.GetRequiredService<IServiceProviderIsService>();
+                var hasSpaceAdmin = serviceAvailability.IsService(typeof(ISpaceAdmin));
+                var hasSpaceContextAccessor = serviceAvailability.IsService(typeof(ISpaceContextAccessor));
+
+                if (hasSpaceAdmin != hasSpaceContextAccessor)
+                {
+                    throw new InvalidOperationException(
+                        "Spaces registration is incomplete. Both ISpaceAdmin and ISpaceContextAccessor are required to count licensed users across spaces.");
+                }
+
+                return hasSpaceAdmin
+                    ? new SpaceAwareUserCountProvider(
+                        sp.GetRequiredService<ISpaceAdmin>(),
+                        sp.GetRequiredService<ISpaceContextAccessor>(),
+                        sp.GetRequiredService<UserRepository>())
+                    : new StorageUserCountProvider(sp.GetRequiredService<UserRepository>());
+            });
+
             _ = builder.Services.AddUserManagementInternal(storageInstanceId, configure);
 
             // Default user profile schema. Customers replace or extend it with AddInMemoryDataExtensionSchemas,

@@ -83,7 +83,7 @@ public sealed class PasskeyAuthentication : IAsyncLifetime
     }
 
     [Theory]
-    [InlineData(16)]
+    [InlineData(WebAuthnConstants.MinimumChallengeSize)]
     [InlineData(32)]
     [InlineData(64)]
     public async Task Challenge_size_should_be_configurable(int challengeSize)

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.UserManagement;
 using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.Passkeys;
 using Duende.UserManagement.Authentication.Passkeys.Internal;
 
 namespace Duende.Platform.UserManagement.Passkeys;
@@ -13,7 +14,6 @@ namespace Duende.Platform.UserManagement.Passkeys;
 public static class PackedAttestationFormatValidatorTests
 {
     private const int UnsupportedAlgorithm = -999;
-    private const int UnknownKeyType = 0;
     private const int MinimumAuthDataLength = 37; // rpIdHash(32) + flags(1) + signCounter(4)
     private const int AaguidOffsetInAuthData = MinimumAuthDataLength; // AAGUID starts right after the minimum auth data
     private const int AuthDataWithAttestedCredentialLength = 53; // MinAuthDataLength + aaguid(16)
@@ -22,7 +22,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_with_missing_alg_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new[] { new TestSignatureVerifier(CoseAlgorithms.Es256, true) }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new TestSignatureVerifier(CoseAlgorithms.Es256, true)), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -30,7 +30,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(UnknownKeyType, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -42,7 +42,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_with_wrong_algorithm_type_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new[] { new TestSignatureVerifier(CoseAlgorithms.Es256, true) }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new TestSignatureVerifier(CoseAlgorithms.Es256, true)), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -51,7 +51,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(UnknownKeyType, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -61,7 +61,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_with_missing_sig_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new[] { new TestSignatureVerifier(CoseAlgorithms.Es256, true) }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new TestSignatureVerifier(CoseAlgorithms.Es256, true)), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -69,7 +69,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(UnknownKeyType, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -81,7 +81,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_with_ecdaa_key_id_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new[] { new TestSignatureVerifier(CoseAlgorithms.Es256, true) }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new TestSignatureVerifier(CoseAlgorithms.Es256, true)), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -91,7 +91,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(UnknownKeyType, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -105,8 +105,8 @@ public static class PackedAttestationFormatValidatorTests
     {
         var (key, coseKey) = MakeEs256CoseKey();
         using var _ = key;
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[]
-            { new Es256SignatureVerifier(), new Rs256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(
+            new Es256SignatureVerifier(), new Rs256SignatureVerifier()), TimeProvider.System);
         var context = MakeRealSelfAttestationContext(key, coseKey, attStmtAlgorithm: CoseAlgorithms.Rs256);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -119,10 +119,11 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_self_attestation_with_unsupported_algorithm_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new[] { new TestSignatureVerifier(CoseAlgorithms.Es256, true) }, TimeProvider.System);
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new TestSignatureVerifier(CoseAlgorithms.Es256, true)), TimeProvider.System);
         var context =
             MakeSelfAttestationContext(UnsupportedAlgorithm,
-                new CoseKey(CoseConstants.KeyTypes.Ec2, UnsupportedAlgorithm, []));
+                EcdsaSignatureVerifierTests.BuildCoseKey(key, UnsupportedAlgorithm, CoseConstants.Curves.P256));
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -136,7 +137,7 @@ public static class PackedAttestationFormatValidatorTests
     {
         var (key, coseKey) = MakeEs256CoseKey();
         using var _ = key;
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeRealSelfAttestationContext(key, coseKey);
         TamperWithSignature((byte[])context.AttStmt["sig"]!);
 
@@ -152,7 +153,7 @@ public static class PackedAttestationFormatValidatorTests
     {
         var (key, coseKey) = MakeEs256CoseKey();
         using var ecdsaKey = key;
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeRealSelfAttestationContext(key, coseKey);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -163,7 +164,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_full_attestation_with_empty_X5c_array_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -173,7 +174,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[AuthDataWithAttestedCredentialLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(CoseConstants.KeyTypes.Ec2, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -185,7 +186,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_full_attestation_with_null_first_cert_in_X5c_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -195,7 +196,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[AuthDataWithAttestedCredentialLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(CoseConstants.KeyTypes.Ec2, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -207,7 +208,7 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_full_attestation_with_invalid_cert_should_fail()
     {
-        var validator = new PackedAttestationFormatValidator(new[] { new TestSignatureVerifier(CoseAlgorithms.Es256, true) }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new TestSignatureVerifier(CoseAlgorithms.Es256, true)), TimeProvider.System);
         var invalidCertificate = new byte[] { 1, 2, 3 };
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
@@ -218,7 +219,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[AuthDataWithAttestedCredentialLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: new CoseKey(CoseConstants.KeyTypes.Ec2, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -237,7 +238,7 @@ public static class PackedAttestationFormatValidatorTests
         var authData = new byte[AuthDataWithAttestedCredentialLength];
         var clientDataHash = new byte[Sha256HashLength];
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -247,7 +248,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: authData,
             ClientDataHash: clientDataHash,
-            CredentialPublicKey: new CoseKey(CoseConstants.KeyTypes.Ec2, UnsupportedAlgorithm, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -262,7 +263,7 @@ public static class PackedAttestationFormatValidatorTests
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         using var cert = MakeFullAttestationCertificate(ecKey);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
         TamperWithSignature((byte[])context.AttStmt["sig"]!);
 
@@ -280,7 +281,7 @@ public static class PackedAttestationFormatValidatorTests
         using var cert = MakeFullAttestationCertificate(ecKey,
             subject: "CN=Test, OU=Not Authenticator Attestation, O=Test Org, C=US");
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -294,11 +295,11 @@ public static class PackedAttestationFormatValidatorTests
     public static async Task Validate_full_attestation_with_missing_o_in_subject_should_fail()
     {
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        // Subject has OU but no distinct O component — old string-based check falsely passed
+        // Subject has OU but no distinct O component - old string-based check falsely passed
         // because "OU=..." contains the substring "O=".
         using var cert = MakeFullAttestationCertificate(ecKey, subject: "CN=Test, OU=Authenticator Attestation, C=US");
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -312,12 +313,12 @@ public static class PackedAttestationFormatValidatorTests
     public static async Task Validate_full_attestation_with_ou_superstring_value_should_fail()
     {
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        // OU value is a superstring of the required "Authenticator Attestation" —
+        // OU value is a superstring of the required "Authenticator Attestation" -
         // old string-based Contains() check falsely passed.
         using var cert = MakeFullAttestationCertificate(ecKey,
             subject: "CN=Test, OU=Authenticator Attestation Bypass, O=Test Org, C=US");
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -331,10 +332,10 @@ public static class PackedAttestationFormatValidatorTests
     public static async Task Validate_full_attestation_with_missing_ou_should_fail()
     {
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        // No OU component at all — boundary test for the new OID-based implementation.
+        // No OU component at all - boundary test for the new OID-based implementation.
         using var cert = MakeFullAttestationCertificate(ecKey, subject: "CN=Test, O=Test Org, C=US");
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -350,7 +351,7 @@ public static class PackedAttestationFormatValidatorTests
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         using var cert = MakeFullAttestationCertificate(ecKey, isCertificateAuthority: true);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -368,7 +369,7 @@ public static class PackedAttestationFormatValidatorTests
             notBefore: DateTimeOffset.UtcNow.AddDays(-365),
             notAfter: DateTimeOffset.UtcNow.AddDays(-1));
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -386,7 +387,7 @@ public static class PackedAttestationFormatValidatorTests
             notBefore: DateTimeOffset.UtcNow.AddDays(1),
             notAfter: DateTimeOffset.UtcNow.AddDays(365));
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -399,13 +400,13 @@ public static class PackedAttestationFormatValidatorTests
     [Fact]
     public static async Task Validate_full_attestation_with_invalid_Aaguid_extension_format_should_fail()
     {
-        // Wrong tag (0x05 instead of 0x04) — invalid DER format
+        // Wrong tag (0x05 instead of 0x04) - invalid DER format
         var invalidAaguidExtRaw = new byte[] { 0x05, 0x10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         using var cert = MakeFullAttestationCertificate(ecKey, aaguidExtensionRawData: invalidAaguidExtRaw);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -435,7 +436,7 @@ public static class PackedAttestationFormatValidatorTests
         var authData = new byte[AuthDataWithAttestedCredentialLength];
         authDataAaguid.CopyTo(authData, AaguidOffsetInAuthData);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert, authData: authData);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -451,7 +452,7 @@ public static class PackedAttestationFormatValidatorTests
         using var ecKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         using var cert = MakeFullAttestationCertificate(ecKey);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -480,7 +481,7 @@ public static class PackedAttestationFormatValidatorTests
         var signedData = WebAuthnCrypto.CombineBytes(authData, clientDataHash);
         var sig = rsaKey.SignData(signedData, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Rs256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Rs256SignatureVerifier()), TimeProvider.System);
         var context = new AttestationContext(
             AttStmt: new Dictionary<string, object?>
             {
@@ -490,7 +491,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: authData,
             ClientDataHash: clientDataHash,
-            CredentialPublicKey: new CoseKey(CoseConstants.KeyTypes.Rsa, CoseAlgorithms.Rs256, []));
+            CredentialPublicKeyCbor: []);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -510,7 +511,7 @@ public static class PackedAttestationFormatValidatorTests
         var authData = new byte[AuthDataWithAttestedCredentialLength];
         aaguid.CopyTo(authData, AaguidOffsetInAuthData);
 
-        var validator = new PackedAttestationFormatValidator(new ISignatureVerifier[] { new Es256SignatureVerifier() }, TimeProvider.System);
+        var validator = new PackedAttestationFormatValidator(SignatureVerifiers.Create(new Es256SignatureVerifier()), TimeProvider.System);
         var context = MakeFullAttestationEs256Context(ecKey, cert, authData: authData);
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
@@ -524,7 +525,7 @@ public static class PackedAttestationFormatValidatorTests
         public bool VerifySignature(byte[] publicKeyCbor, byte[] data, byte[]? signature) => result;
     }
 
-    private static (ECDsa Key, CoseKey CoseKey) MakeEs256CoseKey()
+    private static (ECDsa Key, byte[] CoseKey) MakeEs256CoseKey()
     {
         var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         var parameters = key.ExportParameters(false);
@@ -548,15 +549,12 @@ public static class PackedAttestationFormatValidatorTests
         writer.WriteByteString(parameters.Q.Y!);
 
         writer.WriteEndMap();
-        var rawCbor = writer.Encode();
-
-        var coseKey = new CoseKey(CoseConstants.KeyTypes.Ec2, CoseAlgorithms.Es256, rawCbor);
-        return (key, coseKey);
+        return (key, writer.Encode());
     }
 
     private static AttestationContext MakeRealSelfAttestationContext(
         ECDsa key,
-        CoseKey coseKey,
+        byte[] coseKey,
         int algorithm = CoseAlgorithms.Es256,
         int? attStmtAlgorithm = null)
     {
@@ -573,7 +571,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: authData,
             ClientDataHash: clientDataHash,
-            CredentialPublicKey: coseKey);
+            CredentialPublicKeyCbor: coseKey);
     }
 
     private static X509Certificate2 MakeFullAttestationCertificate(
@@ -619,12 +617,12 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: authData,
             ClientDataHash: clientDataHash,
-            CredentialPublicKey: new CoseKey(CoseConstants.KeyTypes.Ec2, CoseAlgorithms.Es256, []));
+            CredentialPublicKeyCbor: []);
     }
 
     private static AttestationContext MakeSelfAttestationContext(
         int algorithm,
-        CoseKey credentialPublicKey,
+        byte[] credentialPublicKey,
         byte[]? sig = null) =>
         new(
             AttStmt: new Dictionary<string, object?>
@@ -634,7 +632,7 @@ public static class PackedAttestationFormatValidatorTests
             },
             AuthData: new byte[MinimumAuthDataLength],
             ClientDataHash: new byte[Sha256HashLength],
-            CredentialPublicKey: credentialPublicKey);
+            CredentialPublicKeyCbor: credentialPublicKey);
 
     private static void TamperWithSignature(byte[] signature) => signature[0] = (byte)~signature[0];
 }

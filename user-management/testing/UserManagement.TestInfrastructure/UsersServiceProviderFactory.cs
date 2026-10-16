@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Platform.UserManagement;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue.Internal;
 using Duende.Storage.Internal;
@@ -26,7 +25,18 @@ public sealed class UsersServiceProviderFactory
         await CreateUsersBuilderAsync(null, addDataProtection);
 
     public static async Task<ServiceProvider> CreateAsync(Action<IUserManagementBuilder> configureBuilder) =>
-        await CreateUsersBuilderAsync(null, false, services => configureBuilder?.Invoke(new IUserManagementBuilder.Builder(services)));
+        await CreateUsersBuilderAsync(
+            configureOptions: null,
+            addDataProtection: false,
+            configureBuilder: configureBuilder);
+
+
+    public static async Task<ServiceProvider> CreateAsync(Action<IServiceCollection> configureServices, Action<IUserManagementBuilder> configureBuilder) =>
+        await CreateUsersBuilderAsync(
+            configureOptions: null,
+            addDataProtection: false,
+            configureServices: configureServices,
+            configureBuilder: configureBuilder);
 
     public static async Task<ServiceProvider> CreateWithOptionsAsync(Action<UserAuthenticationOptions> configureOptions) =>
         await CreateWithOptionsAsync(configureOptions, false);
@@ -38,17 +48,30 @@ public sealed class UsersServiceProviderFactory
     }
 
     public static async Task<ServiceProvider> CreateUsersBuilderAsync(
-        Action<UserAuthenticationOptions>? configureOptions, bool addDataProtection, Action<IServiceCollection>? configureServices = null, Guid? dbId = null)
+        Action<UserAuthenticationOptions>? configureOptions,
+        bool addDataProtection,
+        Action<IServiceCollection>? configureServices = null,
+        Action<IUserManagementBuilder>? configureBuilder = null,
+        Guid? dbId = null)
     {
-        var services = CreateUsersBuilder(configureOptions, addDataProtection, dbId: dbId);
-        configureServices?.Invoke(services);
+        var services = CreateUsersBuilder(configureOptions,
+            addDataProtection,
+            dbId: dbId,
+            configureServices: configureServices,
+            configureBuilder: configureBuilder);
+
         var sp = services.BuildServiceProvider();
         await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
         return sp;
     }
 
     public static IServiceCollection CreateUsersBuilder(
-        Action<UserAuthenticationOptions>? configureOptions, bool addDataProtection, Action<IUserManagementBuilder>? configureBuilder = null, Guid? dbId = null)
+        Action<UserAuthenticationOptions>? configureOptions,
+        bool addDataProtection,
+        Action<IUserManagementBuilder>? configureBuilder = null,
+        Action<IServiceCollection>? configureServices = null,
+        Guid? dbId = null
+        )
     {
         var services = new ServiceCollection();
 
@@ -77,9 +100,6 @@ public sealed class UsersServiceProviderFactory
             options.Passkeys.AllowedOrigins = ["https://example.com"];
         });
 
-        _ = services.AddSingleton<DataCategoryNameRecorder>();
-        _ = services.Decorate<IPartitionedStorageFactory>((partitionedStorageFactory, sp) => new RecordingPartitionedStorageFactory(partitionedStorageFactory, sp.GetRequiredService<DataCategoryNameRecorder>()));
-
         if (configureOptions != null)
         {
             _ = services.Configure(configureOptions);
@@ -93,6 +113,11 @@ public sealed class UsersServiceProviderFactory
         {
             _ = services.AddSingleton<IDataProtectionProvider, NoopDataProtectionProvider>();
         }
+
+        configureServices?.Invoke(services);
+
+        // Register last so the spy wraps the router as finally configured by configureServices.
+        _ = DataCategoryNameRecorder.RegisterAsSpy(services);
 
         return services;
     }

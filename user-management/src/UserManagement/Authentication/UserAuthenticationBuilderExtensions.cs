@@ -117,5 +117,47 @@ public static class UserAuthenticationBuilderExtensions
 
             return builder;
         }
+
+        /// <summary>
+        /// Registers a singleton signature verifier for an additional COSE algorithm.
+        /// Each algorithm must have exactly one verifier. Registering a duplicate, including
+        /// for a built-in algorithm, causes options validation to fail at host startup.
+        /// </summary>
+        /// <typeparam name="TVerifier">The signature verifier implementation to register.</typeparam>
+        /// <returns>The builder for chaining.</returns>
+        public IUserAuthenticationBuilder AddPasskeySignatureVerifier<TVerifier>()
+            where TVerifier : class, ISignatureVerifier
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+
+            _ = builder.Services.AddSingleton<ISignatureVerifier, TVerifier>();
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Registers a validator for an additional passkey attestation format.
+        /// The validator is selected when its <see cref="IAttestationFormatValidator.Format"/>
+        /// matches the format in the attestation object.
+        /// </summary>
+        /// <remarks>
+        /// Format identifiers must be unique, including the built-in formats.
+        /// Duplicate formats prevent host startup with an error naming the duplicate format.
+        /// Format identifiers must be fixed and non-empty; null, empty, or whitespace values also prevent startup.
+        /// Validators are resolved from the root service provider and retained by the singleton authentication
+        /// options validator. Scoped dependencies are not supported. Constructors and format lookup must not
+        /// depend directly or indirectly on <see cref="UserAuthenticationOptions"/>, to avoid circular validation.
+        /// </remarks>
+        /// <typeparam name="TValidator">The type of attestation format validator to register.</typeparam>
+        /// <returns>The builder for chaining.</returns>
+        public IUserAuthenticationBuilder AddAttestationFormatValidator<TValidator>()
+            where TValidator : class, IAttestationFormatValidator
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+
+            _ = builder.Services.AddTransient<IAttestationFormatValidator, TValidator>();
+
+            return builder;
+        }
     }
 }

@@ -25,7 +25,7 @@ public static class NoneAttestationFormatValidatorTests
             AttStmt: new Dictionary<string, object?>(),
             AuthData: Array.Empty<byte>(),
             ClientDataHash: Array.Empty<byte>(),
-            CredentialPublicKey: new CoseKey(0, 0, Array.Empty<byte>()));
+            CredentialPublicKeyCbor: Array.Empty<byte>());
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 
@@ -43,7 +43,7 @@ public static class NoneAttestationFormatValidatorTests
             },
             AuthData: Array.Empty<byte>(),
             ClientDataHash: Array.Empty<byte>(),
-            CredentialPublicKey: new CoseKey(0, 0, Array.Empty<byte>()));
+            CredentialPublicKeyCbor: Array.Empty<byte>());
 
         var result = await validator.ValidateAsync(context, TestContext.Current.CancellationToken);
 

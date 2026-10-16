@@ -10,7 +10,7 @@ namespace Duende.UserManagement.Authentication.Passkeys.Internal;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class WebAuthnAuthenticationCeremony(
     IOptions<UserAuthenticationOptions> options,
-    IEnumerable<ISignatureVerifier> signatureVerifiers,
+    SignatureVerifiers signatureVerifiers,
     IPasskeyOriginValidator originValidator)
 {
     private readonly PasskeyOptions _passkeyOptions = options.Value.Passkeys;
@@ -21,9 +21,6 @@ internal sealed class WebAuthnAuthenticationCeremony(
             : options.Value.Passkeys.ServerDomain;
 
     private IReadOnlyList<string> AllowedOrigins => _passkeyOptions.AllowedOrigins ?? [];
-
-    private readonly Dictionary<int, ISignatureVerifier> _signatureVerifiers =
-        signatureVerifiers.ToDictionary(v => v.Algorithm);
 
     // https://www.w3.org/TR/webauthn-3/#sctn-verifying-assertion
     // 7.2
@@ -193,7 +190,7 @@ internal sealed class WebAuthnAuthenticationCeremony(
                 "Failed to parse COSE key.");
         }
 
-        if (!_signatureVerifiers.TryGetValue(coseKey.Algorithm, out var verifier))
+        if (!signatureVerifiers.TryGet(coseKey.Algorithm, out var verifier))
         {
             return new PasskeyAuthenticationCompleteResult.Failure(
                 AuthenticationCompleteError.UnsupportedAlgorithm,

@@ -24,6 +24,9 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Duende.Storage.Sqlite" />
+    <!-- Pins a patched version of a transitive dependency of the Aspire packages (GHSA-qhrr-8q5h-9q3h). -->
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="xunit.v3.extensibility.core" />

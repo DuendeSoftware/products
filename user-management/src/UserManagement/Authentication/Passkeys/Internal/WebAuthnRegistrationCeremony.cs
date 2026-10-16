@@ -10,7 +10,7 @@ namespace Duende.UserManagement.Authentication.Passkeys.Internal;
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class WebAuthnRegistrationCeremony(
     IEnumerable<IAttestationFormatValidator> attestationValidators,
-    IEnumerable<ISignatureVerifier> signatureVerifiers,
+    SignatureVerifiers signatureVerifiers,
     IEnumerable<IAttestationTrustPolicy> attestationTrustPolicies,
     IOptions<UserAuthenticationOptions> options,
     IPasskeyOriginValidator originValidator)
@@ -27,26 +27,23 @@ internal sealed class WebAuthnRegistrationCeremony(
     private readonly Dictionary<string, IAttestationFormatValidator> _validators =
         attestationValidators.ToDictionary(v => v.Format);
 
-    private readonly Dictionary<int, ISignatureVerifier> _signatureVerifiers =
-        signatureVerifiers.ToDictionary(v => v.Algorithm);
-
     private bool IsAlgorithmSupported(int algorithm) =>
         _passkeyOptions.SupportedAlgorithms is { Count: > 0 } configuredAlgorithms
-            ? configuredAlgorithms.Contains(algorithm) && _signatureVerifiers.ContainsKey(algorithm)
-            : _signatureVerifiers.ContainsKey(algorithm);
+            ? configuredAlgorithms.Contains(algorithm) && signatureVerifiers.Contains(algorithm)
+            : signatureVerifiers.Contains(algorithm);
 
     internal List<PublicKeyCredentialParameters> GetPubKeyCredParams()
     {
         if (_passkeyOptions.SupportedAlgorithms is { Count: > 0 } configured)
         {
             return configured
-                .Where(alg => _signatureVerifiers.ContainsKey(alg))
+                .Where(alg => signatureVerifiers.Contains(alg))
                 .Distinct()
                 .Select(alg => new PublicKeyCredentialParameters { Alg = alg })
                 .ToList();
         }
 
-        return signatureVerifiers
+        return signatureVerifiers.All
             .Select(v => new PublicKeyCredentialParameters { Alg = v.Algorithm })
             .ToList();
     }
@@ -197,7 +194,7 @@ internal sealed class WebAuthnRegistrationCeremony(
             attestationObject.AttStmt,
             attestationObject.AuthData,
             clientDataHash,
-            authenticatorData.AttestedCredential.PublicKey);
+            Array.AsReadOnly(authenticatorData.AttestedCredential.PublicKey.RawCbor.ToArray()));
 
         // Validate Attestation according to Format
         // https://www.w3.org/TR/webauthn-3/#sctn-registering-a-new-credential
@@ -209,7 +206,14 @@ internal sealed class WebAuthnRegistrationCeremony(
                 failure.ErrorDescription);
         }
 
-        var certificateChain = (attestationResult as AttestationValidationResult.Success)?.CertificateChain;
+        if (attestationResult is not AttestationValidationResult.Success success)
+        {
+            return new PasskeyRegistrationCompleteResult.Failure(
+                RegistrationError.AttestationValidationFailed,
+                "Attestation validator returned an invalid result.");
+        }
+
+        var certificateChain = success.CertificateChain;
         var trustContext = new AttestationTrustContext
         {
             UserSubjectId = userSubjectId,

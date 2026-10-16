@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Private.Licencing.V2;
-using Duende.UserManagement.Internal.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.UserManagement.Internal.Licensing;
 
@@ -11,10 +11,15 @@ namespace Duende.UserManagement.Internal.Licensing;
 /// User Management license validation. Delegates to the shared <see cref="LicenseValidator"/>
 /// infrastructure for rate-limited logging and entitlement checks.
 /// </summary>
+/// <remarks>
+/// Disposing the validator cancels a running user count check and waits for it to finish, so no
+/// check outlives the service provider that owns the validator.
+/// </remarks>
 internal sealed class UserManagementLicenseValidator(
     LicenseValidator validator,
     IServiceScopeFactory scopeFactory,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ILogger<UserManagementLicenseValidator> logger) : IDisposable, IAsyncDisposable
 {
     internal bool ValidateProfiles() => validator.ValidateFeature(SkuIds.UM_002);
 
@@ -59,39 +64,121 @@ internal sealed class UserManagementLicenseValidator(
 #pragma warning restore CA2201
 
     private long _lastUserCountCheckTicks;
+    private int _userCountCheckInFlight;
+    private Task _userCountCheck = Task.CompletedTask;
+    private readonly CancellationTokenSource _stopping = new();
+    private int _disposed;
     private static readonly TimeSpan UserCountCheckInterval = TimeSpan.FromHours(1);
 
-    internal void ValidateUserCount()
+    public void Dispose()
     {
+        if (BeginDispose())
+        {
+            // The check catches every exception, so waiting on it cannot throw.
+            Volatile.Read(ref _userCountCheck).GetAwaiter().GetResult();
+            _stopping.Dispose();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (BeginDispose())
+        {
+            await Volatile.Read(ref _userCountCheck);
+            _stopping.Dispose();
+        }
+    }
+
+    private bool BeginDispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return false;
+        }
+
+        _stopping.Cancel();
+        return true;
+    }
+
+    /// <summary>
+    /// Starts a background user count check when the throttle window has elapsed and no check is running.
+    /// The caller never waits for the check, and the check never fails the caller's operation.
+    /// </summary>
+    internal void ValidateUserCount() => _ = TryStartUserCountCheck();
+
+    /// <summary>
+    /// Starts a background user count check if one is due.
+    /// </summary>
+    /// <returns>The running check, or <see langword="null"/> when no check was started.</returns>
+    internal Task? TryStartUserCountCheck()
+    {
+        if (_stopping.IsCancellationRequested)
+        {
+            return null;
+        }
+
         var now = timeProvider.GetUtcNow().UtcTicks;
         var last = Interlocked.Read(ref _lastUserCountCheckTicks);
 
         if (now - last < UserCountCheckInterval.Ticks)
         {
-            return;
+            return null;
+        }
+
+        if (Interlocked.CompareExchange(ref _userCountCheckInFlight, 1, 0) != 0)
+        {
+            return null;
         }
 
         if (Interlocked.CompareExchange(ref _lastUserCountCheckTicks, now, last) != last)
         {
-            return;
+            _ = Interlocked.Exchange(ref _userCountCheckInFlight, 0);
+            return null;
         }
 
-        _ = Task.Run(async () =>
+        var check = Task.Run(CheckUserCountAsync);
+        _ = Interlocked.Exchange(ref _userCountCheck, check);
+        return check;
+    }
+
+    private async Task CheckUserCountAsync()
+    {
+        long count = 0;
+        Exception? failure = null;
+
+        try
         {
-            try
-            {
-                await using var scope = scopeFactory.CreateAsyncScope();
-                var userRepository = scope.ServiceProvider.GetRequiredService<UserRepository>();
-                var count = (int)Math.Min(await userRepository.GetCountAsync(CancellationToken.None), int.MaxValue);
-                validator.ValidateQuantized(SkuIds.UM_001, count);
-            }
-#pragma warning disable CA1031
-            catch
+            var ct = _stopping.Token;
+            await using var scope = scopeFactory.CreateAsyncScope();
+            count = await scope.ServiceProvider.GetRequiredService<IUserCountProvider>()
+                .GetUserCountAsync(ct);
+
+            validator.ValidateQuantized(SkuIds.UM_001, (int)Math.Min(count, int.MaxValue));
+        }
+#pragma warning disable CA1031 // Licence enforcement is soft; a failed count must never fail user operations.
+        catch (Exception) when (_stopping.IsCancellationRequested)
+        {
+            // The validator is being disposed, so the check is abandoned without reporting a failure.
+            return;
+        }
+        catch (Exception ex)
 #pragma warning restore CA1031
-            {
-                // License validation is soft, swallow failures silently.
-                // The next throttle window will retry.
-            }
-        });
+        {
+            // No partial total is validated. The next throttle window retries.
+            failure = ex;
+        }
+        finally
+        {
+            _ = Interlocked.Exchange(ref _userCountCheckInFlight, 0);
+        }
+
+        if (failure is { } exception)
+        {
+            logger.UserCountCheckFailed(exception);
+        }
+        else
+        {
+            logger.UserCountCheckCompleted(count);
+        }
     }
 }

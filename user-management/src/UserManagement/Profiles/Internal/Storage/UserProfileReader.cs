@@ -147,8 +147,8 @@ internal sealed class UserProfileReader(IPartitionedStorageFactory partitionedSt
         {
             foreach (var attrDso in dso.Attributes)
             {
-                var name = AttributeCode.Load(attrDso.Name);
-                if (!schema.AttributeDefinitions.TryGetValue(name, out var definition))
+                if (!AttributeCode.TryCreate(attrDso.Name, out var name) ||
+                    !schema.AttributeDefinitions.TryGetValue(name, out var definition))
                 {
                     continue;
                 }

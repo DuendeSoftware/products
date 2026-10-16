@@ -24,12 +24,12 @@ internal sealed class TpmAttestationFormatValidator : IAttestationFormatValidato
         WebAuthnConstants.AuthenticatorDataLayout.HeaderLength +
         WebAuthnConstants.AuthenticatorDataLayout.AaguidLength;
 
-    private readonly Dictionary<int, ISignatureVerifier> _signatureVerifiers;
+    private readonly SignatureVerifiers _signatureVerifiers;
     private readonly TimeProvider _timeProvider;
 
-    public TpmAttestationFormatValidator(IEnumerable<ISignatureVerifier> signatureVerifiers, TimeProvider timeProvider)
+    public TpmAttestationFormatValidator(SignatureVerifiers signatureVerifiers, TimeProvider timeProvider)
     {
-        _signatureVerifiers = signatureVerifiers.ToDictionary(v => v.Algorithm);
+        _signatureVerifiers = signatureVerifiers;
         _timeProvider = timeProvider;
     }
 
@@ -109,7 +109,7 @@ internal sealed class TpmAttestationFormatValidator : IAttestationFormatValidato
 
         var alg = (int)algLong;
 
-        if (!_signatureVerifiers.TryGetValue(alg, out var verifier))
+        if (!_signatureVerifiers.TryGet(alg, out var verifier))
         {
             return ValueTask.FromResult<AttestationValidationResult>(new AttestationValidationResult.Failure(
                 AttestationValidationError.UnsupportedAlgorithm,
@@ -144,7 +144,8 @@ internal sealed class TpmAttestationFormatValidator : IAttestationFormatValidato
                 "TPM attestation 'attested.name' does not match the supplied 'pubArea'."));
         }
 
-        if (!TpmStructures.ValidatePublicKeyMatch(pubArea, context.CredentialPublicKey))
+        if (!CoseKey.TryParse([.. context.CredentialPublicKeyCbor], out var credentialPublicKey) ||
+            !TpmStructures.ValidatePublicKeyMatch(pubArea, credentialPublicKey))
         {
             return ValueTask.FromResult<AttestationValidationResult>(new AttestationValidationResult.Failure(
                 AttestationValidationError.InvalidAttestationStatement,

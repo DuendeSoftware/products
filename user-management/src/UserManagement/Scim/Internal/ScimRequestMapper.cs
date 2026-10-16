@@ -54,7 +54,7 @@ internal static class ScimRequestMapper
         // Build the attribute collection
         var collection = schema is not null
             ? new AttributeValueCollection(schema)
-            : new AttributeValueCollection(AttributeSchema.Empty);
+            : new AttributeValueCollection(AttributeSchemaFactory.Empty);
 
         var userName = request.UserName;
         if (userName is not null)

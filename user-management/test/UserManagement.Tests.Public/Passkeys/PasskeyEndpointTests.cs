@@ -153,6 +153,49 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Custom_signature_verifier_algorithm_is_offered_after_built_in_algorithms()
+    {
+        // Add a new algorithm without changing any built-in verifier.
+        _fixture.ConfigureBuilder = authentication =>
+        {
+            _ = authentication.AddPasskeySignatureVerifier<TestVerifiers.EdDsaSignatureVerifier>();
+        };
+
+        await _fixture.InitializeAsync();
+
+        // Registration requires an authenticated user.
+        var (subjectId, _) = await _fixture.SeedAuthenticatorsAsync();
+        await UserAuthenticationFixture.SignInClientAsync(_fixture.NonRedirectingClient, subjectId.ToString());
+
+        // The browser should see the new algorithm appended to the built-in order.
+        using var registrationBeginResponse =
+            await _fixture.NonRedirectingClient.PostAsync("/passkeys/register/begin", null, _ct);
+
+        registrationBeginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var registrationBeginJson = await registrationBeginResponse.Content.ReadFromJsonAsync<JsonElement>(_ct);
+
+        var advertisedAlgorithms = registrationBeginJson.GetProperty("options")
+            .GetProperty("pubKeyCredParams")
+            .EnumerateArray()
+            .Select(parameter => parameter.GetProperty("alg").GetInt32())
+            .ToArray();
+
+        advertisedAlgorithms.ShouldBe([
+            CoseAlgorithms.Es256,
+            CoseAlgorithms.Es384,
+            CoseAlgorithms.Es512,
+            CoseAlgorithms.Rs256,
+            CoseAlgorithms.Rs384,
+            CoseAlgorithms.Rs512,
+            CoseAlgorithms.Ps256,
+            CoseAlgorithms.Ps384,
+            CoseAlgorithms.Ps512,
+            CoseAlgorithms.Rs1,
+            TestVerifiers.EdDsaSignatureVerifier.EdDsaAlgorithm
+        ]);
+    }
+
+    [Fact]
     public async Task Authenticate_complete_returns_generic_error_on_failure()
     {
         await _fixture.InitializeAsync();
@@ -284,4 +327,14 @@ public class PasskeyEndpointTests(WebServerFixture webServer) : IAsyncDisposable
         content.ShouldNotContain("/passkeys/");
     }
 
+    // Registration-only verifier: advertises an algorithm but never accepts signatures.
+    private sealed class TestVerifiers
+    {
+        internal sealed class EdDsaSignatureVerifier : ISignatureVerifier
+        {
+            internal const int EdDsaAlgorithm = -8;
+            public int Algorithm => EdDsaAlgorithm;
+            public bool VerifySignature(byte[] publicKeyCbor, byte[] data, byte[]? signature) => false;
+        }
+    }
 }

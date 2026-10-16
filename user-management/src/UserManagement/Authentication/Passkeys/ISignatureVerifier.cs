@@ -1,13 +1,20 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.UserManagement.Authentication.Passkeys.Internal;
+namespace Duende.UserManagement.Authentication.Passkeys;
 
 /// <summary>
 /// Verifies cryptographic signatures for WebAuthn/Passkey authentication.
 /// Implement this interface to add support for additional COSE algorithms.
 /// </summary>
-internal interface ISignatureVerifier
+/// <remarks>
+/// Each COSE algorithm must have exactly one registered verifier.
+/// Duplicate algorithm registrations, including attempts to replace a built-in verifier,
+/// cause options validation to fail at host startup.
+/// Verifiers are resolved once and used for the lifetime of the application, so implementations
+/// must be thread-safe and should be registered as singletons.
+/// </remarks>
+public interface ISignatureVerifier
 {
     /// <summary>
     /// Gets the COSE algorithm identifier this verifier supports.
@@ -34,7 +41,11 @@ internal interface ISignatureVerifier
     /// Verifies a signature against the provided data using the COSE-encoded public key.
     /// </summary>
     /// <param name="publicKeyCbor">The COSE-encoded public key bytes.</param>
-    /// <param name="data">The signed data (authenticatorData || clientDataHash).</param>
+    /// <param name="data">
+    /// The exact signed payload, before algorithm-specific hashing.
+    /// For authentication assertions and packed attestation, this is authenticatorData || clientDataHash.
+    /// For TPM attestation, this is certInfo.
+    /// </param>
     /// <param name="signature">The signature to verify.</param>
     /// <returns>
     /// <c>true</c> if the signature is valid; otherwise, <c>false</c>.

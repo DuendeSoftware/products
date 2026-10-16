@@ -19,12 +19,12 @@ internal sealed class PackedAttestationFormatValidator : IAttestationFormatValid
         WebAuthnConstants.AuthenticatorDataLayout.HeaderLength +
         WebAuthnConstants.AuthenticatorDataLayout.AaguidLength;
 
-    private readonly Dictionary<int, ISignatureVerifier> _signatureVerifiers;
+    private readonly SignatureVerifiers _signatureVerifiers;
     private readonly TimeProvider _timeProvider;
 
-    public PackedAttestationFormatValidator(IEnumerable<ISignatureVerifier> signatureVerifiers, TimeProvider timeProvider)
+    public PackedAttestationFormatValidator(SignatureVerifiers signatureVerifiers, TimeProvider timeProvider)
     {
-        _signatureVerifiers = signatureVerifiers.ToDictionary(v => v.Algorithm);
+        _signatureVerifiers = signatureVerifiers;
         _timeProvider = timeProvider;
     }
 
@@ -80,7 +80,14 @@ internal sealed class PackedAttestationFormatValidator : IAttestationFormatValid
         AttestationContext context, int alg, byte[] sig)
     {
         // https://www.w3.org/TR/webauthn-3/#sctn-packed-attestation
-        if (alg != context.CredentialPublicKey.Algorithm)
+        if (!CoseKey.TryParse([.. context.CredentialPublicKeyCbor], out var credentialPublicKey))
+        {
+            return new AttestationValidationResult.Failure(
+                AttestationValidationError.InvalidAttestationStatement,
+                "Credential public key is invalid.");
+        }
+
+        if (alg != credentialPublicKey.Algorithm)
         {
             return new AttestationValidationResult.Failure(
                 AttestationValidationError.AlgorithmMismatch,
@@ -89,14 +96,14 @@ internal sealed class PackedAttestationFormatValidator : IAttestationFormatValid
 
         var signedData = WebAuthnCrypto.CombineBytes([.. context.AuthData], [.. context.ClientDataHash]);
 
-        if (!_signatureVerifiers.TryGetValue(alg, out var verifier))
+        if (!_signatureVerifiers.TryGet(alg, out var verifier))
         {
             return new AttestationValidationResult.Failure(
                 AttestationValidationError.UnsupportedAlgorithm,
                 $"Unsupported algorithm {alg} for self-attestation signature verification.");
         }
 
-        if (!verifier.VerifySignature([.. context.CredentialPublicKey.RawCbor], signedData, sig))
+        if (!verifier.VerifySignature([.. context.CredentialPublicKeyCbor], signedData, sig))
         {
             return new AttestationValidationResult.Failure(
                 AttestationValidationError.SignatureVerificationFailed,
@@ -148,7 +155,7 @@ internal sealed class PackedAttestationFormatValidator : IAttestationFormatValid
 
             var signedData = WebAuthnCrypto.CombineBytes([.. context.AuthData], [.. context.ClientDataHash]);
 
-            if (!_signatureVerifiers.TryGetValue(alg, out var verifier))
+            if (!_signatureVerifiers.TryGet(alg, out var verifier))
             {
                 return new AttestationValidationResult.Failure(
                     AttestationValidationError.UnsupportedAlgorithm,

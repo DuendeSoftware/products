@@ -56,17 +56,23 @@ internal sealed class UserAuthenticationModule : IDuendeModule
         _ = services.AddTransient<PasswordHashAlgorithms>();
 
         // 3. Register passkey services
-        // Signature verifiers are registered in order of preference.
-        _ = services.AddSingleton<ISignatureVerifier, Es256SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Es384SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Es512SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Rs256SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Rs384SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Rs512SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Ps256SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Ps384SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Ps512SignatureVerifier>();
-        _ = services.AddSingleton<ISignatureVerifier, Rs1SignatureVerifier>();
+        // Built-in verifiers in preference order. SignatureVerifiers appends verifiers registered by the
+        // application, so built-ins are always advertised first regardless of DI registration order.
+        _ = services.AddSingleton(new BuiltInSignatureVerifiers([
+            new Es256SignatureVerifier(),
+            new Es384SignatureVerifier(),
+            new Es512SignatureVerifier(),
+            new Rs256SignatureVerifier(),
+            new Rs384SignatureVerifier(),
+            new Rs512SignatureVerifier(),
+            new Ps256SignatureVerifier(),
+            new Ps384SignatureVerifier(),
+            new Ps512SignatureVerifier(),
+            new Rs1SignatureVerifier()
+        ]));
+        // Singleton, so startup validation and every ceremony use the same, validated set of verifiers.
+        _ = services.AddSingleton<SignatureVerifiers>();
+
         _ = services.AddTransient<IPasskeyCeremonies, PasskeyCeremonies>();
         _ = services.AddTransient<WebAuthnAuthenticationCeremony>();
         _ = services.AddTransient<WebAuthnRegistrationCeremony>();
@@ -98,7 +104,8 @@ internal sealed class UserAuthenticationModule : IDuendeModule
         _ = services.AddScoped<IPasskeyAuthenticationChallengeStore, PasskeyAuthenticationChallengeRepository>();
 
         // 9. Register options
-        _ = services.AddOptions<UserAuthenticationOptions>();
+        _ = services.AddOptions<UserAuthenticationOptions>()
+            .ValidateOnStart();
         _ = services.AddSingleton<IValidateOptions<UserAuthenticationOptions>, UserAuthenticationOptionsValidator>();
         _ = services.AddOptions<UserAuthenticatorsRepository.Options>()
             .Configure<IOptions<UserAuthenticationOptions>>((o, root) =>

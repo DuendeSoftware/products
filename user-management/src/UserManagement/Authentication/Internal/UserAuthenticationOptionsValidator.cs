@@ -1,12 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.UserManagement.Authentication.Passkeys;
+using Duende.UserManagement.Authentication.Passkeys.Internal;
 using Microsoft.Extensions.Options;
 
 namespace Duende.UserManagement.Authentication.Internal;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class UserAuthenticationOptionsValidator : IValidateOptions<UserAuthenticationOptions>
+internal sealed class UserAuthenticationOptionsValidator(
+    SignatureVerifiers signatureVerifiers,
+    IEnumerable<IAttestationFormatValidator> attestationFormatValidators)
+    : IValidateOptions<UserAuthenticationOptions>
 {
     public ValidateOptionsResult Validate(string? name, UserAuthenticationOptions options)
     {
@@ -56,6 +61,32 @@ internal sealed class UserAuthenticationOptionsValidator : IValidateOptions<User
                 {
                     failures.Add($"Throttling.EscalatingThrottleDurations[{i}] must be positive, but was {durations[i]}.");
                 }
+            }
+        }
+
+        // Passkey options
+        var passkeys = options.Passkeys;
+        if (passkeys.ChallengeSize < WebAuthnConstants.MinimumChallengeSize)
+        {
+            failures.Add($"Passkeys.ChallengeSize must be >= {WebAuthnConstants.MinimumChallengeSize}, but was {passkeys.ChallengeSize}.");
+        }
+
+        foreach (var group in signatureVerifiers.All.GroupBy(verifier => verifier.Algorithm).Where(group => group.Count() > 1))
+        {
+            failures.Add($"Multiple passkey signature verifiers are registered for COSE algorithm '{group.Key}'.");
+        }
+
+        var attestationFormats = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var validator in attestationFormatValidators)
+        {
+            var format = validator.Format;
+            if (string.IsNullOrWhiteSpace(format))
+            {
+                failures.Add($"Passkey attestation validator '{validator.GetType().FullName}' must have a non-empty Format.");
+            }
+            else if (!attestationFormats.Add(format))
+            {
+                failures.Add($"Multiple passkey attestation validators are registered for format '{format}'.");
             }
         }
 

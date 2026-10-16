@@ -85,8 +85,7 @@ public sealed class PasskeyRegistration : IAsyncLifetime
     }
 
     [Theory]
-    [InlineData(15)]
-    [InlineData(16)]
+    [InlineData(WebAuthnConstants.MinimumChallengeSize)]
     [InlineData(32)]
     [InlineData(64)]
     public async Task Challenge_size_should_be_configurable(int challengeSize)
@@ -96,14 +95,6 @@ public sealed class PasskeyRegistration : IAsyncLifetime
 
         var passkeyAuth = serviceProvider.GetRequiredService<IPasskeyCeremonies>();
         var userSubjectId = UserSubjectId.New();
-
-        if (challengeSize < 16)
-        {
-            _ = await Should.ThrowAsync<ArgumentOutOfRangeException>(() =>
-                passkeyAuth.BeginRegistrationAsync(userSubjectId, "user@example.com", "Test User", _ct));
-
-            return;
-        }
 
         var result = await passkeyAuth.BeginRegistrationAsync(
             userSubjectId, "user@example.com", "Test User", _ct);
