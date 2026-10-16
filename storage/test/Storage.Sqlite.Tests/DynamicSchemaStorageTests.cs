@@ -259,6 +259,37 @@ public sealed class DynamicSchemaStorageTests
     }
 
     [Fact]
+    public async Task Attribute_definitions_and_groups_from_GetAsync_can_be_mutated_and_saved()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await CreateFixtureAsync(ct);
+        var admin = fixture.ServiceProvider.GetRequiredService<ISchemaAdmin>();
+        var schemaId = SchemaId.Create("mutable-schema");
+        (await admin.CreateAsync(ValidSchema(schemaId.Value), ct)).IsSuccess.ShouldBeTrue();
+
+        var read = await admin.GetAsync(schemaId, ct);
+        read.Found.ShouldBeTrue();
+        var schema = read.Item!;
+
+        schema.AttributeDefinitions.Add(new AttributeDefinition
+        {
+            Code = AttributeCode.Create("second_attribute"),
+            AttributeType = new ScalarAttributeType(ScalarDataType.String),
+        });
+        schema.Groups.Add(new AttributeGroup(AttributeGroupCode.Create("extra"), null, null, Order: 1));
+
+        (await admin.UpdateAsync(schemaId, schema, read.Version!.Value, ct)).IsSuccess.ShouldBeTrue();
+
+        var updated = await admin.GetAsync(schemaId, ct);
+        updated.Found.ShouldBeTrue();
+        updated.Item!.AttributeDefinitions.Select(a => a.Code.Value).ShouldBe(["nickname", "second_attribute"], ignoreOrder: true);
+        updated.Item.Groups.Select(g => g.Code.Value).ShouldBe(["general", "extra"], ignoreOrder: true);
+
+        var query = await admin.QueryAsync(ct);
+        query.Items.Single(i => i.SchemaId == schemaId).AttributeCount.ShouldBe(2);
+    }
+
+    [Fact]
     public async Task Query_returns_every_schema_when_there_are_more_than_one_storage_page()
     {
         var ct = TestContext.Current.CancellationToken;

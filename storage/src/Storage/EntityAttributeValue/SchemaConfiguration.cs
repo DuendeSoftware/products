@@ -26,14 +26,24 @@ public sealed class SchemaConfiguration
     public string? Description { get; set; }
 
     /// <summary>
-    ///     The attribute definitions in this schema.
+    ///     The attribute definitions in this schema. Always a mutable collection: the assigned
+    ///     values are copied, so callers can add or remove definitions even when an array was assigned.
     /// </summary>
-    public ICollection<AttributeDefinition> AttributeDefinitions { get; init; } = [];
+    public ICollection<AttributeDefinition> AttributeDefinitions
+    {
+        get;
+        init => field = [.. value];
+    } = [];
 
     /// <summary>
-    ///     The attribute groups in this schema.
+    ///     The attribute groups in this schema. Always a mutable collection: the assigned
+    ///     values are copied, so callers can add or remove groups even when an array was assigned.
     /// </summary>
-    public ICollection<AttributeGroup> Groups { get; init; } = [];
+    public ICollection<AttributeGroup> Groups
+    {
+        get;
+        init => field = [.. value];
+    } = [];
 
     /// <summary>
     ///     The data version for optimistic concurrency. <c>null</c> for new schemas.
