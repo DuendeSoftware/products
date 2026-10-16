@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.PostgreSql.Internal;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +35,7 @@ public static class PostgreSqlStorageEngineServiceCollectionExtensions
             builder.MarkProviderSelected("PostgreSQL");
 
             var services = builder.Services;
-            _ = services.AddStore<PostgreSqlStorageEngine>(builder.StorageInstanceId);
+            _ = services.AddStore<PostgreSqlStorageEngine>(builder.StorageInstanceId, StorageTelemetryConstants.DatabaseProviders.PostgreSql);
             _ = services.AddKeyedTransient<PostgreSqlStorageEngine>(builder.StorageInstanceId, (sp, _) =>
             {
                 var dataSource = ResolveDataSource(resolver, sp, builder.StorageInstanceId);

@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +23,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.Storage.Oracle.Tests" />
-    <InternalsVisibleTo Include="Duende.Platform.Storage.Oracle" />
   </ItemGroup>
 
 </Project>

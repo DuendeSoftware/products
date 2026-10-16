@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.Oracle;
 
 namespace Duende.Storage.IntegrationTests;
@@ -129,4 +130,12 @@ public partial class SystemTimestampQueryTests(AspireFixture fixture)
 public partial class StorageWireupTests(AspireFixture fixture)
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new OracleStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("OracleIntegration")]
+public partial class InstrumentedStorageEngineWiringTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new OracleStorageEngineFixtureFactory(fixture);
+
+    private static string ExpectedDbSystem => StorageTelemetryConstants.DatabaseProviders.Oracle;
 }

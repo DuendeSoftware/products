@@ -13,7 +13,7 @@ namespace Duende.Storage.Internal.Outbox;
 /// with retry/backoff semantics. Holds no dependency on any product-specific type; the
 /// caller supplies the storage key and processing knobs through <see cref="OutboxProcessorOptions"/>.
 /// </summary>
-internal sealed class OutboxProcessor(
+public sealed class OutboxProcessor(
     ICrossPartitionStorageFactory crossPartitionStorageFactory,
     IStorageInstanceRouter storageInstanceRouter,
     IEnumerable<IOutboxSubscription> subscriptions,
@@ -38,7 +38,7 @@ internal sealed class OutboxProcessor(
     /// Runs a single pass over all enabled subscriptions: fetches a batch, dispatches to the
     /// keyed handler, applies the Success/Retry/Drop outcome, and deletes processed events.
     /// </summary>
-    internal async Task RunProcessorAsync(Ct ct)
+    public async Task RunProcessorAsync(Ct ct)
     {
         foreach (var subscription in subscriptions)
         {

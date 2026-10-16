@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
@@ -25,18 +26,7 @@
     <InternalsVisibleTo Include="Duende.Storage.Oracle.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.Benchmarks" />
-    <InternalsVisibleTo Include="Duende.IdentityServer" />
-    <InternalsVisibleTo Include="IdentityServer.UnitTests" />
-    <InternalsVisibleTo Include="IdentityServer.IntegrationTests" />
-    <InternalsVisibleTo Include="Duende.Platform" />
-    <InternalsVisibleTo Include="Storage" />
-    <InternalsVisibleTo Include="Authentication.Tests.Internal" />
     <InternalsVisibleTo Include="Duende.Storage.Samples.EavSchema" />
-    <InternalsVisibleTo Include="Duende.Spaces" />
-    <InternalsVisibleTo Include="Duende.Spaces.Tests" />
-    <InternalsVisibleTo Include="Duende.UserManagement" />
-    <InternalsVisibleTo Include="Duende.UserManagement.Tests.Internal" />
-    <InternalsVisibleTo Include="Duende.UserManagement.Tests.Public" />
   </ItemGroup>
 
   <ItemGroup>

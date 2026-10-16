@@ -5,6 +5,7 @@ using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Duende.Storage.EntityAttributeValue.Internal;
 
@@ -17,16 +18,16 @@ namespace Duende.Storage.EntityAttributeValue.Internal;
 public static class SchemaServiceCollectionExtensions
 {
     /// <summary>
-    ///     Registers <see cref="StorageSchemaAdmin"/> as both <see cref="ISchemaStore"/> and
-    ///     <see cref="ISchemaAdmin"/> in the service collection, including DSO registration.
+    ///     Registers the storage-backed <see cref="ISchemaStore"/> (<see cref="StorageSchemaStore"/>) and
+    ///     <see cref="ISchemaAdmin"/> (<see cref="StorageSchemaAdmin"/>) in the service collection, including DSO registration.
     /// </summary>
     /// <param name="services">The service collection to register with.</param>
     public static void AddDynamicSchemaStorage(this IServiceCollection services) =>
         RegisterDynamicSchemaStorage(services, StorageInstanceId.Default);
 
     /// <summary>
-    ///     Registers <see cref="StorageSchemaAdmin"/> as both <see cref="ISchemaStore"/> and
-    ///     <see cref="ISchemaAdmin"/> in the service collection, including DSO registration, using
+    ///     Registers the storage-backed <see cref="ISchemaStore"/> (<see cref="StorageSchemaStore"/>) and
+    ///     <see cref="ISchemaAdmin"/> (<see cref="StorageSchemaAdmin"/>) in the service collection, including DSO registration, using
     ///     the supplied <paramref name="storageInstanceId"/> to select the underlying storage instance.
     /// </summary>
     /// <param name="services">The service collection to register with.</param>
@@ -64,7 +65,8 @@ public static class SchemaServiceCollectionExtensions
         storageInstanceRouter.AddMapping(DataCategoryName.DynamicSchemas, storageInstanceId);
 
         services.AddDsoRegistration<AttributeSchemaDso.V1>();
-        _ = services.AddTransient<ISchemaStore, StorageSchemaAdmin>();
+        services.TryAddTransient<AttributeSchemaRepository>();
+        _ = services.AddTransient<ISchemaStore, StorageSchemaStore>();
         _ = services.AddTransient<ISchemaAdmin, StorageSchemaAdmin>();
     }
 }

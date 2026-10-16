@@ -62,6 +62,9 @@ public static class StorageTelemetryConstants
         /// <summary>Microsoft SQL Server.</summary>
         public const string MsSql = "mssql";
 
+        /// <summary>Oracle.</summary>
+        public const string Oracle = "oracle";
+
         /// <summary>PostgreSQL.</summary>
         public const string PostgreSql = "postgresql";
 

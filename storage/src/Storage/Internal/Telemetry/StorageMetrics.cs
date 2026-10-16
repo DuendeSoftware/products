@@ -11,22 +11,22 @@ namespace Duende.Storage.Internal.Telemetry;
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-internal sealed class StorageMetrics : IDisposable
+internal sealed class StorageMetrics
 {
-    private readonly Meter _meter;
     private readonly Counter<long> _operationCounter;
     private readonly Histogram<double> _operationDuration;
 
     /// <summary>
     /// Initializes a new instance of <see cref="StorageMetrics"/>.
     /// </summary>
-    public StorageMetrics()
+    /// <param name="meterFactory">The factory that creates and owns the meter.</param>
+    public StorageMetrics(IMeterFactory meterFactory)
     {
-        _meter = new Meter(StorageTelemetryConstants.MeterName, StorageTracing.ServiceVersion);
-        _operationCounter = _meter.CreateCounter<long>(
+        var meter = meterFactory.Create(new MeterOptions(StorageTelemetryConstants.MeterName) { Version = StorageTracing.ServiceVersion });
+        _operationCounter = meter.CreateCounter<long>(
             StorageTelemetryConstants.Instruments.OperationCount,
             description: "Number of storage operations executed.");
-        _operationDuration = _meter.CreateHistogram<double>(
+        _operationDuration = meter.CreateHistogram<double>(
             StorageTelemetryConstants.Instruments.OperationDuration,
             unit: "s",
             description: "Duration of storage operations in seconds.");
@@ -111,7 +111,4 @@ internal sealed class StorageMetrics : IDisposable
                 new(StorageTelemetryConstants.Tags.Result, result));
         }
     }
-
-    /// <inheritdoc />
-    public void Dispose() => _meter.Dispose();
 }

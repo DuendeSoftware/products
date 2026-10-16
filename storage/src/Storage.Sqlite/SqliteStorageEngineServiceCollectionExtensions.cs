@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite.Internal;
 using Microsoft.Data.Sqlite;
@@ -32,7 +33,7 @@ public static class SqliteStorageEngineServiceCollectionExtensions
 
             var services = builder.Services;
             var options = BuildOptions(configure);
-            _ = services.AddStore<SqliteStorageEngine>(builder.StorageInstanceId);
+            _ = services.AddStore<SqliteStorageEngine>(builder.StorageInstanceId, StorageTelemetryConstants.DatabaseProviders.Sqlite);
             _ = services.AddKeyedSingleton<SqliteConnection>(builder.StorageInstanceId, (_, _) =>
             {
                 var connection = new SqliteConnection(options.ConnectionString);

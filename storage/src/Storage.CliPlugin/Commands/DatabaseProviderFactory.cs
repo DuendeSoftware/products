@@ -3,6 +3,7 @@
 
 using Duende.Storage.Internal;
 using Duende.Storage.MsSql;
+using Duende.Storage.Oracle;
 using Duende.Storage.PostgreSql;
 using Duende.Storage.Sqlite;
 using Microsoft.Data.SqlClient;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Duende.Storage.CliPlugin.Commands;
 
@@ -38,6 +40,17 @@ internal static class DatabaseProviderFactory
             case "mssql":
                 _ = services.AddSingleton<CreateSqlConnection>(() => new SqlConnection(connectionString));
                 _ = services.AddStorageInternal(storage => storage.AddMsSql(options =>
+                {
+                    if (schemaName is not null)
+                    {
+                        options.SchemaName = schemaName;
+                    }
+                }));
+                break;
+
+            case "oracle":
+                _ = services.AddSingleton<CreateOracleConnection>(() => new OracleConnection(connectionString));
+                _ = services.AddStorageInternal(storage => storage.AddOracle(options =>
                 {
                     if (schemaName is not null)
                     {

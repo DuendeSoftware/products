@@ -12,6 +12,7 @@ public sealed class DatabaseProviderFactoryTests
     [InlineData("postgresql")]
     [InlineData("mssql")]
     [InlineData("sqlite")]
+    [InlineData("oracle")]
     public async Task Factory_resolves_database_schema_for_provider(string provider)
     {
         var connectionString = provider == "sqlite"

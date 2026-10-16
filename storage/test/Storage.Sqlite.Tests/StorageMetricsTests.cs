@@ -3,42 +3,36 @@
 
 using System.Diagnostics.Metrics;
 using Duende.Storage.Internal.Telemetry;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 
 namespace Duende.Storage.Sqlite;
 
-public class StorageMetricsTests : IDisposable
+public sealed class StorageMetricsTests : IDisposable
 {
-    private readonly StorageMetrics _metrics = new();
-    private readonly MeterListener _listener;
-    private readonly List<(string Name, object? Value, KeyValuePair<string, object?>[] Tags)> _recordedMetrics = [];
+    private readonly ServiceProvider _provider;
+    private readonly StorageMetrics _metrics;
+    private readonly MetricCollector<long> _counts;
+    private readonly MetricCollector<double> _durations;
 
     public StorageMetricsTests()
     {
-        _listener = new MeterListener();
-        _listener.InstrumentPublished = (instrument, listener) =>
-        {
-            if (instrument.Meter.Name == StorageTelemetryConstants.MeterName)
-            {
-                listener.EnableMeasurementEvents(instrument);
-            }
-        };
-        _listener.SetMeasurementEventCallback<long>(OnMeasurement);
-        _listener.SetMeasurementEventCallback<double>(OnMeasurementDouble);
-        _listener.Start();
+        _provider = new ServiceCollection().AddMetrics().BuildServiceProvider();
+        var meterFactory = _provider.GetRequiredService<IMeterFactory>();
+        _metrics = new StorageMetrics(meterFactory);
+        _counts = new MetricCollector<long>(meterFactory, StorageTelemetryConstants.MeterName, StorageTelemetryConstants.Instruments.OperationCount);
+        _durations = new MetricCollector<double>(meterFactory, StorageTelemetryConstants.MeterName, StorageTelemetryConstants.Instruments.OperationDuration);
     }
-
-    private void OnMeasurement(Instrument instrument, long measurement, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state) =>
-        _recordedMetrics.Add((instrument.Name, measurement, tags.ToArray()));
-
-    private void OnMeasurementDouble(Instrument instrument, double measurement, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state) =>
-        _recordedMetrics.Add((instrument.Name, measurement, tags.ToArray()));
 
     public void Dispose()
     {
-        _listener.Dispose();
-        _metrics.Dispose();
-        GC.SuppressFinalize(this);
+        _counts.Dispose();
+        _durations.Dispose();
+        _provider.Dispose();
     }
+
+    private static bool HasTag<T>(CollectedMeasurement<T> measurement, string key, string value) where T : struct =>
+        measurement.Tags.TryGetValue(key, out var actual) && (string?)actual == value;
 
     [Fact]
     public void meter_name_should_be_correct() =>
@@ -66,13 +60,12 @@ public class StorageMetricsTests : IDisposable
     {
         _metrics.RecordSuccess("create", "mssql", "client");
 
-        _recordedMetrics.ShouldContain(m =>
-            m.Name == StorageTelemetryConstants.Instruments.OperationCount &&
-            (long)m.Value! == 1 &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Operation && (string?)t.Value == "create") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.DbSystem && (string?)t.Value == "mssql") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.EntityType && (string?)t.Value == "client") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Result && (string?)t.Value == "success"));
+        _counts.GetMeasurementSnapshot().ShouldContain(m =>
+            m.Value == 1 &&
+            HasTag(m, StorageTelemetryConstants.Tags.Operation, "create") &&
+            HasTag(m, StorageTelemetryConstants.Tags.DbSystem, "mssql") &&
+            HasTag(m, StorageTelemetryConstants.Tags.EntityType, "client") &&
+            HasTag(m, StorageTelemetryConstants.Tags.Result, "success"));
     }
 
     [Fact]
@@ -80,13 +73,12 @@ public class StorageMetricsTests : IDisposable
     {
         _metrics.RecordSuccess("read", "postgresql", null);
 
-        _recordedMetrics.ShouldContain(m =>
-            m.Name == StorageTelemetryConstants.Instruments.OperationCount &&
-            (long)m.Value! == 1 &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Operation && (string?)t.Value == "read") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.DbSystem && (string?)t.Value == "postgresql") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Result && (string?)t.Value == "success") &&
-            !m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.EntityType));
+        _counts.GetMeasurementSnapshot().ShouldContain(m =>
+            m.Value == 1 &&
+            HasTag(m, StorageTelemetryConstants.Tags.Operation, "read") &&
+            HasTag(m, StorageTelemetryConstants.Tags.DbSystem, "postgresql") &&
+            HasTag(m, StorageTelemetryConstants.Tags.Result, "success") &&
+            !m.Tags.ContainsKey(StorageTelemetryConstants.Tags.EntityType));
     }
 
     [Fact]
@@ -96,14 +88,13 @@ public class StorageMetricsTests : IDisposable
 
         _metrics.RecordError("update", "sqlite", exception, "session");
 
-        _recordedMetrics.ShouldContain(m =>
-            m.Name == StorageTelemetryConstants.Instruments.OperationCount &&
-            (long)m.Value! == 1 &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Operation && (string?)t.Value == "update") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.DbSystem && (string?)t.Value == "sqlite") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.EntityType && (string?)t.Value == "session") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Result && (string?)t.Value == "error") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.ErrorType && (string?)t.Value == "InvalidOperationException"));
+        _counts.GetMeasurementSnapshot().ShouldContain(m =>
+            m.Value == 1 &&
+            HasTag(m, StorageTelemetryConstants.Tags.Operation, "update") &&
+            HasTag(m, StorageTelemetryConstants.Tags.DbSystem, "sqlite") &&
+            HasTag(m, StorageTelemetryConstants.Tags.EntityType, "session") &&
+            HasTag(m, StorageTelemetryConstants.Tags.Result, "error") &&
+            HasTag(m, StorageTelemetryConstants.Tags.ErrorType, "InvalidOperationException"));
     }
 
     [Fact]
@@ -113,12 +104,11 @@ public class StorageMetricsTests : IDisposable
 
         _metrics.RecordError("delete", "in_memory", exception, null);
 
-        _recordedMetrics.ShouldContain(m =>
-            m.Name == StorageTelemetryConstants.Instruments.OperationCount &&
-            (long)m.Value! == 1 &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Result && (string?)t.Value == "error") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.ErrorType && (string?)t.Value == "TimeoutException")
-            && m.Tags.All(t => t.Key != StorageTelemetryConstants.Tags.EntityType));
+        _counts.GetMeasurementSnapshot().ShouldContain(m =>
+            m.Value == 1 &&
+            HasTag(m, StorageTelemetryConstants.Tags.Result, "error") &&
+            HasTag(m, StorageTelemetryConstants.Tags.ErrorType, "TimeoutException")
+            && !m.Tags.ContainsKey(StorageTelemetryConstants.Tags.EntityType));
     }
 
     [Fact]
@@ -126,13 +116,12 @@ public class StorageMetricsTests : IDisposable
     {
         _metrics.RecordDuration("query", 1.234, "postgresql", "success", "token");
 
-        _recordedMetrics.ShouldContain(m =>
-            m.Name == StorageTelemetryConstants.Instruments.OperationDuration &&
-            (double)m.Value! == 1.234 &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Operation && (string?)t.Value == "query") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.DbSystem && (string?)t.Value == "postgresql") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.EntityType && (string?)t.Value == "token") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Result && (string?)t.Value == "success"));
+        _durations.GetMeasurementSnapshot().ShouldContain(m =>
+            m.Value == 1.234 &&
+            HasTag(m, StorageTelemetryConstants.Tags.Operation, "query") &&
+            HasTag(m, StorageTelemetryConstants.Tags.DbSystem, "postgresql") &&
+            HasTag(m, StorageTelemetryConstants.Tags.EntityType, "token") &&
+            HasTag(m, StorageTelemetryConstants.Tags.Result, "success"));
     }
 
     [Fact]
@@ -140,12 +129,11 @@ public class StorageMetricsTests : IDisposable
     {
         _metrics.RecordDuration("batch", 0.567, "mssql", "error", null);
 
-        _recordedMetrics.ShouldContain(m =>
-            m.Name == StorageTelemetryConstants.Instruments.OperationDuration &&
-            (double)m.Value! == 0.567 &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Operation && (string?)t.Value == "batch") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.DbSystem && (string?)t.Value == "mssql") &&
-            m.Tags.Any(t => t.Key == StorageTelemetryConstants.Tags.Result && (string?)t.Value == "error")
-            && m.Tags.All(t => t.Key != StorageTelemetryConstants.Tags.EntityType));
+        _durations.GetMeasurementSnapshot().ShouldContain(m =>
+            m.Value == 0.567 &&
+            HasTag(m, StorageTelemetryConstants.Tags.Operation, "batch") &&
+            HasTag(m, StorageTelemetryConstants.Tags.DbSystem, "mssql") &&
+            HasTag(m, StorageTelemetryConstants.Tags.Result, "error")
+            && !m.Tags.ContainsKey(StorageTelemetryConstants.Tags.EntityType));
     }
 }

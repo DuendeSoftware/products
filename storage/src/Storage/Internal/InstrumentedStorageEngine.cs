@@ -14,24 +14,15 @@ using Duende.Storage.Querying;
 
 namespace Duende.Storage.Internal;
 
-internal interface IPartitionedAndCrossPartitionStorage : ICrossPartitionStorage, IPartitionedStorage
-{
-
-}
-
 /// <summary>
-/// Decorates an <see cref="IPartitionedStorage"/> with tracing and metrics instrumentation.
+/// Decorates an <see cref="IPartitionedStorage"/> and <see cref="ICrossPartitionStorage"/> with tracing and metrics instrumentation.
 /// </summary>
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-internal sealed class InstrumentedStorageEngine(IPartitionedAndCrossPartitionStorage inner, StorageMetrics metrics, string dbSystem) : IPartitionedStorage, ICrossPartitionStorage
+internal sealed class InstrumentedStorageEngine<TInner>(TInner inner, StorageMetrics metrics, string dbSystem) : IPartitionedStorage, ICrossPartitionStorage
+    where TInner : IPartitionedStorage, ICrossPartitionStorage
 {
-    /// <summary>
-    /// Gets the inner store being decorated.
-    /// </summary>
-    public IPartitionedAndCrossPartitionStorage Inner => inner;
-
     /// <inheritdoc />
     public void SetPoolId(PoolId poolId) => inner.SetPoolId(poolId);
 

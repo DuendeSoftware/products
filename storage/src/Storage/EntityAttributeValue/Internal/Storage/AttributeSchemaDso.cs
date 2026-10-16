@@ -19,9 +19,20 @@ internal static class AttributeSchemaDso
     /// <summary>
     /// Version 1 of the attribute schema data storage object.
     /// </summary>
+    /// <remarks>
+    /// Rows saved by pre-release builds don't have a <c>SchemaId</c>, so it deserializes as null for them.
+    /// </remarks>
+    /// <param name="SchemaId">The schema id. Always set on save; null only for rows saved by earlier versions.</param>
+    /// <param name="DisplayName">The optional display name.</param>
+    /// <param name="Description">The optional description.</param>
     /// <param name="AttributeDefinitions">The attribute definitions.</param>
     /// <param name="Groups">The attribute groups.</param>
-    public sealed record V1(ICollection<AttributeDefinitionDso.V1> AttributeDefinitions, ICollection<AttributeGroupDso.V1> Groups) : IDataStorageObject
+    public sealed record V1(
+        string? SchemaId,
+        string? DisplayName,
+        string? Description,
+        ICollection<AttributeDefinitionDso.V1> AttributeDefinitions,
+        ICollection<AttributeGroupDso.V1> Groups) : IDataStorageObject
     {
         /// <summary>Gets the data storage object version descriptor.</summary>
         public static DataStorageObjectVersion DsoVersion { get; } = new(EntityType, 1);

@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
-    <InternalsVisibleTo Include="Duende.Platform.Storage.PostgreSql" />
   </ItemGroup>
 
 </Project>

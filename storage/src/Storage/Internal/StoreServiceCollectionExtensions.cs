@@ -3,6 +3,7 @@
 
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Outbox;
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,11 +17,13 @@ internal static class StoreServiceCollectionExtensions
         /// <summary>
         /// Registers store services with a specific service key for multi-store scenarios.
         /// </summary>
-        internal IServiceCollection AddStore<TStoreBase>(StorageInstanceId storageInstanceId)
+        internal IServiceCollection AddStore<TStoreBase>(StorageInstanceId storageInstanceId, string dbSystem)
             where TStoreBase : class, IPartitionedStorage, IStorageInstanceSchema, ICrossPartitionStorage
         {
             services.GetOrAddStorageInstanceRouter().RegisterInstance(storageInstanceId);
 
+            _ = services.AddMetrics();
+            services.TryAddSingleton<StorageMetrics>();
             services.TryAddSingleton<TimeProvider>(_ => TimeProvider.System);
             services.TryAddSingleton<DataStorageTypeRegistry>();
             // Options pattern: ConfigureOutboxProcessor() callers and the host supplying the
@@ -33,12 +36,16 @@ internal static class StoreServiceCollectionExtensions
             services.TryAddSingleton<OutboxProcessor>();
 
             _ = services.AddKeyedTransient<IPartitionedStorage>(storageInstanceId,
-                (sp, _) => sp.GetRequiredKeyedService<TStoreBase>(storageInstanceId));
+                (sp, _) => Instrument<TStoreBase>(sp, storageInstanceId, dbSystem));
             _ = services.AddKeyedTransient<IStorageInstanceSchema>(storageInstanceId,
                 (sp, _) => sp.GetRequiredKeyedService<TStoreBase>(storageInstanceId));
             _ = services.AddKeyedTransient<ICrossPartitionStorage>
-                (storageInstanceId, (sp, _) => sp.GetRequiredKeyedService<TStoreBase>(storageInstanceId));
+                (storageInstanceId, (sp, _) => Instrument<TStoreBase>(sp, storageInstanceId, dbSystem));
             return services;
         }
     }
+
+    private static InstrumentedStorageEngine<TStoreBase> Instrument<TStoreBase>(IServiceProvider sp, StorageInstanceId storageInstanceId, string dbSystem)
+        where TStoreBase : class, IPartitionedStorage, ICrossPartitionStorage =>
+        new(sp.GetRequiredKeyedService<TStoreBase>(storageInstanceId), sp.GetRequiredService<StorageMetrics>(), dbSystem);
 }

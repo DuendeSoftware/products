@@ -58,8 +58,8 @@ internal sealed class SqliteMigrationFixture(
             }
             catch (SqliteException ex) when (ex.Message.Contains("duplicate column name", StringComparison.OrdinalIgnoreCase))
             {
-                // Column already exists — idempotent ADD COLUMN is not natively
-                // supported in SQLite, so we swallow this specific error.
+                // Column already exists (idempotent ADD COLUMN is not natively
+                // supported in SQLite), so we swallow this specific error.
             }
         }
     }

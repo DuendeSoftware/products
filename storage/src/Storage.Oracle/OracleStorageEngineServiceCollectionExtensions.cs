@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.Oracle.Internal;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +42,7 @@ public static class OracleStorageEngineServiceCollectionExtensions
             builder.MarkProviderSelected("Oracle");
 
             var services = builder.Services;
-            _ = services.AddStore<OracleStorageEngine>(builder.StorageInstanceId);
+            _ = services.AddStore<OracleStorageEngine>(builder.StorageInstanceId, StorageTelemetryConstants.DatabaseProviders.Oracle);
             _ = services.AddKeyedTransient<OracleStorageEngine>(builder.StorageInstanceId, (sp, _) =>
             {
                 var createConnection = ResolveCreateConnection(resolver, sp, builder.StorageInstanceId);

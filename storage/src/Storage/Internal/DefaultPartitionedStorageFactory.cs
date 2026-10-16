@@ -12,9 +12,10 @@ namespace Duende.Storage.Internal;
 /// </summary>
 /// <param name="services">The service provider used to resolve keyed storage engines.</param>
 /// <param name="storageInstanceRouter">Resolves the storage instance for a given category.</param>
-internal class DefaultPartitionedStorageFactory(IServiceProvider services, IStorageInstanceRouter storageInstanceRouter)
+public sealed class DefaultPartitionedStorageFactory(IServiceProvider services, IStorageInstanceRouter storageInstanceRouter)
     : IPartitionedStorageFactory
 {
+    /// <inheritdoc />
     public Task<IPartitionedStorage> GetPartitionedStorageAsync(DataCategoryName dataCategory, Ct ct) =>
         Task.FromResult(GetPartitionedStorage(dataCategory, PoolId.Default));
 
@@ -30,7 +31,7 @@ internal class DefaultPartitionedStorageFactory(IServiceProvider services, IStor
     /// <param name="dataCategory">The data category to resolve a storage instance for.</param>
     /// <param name="poolId">The pool the returned storage should be scoped to.</param>
     /// <returns>An <see cref="IPartitionedStorage"/> scoped to <paramref name="poolId"/>.</returns>
-    internal IPartitionedStorage GetPartitionedStorage(DataCategoryName dataCategory, PoolId poolId)
+    public IPartitionedStorage GetPartitionedStorage(DataCategoryName dataCategory, PoolId poolId)
     {
         var storageInstanceId = storageInstanceRouter.Resolve(dataCategory);
         var storage = services.GetKeyedService<IPartitionedStorage>(storageInstanceId) ??

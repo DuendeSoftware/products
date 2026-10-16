@@ -16,7 +16,7 @@ namespace Duende.Storage.EntityAttributeValue.Internal.Storage;
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-internal sealed class AttributeTypeResolver : IQueryAttributeTypeResolver
+public sealed class AttributeTypeResolver : IQueryAttributeTypeResolver
 {
     private readonly IReadOnlyDictionary<AttributeCode, AttributeDefinition> _attributeDefinitions;
 

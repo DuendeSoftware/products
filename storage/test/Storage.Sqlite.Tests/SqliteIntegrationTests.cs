@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.Sqlite;
 
 namespace Duende.Storage.IntegrationTests;
@@ -110,3 +111,9 @@ public partial class StorageWireupTests
     private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
 }
 
+public partial class InstrumentedStorageEngineWiringTests
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
+
+    private static string ExpectedDbSystem => StorageTelemetryConstants.DatabaseProviders.Sqlite;
+}

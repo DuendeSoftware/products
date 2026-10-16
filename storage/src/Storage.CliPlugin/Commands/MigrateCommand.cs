@@ -12,14 +12,14 @@ internal static class MigrateCommand
 {
     private const string ConnectionStringEnvironmentVariable = "DUENDE_STORAGE_CONNECTION_STRING";
 
-    private static readonly string[] SupportedProviders = ["postgresql", "mssql", "sqlite"];
+    private static readonly string[] SupportedProviders = ["postgresql", "mssql", "oracle", "sqlite"];
 
     internal static Command Create()
     {
         var command = new Command("migrate", "Apply pending Duende Storage schema migrations.");
         var providerOption = new Option<string>("--provider")
         {
-            Description = "Database provider to migrate: postgresql, mssql, sqlite.",
+            Description = "Database provider to migrate: postgresql, mssql, oracle, sqlite.",
             Required = true,
         };
 
@@ -30,7 +30,7 @@ internal static class MigrateCommand
         var schemaOption = new Option<string?>("--schema")
         {
             Description =
-                "Database schema name. Defaults to public for postgresql and dbo for mssql. sqlite does not support schemas.",
+                "Database schema name. Defaults to public for postgresql, dbo for mssql and the connecting user's schema for oracle. sqlite does not support schemas.",
         };
         var dryRunOption = new Option<bool>("--dry-run")
         {
@@ -49,7 +49,7 @@ internal static class MigrateCommand
             if (!SupportedProviders.Contains(rawProvider, StringComparer.OrdinalIgnoreCase))
             {
                 await Console.Error.WriteLineAsync(
-                    $"Unknown provider '{rawProvider}'. Supported providers: postgresql, mssql, sqlite.");
+                    $"Unknown provider '{rawProvider}'. Supported providers: postgresql, mssql, oracle, sqlite.");
                 return 1;
             }
 

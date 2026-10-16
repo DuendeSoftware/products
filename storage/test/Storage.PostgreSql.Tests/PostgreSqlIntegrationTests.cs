@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.PostgreSql;
 
 namespace Duende.Storage.IntegrationTests;
@@ -131,3 +132,10 @@ public partial class StorageWireupTests(AspireFixture fixture)
     private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
 }
 
+[Collection("PostgreSqlIntegration")]
+public partial class InstrumentedStorageEngineWiringTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
+
+    private static string ExpectedDbSystem => StorageTelemetryConstants.DatabaseProviders.PostgreSql;
+}

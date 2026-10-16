@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
+using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.MsSql.Internal;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +34,7 @@ public static class MsSqlStorageEngineServiceCollectionExtensions
             builder.MarkProviderSelected("SQL Server");
 
             var services = builder.Services;
-            _ = services.AddStore<MsSqlStorageEngine>(builder.StorageInstanceId);
+            _ = services.AddStore<MsSqlStorageEngine>(builder.StorageInstanceId, StorageTelemetryConstants.DatabaseProviders.MsSql);
             _ = services.AddKeyedTransient<MsSqlStorageEngine>(builder.StorageInstanceId, (sp, _) =>
             {
                 var createConnection = ResolveCreateConnection(resolver, sp, builder.StorageInstanceId);

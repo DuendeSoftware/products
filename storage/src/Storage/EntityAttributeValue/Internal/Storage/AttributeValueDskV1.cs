@@ -12,7 +12,7 @@ namespace Duende.Storage.EntityAttributeValue.Internal.Storage;
 /// <remarks>
 /// This type is for usage by Duende Software products, is not supported for end user consumption, and not subject to semantic versioning rules.
 /// </remarks>
-internal sealed record AttributeValueDskV1 : IDataStorageKey
+public sealed record AttributeValueDskV1 : IDataStorageKey
 {
     private AttributeValueDskV1(string name, string value)
     {

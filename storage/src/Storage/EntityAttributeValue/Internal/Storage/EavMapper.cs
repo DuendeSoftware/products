@@ -15,7 +15,7 @@ namespace Duende.Storage.EntityAttributeValue.Internal.Storage;
 /// This type is for usage by Duende Software products, is not supported for end user consumption,
 /// and is not subject to semantic versioning rules.
 /// </remarks>
-internal static class EavMapper
+public static class EavMapper
 {
     /// <summary>
     /// Serializes an <see cref="AttributeValueCollection"/> to a list of DSO entries.
@@ -23,7 +23,7 @@ internal static class EavMapper
     /// as ISO-8601 strings to preserve precision across serialization round-trips.
     /// Complex and list values are stored as-is.
     /// </summary>
-    internal static List<AttributeValueDso.V1> ToDsoList(AttributeValueCollection attributes)
+    public static IReadOnlyList<AttributeValueDso.V1> ToDsoList(AttributeValueCollection attributes)
     {
         if (attributes.Count == 0)
         {
@@ -36,7 +36,7 @@ internal static class EavMapper
     /// <summary>
     /// Serializes an <see cref="AttributeValue"/> sequence to a list of DSO entries.
     /// </summary>
-    internal static List<AttributeValueDso.V1> ToDsoList(IEnumerable<AttributeValue> attributes) =>
+    public static IReadOnlyList<AttributeValueDso.V1> ToDsoList(IEnumerable<AttributeValue> attributes) =>
         [.. attributes.Select(ToDso)];
 
     /// <summary>
@@ -44,7 +44,7 @@ internal static class EavMapper
     /// to determine each attribute's type. Attributes not present in the schema are silently skipped.
     /// Complex and list attribute types are supported.
     /// </summary>
-    internal static IEnumerable<AttributeValue> ToAttributeValues(
+    public static IEnumerable<AttributeValue> ToAttributeValues(
         IReadOnlyList<AttributeValueDso.V1> dsos,
         IReadOnlyAttributeSchema? schema)
     {
@@ -126,7 +126,7 @@ internal static class EavMapper
     /// Converts a read-only collection of <see cref="AttributeValue"/> instances to a mutable
     /// <see cref="AttributeValueCollection"/>.
     /// </summary>
-    internal static AttributeValueCollection ToMutableCollection(IReadOnlyCollection<AttributeValue> attributes)
+    public static AttributeValueCollection ToMutableCollection(IReadOnlyCollection<AttributeValue> attributes)
     {
         var collection = new AttributeValueCollection();
         foreach (var attr in attributes)
