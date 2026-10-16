@@ -3,13 +3,10 @@
 
 #nullable enable
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Stores.Storage;
-using Duende.IdentityServer.Stores.Storage.SamlSigninState;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
+using Duende.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -19,37 +16,20 @@ public class StorageSamlSigninStateStoreContractTests : SamlSigninStateStoreCont
     private readonly string _dbName = $"StorageSamlSigninStateContract_{Guid.NewGuid():N}";
     private ServiceProvider _provider = null!;
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton(TimeProvider.System);
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<SamlSigninStateDso.V1>();
-        services.AddScoped<SamlSigninStateRepository>();
-        services.AddSingleton<ISamlSigninStateSerializer, JsonSamlSigninStateSerializer>();
-        services.AddScoped<ISamlSigninStateStore, SamlSigninStateStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(_ct);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddOperationalStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        try
+        {
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([_provider], DataCategoryName.Operational);
+        }
+        finally
+        {
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<ISamlSigninStateStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<ISamlSigninStateStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<ISamlSigninStateStore> CreateStore() => new StoreHandle<ISamlSigninStateStore>(_provider.GetRequiredService<ISamlSigninStateStore>());
 }

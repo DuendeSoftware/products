@@ -141,8 +141,27 @@ public sealed class TestIsolationService : IDisposable
 
             var wrapper = new WebAppWrapper(branchBuilder, testProvider);
 
-            _ = wrapper.UseAuthentication();
+            // With Spaces, the space has to be resolved before any authentication middleware runs
+            // (space-bound data protection resolves the space on every call), so the test pipeline
+            // adds authentication itself, after UseSpaceResolution() (UseIdentityServer() does).
+            var isSpacesTest = testServices.Any(descriptor => descriptor.ServiceType == typeof(Duende.Spaces.ISpaceContextAccessor));
+            if (!isSpacesTest)
+            {
+                _ = wrapper.UseAuthentication();
+            }
+
             configurePipeline(wrapper);
+
+            if (isSpacesTest && !wrapper.AuthenticationMiddlewareAdded)
+            {
+                // Safeguard: without the automatic UseAuthentication(), a Spaces pipeline that never
+                // adds the authentication middleware would silently run without authentication.
+                throw new InvalidOperationException(
+                    "This test registers Spaces, so UseAuthentication() is not added automatically, " +
+                    "but the pipeline never added the authentication middleware. " +
+                    "Call UseIdentityServer() (or UseAuthentication()) after UseSpaceResolution().");
+            }
+
             wrapper.FinalizeEndpoints();
             var pipeline = branchBuilder.Build();
 

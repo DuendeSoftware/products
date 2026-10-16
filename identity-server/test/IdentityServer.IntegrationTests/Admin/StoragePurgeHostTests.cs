@@ -100,5 +100,5 @@ public sealed class StoragePurgeHostTests : IAsyncLifetime
         remaining.Count.ShouldBe(0);
     }
 
-    private StoragePurgeHost CreatePurgeHost() => new(_fixture.StorageInstanceRouter, _fixture.CrossPartitionStorageFactory, _fixture.Options, _fixture.StoragePurgeHostLogger);
+    private StoragePurgeHost CreatePurgeHost() => new(_fixture.StorageInstanceRouter, _fixture.CrossPartitionStorageFactory, _fixture.Options, TimeProvider.System, _fixture.StoragePurgeHostLogger);
 }

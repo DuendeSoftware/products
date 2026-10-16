@@ -39,6 +39,9 @@ internal static class IdentityServerExtensions
             options.Events.RaiseInformationEvents = true;
 
             options.EmitScopesAsSpaceDelimitedStringInJwt = true;
+            // Enabled for the mvc.jar-uri.jwt sample client. Don't copy this into a production host without
+            // restricting the outgoing connections; see
+            // https://docs.duendesoftware.com/identityserver/tokens/jar/#protecting-against-ssrf
             options.Endpoints.EnableJwtRequestUri = true;
 
             options.UserInteraction.CreateAccountUrl = "/Account/Create";

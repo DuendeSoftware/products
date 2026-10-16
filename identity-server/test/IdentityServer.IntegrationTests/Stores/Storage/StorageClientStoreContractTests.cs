@@ -1,16 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.IdentityServer.Stores.Storage.Clients;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -21,71 +18,43 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
     private ServiceProvider _provider = null!;
     private readonly List<ServiceProvider> _isolatedProviders = [];
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<ClientDso.V1>();
-        services.AddScoped<ClientRepository>();
-        services.AddScoped<IClientStore, ClientStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(TestContext.Current.CancellationToken);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddConfigurationStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        foreach (var provider in _isolatedProviders)
+        try
         {
-            await provider.DisposeAsync();
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([.. _isolatedProviders, _provider], DataCategoryName.Configuration);
         }
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        finally
+        {
+            foreach (var provider in _isolatedProviders)
+            {
+                await provider.DisposeAsync();
+            }
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<IClientStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IClientStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<IClientStore> CreateStore() => new StoreHandle<IClientStore>(_provider.GetRequiredService<IClientStore>());
 
     protected override async Task<StoreHandle<IClientStore>> CreateIsolatedStoreAsync()
     {
         var isolatedDbName = $"StorageClientContractIsolated_{Guid.NewGuid():N}";
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={isolatedDbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<ClientDso.V1>();
-        services.AddScoped<ClientRepository>();
-        services.AddScoped<IClientStore, ClientStore>();
-
-        var provider = services.BuildServiceProvider();
+        var provider = await StorageContractTestServices.CreateAsync(isolatedDbName, b => b.AddConfigurationStorage());
         _isolatedProviders.Add(provider);
 
-        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(TestContext.Current.CancellationToken);
-
-        var scope = provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IClientStore>();
-        return StoreHandle.WithDisposable(store, scope);
+        return new StoreHandle<IClientStore>(provider.GetRequiredService<IClientStore>());
     }
 
+    // NOTE: Seeds through ClientRepository rather than IClientAdmin on purpose. IClientAdmin validates
+    // clients like production does and rejects most contract fixtures (no allowed grant types), and it
+    // hashes secret values, while the fixtures pass values that are already hashed. These tests check
+    // what the store does with stored data, not admin validation.
     protected override async Task SeedClientAsync(Client client)
     {
-        using var scope = _provider.CreateScope();
-        var repo = scope.ServiceProvider.GetRequiredService<ClientRepository>();
+        var repo = _provider.GetRequiredService<ClientRepository>();
         var dso = MapToDso(client);
         await repo.CreateAsync(UuidV7.New(), dso, TestContext.Current.CancellationToken);
     }

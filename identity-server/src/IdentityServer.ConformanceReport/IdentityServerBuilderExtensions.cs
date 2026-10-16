@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 using Duende.ConformanceReport;
-using Duende.IdentityServer.Configuration;
+using Duende.ConformanceReport.Internal.Models;
 using Duende.IdentityServer.Licensing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.ConformanceReport;
 
@@ -31,11 +30,7 @@ public static class IdentityServerBuilderExtensions
             _ = services.AddConformanceReport(configure);
 
             // Register the server options provider that adapts IdentityServerOptions
-            services.TryAddScoped<Func<ConformanceReportServerOptions>>(sp =>
-            {
-                var options = sp.GetRequiredService<IOptions<IdentityServerOptions>>().Value;
-                return options.ToConformanceReportServerOptions;
-            });
+            services.TryAddScoped<IConformanceReportServerOptionsProvider, IdentityServerServerOptionsProvider>();
 
             // Register license info from IdentityServer license
             services.TryAddSingleton(sp =>

@@ -30,7 +30,7 @@ internal partial class Spaces : IScenario
             idsrv =>
             {
                 idsrv.AddStorage(opt => opt.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
-                idsrv.Services.AddSpaces();
+                idsrv.AddSpaces(_ => { });
 
             }, configureApp: (app, next) =>
             {

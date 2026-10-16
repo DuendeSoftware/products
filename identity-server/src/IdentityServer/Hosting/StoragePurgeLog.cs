@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Hosting;
@@ -39,12 +40,13 @@ internal static partial class StoragePurgeLog
 
     [LoggerMessage(
         EventName = nameof(PurgeException),
-        Message = "Exception purging expired entities from storage")]
-    internal static partial void PurgeException(this ILogger logger, LogLevel logLevel, Exception exception);
+        Message = $"Exception purging expired entities from storage instance {{{LogParameters.StorageInstanceId}}}")]
+    internal static partial void PurgeException(this ILogger logger, LogLevel logLevel, Exception exception, StorageInstanceId storageInstanceId);
 }
 
 internal static class LogParameters
 {
     public const string Count = "Count";
     public const string ExceptionMessage = "ExceptionMessage";
+    public const string StorageInstanceId = "StorageInstanceId";
 }

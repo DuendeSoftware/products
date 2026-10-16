@@ -21,6 +21,8 @@
     <PackageReference Include="Duende.Spaces" />
     <PackageReference Include="Duende.Storage.Sqlite" />
     <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
+    <!-- Pins a patched version of a transitive dependency of the Aspire packages (GHSA-qhrr-8q5h-9q3h). -->
+    <PackageReference Include="MessagePack" />
     <PackageReference Include="Microsoft.Playwright.Xunit.v3" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" />

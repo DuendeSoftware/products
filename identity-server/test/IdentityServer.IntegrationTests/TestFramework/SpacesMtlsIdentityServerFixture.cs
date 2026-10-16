@@ -359,12 +359,8 @@ public sealed class SpacesMtlsIdentityServerFixture : IAsyncDisposable
             .AddOperationalStorage()
             .AddInMemoryDataExtensionSchemas([])
             .AddMutualTlsSecretValidators()
-            .AddDeveloperSigningCredential(persistKey: false);
-
-        // AddSpaces() must be called after AddStorage() so its IPartitionedStorageFactory registration
-        // (a plain AddTransient, not TryAdd) is resolved in place of IdentityServer's default.
-        services.AddSpaces();
-        services.Configure<SpacesOptions>(o => o.FallbackToDefault = false);
+            .AddDeveloperSigningCredential(persistKey: false)
+            .AddSpaces(spaces => spaces.FallbackToDefault = false);
 
         SpacesTestLicense.RegisterEntitled(services);
     }

@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.SqlServer" />
+    <!-- Pins a patched version of a transitive dependency of the Aspire packages (GHSA-qhrr-8q5h-9q3h). -->
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
   <ItemGroup>

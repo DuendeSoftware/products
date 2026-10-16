@@ -1,18 +1,20 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.Storage;
 using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
 
@@ -56,6 +58,62 @@ public sealed class DefaultAndFallbackStorageTests
 
         var found = await grantStore.GetAsync("default-store-key", ct);
         found.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task Registering_a_storage_database_is_enough_to_purge_its_expired_data()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var timeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        var purgeInterval = TimeSpan.FromMinutes(1);
+        var lifetime = TimeSpan.FromHours(1);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+        services.AddIdentityServer(options =>
+            {
+                options.StoragePurge.FuzzStartup = false;
+                options.StoragePurge.PurgeInterval = purgeInterval;
+            })
+            .AddStorage(s => s.AddSqliteInMemory($"Default_{Guid.NewGuid():N}"));
+        services.AddDsoRegistration<IdentityProviderDso.V1>();
+        services.AddSingleton<TimeProvider>(timeProvider);
+
+        await using var provider = services.BuildServiceProvider();
+
+        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
+        await schema.MigrateAsync(cancellationToken);
+
+        var storageFactory = provider.GetRequiredService<IPartitionedStorageFactory>();
+        var categoryName = DataCategoryName.Create("some-other-category");
+        var otherCategoryStorage = await storageFactory.GetPartitionedStorageAsync(categoryName, cancellationToken);
+
+        var entityId = UuidV7.New();
+        var identityProvider = new IdentityProviderDso.V1
+            { Id = Guid.NewGuid(), Scheme = $"idp_{Guid.NewGuid():N}", Enabled = true, Type = "oidc" };
+        var expiration = Expiration.InRelative(lifetime);
+
+        var createResult = await otherCategoryStorage.CreateAsync(
+            entityId,
+            identityProvider,
+            [],
+            [],
+            expiration,
+            [],
+            cancellationToken);
+        createResult.ShouldBe(CreateResult.Success);
+
+        timeProvider.Advance(lifetime);
+
+        var purgeHost = provider.GetServices<IHostedService>().OfType<StoragePurgeHost>().ShouldHaveSingleItem();
+        await purgeHost.StartAsync(cancellationToken);
+        await Task.Delay(100, cancellationToken);
+        timeProvider.Advance(purgeInterval);
+        var stillFound = await WaitForPurgeAsync(otherCategoryStorage, entityId, cancellationToken);
+        await purgeHost.StopAsync(cancellationToken);
+
+        stillFound.ShouldBeFalse("expired data in a database registered with AddStorage must be purged");
     }
 
     [Fact]
@@ -176,22 +234,52 @@ public sealed class DefaultAndFallbackStorageTests
         var fetched = await schemaAdmin.GetAsync(schemaId, ct);
         fetched.Found.ShouldBeTrue();
 
-        // Prove it physically landed in the configuration database, not the operational one.
-        var partitionedStorageFactory = provider.GetRequiredService<IPartitionedStorageFactory>();
+        // Prove it physically landed in the configuration database, not the operational one, by
+        // standing up independent providers pointed at each shared in-memory database (identified
+        // by data source name) and reading the schema back purely through the public ISchemaAdmin
+        // API. The original provider is still alive, so the shared-cache in-memory SQLite databases
+        // it opened are still backed by a live connection and remain readable from another provider
+        // that connects to the same data source name.
 
-        var configStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.DynamicSchemas, ct);
-        var configRead = await configStorage.TryReadAsync(
-            AttributeSchemaDso.EntityType,
-            DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
-            ct);
-        configRead.Found.ShouldBeTrue();
+        // Positive control: a provider pointed at the configuration database must find the schema,
+        // confirming this cross-provider read technique actually observes the shared database.
+        (await GetSchemaViaFreshProviderAsync(configDb, schemaId, ct)).Found.ShouldBeTrue();
 
-        var opsStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Operational, ct);
-        var opsRead = await opsStorage.TryReadAsync(
-            AttributeSchemaDso.EntityType,
-            DataStorageKey.Create(SchemaIdDskV1.Create(schemaId)),
-            ct);
-        opsRead.Found.ShouldBeFalse();
+        // The actual assertion: a provider pointed at the operational database must NOT find the
+        // schema, proving it was not routed there.
+        (await GetSchemaViaFreshProviderAsync(opsDb, schemaId, ct)).Found.ShouldBeFalse();
+    }
+
+    private static async Task<bool> WaitForPurgeAsync(IPartitionedStorage storage, UuidV7 entityId, Ct cancellationToken)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        var readResult = await storage.TryReadAsync(IdentityProviderDso.EntityType, entityId, cancellationToken);
+        while (readResult.Found && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(10, cancellationToken);
+            readResult = await storage.TryReadAsync(IdentityProviderDso.EntityType, entityId, cancellationToken);
+        }
+
+        return readResult.Found;
+    }
+
+    private static async Task<GetResult<SchemaConfiguration>> GetSchemaViaFreshProviderAsync(
+        string dataSourceName, SchemaId schemaId, Ct ct)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddIdentityServer()
+            .AddStorage(s => s.AddSqliteInMemory(dataSourceName))
+            .AddDynamicSchemas();
+
+        await using var provider = services.BuildServiceProvider();
+
+        var schemaFactory = provider.GetRequiredService<IStorageInstanceSchemaFactory>();
+        var schema = await schemaFactory.GetStorageInstanceSchema(StorageInstanceId.Default, ct);
+        await schema.MigrateAsync(ct);
+
+        var schemaAdmin = provider.GetRequiredService<ISchemaAdmin>();
+        return await schemaAdmin.GetAsync(schemaId, ct);
     }
 }
 

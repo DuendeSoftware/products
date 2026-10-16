@@ -4,6 +4,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
+using Duende.Spaces;
 using Microsoft.AspNetCore.DataProtection;
 
 namespace Duende.IdentityServer.Services.KeyManagement;
@@ -11,6 +12,11 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// <summary>
 /// Implementation of IKeyProtector based on ASP.NET Core's data protection feature.
 /// </summary>
+/// <remarks>
+/// Signing keys are shared across spaces, so this protector uses the unpartitioned provider
+/// (see <see cref="Duende.Spaces.IUnpartitionedDataProtectionSource"/>). Never create a protector
+/// with the <c>nameof(DataProtectionKeyProtector)</c> purpose through a space-partitioned provider.
+/// </remarks>
 public class DataProtectionKeyProtector : ISigningKeyProtector
 {
     private readonly KeyManagementOptions _options;
@@ -26,7 +32,7 @@ public class DataProtectionKeyProtector : ISigningKeyProtector
     public DataProtectionKeyProtector(KeyManagementOptions options, IDataProtectionProvider dataProtectionProvider, TimeProvider timeProvider)
     {
         _options = options;
-        _dataProtectionProvider = dataProtectionProvider.CreateProtector(nameof(DataProtectionKeyProtector));
+        _dataProtectionProvider = dataProtectionProvider.GetUnpartitioned().CreateProtector(nameof(DataProtectionKeyProtector));
         _timeProvider = timeProvider;
     }
 

@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using System.Reflection;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -41,6 +43,12 @@ public sealed class WebAppWrapper : IApplicationBuilder, IEndpointRouteBuilder
         _endpoints = erb;
     }
 
+    /// <summary>
+    /// True once the ASP.NET Core authentication middleware has been added to the pipeline
+    /// (directly or through <c>UseIdentityServer()</c>).
+    /// </summary>
+    public bool AuthenticationMiddlewareAdded { get; private set; }
+
     /// <summary>Seals the route table. Must be called after all MapXxx calls.</summary>
     public void FinalizeEndpoints() => _builder.UseEndpoints(_ => { });
 
@@ -61,6 +69,13 @@ public sealed class WebAppWrapper : IApplicationBuilder, IEndpointRouteBuilder
 
     IApplicationBuilder IApplicationBuilder.Use(Func<RequestDelegate, RequestDelegate> middleware)
     {
+        // UseMiddleware<T>() registers a closure that captures the middleware Type.
+        if (middleware.Target?.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Any(field => field.GetValue(middleware.Target) is Type type && type == typeof(AuthenticationMiddleware)) == true)
+        {
+            AuthenticationMiddlewareAdded = true;
+        }
+
         _ = _builder.Use(middleware);
         return this;
     }

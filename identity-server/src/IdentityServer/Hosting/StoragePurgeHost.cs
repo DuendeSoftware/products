@@ -15,6 +15,7 @@ internal sealed class StoragePurgeHost(
     IStorageInstanceRouter storageInstanceRouter,
     ICrossPartitionStorageFactory crossPartitionStorageFactory,
     IdentityServerOptions options,
+    TimeProvider timeProvider,
     ILogger<StoragePurgeHost> logger) : BackgroundService
 {
     // IPartitionedStorage.PurgeExpiredAsync enforces [1, 1000]; clamp here to avoid noisy exceptions.
@@ -50,7 +51,7 @@ internal sealed class StoragePurgeHost(
         {
             try
             {
-                await Task.Delay(delay, stoppingToken);
+                await Task.Delay(delay, timeProvider, stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -110,7 +111,7 @@ internal sealed class StoragePurgeHost(
                 // OperationCanceledException that did not originate from the caller-supplied ct
                 // (e.g. a store-internal timeout token), which must not be mistaken for a
                 // requested shutdown and silently abort purging of the remaining instances.
-                logger.PurgeException(LogLevel.Error, ex);
+                logger.PurgeException(LogLevel.Error, ex, storageInstanceId);
             }
         }
     }

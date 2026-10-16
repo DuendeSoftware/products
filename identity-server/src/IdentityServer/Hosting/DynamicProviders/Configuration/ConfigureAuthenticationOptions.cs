@@ -49,10 +49,13 @@ public abstract class ConfigureAuthenticationOptions<TAuthenticationOptions, TId
         // we have to resolve these here due to DI lifetime issues
         var providerOptions = _httpContextAccessor.HttpContext.RequestServices.GetRequiredService<DynamicProviderOptions>();
         var cache = _httpContextAccessor.HttpContext.RequestServices.GetRequiredService<DynamicAuthenticationSchemeCache>();
+        var changeTracker = _httpContextAccessor.HttpContext.RequestServices.GetRequiredService<IdentityProviderOptionsMonitorCache>();
 
         var idp = cache.GetIdentityProvider<TIdentityProvider>(name);
         if (idp != null)
         {
+            // The request's copy can predate an update that has already evicted these options; options built from it would stay cached, because nothing evicts them again.
+            idp = changeTracker.GetLatestProvider(idp.Scheme) as TIdentityProvider ?? idp;
             var pathPrefix = providerOptions.PathPrefix + '/' + idp.Scheme;
             var ctx = new ConfigureAuthenticationContext<TAuthenticationOptions, TIdentityProvider>
             {

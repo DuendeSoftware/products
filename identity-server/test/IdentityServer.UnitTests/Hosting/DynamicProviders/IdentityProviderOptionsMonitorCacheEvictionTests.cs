@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.IdentityServer;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Models;
 using Duende.Spaces;
@@ -58,8 +59,7 @@ public class IdentityProviderOptionsMonitorCacheEvictionTests
     {
         var services = new ServiceCollection().AddLogging();
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
-        services.AddIdentityServer();
-        services.AddSpaces();
+        services.AddIdentityServer().AddSpaces(_ => { });
         services.AddSingleton<IHttpContextAccessor>(httpContextAccessor);
 
         var provider = services.BuildServiceProvider();

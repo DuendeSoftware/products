@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
 
@@ -71,7 +72,8 @@ public abstract class SamlSigninStateStoreContractTests : IAsyncLifetime
         }
     }
 
-    [Fact]
+    // Guid.NewGuid() is not a UUIDv7, so the store returns before reaching storage.
+    [Fact, DoesNotTouchStorage]
     public async Task RetrieveSigninRequestStateAsync_WhenStateDoesNotExist_ExpectNull()
     {
         await using var handle = CreateStore();
@@ -102,7 +104,8 @@ public abstract class SamlSigninStateStoreContractTests : IAsyncLifetime
         }
     }
 
-    [Fact]
+    // Guid.NewGuid() is not a UUIDv7, so the store returns before reaching storage.
+    [Fact, DoesNotTouchStorage]
     public async Task RemoveSigninRequestStateAsync_WhenStateDoesNotExist_ExpectNoException()
     {
         await using var handle = CreateStore();

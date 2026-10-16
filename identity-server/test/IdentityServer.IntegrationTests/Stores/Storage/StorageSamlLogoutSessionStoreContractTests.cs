@@ -3,12 +3,10 @@
 
 #nullable enable
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Saml;
-using Duende.IdentityServer.Stores.Storage.SamlLogoutSession;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
+using Duende.IdentityServer.Stores.Storage;
+using Duende.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -18,36 +16,20 @@ public class StorageSamlLogoutSessionStoreContractTests : SamlLogoutSessionStore
     private readonly string _dbName = $"StorageSamlLogoutSessionContract_{Guid.NewGuid():N}";
     private ServiceProvider _provider = null!;
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton(TimeProvider.System);
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<SamlLogoutSessionDso.V1>();
-        services.AddScoped<SamlLogoutSessionRepository>();
-        services.AddScoped<ISamlLogoutSessionStore, SamlLogoutSessionStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(_ct);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddOperationalStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        try
+        {
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([_provider], DataCategoryName.Operational);
+        }
+        finally
+        {
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<ISamlLogoutSessionStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<ISamlLogoutSessionStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<ISamlLogoutSessionStore> CreateStore() => new StoreHandle<ISamlLogoutSessionStore>(_provider.GetRequiredService<ISamlLogoutSessionStore>());
 }

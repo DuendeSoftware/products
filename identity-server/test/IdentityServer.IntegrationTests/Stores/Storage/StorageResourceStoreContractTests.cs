@@ -1,19 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.Admin;
+using Duende.IdentityServer.Admin.ApiScopes;
+using Duende.IdentityServer.Admin.IdentityResources;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.IdentityServer.Stores.Storage.ApiResources;
-using Duende.IdentityServer.Stores.Storage.ApiScopes;
-using Duende.IdentityServer.Stores.Storage.IdentityResources;
-using Duende.IdentityServer.Stores.Storage.Resources;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -23,51 +19,28 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
     private readonly string _dbName = $"StorageResourceContract_{Guid.NewGuid():N}";
     private ServiceProvider _provider = null!;
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<ApiResourceDso.V1>();
-        services.AddDsoRegistration<ApiScopeDso.V1>();
-        services.AddDsoRegistration<IdentityResourceDso.V1>();
-        services.AddScoped<ApiResourceRepository>();
-        services.AddScoped<ApiScopeRepository>();
-        services.AddScoped<IdentityResourceRepository>();
-        services.AddScoped<IResourceStore, StorageResourceStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(TestContext.Current.CancellationToken);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddConfigurationStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        try
+        {
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([_provider], DataCategoryName.Configuration);
+        }
+        finally
+        {
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<IResourceStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IResourceStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<IResourceStore> CreateStore() => new StoreHandle<IResourceStore>(_provider.GetRequiredService<IResourceStore>());
 
     protected override async Task SeedIdentityResourceAsync(IdentityResource resource)
     {
-        using var scope = _provider.CreateScope();
-        var repo = scope.ServiceProvider.GetRequiredService<IdentityResourceRepository>();
-        var dso = new IdentityResourceDso.V1
+        var admin = _provider.GetRequiredService<IIdentityResourceAdmin>();
+        var create = new CreateIdentityResource
         {
-            // dso.Id is an internal identifier within the DSO payload; the UuidV7 passed to
-            // CreateAsync is the storage-layer primary key used for addressing the record.
-            Id = Guid.NewGuid(),
             Name = resource.Name,
             Enabled = resource.Enabled,
             DisplayName = resource.DisplayName,
@@ -75,18 +48,22 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
             ShowInDiscoveryDocument = resource.ShowInDiscoveryDocument,
             Required = resource.Required,
             Emphasize = resource.Emphasize,
-            UserClaims = resource.UserClaims.ToList(),
-            ExtendedAttributeValues = resource.Properties
-                .Select(kvp => new AttributeValueDso.V1(kvp.Key, kvp.Value))
-                .ToList()
+            UserClaims = resource.UserClaims.ToList()
         };
-        await repo.CreateAsync(UuidV7.New(), dso, TestContext.Current.CancellationToken);
+
+        var result = await admin.CreateAsync(create, TestContext.Current.CancellationToken);
+        result.IsSuccess.ShouldBeTrue($"Seeding identity resource '{resource.Name}' failed: {result}");
     }
 
+    // NOTE: ApiResource seeding cannot go through IApiResourceAdmin: ApiResourceAdmin.CreateAsync
+    // resolves every Scopes entry against ApiScopeRepository and rejects scope names that don't
+    // already exist as a seeded ApiScope ("Scope '{name}' does not exist."). Most base
+    // ResourceStoreContractTests cases build an ApiResource via CreateApiResourceTestResource(),
+    // which assigns a random scope name without ever seeding a matching ApiScope first, so the
+    // admin API cannot express this seed data. Kept on the internal repository.
     protected override async Task SeedApiResourceAsync(ApiResource resource)
     {
-        using var scope = _provider.CreateScope();
-        var repo = scope.ServiceProvider.GetRequiredService<ApiResourceRepository>();
+        var repo = _provider.GetRequiredService<ApiResourceRepository>();
 
         // Build scope references — StorageResourceStore.FindApiResourcesByScopeNameAsync queries via
         // ApiResourceRepository.FindByScopeNamesAsync which matches on the scope Name search field
@@ -113,11 +90,9 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
 
     protected override async Task SeedApiScopeAsync(ApiScope scope)
     {
-        using var scopeProvider = _provider.CreateScope();
-        var repo = scopeProvider.ServiceProvider.GetRequiredService<ApiScopeRepository>();
-        var dso = new ApiScopeDso.V1
+        var admin = _provider.GetRequiredService<IApiScopeAdmin>();
+        var create = new CreateApiScope
         {
-            Id = Guid.NewGuid(),
             Name = scope.Name,
             Enabled = scope.Enabled,
             DisplayName = scope.DisplayName,
@@ -127,6 +102,8 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
             Emphasize = scope.Emphasize,
             UserClaims = scope.UserClaims.ToList()
         };
-        await repo.CreateAsync(UuidV7.New(), dso, TestContext.Current.CancellationToken);
+
+        var result = await admin.CreateAsync(create, TestContext.Current.CancellationToken);
+        result.IsSuccess.ShouldBeTrue($"Seeding API scope '{scope.Name}' failed: {result}");
     }
 }

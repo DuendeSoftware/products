@@ -26,7 +26,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.EnablePurge = false;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
@@ -42,7 +42,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.BatchSize = 100;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -58,7 +58,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.EnablePurge = false;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -75,7 +75,7 @@ public class StoragePurgeHostTests
 
         var storageInstanceRouter = new SimpleStorageInstanceRouter();
         var crossPartitionStorageFactory = new ThrowingCrossPartitionStorageFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -91,7 +91,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.EnablePurge = true;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
@@ -111,7 +111,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.BatchSize = 0; // Below minimum — should be clamped to 1
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -128,7 +128,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.BatchSize = 5000; // Above maximum — should be clamped to 1000
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -151,7 +151,7 @@ public class StoragePurgeHostTests
         var crossPartitionStorageFactory = new SelectivelyThrowingCrossPartitionStorageFactory(
             throwFor: failingStorageInstanceId,
             (healthyStorageInstanceId, healthyStorage));
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -176,7 +176,7 @@ public class StoragePurgeHostTests
         var crossPartitionStorageFactory = new MappedCrossPartitionStorageFactory(
             (failingStorageInstanceId, failingStorage),
             (healthyStorageInstanceId, healthyStorage));
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
@@ -205,7 +205,7 @@ public class StoragePurgeHostTests
         var crossPartitionStorageFactory = new MappedCrossPartitionStorageFactory(
             (failingStorageInstanceId, failingStorage),
             (healthyStorageInstanceId, healthyStorage));
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {

@@ -41,7 +41,9 @@ public sealed class IdentityProviderOptionsMonitorCache
     /// Ensures the options monitor cache is up to date for the given identity provider.
     /// If the provider has changed since it was last observed, the corresponding
     /// <see cref="IOptionsMonitorCache{TOptions}"/> entry is evicted so the authentication
-    /// handler will pick up the new configuration.
+    /// handler will pick up the new configuration. The entry is also evicted the first time a provider is seen
+    /// for a scheme in the current space (for example after it was removed), because it cannot be trusted then.
+    /// The return value stays <c>false</c> in that case because the provider did not change.
     /// </summary>
     /// <param name="identityProvider">The identity provider to check.</param>
     /// <returns><c>true</c> if the cache entry was evicted because the provider changed; <c>false</c> otherwise.</returns>
@@ -60,6 +62,7 @@ public sealed class IdentityProviderOptionsMonitorCache
             {
                 if (_identityProviders.TryAdd(key, identityProvider))
                 {
+                    RemoveCacheEntry(identityProvider);
                     return false;
                 }
 
@@ -92,6 +95,8 @@ public sealed class IdentityProviderOptionsMonitorCache
             RemoveDynamicOptionsEntry(providerType.OptionsType, scheme);
         }
     }
+
+    internal IdentityProvider? GetLatestProvider(string scheme) => _identityProviders.GetValueOrDefault(CurrentSpaceKey(scheme));
 
     private (SpaceId Space, string Scheme) CurrentSpaceKey(string scheme) =>
         (_serviceProvider.GetService<ISpaceContextAccessor>()?.GetSpaceIdOrDefault() ?? SpaceId.Default, scheme);

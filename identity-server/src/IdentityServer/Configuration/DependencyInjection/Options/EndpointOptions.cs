@@ -26,6 +26,7 @@ public class EndpointsOptions
     /// Defaults to <c>false</c> due to the security implications described in
     /// <see href="https://datatracker.ietf.org/doc/rfc9101/">RFC 9101 section 10.4</see>.
     /// Enable only when clients require JAR by reference and the associated risks are mitigated.
+    /// See <see href="https://docs.duendesoftware.com/identityserver/tokens/jar/#protecting-against-ssrf">protecting against SSRF</see>.
     /// </remarks>
     public bool EnableJwtRequestUri { get; set; }
 

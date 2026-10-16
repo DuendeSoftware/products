@@ -16,9 +16,11 @@ using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Duende.Spaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -86,6 +88,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             where TContext : DbContext, IConfigurationDbContext
         {
             builder.Services.AddConfigurationDbContext<TContext>(storeOptionsAction);
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SpacesOptions>, SpacesNotSupportedValidator>());
 
             builder.AddClientStore<ClientStore>();
             builder.AddResourceStore<ResourceStore>();
@@ -181,6 +184,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             where TContext : DbContext, IPersistedGrantDbContext
         {
             builder.Services.AddOperationalDbContext<TContext>(storeOptionsAction);
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SpacesOptions>, SpacesNotSupportedValidator>());
 
             builder.AddSigningKeyStore<SigningKeyStore>();
             builder.AddPersistedGrantStore<PersistedGrantStore>();

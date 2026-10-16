@@ -67,6 +67,10 @@ public static class IdentityServerStorageBuilderExtensions
         /// <para>
         /// Each instance is a separate database and is migrated separately.
         /// </para>
+        /// <para>
+        /// Also runs the background purge of expired data and the outbox processor. Both cover every
+        /// registered storage instance, including instances that hold no IdentityServer data.
+        /// </para>
         /// </remarks>
         /// <param name="storageInstanceId">The storage instance to register the database for.</param>
         /// <param name="configure">A callback that selects the database provider for <paramref name="storageInstanceId"/>.</param>
@@ -78,6 +82,10 @@ public static class IdentityServerStorageBuilderExtensions
             ArgumentNullException.ThrowIfNull(configure);
 
             builder.Services.AddStorageInternal(storageInstanceId, configure);
+
+            // TryAddEnumerable keeps repeated AddStorage() calls from registering duplicate hosted services.
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, OutboxProcessorHost>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, Hosting.StoragePurgeHost>());
 
             return builder;
         }
@@ -106,6 +114,10 @@ public static class IdentityServerStorageBuilderExtensions
         /// </para>
         /// <para>
         /// Any data category that is not mapped to a named instance is stored in the default database.
+        /// </para>
+        /// <para>
+        /// Also runs the background purge of expired data and the outbox processor. Both cover every
+        /// registered storage instance, including instances that hold no IdentityServer data.
         /// </para>
         /// </remarks>
         /// <param name="configure">A callback that selects the database provider for the default instance.</param>
@@ -185,17 +197,13 @@ public static class IdentityServerStorageBuilderExtensions
 
         /// <summary>
         /// Stores IdentityServer operational data in the given <paramref name="storageInstanceId"/>, and registers
-        /// the Duende.Storage-backed operational stores and background services.
+        /// the Duende.Storage-backed operational stores.
         /// </summary>
         /// <remarks>
         /// <para>
         /// Operational data covers persisted grants, device flow codes, pushed authorization requests,
         /// server-side sessions, signing keys, SAML signin state and SAML logout sessions. The server-side
         /// session store is only used when server-side sessions are enabled.
-        /// </para>
-        /// <para>
-        /// Also registers the outbox processor and the background purge of expired data. Both run against
-        /// every registered storage instance, not only <paramref name="storageInstanceId"/>.
         /// </para>
         /// <para>
         /// Register a database for <paramref name="storageInstanceId"/> with <c>AddStorage</c>; otherwise the first
@@ -266,11 +274,6 @@ public static class IdentityServerStorageBuilderExtensions
             services.TryAddSingleton<IOutboxSubscription, SessionExpirationSubscription>();
             services.TryAddKeyedTransient<IOutboxSubscriptionHandler, SessionExpirationHandler>(
                 SessionExpirationSubscription.Name.Value);
-
-            // Outbox processor and background purge hosted services. TryAddEnumerable keeps repeated
-            // AddStorage() calls from registering duplicate IHostedService instances.
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, OutboxProcessorHost>());
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, Hosting.StoragePurgeHost>());
 
             return builder;
         }

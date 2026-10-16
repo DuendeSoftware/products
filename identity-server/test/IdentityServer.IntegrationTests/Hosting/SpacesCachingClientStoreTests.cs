@@ -42,7 +42,6 @@ public sealed class SpacesCachingClientStoreTests(WebServerFixture webServerFixt
             services =>
             {
                 services.AddRouting();
-                services.AddSpaces();
                 SpacesTestLicense.RegisterEntitled(services);
 
                 services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
@@ -51,6 +50,7 @@ public sealed class SpacesCachingClientStoreTests(WebServerFixture webServerFixt
                     .AddOperationalStorage()
                     .AddInMemoryCaching()
                     .AddClientStoreCache<ClientStore>()
+                    .AddSpaces(_ => { })
                     .AddDeveloperSigningCredential(persistKey: false);
             },
             webapp =>

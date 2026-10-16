@@ -148,7 +148,6 @@ internal sealed class SpacesFederationTestHost : IAsyncDisposable
             services =>
             {
                 services.AddRouting();
-                services.AddSpaces();
                 services.AddSingleton<TimeProvider>(fakeTimeProvider);
 
                 var builder = services.AddIdentityServer(configureOptions)
@@ -170,7 +169,8 @@ internal sealed class SpacesFederationTestHost : IAsyncDisposable
 
                 builder.AddStorage(storage => storage.AddSqliteInMemory(dbName))
                     .AddConfigurationStorage()
-                    .AddOperationalStorage();
+                    .AddOperationalStorage()
+                    .AddSpaces(_ => { });
 
                 configureIdentityProviderStore(builder);
 

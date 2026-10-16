@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.Net;
 using System.Security.Claims;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
@@ -67,12 +68,6 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
                 services.AddStorageInternal(storage =>
                     storage.AddSqliteInMemory(dbName));
 
-                services.AddSpaces();
-                services.Configure<SpacesOptions>(opt =>
-                {
-                    opt.FallbackToDefault = fallbackToDefaultSpace;
-                });
-
                 var isBuilder = services.AddIdentityServer(options =>
                 {
                     options.KeyManagement.Enabled = false;
@@ -82,7 +77,8 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
                 isBuilder
                     .AddInMemoryClients([])
                     .AddInMemoryApiScopes([])
-                    .AddInMemoryIdentityResources([]);
+                    .AddInMemoryIdentityResources([])
+                    .AddSpaces(spaces => spaces.FallbackToDefault = fallbackToDefaultSpace);
 
                 if (addServerSideSessions)
                 {
@@ -251,11 +247,11 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
         var deleteCookie = SetCookieHeaders(signOutA).Single(h => h.StartsWith($"{MainScheme}=", StringComparison.Ordinal));
         deleteCookie.ShouldContain("path=/t/space-a", Case.Insensitive);
 
-        (await client.GetAsync("/t/space-a/test/whoami")).StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
+        (await client.GetAsync("/t/space-a/test/whoami")).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
         // Space B remains authenticated.
         var stillB = await client.GetAsync("/t/space-b/test/whoami");
-        stillB.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        stillB.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await stillB.Content.ReadAsStringAsync()).ShouldBe("bob");
     }
 
@@ -281,7 +277,7 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
 
         // The external cookie was never issued for space B.
         var whoAmIB = await client.GetAsync($"/t/space-b/test/whoami?scheme={ExternalScheme}");
-        whoAmIB.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
+        whoAmIB.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -482,11 +478,11 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
         (await client.GetAsync("/t/space-b/test/signin?sub=bob")).EnsureSuccessStatusCode();
 
         var whoAmIA = await client.GetAsync("/t/space-a/test/whoami");
-        whoAmIA.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        whoAmIA.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await whoAmIA.Content.ReadAsStringAsync()).ShouldBe("alice");
 
         var whoAmIB = await client.GetAsync("/t/space-b/test/whoami");
-        whoAmIB.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        whoAmIB.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await whoAmIB.Content.ReadAsStringAsync()).ShouldBe("bob");
 
         // Advance past the halfway point of the 20-minute lifetime (but before expiry) so the
@@ -495,7 +491,7 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
         timeProvider.Advance(TimeSpan.FromMinutes(15));
 
         var renewedA = await client.GetAsync("/t/space-a/test/whoami");
-        renewedA.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        renewedA.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await renewedA.Content.ReadAsStringAsync()).ShouldBe("alice");
         SetCookieHeaders(renewedA).Single(h => h.StartsWith($"{MainScheme}=", StringComparison.Ordinal))
             .ShouldContain("path=/t/space-a", Case.Insensitive);
@@ -503,10 +499,10 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
         // Sign out of A only; B keeps its independent server-side session.
         (await client.GetAsync("/t/space-a/test/signout")).EnsureSuccessStatusCode();
 
-        (await client.GetAsync("/t/space-a/test/whoami")).StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
+        (await client.GetAsync("/t/space-a/test/whoami")).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
         var stillB = await client.GetAsync("/t/space-b/test/whoami");
-        stillB.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        stillB.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await stillB.Content.ReadAsStringAsync()).ShouldBe("bob");
     }
 
@@ -550,14 +546,13 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
     }
 
     [Fact]
-    public async Task missing_space_resolution_middleware_fails_closed_to_root_cookie_path()
+    public async Task missing_space_resolution_middleware_fails_closed_and_issues_no_session()
     {
-        // Warp security finding W-2: if UseSpaceResolution() is omitted (or misordered)
-        // relative to UseIdentityServer(), the resolved cookie path must fail closed to root
-        // rather than leaking a wrong/stale space path. A space is still registered here to
-        // prove that, without the resolution middleware installed, its path is never picked up.
+        // If UseSpaceResolution() is omitted (or misordered) relative to UseIdentityServer(),
+        // nothing may fall back to a shared space. Space-bound data protection refuses to
+        // protect without a resolved space, so the sign-in fails and no session cookie is issued.
         await using var handle = await CreateServerAsync(
-            nameof(missing_space_resolution_middleware_fails_closed_to_root_cookie_path),
+            nameof(missing_space_resolution_middleware_fails_closed_and_issues_no_session),
             skipSpaceResolution: true);
 
         await handle.SpaceAdmin.CreateAsync(
@@ -568,11 +563,8 @@ public sealed class SpacesCookieTests(WebServerFixture webServerFixture) : IAsyn
         // A request to a URL that would normally match Space A's path, but with no resolution
         // middleware in the pipeline to rewrite it.
         var response = await client.GetAsync("/t/space-a/test/signin?sub=alice");
-        response.EnsureSuccessStatusCode();
 
-        // No isolation is expected here, but the cookie must never leak a stale/wrong space
-        // path -- it must fail closed to root.
-        SetCookieHeaders(response).Single(h => h.StartsWith($"{MainScheme}=", StringComparison.Ordinal))
-            .ShouldContain("path=/", Case.Insensitive);
+        response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        SetCookieHeaders(response).ShouldNotContain(h => h.StartsWith($"{MainScheme}=", StringComparison.Ordinal));
     }
 }

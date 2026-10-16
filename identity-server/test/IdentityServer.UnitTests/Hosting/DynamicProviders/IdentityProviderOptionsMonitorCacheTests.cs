@@ -15,7 +15,7 @@ namespace UnitTests.Hosting.DynamicProviders;
 public class IdentityProviderOptionsMonitorCacheTests
 {
     [Fact]
-    public void ensure_cache_updated_should_not_remove_options_for_first_observation()
+    public void ensure_cache_updated_should_remove_options_for_first_observation()
     {
         var (subject, optionsCache) = CreateSubject();
         var identityProvider = CreateIdentityProvider();
@@ -25,7 +25,7 @@ public class IdentityProviderOptionsMonitorCacheTests
         var updated = subject.EnsureCacheUpdated(identityProvider);
 
         updated.ShouldBeFalse();
-        optionsCache.TryRemove(identityProvider.Scheme).ShouldBeTrue();
+        optionsCache.TryRemove(identityProvider.Scheme).ShouldBeFalse();
     }
 
     [Fact]

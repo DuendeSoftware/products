@@ -3,13 +3,10 @@
 
 #nullable enable
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
-using Duende.IdentityServer.Stores.Storage.PushedAuthorization;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
+using Duende.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -19,36 +16,20 @@ public class StoragePushedAuthorizationRequestStoreContractTests : PushedAuthori
     private readonly string _dbName = $"StoragePushedAuthorizationContract_{Guid.NewGuid():N}";
     private ServiceProvider _provider = null!;
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton(TimeProvider.System);
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<PushedAuthorizationDso.V1>();
-        services.AddScoped<PushedAuthorizationRepository>();
-        services.AddScoped<IPushedAuthorizationRequestStore, PushedAuthorizationStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(TestContext.Current.CancellationToken);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddOperationalStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        try
+        {
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([_provider], DataCategoryName.Operational);
+        }
+        finally
+        {
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<IPushedAuthorizationRequestStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPushedAuthorizationRequestStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<IPushedAuthorizationRequestStore> CreateStore() => new StoreHandle<IPushedAuthorizationRequestStore>(_provider.GetRequiredService<IPushedAuthorizationRequestStore>());
 }

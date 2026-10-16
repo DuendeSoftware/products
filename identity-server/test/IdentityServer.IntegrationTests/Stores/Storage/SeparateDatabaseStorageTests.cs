@@ -254,6 +254,7 @@ public class SeparateDatabaseStorageTests : IAsyncLifetime
             storageInstanceRouter,
             crossPartitionStorageFactory,
             options,
+            TimeProvider.System,
             _provider.GetRequiredService<ILogger<StoragePurgeHost>>());
 
         await host.RunPurgeAsync(ct);

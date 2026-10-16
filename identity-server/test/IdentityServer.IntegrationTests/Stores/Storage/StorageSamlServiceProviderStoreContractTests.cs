@@ -3,15 +3,12 @@
 
 #nullable enable
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.IdentityServer.Stores.Storage.SamlServiceProviders;
 using Duende.Storage;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -22,71 +19,42 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
     private ServiceProvider _provider = null!;
     private readonly List<ServiceProvider> _isolatedProviders = [];
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<SamlServiceProviderDso.V1>();
-        services.AddScoped<SamlServiceProviderRepository>();
-        services.AddScoped<ISamlServiceProviderStore, SamlServiceProviderStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(_ct);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddConfigurationStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        foreach (var provider in _isolatedProviders)
+        try
         {
-            await provider.DisposeAsync();
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([.. _isolatedProviders, _provider], DataCategoryName.Configuration);
         }
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        finally
+        {
+            foreach (var provider in _isolatedProviders)
+            {
+                await provider.DisposeAsync();
+            }
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<ISamlServiceProviderStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<ISamlServiceProviderStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<ISamlServiceProviderStore> CreateStore() => new StoreHandle<ISamlServiceProviderStore>(_provider.GetRequiredService<ISamlServiceProviderStore>());
 
     protected override async Task<StoreHandle<ISamlServiceProviderStore>> CreateIsolatedStoreAsync()
     {
         var isolatedDbName = $"StorageSamlServiceProviderContractIsolated_{Guid.NewGuid():N}";
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={isolatedDbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<SamlServiceProviderDso.V1>();
-        services.AddScoped<SamlServiceProviderRepository>();
-        services.AddScoped<ISamlServiceProviderStore, SamlServiceProviderStore>();
-
-        var provider = services.BuildServiceProvider();
+        var provider = await StorageContractTestServices.CreateAsync(isolatedDbName, b => b.AddConfigurationStorage());
         _isolatedProviders.Add(provider);
 
-        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(_ct);
-
-        var scope = provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<ISamlServiceProviderStore>();
-        return StoreHandle.WithDisposable(store, scope);
+        return new StoreHandle<ISamlServiceProviderStore>(provider.GetRequiredService<ISamlServiceProviderStore>());
     }
 
+    // NOTE: Seeds through SamlServiceProviderRepository rather than ISamlServiceProviderAdmin on purpose.
+    // The admin requires an HTTP-POST assertion consumer service URL and at least one allowed scope, which
+    // the contract fixtures don't set. These tests check what the store does with stored data, not admin validation.
     protected override async Task SeedSamlServiceProviderAsync(SamlServiceProvider sp)
     {
-        await using var scope = _provider.CreateAsyncScope();
-        var repository = scope.ServiceProvider.GetRequiredService<SamlServiceProviderRepository>();
+        var repository = _provider.GetRequiredService<SamlServiceProviderRepository>();
 
         var id = UuidV7.New();
         var dso = new SamlServiceProviderDso.V1

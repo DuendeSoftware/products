@@ -1,13 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
-using Duende.IdentityServer.Stores.Storage.PersistedGrants;
-using Duende.Storage.Internal;
-using Duende.Storage.Internal.Builder;
-using Duende.Storage.Schema;
-using Duende.Storage.Sqlite;
+using Duende.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -18,64 +15,33 @@ public class StoragePersistedGrantStoreContractTests : PersistedGrantStoreContra
     private ServiceProvider _provider = null!;
     private readonly List<ServiceProvider> _isolatedProviders = [];
 
-    public override async ValueTask InitializeAsync()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={_dbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<PersistedGrantDso.V1>();
-        services.AddScoped<PersistedGrantRepository>();
-        services.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
-
-        _provider = services.BuildServiceProvider();
-
-        var schema = _provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(TestContext.Current.CancellationToken);
-    }
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddOperationalStorage());
 
     public override async ValueTask DisposeAsync()
     {
-        foreach (var provider in _isolatedProviders)
+        try
         {
-            await provider.DisposeAsync();
+            DataCategoryNameRecorder.CurrentTestShouldHaveUsed([.. _isolatedProviders, _provider], DataCategoryName.Operational);
         }
-        await _provider.DisposeAsync();
-        await base.DisposeAsync();
+        finally
+        {
+            foreach (var provider in _isolatedProviders)
+            {
+                await provider.DisposeAsync();
+            }
+            await _provider.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 
-    protected override StoreHandle<IPersistedGrantStore> CreateStore()
-    {
-        var scope = _provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPersistedGrantStore>();
-        return StoreHandle.WithDisposable(store, scope);
-    }
+    protected override StoreHandle<IPersistedGrantStore> CreateStore() => new StoreHandle<IPersistedGrantStore>(_provider.GetRequiredService<IPersistedGrantStore>());
 
     protected override async Task<StoreHandle<IPersistedGrantStore>> CreateIsolatedStoreAsync()
     {
         var isolatedDbName = $"StoragePersistedGrantContractIsolated_{Guid.NewGuid():N}";
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        services.AddStorageInternal(storage =>
-            storage.AddSqlite(opt =>
-                opt.ConnectionString = $"Data Source={isolatedDbName};Mode=Memory;Cache=Shared"));
-
-        services.AddDsoRegistration<PersistedGrantDso.V1>();
-        services.AddScoped<PersistedGrantRepository>();
-        services.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
-
-        var provider = services.BuildServiceProvider();
+        var provider = await StorageContractTestServices.CreateAsync(isolatedDbName, b => b.AddOperationalStorage());
         _isolatedProviders.Add(provider);
 
-        var schema = provider.GetRequiredService<IStorageInstanceSchema>();
-        await schema.MigrateAsync(TestContext.Current.CancellationToken);
-
-        var scope = provider.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPersistedGrantStore>();
-        return StoreHandle.WithDisposable(store, scope);
+        return new StoreHandle<IPersistedGrantStore>(provider.GetRequiredService<IPersistedGrantStore>());
     }
 }

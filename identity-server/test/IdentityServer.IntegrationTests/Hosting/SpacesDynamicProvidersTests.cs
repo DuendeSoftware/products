@@ -38,6 +38,8 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
     private const string SamlScheme = "my-saml";
 
     private readonly Ct _ct = TestContext.Current.CancellationToken;
+    private readonly TaskCompletionSource _heldRequestLoadedScheme = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource _releaseHeldRequest = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
@@ -98,17 +100,17 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
             services =>
             {
                 services.AddRouting();
-                services.AddSpaces();
 
                 var builder = services.AddIdentityServer(configureOptions)
                     .AddDeveloperSigningCredential(persistKey: false)
                     .AddSamlDynamicProvider();
 
-                // AddSpaces() requires the storage infrastructure even when the identity provider
+                // Spaces requires the storage infrastructure even when the identity provider
                 // store itself is not Duende.Storage-backed.
                 builder.AddStorage(storage => storage.AddSqliteInMemory(dbName))
                     .AddConfigurationStorage()
-                    .AddOperationalStorage();
+                    .AddOperationalStorage()
+                    .AddSpaces(_ => { });
 
                 configureIdentityProviderStore(builder);
 
@@ -138,6 +140,22 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
                     if (ctx.Request.Path.Value == "/test/saml-challenge")
                     {
                         await ctx.ChallengeAsync(SamlScheme,
+                            new AuthenticationProperties { RedirectUri = ctx.Request.PathBase + "/test/finish" });
+                        return;
+                    }
+
+                    if (ctx.Request.Path.Value == "/test/load-scheme")
+                    {
+                        await ctx.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>().GetSchemeAsync(OidcScheme);
+                        return;
+                    }
+
+                    if (ctx.Request.Path.Value == "/test/load-scheme-then-wait-then-challenge")
+                    {
+                        await ctx.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>().GetSchemeAsync(OidcScheme);
+                        _heldRequestLoadedScheme.SetResult();
+                        await _releaseHeldRequest.Task;
+                        await ctx.ChallengeAsync(OidcScheme,
                             new AuthenticationProperties { RedirectUri = ctx.Request.PathBase + "/test/finish" });
                         return;
                     }
@@ -218,13 +236,13 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
             services =>
             {
                 services.AddRouting();
-                services.AddSpaces();
 
                 services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
                     .AddDeveloperSigningCredential(persistKey: false)
                     .AddStorage(storage => storage.AddSqliteInMemory(dbName))
                     .AddConfigurationStorage()
-                    .AddOperationalStorage();
+                    .AddOperationalStorage()
+                    .AddSpaces(_ => { });
 
                 services.AddAuthentication()
                     .AddOpenIdConnect(staticScheme, options =>
@@ -329,7 +347,6 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
             services =>
             {
                 services.AddRouting();
-                services.AddSpaces();
 
                 var builder = services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
                     .AddDeveloperSigningCredential(persistKey: false)
@@ -361,7 +378,8 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
 
                 builder.AddStorage(storage => storage.AddSqliteInMemory(dbName))
                     .AddConfigurationStorage()
-                    .AddOperationalStorage();
+                    .AddOperationalStorage()
+                    .AddSpaces(_ => { });
 
                 services.ConfigureAll<OpenIdConnectOptions>(options =>
                 {
@@ -867,6 +885,31 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
     }
 
     [Fact]
+    public async Task when_provider_in_space_changes_while_a_request_holds_the_old_provider_expect_that_request_and_later_challenges_to_use_the_new_provider()
+    {
+        var (fixture, spaceAId, _) = await CreateFixtureWithTwoSpacesAsync(CreateStorageFixtureAsync,
+            nameof(when_provider_in_space_changes_while_a_request_holds_the_old_provider_expect_that_request_and_later_challenges_to_use_the_new_provider));
+        await using var _ = fixture;
+        var idpAuthority = fixture.IdpServer.BuildUrl("/").ToString().TrimEnd('/');
+        var providerId = await CreateOidcProviderInSpaceAsync(fixture.MainServer, spaceAId, OidcScheme, idpAuthority, "client-v1");
+        using var mainClient = fixture.MainServer.CreateClient();
+        ExtractClientId(await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).ShouldBe("client-v1");
+
+        var heldRequest = mainClient.GetAsync("/t/space-a/test/load-scheme-then-wait-then-challenge", _ct);
+        await _heldRequestLoadedScheme.Task.WaitAsync(_ct);
+
+        await UpdateOidcProviderClientIdInSpaceAsync(fixture.MainServer, spaceAId, providerId, "client-v2");
+        (await mainClient.GetAsync("/t/space-a/test/load-scheme", _ct)).EnsureSuccessStatusCode();
+
+        _releaseHeldRequest.SetResult();
+        ExtractClientId(await heldRequest).ShouldBe("client-v2");
+
+        var challengeAfterUpdate = await mainClient.GetAsync("/t/space-a/test/challenge", _ct);
+
+        ExtractClientId(challengeAfterUpdate).ShouldBe("client-v2");
+    }
+
+    [Fact]
     public async Task update_in_space_a_does_not_affect_space_b_when_store_is_storage_without_wrapper() =>
         await RunUpdateInSpaceADoesNotAffectSpaceBAsync(CreateStorageFixtureAsync,
             nameof(update_in_space_a_does_not_affect_space_b_when_store_is_storage_without_wrapper));
@@ -1017,7 +1060,7 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
             services =>
             {
                 services.AddRouting();
-                // Deliberately no services.AddSpaces() call: ISpaceContextAccessor is not
+                // Deliberately no AddSpaces() builder call: ISpaceContextAccessor is not
                 // registered at all, unlike the no-spaces regression host in DynamicProvidersTests
                 // (which covers a *static* OIDC scheme end-to-end login instead).
 

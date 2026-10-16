@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Duende.IdentityServer;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Hosting.DynamicProviders.Store;
 using Duende.IdentityServer.Models;
@@ -26,8 +27,7 @@ public class SpaceAwareDynamicOptionsMonitorCacheTests
     {
         var services = new ServiceCollection().AddLogging();
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
-        services.AddIdentityServer();
-        services.AddSpaces();
+        services.AddIdentityServer().AddSpaces(_ => { });
         return services.BuildServiceProvider().GetRequiredService<ISpaceContextAccessor>();
     }
 

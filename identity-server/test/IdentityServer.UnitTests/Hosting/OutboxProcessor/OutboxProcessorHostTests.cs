@@ -188,7 +188,7 @@ public class OutboxProcessorHostTests
             _storageInstanceRouter,
             [subscription],
             sp.GetRequiredService<IServiceScopeFactory>(),
-            new DefaultAmbientOutboxProcessingContextProvider(),
+            new PassThroughAmbientOutboxProcessingContextProvider(),
             Options.Create(new StorageOutboxProcessorOptions()),
             _time,
             TestLogger.Create<StorageOutboxProcessor>());
@@ -265,6 +265,14 @@ public class OutboxProcessorHostTests
     {
         public Task<HandleOutcomeResult> HandleAsync(PersistedOutboxEvent item, Ct ct) =>
             Task.FromResult(HandleOutcomeResult.Success());
+    }
+
+    // Stands in for the real ambient context provider, which is internal to Duende.Storage. These
+    // host timing tests don't exercise ambient context propagation, so a pass-through is enough.
+    private sealed class PassThroughAmbientOutboxProcessingContextProvider : IAmbientOutboxProcessingContextProvider
+    {
+        public Task<HandleOutcomeResult> ExecuteWithContextAsync(PersistedOutboxEvent evt, Func<Ct, Task<HandleOutcomeResult>> handlerAsync, Ct ct) =>
+            handlerAsync(ct);
     }
 }
 

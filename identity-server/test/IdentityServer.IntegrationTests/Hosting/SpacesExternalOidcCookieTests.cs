@@ -72,12 +72,11 @@ public sealed class SpacesExternalOidcCookieTests(WebServerFixture webServerFixt
                 services.AddStorageInternal(storage =>
                     storage.AddSqliteInMemory(dbName));
 
-                services.AddSpaces();
-
                 services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
                     .AddInMemoryClients([])
                     .AddInMemoryApiScopes([])
-                    .AddInMemoryIdentityResources([]);
+                    .AddInMemoryIdentityResources([])
+                    .AddSpaces(_ => { });
 
                 services.AddAuthentication()
                     .AddOpenIdConnect(OidcScheme, options =>

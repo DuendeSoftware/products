@@ -433,8 +433,9 @@ public class DuendeStorageRegistrationTests
     }
 
     [Fact]
-    public void AddDynamicSchemas_named_instance_between_AddStorage_and_AddConfigurationStorage_is_not_overwritten()
+    public async Task AddDynamicSchemas_named_instance_between_AddStorage_and_AddConfigurationStorage_is_not_overwritten()
     {
+        var ct = Ct.None;
         var services = new ServiceCollection();
         services.AddLogging();
         var builder = services.AddIdentityServer();
@@ -446,13 +447,25 @@ public class DuendeStorageRegistrationTests
         builder.AddDynamicSchemas(namedStorageInstanceId);
         builder.AddConfigurationStorage(namedStorageInstanceId);
 
-        using var sp = services.BuildServiceProvider();
-        var schema = sp.GetRequiredService<IStorageInstanceSchemaFactory>()
-            .GetStorageInstanceSchema(namedStorageInstanceId, Ct.None).GetAwaiter().GetResult();
-        schema.MigrateAsync(Ct.None).GetAwaiter().GetResult();
+        await using var sp = services.BuildServiceProvider();
+        var schema = await sp.GetRequiredService<IStorageInstanceSchemaFactory>()
+            .GetStorageInstanceSchema(namedStorageInstanceId, ct);
+        await schema.MigrateAsync(ct);
 
-        sp.GetRequiredService<ISchemaStore>().ShouldBeOfType<StorageSchemaAdmin>();
-        sp.GetRequiredService<ISchemaAdmin>().ShouldBeOfType<StorageSchemaAdmin>();
+        // AddConfigurationStorage() must not have replaced the dynamic-schema registration made
+        // between AddStorage() and AddConfigurationStorage() with the default in-memory store.
+        sp.GetRequiredService<ISchemaStore>().ShouldNotBeOfType<InMemorySchemaStore>();
+
+        // Prove behaviorally that the registration is storage-backed: a schema created through the
+        // admin API must be persisted (and therefore retrievable) rather than held only in memory.
+        var schemaAdmin = sp.GetRequiredService<ISchemaAdmin>();
+        var schemaId = SchemaId.Create($"custom:{Guid.NewGuid():N}");
+        var createResult = await schemaAdmin.CreateAsync(
+            new SchemaConfiguration { SchemaId = schemaId, DisplayName = "Widget" }, ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var fetched = await schemaAdmin.GetAsync(schemaId, ct);
+        fetched.Found.ShouldBeTrue();
     }
 
     [Fact]
@@ -562,7 +575,7 @@ public class DuendeStorageRegistrationTests
 
     private sealed class CustomSchemaStore : ISchemaStore
     {
-        public Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, Ct ct) => Task.FromResult<IReadOnlyAttributeSchema>(AttributeSchema.Empty);
+        public Task<IReadOnlyAttributeSchema> GetAsync(SchemaId schemaId, Ct ct) => Task.FromResult<IReadOnlyAttributeSchema>(AttributeSchemaFactory.Empty);
     }
 
     private sealed class CustomSamlLogoutSessionStore : ISamlLogoutSessionStore

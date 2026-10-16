@@ -6,6 +6,7 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Stores;
 using Duende.Spaces;
+using Duende.Spaces.Internal;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,7 +33,7 @@ public class ConfigurationStoreHybridCacheSpaceAwarenessTests
 
     private static IServiceCollection AddSpacesWithFakeAccessor(IServiceCollection services)
     {
-        services.AddSpaces();
+        services.AddSpacesInternal();
 
         // Avoid the license-gated default accessor; the factory only needs an accessor instance.
         services.AddSingleton<ISpaceContextAccessor, FakeSpaceContextAccessor>();

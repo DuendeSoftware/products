@@ -3,6 +3,7 @@
 
 
 using System.Net;
+using System.Web;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
@@ -27,6 +28,8 @@ public sealed class DynamicProvidersTests : IAsyncLifetime
     private GenericHost _host;
     private GenericHost _idp1;
     private GenericHost _idp2;
+    private readonly TaskCompletionSource _heldRequestLoadedScheme = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource _releaseHeldRequest = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private List<OidcProvider> _oidcProviders = new List<OidcProvider>()
     {
@@ -64,6 +67,14 @@ public sealed class DynamicProvidersTests : IAsyncLifetime
                         RedirectUris = { "https://server/federation/idp1/signin" },
                         PostLogoutRedirectUris = { "https://server/federation/idp1/signout-callback" },
                         FrontChannelLogoutUri = "https://server/federation/idp1/signout",
+                        AllowedScopes = { "openid" }
+                    },
+                    new Client
+                    {
+                        ClientId = "client-v2",
+                        ClientSecrets = { new Secret("secret".Sha256()) },
+                        AllowedGrantTypes = GrantTypes.Code,
+                        RedirectUris = { "https://server/federation/idp1/signin" },
                         AllowedScopes = { "openid" }
                     }
                 })
@@ -229,6 +240,22 @@ public sealed class DynamicProvidersTests : IAsyncLifetime
             {
                 await ctx.SignOutAsync(ctx.Request.Query["scheme"]);
             });
+
+            app.MapGet("/load-scheme", async ctx =>
+            {
+                var schemes = ctx.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                await schemes.GetSchemeAsync(ctx.Request.Query["scheme"]);
+            });
+
+            app.MapGet("/load-scheme-then-wait-then-challenge", async ctx =>
+            {
+                var schemes = ctx.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                await schemes.GetSchemeAsync(ctx.Request.Query["scheme"]);
+                _heldRequestLoadedScheme.SetResult();
+                await _releaseHeldRequest.Task;
+                await ctx.ChallengeAsync(ctx.Request.Query["scheme"],
+                    new AuthenticationProperties { RedirectUri = "/callback" });
+            });
         };
     }
 
@@ -267,6 +294,70 @@ public sealed class DynamicProvidersTests : IAsyncLifetime
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://idp2/connect/authorize");
+    }
+
+    [Fact]
+    public async Task when_provider_changes_while_a_request_holds_the_old_provider_expect_that_request_and_later_challenges_to_use_the_new_provider()
+    {
+        await _host.InitializeAsync();
+        var firstChallenge = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp1"), _ct);
+        ExtractClientId(firstChallenge).ShouldBe("client");
+
+        var heldRequest = _host.HttpClient.GetAsync(_host.Url("/load-scheme-then-wait-then-challenge?scheme=idp1"), _ct);
+        await _heldRequestLoadedScheme.Task.WaitAsync(_ct);
+
+        _oidcProviders[0] = new OidcProvider
+        {
+            Scheme = "idp1",
+            Authority = "https://idp1",
+            ClientId = "client-v2",
+            ClientSecret = "secret",
+            ResponseType = "code",
+        };
+        var cache = _host.Resolve<HybridCache>(ServiceProviderKeys.ConfigurationStoreCache);
+        var cachePolicy = _host.Resolve<CachePolicy<IdentityProvider>>();
+        await cache.RemoveAsync(cachePolicy.BuildKey("idp1"), _ct);
+        (await _host.HttpClient.GetAsync(_host.Url("/load-scheme?scheme=idp1"), _ct)).EnsureSuccessStatusCode();
+
+        _releaseHeldRequest.SetResult();
+        ExtractClientId(await heldRequest).ShouldBe("client-v2");
+
+        var challengeAfterUpdate = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp1"), _ct);
+
+        ExtractClientId(challengeAfterUpdate).ShouldBe("client-v2");
+    }
+
+    [Fact]
+    public async Task when_provider_is_deleted_and_recreated_while_a_request_holds_the_old_provider_expect_later_challenges_to_use_the_new_provider()
+    {
+        await _host.InitializeAsync();
+        var firstChallenge = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp1"), _ct);
+        ExtractClientId(firstChallenge).ShouldBe("client");
+
+        var heldRequest = _host.HttpClient.GetAsync(_host.Url("/load-scheme-then-wait-then-challenge?scheme=idp1"), _ct);
+        await _heldRequestLoadedScheme.Task.WaitAsync(_ct);
+
+        var cache = _host.Resolve<HybridCache>(ServiceProviderKeys.ConfigurationStoreCache);
+        var cachePolicy = _host.Resolve<CachePolicy<IdentityProvider>>();
+        _oidcProviders.RemoveAt(0);
+        await cache.RemoveAsync(cachePolicy.BuildKey("idp1"), _ct);
+        (await _host.HttpClient.GetAsync(_host.Url("/load-scheme?scheme=idp1"), _ct)).EnsureSuccessStatusCode();
+
+        _oidcProviders.Add(new OidcProvider
+        {
+            Scheme = "idp1",
+            Authority = "https://idp1",
+            ClientId = "client-v2",
+            ClientSecret = "secret",
+            ResponseType = "code",
+        });
+
+        _releaseHeldRequest.SetResult();
+        (await heldRequest).StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
+        var challengeAfterRecreate = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp1"), _ct);
+
+        ExtractClientId(challengeAfterRecreate).ShouldBe("client-v2");
     }
 
     // the cookie processing in this workflow requires updates to .NET5 for our test browser and cookie container
@@ -489,7 +580,7 @@ public sealed class DynamicProvidersTests : IAsyncLifetime
             {
                 services.AddRouting();
 
-                // Deliberately no services.AddSpaces(): this is the no-spaces regression host.
+                // Deliberately no AddSpaces() builder call: this is the no-spaces regression host.
                 services.AddIdentityServer(options => options.KeyManagement.Enabled = false)
                     .AddInMemoryClients([])
                     .AddInMemoryApiScopes([])
@@ -584,5 +675,11 @@ public sealed class DynamicProvidersTests : IAsyncLifetime
         await mainServer.StartAsync();
 
         return new NoSpacesFixture { MainServer = mainServer, IdpServer = idpServer };
+    }
+
+    private static string ExtractClientId(HttpResponseMessage challengeResponse)
+    {
+        challengeResponse.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        return HttpUtility.ParseQueryString(challengeResponse.Headers.Location.Query)["client_id"];
     }
 }
