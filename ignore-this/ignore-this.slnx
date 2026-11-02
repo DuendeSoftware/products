@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/IgnoreThis/IgnoreThis.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/IgnoreThis.Tests/IgnoreThis.Tests.csproj" />
+  </Folder>
+</Solution>
