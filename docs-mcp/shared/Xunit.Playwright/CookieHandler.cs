@@ -12,7 +12,7 @@ public class CookieHandler : DelegatingHandler
     public CookieHandler(HttpMessageHandler innerHandler, CookieContainer cookieContainer)
         : base(innerHandler) => _cookieContainer = cookieContainer;
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
     {
         var requestUri = request.RequestUri;
         var header = _cookieContainer.GetCookieHeader(requestUri!);

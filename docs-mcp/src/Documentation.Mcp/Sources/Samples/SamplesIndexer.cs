@@ -20,7 +20,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(7);
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(Ct stoppingToken)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
 
@@ -38,7 +38,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
         }
     }
 
-    private async Task RunIndexerAsync(CancellationToken stoppingToken)
+    private async Task RunIndexerAsync(Ct stoppingToken)
     {
         logger.LogInformation("Running samples indexer");
 
@@ -155,7 +155,7 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
     private static async Task<List<string>> GetFilesForRepositoryPathAsync(
         string markdownText,
         ZipArchive repositoryArchive,
-        CancellationToken cancellationToken)
+        Ct cancellationToken)
     {
         var files = new List<string>();
 

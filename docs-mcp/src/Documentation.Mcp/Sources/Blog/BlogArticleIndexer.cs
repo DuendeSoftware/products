@@ -19,7 +19,7 @@ internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<Blog
     private static readonly DateTime ReferenceDate = new(2024, 10, 01);
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(Ct stoppingToken)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
 
@@ -37,7 +37,7 @@ internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<Blog
         }
     }
 
-    private async Task RunIndexerAsync(CancellationToken stoppingToken)
+    private async Task RunIndexerAsync(Ct stoppingToken)
     {
         logger.LogInformation("Running blog indexer");
 
@@ -81,7 +81,7 @@ internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<Blog
         Uri? url,
         McpDb db,
         HttpClient httpClient,
-        CancellationToken stoppingToken)
+        Ct stoppingToken)
     {
         if (url == null)
         {

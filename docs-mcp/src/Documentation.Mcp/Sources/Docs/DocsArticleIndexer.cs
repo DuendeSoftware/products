@@ -18,7 +18,7 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(Ct stoppingToken)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
 
@@ -36,7 +36,7 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
         }
     }
 
-    private async Task RunIndexerAsync(CancellationToken stoppingToken)
+    private async Task RunIndexerAsync(Ct stoppingToken)
     {
         logger.LogInformation("Running docs indexer");
 
@@ -82,7 +82,7 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
         string linkUrl,
         McpDb db,
         HttpClient httpClient,
-        CancellationToken stoppingToken)
+        Ct stoppingToken)
     {
         // Start indexing
         var linkUri = new Uri(linkUrl);
