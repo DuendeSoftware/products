@@ -198,11 +198,6 @@
   <Folder Name="/multi-space/test/">
     <Project Path="multi-space/test/MultiSpace.Tests/MultiSpace.Tests.csproj" />
   </Folder>
-  <Folder Name="/shared/">
-    <Project Path="shared/AppHost.Abstractions/AppHost.Abstractions.csproj" />
-    <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
-    <Project Path="shared/Xunit.Playwright/Xunit.Playwright.csproj" />
-  </Folder>
   <Folder Name="/spaces/" />
   <Folder Name="/spaces/src/">
     <Project Path="spaces/src/Spaces/Spaces.csproj" />
