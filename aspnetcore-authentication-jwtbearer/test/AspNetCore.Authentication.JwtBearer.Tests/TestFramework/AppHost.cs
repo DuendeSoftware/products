@@ -164,7 +164,7 @@ public class AppHost : GenericHost
         }
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // client callback
+        response.StatusCode.ShouldBe((HttpStatusCode)303); // client callback
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());

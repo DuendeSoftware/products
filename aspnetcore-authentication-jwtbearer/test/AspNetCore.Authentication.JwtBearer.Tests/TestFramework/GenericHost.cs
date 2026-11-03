@@ -35,7 +35,7 @@ public class GenericHost
     public TestServer Server
     {
         get => _server ?? throw new InvalidOperationException(
-                $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call {nameof(Initialize)}?");
+                $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call {nameof(InitializeAsync)}?");
         private set => _server = value;
     }
 
@@ -44,7 +44,7 @@ public class GenericHost
     {
         get =>
             _browserClient ?? throw new InvalidOperationException(
-                $"Attempt to use {nameof(BrowserClient)} before is was initialized. Did you forget to call {nameof(Initialize)}");
+                $"Attempt to use {nameof(BrowserClient)} before is was initialized. Did you forget to call {nameof(InitializeAsync)}");
         private set => _browserClient = value;
     }
 
@@ -53,7 +53,7 @@ public class GenericHost
     {
         get =>
             _httpClient ?? throw new InvalidOperationException(
-                $"Attempt to use ${nameof(HttpClient)} before is was initialized. Did you forget to call {nameof(Initialize)}");
+                $"Attempt to use ${nameof(HttpClient)} before is was initialized. Did you forget to call {nameof(InitializeAsync)}");
         private set => _httpClient = value;
     }
 
@@ -74,7 +74,7 @@ public class GenericHost
         return _baseAddress + path;
     }
 
-    public async Task Initialize()
+    public async Task InitializeAsync()
     {
         var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions
         {
@@ -108,8 +108,6 @@ public class GenericHost
             _ = options.AddFilter("Duende", LogLevel.Information);
             _ = options.AddFilter("Duende.IdentityServer.License", LogLevel.Error);
             _ = options.AddFilter("Duende.IdentityServer.Startup", LogLevel.Error);
-
-            _ = options.AddXUnit(_testOutputHelper);
         });
 
         OnConfigureServices(services);

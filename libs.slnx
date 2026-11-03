@@ -1,11 +1,4 @@
 <Solution>
-  <Folder Name="/aspnetcore-authentication-jwtbearer/" />
-  <Folder Name="/aspnetcore-authentication-jwtbearer/src/">
-    <Project Path="aspnetcore-authentication-jwtbearer/src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj" />
-  </Folder>
-  <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
-    <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
-  </Folder>
   <Folder Name="/bff/" />
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />

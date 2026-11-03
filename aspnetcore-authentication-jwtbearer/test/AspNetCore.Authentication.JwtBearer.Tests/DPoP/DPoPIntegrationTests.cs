@@ -260,9 +260,9 @@ public class DPoPIntegrationTests
     // Initialize all the hosts. We separate this from creation of the hosts so that tests can customize their behavior
     private async Task Initialize()
     {
-        await IdentityServer.Initialize();
-        await Api.Initialize();
-        await App.Initialize();
+        await IdentityServer.InitializeAsync();
+        await Api.InitializeAsync();
+        await App.InitializeAsync();
     }
 
     /// <summary>

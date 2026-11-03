@@ -78,7 +78,7 @@ public class IdentityServerHost : GenericHost
                 var logoutId = context.Request.Query["logoutId"];
                 var interaction = context.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
 
-                var signOutContext = await interaction.GetLogoutContextAsync(logoutId);
+                var signOutContext = await interaction.GetLogoutContextAsync(logoutId, context.RequestAborted);
 
                 context.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
             });

@@ -1,0 +1,12 @@
+<Project>
+  <Target Name="CleanPreviouslyGeneratedSources" BeforeTargets="GenerateSources"
+          Condition="'$(EmitCompilerGeneratedFiles)' == 'true' AND '$(CompilerGeneratedFilesOutputPath)' != ''">
+    <ItemGroup>
+      <PreviouslyGeneratedSources Include="$(CompilerGeneratedFilesOutputPath)\**\*.*" />
+    </ItemGroup>
+    <Delete Files="@(PreviouslyGeneratedSources)" />
+  </Target>
+  <ItemGroup Condition="'$(CompilerGeneratedFilesOutputPath)' != ''">
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)\**\*.cs" />
+  </ItemGroup>
+</Project>
