@@ -26,7 +26,7 @@ internal static class ProjectContextScanner
     internal static async Task<PluginResolution?> ResolveAsync(
         string pluginName,
         string? searchDirectory = null,
-        CancellationToken ct = default)
+        Ct ct = default)
     {
         if (!PluginRegistry.KnownPlugins.TryGetValue(pluginName, out var info))
         {
@@ -67,7 +67,7 @@ internal static class ProjectContextScanner
     internal static async Task<string?> GetResolvedVersionAsync(
         string workingDirectory,
         string anchorPackage,
-        CancellationToken ct)
+        Ct ct)
     {
         try
         {
@@ -86,7 +86,7 @@ internal static class ProjectContextScanner
     /// </summary>
     private static async Task<string> RunDotnetListPackageAsync(
         string workingDirectory,
-        CancellationToken ct)
+        Ct ct)
     {
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo

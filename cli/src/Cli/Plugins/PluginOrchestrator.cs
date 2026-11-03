@@ -17,7 +17,7 @@ internal static class PluginOrchestrator
         string? pluginPath,
         string? explicitVersion,
         string[] originalArgs,
-        CancellationToken ct)
+        Ct ct)
     {
         // Phase 1: resolve the plugin assembly path
         string assemblyPath;

@@ -60,7 +60,7 @@ if (requestedPlugin is not null)
 {
     // Eagerly load the real plugin command and register it in place of the stub
     var realCommand = await PluginPreloader.LoadPluginCommandAsync(
-        requestedPlugin, pluginPath, explicitVersion, CancellationToken.None);
+        requestedPlugin, pluginPath, explicitVersion, Ct.None);
     if (realCommand is not null)
     {
         rootCommand.Subcommands.Add(realCommand);

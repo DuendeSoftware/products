@@ -23,5 +23,5 @@ public interface IPluginContext
     /// <summary>
     /// Gets a cancellation token that is cancelled when the CLI is shutting down.
     /// </summary>
-    CancellationToken CancellationToken { get; }
+    Ct CancellationToken { get; }
 }

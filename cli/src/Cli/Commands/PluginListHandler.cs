@@ -11,7 +11,7 @@ namespace Duende.Cli.Commands;
 /// </summary>
 internal static class PluginListHandler
 {
-    internal static async Task ExecuteAsync(CancellationToken ct)
+    internal static async Task ExecuteAsync(Ct ct)
     {
         Console.WriteLine("Known plugins:");
         Console.WriteLine();

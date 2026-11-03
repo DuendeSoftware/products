@@ -97,7 +97,7 @@ internal static class PluginPreloader
         string pluginName,
         string? pluginPath,
         string? explicitVersion,
-        CancellationToken ct)
+        Ct ct)
     {
         try
         {

@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Cli.PluginAbstractions/Cli.PluginAbstractions.csproj" />

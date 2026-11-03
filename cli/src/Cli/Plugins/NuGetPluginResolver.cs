@@ -3,7 +3,9 @@
 
 using NuGet.Common;
 using NuGet.Configuration;
+using NuGet.Frameworks;
 using NuGet.Packaging;
+using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
@@ -25,18 +27,27 @@ internal static class NuGetPluginResolver
     /// <param name="resolution">The resolved plugin package ID and version range (e.g. "7.2.*").</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The path to the plugin's primary assembly.</returns>
-    internal static async Task<string> EnsureDownloadedAsync(PluginResolution resolution, Ct ct)
+    internal static Task<string> EnsureDownloadedAsync(PluginResolution resolution, Ct ct) =>
+        EnsureDownloadedAsync(
+            resolution,
+            GlobalPackagesFolder,
+            Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json"),
+            ct);
+
+    internal static async Task<string> EnsureDownloadedAsync(
+        PluginResolution resolution,
+        string globalPackagesFolder,
+        SourceRepository source,
+        Ct ct)
     {
         // Check if any version matching the range is already cached
-        var cachedPath = FindCachedAssembly(resolution.PackageId, resolution.Version);
+        var cachedPath = FindCachedAssembly(globalPackagesFolder, resolution.PackageId, resolution.Version);
         if (cachedPath is not null)
         {
             return cachedPath;
         }
 
-        // Download from nuget.org
-        var repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
-        var resource = await repository.GetResourceAsync<FindPackageByIdResource>(ct);
+        var resource = await source.GetResourceAsync<FindPackageByIdResource>(ct);
 
         using var cache = new SourceCacheContext();
         var versions = await resource.GetAllVersionsAsync(resolution.PackageId, cache, NullLogger.Instance, ct);
@@ -53,95 +64,28 @@ internal static class NuGetPluginResolver
 
         Console.WriteLine($"Downloading {resolution.PackageId} {bestMatch}...");
 
-        using var packageStream = new MemoryStream();
-        var downloaded = await resource.CopyNupkgToStreamAsync(
-            resolution.PackageId, bestMatch, packageStream, cache, NullLogger.Instance, ct);
-
-        if (!downloaded)
-        {
-            throw new InvalidOperationException(
+        var identity = new PackageIdentity(resolution.PackageId, bestMatch);
+        using var downloader = await resource.GetPackageDownloaderAsync(identity, cache, NullLogger.Instance, ct)
+            ?? throw new InvalidOperationException(
                 $"Failed to download '{resolution.PackageId}' {bestMatch} from nuget.org.");
-        }
 
-        packageStream.Position = 0;
+        var pathResolver = new VersionFolderPathResolver(globalPackagesFolder);
+        _ = await PackageExtractor.InstallFromSourceAsync(
+            identity,
+            downloader,
+            pathResolver,
+            new PackageExtractionContext(PackageSaveMode.Defaultv3, XmlDocFileSaveMode.None, clientPolicyContext: null, NullLogger.Instance),
+            ct);
 
-        // Extract to global packages folder — NuGet convention requires lowercase package IDs in path
-#pragma warning disable CA1308 // NuGet global packages folder uses lowercase package IDs by convention
-        var packageDir = Path.Combine(GlobalPackagesFolder, resolution.PackageId.ToLowerInvariant(), bestMatch.ToString());
-#pragma warning restore CA1308
-
-        // Use a temp directory + atomic rename to avoid races between concurrent invocations
-        var tempDir = $"{packageDir}.{Path.GetRandomFileName()}";
-        _ = Directory.CreateDirectory(tempDir);
-
-        try
-        {
-            using var packageReader = new PackageArchiveReader(packageStream);
-            var tfmFolder = GetBestTfmFolder(packageReader);
-
-            // Strip the NuGet TFM prefix (e.g. "lib/net10.0/") but preserve the remaining
-            // subdirectory structure. AssemblyDependencyResolver reads runtimeTargets from the
-            // deps.json and expects RID-specific assemblies at relative paths from the plugin
-            // assembly (e.g. "runtimes/win/lib/net9.0/Microsoft.Data.SqlClient.dll").
-            var prefix = tfmFolder.TrimEnd('/') + "/";
-            var tempDirRoot = Path.GetFullPath(tempDir) + Path.DirectorySeparatorChar;
-            foreach (var file in packageReader.GetFiles(tfmFolder))
-            {
-                var relativePath = file.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                    ? file[prefix.Length..]
-                    : Path.GetFileName(file);
-
-                var destPath = Path.GetFullPath(Path.Combine(tempDir, relativePath.Replace('/', Path.DirectorySeparatorChar)));
-
-                // Guard against path traversal from malicious package entries.
-                // The trailing separator prevents prefix false-positives
-                // (e.g. "C:\temp\pkg2\..." falsely matching "C:\temp\pkg").
-                if (!destPath.StartsWith(tempDirRoot, StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException(
-                        $"Package contains a file entry that would extract outside the target directory: '{file}'.");
-                }
-
-                var destDir = Path.GetDirectoryName(destPath);
-                if (destDir is not null)
-                {
-                    _ = Directory.CreateDirectory(destDir);
-                }
-
-                using var fileStream = packageReader.GetStream(file);
-                using var dest = File.Create(destPath);
-                await fileStream.CopyToAsync(dest, ct);
-            }
-
-            try
-            {
-                Directory.Move(tempDir, packageDir);
-            }
-            catch (IOException) when (Directory.Exists(packageDir))
-            {
-                // Another process won the race — use their copy
-                Directory.Delete(tempDir, recursive: true);
-            }
-        }
-        catch
-        {
-            // Clean up temp directory on any failure
-#pragma warning disable CA1031 // Best-effort cleanup — must not mask the original exception
-            try { Directory.Delete(tempDir, recursive: true); } catch { /* best effort */ }
-#pragma warning restore CA1031
-            throw;
-        }
-
-        return FindAssemblyInDirectory(packageDir, resolution.PackageId)
+        return FindAssemblyInDirectory(pathResolver.GetInstallPath(resolution.PackageId, bestMatch), resolution.PackageId)
             ?? throw new InvalidOperationException(
                 $"Could not find plugin assembly in downloaded package '{resolution.PackageId}'.");
     }
 
-    private static string? FindCachedAssembly(string packageId, string versionRange)
+    private static string? FindCachedAssembly(string globalPackagesFolder, string packageId, string versionRange)
     {
-#pragma warning disable CA1308 // NuGet global packages folder uses lowercase package IDs by convention
-        var packageDir = Path.Combine(GlobalPackagesFolder, packageId.ToLowerInvariant());
-#pragma warning restore CA1308
+        var pathResolver = new VersionFolderPathResolver(globalPackagesFolder);
+        var packageDir = pathResolver.GetVersionListPath(packageId);
         if (!Directory.Exists(packageDir))
         {
             return null;
@@ -154,7 +98,8 @@ internal static class NuGetPluginResolver
 
         var installedVersions = Directory.GetDirectories(packageDir)
             .Select(d => NuGetVersion.TryParse(Path.GetFileName(d), out var v) ? v : null)
-            .OfType<NuGetVersion>();
+            .OfType<NuGetVersion>()
+            .Where(v => File.Exists(pathResolver.GetNupkgMetadataPath(packageId, v)));
 
         var best = range.FindBestMatch(installedVersions);
         if (best is null)
@@ -162,27 +107,26 @@ internal static class NuGetPluginResolver
             return null;
         }
 
-        var versionDir = Path.Combine(packageDir, best.ToString());
-        return FindAssemblyInDirectory(versionDir, packageId);
+        return FindAssemblyInDirectory(pathResolver.GetInstallPath(packageId, best), packageId);
     }
 
-    private static string? FindAssemblyInDirectory(string directory, string packageId)
+    private static string? FindAssemblyInDirectory(string packageDirectory, string packageId)
     {
-        var assemblyName = $"{packageId}.dll";
-        var path = Path.Combine(directory, assemblyName);
-        return File.Exists(path) ? path : null;
-    }
+        var libDirectory = Path.Combine(packageDirectory, "lib");
+        if (!Directory.Exists(libDirectory))
+        {
+            return null;
+        }
 
-    private static string GetBestTfmFolder(PackageArchiveReader reader)
-    {
-        // Pick the highest TFM version available in the package
-        var libItems = reader.GetLibItems().ToList();
-        var preferred = libItems
-            .OrderByDescending(g => g.TargetFramework.Version)
+        var tfmDirectory = Directory.GetDirectories(libDirectory)
+            .OrderByDescending(d => NuGetFramework.ParseFolder(Path.GetFileName(d)).Version)
             .FirstOrDefault();
+        if (tfmDirectory is null)
+        {
+            return null;
+        }
 
-        return preferred?.TargetFramework.GetShortFolderName() is { } tfm
-            ? $"lib/{tfm}"
-            : "lib";
+        var path = Path.Combine(tfmDirectory, $"{packageId}.dll");
+        return File.Exists(path) ? path : null;
     }
 }

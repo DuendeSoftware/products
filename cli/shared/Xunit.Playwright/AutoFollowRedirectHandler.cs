@@ -8,7 +8,7 @@ namespace Duende.Xunit.Playwright;
 public class AutoFollowRedirectHandler(ILogger<AutoFollowRedirectHandler> logger) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        Ct cancellationToken)
     {
         var previousUri = request.RequestUri;
         for (var i = 0; i < 20; i++)
