@@ -35,6 +35,17 @@ public class LoginEndpointTests : BffTestBase
         response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
     }
 
+    [Fact]
+    public async Task login_fails_when_bff_middleware_runs_before_routing()
+    {
+        Bff.UseBffPlacement = UseBffPlacement.BeforeRouting;
+        await ConfigureBff(BffSetupType.V4Bff);
+
+        var ex = await Should.ThrowAsync<InvalidOperationException>(() => Bff.BrowserClient.GetAsync(Bff.Url("/bff/login")));
+
+        ex.Message.ShouldContain("app.UseBff");
+    }
+
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task when_unauthenticated_silent_login_should_return_isLoggedIn_false(BffSetupType setup)

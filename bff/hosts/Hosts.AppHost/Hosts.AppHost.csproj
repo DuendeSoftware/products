@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Pins a patched version of a transitive dependency of the Aspire packages (GHSA-qhrr-8q5h-9q3h). -->
+    <PackageReference Include="MessagePack" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Hosts.Bff.MultiFrontend\Hosts.Bff.MultiFrontend.csproj" />
     <ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />

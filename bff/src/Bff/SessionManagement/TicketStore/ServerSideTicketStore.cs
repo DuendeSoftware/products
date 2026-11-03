@@ -54,7 +54,10 @@ internal class ServerSideTicketStore(
 
     private async Task CreateNewSessionAsync(string key, AuthenticationTicket ticket)
     {
-        logger.CreatingAuthenticationTicketEntry(LogLevel.Debug, key, ticket.GetExpiration());
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.CreatingAuthenticationTicketEntry(LogLevel.Debug, key, ticket.GetExpiration());
+        }
 
         var session = new UserSession
         {
@@ -88,7 +91,11 @@ internal class ServerSideTicketStore(
         var ticket = session.Deserialize(_protector, logger);
         if (ticket != null)
         {
-            logger.TicketLoaded(LogLevel.Debug, key, ticket.GetExpiration());
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.TicketLoaded(LogLevel.Debug, key, ticket.GetExpiration());
+            }
+
             return ticket;
         }
 
@@ -119,7 +126,10 @@ internal class ServerSideTicketStore(
             return;
         }
 
-        logger.RenewingAuthenticationTicket(LogLevel.Debug, key, ticket.GetExpiration());
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.RenewingAuthenticationTicket(LogLevel.Debug, key, ticket.GetExpiration());
+        }
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
@@ -147,7 +157,11 @@ internal class ServerSideTicketStore(
 
     private Task RemoveAsync(UserSessionKey userSessionKey)
     {
-        logger.RemovingAuthenticationTicket(LogLevel.Debug, userSessionKey.ToString());
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.RemovingAuthenticationTicket(LogLevel.Debug, userSessionKey.ToString());
+        }
+
         metrics.SessionEnded();
 
         return store.DeleteUserSessionAsync(userSessionKey, _ct);
@@ -172,7 +186,11 @@ internal class ServerSideTicketStore(
             else
             {
                 // if we failed to get a ticket, then remove DB record 
-                logger.FailedToDeserializeAuthenticationTicket(LogLevel.Debug, session.Key.ToString()!);
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.FailedToDeserializeAuthenticationTicket(LogLevel.Debug, session.Key.ToString()!);
+                }
+
                 await RemoveAsync(session.GetUserSessionKey());
             }
         }

@@ -21,7 +21,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     public TestServer Server { get; private set; } = null!;
 
-    private TestLoggerProvider Logger { get; } = new(context.WriteOutput, baseAddress.Host + " - ");
+    public TestLoggerProvider Logger { get; } = new(context.WriteOutput, baseAddress.Host + " - ");
 
     /// <summary>
     /// Allows you to resolve a service directly from the container AS IF it's requested for a specific frontend

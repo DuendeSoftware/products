@@ -11,7 +11,7 @@ public class CookieHandler(HttpMessageHandler innerHandler, CookieContainer? coo
     public void ClearCookies() => CookieContainer = new CookieContainer();
     public CookieContainer CookieContainer { get; private set; } = cookies ?? new CookieContainer();
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Ct ct)
     {
         var requestUri = request.RequestUri;
         var header = CookieContainer.GetCookieHeader(requestUri!);

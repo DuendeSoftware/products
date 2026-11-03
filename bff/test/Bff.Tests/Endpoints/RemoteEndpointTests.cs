@@ -385,6 +385,38 @@ public class RemoteEndpointTests : BffTestBase
         apiResult.ClientId.ShouldBe("fake-client");
     }
 
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task calls_to_remote_endpoint_should_forward_access_token_longer_than_32kb_from_custom_retriever(
+        BffSetupType setup)
+    {
+        // BFF no longer enforces any max length on access tokens (that's now ATM's responsibility),
+        // so a custom IAccessTokenRetriever that returns a token longer than the former 32kb limit
+        // must still reach the remote API in the Authorization header.
+        var longAccessToken = AccessToken.Parse(new string('a', 32 * 1024 + 1));
+
+        Bff.OnConfigureServices += services =>
+        {
+            _ = services.AddSingleton(new TestAccessTokenRetriever(
+                () => Task.FromResult<AccessTokenResult>(new BearerTokenResult { AccessToken = longAccessToken })));
+        };
+
+        Bff.OnConfigureApp += app =>
+        {
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
+                .WithAccessTokenRetriever<TestAccessTokenRetriever>()
+                .WithAccessToken();
+        };
+
+        await ConfigureBff(setup);
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path)
+        );
+
+        var authorizationHeader = apiResult.RequestHeaders["Authorization"].Single();
+        authorizationHeader.ShouldBe($"Bearer {longAccessToken}");
+    }
+
     private async Task<AccessTokenResult> CreateAccessToken(string sub, string clientId)
     {
         var tokens = IdentityServer.Resolve<ITokenService>();
@@ -408,7 +440,7 @@ public class RemoteEndpointTests : BffTestBase
 
         return new BearerTokenResult()
         {
-            AccessToken = AccessToken.Parse(await tokens.CreateSecurityTokenAsync(token, CancellationToken.None))
+            AccessToken = AccessToken.Parse(await tokens.CreateSecurityTokenAsync(token, Ct.None))
         };
     }
 
@@ -556,6 +588,30 @@ public class RemoteEndpointTests : BffTestBase
             url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Forbidden
         );
+    }
+
+    [Fact]
+    public async Task remote_api_endpoint_does_not_call_the_api_when_bff_middleware_is_missing()
+    {
+        Bff.UseBffPlacement = UseBffPlacement.Omitted;
+        Bff.OnConfigureApp += app => app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path));
+        await ConfigureBff(BffSetupType.V4Bff);
+
+        var ex = await Should.ThrowAsync<InvalidOperationException>(() => Bff.BrowserClient.GetAsync(Bff.Url(The.Path)));
+
+        ex.Message.ShouldContain("app.UseBff");
+        Api.ReceivedRequestCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task remote_api_endpoint_calls_the_api_without_bff_middleware_when_enforcement_is_disabled()
+    {
+        Bff.UseBffPlacement = UseBffPlacement.Omitted;
+        Bff.OnConfigureBffOptions += options => options.EnforceBffMiddleware = false;
+        Bff.OnConfigureApp += app => app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path));
+        await ConfigureBff(BffSetupType.V4Bff);
+
+        _ = await Bff.BrowserClient.GetAsync(Bff.Url(The.Path)).CheckHttpStatusCode();
     }
 
     [Theory, MemberData(nameof(AllSetups))]

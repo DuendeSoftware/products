@@ -46,22 +46,19 @@ internal class AntiForgeryMiddleware
             return;
         }
 
-
-        if (route.Config.Metadata != null)
+        if (route.Config.HasAntiforgeryCheck())
         {
-            if (route.Config.Metadata.TryGetValue(Constants.Yarp.AntiforgeryCheckMetadata, out var value))
+            if (!context.CheckAntiForgeryHeader(_options))
             {
-                if (string.Equals(value, true.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    if (!context.CheckAntiForgeryHeader(_options))
-                    {
-                        context.Response.StatusCode = 401;
-                        _logger.AntiForgeryValidationFailed(LogLevel.Warning, route.Config.RouteId);
+                context.Response.StatusCode = 401;
+                _logger.AntiForgeryValidationFailed(LogLevel.Warning, route.Config.RouteId);
 
-                        return;
-                    }
-                }
+                return;
             }
+
+            // Record that the header was checked for this endpoint, so the YARP access token
+            // transform can tell that proxyApp.UseAntiforgeryCheck() is in the pipeline.
+            context.Items[Constants.Middleware.YarpAntiForgeryCheckedEndpoint] = context.GetEndpoint();
         }
 
         await _next(context);

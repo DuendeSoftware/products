@@ -36,6 +36,20 @@ public class LocalEndpointTests : BffTestBase
         apiResult.Sub.ShouldBe(The.Sub);
     }
 
+    [Fact]
+    public async Task local_api_endpoint_does_not_run_when_bff_middleware_is_missing()
+    {
+        var handlerCalled = false;
+        Bff.UseBffPlacement = UseBffPlacement.Omitted;
+        Bff.OnConfigureApp += app => app.MapGet(The.Path, () => handlerCalled = true).AsBffApiEndpoint();
+        await ConfigureBff(BffSetupType.V4Bff);
+
+        var ex = await Should.ThrowAsync<InvalidOperationException>(() => Bff.BrowserClient.GetAsync(Bff.Url(The.Path)));
+
+        ex.Message.ShouldContain("app.UseBff");
+        handlerCalled.ShouldBeFalse();
+    }
+
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_authorized_local_endpoint_without_csrf_should_succeed_without_antiforgery_header(BffSetupType setup)

@@ -16,7 +16,7 @@ public class TokenExchangeGrantValidator : IExtensionGrantValidator
     // register for urn:ietf:params:oauth:grant-type:token-exchange
     public string GrantType => OidcConstants.GrantTypes.TokenExchange;
 
-    public async Task ValidateAsync(ExtensionGrantValidationContext context, CancellationToken ct)
+    public async Task ValidateAsync(ExtensionGrantValidationContext context, Ct ct)
     {
         // default response is error
         context.Result = new GrantValidationResult(TokenRequestErrors.InvalidRequest);

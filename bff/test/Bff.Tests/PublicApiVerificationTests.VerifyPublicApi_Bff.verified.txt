@@ -3,6 +3,7 @@
     [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.AccessToken>))]
     public readonly struct AccessToken : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessToken>
     {
+        [System.Obsolete(@"BFF no longer limits access token length. ATM's configured limits (UserTokenManagementOptions.MaxAccessTokenLength / ClientCredentialsTokenManagementOptions.MaxAccessTokenLength) apply to tokens it manages. This member will be removed in a future major version.")]
         public const int MaxLength = 32768;
         public AccessToken() { }
         public override string ToString() { }
@@ -306,6 +307,7 @@ namespace Duende.Bff.Configuration
         public Microsoft.AspNetCore.Http.PathString LoginPath { get; }
         public Microsoft.AspNetCore.Http.PathString LogoutPath { get; }
         public Microsoft.AspNetCore.Http.PathString ManagementBasePath { get; set; }
+        public bool RemoveCookieHeaderFromYarpRequests { get; set; }
         public bool RemoveSessionAfterRefreshTokenExpiration { get; set; }
         public bool RequireLogoutSessionId { get; set; }
         public bool RevokeRefreshTokenOnLogout { get; set; }

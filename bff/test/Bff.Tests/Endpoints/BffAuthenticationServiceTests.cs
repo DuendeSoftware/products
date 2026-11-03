@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Endpoints.Internal;
@@ -304,6 +305,98 @@ public class BffAuthenticationServiceTests
         context.Response.StatusCode.ShouldBe(StatusCodes.Status401Unauthorized);
         context.Response.Headers["WWW-Authenticate"].ToString().ShouldBe("Bearer api");
         _ = inner.Received(1).ChallengeAsync(context, "Bearer", Arg.Any<AuthenticationProperties?>());
+    }
+
+    [Fact]
+    public async Task authenticate_should_pass_scheme_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        _ = inner.AuthenticateAsync(Arg.Any<HttpContext>(), "Bearer").Returns(AuthenticateResult.NoResult());
+
+        var frontend = new BffFrontend(BffFrontendName.Parse("some-frontend"));
+        var context = CreateContext();
+        var sut = CreateSut(inner, context, frontend);
+
+        _ = await sut.AuthenticateAsync(context, "Bearer");
+
+        _ = await inner.Received(1).AuthenticateAsync(context, "Bearer");
+    }
+
+    [Fact]
+    public async Task authenticate_with_null_scheme_should_pass_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        var frontend = new BffFrontend(BffFrontendName.Parse("some-frontend"));
+        var context = CreateContext();
+        var sut = CreateSut(inner, context, frontend);
+
+        _ = await sut.AuthenticateAsync(context, scheme: null);
+
+        _ = await inner.Received(1).AuthenticateAsync(context, scheme: null);
+    }
+
+    [Fact]
+    public async Task authenticate_with_no_frontend_selected_should_pass_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        var context = CreateContext();
+        var sut = CreateSut(inner, context);
+
+        _ = await sut.AuthenticateAsync(context, "Bearer");
+
+        _ = await inner.Received(1).AuthenticateAsync(context, "Bearer");
+    }
+
+    [Fact]
+    public async Task sign_in_should_pass_scheme_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        var frontend = new BffFrontend(BffFrontendName.Parse("some-frontend"));
+        var context = CreateContext();
+        var sut = CreateSut(inner, context, frontend);
+        var principal = new ClaimsPrincipal();
+
+        await sut.SignInAsync(context, "Bearer", principal, new AuthenticationProperties());
+
+        await inner.Received(1).SignInAsync(context, "Bearer", principal, Arg.Any<AuthenticationProperties?>());
+    }
+
+    [Fact]
+    public async Task sign_out_should_pass_scheme_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        var frontend = new BffFrontend(BffFrontendName.Parse("some-frontend"));
+        var context = CreateContext();
+        var sut = CreateSut(inner, context, frontend);
+
+        await sut.SignOutAsync(context, "Bearer", new AuthenticationProperties());
+
+        await inner.Received(1).SignOutAsync(context, "Bearer", Arg.Any<AuthenticationProperties?>());
+    }
+
+    [Fact]
+    public async Task sign_out_with_null_scheme_should_pass_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        var frontend = new BffFrontend(BffFrontendName.Parse("some-frontend"));
+        var context = CreateContext();
+        var sut = CreateSut(inner, context, frontend);
+
+        await sut.SignOutAsync(context, scheme: null, new AuthenticationProperties());
+
+        await inner.Received(1).SignOutAsync(context, scheme: null, Arg.Any<AuthenticationProperties?>());
+    }
+
+    [Fact]
+    public async Task sign_out_with_no_frontend_selected_should_pass_through_unchanged()
+    {
+        var inner = Substitute.For<IAuthenticationService>();
+        var context = CreateContext();
+        var sut = CreateSut(inner, context);
+
+        await sut.SignOutAsync(context, "Bearer", new AuthenticationProperties());
+
+        await inner.Received(1).SignOutAsync(context, "Bearer", Arg.Any<AuthenticationProperties?>());
     }
 
     private static BffAuthenticationService CreateSut(IAuthenticationService inner, HttpContext? context = null, BffFrontend? frontend = null)

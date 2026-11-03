@@ -28,6 +28,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public bool MapGetForRoot { get; set; } = true;
 
     public bool EnableBackChannelHandler { get; set; } = true;
+    public UseBffPlacement UseBffPlacement { get; set; } = UseBffPlacement.AfterAuthorization;
     public event Action<IBffServicesBuilder> OnConfigureBff = _ => { };
 
     public override void Initialize()
@@ -81,6 +82,11 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
     protected override void ConfigureApp(IApplicationBuilder app)
     {
+        if (UseBffPlacement == UseBffPlacement.BeforeRouting)
+        {
+            _ = app.UseBff();
+        }
+
         _ = app.UseRouting();
         _ = app.Use(async (c, n) =>
         {
@@ -93,7 +99,11 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
         });
         _ = app.UseAuthorization();
 
-        _ = app.UseBff();
+        if (UseBffPlacement == UseBffPlacement.AfterAuthorization)
+        {
+            _ = app.UseBff();
+        }
+
         base.ConfigureApp(app);
     }
 
@@ -104,4 +114,11 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     }
 
     public void AddOrUpdateFrontend(BffFrontend frontend) => Resolve<FrontendCollection>().AddOrUpdate(frontend);
+}
+
+public enum UseBffPlacement
+{
+    AfterAuthorization,
+    BeforeRouting,
+    Omitted
 }

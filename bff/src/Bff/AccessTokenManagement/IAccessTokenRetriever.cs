@@ -7,6 +7,11 @@ namespace Duende.Bff.AccessTokenManagement;
 /// <summary>
 /// Retrieves access tokens
 /// </summary>
+/// <remarks>
+/// BFF doesn't limit access token length. Tokens obtained through Duende.AccessTokenManagement (ATM) are
+/// checked against ATM's configured limits. An implementation that gets tokens without ATM (for example, by
+/// calling a token endpoint itself for token exchange) is responsible for any length validation.
+/// </remarks>
 public interface IAccessTokenRetriever
 {
     /// <summary>

@@ -36,14 +36,14 @@ public class TestClient(Uri baseAddress, CookieHandler cookies, HttpMessageHandl
         return new TestClient(baseAddress, cookieHandler, handler);
     }
 
-    public Task<HttpResponseMessage> GetAsync(string path, Dictionary<string, string>? headers = null, CancellationToken ct = default)
+    public Task<HttpResponseMessage> GetAsync(string path, Dictionary<string, string>? headers = null, Ct ct = default)
     {
         var request = BuildRequest(HttpMethod.Get, path, headers);
 
         return Client.SendAsync(request);
     }
 
-    public Task<HttpResponseMessage> PostAsync(string path, object? body, Dictionary<string, string>? headers = null, CancellationToken ct = default)
+    public Task<HttpResponseMessage> PostAsync(string path, object? body, Dictionary<string, string>? headers = null, Ct ct = default)
     {
         var request = BuildRequest(HttpMethod.Post, path, headers);
         request.Content = JsonContent.Create(body);
@@ -51,7 +51,7 @@ public class TestClient(Uri baseAddress, CookieHandler cookies, HttpMessageHandl
         return Client.SendAsync(request);
     }
 
-    public Task<HttpResponseMessage> PostAsync<T>(Uri path, T body, Dictionary<string, string>? headers = null, CancellationToken ct = default)
+    public Task<HttpResponseMessage> PostAsync<T>(Uri path, T body, Dictionary<string, string>? headers = null, Ct ct = default)
         where T : HttpContent
     {
         var request = BuildRequest(HttpMethod.Post, path.ToString(), headers);
@@ -81,7 +81,7 @@ public class TestClient(Uri baseAddress, CookieHandler cookies, HttpMessageHandl
     }
 
 
-    public async Task<HttpResponseMessage> TriggerLogin(string userName = "alice", string password = "alice", CancellationToken ct = default) => await GetAsync("/bff/login");
+    public async Task<HttpResponseMessage> TriggerLogin(string userName = "alice", string password = "alice", Ct ct = default) => await GetAsync("/bff/login");
 
     public async Task<HttpResponseMessage> TriggerLogout()
     {

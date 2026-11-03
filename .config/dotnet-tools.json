@@ -2,6 +2,12 @@
   "version": 1,
   "isRoot": true,
   "tools": {
+    "cyclonedx": {
+      "version": "6.3.1",
+      "commands": [
+        "dotnet-CycloneDX"
+      ]
+    },
     "NuGetKeyVaultSignTool": {
       "version": "3.2.3",
       "commands": [

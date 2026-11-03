@@ -11,6 +11,7 @@ namespace Duende.Bff.Tests.TestInfra;
 public class ApiHost : TestHost
 {
     public HttpStatusCode? ApiStatusCodeToReturn { get; set; }
+    public int ReceivedRequestCount { get; private set; }
 
 
     public ApiHost(TestHostContext context, IdentityServerTestHost identityServerUri) : base(context, new Uri("https://api"))
@@ -32,6 +33,7 @@ public class ApiHost : TestHost
             _ = app.Map("/{**catch-all}",
                 async context =>
                 {
+                    ReceivedRequestCount++;
                     await ReturnApiCallDetails(context, () => ApiStatusCodeToReturn ?? HttpStatusCode.OK);
                 });
         };

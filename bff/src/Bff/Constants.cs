@@ -10,7 +10,22 @@ public static class Constants
 {
     internal static class Middleware
     {
+        /// <summary>
+        /// Key used in <see cref="Microsoft.AspNetCore.Http.HttpContext.Items"/> to record the
+        /// <see cref="Microsoft.AspNetCore.Http.Endpoint"/> that BffAntiForgeryMiddleware
+        /// (app.UseBff()) ran for. Only set once routing has selected an endpoint.
+        /// CheckForBffMiddleware compares it with the current endpoint, so a UseBff() call
+        /// before UseRouting() doesn't count.
+        /// </summary>
         internal const string AntiForgeryMarker = "Duende.Bff.AntiForgery";
+
+        /// <summary>
+        /// Key used in <see cref="Microsoft.AspNetCore.Http.HttpContext.Items"/> to record the
+        /// <see cref="Microsoft.AspNetCore.Http.Endpoint"/> for which the YARP AntiForgeryMiddleware
+        /// (proxyApp.UseAntiforgeryCheck()) checked and accepted the anti-forgery header of a route
+        /// configured with WithAntiforgeryCheck().
+        /// </summary>
+        internal const string YarpAntiForgeryCheckedEndpoint = "Duende.Bff.Yarp.AntiForgeryCheckedEndpoint";
     }
 
     /// <summary>

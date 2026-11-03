@@ -22,7 +22,7 @@ public class BffClient
         _client.DefaultRequestHeaders.Add("X-CSRF", "1");
     }
 
-    public async Task TriggerLogin(string userName = "alice", string password = "alice", CancellationToken ct = default)
+    public async Task TriggerLogin(string userName = "alice", string password = "alice", Ct ct = default)
     {
         var triggerLoginResponse = await _client.GetAsync("/bff/login");
 

@@ -3,6 +3,8 @@
 
 using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Duende.Bff;
 
@@ -17,7 +19,7 @@ public static class EndpointConventionBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IEndpointConventionBuilder AsBffApiEndpoint(this IEndpointConventionBuilder builder) => builder.WithMetadata(new BffApiAttribute());
+    public static IEndpointConventionBuilder AsBffApiEndpoint(this IEndpointConventionBuilder builder) => builder.WithMetadata(new BffApiAttribute()).RequireBffMiddleware();
 
     /// <summary>
     /// Adds marker that will cause the BFF framework to skip all antiforgery for this endpoint.
@@ -32,4 +34,18 @@ public static class EndpointConventionBuilderExtensions
     /// <param name="builder"></param>
     /// <returns></returns>
     public static IEndpointConventionBuilder SkipResponseHandling(this IEndpointConventionBuilder builder) => builder.WithMetadata(new BffApiSkipResponseHandlingAttribute());
+
+    internal static TBuilder RequireBffMiddleware<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder
+    {
+        builder.Add(endpoint =>
+        {
+            var next = endpoint.RequestDelegate!;
+            endpoint.RequestDelegate = context =>
+            {
+                context.CheckForBffMiddleware(context.RequestServices.GetRequiredService<IOptions<BffOptions>>().Value);
+                return next(context);
+            };
+        });
+        return builder;
+    }
 }

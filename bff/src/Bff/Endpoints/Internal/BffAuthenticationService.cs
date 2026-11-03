@@ -11,8 +11,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.Endpoints.Internal;
 
-// this decorates the real authentication service to detect when
-// Challenge of Forbid is being called for a BFF API endpoint
+// This decorates the real authentication service to detect when Challenge or Forbid is being called
+// for a BFF API endpoint, so it can translate the resulting redirect into a 401/403 response instead.
+// Authenticate/SignIn/SignOut are pure pass-throughs: scheme remapping for "no scheme specified" /
+// default-scheme calls is handled by BffAuthenticationSchemeProvider, which resolves the frontend's
+// own scheme for the default authenticate/sign-in/forbid/challenge/sign-out scheme methods.
 internal class BffAuthenticationService(Decorator<IAuthenticationService> decorator,
     CurrentFrontendAccessor currentFrontendAccessor,
     ILogger<BffAuthenticationService> logger)
@@ -22,39 +25,9 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
 
     public Task SignInAsync(HttpContext context, string? scheme, ClaimsPrincipal principal, AuthenticationProperties? properties) => _inner.SignInAsync(context, scheme, principal, properties);
 
-    public async Task SignOutAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
-    {
-        if (currentFrontendAccessor.TryGet(out var frontend))
-        {
-            if (scheme == frontend.CookieSchemeName.ToString() || scheme == frontend.OidcSchemeName.ToString())
-            {
-                await _inner.SignOutAsync(context, scheme, properties);
-                return;
-            }
+    public Task SignOutAsync(HttpContext context, string? scheme, AuthenticationProperties? properties) => _inner.SignOutAsync(context, scheme, properties);
 
-            logger.SigningOutOfScheme(LogLevel.Debug, scheme);
-            await _inner.SignOutAsync(context, frontend.OidcSchemeName, properties);
-            return;
-        }
-
-        await _inner.SignOutAsync(context, scheme, properties);
-    }
-
-    public async Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string? scheme)
-    {
-        if (currentFrontendAccessor.TryGet(out var frontend))
-        {
-            if (scheme == frontend.CookieSchemeName.ToString() || scheme == frontend.OidcSchemeName.ToString())
-            {
-                return await _inner.AuthenticateAsync(context, scheme);
-            }
-
-            logger.AuthenticatingScheme(LogLevel.Trace, scheme);
-            return await _inner.AuthenticateAsync(context, frontend.CookieSchemeName);
-        }
-
-        return await _inner.AuthenticateAsync(context, scheme);
-    }
+    public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string? scheme) => _inner.AuthenticateAsync(context, scheme);
 
     public async Task ChallengeAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
     {

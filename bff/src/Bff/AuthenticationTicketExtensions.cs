@@ -104,9 +104,12 @@ public static class AuthenticationTicketExtensions
             var envelope = JsonSerializer.Deserialize<Envelope>(session.Ticket, JsonOptions);
             if (envelope == null || envelope.Version != 1)
             {
-                logger.AuthenticationTicketEnvelopeVersionInvalid(
-                    LogLevel.Debug,
-                    session.GetUserSessionKey());
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.AuthenticationTicketEnvelopeVersionInvalid(
+                        LogLevel.Debug,
+                        session.GetUserSessionKey());
+                }
                 return null;
             }
 

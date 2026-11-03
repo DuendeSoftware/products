@@ -81,7 +81,7 @@ internal class DefaultBackchannelLogoutEndpoint(
             logger.NoClaimsInBackChannelJwt(LogLevel.Debug);
             return null;
         }
-        else
+        else if (logger.IsEnabled(LogLevel.Trace))
         {
             logger.ClaimsFoundInBackChannelJwt(LogLevel.Trace, string.Join(',', claims.Claims));
         }

@@ -71,7 +71,8 @@ public static class RouteBuilderExtensions
                     yarpTransformBuilder(context);
                 },
                 requestConfig: requestConfig)
-            .WithMetadata(new BffRemoteApiEndpointMetadata());
+            .WithMetadata(new BffRemoteApiEndpointMetadata())
+            .RequireBffMiddleware();
     }
 
 }

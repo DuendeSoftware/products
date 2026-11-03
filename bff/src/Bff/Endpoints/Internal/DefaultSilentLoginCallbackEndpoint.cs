@@ -53,7 +53,10 @@ internal class DefaultSilentLoginCallbackEndpoint(
         context.Response.Headers["Cache-Control"] = "no-store, no-cache, max-age=0";
         context.Response.Headers["Pragma"] = "no-cache";
 
-        logger.SilentLoginEndpointRenderingHtml(LogLevel.Debug, origin.Sanitize(), result);
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.SilentLoginEndpointRenderingHtml(LogLevel.Debug, origin.Sanitize(), result);
+        }
 
         await context.Response.WriteAsync(html, Encoding.UTF8, ct);
     }
@@ -70,7 +73,11 @@ internal class DefaultSilentLoginCallbackEndpoint(
         referer = refererValues.FirstOrDefault()?.TrimEnd('/') ?? string.Empty;
         if (!options.Value.AllowedSilentLoginReferers.Contains(referer, StringComparer.OrdinalIgnoreCase))
         {
-            logger.SilentLoginEndpointRefererNotAllowed(LogLevel.Information, referer.Sanitize() ?? "", string.Join(", ", options.Value.AllowedSilentLoginReferers));
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.SilentLoginEndpointRefererNotAllowed(LogLevel.Information, referer.Sanitize() ?? "", string.Join(", ", options.Value.AllowedSilentLoginReferers));
+            }
+
             return false;
         }
 

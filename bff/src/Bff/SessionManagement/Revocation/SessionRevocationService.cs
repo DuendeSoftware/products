@@ -44,15 +44,38 @@ internal class SessionRevocationService(
                 var refreshToken = ticket.Properties.GetTokenValue("refresh_token");
                 if (!string.IsNullOrWhiteSpace(refreshToken))
                 {
-                    await tokenEndpoint.RevokeRefreshTokenAsync(
-                        new UserRefreshToken(RefreshToken.Parse(refreshToken),
-                        options.Value.DPoPJsonWebKey), new UserTokenRequestParameters(), ct);
-
-                    logger.RefreshTokenRevoked(LogLevel.Debug, ticket.GetSubjectId(), ticket.GetSessionId());
+                    await TryRevokeRefreshTokenAsync(ticket, refreshToken, filter, ct);
                 }
             }
         }
 
         await sessionStore.DeleteUserSessionsAsync(buildUserPartitionKey(), filter, ct);
+    }
+
+    /// <summary>
+    /// Revokes a single session's refresh token. Revocation is best effort: a failure is logged
+    /// and swallowed, so that it can't stop the remaining tokens from being revoked or the
+    /// user's sessions from being deleted.
+    /// </summary>
+    private async Task TryRevokeRefreshTokenAsync(AuthenticationTicket ticket, string refreshToken, UserSessionsFilter filter, Ct ct)
+    {
+        try
+        {
+            await tokenEndpoint.RevokeRefreshTokenAsync(
+                // This refresh token comes from our own session store and is sent back to the provider
+                // that issued it, so refusing an oversized token here would mean it never gets revoked.
+                new UserRefreshToken(RefreshToken.Parse(refreshToken, int.MaxValue), _options.DPoPJsonWebKey),
+                new UserTokenRequestParameters(),
+                ct);
+
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.RefreshTokenRevoked(LogLevel.Debug, ticket.GetSubjectId(), ticket.GetSessionId());
+            }
+        }
+        catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
+        {
+            logger.FailedToRevokeRefreshToken(LogLevel.Warning, ex, filter.SubjectId, ticket.GetSessionId());
+        }
     }
 }

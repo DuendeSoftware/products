@@ -47,7 +47,11 @@ internal class DefaultLoginEndpoint(
 
         if (prompt != null && !supportedPromptValues.Contains(prompt))
         {
-            logger.InvalidPromptValue(LogLevel.Information, prompt.Sanitize());
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.InvalidPromptValue(LogLevel.Information, prompt.Sanitize());
+            }
+
             context.ReturnHttpProblem("Invalid prompt value", (Constants.RequestParameters.Prompt, [$"prompt '{prompt}' is not supported"]));
             return;
         }
@@ -57,7 +61,11 @@ internal class DefaultLoginEndpoint(
             if (!Uri.TryCreate(returnUrl, UriKind.RelativeOrAbsolute, out var returnUri)
                 || !await returnUrlValidator.IsValidAsync(returnUri, ct))
             {
-                logger.InvalidReturnUrl(LogLevel.Information, returnUrl.Sanitize());
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.InvalidReturnUrl(LogLevel.Information, returnUrl.Sanitize());
+                }
+
                 context.ReturnHttpProblem("Invalid return url", (Constants.RequestParameters.ReturnUrl, [$"ReturnUrl '{returnUrl}' was invalid"]));
                 return;
             }
@@ -80,7 +88,10 @@ internal class DefaultLoginEndpoint(
             props.Items.Add(Constants.BffFlags.Prompt, prompt);
         }
 
-        logger.LoginEndpointTriggeringChallenge(LogLevel.Debug, returnUrl.Sanitize());
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LoginEndpointTriggeringChallenge(LogLevel.Debug, returnUrl.Sanitize());
+        }
 
         await context.ChallengeAsync(props);
     }

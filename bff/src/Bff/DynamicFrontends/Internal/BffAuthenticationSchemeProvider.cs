@@ -40,6 +40,60 @@ internal class BffAuthenticationSchemeProvider(
         return scheme ?? GetBffAuthenticationScheme(name);
     }
 
+    public override Task<AuthenticationScheme?> GetDefaultAuthenticateSchemeAsync() =>
+        TryGetSelectedFrontendCookieScheme(out var scheme)
+            ? Task.FromResult(scheme)
+            : base.GetDefaultAuthenticateSchemeAsync();
+
+    public override Task<AuthenticationScheme?> GetDefaultSignInSchemeAsync() =>
+        TryGetSelectedFrontendCookieScheme(out var scheme)
+            ? Task.FromResult(scheme)
+            : base.GetDefaultSignInSchemeAsync();
+
+    public override Task<AuthenticationScheme?> GetDefaultForbidSchemeAsync() =>
+        TryGetSelectedFrontendCookieScheme(out var scheme)
+            ? Task.FromResult(scheme)
+            : base.GetDefaultForbidSchemeAsync();
+
+    public override Task<AuthenticationScheme?> GetDefaultChallengeSchemeAsync() =>
+        TryGetSelectedFrontendOidcScheme(out var scheme)
+            ? Task.FromResult(scheme)
+            : base.GetDefaultChallengeSchemeAsync();
+
+    public override Task<AuthenticationScheme?> GetDefaultSignOutSchemeAsync() =>
+        TryGetSelectedFrontendOidcScheme(out var scheme)
+            ? Task.FromResult(scheme)
+            : base.GetDefaultSignOutSchemeAsync();
+
+    // When a frontend is selected for the current request, the BFF's own cookie/OIDC schemes are
+    // always used for the default authentication operations, regardless of how the host application
+    // configured its own default schemes (e.g. DefaultAuthenticateScheme = "Bearer"). This is safe
+    // because explicitly named schemes (e.g. [Authorize(AuthenticationSchemes = "Bearer")]) are never
+    // affected by this override - only callers that ask for "the default scheme" are.
+    private bool TryGetSelectedFrontendCookieScheme(out AuthenticationScheme? scheme)
+    {
+        if (httpContextAccessor.HttpContext != null && currentFrontendAccessor.TryGet(out var frontend))
+        {
+            scheme = GetBffAuthenticationScheme(frontend.CookieSchemeName);
+            return true;
+        }
+
+        scheme = null;
+        return false;
+    }
+
+    private bool TryGetSelectedFrontendOidcScheme(out AuthenticationScheme? scheme)
+    {
+        if (httpContextAccessor.HttpContext != null && currentFrontendAccessor.TryGet(out var frontend))
+        {
+            scheme = GetBffAuthenticationScheme(frontend.OidcSchemeName);
+            return true;
+        }
+
+        scheme = null;
+        return false;
+    }
+
     private BffAuthenticationScheme? GetBffAuthenticationScheme(string name)
     {
         BffFrontend? frontend = null;

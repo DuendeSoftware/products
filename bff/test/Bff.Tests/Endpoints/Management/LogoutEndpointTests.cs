@@ -63,6 +63,23 @@ public class LogoutEndpointTests : BffTestBase
 
     [Theory]
     [MemberData(nameof(AllSetups))]
+    public async Task logout_endpoint_with_invalid_sid_should_not_return_session_id(BffSetupType setup)
+    {
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+        var sid = await Bff.BrowserClient.GetSid();
+
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout?sid=wrong"));
+        var body = await response.Content.ReadAsStringAsync();
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        body.ShouldNotContain(sid);
+
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync()).ShouldBeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_for_authenticated_when_require_option_is_false_should_not_require_sid(
         BffSetupType setup)
     {

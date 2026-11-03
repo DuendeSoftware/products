@@ -68,7 +68,10 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(json, Encoding.UTF8, ct);
 
-            logger.UserEndpointLoggedInWithClaims(LogLevel.Trace, string.Join(',', claims));
+            if (logger.IsEnabled(LogLevel.Trace))
+            {
+                logger.UserEndpointLoggedInWithClaims(LogLevel.Trace, string.Join(',', claims));
+            }
         }
     }
 

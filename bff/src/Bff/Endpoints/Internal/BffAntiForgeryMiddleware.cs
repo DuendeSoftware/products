@@ -23,8 +23,12 @@ internal class BffAntiForgeryMiddleware(
     /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
-        // add marker so we can determine if middleware has run later in the pipeline
-        context.Items[Constants.Middleware.AntiForgeryMarker] = true;
+        // record the endpoint this middleware ran for, so CheckForBffMiddleware can tell later in the
+        // pipeline that it ran after routing selected the endpoint
+        if (context.GetEndpoint() is { } selectedEndpoint)
+        {
+            context.Items[Constants.Middleware.AntiForgeryMarker] = selectedEndpoint;
+        }
 
         if (options.Value.DisableAntiForgeryCheck(context))
         {
@@ -55,7 +59,10 @@ internal class BffAntiForgeryMiddleware(
         var isUiEndpoint = endpoint.Metadata.GetMetadata<IBffUIApiEndpoint>() != null;
         if (isUiEndpoint && context.IsAjaxRequest())
         {
-            logger.ManagementEndpointAccessedViaAjax(LogLevel.Debug, context.Request.Path.Sanitize());
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.ManagementEndpointAccessedViaAjax(LogLevel.Debug, context.Request.Path.Sanitize());
+            }
         }
 
         await next(context);

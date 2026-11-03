@@ -40,8 +40,8 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
                 // prevent unauthenticated logout requests (similar to OIDC front channel)
                 if (options.Value.RequireLogoutSessionId && userSessionId != passedSessionId)
                 {
-                    logger.InvalidSid(LogLevel.Information, userSessionId);
-                    context.ReturnHttpProblem("Invalid Session ID", (JwtClaimTypes.SessionId, [$"SessionId '{userSessionId}' was invalid"]));
+                    logger.LogoutSessionIdMismatch(LogLevel.Information);
+                    context.ReturnHttpProblem("Invalid Session ID", (JwtClaimTypes.SessionId, ["SessionId was missing or invalid"]));
                     return;
                 }
             }
@@ -53,7 +53,11 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
             if (!Uri.TryCreate(returnUrl, UriKind.RelativeOrAbsolute, out var returnUri) ||
                 !await returnUrlValidator.IsValidAsync(returnUri, ct))
             {
-                logger.InvalidReturnUrl(LogLevel.Information, returnUrl.Sanitize());
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.InvalidReturnUrl(LogLevel.Information, returnUrl.Sanitize());
+                }
+
                 context.ReturnHttpProblem("Invalid return url", (Constants.RequestParameters.ReturnUrl, [$"ReturnUrl '{returnUrl}' was invalid"]));
                 return;
             }
@@ -80,7 +84,10 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
             RedirectUri = returnUrl
         };
 
-        logger.LogoutEndpointTriggeringSignOut(LogLevel.Debug, returnUrl.Sanitize());
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogoutEndpointTriggeringSignOut(LogLevel.Debug, returnUrl.Sanitize());
+        }
 
         // trigger idp logout
         await context.SignOutAsync(props);

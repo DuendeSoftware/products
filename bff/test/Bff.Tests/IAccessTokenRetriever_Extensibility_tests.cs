@@ -62,6 +62,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
                 subPath =>
                 {
                     _ = subPath.UseRouting();
+                    _ = subPath.UseBff();
                     _ = subPath.UseEndpoints((endpoints) =>
                     {
                         _ = endpoints.MapRemoteBffApiEndpoint("/custom_within_subpath", Api.Url("/some/path"))

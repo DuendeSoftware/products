@@ -35,5 +35,5 @@ public static class ReverseProxyEndpointConventionBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static ReverseProxyConventionBuilder AsBffApiEndpoint(this ReverseProxyConventionBuilder builder) => builder.WithMetadata(new BffApiAttribute());
+    public static ReverseProxyConventionBuilder AsBffApiEndpoint(this ReverseProxyConventionBuilder builder) => builder.WithMetadata(new BffApiAttribute()).RequireBffMiddleware();
 }

@@ -12,6 +12,10 @@ namespace Bff;
 
 public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IAccessTokenRetriever
 {
+    // BFF doesn't limit access token length. This retriever gets its token without ATM,
+    // so it's responsible for rejecting tokens that are too long.
+    private const int MaxAccessTokenLength = 32 * 1024;
+
     public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, Ct ct = default)
     {
         var result = await inner.GetAccessTokenAsync(context, ct);
@@ -44,6 +48,14 @@ public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IA
                 {
                     Error = exchangeResponse.Error ?? "Failed to get access token",
                     ErrorDescription = exchangeResponse.ErrorDescription
+                };
+            }
+
+            if (exchangeResponse.AccessToken.Length > MaxAccessTokenLength)
+            {
+                return new AccessTokenRetrievalError
+                {
+                    Error = "Token exchange failed. Access token is too long"
                 };
             }
 

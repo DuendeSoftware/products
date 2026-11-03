@@ -32,14 +32,22 @@ internal static class HttpContextExtensions
     {
         if (options.EnforceBffMiddleware)
         {
-            var found = context.Items.TryGetValue(Constants.Middleware.AntiForgeryMarker, out _);
-            if (!found)
+            if (!context.BffMiddlewareRanForEndpoint())
             {
                 throw new InvalidOperationException(
-                    "The BFF middleware is missing in the pipeline. Add 'app.UseBff' after 'app.UseRouting' but before 'app.UseAuthorization'");
+                    "The BFF middleware is missing in the pipeline or runs before 'app.UseRouting'. Add 'app.UseBff' after 'app.UseRouting' but before 'app.UseAuthorization'");
             }
         }
     }
+
+    /// <summary>
+    /// True when the BFF middleware (app.UseBff()) ran for the endpoint that routing selected
+    /// for this request.
+    /// </summary>
+    public static bool BffMiddlewareRanForEndpoint(this HttpContext context) =>
+        context.GetEndpoint() is { } endpoint
+        && context.Items.TryGetValue(Constants.Middleware.AntiForgeryMarker, out var markedEndpoint)
+        && ReferenceEquals(markedEndpoint, endpoint);
 
     public static bool CheckAntiForgeryHeader(this HttpContext context, BffOptions options)
     {
