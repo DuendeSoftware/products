@@ -200,7 +200,7 @@ public static class BffEndpointRouteBuilderExtensions
 
     internal static void CheckLicense(this IServiceProvider serviceProvider)
     {
-        var license = serviceProvider.GetRequiredService<LicenseValidator>();
-        _ = license.CheckLicense();
+        var license = serviceProvider.GetRequiredService<BffLicenseValidator>();
+        license.ValidateLicense();
     }
 }

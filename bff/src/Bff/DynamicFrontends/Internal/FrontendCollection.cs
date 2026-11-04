@@ -3,14 +3,12 @@
 
 using System.Collections;
 using Duende.Bff.Configuration;
-using Duende.Bff.Licensing;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
 internal class FrontendCollection : IDisposable, IFrontendCollection
 {
-    private readonly LicenseValidator _licenseValidator;
     private readonly IBffPluginLoader[] _plugins;
     private readonly object _syncRoot = new();
 
@@ -26,13 +24,11 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     internal event Action<BffFrontend> OnFrontendAdded = (_) => { };
 
     public FrontendCollection(
-        LicenseValidator licenseValidator,
         IOptionsMonitor<BffConfiguration> bffConfiguration,
         IEnumerable<IBffPluginLoader> plugins,
         IEnumerable<BffFrontend>? frontendsConfiguredDuringStartup = null
     )
     {
-        _licenseValidator = licenseValidator;
         _plugins = plugins.ToArray();
         _frontends = ReadFrontends(bffConfiguration.CurrentValue, frontendsConfiguredDuringStartup ?? []);
 

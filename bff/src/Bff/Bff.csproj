@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect"/>
+    <PackageReference Include="Duende.Private.Licensing"/>
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid"/>
   </ItemGroup>
 

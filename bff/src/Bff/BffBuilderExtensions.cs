@@ -18,6 +18,7 @@ using Duende.Bff.SessionManagement.Configuration;
 using Duende.Bff.SessionManagement.Revocation;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
+using Duende.Private.Licencing.V2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -25,6 +26,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff;
@@ -47,15 +49,15 @@ public static class BffBuilderExtensions
 
     internal static T AddBaseBffServices<T>(this T builder) where T : IBffServicesBuilder
     {
-        _ = builder.Services.AddSingleton<GetLicenseKey>(sp =>
-            () => sp.GetRequiredService<IOptions<BffOptions>>().Value.LicenseKey);
-        _ = builder.Services.AddSingleton<License>(sp =>
+        builder.Services.TryAddSingleton(sp =>
         {
-            var accessor = sp.GetRequiredService<LicenseAccessor>();
+            var logger = sp.GetRequiredService<ILogger<V2LicenseAccessor>>();
+            var options = sp.GetRequiredService<IOptions<BffOptions>>().Value;
+            var accessor = new V2LicenseAccessor(() => options.LicenseKey, logger);
             return accessor.Current;
         });
-        _ = builder.Services.AddSingleton<LicenseAccessor>();
         builder.Services.TryAddSingleton<LicenseValidator>();
+        builder.Services.TryAddSingleton<BffLicenseValidator>();
         _ = builder.Services.AddDistributedMemoryCache();
 
         // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
@@ -98,11 +100,6 @@ public static class BffBuilderExtensions
 
         _ = builder.Services
             .AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
-
-        _ = builder.Services.AddSingleton<TrialModeAuthenticatedSessionTracker>();
-        _ = builder.Services
-            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
-                PostConfigureApplicationCookieTrialModeCheck>();
 
         AddBffMetrics(builder);
 

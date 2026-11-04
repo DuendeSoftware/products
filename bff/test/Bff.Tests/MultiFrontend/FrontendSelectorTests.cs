@@ -23,8 +23,7 @@ public class FrontendSelectorTests
     public FrontendSelectorTests()
     {
         _frontendCollection = new(plugins: [],
-            bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()),
-            licenseValidator: Some.LicenseValidator
+            bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration())
         );
         var testLoggerProvider = new TestLoggerProvider((s) =>
         {

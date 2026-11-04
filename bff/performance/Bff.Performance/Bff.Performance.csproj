@@ -9,6 +9,8 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Pins a patched version of a transitive dependency of the NBomber packages (GHSA-qhrr-8q5h-9q3h). -->
+    <PackageReference Include="MessagePack" />
     <PackageReference Include="NBomber" />
     <PackageReference Include="NBomber.Http" />
   </ItemGroup>

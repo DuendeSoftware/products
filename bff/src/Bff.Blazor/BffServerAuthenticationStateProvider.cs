@@ -52,7 +52,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         BuildUserSessionPartitionKey buildUserSessionPartitionKey,
         IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
-        LicenseValidator licenseValidator,
+        BffLicenseValidator licenseValidator,
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
     {
@@ -68,7 +68,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
 
-        _ = licenseValidator.CheckLicense();
+        licenseValidator.ValidateLicense();
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task) => _authenticationStateTask = task;
