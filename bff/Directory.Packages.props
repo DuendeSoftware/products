@@ -23,8 +23,8 @@
 		<PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.0" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.0" />
-		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
-		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.0" />
+		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.32" />
+		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.21" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.0" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />

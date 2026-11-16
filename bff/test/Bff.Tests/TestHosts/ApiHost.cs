@@ -7,12 +7,14 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 
 namespace Duende.Bff.Tests.TestHosts
 {
     public class ApiHost : GenericHost
     {
         public int? ApiStatusCodeToReturn { get; set; }
+        public Dictionary<string, StringValues> ResponseHeadersToReturn { get; } = [];
 
         private readonly IdentityServerHost _identityServerHost;
 
@@ -71,6 +73,11 @@ namespace Duende.Bff.Tests.TestHosts
 
                 endpoints.Map("/{**catch-all}", async context =>
                 {
+                    foreach (var (name, values) in ResponseHeadersToReturn)
+                    {
+                        context.Response.Headers[name] = values;
+                    }
+
                     // capture body if present
                     var body = default(string);
                     if (context.Request.HasJsonContentType())

@@ -75,6 +75,8 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
+        transformBuildContext.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(Options.Create(_options)));
+
         // Applies to every route, with or without token metadata, matching the direct forwarder
         // (MapRemoteBffApiEndpoint), which already removes the Cookie header.
         transformBuildContext.AddRequestTransform(transformContext =>

@@ -28,6 +28,10 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
     <!-- KubernetesClient 15.0.1 (via Aspire.Hosting.AppHost) -->
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w7r3-mgwf-4mqq" />
+    <!-- Aspire.Hosting.AppHost / Aspire.Hosting 9.0.0 -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <!-- Aspire.Dashboard.Sdk.<rid> 9.0.0 (via Aspire.Hosting.AppHost) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
   </ItemGroup>
   <Import Project="../samples.props" />
 </Project>

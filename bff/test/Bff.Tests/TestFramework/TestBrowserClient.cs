@@ -41,6 +41,11 @@ public class TestBrowserClient : HttpClient
     private readonly CookieHandler _handler;
 
     private CookieContainer CookieContainer => _handler.CookieContainer;
+
+    /// <summary>
+    /// Exposes the underlying cookie jar, e.g. so tests can copy cookies between browser clients.
+    /// </summary>
+    public CookieContainer Cookies => _handler.CookieContainer;
     public Uri? CurrentUri => _handler.CurrentUri;
     public HttpResponseMessage? LastResponse => _handler.LastResponse;
 
@@ -61,6 +66,9 @@ public class TestBrowserClient : HttpClient
 
         RemoveCookie(CurrentUri.ToString(), name);
     }
+
+    public string[] GetCookieNames(string uri) =>
+        CookieContainer.GetCookies(new Uri(uri)).Select(x => x.Name).ToArray();
 
     private void RemoveCookie(string uri, string name)
     {

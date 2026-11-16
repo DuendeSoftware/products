@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints
@@ -338,6 +339,81 @@ namespace Duende.Bff.Tests.Endpoints
 
             response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform",
                 "a custom transform doesn't run the defaults");
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_should_not_forward_set_cookie_or_clear_site_data_from_api_to_browser()
+        {
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+            ApiHost.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+            ApiHost.ResponseHeadersToReturn["x-from-api"] = "kept";
+            await BffHost.BffLoginAsync("alice");
+
+            var (response, _) = await BffHost.BrowserClient.CallBffHostApi(
+                url: BffHost.Url("/api_user/test")
+            );
+
+            var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values) ? values : [];
+            setCookieValues.ShouldNotContain(value => value.StartsWith("from-api=", StringComparison.Ordinal));
+            response.Headers.Contains("Clear-Site-Data").ShouldBeFalse();
+            response.Headers.GetValues("x-from-api").ShouldBe(["kept"]);
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_that_renew_the_user_token_should_forward_the_bff_cookie_but_not_the_api_cookie()
+        {
+            await BffHost.BffLoginAsync("alice");
+            var sessionCookieNames = BffHost.BrowserClient.GetCookieNames(BffHost.Url());
+
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+
+            var (response, _) = await BffHost.BrowserClient.CallBffHostApi(
+                url: BffHost.Url("/api_user_force_renewal/test")
+            );
+
+            var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values) ? values.ToArray() : [];
+            var setCookieNames = setCookieValues.Select(v => v.Split('=')[0]).ToArray();
+
+            setCookieNames.ShouldNotContain("from-api");
+            setCookieNames.ShouldContain(name => sessionCookieNames.Contains(name),
+                "the BFF re-issues its session cookie after it renews the user token");
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_with_custom_transform_should_not_forward_set_cookie_from_api_to_browser()
+        {
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+            await BffHost.BffLoginAsync("alice");
+
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_custom_transform/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.ShouldBeTrue();
+            var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values) ? values : [];
+            setCookieValues.ShouldNotContain(value => value.StartsWith("from-api=", StringComparison.Ordinal));
+        }
+    }
+
+    public class RemoteEndpointCookieResponseHeaderOptOutTests : BffIntegrationTestBase
+    {
+        public RemoteEndpointCookieResponseHeaderOptOutTests(ITestOutputHelper output) : base(output) =>
+            BffHost.OnConfigureServices += services =>
+                services.Configure<BffOptions>(options => options.RemoveCookieHeadersFromProxiedResponses = false);
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_when_opted_out_should_forward_set_cookie_and_clear_site_data_from_api_to_browser()
+        {
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+            ApiHost.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+            await BffHost.BffLoginAsync("alice");
+
+            var (response, _) = await BffHost.BrowserClient.CallBffHostApi(
+                url: BffHost.Url("/api_user/test")
+            );
+
+            response.Headers.GetValues("Set-Cookie").ShouldContain("from-api=1; path=/");
+            response.Headers.GetValues("Clear-Site-Data").ShouldBe(["\"cookies\""]);
         }
     }
 }

@@ -9,5 +9,9 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w7r3-mgwf-4mqq" />
     <!-- OpenTelemetry.Exporter.OpenTelemetryProtocol 1.11.0 (via host project references) -->
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
+    <!-- Aspire.Hosting 9.0.0 (via Aspire.Hosting.Testing) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <!-- Aspire.Dashboard.Sdk.<rid> 9.0.0 (via host project references) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
   </ItemGroup>
 </Project>

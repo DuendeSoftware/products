@@ -159,6 +159,35 @@ public class BffOptions
     /// setting a <c>Cookie</c> header.
     /// </remarks>
     public bool RemoveCookieHeaderFromYarpRequests { get; set; } = true;
+
+    /// <summary>
+    /// Specifies if the <c>Set-Cookie</c> and <c>Clear-Site-Data</c> headers that a proxied API returns
+    /// are removed before the response goes to the browser. Defaults to true.
+    ///
+    /// This applies to remote APIs (<c>MapRemoteBffApiEndpoint</c>) and to every route proxied through
+    /// the YARP integration (<c>services.AddReverseProxy().AddBffExtensions()</c>). Only the values that
+    /// the API sent are removed. Cookies that the BFF itself writes during the same request, for example
+    /// when it re-issues the authentication cookie after it renews a token, still reach the browser.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Do not set this to false unless you must. The browser applies these headers as if the BFF sent
+    /// them. When this is false, every proxied API, and anything on the network path between the BFF and
+    /// that API, can set, replace or delete cookies on the BFF's origin. This includes the BFF
+    /// authentication cookie, also when it uses the <c>__Host-</c> prefix. For example, an API can:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>replace the user's authentication cookie with a valid cookie for a different
+    /// account, so that the frontend then acts as that account and the user's data goes to it;</description></item>
+    /// <item><description>send <c>Clear-Site-Data: "cookies"</c> and sign the user out.</description></item>
+    /// </list>
+    /// <para>
+    /// Set this to false only when you trust every API that the BFF proxies, and one of them must set
+    /// cookies on the BFF's origin, for example a load balancer affinity cookie such as <c>ARRAffinity</c>.
+    /// The setting applies to every proxied route, not only to the API that needs it.
+    /// </para>
+    /// </remarks>
+    public bool RemoveCookieHeadersFromProxiedResponses { get; set; } = true;
 }
 
 /// <summary>

@@ -108,6 +108,47 @@ public class YarpBffHost : GenericHost
                     }
                 }.WithAntiforgeryCheck(),
 
+                // Route whose configuration-based transform disables response header copying. The BFF's
+                // ApiCookieResponseHeaderRemoveTransform does nothing then, because nothing from the API
+                // reached the response.
+                new RouteConfig
+                {
+                    RouteId = "api_response_headers_copy_disabled",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_response_headers_copy_disabled/{**catch-all}"
+                    },
+                    Transforms = new[]
+                    {
+                        new Dictionary<string, string>
+                        {
+                            ["ResponseHeadersCopy"] = "false",
+                        }
+                    }
+                },
+
+                // Route whose configuration-based transform allow-lists Set-Cookie. The BFF still removes
+                // the API's Set-Cookie value, because YARP marks it as copied.
+                new RouteConfig
+                {
+                    RouteId = "api_response_headers_allowed",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_response_headers_allowed/{**catch-all}"
+                    },
+                    Transforms = new[]
+                    {
+                        new Dictionary<string, string>
+                        {
+                            ["ResponseHeadersAllowed"] = "Set-Cookie;x-from-api",
+                        }
+                    }
+                },
+
                 new RouteConfig
                     {
                         RouteId = "api_user",
