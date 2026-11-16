@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
-        <AspNetCoreVersion>8.0.1</AspNetCoreVersion>
+        <!-- 8.0.32 patches GHSA-qjpx-jqm5-h2c4 (NU1903) in Microsoft.AspNetCore.Components.WebAssembly.Server. -->
+        <AspNetCoreVersion>8.0.32</AspNetCoreVersion>
         <!-- EF must be at least 8.0.10 so that 'Microsoft.Extensions.Caching.Memory'
              is at least 8.0.1, which addresses a known high severity vulnerability.
              The SQL Server EF provider that is commonly used has a transitive

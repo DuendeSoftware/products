@@ -3,6 +3,9 @@
 
 using Duende.Bff.Tests.TestHosts;
 using FluentAssertions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -285,6 +288,47 @@ namespace Duende.Bff.Tests.Endpoints
             var apiResult = await CallApi(bffHost, "/api_anon/test");
 
             apiResult.RequestHeaders.Keys.Should().Contain("Cookie");
+        }
+
+        [Fact]
+        public async Task authenticated_call_should_not_forward_set_cookie_or_clear_site_data_from_api_to_browser()
+        {
+            await BffHost.BffLoginAsync("alice");
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = new List<string> { "from-api=1; path=/" };
+            ApiHost.ResponseHeadersToReturn["Clear-Site-Data"] = new List<string> { "\"cookies\"" };
+            ApiHost.ResponseHeadersToReturn["x-from-api"] = new List<string> { "kept" };
+
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values)
+                ? values.ToArray()
+                : Array.Empty<string>();
+            setCookieValues.Should().NotContain(value => value.StartsWith("from-api=", StringComparison.Ordinal));
+            response.Headers.Contains("Clear-Site-Data").Should().BeFalse();
+            response.Headers.GetValues("x-from-api").Should().Contain("kept");
+        }
+
+        [Fact]
+        public async Task when_opted_out_set_cookie_and_clear_site_data_from_api_are_forwarded_to_browser()
+        {
+            var bffHost = new YarpBffHost(IdentityServerHost, ApiHost, "spa");
+            bffHost.OnConfigureServices += services =>
+                services.Configure<BffOptions>(options => options.RemoveCookieHeadersFromProxiedResponses = false);
+            await bffHost.InitializeAsync();
+            await bffHost.BffLoginAsync("alice");
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = new List<string> { "from-api=1; path=/" };
+            ApiHost.ResponseHeadersToReturn["Clear-Site-Data"] = new List<string> { "\"cookies\"" };
+
+            var req = new HttpRequestMessage(HttpMethod.Get, bffHost.Url("/api_anon/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await bffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.Headers.GetValues("Set-Cookie").Should().Contain("from-api=1; path=/");
+            response.Headers.GetValues("Clear-Site-Data").Should().Contain("\"cookies\"");
         }
 
         private static async Task<ApiResponse> CallApi(YarpBffHost host, string path)

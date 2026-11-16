@@ -17,6 +17,7 @@ namespace Duende.Bff.Tests.TestHosts
     public class ApiHost : GenericHost
     {
         public int? ApiStatusCodeToReturn { get; set; }
+        public Dictionary<string, List<string>> ResponseHeadersToReturn { get; } = new();
 
         private readonly IdentityServerHost _identityServerHost;
         private readonly bool _useForwardedHeaders;
@@ -98,6 +99,11 @@ namespace Duende.Bff.Tests.TestHosts
                         Body = body,
                         RequestHeaders = requestHeaders
                     };
+
+                    foreach (var (name, values) in ResponseHeadersToReturn)
+                    {
+                        context.Response.Headers[name] = values.ToArray();
+                    }
 
                     context.Response.StatusCode = ApiStatusCodeToReturn ?? 200;
                     ApiStatusCodeToReturn = null;

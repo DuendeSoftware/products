@@ -21,6 +21,7 @@ namespace Duende.Bff.Yarp;
 public class AccessTokenTransformProvider : ITransformProvider
 {
     private readonly BffOptions _options;
+    private readonly IOptions<BffOptions> _optionsAccessor;
     private readonly ILogger<AccessTokenTransformProvider> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IDPoPProofService _dPoPProofService;
@@ -35,6 +36,7 @@ public class AccessTokenTransformProvider : ITransformProvider
     public AccessTokenTransformProvider(IOptions<BffOptions> options, ILogger<AccessTokenTransformProvider> logger, ILoggerFactory loggerFactory, IDPoPProofService dPoPProofService)
     {
         _options = options.Value;
+        _optionsAccessor = options;
         _logger = logger;
         _loggerFactory = loggerFactory;
         _dPoPProofService = dPoPProofService;
@@ -90,6 +92,8 @@ public class AccessTokenTransformProvider : ITransformProvider
 
             return ValueTask.CompletedTask;
         });
+
+        transformBuildContext.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(_optionsAccessor));
 
         TokenType tokenType;
         bool optional;

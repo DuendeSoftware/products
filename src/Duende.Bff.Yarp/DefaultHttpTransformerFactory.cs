@@ -20,6 +20,8 @@ public class DefaultHttpTransformerFactory : IHttpTransformerFactory
     /// </summary>
     protected readonly BffOptions Options;
 
+    private readonly IOptions<BffOptions> _optionsAccessor;
+
     /// <summary>
     /// The YARP transform builder
     /// </summary>
@@ -49,6 +51,7 @@ public class DefaultHttpTransformerFactory : IHttpTransformerFactory
         ILoggerFactory loggerFactory)
     {
         Options = options.Value;
+        _optionsAccessor = options;
         TransformBuilder = transformBuilder;
         ProofService = proofService;
         LoggerFactory = loggerFactory;
@@ -76,6 +79,9 @@ public class DefaultHttpTransformerFactory : IHttpTransformerFactory
                 ProofService,
                 LoggerFactory.CreateLogger<AccessTokenRequestTransform>(),
                 accessToken));
+
+            // remove Set-Cookie / Clear-Site-Data headers set by the proxied API
+            context.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(_optionsAccessor));
         });
     }
 }

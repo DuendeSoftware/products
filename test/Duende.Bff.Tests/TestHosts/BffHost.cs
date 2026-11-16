@@ -414,6 +414,11 @@ public class BffHost : GenericHost
                 .RequireAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
+                    "/api_user_force_renewal", _apiHost.Url())
+                .WithUserAccessTokenParameter(new BffUserAccessTokenParameters(forceRenewal: true))
+                .RequireAccessToken();
+
+            endpoints.MapRemoteBffApiEndpoint(
                     "/api_client", _apiHost.Url())
                 .RequireAccessToken(TokenType.Client);
 

@@ -1,12 +1,17 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AccessTokenManagement;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Yarp;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,6 +20,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
+using Yarp.ReverseProxy.Forwarder;
+using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Duende.Bff.Tests.Endpoints
 {
@@ -405,6 +412,109 @@ namespace Duende.Bff.Tests.Endpoints
             var apiResult = JsonSerializer.Deserialize<ApiResponse>(json);
             apiResult.RequestHeaders["DPoP"].First().Should().NotBeNullOrEmpty();
             apiResult.RequestHeaders["Authorization"].First().StartsWith("DPoP ").Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_should_not_forward_set_cookie_or_clear_site_data_from_api_to_browser()
+        {
+            await BffHost.BffLoginAsync("alice");
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = new List<string> { "from-api=1; path=/" };
+            ApiHost.ResponseHeadersToReturn["Clear-Site-Data"] = new List<string> { "\"cookies\"" };
+            ApiHost.ResponseHeadersToReturn["x-from-api"] = new List<string> { "kept" };
+
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values)
+                ? values.ToArray()
+                : Array.Empty<string>();
+            setCookieValues.Should().NotContain(value => value.StartsWith("from-api=", StringComparison.Ordinal));
+            response.Headers.Contains("Clear-Site-Data").Should().BeFalse();
+            response.Headers.GetValues("x-from-api").Should().Contain("kept");
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_that_renew_the_user_token_should_forward_the_bff_cookie_but_not_the_api_cookie()
+        {
+            await BffHost.BffLoginAsync("alice");
+            var sessionCookieNames = BffHost.BrowserClient.CookieContainer.GetCookies(new Uri(BffHost.Url()))
+                .Cast<Cookie>()
+                .Select(cookie => cookie.Name)
+                .ToArray();
+
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = new List<string> { "from-api=1; path=/" };
+
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user_force_renewal/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+
+            var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values)
+                ? values.ToArray()
+                : Array.Empty<string>();
+            var setCookieNames = setCookieValues.Select(v => v.Split('=')[0]).ToArray();
+
+            setCookieNames.Should().NotContain("from-api");
+            setCookieNames.Should().Contain(name => sessionCookieNames.Contains(name),
+                "the BFF re-issues its session cookie after it renews the user token");
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_when_opted_out_should_forward_set_cookie_and_clear_site_data_from_api_to_browser()
+        {
+            BffHost.OnConfigureServices += services =>
+                services.Configure<BffOptions>(options => options.RemoveCookieHeadersFromProxiedResponses = false);
+            await BffHost.InitializeAsync();
+            await BffHost.BffLoginAsync("alice");
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = new List<string> { "from-api=1; path=/" };
+            ApiHost.ResponseHeadersToReturn["Clear-Site-Data"] = new List<string> { "\"cookies\"" };
+
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.Headers.GetValues("Set-Cookie").Should().Contain("from-api=1; path=/");
+            response.Headers.GetValues("Clear-Site-Data").Should().Contain("\"cookies\"");
+        }
+
+        [Fact]
+        public async Task calls_to_remote_endpoint_with_custom_transformer_factory_derived_from_default_should_still_remove_set_cookie_from_api_to_browser()
+        {
+            BffHost.OnConfigureServices += services =>
+                services.AddTransient<IHttpTransformerFactory, DerivedHttpTransformerFactory>();
+            await BffHost.InitializeAsync();
+            await BffHost.BffLoginAsync("alice");
+            ApiHost.ResponseHeadersToReturn["Set-Cookie"] = new List<string> { "from-api=1; path=/" };
+
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
+
+            response.IsSuccessStatusCode.Should().BeTrue();
+            response.Headers.Contains("Set-Cookie").Should().BeFalse();
+        }
+
+        /// <summary>
+        /// A custom IHttpTransformerFactory that derives from DefaultHttpTransformerFactory and calls
+        /// base.CreateTransformer, as documented on BffOptions.RemoveCookieHeadersFromProxiedResponses.
+        /// </summary>
+        private class DerivedHttpTransformerFactory : DefaultHttpTransformerFactory
+        {
+            public DerivedHttpTransformerFactory(
+                IOptions<BffOptions> options,
+                ITransformBuilder transformBuilder,
+                IDPoPProofService proofService,
+                ILoggerFactory loggerFactory)
+                : base(options, transformBuilder, proofService, loggerFactory)
+            {
+            }
+
+            public override HttpTransformer CreateTransformer(string localPath, AccessTokenResult accessToken) =>
+                base.CreateTransformer(localPath, accessToken);
         }
     }
 }
