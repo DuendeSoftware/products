@@ -5,6 +5,8 @@
 using FluentAssertions;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
@@ -713,6 +715,65 @@ public class DPoPTokenEndpointTests
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
         rtResponse.IsError.Should().BeTrue();
         rtResponse.Error.Should().Be("invalid_dpop_proof");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task public_client_should_not_be_able_to_refresh_with_proof_signed_by_x5c_key_instead_of_bound_key()
+    {
+        _dpopClient.RequireClientSecret = false;
+
+        await _mockPipeline.LoginAsync("bob");
+
+        _mockPipeline.BrowserClient.AllowAutoRedirect = false;
+
+        var attackUrl = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "code",
+            responseMode: "query",
+            scope: "openid scope1 offline_access",
+            redirectUri: "https://client1/callback");
+        var attackAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(attackUrl);
+
+        attackAuthorizeResponse.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        attackAuthorizeResponse.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+
+        var attackAuthorization = new AuthorizeResponse(attackAuthorizeResponse.Headers.Location.ToString());
+        attackAuthorization.IsError.Should().BeFalse();
+
+        var attackCodeRequest = new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client1",
+            ClientSecret = "secret",
+            Code = attackAuthorization.Code,
+            RedirectUri = "https://client1/callback",
+        };
+        attackCodeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
+
+        var attackCodeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(attackCodeRequest);
+        attackCodeResponse.IsError.Should().BeFalse();
+        GetJKTFromAccessToken(attackCodeResponse).Should().Be(_JKT);
+
+        using var attackerKey = RSA.Create(2048);
+        using var attackerCertificate = new CertificateRequest("CN=attacker", attackerKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        ((Dictionary<string, object>)_header["jwk"]).Add("x5c", new[] { Convert.ToBase64String(attackerCertificate.RawData) });
+
+        var attackRtRequest = new RefreshTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client1",
+            ClientSecret = "secret",
+            RefreshToken = attackCodeResponse.RefreshToken
+        };
+        var algorithmTheClientHasNotUsed = SecurityAlgorithms.RsaSsaPssSha256;
+        attackRtRequest.Headers.Add("DPoP", CreateDPoPProofToken(algorithmTheClientHasNotUsed, new RsaSecurityKey(attackerKey)));
+
+        var attackRtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(attackRtRequest);
+
+        attackRtResponse.IsError.Should().BeTrue();
+        attackRtResponse.Error.Should().Be("invalid_dpop_proof");
     }
 
     [Fact]
