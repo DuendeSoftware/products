@@ -745,4 +745,95 @@ public class RemoteEndpointTests : BffTestBase
 
 
     }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task calls_to_remote_endpoint_should_not_forward_set_cookie_or_clear_site_data_from_api_to_browser(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Api.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+        Api.ResponseHeadersToReturn["x-from-api"] = "kept";
+        Bff.OnConfigureApp += app =>
+        {
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
+                .WithAccessToken();
+        };
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(url: Bff.Url(The.Path));
+
+        SetCookieNames(response).ShouldNotContain("from-api");
+        response.Headers.Contains("Clear-Site-Data").ShouldBeFalse();
+        response.Headers.GetValues("x-from-api").ShouldBe(["kept"]);
+    }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task calls_to_remote_endpoint_with_custom_transform_should_not_forward_set_cookie_from_api_to_browser(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Bff.OnConfigureApp += app =>
+        {
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path), context =>
+                    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(The.Path, context))
+                .WithAccessToken();
+        };
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(url: Bff.Url(The.Path));
+
+        SetCookieNames(response).ShouldNotContain("from-api");
+    }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task calls_to_remote_endpoint_when_opted_out_should_forward_set_cookie_and_clear_site_data_from_api_to_browser(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Api.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+        Bff.OnConfigureServices += services =>
+            services.Configure<BffOptions>(options => options.RemoveCookieHeadersFromProxiedResponses = false);
+        Bff.OnConfigureApp += app =>
+        {
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
+                .WithAccessToken();
+        };
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(url: Bff.Url(The.Path));
+
+        SetCookieNames(response).ShouldContain("from-api");
+        response.Headers.GetValues("Clear-Site-Data").ShouldBe(["\"cookies\""]);
+    }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task calls_to_remote_endpoint_that_renew_the_user_token_should_forward_the_bff_cookie_but_not_the_api_cookie(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Bff.OnConfigureApp += app =>
+        {
+            _ = app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
+                .WithUserAccessTokenParameter(new BffUserAccessTokenParameters { ForceRenewal = true })
+                .WithAccessToken();
+        };
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
+        {
+            The.DefaultOpenIdConnectConfiguration(options);
+            options.Scope.Add("offline_access");
+        });
+        _ = await Bff.BrowserClient.Login();
+        var sessionCookieNames = Bff.BrowserClient.Cookies.GetCookies(Bff.Url()).Select(cookie => cookie.Name).ToArray();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(url: Bff.Url(The.Path));
+
+        var setCookieNames = SetCookieNames(response);
+        setCookieNames.ShouldNotContain("from-api");
+        setCookieNames.ShouldContain(name => sessionCookieNames.Contains(name),
+            "the BFF re-issues its session cookie after it renews the user token");
+    }
+
+    private static string[] SetCookieNames(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("Set-Cookie", out var values)
+            ? values.Select(value => value.Split('=')[0]).ToArray()
+            : [];
 }

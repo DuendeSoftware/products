@@ -32,6 +32,18 @@
 //     public static partial void IndexHtmlRetrievalFailed(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
 //
 //     [LoggerMessage(
+//         Message = $"Rejected a static asset proxy request for {{{OTelParameters.Frontend}}} because the path is outside the configured base.")]
+//     public static partial void StaticAssetProxyPathRejected(this ILogger logger, LogLevel level, BffFrontendName frontend);
+//
+//     [LoggerMessage(
+//         Message = $"Rejected a static asset proxy redirect for {{{OTelParameters.Frontend}}}. Statuscode was {{{OTelParameters.StatusCode}}}.")]
+//     public static partial void StaticAssetProxyRedirectRejected(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
+//
+//     [LoggerMessage(
+//         Message = "StaticAssetsClientName matches the static asset proxy client '{ClientName}'. An internal client is used for proxy requests; set a different StaticAssetsClientName to customize the proxy client.")]
+//     public static partial void StaticAssetProxyClientNameCollision(this ILogger logger, LogLevel level, string clientName);
+//
+//     [LoggerMessage(
 //         Message = $"Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ")]
 //     public static partial void DuplicateDefaultRouteConfigured(this ILogger logger, LogLevel level);
 //

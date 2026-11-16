@@ -379,6 +379,86 @@ public class YarpTests : BffTestBase
 
     [Theory]
     [MemberData(nameof(AllSetups))]
+    public async Task authenticated_call_should_not_forward_set_cookie_or_clear_site_data_from_api_to_browser(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Api.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+        Api.ResponseHeadersToReturn["x-from-api"] = "kept";
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(path: The.PathAndSubPath);
+
+        var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values) ? values : [];
+        setCookieValues.ShouldNotContain(value => value.StartsWith("from-api=", StringComparison.Ordinal));
+        response.Headers.Contains("Clear-Site-Data").ShouldBeFalse();
+        response.Headers.GetValues("x-from-api").ShouldBe(["kept"]);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task when_opted_out_set_cookie_and_clear_site_data_from_api_are_forwarded_to_browser(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Api.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+        ConfigureYarp(Some.RouteConfig());
+        Bff.OnConfigureServices += services =>
+            services.Configure<BffOptions>(options => options.RemoveCookieHeadersFromProxiedResponses = false);
+
+        await ConfigureBff(setup);
+        _ = await Bff.BrowserClient.Login();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(path: The.PathAndSubPath);
+
+        response.Headers.GetValues("Set-Cookie").ShouldContain("from-api=1; path=/");
+        response.Headers.GetValues("Clear-Site-Data").ShouldBe(["\"cookies\""]);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task when_response_header_copy_is_disabled_a_bff_cookie_equal_to_the_api_cookie_reaches_the_browser(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "affinity=1; path=/";
+        ConfigureYarp(Some.RouteConfig() with
+        {
+            Transforms = [new Dictionary<string, string> { ["ResponseHeadersCopy"] = "false" }]
+        });
+        Bff.OnConfigureApp += app => app.Use((context, next) =>
+        {
+            context.Response.Headers.Append("Set-Cookie", "affinity=1; path=/");
+            return next();
+        });
+
+        await ConfigureBff(setup);
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(path: The.PathAndSubPath);
+
+        response.Headers.GetValues("Set-Cookie").ShouldBe(["affinity=1; path=/"]);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task when_set_cookie_is_in_the_response_header_allow_list_the_api_cookie_is_still_removed(BffSetupType setup)
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Api.ResponseHeadersToReturn["x-from-api"] = "kept";
+        ConfigureYarp(Some.RouteConfig() with
+        {
+            Transforms = [new Dictionary<string, string> { ["ResponseHeadersAllowed"] = "Set-Cookie;x-from-api" }]
+        });
+
+        await ConfigureBff(setup);
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(path: The.PathAndSubPath);
+
+        response.Headers.Contains("Set-Cookie").ShouldBeFalse();
+        response.Headers.GetValues("x-from-api").ShouldBe(["kept"]);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
     public async Task route_config_transform_setting_cookie_header_is_still_removed(BffSetupType setup)
     {
         var routeConfig = Some.RouteConfig() with

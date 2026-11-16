@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <Import Project="../hosts_and_clients.props" />
-  <!-- Sample/test-only projects (not shipped): suppress known advisories in transitive packages from Aspire/OpenTelemetry/test tooling. AngleSharp GHSA-pgww-w46g-26qg; MessagePack 2.5.192 (11 advisories); OpenTelemetry.Api GHSA-g94r-2vxg-569j; OpenTelemetry.Exporter.OpenTelemetryProtocol GHSA-4625-4j76-fww9; SQLitePCLRaw.lib.e_sqlite3 GHSA-2m69-gcr7-jv3q (no patched 2.x release). -->
+  <!-- Sample/test-only projects (not shipped): suppress known advisories in transitive packages from Aspire/OpenTelemetry/test tooling. AngleSharp GHSA-pgww-w46g-26qg; MessagePack 2.5.192 (12 advisories, patched 2.5.303); OpenTelemetry.Api GHSA-g94r-2vxg-569j; OpenTelemetry.Exporter.OpenTelemetryProtocol GHSA-4625-4j76-fww9; SQLitePCLRaw.lib.e_sqlite3 GHSA-2m69-gcr7-jv3q (no patched 2.x release); Aspire.Hosting/Aspire.Hosting.AppHost 13.0.0 GHSA-f7vh-h5g3-7jrh and Aspire.Dashboard.Sdk 13.0.0 GHSA-4g86-54fm-h9h8 (patched 13.6.5). -->
   <ItemGroup>
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2f33-pr97-265q" />
@@ -32,6 +32,7 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-hv8m-jj95-wg3x" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-q2h6-ghwm-5qm8" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhmf-xw27-6rqr" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhrr-8q5h-9q3h" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-v72x-2h86-7f8m" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-vh6j-jc39-fggf" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-w567-gjr2-hm5j" />
@@ -39,5 +40,7 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g94r-2vxg-569j" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
   </ItemGroup>
 </Project>

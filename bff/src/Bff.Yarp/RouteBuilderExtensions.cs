@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
+using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms.Builder;
 
@@ -69,6 +71,8 @@ public static class RouteBuilderExtensions
                 configureTransform: context =>
                 {
                     yarpTransformBuilder(context);
+                    context.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(
+                        context.Services.GetRequiredService<IOptions<BffOptions>>()));
                 },
                 requestConfig: requestConfig)
             .WithMetadata(new BffRemoteApiEndpointMetadata());

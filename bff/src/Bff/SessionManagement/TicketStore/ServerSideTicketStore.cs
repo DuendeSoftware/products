@@ -114,8 +114,6 @@ internal class ServerSideTicketStore(
         var session = await store.GetUserSessionAsync(userSessionKey, ct);
         if (session == null)
         {
-            // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
-            await CreateNewSessionAsync(key, ticket);
             return;
         }
 
@@ -123,6 +121,12 @@ internal class ServerSideTicketStore(
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
+        if (session.SubjectId != sub)
+        {
+            await RemoveAsync(userSessionKey);
+            return;
+        }
+
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         var created = isNew ? ticket.GetIssued(timeProvider.GetUtcNow()) : session.Created;
 

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +37,11 @@ public static class BffFrontendExtensions
     /// be 404, then another attempt to forward this request to '/' is done. This allows for SPAs that use client side routing.
     ///
     /// This setting is usually used during development in combination with development webserver.
+    ///
+    /// The built-in proxy does not follow redirects and, by default, does not forward upstream
+    /// Set-Cookie or Clear-Site-Data headers. See <see cref="BffOptions.RemoveCookieHeadersFromProxiedResponses"/>.
+    /// Custom proxy HTTP handlers must not follow redirects.
+    /// The content is served on the BFF's origin and should come from a trusted source.
     ///
     /// Note, this is less than ideal for production scenarios, as it adds additional load to the BFF server.
     /// Consider deploying your assets to a CDN and use the <see cref="WithCdnIndexHtmlUrl"/>. If you want to switch this value

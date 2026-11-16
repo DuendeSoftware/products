@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Folder Name="/hosts/">
     <Project Path="hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent.Client/Hosts.Bff.Blazor.PerComponent.Client.csproj" />
