@@ -376,6 +376,113 @@ namespace Duende.Bff.Otel
         }
 
         /// <summary>
+        /// Logs "Rejected a static asset proxy request for {Frontend} because the path is outside the configured base.".
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
+        public static void StaticAssetProxyPathRejected(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend)
+        {
+            if (!logger.IsEnabled(level))
+            {
+                return;
+            }
+
+            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
+
+            _ = state.ReserveTagSpace(2);
+            state.TagArray[1] = new("{OriginalFormat}", "Rejected a static asset proxy request for {Frontend} because the path is outside the configured base.");
+            state.TagArray[0] = new("Frontend", frontend.ToString());
+
+            logger.Log(
+                level,
+                new(229839182, nameof(StaticAssetProxyPathRejected)),
+                state,
+                null,
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
+                {
+                    var frontend = s.TagArray[0].Value;
+                    #if NET
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Rejected a static asset proxy request for {frontend} because the path is outside the configured base.");
+                    #else
+                    return global::System.FormattableString.Invariant($"Rejected a static asset proxy request for {frontend} because the path is outside the configured base.");
+                    #endif
+                });
+
+            state.Clear();
+        }
+
+        /// <summary>
+        /// Logs "Rejected a static asset proxy redirect for {Frontend}. Statuscode was {StatusCode}.".
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
+        public static void StaticAssetProxyRedirectRejected(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend, global::System.Net.HttpStatusCode statusCode)
+        {
+            if (!logger.IsEnabled(level))
+            {
+                return;
+            }
+
+            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
+
+            _ = state.ReserveTagSpace(3);
+            state.TagArray[2] = new("{OriginalFormat}", "Rejected a static asset proxy redirect for {Frontend}. Statuscode was {StatusCode}.");
+            state.TagArray[1] = new("Frontend", frontend.ToString());
+            state.TagArray[0] = new("StatusCode", statusCode);
+
+            logger.Log(
+                level,
+                new(1219868071, nameof(StaticAssetProxyRedirectRejected)),
+                state,
+                null,
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
+                {
+                    var frontend = s.TagArray[1].Value;
+                    var statusCode = s.TagArray[0].Value;
+                    #if NET
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Rejected a static asset proxy redirect for {frontend}. Statuscode was {statusCode}.");
+                    #else
+                    return global::System.FormattableString.Invariant($"Rejected a static asset proxy redirect for {frontend}. Statuscode was {statusCode}.");
+                    #endif
+                });
+
+            state.Clear();
+        }
+
+        /// <summary>
+        /// Logs "StaticAssetsClientName matches the static asset proxy client '{ClientName}'. An internal client is used for proxy requests; set a different StaticAssetsClientName to customize the proxy client.".
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
+        public static void StaticAssetProxyClientNameCollision(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, string clientName)
+        {
+            if (!logger.IsEnabled(level))
+            {
+                return;
+            }
+
+            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
+
+            _ = state.ReserveTagSpace(2);
+            state.TagArray[1] = new("{OriginalFormat}", "StaticAssetsClientName matches the static asset proxy client '{ClientName}'. An internal client is used for proxy requests; set a different StaticAssetsClientName to customize the proxy client.");
+            state.TagArray[0] = new("ClientName", clientName);
+
+            logger.Log(
+                level,
+                new(1630848015, nameof(StaticAssetProxyClientNameCollision)),
+                state,
+                null,
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
+                {
+                    var clientName = s.TagArray[0].Value;
+                    #if NET
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"StaticAssetsClientName matches the static asset proxy client '{clientName}'. An internal client is used for proxy requests; set a different StaticAssetsClientName to customize the proxy client.");
+                    #else
+                    return global::System.FormattableString.Invariant($"StaticAssetsClientName matches the static asset proxy client '{clientName}'. An internal client is used for proxy requests; set a different StaticAssetsClientName to customize the proxy client.");
+                    #endif
+                });
+
+            state.Clear();
+        }
+
+        /// <summary>
         /// Logs "Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ".
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]

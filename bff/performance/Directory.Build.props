@@ -13,6 +13,7 @@
        transitive dependencies so Release builds pass. -->
   <ItemGroup Label="NuGetAuditSuppress">
     <!-- MessagePack 2.5.192 (transitive via Aspire) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhrr-8q5h-9q3h" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2f33-pr97-265q" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2x83-8g95-xh59" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-cj9g-3mj2-g8vv" />

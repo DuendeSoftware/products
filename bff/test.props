@@ -30,6 +30,7 @@
     <!-- AngleSharp 1.1.2 -->
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-pgww-w46g-26qg" />
     <!-- MessagePack 2.5.192 (transitive via Aspire) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhrr-8q5h-9q3h" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2f33-pr97-265q" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2x83-8g95-xh59" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-cj9g-3mj2-g8vv" />
@@ -46,6 +47,9 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
     <!-- SQLitePCLRaw.lib.e_sqlite3 2.1.x (no patched 2.x version) -->
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+    <!-- Aspire.Hosting / Aspire.Hosting.AppHost 13.0.0 and Aspire.Dashboard.Sdk.* 13.0.0 (hosts and tests only, not shipped) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
   </ItemGroup>
 
   <ItemGroup>

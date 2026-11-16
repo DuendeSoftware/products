@@ -28,6 +28,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public bool MapGetForRoot { get; set; } = true;
 
     public bool EnableBackChannelHandler { get; set; } = true;
+    public bool EnableStaticAssetsProxyHandler { get; set; } = true;
     public event Action<IBffServicesBuilder> OnConfigureBff = _ => { };
 
     public override void Initialize()
@@ -50,6 +51,12 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
                 options.LicenseKey = LicenseKey;
                 OnConfigureBffOptions(options);
             });
+
+            if (EnableStaticAssetsProxyHandler)
+            {
+                _ = services.AddHttpClient(Constants.HttpClientNames.StaticAssetsProxyClientName)
+                    .ConfigurePrimaryHttpMessageHandler(() => Internet);
+            }
 
             OnConfigureBff(builder);
         };

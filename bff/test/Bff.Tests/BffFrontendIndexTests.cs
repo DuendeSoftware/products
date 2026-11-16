@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
+using System.Text;
 using System.Text.Encodings.Web;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
@@ -8,6 +10,7 @@ using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Hybrid;
+using NSubstitute;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -205,6 +208,112 @@ public class BffFrontendIndexTests : BffTestBase
         // The existing image.png should be proxied through the BFF. and should not be transformed
         await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
+    }
+
+    [Theory]
+    [InlineData("/", "<html><body>The transformed index document contains additional frontend configuration and application content, making it longer than the original document.</body></html>")]
+    [InlineData("/not-found", "<html><body>The transformed index document contains additional frontend configuration and application content, making it longer than the original document.</body></html>")]
+    [InlineData("/", "<p>short</p>")]
+    [InlineData("/not-found", "<p>short</p>")]
+    [InlineData("/", "<p>\u00e9 \u6f22 \U0001f600</p>")]
+    [InlineData("/not-found", "<p>\u00e9 \u6f22 \U0001f600</p>")]
+    [InlineData("/", "")]
+    [InlineData("/not-found", "")]
+    [InlineData("/", null)]
+    [InlineData("/not-found", null)]
+    public async Task proxying_transformed_index_html_sets_content_length_to_utf8_byte_count(string path, string? transformedHtml)
+    {
+        var transformer = Substitute.For<IIndexHtmlTransformer>();
+        _ = transformer.Transform(Cdn.IndexHtml, Arg.Any<BffFrontend>(), Arg.Any<CT>())
+            .Returns(Task.FromResult(transformedHtml));
+        Bff.OnConfigureServices += services => services.AddSingleton(transformer);
+
+        await InitializeAsync();
+        AddOrUpdateFrontend(Some.BffFrontend().WithProxiedStaticAssets(Cdn.Url("/")));
+
+        using var response = await Bff.BrowserClient.GetAsync(path, HttpCompletionOption.ResponseHeadersRead)
+            .CheckHttpStatusCode();
+
+        response.Content.Headers.Contains("Content-Length").ShouldBeTrue();
+        var contentLength = response.Content.Headers.ContentLength;
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+
+        bytes.ShouldBe(Encoding.UTF8.GetBytes(transformedHtml ?? string.Empty));
+        contentLength.ShouldBe(bytes.LongLength);
+    }
+
+    [Theory]
+    [InlineData("/")]
+    [InlineData("/not-found")]
+    public async Task proxying_transformed_index_html_over_kestrel_returns_complete_response(string path)
+    {
+        var transformedHtml = Cdn.IndexHtml + "<p>Additional frontend configuration: \u00e9 \u6f22 \U0001f600</p>";
+        var transformer = Substitute.For<IIndexHtmlTransformer>();
+        _ = transformer.Transform(Cdn.IndexHtml, Arg.Any<BffFrontend>(), Arg.Any<CT>())
+            .Returns(Task.FromResult<string?>(transformedHtml));
+
+        await InitializeAsync();
+
+        var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
+        _ = builder.WebHost.UseKestrel(options => options.Listen(IPAddress.Loopback, 0));
+        _ = builder.Logging.AddProvider(new TestLoggerProvider(Context.WriteOutput, "kestrel - "));
+        _ = builder.Services.AddAuthentication();
+        _ = builder.Services.AddAuthorization();
+        _ = builder.Services.AddRouting();
+        _ = builder.Services.AddSingleton(transformer);
+        _ = builder.Services.AddBff(options => options.BackchannelHttpHandler = Internet)
+            .AddFrontends(Some.BffFrontend().WithProxiedStaticAssets(Cdn.Url("/")));
+        _ = builder.Services.AddHttpClient(Constants.HttpClientNames.StaticAssetsProxyClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => Internet);
+
+        await using var app = builder.Build();
+        _ = app.UseRouting();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
+        _ = app.UseBff();
+        await app.StartAsync();
+
+        // Use a real connection so Kestrel enforces the response's Content-Length.
+        using var client = new HttpClient
+        {
+            BaseAddress = new Uri(app.Urls.Single()),
+            Timeout = TimeSpan.FromSeconds(30)
+        };
+        using var response = await client.GetAsync(path, HttpCompletionOption.ResponseHeadersRead)
+            .CheckHttpStatusCode();
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+
+        bytes.ShouldBe(Encoding.UTF8.GetBytes(transformedHtml));
+        response.Content.Headers.ContentLength.ShouldBe(bytes.LongLength);
+    }
+
+    [Theory]
+    [InlineData("/", false)]
+    [InlineData("/not-found", false)]
+    [InlineData("/index2.html", false)]
+    [InlineData("/image.png", false)]
+    [InlineData("/index2.html", true)]
+    [InlineData("/image.png", true)]
+    public async Task proxying_untransformed_static_assets_preserves_content_and_length(string path, bool useTransformer)
+    {
+        if (useTransformer)
+        {
+            Bff.OnConfigureServices += services => services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
+        }
+
+        await InitializeAsync();
+        AddOrUpdateFrontend(Some.BffFrontend().WithProxiedStaticAssets(Cdn.Url("/")));
+
+        using var response = await Bff.BrowserClient.GetAsync(path, HttpCompletionOption.ResponseHeadersRead)
+            .CheckHttpStatusCode();
+
+        response.Content.Headers.Contains("Content-Length").ShouldBeTrue();
+        var contentLength = response.Content.Headers.ContentLength;
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var expectedBytes = path == "/image.png" ? Cdn.ImageBytes : Encoding.UTF8.GetBytes(Cdn.IndexHtml);
+
+        bytes.ShouldBe(expectedBytes);
+        contentLength.ShouldBe(expectedBytes.LongLength);
     }
 
     [Fact]
