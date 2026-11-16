@@ -12,6 +12,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -19,6 +20,12 @@ namespace UnitTests.Validation.EndSessionRequestValidation;
 
 public class EndSessionRequestValidatorTests
 {
+    // A minimal JWT whose header is {"alg":"none","typ":"JWT"} and payload is {}. The
+    // StubTokenValidator below returns the claims and typ checks read this header directly from
+    // the submitted hint, so tests need a token that at least parses as a JWT, even though its
+    // signature is never checked by the stub.
+    private const string JwtShapedIdTokenHint = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.e30.";
+
     private EndSessionRequestValidator _subject;
     private IdentityServerOptions _options;
     private StubTokenValidator _stubTokenValidator = new StubTokenValidator();
@@ -72,7 +79,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
         parameters.Add("post_logout_redirect_uri", "http://client/signout-cb");
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
@@ -87,6 +94,30 @@ public class EndSessionRequestValidatorTests
     }
 
     [Fact]
+    public async Task hint_with_unexpected_typ_header_should_be_rejected_even_when_token_validator_reports_success()
+    {
+        // A JWT whose header is {"alg":"none","typ":"at+jwt"} and payload is {}: the typ check
+        // reads this header from the submitted hint itself, so this must be rejected even though
+        // the (stubbed) token validator reports success with a sub claim.
+        const string atJwtShapedIdTokenHint = "eyJhbGciOiJub25lIiwidHlwIjoiYXQrand0In0.e30.";
+
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
+            Client = new Client() { ClientId = "client" }
+        };
+        _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", atJwtShapedIdTokenHint);
+
+        var result = await _subject.ValidateAsync(parameters, _user);
+
+        result.IsError.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task no_post_logout_redirect_uri_should_not_use_single_registered_uri()
     {
         _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
@@ -98,7 +129,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user);
         result.IsError.Should().BeFalse();
@@ -117,7 +148,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user);
         result.IsError.Should().BeFalse();
@@ -136,7 +167,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = false;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
         parameters.Add("post_logout_redirect_uri", "http://client/signout-cb");
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
@@ -163,7 +194,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
         parameters.Add("post_logout_redirect_uri", "http://client/signout-cb");
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
@@ -180,5 +211,25 @@ public class EndSessionRequestValidatorTests
         var result = await _subject.ValidateAsync(parameters, _user);
         result.IsError.Should().BeFalse();
         result.ValidatedRequest.Raw.Should().BeSameAs(parameters);
+    }
+
+    [Fact]
+    public async Task id_token_hint_without_sub_or_sid_should_be_rejected()
+    {
+        // A hint with neither sub nor sid gives no basis for matching it to the signed-in user.
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("aud", "some-client") },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
+
+        var result = await _subject.ValidateAsync(parameters, _user);
+
+        result.IsError.ShouldBeTrue();
+        result.ErrorDescription.ShouldContain(IdentityTokenHintChecks.NoSubClaimReason);
     }
 }

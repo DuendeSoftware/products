@@ -17,6 +17,7 @@ using Duende.IdentityModel.Client;
 using System.Collections.Generic;
 using System;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Duende.IdentityServer;
 using Microsoft.AspNetCore.DataProtection;
@@ -86,6 +87,14 @@ public class ServerSideSessionTests
                     return Task.CompletedTask;
                 });
             });
+            app.Map("/signout-then-signin-alice", ep =>
+            {
+                ep.Run(async ctx =>
+                {
+                    await ctx.SignOutAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
+                    await ctx.SignInAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme, new IdentityServerUser("alice").CreatePrincipal());
+                });
+            });
         };
 
 
@@ -145,14 +154,15 @@ public class ServerSideSessionTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task renewal_should_create_new_record_if_missing()
+    public async Task renewal_should_not_bring_back_a_removed_session()
     {
         await _pipeline.LoginAsync("bob");
-        
+
         ShouldRenewCookie = true;
-        (await IsLoggedIn()).Should().BeTrue();
-        
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().NotBeEmpty();
+        await IsLoggedIn();
+
+        (await IsLoggedIn()).Should().BeFalse("a renew must not recreate the session that was removed during the request");
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().BeEmpty();
     }
 
     [Fact]
@@ -217,14 +227,15 @@ public class ServerSideSessionTests
 
         var bob_session = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Single();
 
-        await Task.Delay(1000);
+        await _pipeline.LoginAsync("alice");
+        var signedInAfterFirstSignIn = await IsLoggedIn();
         await _pipeline.LoginAsync("alice");
 
+        signedInAfterFirstSignIn.Should().BeFalse("the first sign-in must not put alice's session under bob's key");
         (await IsLoggedIn()).Should().BeTrue();
         var alice_session = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single();
 
-        alice_session.Key.Should().Be(bob_session.Key);
-        (alice_session.Created > bob_session.Created).Should().BeTrue();
+        alice_session.Key.Should().NotBe(bob_session.Key);
         alice_session.SessionId.Should().NotBe(bob_session.SessionId);
     }
 
@@ -763,5 +774,39 @@ public class ServerSideSessionTests
         var claims = ticket.Principal.Claims;
         claims.Should().Contain(c => c.Issuer == "Custom Issuer" && c.Type == "Test");
         claims.Should().Contain(c => c.Issuer == ClaimsIdentity.DefaultIssuer && c.Type == "Test");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task changing_users_should_not_let_a_copy_of_the_previous_users_cookie_reach_the_new_users_session()
+    {
+        await _pipeline.LoginAsync("bob");
+        var bobsCookieCopy = CopyOfSessionCookie();
+
+        await _pipeline.LoginAsync("alice");
+
+        var bobsCookieCopyResponse = await bobsCookieCopy.GetAsync(IdentityServerPipeline.BaseUrl + "/user");
+        bobsCookieCopyResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized, "a copy of bob's cookie must not reach alice's session");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task changing_users_by_signing_out_and_in_in_one_request_should_not_let_a_copy_of_the_previous_users_cookie_reach_the_new_users_session()
+    {
+        await _pipeline.LoginAsync("bob");
+        var bobsCookieCopy = CopyOfSessionCookie();
+
+        await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + "/signout-then-signin-alice");
+
+        var bobsCookieCopyResponse = await bobsCookieCopy.GetAsync(IdentityServerPipeline.BaseUrl + "/user");
+        bobsCookieCopyResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized, "a copy of bob's cookie must not reach alice's session");
+    }
+
+    private BrowserClient CopyOfSessionCookie()
+    {
+        var sessionCookie = _pipeline.BrowserClient.GetCookie(IdentityServerPipeline.BaseUrl, IdentityServerConstants.DefaultCookieAuthenticationScheme);
+        var browser = new BrowserClient(new BrowserHandler(_pipeline.Handler));
+        browser.SetCookie(IdentityServerPipeline.BaseUrl, sessionCookie.Name, sessionCookie.Value);
+        return browser;
     }
 }

@@ -63,6 +63,8 @@ public class BrowserHandler : DelegatingHandler
         return _cookieContainer.GetCookies(new Uri(uri)).FirstOrDefault(x => x.Name == name);
     }
 
+    internal void SetCookie(string uri, string name, string value) => _cookieContainer.Add(new Uri(uri), new Cookie(name, value, "/"));
+
     internal void RemoveCookie(string uri, string name)
     {
         var cookie = _cookieContainer.GetCookies(new Uri(uri)).FirstOrDefault(x => x.Name == name);

@@ -14,6 +14,7 @@ using Duende.IdentityModel;
 using System.Linq;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
+using Duende.Shared;
 using Microsoft.AspNetCore.DataProtection;
 using System.Security.Cryptography;
 using System.Text;
@@ -182,8 +183,16 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return Task.CompletedTask;
         }
 
+        var publicKey = CreatePublicKey(jwk);
+        if (publicKey is null)
+        {
+            result.IsError = true;
+            result.ErrorDescription = "Invalid 'jwk' value.";
+            return Task.CompletedTask;
+        }
+
         result.JsonWebKey = jwkJson;
-        result.JsonWebKeyThumbprint = jwk.CreateThumbprint();
+        result.JsonWebKeyThumbprint = publicKey.CreateThumbprint();
 
         if (context.ValidateAccessToken)
         {
@@ -242,6 +251,18 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     }
 
     /// <summary>
+    /// Creates a key from only the members that RFC 7638 uses for the thumbprint, so the proof signature is
+    /// checked against the key that the thumbprint names. Microsoft.IdentityModel uses an RSA key's x5c
+    /// certificate instead of its n and e when both are present.
+    /// </summary>
+    private static Microsoft.IdentityModel.Tokens.JsonWebKey CreatePublicKey(Microsoft.IdentityModel.Tokens.JsonWebKey jwk) => jwk.Kty switch
+    {
+        Microsoft.IdentityModel.Tokens.JsonWebAlgorithmsKeyTypes.RSA => new Microsoft.IdentityModel.Tokens.JsonWebKey { Kty = jwk.Kty, N = jwk.N, E = jwk.E },
+        Microsoft.IdentityModel.Tokens.JsonWebAlgorithmsKeyTypes.EllipticCurve => new Microsoft.IdentityModel.Tokens.JsonWebKey { Kty = jwk.Kty, Crv = jwk.Crv, X = jwk.X, Y = jwk.Y },
+        _ => null
+    };
+
+    /// <summary>
     /// Validates the signature.
     /// </summary>
     protected virtual async Task ValidateSignatureAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
@@ -250,7 +271,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         try
         {
-            var key = new Microsoft.IdentityModel.Tokens.JsonWebKey(result.JsonWebKey);
+            var key = CreatePublicKey(new Microsoft.IdentityModel.Tokens.JsonWebKey(result.JsonWebKey));
             var tvp = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
                 ValidateAudience = false,
@@ -259,7 +280,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 IssuerSigningKey = key,
             };
 
-            var handler = new JsonWebTokenHandler();
+            var handler = new NonCachedJsonWebTokenHandler();
             tokenValidationResult = await handler.ValidateTokenAsync(context.ProofToken, tvp);
         }
         catch (Exception ex)
