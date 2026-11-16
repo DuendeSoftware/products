@@ -12,8 +12,8 @@ using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Duende.Shared;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Validation;
@@ -279,7 +279,7 @@ internal class TokenValidator : ITokenValidator
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
 
-        var handler = new JsonWebTokenHandler();
+        var handler = new NonCachedJsonWebTokenHandler();
 
         var parameters = new TokenValidationParameters
         {

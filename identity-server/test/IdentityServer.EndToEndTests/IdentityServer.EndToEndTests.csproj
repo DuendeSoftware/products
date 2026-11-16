@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Aspire.Dashboard.Sdk comes in through Aspire.Hosting.Testing and only runs the test dashboard; it is not part of any shipped package. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Aspire.Hosting.ApplicationModel" />
     <Using Include="Aspire.Hosting.Testing" />
     <Using Include="Microsoft.Extensions.DependencyInjection" />

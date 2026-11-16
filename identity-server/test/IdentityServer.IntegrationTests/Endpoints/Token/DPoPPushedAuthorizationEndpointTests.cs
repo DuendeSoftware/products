@@ -19,6 +19,8 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
 {
     protected const string Category = "DPoP PAR endpoint";
 
+    public DPoPPushedAuthorizationEndpointTests() => InitializePipeline();
+
     private PushedAuthorizationRequest CreatePushedAuthorizationRequest(
         string proofToken = null, bool omitDPoPProof = false, string dpopKeyThumprint = null
     )

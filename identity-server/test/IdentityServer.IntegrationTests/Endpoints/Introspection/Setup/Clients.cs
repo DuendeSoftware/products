@@ -72,5 +72,22 @@ internal class Clients
                 AllowOfflineAccess = true,
                 AccessTokenType = AccessTokenType.Reference
             },
+            new Client
+            {
+                ClientId = "ro.public",
+                RequireClientSecret = false,
+
+                AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                AllowedScopes = { "api1" },
+                AccessTokenType = AccessTokenType.Reference
+            },
+            new Client
+            {
+                ClientId = "implicit",
+
+                AllowedGrantTypes = GrantTypes.Implicit,
+                RedirectUris = { "https://client/callback" },
+                AllowedScopes = { "api1" }
+            },
         };
 }

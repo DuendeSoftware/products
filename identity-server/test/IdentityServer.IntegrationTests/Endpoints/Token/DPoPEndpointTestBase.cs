@@ -185,6 +185,11 @@ public abstract class DPoPEndpointTestBase
             }
         ]);
 
+        CreateHeaderValuesFromPublicKey();
+    }
+
+    protected void InitializePipeline()
+    {
         Pipeline.Initialize();
 
         CreateHeaderValuesFromPublicKey();

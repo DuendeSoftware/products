@@ -15,7 +15,7 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
         using var timer = new PeriodicTimer(options.Value.Diagnostics.LogFrequency);
         try
         {
-            while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
+            while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
             {
                 try
                 {
@@ -41,6 +41,6 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
     {
         await diagnosticSummary.PrintSummary();
 
-        await base.StopAsync(cancellationToken);
+        await base.StopAsync(cancellationToken).ConfigureAwait(false);
     }
 }

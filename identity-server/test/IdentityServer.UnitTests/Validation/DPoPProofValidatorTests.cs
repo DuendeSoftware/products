@@ -4,6 +4,7 @@
 using System.Buffers.Text;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
@@ -136,6 +137,22 @@ public class DPoPProofValidatorTests
 
         result.IsError.ShouldBeFalse();
         result.JsonWebKeyThumbprint.ShouldBe(_JKT);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task proof_signed_by_jwk_key_should_pass_validation_when_x5c_holds_another_key()
+    {
+        using var unrelatedKey = RSA.Create(2048);
+        using var unrelatedCertificate = new CertificateRequest("CN=unrelated", unrelatedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        ((Dictionary<string, object>)_header["jwk"]).Add("x5c", new[] { Convert.ToBase64String(unrelatedCertificate.RawData) });
+        _context.ProofToken = CreateDPoPProofToken();
+
+        var proofValidation = await _subject.ValidateAsync(_context);
+
+        proofValidation.IsError.ShouldBeFalse(proofValidation.ErrorDescription);
+        proofValidation.JsonWebKeyThumbprint.ShouldBe(_JKT);
     }
 
     [Fact]

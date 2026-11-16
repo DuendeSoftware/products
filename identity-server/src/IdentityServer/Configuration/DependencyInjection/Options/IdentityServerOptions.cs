@@ -46,6 +46,21 @@ public class IdentityServerOptions
     public string LogoutTokenJwtType { get; set; } = "logout+jwt";
 
     /// <summary>
+    /// Gets or sets the JWT <c>typ</c> header values accepted for an <c>id_token_hint</c> at the
+    /// end session endpoint.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to a collection containing only <c>JWT</c>, the value that IdentityServer writes
+    /// to identity tokens it issues. A token with no <c>typ</c> header is always accepted. The
+    /// values IdentityServer uses for other kinds of tokens (<see cref="AccessTokenJwtType"/>,
+    /// <see cref="LogoutTokenJwtType"/>, and the token-introspection response type) are never
+    /// accepted as an identity token hint, even if they are listed here. The generic <c>JWT</c>
+    /// value is the exception: it stays accepted when listed here, even if
+    /// <see cref="AccessTokenJwtType"/> or <see cref="LogoutTokenJwtType"/> is set to it.
+    /// </remarks>
+    public ICollection<string> IdentityTokenJwtTypes { get; set; } = new HashSet<string> { "JWT" };
+
+    /// <summary>
     /// Emits an aud claim with the format issuer/resources. That's needed for some older access token validation plumbing. Defaults to false.
     /// </summary>
     public bool EmitStaticAudienceClaim { get; set; }

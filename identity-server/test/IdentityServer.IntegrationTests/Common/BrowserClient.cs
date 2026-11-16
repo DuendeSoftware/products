@@ -32,6 +32,8 @@ public class BrowserClient : HttpClient
         set => BrowserHandler.StopRedirectingAfter = value;
     }
 
+    internal void SetCookie(string uri, string name, string value) => BrowserHandler.SetCookie(uri, name, value);
+
     internal void RemoveCookie(string uri, string name) => BrowserHandler.RemoveCookie(uri, name);
 
     internal System.Net.Cookie GetCookie(string uri, string name) => BrowserHandler.GetCookie(uri, name);

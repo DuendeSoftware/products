@@ -29,6 +29,9 @@
     <Compile Include="..\Shared\Extensions\StringExtensions.cs">
       <Link>Extensions\StringExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\JsonWebTokens\NonCachedJsonWebTokenHandler.cs">
+      <Link>JsonWebTokens\NonCachedJsonWebTokenHandler.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
