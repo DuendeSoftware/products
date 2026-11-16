@@ -15,6 +15,7 @@
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="PublicApiGenerator" />
     <PackageReference Include="RichardSzalay.MockHttp" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
   <ItemGroup>

@@ -30,5 +30,16 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wfr3-xj75-pfwh" />
     <!-- SQLitePCLRaw.lib.e_sqlite3 2.1.11 (via Microsoft.EntityFrameworkCore.Sqlite in tests/hosts/migrations) -->
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+    <!-- MessagePack 2.5.192 (via Aspire hosting / test tooling) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhrr-8q5h-9q3h" />
+    <!-- Aspire.Hosting / Aspire.Hosting.AppHost / Aspire.Dashboard.Sdk 13.2.4 (hosts and Playwright tests) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
+    <!-- System.Security.Cryptography.Pkcs 9.0.4 (via EF Core tooling in hosts/migrations) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2fmv-rv2c-59x7" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-846f-f764-76mx" />
+    <!-- Microsoft.AspNetCore.Components.WebAssembly.Server 10.0.0 (template source project) -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g27p-qf6j-c96c" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qjpx-jqm5-h2c4" />
   </ItemGroup>
 </Project>

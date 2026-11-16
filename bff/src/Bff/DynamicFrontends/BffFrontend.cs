@@ -91,6 +91,11 @@ public sealed record BffFrontend
     ///
     /// This setting is usually used during development in combination with development webserver.
     ///
+    /// The built-in proxy does not follow redirects and, by default, does not forward upstream
+    /// Set-Cookie or Clear-Site-Data headers. See <see cref="BffOptions.RemoveCookieHeadersFromProxiedResponses"/>.
+    /// Custom proxy HTTP handlers must not follow redirects.
+    /// The content is served on the BFF's origin and should come from a trusted source.
+    ///
     /// Note, this is less than ideal for production scenarios, as it adds additional load to the BFF server.
     /// Consider deploying your assets to a CDN and use the <see cref="CdnIndexHtmlUrl"/>. If you want to switch this value
     /// depending on environment, consider using the <see cref="BffFrontendExtensions.WithBffStaticAssets"/> extension method.

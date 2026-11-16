@@ -32,6 +32,18 @@
 //     public static partial void IndexHtmlRetrievalFailed(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
 //
 //     [LoggerMessage(
+//         Message = $"Rejected a static asset proxy request for {{{OTelParameters.Frontend}}} because the path is outside the configured base.")]
+//     public static partial void StaticAssetProxyPathRejected(this ILogger logger, LogLevel level, BffFrontendName frontend);
+//
+//     [LoggerMessage(
+//         Message = $"Rejected a static asset proxy redirect for {{{OTelParameters.Frontend}}}. Statuscode was {{{OTelParameters.StatusCode}}}.")]
+//     public static partial void StaticAssetProxyRedirectRejected(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
+//
+//     [LoggerMessage(
+//         Message = "StaticAssetsClientName matches the static asset proxy client '{ClientName}'. An internal client is used for proxy requests; set a different StaticAssetsClientName to customize the proxy client.")]
+//     public static partial void StaticAssetProxyClientNameCollision(this ILogger logger, LogLevel level, string clientName);
+//
+//     [LoggerMessage(
 //         Message = $"Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ")]
 //     public static partial void DuplicateDefaultRouteConfigured(this ILogger logger, LogLevel level);
 //
@@ -88,8 +100,8 @@
 //     public static partial void InvalidReturnUrl(this ILogger logger, LogLevel logLevel, string url);
 //
 //     [LoggerMessage(
-//         $"Invalid sid {{{OTelParameters.Sid}}}.")]
-//     public static partial void InvalidSid(this ILogger logger, LogLevel logLevel, string sid);
+//         "Logout request rejected: the sid parameter did not match the user's session.")]
+//     public static partial void LogoutSessionIdMismatch(this ILogger logger, LogLevel logLevel);
 //
 //
 //     [LoggerMessage(
@@ -373,6 +385,10 @@
 //     public static partial void RefreshTokenRevoked(this ILogger logger, LogLevel logLevel, string sub, string? sid);
 //
 //     [LoggerMessage(
+//         message: "Failed to revoke refresh token for sub {Sub} and sid {Sid}. The session is still deleted.")]
+//     public static partial void FailedToRevokeRefreshToken(this ILogger logger, LogLevel logLevel, Exception ex, string? sub, string? sid);
+//
+//     [LoggerMessage(
 //         message: "BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.")]
 //     public static partial void SessionCleanupNotRegistered(this ILogger logger, LogLevel logLevel);
 //
@@ -444,6 +460,16 @@
 //     [LoggerMessage(
 //         message: $"Failed to add frontend change to {{{OTelParameters.Frontend}}} to queue")]
 //     public static partial void FailedToAddFrontendToQueue(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
+//
+//     [LoggerMessage(
+//         Message =
+//         $"Route '{{{OTelParameters.RouteId}}}' forwards a user access token without anti-forgery protection. An attacker could trigger this route cross-site and cause the BFF to forward the user's access token. Protect it by mapping the route with MapBffReverseProxy/AsBffApiEndpoint and calling app.UseBff(), or by calling WithAntiforgeryCheck() on the route and proxyApp.UseAntiforgeryCheck() on the YARP pipeline.")]
+//     public static partial void YarpRouteMissingAntiForgeryProtection(this ILogger logger, LogLevel logLevel, string routeId);
+//
+//     [LoggerMessage(
+//         Message =
+//         $"Route '{{{OTelParameters.RouteId}}}' forwards a user access token and is configured with WithAntiforgeryCheck(), but proxyApp.UseAntiforgeryCheck() was not added to the YARP pipeline, so no anti-forgery check is actually performed. Add proxyApp.UseAntiforgeryCheck() to the pipeline.")]
+//     public static partial void YarpRouteAntiForgeryCheckNotEnabled(this ILogger logger, LogLevel logLevel, string routeId);
 //
 //     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 //

@@ -5,12 +5,15 @@ using System.Net;
 using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Primitives;
 
 namespace Duende.Bff.Tests.TestInfra;
 
 public class ApiHost : TestHost
 {
     public HttpStatusCode? ApiStatusCodeToReturn { get; set; }
+    public int ReceivedRequestCount { get; private set; }
+    public Dictionary<string, StringValues> ResponseHeadersToReturn { get; } = [];
 
 
     public ApiHost(TestHostContext context, IdentityServerTestHost identityServerUri) : base(context, new Uri("https://api"))
@@ -32,6 +35,12 @@ public class ApiHost : TestHost
             _ = app.Map("/{**catch-all}",
                 async context =>
                 {
+                    ReceivedRequestCount++;
+                    foreach (var (name, values) in ResponseHeadersToReturn)
+                    {
+                        context.Response.Headers[name] = values;
+                    }
+
                     await ReturnApiCallDetails(context, () => ApiStatusCodeToReturn ?? HttpStatusCode.OK);
                 });
         };
