@@ -115,6 +115,12 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 return Invalid("Error validating id token hint", validatedRequest);
             }
 
+            var hintCheckFailure = IdentityTokenHintChecks.Validate(idTokenHint, tokenValidationResult, Options, Logger);
+            if (hintCheckFailure != null)
+            {
+                return Invalid(hintCheckFailure, validatedRequest);
+            }
+
             validatedRequest.SetClient(tokenValidationResult.Client);
 
             // validate sub claim against currently logged on user

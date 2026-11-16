@@ -3,6 +3,8 @@
 
 
 using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
@@ -163,10 +165,12 @@ public class MutualTlsSecretValidation
         var clientId = "mtls_client_invalid";
         var client = await _clients.FindEnabledClientByIdAsync(clientId);
 
+        using var clientCertificate = CreateCaIssuedCertificate("CN=identityserver_testing");
+
         var secret = new ParsedSecret
         {
             Id = clientId,
-            Credential = TestCert.Load(),
+            Credential = clientCertificate,
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
@@ -184,15 +188,28 @@ public class MutualTlsSecretValidation
         var clientId = "mtls_client_valid";
         var client = await _clients.FindEnabledClientByIdAsync(clientId);
 
+        using var clientCertificate = CreateCaIssuedCertificate("CN=identityserver_testing");
+
         var secret = new ParsedSecret
         {
             Id = clientId,
-            Credential = TestCert.Load(),
+            Credential = clientCertificate,
             Type = IdentityServerConstants.ParsedSecretTypes.X509Certificate
         };
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
         result.Success.Should().BeTrue();
+    }
+
+    private static X509Certificate2 CreateCaIssuedCertificate(string subject)
+    {
+        using var caKey = RSA.Create(2048);
+        var caRequest = new CertificateRequest("CN=Test CA", caKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        caRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, false, 0, true));
+        using var ca = caRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddHours(1));
+        using var clientKey = RSA.Create(2048);
+        var clientRequest = new CertificateRequest(subject, clientKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        return clientRequest.Create(ca, ca.NotBefore, ca.NotAfter, RandomNumberGenerator.GetBytes(8));
     }
 }
