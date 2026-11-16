@@ -164,7 +164,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             }.Distinct();
         }
 
-        var handler = new JsonWebTokenHandler() { MaximumTokenSizeInBytes = _options.InputLengthRestrictions.Jwt };
+        var handler = new NonCachedJsonWebTokenHandler { MaximumTokenSizeInBytes = _options.InputLengthRestrictions.Jwt };
         var result = await handler.ValidateTokenAsync(jwtTokenString, tokenValidationParameters);
         if (!result.IsValid)
         {
