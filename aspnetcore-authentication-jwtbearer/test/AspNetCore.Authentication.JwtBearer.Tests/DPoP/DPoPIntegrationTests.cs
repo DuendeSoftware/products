@@ -1,9 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.Json;
 using Duende.AccessTokenManagement.DPoP;
 using Duende.AccessTokenManagement.OpenIdConnect;
@@ -14,6 +18,7 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
@@ -257,6 +262,69 @@ public class DPoPIntegrationTests
         cache.GetOrCreateAsyncCalls.Count.ShouldBeGreaterThan(0);
     }
 
+    [Fact]
+    public async Task proof_signed_by_x5c_key_instead_of_bound_jwk_fails()
+    {
+        await Initialize();
+        var token = await LoginAndGetToken();
+        using var attackerKey = RSA.Create(2048);
+        var algorithmTheClientHasNotUsed = SecurityAlgorithms.RsaSsaPssSha256;
+        var forgedProof = CreateProofWithClientJwkAndAttackerCertificate(token, attackerKey, algorithmTheClientHasNotUsed);
+        Api.HttpClient.SetToken(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, token.AccessToken);
+        Api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, forgedProof);
+
+        var forgedResponse = await Api.HttpClient.GetAsync("/");
+
+        forgedResponse.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task poisoning_the_shared_jwt_verifier_cache_does_not_affect_a_valid_proof()
+    {
+        await Initialize();
+        var clientToken = await LoginAndGetToken();
+        var clientDPoPKey = Jwk.ToJsonWebKey();
+        var algorithmTheClientHasNotUsed = SecurityAlgorithms.RsaSsaPssSha256;
+
+        using var attackerKey = RSA.Create(2048);
+        using var attackerCertificate = new CertificateRequest("CN=attacker", attackerKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        var clientKeyWithAttackerCertificate = new Dictionary<string, object>
+        {
+            { JsonWebKeyParameterNames.Kty, clientDPoPKey.Kty },
+            { JsonWebKeyParameterNames.E, clientDPoPKey.E },
+            { JsonWebKeyParameterNames.N, clientDPoPKey.N },
+            { JsonWebKeyParameterNames.X5c, new[] { Convert.ToBase64String(attackerCertificate.RawData) } },
+        };
+        var cachePoisoningTokenHandler = new JsonWebTokenHandler();
+        var tokenSignedByAttacker = cachePoisoningTokenHandler.CreateToken(new SecurityTokenDescriptor
+        {
+            SigningCredentials = new SigningCredentials(new RsaSecurityKey(attackerKey), algorithmTheClientHasNotUsed)
+        });
+        var cachePoisoningAttempt = await cachePoisoningTokenHandler.ValidateTokenAsync(tokenSignedByAttacker, new TokenValidationParameters
+        {
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.JsonWebKey(JsonSerializer.Serialize(clientKeyWithAttackerCertificate)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        });
+        cachePoisoningAttempt.IsValid.ShouldBeTrue();
+
+        var clientPublicKey = new Dictionary<string, object>
+        {
+            { JsonWebKeyParameterNames.Kty, clientDPoPKey.Kty },
+            { JsonWebKeyParameterNames.E, clientDPoPKey.E },
+            { JsonWebKeyParameterNames.N, clientDPoPKey.N },
+        };
+        var validClientProof = CreateProof(clientToken, clientDPoPKey, algorithmTheClientHasNotUsed, clientPublicKey);
+        Api.HttpClient.SetToken(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, clientToken.AccessToken);
+        Api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, validClientProof);
+        var dpopProtectedEndpoint = "/";
+
+        var responseToValidClientProof = await Api.HttpClient.GetAsync(dpopProtectedEndpoint);
+
+        responseToValidClientProof.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
     // Initialize all the hosts. We separate this from creation of the hosts so that tests can customize their behavior
     private async Task Initialize()
     {
@@ -303,6 +371,21 @@ public class DPoPIntegrationTests
         var proof = await dpopService.CreateProofTokenAsync(proofRequest);
         _ = proof.ShouldNotBeNull();
         return proof.Value;
+    }
+
+    private string CreateProofWithClientJwkAndAttackerCertificate(UserToken token, RSA attackerKey, string algorithm)
+    {
+        var clientJwk = Jwk.ToJsonWebKey();
+        using var attackerCertificate = new CertificateRequest("CN=attacker", attackerKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        var proofJwk = new Dictionary<string, object>
+        {
+            { JsonWebKeyParameterNames.Kty, clientJwk.Kty },
+            { JsonWebKeyParameterNames.E, clientJwk.E },
+            { JsonWebKeyParameterNames.N, clientJwk.N },
+            { JsonWebKeyParameterNames.X5c, new[] { Convert.ToBase64String(attackerCertificate.RawData) } },
+        };
+        return CreateProof(token, new RsaSecurityKey(attackerKey), algorithm, proofJwk);
     }
 
     private IdentityServerHost CreateIdentityServer(Action<IdentityServerHost>? setup = null)
@@ -355,5 +438,25 @@ public class DPoPIntegrationTests
         jwkKey.Alg = "RS256";
         var jwk = JsonSerializer.Serialize(jwkKey);
         return DPoPProofKey.Parse(jwk);
+    }
+
+    private static string CreateProof(UserToken token, SecurityKey signingKey, string algorithm, Dictionary<string, object> proofJwk)
+    {
+        var accessTokenHash = Base64Url.EncodeToString(SHA256.HashData(Encoding.ASCII.GetBytes(token.AccessToken.ToString())));
+        var descriptor = new SecurityTokenDescriptor
+        {
+            TokenType = JwtClaimTypes.JwtTypes.DPoPProofToken,
+            IssuedAt = DateTime.UtcNow,
+            AdditionalHeaderClaims = new Dictionary<string, object> { { JwtClaimTypes.JsonWebKey, proofJwk } },
+            Subject = new ClaimsIdentity(
+            [
+                new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
+                new Claim(JwtClaimTypes.DPoPHttpMethod, HttpMethod.Get.Method),
+                new Claim(JwtClaimTypes.DPoPHttpUrl, "http://localhost/"),
+                new Claim(JwtClaimTypes.DPoPAccessTokenHash, accessTokenHash),
+            ]),
+            SigningCredentials = new SigningCredentials(signingKey, algorithm)
+        };
+        return new JsonWebTokenHandler().CreateToken(descriptor);
     }
 }

@@ -1,16 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/.github/">
+    <Project Path=".github/BuildHelpers/BuildHelpers.csproj" />
+    <Project Path=".github/RepoTool/RepoTool.csproj" />
+  </Folder>
+  <Folder Name="/aspnetcore-authentication-jwtbearer/" />
   <Folder Name="/aspnetcore-authentication-jwtbearer/src/">
     <Project Path="aspnetcore-authentication-jwtbearer/src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj" />
   </Folder>
   <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
+  <Folder Name="/bff/" />
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
@@ -21,6 +26,7 @@
     <Project Path="bff/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="bff/hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/bff/hosts/Blazor/" />
   <Folder Name="/bff/hosts/Blazor/PerComponent/">
     <Project Path="bff/hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent.Client/Hosts.Bff.Blazor.PerComponent.Client.csproj" />
     <Project Path="bff/hosts/Blazor/PerComponent/Hosts.Bff.Blazor.PerComponent/Hosts.Bff.Blazor.PerComponent.csproj" />
@@ -48,6 +54,7 @@
     <Project Path="bff/src/Bff.Yarp/Bff.Yarp.csproj" />
     <Project Path="bff/src/Bff/Bff.csproj" />
   </Folder>
+  <Folder Name="/bff/templates/" />
   <Folder Name="/bff/templates/src/">
     <Project Path="bff/templates/src/BffLocalApi/BffLocalApi.csproj" />
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
@@ -60,6 +67,7 @@
     <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
+  <Folder Name="/conformance-report/" />
   <Folder Name="/conformance-report/src/">
     <Project Path="conformance-report/src/ConformanceReport/ConformanceReport.csproj" />
   </Folder>
@@ -73,11 +81,13 @@
   <Folder Name="/docs-mcp/.config/">
     <File Path="docs-mcp/.config/dotnet-tools.json" />
   </Folder>
+  <Folder Name="/identity-server/" />
   <Folder Name="/identity-server/aspire/">
     <Project Path="identity-server/aspire/AppHosts/All/All.csproj" />
     <Project Path="identity-server/aspire/AppHosts/Dev/Dev.csproj" />
     <Project Path="identity-server/aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/identity-server/clients/" />
   <Folder Name="/identity-server/clients/src/">
     <Project Path="identity-server/clients/src/ConsoleCibaClient/ConsoleCibaClient.csproj" />
     <Project Path="identity-server/clients/src/ConsoleClientCredentialsFlow/ConsoleClientCredentialsFlow.csproj" />
@@ -146,6 +156,7 @@
     <Project Path="identity-server/src/IdentityServer/IdentityServer.csproj" />
     <Project Path="identity-server/src/Storage/IdentityServer.Storage.csproj" />
   </Folder>
+  <Folder Name="/identity-server/templates/" />
   <Folder Name="/identity-server/templates/src/">
     <Project Path="identity-server/templates/src/IdentityServer/IdentityServerTemplate.csproj" />
     <Project Path="identity-server/templates/src/IdentityServerAspNetIdentity/IdentityServerAspNetIdentity.csproj" />
@@ -159,11 +170,136 @@
     <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/ignore-this/" />
   <Folder Name="/ignore-this/src/">
     <Project Path="ignore-this/src/IgnoreThis/IgnoreThis.csproj" />
   </Folder>
   <Folder Name="/ignore-this/test/">
     <Project Path="ignore-this/test/IgnoreThis.Tests/IgnoreThis.Tests.csproj" />
+  </Folder>
+  <Folder Name="/platform/" />
+  <Folder Name="/platform/performance/">
+    <Project Path="platform/performance/database/Duende.Platform.Database.Benchmarks.csproj" />
+    <Project Path="platform/performance/LoadTests/LoadTests.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/" />
+  <Folder Name="/platform/samples/identity-federation-samples/" />
+  <Folder Name="/platform/samples/identity-federation-samples/hrd/">
+    <Project Path="platform/samples/identity-federation-samples/hrd/AppHost/AppHost.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/hrd/DownstreamClient/DownstreamClient.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/hrd/HrdIdentityFederation/HrdIdentityFederation.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/hrd/OidcIdp/OidcIdp.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/hrd/SamlIdp/SamlIdp.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/identity-federation-samples/multi-space/">
+    <Project Path="platform/samples/identity-federation-samples/multi-space/AppHost/AppHost.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/multi-space/DownstreamClient/DownstreamClient.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/multi-space/MultiSpaceIdentityFederation/MultiSpaceIdentityFederation.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/multi-space/OidcIdp/OidcIdp.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/multi-space/SamlIdp/SamlIdp.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/identity-federation-samples/single-space/">
+    <Project Path="platform/samples/identity-federation-samples/single-space/AppHost/AppHost.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/single-space/DownstreamClient/DownstreamClient.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/single-space/OidcIdp/OidcIdp.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/single-space/SamlIdp/SamlIdp.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/single-space/SingleSpaceIdentityFederation/SingleSpaceIdentityFederation.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/identity-server/">
+    <Project Path="platform/samples/identity-server/FaroIdentityServer/FaroIdentityServer.csproj" />
+    <Project Path="platform/samples/identity-server/MultiSpaceIdentityServer/MultiSpaceIdentityServer.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/jobs/" />
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v10/" />
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v10/src/">
+    <Project Path="platform/samples/jobs/import-aspnet-identity-v10/src/ImportAspNetIdentityV10/ImportAspNetIdentityV10.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v10/test/">
+    <Project Path="platform/samples/jobs/import-aspnet-identity-v10/test/ImportAspNetIdentityV10.Tests/ImportAspNetIdentityV10.Tests.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v8/" />
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v8/src/">
+    <Project Path="platform/samples/jobs/import-aspnet-identity-v8/src/ImportAspNetIdentityV8/ImportAspNetIdentityV8.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v8/test/">
+    <Project Path="platform/samples/jobs/import-aspnet-identity-v8/test/ImportAspNetIdentityV8.Tests/ImportAspNetIdentityV8.Tests.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v9/" />
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v9/src/">
+    <Project Path="platform/samples/jobs/import-aspnet-identity-v9/src/ImportAspNetIdentityV9/ImportAspNetIdentityV9.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/jobs/import-aspnet-identity-v9/test/">
+    <Project Path="platform/samples/jobs/import-aspnet-identity-v9/test/ImportAspNetIdentityV9.Tests/ImportAspNetIdentityV9.Tests.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/saml/">
+    <Project Path="platform/samples/saml/IdentityServer/IdentityServer.csproj" />
+    <Project Path="platform/samples/saml/OidcClient/OidcClient.csproj" />
+    <Project Path="platform/samples/saml/SamlSamples/SamlSamples.csproj" />
+    <Project Path="platform/samples/saml/ServiceProvider/ServiceProvider.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/user-management/">
+    <Project Path="platform/samples/user-management/ExternalAuthentication/ExternalAuthentication.csproj" />
+    <Project Path="platform/samples/user-management/OtpAuthentication/OtpAuthentication.csproj" />
+    <Project Path="platform/samples/user-management/PasskeyAuthentication/PasskeyAuthentication.csproj" />
+    <Project Path="platform/samples/user-management/PersonaOtpIdentityServer/PersonaOtpIdentityServer.csproj" />
+    <Project Path="platform/samples/user-management/SimpleWebApp/SimpleWebApp.csproj" />
+    <Project Path="platform/samples/user-management/TotpAuthentication/TotpAuthentication.csproj" />
+    <Project Path="platform/samples/user-management/UserManagementSamples/UserManagementSamples.csproj" />
+    <Project Path="platform/samples/user-management/WebComponent/AuthenticationFlowWithWebComponent/AuthenticationFlowWithWebComponent.csproj" />
+  </Folder>
+  <Folder Name="/platform/src/">
+    <Project Path="platform/src/AdminStudio.Client/AdminStudio.Client.csproj" />
+    <Project Path="platform/src/AdminStudio.Server/AdminStudio.Server.csproj" />
+    <Project Path="platform/src/AdminStudio.Shared/AdminStudio.Shared.csproj" />
+    <Project Path="platform/src/AdminStudio.Web/AdminStudio.Web.csproj" Id="1a5ccdd7-7080-463d-a1a8-a5d018bda0fc" />
+    <Project Path="platform/src/Authentication.Web/Authentication.Web.csproj" />
+    <Project Path="platform/src/Authentication/Authentication.csproj" />
+    <Project Path="platform/src/Builder.Abstractions/Builder.Abstractions.csproj" />
+    <Project Path="platform/src/Builder.Web.Abstractions/Builder.Web.Abstractions.csproj" />
+    <Project Path="platform/src/Builder.Web/Builder.Web.csproj" />
+    <Project Path="platform/src/Builder/Builder.csproj" />
+    <Project Path="platform/src/IdentityFederation/IdentityFederation.csproj" />
+    <Project Path="platform/src/IdentityServer/IdentityServer.csproj" />
+    <Project Path="platform/src/Jobs.Abstractions/Jobs.Abstractions.csproj" />
+    <Project Path="platform/src/Jobs.Web/Jobs.Web.csproj" />
+    <Project Path="platform/src/Jobs/Jobs.csproj" />
+    <Project Path="platform/src/Platform.Web/Platform.Web.csproj" />
+    <Project Path="platform/src/Platform/Platform.csproj" />
+    <Project Path="platform/src/Storage.MsSql/Storage.MsSql.csproj" />
+    <Project Path="platform/src/Storage.PostgreSql/Storage.PostgreSql.csproj" />
+    <Project Path="platform/src/Users.Authentication.Web/Users.Authentication.Web.csproj" />
+    <Project Path="platform/src/Users.Authentication/Users.Authentication.csproj" />
+    <Project Path="platform/src/Users.Profiles/Users.Profiles.csproj" />
+    <Project Path="platform/src/Users/Users.csproj" />
+    <Project Path="platform\src\Storage\Storage.csproj" />
+  </Folder>
+  <Folder Name="/platform/src/tooling/">
+    <Project Path="platform/src/Tooling/Cli/Cli.csproj" />
+    <Project Path="platform/src/Tooling/PublicApi/PublicApi.csproj" />
+  </Folder>
+  <Folder Name="/platform/test/">
+    <Project Path="platform/test/AdminStudio.Client.Tests/AdminStudio.Client.Tests.csproj" />
+    <Project Path="platform/test/AdminStudio.Server.IntegrationTests/AdminStudio.Server.IntegrationTests.csproj" />
+    <Project Path="platform/test/Authentication.Tests.Internal/Authentication.Tests.Internal.csproj" />
+    <Project Path="platform/test/Authentication.Tests.Public/Authentication.Tests.Public.csproj" />
+    <Project Path="platform/test/IdentityFederation.Tests.Public/IdentityFederation.Tests.Public.csproj" />
+    <Project Path="platform/test/Jobs.Tests.Internal/Jobs.Tests.Internal.csproj" />
+    <Project Path="platform/test/Platform.Tests.Conventions/Platform.Tests.Conventions.csproj" />
+    <Project Path="platform/test/Platform.Tests.Internal/Platform.Tests.Internal.csproj" />
+    <Project Path="platform/test/Storage.Tests/Storage.Tests.csproj" />
+    <Project Path="platform/test/UserManagement.Tests.Internal/UserManagement.Tests.Internal.csproj" />
+    <Project Path="platform/test/UserManagement.Tests.Public/UserManagement.Tests.Public.csproj" />
+  </Folder>
+  <Folder Name="/platform/testing/">
+    <Project Path="platform/testing/Platform.TestInfrastructure/Platform.TestInfrastructure.csproj" />
+    <Project Path="platform/testing/TestAppHost/TestAppHost.csproj" />
+    <Project Path="platform/testing/TestResources/TestResources.csproj" />
+  </Folder>
+  <Folder Name="/platform/samples/identity-federation-samples/interactive-provisioning/">
+    <Project Path="platform/samples/identity-federation-samples/interactive-provisioning/AppHost/AppHost.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/interactive-provisioning/OidcIdp/OidcIdp.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/interactive-provisioning/DownstreamClient/DownstreamClient.csproj" />
+    <Project Path="platform/samples/identity-federation-samples/interactive-provisioning/ProvisioningIdentityFederation/ProvisioningIdentityFederation.csproj" />
   </Folder>
   <Folder Name="/shared/">
     <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />

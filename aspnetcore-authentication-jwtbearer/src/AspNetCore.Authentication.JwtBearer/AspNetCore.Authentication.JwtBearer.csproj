@@ -12,4 +12,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.AspNetCore.Authentication.JwtBearer.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\shared\JsonWebTokens\NonCachedJsonWebTokenHandler.cs" Link="NonCachedJsonWebTokenHandler.cs" />
+  </ItemGroup>
 </Project>

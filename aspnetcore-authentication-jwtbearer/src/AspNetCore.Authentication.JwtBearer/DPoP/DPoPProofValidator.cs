@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
+using Duende.Shared;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -211,9 +212,29 @@ internal class DPoPProofValidator : IDPoPProofValidator
             return;
         }
 
+        var publicKey = CreatePublicKey(jwk);
+        if (publicKey is null)
+        {
+            Logger.LogDebug("Unsupported 'jwk' key type: {KeyType}", jwk.Kty);
+            result.SetError("Invalid 'jwk' value.");
+            return;
+        }
+
         result.JsonWebKey = jwkJson;
-        result.JsonWebKeyThumbprint = jwk.CreateThumbprint();
+        result.JsonWebKeyThumbprint = publicKey.CreateThumbprint();
     }
+
+    /// <summary>
+    /// Creates a key from only the members that RFC 7638 uses for the thumbprint, so the proof signature is
+    /// checked against the key that the thumbprint names. Microsoft.IdentityModel uses an RSA key's x5c
+    /// certificate instead of its n and e when both are present.
+    /// </summary>
+    private static JsonWebKey? CreatePublicKey(JsonWebKey jwk) => jwk.Kty switch
+    {
+        JsonWebAlgorithmsKeyTypes.RSA => new JsonWebKey { Kty = jwk.Kty, N = jwk.N, E = jwk.E },
+        JsonWebAlgorithmsKeyTypes.EllipticCurve => new JsonWebKey { Kty = jwk.Kty, Crv = jwk.Crv, X = jwk.X, Y = jwk.Y },
+        _ => null
+    };
 
     /// <summary>
     /// Performs all the validation that we can using the JsonWebTokenHandler, including signature, alg, and typ validation
@@ -227,9 +248,9 @@ internal class DPoPProofValidator : IDPoPProofValidator
         try
         {
             var tvp = context.Options.ProofTokenValidationParameters.Clone();
-            tvp.IssuerSigningKey = new JsonWebKey(result.JsonWebKey);
+            tvp.IssuerSigningKey = CreatePublicKey(new JsonWebKey(result.JsonWebKey));
 
-            var handler = new JsonWebTokenHandler();
+            var handler = new NonCachedJsonWebTokenHandler();
             tokenValidationResult = await handler.ValidateTokenAsync(context.ProofToken, tvp);
         }
         catch (Exception ex)

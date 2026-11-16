@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
+  </Folder>
+</Solution>

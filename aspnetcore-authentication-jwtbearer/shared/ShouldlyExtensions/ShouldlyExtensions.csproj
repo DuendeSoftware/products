@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AnalysisMode>None</AnalysisMode>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <IsTestProject>false</IsTestProject>
+    <RootNamespace>Shouldly</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+  </ItemGroup>
+
+</Project>
