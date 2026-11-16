@@ -173,8 +173,26 @@ public static class BffBuilderExtensions
         builder.Services.TryAddSingleton<IStaticFilesClient, StaticFilesHttpClient>();
 
         builder.Services.ApplyBackchannelHttpHandlerFromOptions();
+        ConfigureStaticAssetsProxyClient(builder.Services, Constants.HttpClientNames.StaticAssetsProxyClientName);
+        ConfigureStaticAssetsProxyClient(builder.Services, Constants.HttpClientNames.StaticAssetsProxyFallbackClientName);
 
         return builder;
+    }
+
+    private static void ConfigureStaticAssetsProxyClient(IServiceCollection services, string name)
+    {
+        _ = services.AddHttpClient(name);
+        _ = services.Configure<HttpClientFactoryOptions>(name, options =>
+        {
+            options.HttpMessageHandlerBuilderActions.Insert(0, handlerBuilder =>
+            {
+                var bffOptions = handlerBuilder.Services.GetRequiredService<IOptions<BffOptions>>().Value;
+                if (!string.Equals(bffOptions.StaticAssetsClientName, name, StringComparison.Ordinal))
+                {
+                    handlerBuilder.PrimaryHandler = new HttpClientHandler { AllowAutoRedirect = false };
+                }
+            });
+        });
     }
 
     /// <summary>

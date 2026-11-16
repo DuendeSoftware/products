@@ -152,7 +152,8 @@ public sealed class BffOptions
     public HttpMessageHandler? BackchannelHttpHandler { get; set; }
 
     /// <summary>
-    /// The name of the http client that's used to proxy static files using the <see cref="IStaticFilesClient"/>.
+    /// The name of the HTTP client used by the built-in <see cref="IStaticFilesClient"/> to retrieve CDN index HTML.
+    /// Static asset proxying normally uses <see cref="Constants.HttpClientNames.StaticAssetsProxyClientName"/> instead.
     /// </summary>
     public string StaticAssetsClientName { get; set; } = Constants.HttpClientNames.StaticAssetsClientName;
 
@@ -203,5 +204,38 @@ public sealed class BffOptions
     /// setting a <c>Cookie</c> header.
     /// </remarks>
     public bool RemoveCookieHeaderFromYarpRequests { get; set; } = true;
+
+    /// <summary>
+    /// Specifies if the <c>Set-Cookie</c> and <c>Clear-Site-Data</c> headers returned by proxied APIs
+    /// and the built-in static asset proxy are removed before the response goes to the browser. Defaults to true.
+    ///
+    /// This applies to remote APIs (<c>MapRemoteBffApiEndpoint</c> and the remote APIs of a frontend) and
+    /// every route proxied through the YARP integration (<c>AddYarpConfig</c> / <c>AddBffExtensions</c>),
+    /// as well as assets proxied from <see cref="BffFrontend.StaticAssetsUrl"/>. Only the values that the
+    /// upstream server sent are removed. Headers that the BFF itself writes during the same
+    /// request, for example when it re-issues the authentication cookie after it renews a token, still
+    /// reach the browser.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Do not set this to false unless you must. The browser applies these headers as if the BFF sent
+    /// them. When this is false, every proxied API and static asset server, and anything on the network
+    /// path between the BFF and those servers, can set, replace or delete cookies on the BFF's origin.
+    /// This includes the BFF authentication cookie, also when it uses the <c>__Host-</c> prefix.
+    /// For example, an upstream server can:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>replace the user's authentication cookie with a valid cookie for a different
+    /// account, so that the frontend then acts as that account and the user's data goes to it;</description></item>
+    /// <item><description>send <c>Clear-Site-Data: "cookies"</c> and sign the user out.</description></item>
+    /// </list>
+    /// <para>
+    /// Set this to false only when you trust every API and static asset server that the BFF proxies,
+    /// and one of them must set cookies on the BFF's origin, for example a load balancer affinity cookie
+    /// such as <c>ARRAffinity</c>. The setting applies to every proxied API route and static asset
+    /// frontend, not only to the server that needs it.
+    /// </para>
+    /// </remarks>
+    public bool RemoveCookieHeadersFromProxiedResponses { get; set; } = true;
 
 }

@@ -238,4 +238,31 @@ public class BffRemoteApiTests : BffTestBase
         var userTokenManager = (FakeUserManager)Bff.Resolve<IUserTokenManager>();
         userTokenManager.WasCalled.ShouldBeFalse("The fake user token manager should not have been called because there is no currently logged in user.");
     }
+
+    [Fact]
+    public async Task When_api_returns_set_cookie_or_clear_site_data_then_neither_reaches_the_browser()
+    {
+        Api.ResponseHeadersToReturn["Set-Cookie"] = "from-api=1; path=/";
+        Api.ResponseHeadersToReturn["Clear-Site-Data"] = "\"cookies\"";
+        Api.ResponseHeadersToReturn["x-from-api"] = "kept";
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend()
+            .WithRemoteApis(
+                new RemoteApi()
+                {
+                    PathMatch = The.Path,
+                    TargetUri = Api.Url(),
+                    RequiredTokenType = RequiredTokenType.User
+                })
+        );
+        _ = await Bff.BrowserClient.Login();
+
+        var (response, _) = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
+
+        var setCookieValues = response.Headers.TryGetValues("Set-Cookie", out var values) ? values : [];
+        setCookieValues.ShouldNotContain(value => value.StartsWith("from-api=", StringComparison.Ordinal));
+        response.Headers.Contains("Clear-Site-Data").ShouldBeFalse();
+        response.Headers.GetValues("x-from-api").ShouldBe(["kept"]);
+    }
 }

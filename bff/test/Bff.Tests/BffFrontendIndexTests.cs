@@ -260,6 +260,8 @@ public class BffFrontendIndexTests : BffTestBase
         _ = builder.Services.AddSingleton(transformer);
         _ = builder.Services.AddBff(options => options.BackchannelHttpHandler = Internet)
             .AddFrontends(Some.BffFrontend().WithProxiedStaticAssets(Cdn.Url("/")));
+        _ = builder.Services.AddHttpClient(Constants.HttpClientNames.StaticAssetsProxyClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => Internet);
 
         await using var app = builder.Build();
         _ = app.UseRouting();

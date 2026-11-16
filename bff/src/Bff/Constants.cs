@@ -140,6 +140,12 @@ public static class Constants
     {
         public const string StaticAssetsClientName = "Duende.Bff.IndexHtmlClient";
 
+        /// <summary>
+        /// The HTTP client used by the built-in static asset proxy.
+        /// </summary>
+        public const string StaticAssetsProxyClientName = "Duende.Bff.StaticAssetsProxyClient";
+
+        internal const string StaticAssetsProxyFallbackClientName = "Duende.Bff.StaticAssetsProxyClient.Fallback";
     }
 
 }

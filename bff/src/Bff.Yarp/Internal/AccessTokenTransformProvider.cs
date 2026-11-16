@@ -76,6 +76,8 @@ internal class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogge
             return default;
         });
 
+        transformBuildContext.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(options));
+
         if (!GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
         {
             return;

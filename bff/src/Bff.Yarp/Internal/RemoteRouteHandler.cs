@@ -72,7 +72,11 @@ internal class RemoteRouteHandler : IDisposable
             .GetOrAdd(frontend.Name, _ => new());
 
         return transformersForFrontend
-            .GetOrAdd(api.PathMatch, path => _transformBuilder.Create(c => _bffTransformBuilder(path, c)));
+            .GetOrAdd(api.PathMatch, path => _transformBuilder.Create(c =>
+            {
+                _bffTransformBuilder(path, c);
+                c.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(_options));
+            }));
     }
 
     public void ClearTransformerCacheFor(BffFrontend frontend) => _cache.TryRemove(frontend.Name, out _);
