@@ -190,6 +190,13 @@ public abstract class DPoPEndpointTestBase
         CreateHeaderValuesFromPublicKey();
     }
 
+    protected void InitializePipeline()
+    {
+        Pipeline.Initialize();
+
+        CreateHeaderValuesFromPublicKey();
+    }
+
     protected void CreateNewRSAKey()
     {
         var key = CryptoHelper.CreateRsaSecurityKey();

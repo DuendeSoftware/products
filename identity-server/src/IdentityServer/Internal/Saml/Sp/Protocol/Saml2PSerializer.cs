@@ -81,7 +81,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
                 {
                     try
                     {
-                        decrypted = encrypted.DocumentElement.Decrypt(cert.PrivateKey);
+                        decrypted = encrypted.DocumentElement.Decrypt(cert.PrivateKey, spOptions.MaxXmlNestingDepth);
                         break;
                     }
                     catch (CryptographicException)

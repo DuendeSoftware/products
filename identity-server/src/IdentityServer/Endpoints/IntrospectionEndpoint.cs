@@ -104,16 +104,20 @@ internal class IntrospectionEndpoint : IEndpointHandler
         if (apiResult.IsError)
         {
             clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
-            if (clientResult.IsError)
+            if (clientResult.IsError || clientResult.Client is null)
             {
                 _logger.LogError("Unauthorized call introspection endpoint. aborting.");
                 return new StatusCodeResult(HttpStatusCode.Unauthorized);
             }
-            else
+
+            client = clientResult.Client;
+            if (!client.RequireClientSecret || client.IsImplicitOnly())
             {
-                client = clientResult.Client;
-                _logger.LogDebug("Client making introspection request: {clientId}", client.ClientId);
+                _logger.LogInformation("Client {ClientId} does not authenticate with a secret and cannot call the introspection endpoint. aborting.", client.ClientId);
+                return new StatusCodeResult(HttpStatusCode.Unauthorized);
             }
+
+            _logger.LogDebug("Client making introspection request: {clientId}", client.ClientId);
         }
         else
         {

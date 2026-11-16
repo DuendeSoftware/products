@@ -124,7 +124,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
             var issuerNode = xml["Issuer", Saml2Namespaces.Saml2Name];
             if (issuerNode != null)
             {
-                Issuer = new EntityId(issuerNode.InnerXml);
+                Issuer = new EntityId(XmlHelpers.GetDirectTextContents(issuerNode));
             }
 
             var extensionsNode = xml["Extensions", Saml2Namespaces.Saml2PName];

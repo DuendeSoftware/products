@@ -54,11 +54,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
 
                     var idpContext = GetIdpContext(unbindResult.Data, request, options);
 
-                    var result = ProcessResponse(options, samlResponse, request.StoredRequestState, idpContext, unbindResult.RelayState);
+                    var urls = new Saml2Urls(request, options);
+
+                    var result = ProcessResponse(options, samlResponse, request.StoredRequestState, idpContext, unbindResult.RelayState, urls.AssertionConsumerServiceUrl);
 
                     if (request.StoredRequestState != null)
                     {
-                        var urls = new Saml2Urls(request, options);
                         result.ClearCookieName = StoredRequestState.CookieNameBase + unbindResult.RelayState;
                         result.SetCookieSecureFlag = urls.AssertionConsumerServiceUrl.IsHttps();
                     }
@@ -129,11 +130,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
             Saml2Response samlResponse,
             StoredRequestState storedRequestState,
             IdentityProvider identityProvider,
-            string relayState)
+            string relayState,
+            Uri assertionConsumerServiceUrl)
         {
             ValidateIssuer(storedRequestState?.Idp, samlResponse);
 
-            var principal = new ClaimsPrincipal(samlResponse.GetClaims(options, storedRequestState?.RelayData));
+            var principal = new ClaimsPrincipal(samlResponse.GetClaims(options, storedRequestState?.RelayData, assertionConsumerServiceUrl));
 
             if (options.SPOptions.IdpInitiatedCallbackUrl == null)
             {

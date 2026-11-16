@@ -140,6 +140,26 @@ public sealed class HttpRedirectBindingTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task UnbindWithNestedIssuerShouldThrowXmlExceptionBeforeResolvingEntity()
+    {
+        var binding = CreateBinding();
+        var xml = SimpleAuthnRequestXml("<nested>https://sp.example.com</nested>");
+        var url = CreateRedirectUrl(xml)
+            + $"&SigAlg={Uri.EscapeDataString(SignedXml.XmlDsigRSASHA256Url)}&Signature=AA%3D%3D";
+        var resolverCalled = false;
+
+        var ex = await Should.ThrowAsync<XmlException>(() => binding.UnBindAsync(url, (_, _) =>
+        {
+            resolverCalled = true;
+            return Task.FromResult<Saml2Entity?>(null);
+        }, _ct));
+
+        ex.Message.ShouldBe("Element \"Issuer\" must contain text only.");
+        resolverCalled.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task UnbindWithXxePayloadShouldThrowXmlException()
     {
         var binding = CreateBinding();

@@ -5,6 +5,11 @@
     <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
+  <!-- Test infrastructure only (not shipped): Aspire.Hosting/Aspire.Hosting.AppHost 13.2.4 GHSA-f7vh-h5g3-7jrh and Aspire.Dashboard.Sdk 13.2.4 GHSA-4g86-54fm-h9h8 (patched 13.6.5). -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
+  </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
     <DefineConstants>$(DefineConstants);DEBUG_NCRUNCH</DefineConstants>
   </PropertyGroup>

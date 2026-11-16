@@ -23,6 +23,12 @@ namespace UnitTests.Validation.EndSessionRequestValidation;
 
 public class EndSessionRequestValidatorTests
 {
+    // A minimal JWT whose header is {"alg":"none","typ":"JWT"} and payload is {}. The
+    // StubTokenValidator below returns the claims and typ checks read this header directly from
+    // the submitted hint, so tests need a token that at least parses as a JWT, even though its
+    // signature is never checked by the stub.
+    private const string JwtShapedIdTokenHint = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.e30.";
+
     private EndSessionRequestValidator _subject;
     private IdentityServerOptions _options;
     private readonly Ct _ct = TestContext.Current.CancellationToken;
@@ -81,7 +87,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
         parameters.Add("post_logout_redirect_uri", "http://client/signout-cb");
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
@@ -96,6 +102,30 @@ public class EndSessionRequestValidatorTests
     }
 
     [Fact]
+    public async Task hint_with_unexpected_typ_header_should_be_rejected_even_when_token_validator_reports_success()
+    {
+        // A JWT whose header is {"alg":"none","typ":"at+jwt"} and payload is {}: the typ check
+        // reads this header from the submitted hint itself, so this must be rejected even though
+        // the (stubbed) token validator reports success with a sub claim.
+        const string atJwtShapedIdTokenHint = "eyJhbGciOiJub25lIiwidHlwIjoiYXQrand0In0.e30.";
+
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
+            Client = new Client() { ClientId = "client" }
+        };
+        _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", atJwtShapedIdTokenHint);
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+
+        result.IsError.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task no_post_logout_redirect_uri_should_not_use_single_registered_uri()
     {
         _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
@@ -107,7 +137,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
@@ -126,7 +156,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
@@ -145,7 +175,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = false;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
         parameters.Add("post_logout_redirect_uri", "http://client/signout-cb");
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
@@ -172,7 +202,7 @@ public class EndSessionRequestValidatorTests
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
         parameters.Add("post_logout_redirect_uri", "http://client/signout-cb");
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
@@ -273,7 +303,7 @@ public class EndSessionRequestValidatorTests
         ];
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
 
@@ -489,12 +519,16 @@ public class EndSessionRequestValidatorTests
         _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
         {
             IsError = false,
-            Claims = new Claim[] { new Claim("sid", "session-abc") },
+            Claims = new Claim[]
+            {
+                new Claim("sid", "session-abc"),
+                new Claim("sub", "123")
+            },
             Client = new Client() { ClientId = "client" }
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
@@ -509,15 +543,20 @@ public class EndSessionRequestValidatorTests
         _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
         {
             IsError = false,
-            Claims = new Claim[] { new Claim("sid", "session-xyz") },
+            Claims = new Claim[]
+            {
+                new Claim("sid", "session-xyz"),
+                new Claim("sub", _user.GetSubjectId())
+            },
             Client = new Client() { ClientId = "client" }
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeTrue();
+        result.ErrorDescription.ShouldContain("Session ID in id_token_hint does not match current session");
     }
 
     [Fact]
@@ -537,7 +576,7 @@ public class EndSessionRequestValidatorTests
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
@@ -555,7 +594,7 @@ public class EndSessionRequestValidatorTests
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
@@ -573,16 +612,20 @@ public class EndSessionRequestValidatorTests
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task NoSubNoSidInTokenShouldReturnSuccess()
+    public async Task id_token_hint_without_sub_or_sid_should_be_rejected()
     {
-        // no claims to match — token hint proceeds without sub/sid validation
+        // A hint with neither sub nor sid gives no basis for matching it to the signed-in user.
+        // It is rejected earlier, by the sub-claim requirement in IdentityTokenHintChecks, before
+        // ValidateIdTokenHintAsync's own sub/sid matching is ever reached; see
+        // ValidateIdTokenHintAsync_should_be_invalid_when_neither_sid_nor_sub_present below for a
+        // direct test of that method's own rejection of this shape.
         _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
         {
             IsError = false,
@@ -591,10 +634,155 @@ public class EndSessionRequestValidatorTests
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
-        result.IsError.ShouldBeFalse();
+
+        result.IsError.ShouldBeTrue();
+        result.ErrorDescription.ShouldContain(IdentityTokenHintChecks.NoSubClaimReason);
+    }
+
+    [Fact]
+    public async Task id_token_hint_with_only_sid_and_no_session_id_should_be_rejected()
+    {
+        // Session has no sid (null) and the token has only a sid (no sub). This is rejected
+        // earlier, by the sub-claim requirement in IdentityTokenHintChecks, before
+        // ValidateIdTokenHintAsync's own sid/session-id matching is ever reached; see
+        // ValidateIdTokenHintAsync_should_be_invalid_when_only_sid_present_and_no_session_id below
+        // for a direct test of that method's own rejection of this shape.
+        _userSession.SessionId = null;
+        _stubTokenValidator.IdentityTokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[]
+            {
+                new Claim("sid", "session-abc")
+            },
+            Client = new Client() { ClientId = "client" }
+        };
+
+        var parameters = new NameValueCollection();
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
+
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
+
+        result.IsError.ShouldBeTrue();
+        result.ErrorDescription.ShouldContain(IdentityTokenHintChecks.NoSubClaimReason);
+    }
+
+    // Direct tests of the protected ValidateIdTokenHintAsync, via a subclass that exposes it, so
+    // its own sub/sid matching branches are covered even though IdentityTokenHintChecks' sub-claim
+    // requirement now rejects these shapes earlier in the pipeline (see the two tests above).
+    [Fact]
+    public async Task ValidateIdTokenHintAsync_should_be_invalid_when_neither_sid_nor_sub_present()
+    {
+        var subject = new ExposedEndSessionRequestValidator(
+            _options,
+            _stubTokenValidator,
+            _stubRedirectUriValidator,
+            _userSession,
+            _mockLogoutNotificationService,
+            _mockSamlLogoutNotificationService,
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance),
+            TimeProvider.System,
+            _mockEndSessionMessageStore,
+            TestLogger.Create<EndSessionRequestValidator>());
+
+        var tokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("aud", "some-client") },
+            Client = new Client() { ClientId = "client" }
+        };
+        var context = new EndSessionHintValidationContext(_user, tokenValidationResult, "session-abc");
+
+        var result = await subject.CallValidateIdTokenHintAsync(context, _ct);
+
+        result.Outcome.ShouldBe(EndSessionHintValidationOutcome.Invalid);
+    }
+
+    [Fact]
+    public async Task ValidateIdTokenHintAsync_should_be_invalid_when_only_sid_present_and_no_session_id()
+    {
+        var subject = new ExposedEndSessionRequestValidator(
+            _options,
+            _stubTokenValidator,
+            _stubRedirectUriValidator,
+            _userSession,
+            _mockLogoutNotificationService,
+            _mockSamlLogoutNotificationService,
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance),
+            TimeProvider.System,
+            _mockEndSessionMessageStore,
+            TestLogger.Create<EndSessionRequestValidator>());
+
+        var tokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sid", "session-abc") },
+            Client = new Client() { ClientId = "client" }
+        };
+        var context = new EndSessionHintValidationContext(_user, tokenValidationResult, sessionId: null);
+
+        var result = await subject.CallValidateIdTokenHintAsync(context, _ct);
+
+        result.Outcome.ShouldBe(EndSessionHintValidationOutcome.Invalid);
+    }
+
+    [Fact]
+    public async Task ValidateIdTokenHintAsync_should_be_valid_when_sid_matches_session_id()
+    {
+        var subject = new ExposedEndSessionRequestValidator(
+            _options,
+            _stubTokenValidator,
+            _stubRedirectUriValidator,
+            _userSession,
+            _mockLogoutNotificationService,
+            _mockSamlLogoutNotificationService,
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance),
+            TimeProvider.System,
+            _mockEndSessionMessageStore,
+            TestLogger.Create<EndSessionRequestValidator>());
+
+        var tokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sid", "session-abc") },
+            Client = new Client() { ClientId = "client" }
+        };
+        var context = new EndSessionHintValidationContext(_user, tokenValidationResult, sessionId: "session-abc");
+
+        var result = await subject.CallValidateIdTokenHintAsync(context, _ct);
+
+        result.Outcome.ShouldBe(EndSessionHintValidationOutcome.Valid);
+    }
+
+    [Fact]
+    public async Task ValidateIdTokenHintAsync_should_be_valid_when_sub_matches_and_no_sid_present()
+    {
+        var subject = new ExposedEndSessionRequestValidator(
+            _options,
+            _stubTokenValidator,
+            _stubRedirectUriValidator,
+            _userSession,
+            _mockLogoutNotificationService,
+            _mockSamlLogoutNotificationService,
+            new InMemorySamlLogoutSessionStore(TimeProvider.System, NullLogger<InMemorySamlLogoutSessionStore>.Instance),
+            TimeProvider.System,
+            _mockEndSessionMessageStore,
+            TestLogger.Create<EndSessionRequestValidator>());
+
+        var tokenValidationResult = new TokenValidationResult()
+        {
+            IsError = false,
+            Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
+            Client = new Client() { ClientId = "client" }
+        };
+        var context = new EndSessionHintValidationContext(_user, tokenValidationResult, sessionId: null);
+
+        var result = await subject.CallValidateIdTokenHintAsync(context, _ct);
+
+        result.Outcome.ShouldBe(EndSessionHintValidationOutcome.Valid);
     }
 
     [Fact]
@@ -614,7 +802,7 @@ public class EndSessionRequestValidatorTests
         };
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
@@ -644,7 +832,7 @@ public class EndSessionRequestValidatorTests
             TestLogger.Create<EndSessionRequestValidator>());
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await subject.ValidateAsync(parameters, _user, _ct);
 
@@ -684,10 +872,36 @@ public class EndSessionRequestValidatorTests
             TestLogger.Create<EndSessionRequestValidator>());
 
         var parameters = new NameValueCollection();
-        parameters.Add("id_token_hint", "id_token");
+        parameters.Add("id_token_hint", JwtShapedIdTokenHint);
 
         var result = await subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Test subclass that exposes the protected ValidateIdTokenHintAsync for direct testing.
+    /// </summary>
+    private sealed class ExposedEndSessionRequestValidator : EndSessionRequestValidator
+    {
+        public ExposedEndSessionRequestValidator(
+            IdentityServerOptions options,
+            ITokenValidator tokenValidator,
+            IRedirectUriValidator uriValidator,
+            IUserSession userSession,
+            ILogoutNotificationService logoutNotificationService,
+            ISamlLogoutNotificationService samlLogoutNotificationService,
+            ISamlLogoutSessionStore samlLogoutSessionStore,
+            TimeProvider timeProvider,
+            IMessageStore<LogoutNotificationContext> endSessionMessageStore,
+            ILogger<EndSessionRequestValidator> logger)
+            : base(options, tokenValidator, uriValidator, userSession, logoutNotificationService,
+                  samlLogoutNotificationService, timeProvider, endSessionMessageStore, logger, samlLogoutSessionStore)
+        {
+        }
+
+        public Task<EndSessionHintValidationResult> CallValidateIdTokenHintAsync(
+            EndSessionHintValidationContext context, Ct ct) =>
+            ValidateIdTokenHintAsync(context, ct);
     }
 
     /// <summary>

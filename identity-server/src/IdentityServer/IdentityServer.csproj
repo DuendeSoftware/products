@@ -45,4 +45,8 @@
     <EmbeddedResource Include="Hosting\FederatedSignOut\federated-signout.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\shared\JsonWebTokens\NonCachedJsonWebTokenHandler.cs" Link="NonCachedJsonWebTokenHandler.cs" />
+  </ItemGroup>
+
 </Project>

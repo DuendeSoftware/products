@@ -462,7 +462,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
                 {
                     try
                     {
-                        assertions.AddRange(encryptedAssertions.Decrypt(serviceCertificate.PrivateKey)
+                        assertions.AddRange(encryptedAssertions.Decrypt(serviceCertificate.PrivateKey, options.SPOptions.MaxXmlNestingDepth)
                                 .Select(xe => (XmlElement)xe.GetElementsByTagName("Assertion", Saml2Namespaces.Saml2Name)[0]));
                         decrypted = true;
                         options.SPOptions.Logger.WriteVerbose($"Assertion decryption succeeded using {serviceCertificate.Thumbprint}");
@@ -545,24 +545,13 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
         /// Extract claims from the assertions contained in the response.
         /// </summary>
         /// <param name="options">Service provider settings used when processing the response into claims.</param>
-        /// <returns>ClaimsIdentities</returns>
-        // Method might throw expections so make it a method and not a property.
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public IEnumerable<ClaimsIdentity> GetClaims(IOptions options)
-        {
-            return GetClaims(options, null);
-        }
-
-        /// <summary>
-        /// Extract claims from the assertions contained in the response.
-        /// </summary>
-        /// <param name="options">Service provider settings used when processing the response into claims.</param>
         /// <param name="relayData">Relay data stored when creating AuthnRequest, to be passed on to
         /// GetIdentityProvider notification.</param>
+        /// <param name="assertionConsumerServiceUrl">The assertion consumer service url the response was delivered to.</param>
         /// <returns>ClaimsIdentities</returns>
         // Method might throw expections so make it a method and not a property.
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public IEnumerable<ClaimsIdentity> GetClaims(IOptions options, IDictionary<string, string> relayData)
+        public IEnumerable<ClaimsIdentity> GetClaims(IOptions options, IDictionary<string, string> relayData, Uri assertionConsumerServiceUrl)
         {
             if (createClaimsException != null)
             {
@@ -574,7 +563,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
                 try
                 {
                     var idp = options.Notifications.GetIdentityProvider(Issuer, relayData, options);
-                    claimsIdentities = CreateClaims(options, idp).ToList();
+                    claimsIdentities = CreateClaims(options, idp, assertionConsumerServiceUrl).ToList();
 
                     // Validate InResponseTo now, to be able to include generated claims in notification.
                     ValidateInResponseTo(options, claimsIdentities);
@@ -589,7 +578,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
             return claimsIdentities;
         }
 
-        private IEnumerable<ClaimsIdentity> CreateClaims(IOptions options, IdentityProvider idp)
+        private IEnumerable<ClaimsIdentity> CreateClaims(IOptions options, IdentityProvider idp, Uri assertionConsumerServiceUrl)
         {
             Validate(options, idp);
 
@@ -608,6 +597,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
             validationParameters.ValidateIssuer = true;
 
             options.Notifications.Unsafe.TokenValidationParametersCreated(validationParameters, idp, XmlElement);
+
+            // After the notification, so a callback cannot replace the expected values.
+            validationParameters.PropertyBag ??= new Dictionary<string, object>();
+            validationParameters.PropertyBag[Saml2PSecurityTokenHandler.AssertionConsumerServiceUrlKey] = assertionConsumerServiceUrl;
+            validationParameters.PropertyBag[Saml2PSecurityTokenHandler.ExpectedInResponseToKey] = ExpectedInResponseTo?.Value;
 
             var handler = options.SPOptions.Saml2PSecurityTokenHandler;
 

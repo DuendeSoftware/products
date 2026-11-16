@@ -23,8 +23,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
             // backward compatibility = null spOptions
         }
 
+        private readonly SPOptions _spOptions;
+
         public Saml2PSecurityTokenHandler(SPOptions spOptions)
         {
+            _spOptions = spOptions;
             Serializer = new Saml2PSerializer(spOptions);
         }
 
@@ -79,6 +82,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
 
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
+            ValidateBearerConfirmation(samlToken, validationParameters);
 
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
 
@@ -100,6 +104,9 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
         }
         private static readonly Uri bearerUri = new Uri("urn:oasis:names:tc:SAML:2.0:cm:bearer");
 
+        internal const string AssertionConsumerServiceUrlKey = "Duende.Saml2.AssertionConsumerServiceUrl";
+        internal const string ExpectedInResponseToKey = "Duende.Saml2.ExpectedInResponseTo";
+
         protected override void ValidateSubject(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
         {
             base.ValidateSubject(samlToken, validationParameters);
@@ -114,5 +121,39 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
                 throw new Saml2ResponseFailedValidationException("Only assertions with subject confirmation method \"bearer\" are supported.");
             }
         }
+
+        // saml-profiles-2.0-os 4.1.4.3: the SP must verify Recipient, NotOnOrAfter and InResponseTo of the bearer confirmation.
+        private void ValidateBearerConfirmation(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
+        {
+            var assertionConsumerServiceUrl = (Uri)validationParameters.PropertyBag[AssertionConsumerServiceUrlKey];
+            var expectedInResponseTo = (string)validationParameters.PropertyBag[ExpectedInResponseToKey];
+            var now = (_spOptions?.TimeProvider ?? TimeProvider.System).GetUtcNow().UtcDateTime;
+
+            foreach (var confirmation in samlToken.Assertion.Subject.SubjectConfirmations)
+            {
+                var data = confirmation.SubjectConfirmationData;
+                if (confirmation.Method != bearerUri || data == null)
+                {
+                    continue;
+                }
+
+                var isForThisAcs = IsSameUrl(data.Recipient, assertionConsumerServiceUrl);
+                var isNotExpired = data.NotOnOrAfter.HasValue && data.NotOnOrAfter.Value > now - validationParameters.ClockSkew;
+                var answersExpectedRequest = data.InResponseTo?.Value == expectedInResponseTo;
+
+                if (isForThisAcs && isNotExpired && answersExpectedRequest)
+                {
+                    return;
+                }
+            }
+
+            throw new Saml2ResponseFailedValidationException(
+                "No bearer subject confirmation matches this assertion consumer service url, "
+                + "is unexpired and answers the expected request.");
+        }
+
+        private static bool IsSameUrl(Uri recipient, Uri expected) =>
+            recipient != null && recipient.IsAbsoluteUri
+            && Uri.Compare(expected, recipient, UriComponents.HttpRequestUrl, UriFormat.SafeUnescaped, StringComparison.Ordinal) == 0;
     }
 }

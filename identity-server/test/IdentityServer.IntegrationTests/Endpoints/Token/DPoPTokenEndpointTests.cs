@@ -3,6 +3,8 @@
 
 
 using System.Net;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
@@ -13,6 +15,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
@@ -253,6 +256,28 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         var rtResponse = await Pipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
         rtResponse.IsError.ShouldBeTrue();
         rtResponse.Error.ShouldBe("invalid_dpop_proof");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task public_client_should_not_be_able_to_refresh_with_proof_signed_by_x5c_key_instead_of_bound_key()
+    {
+        CreateNewRSAKey();
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2");
+        var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
+        codeResponse.ShouldHaveDPoPThumbprint(JKT);
+        using var attackerKey = RSA.Create(2048);
+        using var attackerCertificate = new CertificateRequest("CN=attacker", attackerKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+            .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        ((Dictionary<string, object>)Header["jwk"]).Add("x5c", new[] { Convert.ToBase64String(attackerCertificate.RawData) });
+        var algorithmTheClientHasNotUsed = SecurityAlgorithms.RsaSsaPssSha256;
+        var forgedRequest = CreateRefreshTokenRequest(codeResponse, clientId: "client2", omitDPoPProof: true);
+        forgedRequest.Headers.Add("DPoP", CreateDPoPProofToken(algorithmTheClientHasNotUsed, new RsaSecurityKey(attackerKey)));
+
+        var forgedResponse = await Pipeline.BackChannelClient.RequestRefreshTokenAsync(forgedRequest);
+
+        forgedResponse.IsError.ShouldBeTrue();
+        forgedResponse.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Theory]

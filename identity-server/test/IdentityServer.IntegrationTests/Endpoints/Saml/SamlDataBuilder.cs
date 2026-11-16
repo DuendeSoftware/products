@@ -75,7 +75,8 @@ internal class SamlDataBuilder(SamlData data)
         string? requestedAuthnContext = null,
         string? nameIdFormat = null,
         string? spNameQualifier = null,
-        SamlBinding samlBinding = SamlBinding.HttpPost
+        SamlBinding samlBinding = SamlBinding.HttpPost,
+        string? extensions = null
         )
     {
         var id = requestId ?? data.RequestId;
@@ -121,6 +122,7 @@ internal class SamlDataBuilder(SamlData data)
                                                        xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
                                                        xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
                                                        <saml:Issuer>{issuerValue}</saml:Issuer>
+                                                       {extensions}
                                                        {requestedAuthnContext}
                                                        {nameIdPolicyElement}
                                                    </samlp:AuthnRequest>
@@ -136,7 +138,8 @@ internal class SamlDataBuilder(SamlData data)
         string? nameId = null,
         string? nameIdFormat = null,
         string? sessionIndex = "12345",
-        DateTimeOffset? notOnOrAfter = null)
+        DateTimeOffset? notOnOrAfter = null,
+        string? extensions = null)
     {
         var id = requestId ?? data.RequestId;
         var issuerValue = issuer ?? data.EntityId;
@@ -162,6 +165,7 @@ internal class SamlDataBuilder(SamlData data)
                                                        xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
                                                        xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
                                                        <saml:Issuer>{issuerValue}</saml:Issuer>
+                                                       {extensions}
                                                        <saml:NameID Format="{nameIdFormatValue}">{nameIdValue}</saml:NameID>
                                                    {sessionIndexElement}
                                                     </samlp:LogoutRequest>

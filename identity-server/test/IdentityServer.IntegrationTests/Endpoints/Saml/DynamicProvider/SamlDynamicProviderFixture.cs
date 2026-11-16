@@ -11,6 +11,7 @@ using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
+using Duende.IdentityServer.Internal.Saml.Sp;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
 using Microsoft.AspNetCore.Authentication;
@@ -24,6 +25,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml.DynamicProvider;
 
@@ -38,7 +40,11 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml.DynamicProvider;
 /// Both IdentityServer hosts use EF with SQLite in-memory databases. Cross-references
 /// (SAML service providers, OIDC clients) are seeded into the EF stores after each host starts.
 /// </summary>
-internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Action<IServiceCollection>? additionalSpServices = null) : IAsyncLifetime
+internal sealed class SamlDynamicProviderFixture(
+    ITestOutputHelper output,
+    Action<IServiceCollection>? additionalSpServices = null,
+    Action<SamlProvider>? configureSamlProvider = null,
+    X509Certificate2? spIdentityServerSigningCertificate = null) : IAsyncLifetime
 {
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
@@ -54,7 +60,14 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
     public KestrelTestHost? ClientHost; // Webapp 1 — OIDC client app
 
     // Shared browser client with a single CookieContainer so cookies flow across all 3 hosts
+    public FakeTimeProvider? Clock;      // Shared by the IdP and SP hosts
     public HttpClient? BrowserClient;
+    public CookieContainer? BrowserCookies;
+
+    // Exposed so tests can build an additional, non-auto-redirecting client that shares the
+    // same session cookies as BrowserClient (useful to inspect a single hop's raw response,
+    // e.g. whether a request cleared the IdentityServer session cookie).
+    public CookieContainer? BrowserCookieContainer;
 
     // The test user signed in at Webapp 3
     public const string TestUserSub = "test-user";
@@ -69,7 +82,7 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
         await _spSqliteConnection.OpenAsync(_ct);
 
         // Use current time — Sustainsys does not use TimeProvider abstraction
-        var fakeTimeProvider = new FakeTimeProvider(DateTime.UtcNow);
+        var fakeTimeProvider = Clock = new FakeTimeProvider(DateTime.UtcNow);
 
         // Load the stable signing cert (PFX with private key) for Webapp 3 (IdP)
         var idpSigningCert = X509CertificateLoader.LoadPkcs12(
@@ -106,8 +119,11 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
         // Create a shared browser client with a single CookieContainer so cookies are
         // shared across all 3 hosts during the redirect chain.
         var cookieContainer = new CookieContainer();
+        var browserHandler = new HttpClientHandler { AllowAutoRedirect = true };
+        BrowserCookies = browserHandler.CookieContainer;
+        BrowserCookieContainer = cookieContainer;
         var handler = new CookieHandler(
-            new HttpClientHandler { AllowAutoRedirect = true },
+            browserHandler,
             cookieContainer);
         BrowserClient = new HttpClient(handler);
     }
@@ -212,14 +228,45 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
                 services.AddSingleton<IDistributedCache>(
                     sp => new FakeDistributedCache(sp.GetRequiredService<TimeProvider>()));
 
-                services.AddIdentityServer(options =>
+                var identityServerBuilder = services.AddIdentityServer(options =>
                     {
                         options.UserInteraction.LoginUrl = "/account/login";
                         options.UserInteraction.LogoutUrl = "/account/logout";
                         options.UserInteraction.ConsentUrl = "/consent";
                         options.KeyManagement.Enabled = false;
-                    })
-                    .AddDeveloperSigningCredential(persistKey: false)
+                    });
+
+                var isBuilder = spIdentityServerSigningCertificate != null
+                    // Test-only override: an X509-backed signing credential is required for
+                    // IdentityServer to sign outbound SAML LogoutResponses (SamlSigningService
+                    // cannot wrap a raw, manually registered RSA key without an associated
+                    // key-management container as an X509 certificate). DefaultKeyMaterialService
+                    // picks the *first* registered ISigningCredentialStore, so the developer
+                    // credential must not be registered in this case.
+                    ? identityServerBuilder.AddSigningCredential(spIdentityServerSigningCertificate)
+                    : identityServerBuilder.AddDeveloperSigningCredential(persistKey: false);
+
+                if (spIdentityServerSigningCertificate != null)
+                {
+                    // AddSamlDynamicProvider() alone does not register the Saml2FrontChannelResult
+                    // HTTP writer or the IFrontChannelBinding implementations (normally added by
+                    // the full AddSaml() IdP feature), but SpLogoutCompletionEndpoint (always
+                    // registered) returns that result type, bound via HTTP-Redirect, when actually
+                    // sending the signed outbound LogoutResponse.
+                    identityServerBuilder.AddHttpWriter<
+                        Duende.IdentityServer.Saml.Endpoints.Results.Saml2FrontChannelResult,
+                        Duende.IdentityServer.Saml.Endpoints.Results.Saml2FrontChannelResultHttpWriter>();
+                    services.TryAddEnumerable(new ServiceDescriptor(
+                        typeof(Duende.IdentityServer.Saml.Bindings.IFrontChannelBinding),
+                        typeof(Duende.IdentityServer.Saml.Bindings.HttpPostBinding),
+                        ServiceLifetime.Singleton));
+                    services.TryAddEnumerable(new ServiceDescriptor(
+                        typeof(Duende.IdentityServer.Saml.Bindings.IFrontChannelBinding),
+                        typeof(Duende.IdentityServer.Saml.Bindings.HttpRedirectBinding),
+                        ServiceLifetime.Singleton));
+                }
+
+                isBuilder
                     .AddConfigurationStore(options =>
                     {
                         options.ResolveDbContextOptions = (_, dbOptions) =>
@@ -251,6 +298,21 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
                 app.MapGet("/account/logout", () => Results.Ok());
                 app.MapGet("/consent", () => Results.Ok());
 
+                // Diagnostic endpoint: reports whether the main IdentityServer session
+                // (the session established via SignInAsync in /external-callback) is still
+                // authenticated, and if so, which subject/idp it belongs to. Used by tests to
+                // observe whether a logout request terminated the caller's session.
+                app.MapGet("/__whoami", async (HttpContext ctx) =>
+                {
+                    var result = await ctx.AuthenticateAsync();
+                    await ctx.Response.WriteAsJsonAsync(new
+                    {
+                        authenticated = result.Succeeded,
+                        sub = result.Principal?.FindFirst(JwtClaimTypes.Subject)?.Value,
+                        idp = result.Principal?.FindFirst(JwtClaimTypes.IdentityProvider)?.Value
+                    });
+                });
+
                 // External login callback for IDP-initiated SSO
                 app.MapGet("/external-callback", async (HttpContext ctx) =>
                 {
@@ -276,6 +338,11 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
                         new Claim(JwtClaimTypes.AuthenticationMethod, "external")
                     ], "external", JwtClaimTypes.Name, JwtClaimTypes.Role));
 
+                    localUser.Identities.First().AddClaims(externalUser.Claims.Where(claim => claim.Type
+                        is Saml2ClaimTypes.Scheme
+                        or Saml2ClaimTypes.LogoutNameIdentifier
+                        or Saml2ClaimTypes.SessionIndex));
+
                     await ctx.SignInAsync(localUser, new AuthenticationProperties());
                     await ctx.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
 
@@ -283,9 +350,13 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
                     {
                         sub = userIdClaim?.Value,
                         provider = schemeName,
-                        relayState
+                        relayState,
+                        sessionIndex = externalUser.FindFirst(Saml2ClaimTypes.SessionIndex)?.Value
                     }, _ct);
                 });
+
+                app.MapGet("/test/session", async (HttpContext ctx) =>
+                    (await ctx.AuthenticateAsync()).Succeeded ? Results.Ok() : Results.Unauthorized());
             },
             _ct);
 
@@ -301,7 +372,7 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
         var creator = opDb.GetService<IRelationalDatabaseCreator>()!;
         await creator.CreateTablesAsync(_ct);
 
-        db.IdentityProviders.Add(new SamlProvider
+        var samlProvider = new SamlProvider
         {
             Scheme = "saml-idp",
             DisplayName = "SAML IdP (Webapp 3)",
@@ -313,7 +384,9 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
             WantAssertionsSigned = false,
             AllowUnsolicitedAuthnResponse = true,
             IdpInitiatedCallbackUrl = "/external-callback"
-        }.ToEntity());
+        };
+        configureSamlProvider?.Invoke(samlProvider);
+        db.IdentityProviders.Add(samlProvider.ToEntity());
 
         db.IdentityResources.Add(new IdentityResources.OpenId().ToEntity());
         db.IdentityResources.Add(new IdentityResources.Profile().ToEntity());
@@ -530,6 +603,21 @@ internal sealed class SamlDynamicProviderFixture(ITestOutputHelper output, Actio
 
         using var formContent = new FormUrlEncodedContent(formData);
         return await BrowserClient!.PostAsync(actionUrl, formContent, _ct);
+    }
+
+    /// <summary>
+    /// Re-fetches the dynamic SAML provider from Webapp 2's configured
+    /// <see cref="Duende.IdentityServer.Stores.IIdentityProviderStore"/> (going through the EF store and, if configured,
+    /// the caching decorator), proving that provider properties round trip through storage/cache
+    /// serialization.
+    /// </summary>
+    public async Task<SamlProvider> ReloadSamlProviderFromStoreAsync(string scheme = "saml-idp")
+    {
+        await using var scope = SpHost!.ConfiguredServices.CreateAsyncScope();
+        var store = scope.ServiceProvider.GetRequiredService<Duende.IdentityServer.Stores.IIdentityProviderStore>();
+        var provider = await store.GetBySchemeAsync(scheme, _ct);
+        provider.ShouldNotBeNull();
+        return new SamlProvider(provider!);
     }
 
     public async ValueTask DisposeAsync()

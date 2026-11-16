@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Internal.Saml.Sp.Helpers;
+using Duende.IdentityServer.Saml.Infrastructure;
 
 namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
 {
@@ -59,7 +60,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
 
             try
             {
-                elementToEncrypt.OwnerDocument.DocumentElement.Decrypt(certificate.PrivateKey);
+                elementToEncrypt.OwnerDocument.DocumentElement.Decrypt(certificate.PrivateKey, SecureXmlParser.DefaultMaxNestingDepth);
             }
             catch (CryptographicException)
             {

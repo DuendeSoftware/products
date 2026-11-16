@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -71,6 +72,13 @@ public class MutualTlsSecretParser : ISecretParser
                 if (clientCertificate is null)
                 {
                     _logger.LogDebug("Client certificate not present");
+                    return null;
+                }
+
+                var authenticationResult = await context.AuthenticateAsync(_options.MutualTls.ClientCertificateAuthenticationScheme);
+                if (!authenticationResult.Succeeded)
+                {
+                    _logger.LogDebug("Client certificate rejected by the client certificate authentication scheme");
                     return null;
                 }
 

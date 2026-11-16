@@ -65,6 +65,13 @@ public class SamlAuthenticationOptions : AuthenticationSchemeOptions
     public int? MaxRelayStateLength { get; set; }
 
     /// <summary>
+    /// Maximum element nesting depth of an inbound SAML message from this provider.
+    /// The root is depth 0; text, comments and attributes do not add element depth.
+    /// Null uses the default of 32.
+    /// </summary>
+    public int? MaxXmlNestingDepth { get; set; }
+
+    /// <summary>
     /// The AuthnRequest signing behavior for this provider.
     /// Null means use the value from <see cref="Models.SamlProvider"/>.
     /// This callback overrides the signing policy only; selecting

@@ -8,6 +8,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.Shared;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -24,6 +25,11 @@ public class JwtRequestValidator : IJwtRequestValidator
     /// <summary>
     /// JWT handler
     /// </summary>
+    /// <remarks>
+    /// By default, this handler checks request object signatures without Microsoft.IdentityModel's process-wide cache
+    /// of signature verifiers. If you replace it with another <see cref="JsonWebTokenHandler"/>, the checks use that
+    /// cache again, and their result can then depend on signatures that other code in the process checked before.
+    /// </remarks>
     protected JsonWebTokenHandler Handler;
 
     /// <summary>
@@ -64,7 +70,7 @@ public class JwtRequestValidator : IJwtRequestValidator
         IssuerNameService = issuerNameService;
         Logger = logger;
 
-        Handler = new JsonWebTokenHandler
+        Handler = new NonCachedJsonWebTokenHandler
         {
             MaximumTokenSizeInBytes = options.InputLengthRestrictions.Jwt
         };
@@ -78,7 +84,7 @@ public class JwtRequestValidator : IJwtRequestValidator
         _audienceUri = audience;
 
         Logger = logger;
-        Handler = new JsonWebTokenHandler();
+        Handler = new NonCachedJsonWebTokenHandler();
     }
 
     /// <inheritdoc/>

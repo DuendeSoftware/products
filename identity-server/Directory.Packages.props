@@ -139,7 +139,7 @@
   </ItemGroup>
   <!-- Pin vulnerable transitive dependencies to patched versions -->
   <ItemGroup>
-    <GlobalPackageReference Include="MessagePack" Version="2.5.301" PrivateAssets="all" />
+    <GlobalPackageReference Include="MessagePack" Version="2.5.303" PrivateAssets="all" />
     <GlobalPackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" PrivateAssets="all" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@
 
 #nullable enable
 using System.Security.Cryptography;
+using System.Text;
 using System.Xml;
 using Duende.IdentityServer.Saml.Common;
 using Microsoft.AspNetCore.WebUtilities;
@@ -31,6 +32,35 @@ public static class XmlHelpers
         bytes[0] = (byte)(bytes[0] & 0x7F);
 
         return Base64UrlTextEncoder.Encode(bytes);
+    }
+
+    internal static string GetDirectTextContents(XmlElement element)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+
+        var text = new StringBuilder();
+
+        foreach (XmlNode child in element.ChildNodes)
+        {
+            switch (child.NodeType)
+            {
+                case XmlNodeType.Text:
+                case XmlNodeType.CDATA:
+                case XmlNodeType.Whitespace:
+                case XmlNodeType.SignificantWhitespace:
+                    text.Append(child.Value);
+                    break;
+
+                case XmlNodeType.Comment:
+                    break;
+
+                default:
+                    throw new XmlException(
+                        $"Element \"{element.LocalName}\" must contain text only.");
+            }
+        }
+
+        return text.ToString();
     }
 
     /// <summary>
