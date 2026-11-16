@@ -462,7 +462,22 @@ public class BffHost : GenericHost
         });
     }
 
-    public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
+    /// <summary>
+    /// Builds a new browser client against this host's test server, so tests can simulate
+    /// more than one browser (e.g. to plant one browser's cookie into another's).
+    /// </summary>
+    public TestBrowserClient BuildBrowserClient()
+    {
+        var client = new TestBrowserClient(Server.CreateHandler())
+        {
+            BaseAddress = new Uri(Url())
+        };
+        return client;
+    }
+
+    public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null) => await GetIsUserLoggedInAsync(BrowserClient, userQuery);
+
+    public async Task<bool> GetIsUserLoggedInAsync(TestBrowserClient browserClient, string? userQuery = null)
     {
         if (userQuery != null)
         {
@@ -471,7 +486,7 @@ public class BffHost : GenericHost
 
         var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user") + userQuery);
         req.Headers.Add("x-csrf", "1");
-        var response = await BrowserClient.SendAsync(req);
+        var response = await browserClient.SendAsync(req);
 
         (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Unauthorized)
             .ShouldBeTrue();
@@ -479,12 +494,14 @@ public class BffHost : GenericHost
         return response.StatusCode == HttpStatusCode.OK;
     }
 
-    public async Task<List<JsonRecord>> CallUserEndpointAsync()
+    public async Task<List<JsonRecord>> CallUserEndpointAsync() => await CallUserEndpointAsync(BrowserClient);
+
+    public async Task<List<JsonRecord>> CallUserEndpointAsync(TestBrowserClient browserClient)
     {
         var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user"));
         req.Headers.Add("x-csrf", "1");
 
-        var response = await BrowserClient.SendAsync(req);
+        var response = await browserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
@@ -517,6 +534,37 @@ public class BffHost : GenericHost
         (await GetIsUserLoggedInAsync()).ShouldBeTrue();
 
         response = await BrowserClient.GetAsync(Url(response.Headers.Location.ToString()));
+        return response;
+    }
+
+    /// <summary>
+    /// Runs the OIDC sign-in flow for the given browser client without asserting that the user
+    /// ends up logged in, so tests can exercise a renewal that is expected to leave no session.
+    /// </summary>
+    public async Task<HttpResponseMessage> BffOidcLoginAsyncWithoutAssertingSuccess(TestBrowserClient browserClient)
+    {
+        var response = await browserClient.GetAsync(Url("/bff/login"));
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // authorize
+
+        response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // client callback
+
+        response = await browserClient.GetAsync(response.Headers.Location!.ToString());
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage> BffLoginAsyncWithoutAssertingSuccess(TestBrowserClient browserClient, string sub, string? sid = null)
+    {
+        await _identityServerHost.CreateIdentityServerSessionCookieAsync(sub, sid);
+        return await BffOidcLoginAsyncWithoutAssertingSuccess(browserClient);
+    }
+
+    public async Task<HttpResponseMessage> BffLoginAsync(TestBrowserClient browserClient, string sub, string? sid = null)
+    {
+        var response = await BffLoginAsyncWithoutAssertingSuccess(browserClient, sub, sid);
+        (await GetIsUserLoggedInAsync(browserClient)).ShouldBeTrue();
         return response;
     }
 

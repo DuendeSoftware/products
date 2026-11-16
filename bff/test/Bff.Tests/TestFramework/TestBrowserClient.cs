@@ -41,6 +41,12 @@ public class TestBrowserClient : HttpClient
     private readonly CookieHandler _handler;
 
     private CookieContainer CookieContainer => _handler.CookieContainer;
+
+    /// <summary>
+    /// Exposes the underlying cookie container so tests can copy cookies between browser clients,
+    /// e.g. to simulate a cookie planted by another browser.
+    /// </summary>
+    public CookieContainer Cookies => _handler.CookieContainer;
     public Uri? CurrentUri => _handler.CurrentUri;
     public HttpResponseMessage? LastResponse => _handler.LastResponse;
 

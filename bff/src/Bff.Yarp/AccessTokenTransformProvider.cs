@@ -92,6 +92,8 @@ public class AccessTokenTransformProvider : ITransformProvider
             return default;
         });
 
+        transformBuildContext.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(Options.Create(_options)));
+
         if (GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))
         {
             if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))

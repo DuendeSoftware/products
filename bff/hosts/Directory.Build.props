@@ -21,5 +21,11 @@
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g94r-2vxg-569j" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4625-4j76-fww9" />
     <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+    <!-- MessagePack 2.5.192 (transitive via Aspire.Hosting.AppHost), patched 2.5.303: non-shipped host infra only. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-qhrr-8q5h-9q3h" />
+    <!-- Aspire.Hosting / Aspire.Hosting.AppHost 13.0.0, patched 13.6.5: non-shipped host infra only. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-f7vh-h5g3-7jrh" />
+    <!-- Aspire.Dashboard.Sdk.* 13.0.0 (pulled in by the Aspire AppHost), patched 13.6.5: non-shipped, local dashboard only. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-4g86-54fm-h9h8" />
   </ItemGroup>
 </Project>

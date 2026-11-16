@@ -100,6 +100,42 @@ public class YarpBffHost : GenericHost
 
                 new RouteConfig
                 {
+                    RouteId = "api_response_headers_copy_disabled",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_response_headers_copy_disabled/{**catch-all}"
+                    },
+                    Transforms = new[]
+                    {
+                        new Dictionary<string, string>
+                        {
+                            ["ResponseHeadersCopy"] = "false",
+                        }
+                    }
+                },
+
+                new RouteConfig
+                {
+                    RouteId = "api_response_headers_allowed",
+                    ClusterId = "cluster1",
+
+                    Match = new RouteMatch
+                    {
+                        Path = "/api_response_headers_allowed/{**catch-all}"
+                    },
+                    Transforms = new[]
+                    {
+                        new Dictionary<string, string>
+                        {
+                            ["ResponseHeadersAllowed"] = "Set-Cookie;x-from-api",
+                        }
+                    }
+                },
+
+                new RouteConfig
+                {
                     RouteId = "api_cookie_later_transform",
                     ClusterId = "cluster1",
 
@@ -292,6 +328,26 @@ public class YarpBffHost : GenericHost
                                    ForwardedHeaders.XForwardedHost
             });
         }
+
+        // Only used by when_response_header_copy_is_disabled_a_bff_cookie_equal_to_the_api_cookie_reaches_the_browser:
+        // simulates the BFF writing its own Set-Cookie in the same request as the proxied call.
+        app.Use((context, next) =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api_response_headers_copy_disabled"))
+            {
+                context.Response.Headers["Set-Cookie"] = "affinity=1; path=/";
+            }
+
+            // Only used by yarp_route_should_keep_a_bff_written_cookie_while_removing_the_api_cookie:
+            // simulates the BFF writing its own Set-Cookie on a route where response header copying is
+            // enabled, so the removal transform's HeadersCopied/value-matching logic actually runs.
+            if (context.Request.Path.StartsWithSegments("/api_user"))
+            {
+                context.Response.Headers["Set-Cookie"] = "bff-written=1; path=/";
+            }
+
+            return next();
+        });
 
         app.UseAuthentication();
 

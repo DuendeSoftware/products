@@ -6,6 +6,7 @@ using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Microsoft.AspNetCore.Builder;
@@ -49,6 +50,8 @@ public static class BffYarpEndpointRouteBuilderExtensions
                 configureTransform: context =>
                 {
                     yarpTransformBuilder(context);
+                    context.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(
+                        context.Services.GetRequiredService<IOptions<BffOptions>>()));
                 })
             .WithMetadata(new BffRemoteApiEndpointMetadata());
     }

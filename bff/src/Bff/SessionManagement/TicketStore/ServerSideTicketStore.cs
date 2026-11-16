@@ -110,8 +110,6 @@ public class ServerSideTicketStore : IServerTicketStore
         var session = await _store.GetUserSessionAsync(key);
         if (session == null)
         {
-            // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
-            await CreateNewSessionAsync(key, ticket);
             return;
         }
 
@@ -119,6 +117,12 @@ public class ServerSideTicketStore : IServerTicketStore
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
+        if (session.SubjectId != sub)
+        {
+            await RemoveAsync(key);
+            return;
+        }
+
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         var created = isNew ? ticket.GetIssued() : session.Created;
 

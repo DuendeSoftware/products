@@ -13,6 +13,7 @@ namespace Duende.Bff.Tests.TestHosts;
 public class ApiHost : GenericHost
 {
     public int? ApiStatusCodeToReturn { get; set; }
+    public Dictionary<string, Microsoft.Extensions.Primitives.StringValues> ResponseHeadersToReturn { get; } = [];
 
     private readonly IdentityServerHost _identityServerHost;
 
@@ -102,6 +103,11 @@ public class ApiHost : GenericHost
 
                 context.Response.StatusCode = ApiStatusCodeToReturn ?? 200;
                 ApiStatusCodeToReturn = null;
+
+                foreach (var (name, values) in ResponseHeadersToReturn)
+                {
+                    context.Response.Headers[name] = values;
+                }
 
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(JsonSerializer.Serialize(response));
