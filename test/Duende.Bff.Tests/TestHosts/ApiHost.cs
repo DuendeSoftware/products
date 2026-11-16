@@ -11,12 +11,19 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Primitives;
 
 namespace Duende.Bff.Tests.TestHosts
 {
     public class ApiHost : GenericHost
     {
         public int? ApiStatusCodeToReturn { get; set; }
+
+        /// <summary>
+        /// Extra response headers (e.g. Set-Cookie, Clear-Site-Data) to add to every response this
+        /// host returns. Used to test that the BFF strips API-sent cookie headers.
+        /// </summary>
+        public Dictionary<string, StringValues> ResponseHeadersToReturn { get; } = new();
 
         private readonly IdentityServerHost _identityServerHost;
         private readonly bool _useForwardedHeaders;
@@ -70,6 +77,11 @@ namespace Duende.Bff.Tests.TestHosts
             {
                 endpoints.Map("/{**catch-all}", async context =>
                 {
+                    foreach (var (name, values) in ResponseHeadersToReturn)
+                    {
+                        context.Response.Headers[name] = values;
+                    }
+
                     // capture body if present
                     var body = default(string);
                     if (context.Request.HasJsonContentType())

@@ -91,6 +91,10 @@ public class AccessTokenTransformProvider : ITransformProvider
             return ValueTask.CompletedTask;
         });
 
+        // Always registered too, so Set-Cookie/Clear-Site-Data from the API are removed on every
+        // route, with or without token metadata.
+        transformBuildContext.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(_options));
+
         TokenType tokenType;
         bool optional;
         if(GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))

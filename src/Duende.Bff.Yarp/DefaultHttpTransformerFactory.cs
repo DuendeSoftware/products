@@ -76,6 +76,9 @@ public class DefaultHttpTransformerFactory : IHttpTransformerFactory
                 ProofService,
                 LoggerFactory.CreateLogger<AccessTokenRequestTransform>(),
                 accessToken));
+
+            // remove Set-Cookie/Clear-Site-Data that the API sent, so they don't reach the browser
+            context.ResponseTransforms.Add(new ApiCookieResponseHeaderRemoveTransform(Options));
         });
     }
 }

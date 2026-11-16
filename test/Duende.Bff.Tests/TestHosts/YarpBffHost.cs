@@ -165,6 +165,49 @@ namespace Duende.Bff.Tests.TestHosts
                         }.WithAntiforgeryCheck()
                          .WithAccessToken(TokenType.UserOrClient),
                     
+                    // Route whose YARP configuration disables header copying. The BFF's own
+                    // Set-Cookie header, added after the proxied response, must still reach
+                    // the browser even though response headers aren't copied from the API.
+                    new RouteConfig()
+                        {
+                            RouteId = "api_response_headers_copy_disabled",
+                            ClusterId = "cluster1",
+
+                            Match = new()
+                            {
+                                Path = "/api_response_headers_copy_disabled/{**catch-all}"
+                            },
+
+                            Transforms = new[]
+                            {
+                                new Dictionary<string, string>
+                                {
+                                    ["ResponseHeadersCopy"] = "false",
+                                }
+                            }
+                        }.WithAntiforgeryCheck(),
+
+                    // Route whose YARP configuration explicitly allows Set-Cookie through.
+                    // The BFF's cookie removal still strips the API's Set-Cookie header.
+                    new RouteConfig()
+                        {
+                            RouteId = "api_response_headers_allowed",
+                            ClusterId = "cluster1",
+
+                            Match = new()
+                            {
+                                Path = "/api_response_headers_allowed/{**catch-all}"
+                            },
+
+                            Transforms = new[]
+                            {
+                                new Dictionary<string, string>
+                                {
+                                    ["ResponseHeadersAllowed"] = "Set-Cookie;x-from-api",
+                                }
+                            }
+                        }.WithAntiforgeryCheck(),
+
                     // This route configuration is invalid. WithAccessToken says
                     // that the access token is required, while
                     // WithOptionalUserAccessToken says that it is optional.
