@@ -220,20 +220,6 @@
   <Folder Name="/ignore-this/test/">
     <Project Path="ignore-this/test/IgnoreThis.Tests/IgnoreThis.Tests.csproj" />
   </Folder>
-  <Folder Name="/multi-space/" />
-  <Folder Name="/multi-space/src/">
-    <Project Path="multi-space/src/MultiSpace/MultiSpace.csproj" />
-  </Folder>
-  <Folder Name="/multi-space/test/">
-    <Project Path="multi-space/test/MultiSpace.Tests/MultiSpace.Tests.csproj" />
-  </Folder>
-  <Folder Name="/spaces/" />
-  <Folder Name="/spaces/src/">
-    <Project Path="spaces/src/Spaces/Spaces.csproj" />
-  </Folder>
-  <Folder Name="/spaces/test/">
-    <Project Path="spaces/test/Spaces.Tests/Spaces.Tests.csproj" />
-  </Folder>
   <Folder Name="/storage/" />
   <Folder Name="/storage/hosts/">
     <Project Path="storage/hosts/EntityLinking/EntityLinking.csproj" />
@@ -257,18 +243,5 @@
   </Folder>
   <Folder Name="/storage/testing/">
     <Project Path="storage/testing/TestAppHost/TestAppHost.csproj" />
-  </Folder>
-  <Folder Name="/user-management/" />
-  <Folder Name="/user-management/src/">
-    <Project Path="user-management/src/IdentityServer8/IdentityServer8.csproj" />
-    <Project Path="user-management/src/UserManagement/UserManagement.csproj" />
-  </Folder>
-  <Folder Name="/user-management/test/">
-    <Project Path="user-management/test/IdentityServer8.UnitTests/IdentityServer8.UnitTests.csproj" />
-    <Project Path="user-management/test/UserManagement.Tests.Internal/UserManagement.Tests.Internal.csproj" />
-    <Project Path="user-management/test/UserManagement.Tests.Public/UserManagement.Tests.Public.csproj" />
-  </Folder>
-  <Folder Name="/user-management/testing/">
-    <Project Path="user-management/testing/UserManagement.TestInfrastructure/UserManagement.TestInfrastructure.csproj" />
   </Folder>
 </Solution>
