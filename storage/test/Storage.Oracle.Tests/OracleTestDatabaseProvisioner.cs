@@ -45,7 +45,7 @@ internal sealed class OracleTestDatabaseProvisioner(string serverConnectionStrin
     /// <summary>
     /// Creates the Oracle user (schema) backing <paramref name="connectionString"/>.
     /// </summary>
-    internal async Task CreateAsync(string connectionString, CancellationToken ct)
+    internal async Task CreateAsync(string connectionString, Ct ct)
     {
         var user = new OracleConnectionStringBuilder(connectionString).UserID;
 
@@ -135,7 +135,7 @@ internal sealed class OracleTestDatabaseProvisioner(string serverConnectionStrin
     /// connection string that connects as that user. Used by migration tests, which
     /// need a guaranteed-unmigrated schema rather than a possibly-recycled one.
     /// </summary>
-    internal static async Task<(string ConnectionString, string User)> CreateFreshUserAsync(string serverConnectionString, CancellationToken ct)
+    internal static async Task<(string ConnectionString, string User)> CreateFreshUserAsync(string serverConnectionString, Ct ct)
     {
         var user = ("MIG_" + Guid.NewGuid().ToString("N")[..24]).ToUpperInvariant();
 
@@ -165,7 +165,7 @@ internal sealed class OracleTestDatabaseProvisioner(string serverConnectionStrin
     /// <summary>
     /// Drops an Oracle user and all of its objects.
     /// </summary>
-    internal static async Task DropUserAsync(string serverConnectionString, string user, CancellationToken ct)
+    internal static async Task DropUserAsync(string serverConnectionString, string user, Ct ct)
     {
         await using var connection = new OracleConnection(serverConnectionString);
         await connection.OpenAsync(ct);

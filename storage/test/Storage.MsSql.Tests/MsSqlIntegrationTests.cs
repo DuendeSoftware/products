@@ -31,6 +31,12 @@ public partial class StoreLinkQueryTests(AspireFixture fixture)
 }
 
 [Collection("MsSqlIntegration")]
+public partial class StoreLinkIntegrityTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new MsSqlStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("MsSqlIntegration")]
 public partial class StoreOutboxOperations(AspireFixture fixture)
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new MsSqlStorageEngineFixtureFactory(fixture);
@@ -97,7 +103,19 @@ public partial class QueryStoreCursorPagingTests(AspireFixture fixture)
 }
 
 [Collection("MsSqlIntegration")]
-public partial class QueryStoreCursorBidirectionalPagingTests(AspireFixture fixture)
+public partial class QueryStoreDsoVersionTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new MsSqlStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("MsSqlIntegration")]
+public partial class QueryStoreCursorTraversalTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new MsSqlStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("MsSqlIntegration")]
+public partial class QueryStoreLinkFilterTests(AspireFixture fixture)
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new MsSqlStorageEngineFixtureFactory(fixture);
 }

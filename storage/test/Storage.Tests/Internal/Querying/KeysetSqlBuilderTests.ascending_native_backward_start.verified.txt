@@ -1,0 +1,5 @@
+ORDER BY:
+v.number_value DESC NULLS FIRST, v.entity_id DESC
+
+StrictlyAfter:
+1=0

@@ -9,8 +9,7 @@ using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.IntegrationTests;
 
@@ -107,14 +106,14 @@ public partial class FilterTranslatorIntegrationTests
         return id;
     }
 
-    private static async Task<QueryResult<MetadataEnvelope<TestEntityDso>>> TranslateAndQueryAsync(
+    private static async Task<QueryResult<MetadataEnvelope>> TranslateAndQueryAsync(
         IPartitionedStorage partitionedStorage, string filterString, EntityType entityType)
     {
         var resolver = new TestEntityAttributeResolver();
         var translator = new FilterTranslator(resolver);
         var filter = translator.Translate(filterString)!;
         var page = DataRange.FromPage(1, 10);
-        return await partitionedStorage.QueryAsync<TestEntityDso>(entityType, filter, SortParameter.Empty, page, Ct.None);
+        return await partitionedStorage.QueryAsync(entityType, filter, SortParameter.Empty, page, Ct.None);
     }
 
     [Fact]
@@ -130,7 +129,7 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "name eq \"Alice\"", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Alice");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Alice");
     }
 
     [Fact]
@@ -146,8 +145,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "name ne \"Alice\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Bob");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -163,8 +162,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "name co \"Smith\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice Smith");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie Smith");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Alice Smith");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Charlie Smith");
     }
 
     [Fact]
@@ -180,8 +179,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "name sw \"Alpha\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alpha");
-        result.Items.ShouldContain(x => x.Value.Name == "Alpha Centauri");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Alpha");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Alpha Centauri");
     }
 
     [Fact]
@@ -197,8 +196,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "name ew \"Smith\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice Smith");
-        result.Items.ShouldContain(x => x.Value.Name == "John Smith");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Alice Smith");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "John Smith");
     }
 
     [Fact]
@@ -214,8 +213,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "score pr", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "WithScore1");
-        result.Items.ShouldContain(x => x.Value.Name == "WithScore2");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "WithScore1");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "WithScore2");
     }
 
     [Fact]
@@ -231,7 +230,7 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "isActive eq true", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Active");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Active");
     }
 
     [Fact]
@@ -247,7 +246,7 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "score gt 75", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("High");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("High");
     }
 
     [Fact]
@@ -263,8 +262,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "score le 50", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Low");
-        result.Items.ShouldContain(x => x.Value.Name == "Boundary");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Low");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Boundary");
     }
 
     [Fact]
@@ -279,7 +278,7 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "price eq 19.99", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Cheap");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Cheap");
     }
 
     [Fact]
@@ -295,8 +294,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "recordedAt gt \"2024-06-01T00:00:00Z\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "July");
-        result.Items.ShouldContain(x => x.Value.Name == "December");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "July");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "December");
     }
 
     [Fact]
@@ -312,7 +311,7 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "name sw \"User\" and score gt 50", _testEntityType);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("User2");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("User2");
     }
 
     [Fact]
@@ -328,8 +327,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "status eq \"active\" or status eq \"pending\"", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "ActiveEntity");
-        result.Items.ShouldContain(x => x.Value.Name == "PendingEntity");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "ActiveEntity");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "PendingEntity");
     }
 
     [Fact]
@@ -345,8 +344,8 @@ public partial class FilterTranslatorIntegrationTests
         var result = await TranslateAndQueryAsync(partitionedStorage, "not (name eq \"Alice\")", _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Bob");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -366,8 +365,8 @@ public partial class FilterTranslatorIntegrationTests
             _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "A");
-        result.Items.ShouldContain(x => x.Value.Name == "B");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "A");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "B");
     }
 
     [Fact]
@@ -386,7 +385,7 @@ public partial class FilterTranslatorIntegrationTests
             _testEntityType);
 
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "a");
-        result.Items.ShouldContain(x => x.Value.Name == "b");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "a");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "b");
     }
 }

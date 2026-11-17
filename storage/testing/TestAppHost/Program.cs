@@ -100,7 +100,7 @@ if (isWarmup)
 
     async Task WaitForHealthyAsync(string resourceName)
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(8));
         await foreach (var notification in notificationService.WatchAsync(cts.Token))
         {
             if (notification.Resource.Name != resourceName)

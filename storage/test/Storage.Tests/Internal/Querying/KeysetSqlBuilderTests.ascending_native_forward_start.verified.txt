@@ -1,0 +1,5 @@
+ORDER BY:
+v.number_value ASC NULLS LAST, v.entity_id ASC
+
+StrictlyAfter:
+

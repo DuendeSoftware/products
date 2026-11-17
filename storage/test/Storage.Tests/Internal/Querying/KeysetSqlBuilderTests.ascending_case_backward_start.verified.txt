@@ -1,0 +1,5 @@
+ORDER BY:
+CASE WHEN v.number_value IS NULL THEN 1 ELSE 0 END DESC, v.number_value DESC, v.entity_id DESC
+
+StrictlyAfter:
+1=0

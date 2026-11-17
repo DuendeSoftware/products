@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -8,13 +9,13 @@ using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Outbox;
+using Duende.Storage.Internal.Pagination;
 using Duende.Storage.Internal.Querying;
+using Duende.Storage.Internal.Querying.Cursors;
 using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
 using Duende.Storage.Schema;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@ internal sealed class SqliteStorageEngine(
     OutboxSubscriptions outboxSubscriptions,
     ILogger<SqliteStorageEngine> logger) : StoreBase, IPartitionedStorage, ICrossPartitionStorage, IStorageInstanceSchema
 {
-    private const int RequiredSchemaVersion = 2;
+    private const int RequiredSchemaVersion = 3;
     private static readonly SqliteDialect Dialect = new();
 
     // SQLite's default schema is "main", used for SqlWhereClauseBuilder schema-qualified table names
@@ -67,7 +68,7 @@ internal sealed class SqliteStorageEngine(
 
         // Check if __schema_info table exists
         await using var checkCmd = connection.CreateCommand();
-        checkCmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name='__schema_info'";
+        checkCmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name='__schema_info' COLLATE NOCASE";
         Log.ExecutingSql(logger, checkCmd.CommandText);
         var tableExists = await checkCmd.ExecuteScalarAsync(ct);
 
@@ -189,6 +190,7 @@ internal sealed class SqliteStorageEngine(
                 ("left_entity_id", "TEXT"),
                 ("right_entity_type_id", "INTEGER"),
                 ("right_entity_id", "TEXT"),
+                ("restrict_delete", "INTEGER"),
                 ("created_at", "TEXT")
             ],
             ["outbox_subscriber_queue"] =
@@ -208,11 +210,14 @@ internal sealed class SqliteStorageEngine(
             ]
         };
 
+        var actualTables = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        var actualKeys = new List<SchemaVerification.KeyColumn>();
+
         // Check each expected table
         foreach (var (tableName, expectedColumns) in expectedTables)
         {
             await using var tableCmd = connection.CreateCommand();
-            tableCmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name";
+            tableCmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name COLLATE NOCASE";
             _ = tableCmd.Parameters.AddWithValue("@name", tableName);
             var tableExists = await tableCmd.ExecuteScalarAsync(ct);
 
@@ -222,110 +227,246 @@ internal sealed class SqliteStorageEngine(
                 continue;
             }
 
+            var actualColumnNames = new HashSet<string>(StringComparer.Ordinal);
+            actualTables.Add(tableName, actualColumnNames);
+            var hasPrimaryKeyIndex = false;
+            if (tableName == "outbox_subscriber_queue")
+            {
+                await using var primaryIndexCmd = connection.CreateCommand();
+                primaryIndexCmd.CommandText =
+                    "SELECT EXISTS(SELECT 1 FROM pragma_index_list('outbox_subscriber_queue') WHERE origin = 'pk')";
+                hasPrimaryKeyIndex = Convert.ToInt64(await primaryIndexCmd.ExecuteScalarAsync(ct), CultureInfo.InvariantCulture) != 0;
+            }
+
             // Check columns via PRAGMA table_info
             await using var colCmd = connection.CreateCommand();
             colCmd.CommandText = $"PRAGMA table_info({tableName})";
             await using var colReader = await colCmd.ExecuteReaderAsync(ct);
 
-            var actualColumns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var actualColumns = new Dictionary<string, (string Type, bool IsNullable, int PrimaryKeyPosition)>(StringComparer.OrdinalIgnoreCase);
             while (await colReader.ReadAsync(ct))
             {
                 var colName = colReader.GetString(1);
                 var colType = colReader.GetString(2).ToUpperInvariant();
-                actualColumns[colName] = colType;
+                var primaryKeyPosition = colReader.GetInt32(5);
+                actualColumns[colName] = (colType, colReader.GetInt32(3) == 0, primaryKeyPosition);
+                _ = actualColumnNames.Add(colName);
+
+                if (primaryKeyPosition > 0)
+                {
+                    actualKeys.Add(new SchemaVerification.KeyColumn(tableName, "PRIMARY", true, colName, primaryKeyPosition));
+                }
             }
 
             foreach (var (colName, typeHint) in expectedColumns)
             {
-                if (!actualColumns.TryGetValue(colName, out var actualType))
+                if (!actualColumns.TryGetValue(colName, out var actualColumn))
                 {
                     errors.Add(new SchemaVerificationError(tableName, colName, $"Column '{tableName}.{colName}' is missing.", SchemaVerificationErrorKind.MissingColumn));
                 }
-                else if (!actualType.Contains(typeHint, StringComparison.OrdinalIgnoreCase))
+                else
                 {
-                    errors.Add(new SchemaVerificationError(tableName, colName, $"Column '{tableName}.{colName}' has type '{actualType}', expected '{typeHint}'.", SchemaVerificationErrorKind.WrongType));
+                    if (!actualColumn.Type.Contains(typeHint, StringComparison.OrdinalIgnoreCase))
+                    {
+                        errors.Add(new SchemaVerificationError(tableName, colName, $"Column '{tableName}.{colName}' has type '{actualColumn.Type}', expected '{typeHint}'.", SchemaVerificationErrorKind.WrongType));
+                    }
+
+                    // A rowid alias is non-null even when PRAGMA table_info reports notnull=0.
+                    // INTEGER PRIMARY KEY DESC has a separate index and can actually store NULL.
+                    var isRowIdAlias = tableName == "outbox_subscriber_queue" &&
+                                       colName == "sequence_number" &&
+                                       actualColumn.Type == "INTEGER" &&
+                                       actualColumn.PrimaryKeyPosition == 1 &&
+                                       !hasPrimaryKeyIndex;
+                    SchemaVerification.VerifyNullability(
+                        errors, tableName, colName, actualColumn.IsNullable && !isRowIdAlias, isSqlite: true);
                 }
             }
         }
 
-        // Verify required indexes
-        var expectedIndexes = new (string Table, string Index)[]
+        var uniqueIndexes = new List<string>();
+        await using (var uniqueCmd = connection.CreateCommand())
         {
-            ("entities", "entities_expires_at_index"),
-            ("entities", "entities_created_at_index"),
-            ("entities", "entities_last_updated_at_index"),
-            ("entity_keys", "entity_keys_entity_type_id_entity_id_index"),
-            ("search_values", "search_values_string_value_index"),
-            ("search_values", "search_values_number_value_index"),
-            ("search_values", "search_values_datetime_value_index"),
-            ("search_values", "search_values_boolean_value_index"),
-            ("search_values", "search_values_array_string_value_index"),
-            ("search_values", "search_values_array_number_value_index"),
-            ("search_values", "search_values_array_datetime_value_index"),
-            ("search_values", "search_values_array_boolean_value_index"),
-            ("search_values", "search_values_guid_value_index"),
-            ("search_values", "search_values_array_guid_value_index"),
-            ("entity_links", "entity_links_left_entity_index"),
-            ("entity_links", "entity_links_right_entity_index"),
-            ("entity_links", "entity_links_left_cascade_index"),
-            ("entity_links", "entity_links_right_cascade_index"),
-            ("outbox_subscriber_queue", "outbox_subscriber_queue_subscriber_index"),
-            ("outbox_subscriber_queue", "outbox_subscriber_queue_pool_id_index"),
+            uniqueCmd.CommandText = """
+                SELECT name
+                FROM pragma_index_list('outbox_subscriber_queue')
+                WHERE "unique" = 1 AND origin = 'u'
+                """;
+            await using var reader = await uniqueCmd.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+            {
+                uniqueIndexes.Add(reader.GetString(0));
+            }
+        }
+
+        foreach (var index in uniqueIndexes)
+        {
+            await using var uniqueColumnsCmd = connection.CreateCommand();
+            uniqueColumnsCmd.CommandText = "SELECT name, seqno FROM pragma_index_info(@name) ORDER BY seqno";
+            _ = uniqueColumnsCmd.Parameters.AddWithValue("@name", index);
+            await using var reader = await uniqueColumnsCmd.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+            {
+                actualKeys.Add(new SchemaVerification.KeyColumn(
+                    "outbox_subscriber_queue", index, false,
+                    await reader.IsDBNullAsync(0, ct) ? "<expression>" : reader.GetString(0), reader.GetInt32(1) + 1));
+            }
+        }
+
+        SchemaVerification.VerifyKeys(errors, actualTables, actualKeys, schemaInfoPrimaryKey: "key");
+
+        // Verify required indexes
+        var expectedIndexes = new (string Table, string Index, string Definition)[]
+        {
+            ("entities", "entities_expires_at_index", "entities_expires_at"),
+            ("entities", "entities_created_at_index", "entities_created_at"),
+            ("entities", "entities_last_updated_at_index", "entities_last_updated_at"),
+            ("entity_keys", "entity_keys_entity_type_id_entity_id_index", "entity_keys_entity_type_id_entity_id"),
+            ("search_values", "search_values_string_value_index", "search_values_string_value"),
+            ("search_values", "search_values_number_value_index", "search_values_number_value"),
+            ("search_values", "search_values_datetime_value_index", "search_values_datetime_value"),
+            ("search_values", "search_values_boolean_value_index", "search_values_boolean_value"),
+            ("search_values", "search_values_array_string_value_index", "search_values_array_string_value"),
+            ("search_values", "search_values_array_number_value_index", "search_values_array_number_value"),
+            ("search_values", "search_values_array_datetime_value_index", "search_values_array_datetime_value"),
+            ("search_values", "search_values_array_boolean_value_index", "search_values_array_boolean_value"),
+            ("search_values", "search_values_guid_value_index", "search_values_guid_value"),
+            ("search_values", "search_values_array_guid_value_index", "search_values_array_guid_value"),
+            ("entity_links", "entity_links_right_entity_index", "entity_links_right_entity"),
+            ("entity_links", "entity_links_left_fk_index", "entity_links_left_fk"),
+            ("entity_links", "entity_links_right_fk_index", "entity_links_right_fk_trailing"),
+            ("outbox_subscriber_queue", "outbox_subscriber_queue_subscriber_index", "outbox_subscriber_queue_subscriber"),
+            ("outbox_subscriber_queue", "outbox_subscriber_queue_pool_id_index", "outbox_subscriber_queue_pool_id"),
         };
 
+        var actualIndexNames = new HashSet<(string Table, string Index)>(
+            EqualityComparer<(string, string)>.Create(
+                (a, b) => string.Equals(a.Item1, b.Item1, StringComparison.OrdinalIgnoreCase) &&
+                          string.Equals(a.Item2, b.Item2, StringComparison.OrdinalIgnoreCase),
+                x => StringComparer.OrdinalIgnoreCase.GetHashCode(x.Item1) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(x.Item2)));
         {
             await using var idxCmd = connection.CreateCommand();
             idxCmd.CommandText = "SELECT tbl_name, name FROM sqlite_master WHERE type='index' AND name IS NOT NULL";
             await using var idxReader = await idxCmd.ExecuteReaderAsync(ct);
 
-            var actualIndexes = new HashSet<(string Table, string Index)>(
-                EqualityComparer<(string, string)>.Create(
-                    (a, b) => string.Equals(a.Item1, b.Item1, StringComparison.OrdinalIgnoreCase) &&
-                              string.Equals(a.Item2, b.Item2, StringComparison.OrdinalIgnoreCase),
-                    x => StringComparer.OrdinalIgnoreCase.GetHashCode(x.Item1) ^ StringComparer.OrdinalIgnoreCase.GetHashCode(x.Item2)));
-
             while (await idxReader.ReadAsync(ct))
             {
-                _ = actualIndexes.Add((idxReader.GetString(0), idxReader.GetString(1)));
+                _ = actualIndexNames.Add((idxReader.GetString(0), idxReader.GetString(1)));
             }
+        }
 
-            foreach (var (tableName, indexName) in expectedIndexes)
+        var actualIndexes = new List<SchemaVerification.IndexColumn>();
+        foreach (var (tableName, indexName, _) in expectedIndexes)
+        {
+            if (actualIndexNames.Contains((tableName, indexName)))
             {
-                if (!actualIndexes.Contains((tableName, indexName)))
+                await using var columnsCmd = connection.CreateCommand();
+                columnsCmd.CommandText = "SELECT name, seqno FROM pragma_index_xinfo(@name) WHERE key = 1 ORDER BY seqno";
+                _ = columnsCmd.Parameters.AddWithValue("@name", indexName);
+                await using var reader = await columnsCmd.ExecuteReaderAsync(ct);
+                var hasColumns = false;
+                while (await reader.ReadAsync(ct))
                 {
-                    errors.Add(new SchemaVerificationError(
-                        tableName, null,
-                        $"Index '{indexName}' is missing from table '{tableName}'.",
-                        SchemaVerificationErrorKind.MissingIndex));
+                    hasColumns = true;
+                    actualIndexes.Add(new SchemaVerification.IndexColumn(
+                        tableName, indexName, await reader.IsDBNullAsync(0, ct) ? null : reader.GetString(0), reader.GetInt32(1) + 1));
+                }
+
+                if (!hasColumns)
+                {
+                    actualIndexes.Add(new SchemaVerification.IndexColumn(tableName, indexName, null, 0));
                 }
             }
         }
 
-        // Verify required foreign keys
-        var expectedForeignKeys = new (string Table, string ReferencedTable)[]
-        {
-            ("entity_keys", "entities"),
-            ("search_values", "entities"),
-        };
+        SchemaVerification.VerifyIndexes(errors, actualTables, expectedIndexes, actualIndexes, (tableName, indexName) =>
+            new SchemaVerificationError(
+                tableName, null,
+                $"Index '{indexName}' is missing from table '{tableName}'.",
+                SchemaVerificationErrorKind.MissingIndex));
 
-        foreach (var (tableName, referencedTable) in expectedForeignKeys)
+        // Verify required foreign keys
+        var actualForeignKeys = new List<SchemaVerification.ForeignKeyColumn>();
+        var entityPrimaryKeyColumns = new List<string>();
+        await using (var primaryKeyCmd = connection.CreateCommand())
+        {
+            primaryKeyCmd.CommandText = "SELECT name FROM pragma_table_info('entities') WHERE pk > 0 ORDER BY pk";
+            await using var primaryKeyReader = await primaryKeyCmd.ExecuteReaderAsync(ct);
+            while (await primaryKeyReader.ReadAsync(ct))
+            {
+                entityPrimaryKeyColumns.Add(primaryKeyReader.GetString(0));
+            }
+        }
+
+        foreach (var tableName in new[] { "entity_keys", "search_values" })
         {
             await using var fkCmd = connection.CreateCommand();
             fkCmd.CommandText = $"PRAGMA foreign_key_list({tableName})";
             await using var fkReader = await fkCmd.ExecuteReaderAsync(ct);
 
-            var referencedTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             while (await fkReader.ReadAsync(ct))
             {
-                _ = referencedTables.Add(fkReader.GetString(2)); // column 2 is "table" (referenced table)
+                var sequence = fkReader.GetInt32(1);
+                var referencedColumn = await fkReader.IsDBNullAsync(4, ct)
+                    ? entityPrimaryKeyColumns.ElementAtOrDefault(sequence) ?? ""
+                    : fkReader.GetString(4);
+                actualForeignKeys.Add(new SchemaVerification.ForeignKeyColumn(
+                    tableName, fkReader.GetInt32(0).ToString(CultureInfo.InvariantCulture), fkReader.GetString(2), true,
+                    fkReader.GetString(3), referencedColumn, fkReader.GetString(6), sequence + 1));
+            }
+        }
+
+        SchemaVerification.VerifyForeignKeys(errors, actualTables, actualForeignKeys);
+
+        // Verify required foreign keys for entity_links. SQLite's FKs aren't named: PRAGMA
+        // foreign_key_list returns one row per column with a shared "id" for each constraint, so
+        // rows must be grouped by id and all three source-to-target column pairs validated
+        // together with the referenced table and delete action, otherwise a single matching
+        // column (e.g. right_entity_id -> entities) would pass even if another column in the same
+        // FK pointed at the wrong column (e.g. left_entity_type_id instead of right_entity_type_id).
+        var expectedLinkForeignKeys = new (string ConstraintLabel, (string From, string To)[] Columns, string OnDelete)[]
+        {
+            ("left", [("pool_id", "pool_id"), ("left_entity_type_id", "entity_type_id"), ("left_entity_id", "entity_id")], "NO ACTION"),
+            ("right", [("pool_id", "pool_id"), ("right_entity_type_id", "entity_type_id"), ("right_entity_id", "entity_id")], "NO ACTION"),
+        };
+
+        await using (var linkFkCmd = connection.CreateCommand())
+        {
+            linkFkCmd.CommandText = "PRAGMA foreign_key_list(entity_links)";
+            await using var linkFkReader = await linkFkCmd.ExecuteReaderAsync(ct);
+
+            var actualLinkForeignKeys = new List<(int Id, string ReferencedTable, string From, string To, string OnDelete)>();
+            while (await linkFkReader.ReadAsync(ct))
+            {
+                actualLinkForeignKeys.Add((
+                    linkFkReader.GetInt32(0),
+                    linkFkReader.GetString(2), // "table" (referenced table)
+                    linkFkReader.GetString(3), // "from" (referencing column)
+                    linkFkReader.GetString(4), // "to" (referenced column)
+                    linkFkReader.GetString(6))); // "on_delete"
             }
 
-            if (!referencedTables.Contains(referencedTable))
+            var groupedById = actualLinkForeignKeys
+                .GroupBy(fk => fk.Id)
+                .ToArray();
+
+            foreach (var (constraintLabel, expectedColumns, onDelete) in expectedLinkForeignKeys)
             {
-                errors.Add(new SchemaVerificationError(
-                    tableName, null,
-                    $"Foreign key from '{tableName}' to '{referencedTable}' is missing.",
-                    SchemaVerificationErrorKind.MissingForeignKey));
+                var found = groupedById.Any(group =>
+                    group.Count() == expectedColumns.Length &&
+                    group.All(fk => string.Equals(fk.ReferencedTable, "entities", StringComparison.OrdinalIgnoreCase)) &&
+                    group.All(fk => string.Equals(fk.OnDelete, onDelete, StringComparison.OrdinalIgnoreCase)) &&
+                    expectedColumns.All(expected => group.Any(fk =>
+                        string.Equals(fk.From, expected.From, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(fk.To, expected.To, StringComparison.OrdinalIgnoreCase))));
+
+                if (!found)
+                {
+                    errors.Add(new SchemaVerificationError(
+                        "entity_links", null,
+                        $"Foreign key from 'entity_links' ({constraintLabel} side) to 'entities' with the expected column mapping and ON DELETE {onDelete} is missing.",
+                        SchemaVerificationErrorKind.MissingForeignKey));
+                }
             }
         }
 
@@ -345,6 +486,17 @@ internal sealed class SqliteStorageEngine(
     }
 
     /// <summary>
+    /// Returns whether the database error says that a table does not exist: SQLite error 1 with the text 'no such table'.
+    /// </summary>
+    private static bool IsMissingStorageTable(SqliteException ex) => ex.SqliteErrorCode == 1 && ex.Message.Contains("no such table", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Qualified table names <see cref="SqlWhereClauseBuilder"/> needs to compile a link filter, matching the
+    /// qualified names used elsewhere in this engine.
+    /// </summary>
+    private static readonly StorageTableNames LinkFilterTableNames = new("main.entities", "main.entity_links");
+
+    /// <summary>
     /// Creates a new entity in the store.
     /// </summary>
     async Task<CreateResult> IPartitionedStorage.CreateAsync<TDso>(
@@ -356,29 +508,36 @@ internal sealed class SqliteStorageEngine(
         IReadOnlyList<OutboxEvent> outboxEvents,
         Ct ct)
     {
-        var createOp = CreateOperation.For(id, dso, keys, searchFieldCollection, expiration);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-
-        var outcome = await ExecuteCreateCoreAsync(cnn, tx, createOp, ct);
-
-        if (outcome == OperationOutcome.Success)
+        try
         {
-            if (outboxEvents is { Count: > 0 })
+            var createOp = CreateOperation.For(id, dso, keys, searchFieldCollection, expiration);
+
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+            var outcome = await ExecuteCreateCoreAsync(cnn, tx, createOp, ct);
+
+            if (outcome == OperationOutcome.Success)
             {
-                await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+                if (outboxEvents is { Count: > 0 })
+                {
+                    await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+                }
+                await tx.CommitAsync(ct);
             }
-            await tx.CommitAsync(ct);
-        }
 
-        return outcome switch
+            return outcome switch
+            {
+                OperationOutcome.Success => CreateResult.Success,
+                OperationOutcome.AlreadyExists => CreateResult.AlreadyExists,
+                OperationOutcome.KeyConflict => CreateResult.KeyConflict,
+                _ => throw new InvalidOperationException($"Unexpected outcome from create operation: {outcome}")
+            };
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            OperationOutcome.Success => CreateResult.Success,
-            OperationOutcome.AlreadyExists => CreateResult.AlreadyExists,
-            OperationOutcome.KeyConflict => CreateResult.KeyConflict,
-            _ => throw new InvalidOperationException($"Unexpected outcome from create operation: {outcome}")
-        };
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     async Task<StoreGetResult> IPartitionedStorage.TryReadAsync(
@@ -386,144 +545,31 @@ internal sealed class SqliteStorageEngine(
         Storage.UuidV7 id,
         Ct ct)
     {
-        Log.ReadingDso(logger, entityType, id.Value);
-
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-        cmd.CommandText = """
-            SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-            FROM main.entities v
-            WHERE v.entity_type_id = @entity_type_id AND v.entity_id = @entity_id AND v.pool_id = @pool_id
-            """;
-
-        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
-        _ = cmd.Parameters.AddWithValue("@entity_id", id.Value.ToString());
-        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-        Log.ExecutingSql(logger, cmd.CommandText);
-        await using var reader = await cmd.ExecuteReaderAsync(ct);
-
-        if (!await reader.ReadAsync(ct))
+        try
         {
-            return StoreGetResult.NotFound();
-        }
+            Log.ReadingDso(logger, entityType, id.Value);
 
-        var entityId = Guid.Parse(reader.GetString(0));
-        var jsonValue = reader.GetString(1);
-        var dsoTypeVersion = reader.GetInt32(2);
-        var valueVersion = reader.GetInt32(3);
-        var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
-        var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
 
-        var version = new DataStorageObjectVersion(entityType, (uint)dsoTypeVersion);
-        var dsoType = dataStorageTypeRegistry.Get(version);
-        var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+            await using var cnn = await OpenConnectionAsync(ct);
 
-        return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
-    }
+            await using var cmd = cnn.CreateCommand();
+            cmd.CommandText = """
+                SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
+                FROM main.entities v
+                WHERE v.entity_type_id = @entity_type_id AND v.entity_id = @entity_id AND v.pool_id = @pool_id
+                """;
 
-    async Task<StoreGetResult> IPartitionedStorage.TryReadAsync(
-        EntityType entityType,
-        DataStorageKey key,
-        Ct ct)
-    {
-        Log.ReadingDso(logger, entityType, key.Value);
+            _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
+            _ = cmd.Parameters.AddWithValue("@entity_id", id.Value.ToString());
+            _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            Log.ExecutingSql(logger, cmd.CommandText);
+            await using var reader = await cmd.ExecuteReaderAsync(ct);
 
-        var keyGuid = key.Value;
-        var keyTypeId = (int)key.DskVersion.KeyType.Id;
-        var keyTypeVersion = (int)key.DskVersion.SchemaVersion;
+            if (!await reader.ReadAsync(ct))
+            {
+                return StoreGetResult.NotFound();
+            }
 
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-        cmd.CommandText = """
-            SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-            FROM main.entity_keys i
-            INNER JOIN main.entities v ON i.entity_type_id = v.entity_type_id AND i.entity_id = v.entity_id
-            WHERE i.entity_type_id = @entity_type_id
-                AND i.key_type_id = @key_type_id
-                AND i.key_type_version = @key_type_version
-                AND i.key_value = @key_value
-                AND i.pool_id = @pool_id
-                AND v.pool_id = @pool_id
-            """;
-
-        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
-        _ = cmd.Parameters.AddWithValue("@key_type_id", keyTypeId);
-        _ = cmd.Parameters.AddWithValue("@key_type_version", keyTypeVersion);
-        _ = cmd.Parameters.AddWithValue("@key_value", keyGuid.ToString());
-        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-
-        Log.ExecutingSql(logger, cmd.CommandText);
-
-        await using var reader = await cmd.ExecuteReaderAsync(ct);
-
-        if (!await reader.ReadAsync(ct))
-        {
-            return StoreGetResult.NotFound();
-        }
-
-        var entityId = Guid.Parse(reader.GetString(0));
-        var jsonValue = reader.GetString(1);
-        var dsoTypeVersion = reader.GetInt32(2);
-        var valueVersion = reader.GetInt32(3);
-        var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
-        var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
-
-        var version = new DataStorageObjectVersion(entityType, (uint)dsoTypeVersion);
-        var dsoType = dataStorageTypeRegistry.Get(version);
-        var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
-
-        return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
-    }
-
-    async Task<IReadOnlyList<StoreGetResult>> IPartitionedStorage.TryReadManyAsync(
-        EntityType entityType,
-        IReadOnlySet<Storage.UuidV7> ids,
-        int maximum,
-        Ct ct)
-    {
-        if (ids.Count > maximum)
-        {
-            throw new InvalidOperationException(
-                $"The number of requested IDs ({ids.Count}) exceeds the maximum allowed ({maximum}).");
-        }
-
-        Log.ReadingDsos(logger, entityType, ids.Count);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-
-        // Build IN clause with individual parameters (SQLite doesn't support array parameters)
-        var idParams = new List<string>();
-        var i = 0;
-        foreach (var id in ids)
-        {
-            var paramName = $"@id{i}";
-            idParams.Add(paramName);
-            _ = cmd.Parameters.AddWithValue(paramName, id.Value.ToString());
-            i++;
-        }
-
-        var inClause = string.Join(", ", idParams);
-        cmd.CommandText = $"""
-            SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
-            FROM main.entities v
-            WHERE v.entity_type_id = @entityTypeId AND v.entity_id IN ({inClause}) AND v.pool_id = @poolId
-            """;
-
-        _ = cmd.Parameters.AddWithValue("@entityTypeId", (int)entityType.Id);
-        _ = cmd.Parameters.AddWithValue("@poolId", PoolId.Value);
-
-        Log.ExecutingSql(logger, cmd.CommandText);
-
-        await using var reader = await cmd.ExecuteReaderAsync(ct);
-
-        var results = new List<StoreGetResult>();
-        while (await reader.ReadAsync(ct))
-        {
             var entityId = Guid.Parse(reader.GetString(0));
             var jsonValue = reader.GetString(1);
             var dsoTypeVersion = reader.GetInt32(2);
@@ -535,10 +581,144 @@ internal sealed class SqliteStorageEngine(
             var dsoType = dataStorageTypeRegistry.Get(version);
             var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
 
-            results.Add(StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated));
+            return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
         }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
+    }
 
-        return results;
+    async Task<StoreGetResult> IPartitionedStorage.TryReadAsync(
+        EntityType entityType,
+        DataStorageKey key,
+        Ct ct)
+    {
+        try
+        {
+            Log.ReadingDso(logger, entityType, key.Value);
+
+            var keyGuid = key.Value;
+            var keyTypeId = (int)key.DskVersion.KeyType.Id;
+            var keyTypeVersion = (int)key.DskVersion.SchemaVersion;
+
+            await using var cnn = await OpenConnectionAsync(ct);
+
+            await using var cmd = cnn.CreateCommand();
+            cmd.CommandText = """
+                SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
+                FROM main.entity_keys i
+                INNER JOIN main.entities v ON i.entity_type_id = v.entity_type_id AND i.entity_id = v.entity_id
+                WHERE i.entity_type_id = @entity_type_id
+                    AND i.key_type_id = @key_type_id
+                    AND i.key_type_version = @key_type_version
+                    AND i.key_value = @key_value
+                    AND i.pool_id = @pool_id
+                    AND v.pool_id = @pool_id
+                """;
+
+            _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
+            _ = cmd.Parameters.AddWithValue("@key_type_id", keyTypeId);
+            _ = cmd.Parameters.AddWithValue("@key_type_version", keyTypeVersion);
+            _ = cmd.Parameters.AddWithValue("@key_value", keyGuid.ToString());
+            _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+
+            Log.ExecutingSql(logger, cmd.CommandText);
+
+            await using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            if (!await reader.ReadAsync(ct))
+            {
+                return StoreGetResult.NotFound();
+            }
+
+            var entityId = Guid.Parse(reader.GetString(0));
+            var jsonValue = reader.GetString(1);
+            var dsoTypeVersion = reader.GetInt32(2);
+            var valueVersion = reader.GetInt32(3);
+            var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
+            var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
+
+            var version = new DataStorageObjectVersion(entityType, (uint)dsoTypeVersion);
+            var dsoType = dataStorageTypeRegistry.Get(version);
+            var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+
+            return StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated);
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
+    }
+
+    async Task<IReadOnlyList<StoreGetResult>> IPartitionedStorage.TryReadManyAsync(
+        EntityType entityType,
+        IReadOnlySet<Storage.UuidV7> ids,
+        int maximum,
+        Ct ct)
+    {
+        try
+        {
+            if (ids.Count > maximum)
+            {
+                throw new InvalidOperationException(
+                    $"The number of requested IDs ({ids.Count}) exceeds the maximum allowed ({maximum}).");
+            }
+
+            Log.ReadingDsos(logger, entityType, ids.Count);
+
+            await using var cnn = await OpenConnectionAsync(ct);
+
+            await using var cmd = cnn.CreateCommand();
+
+            // Build IN clause with individual parameters (SQLite doesn't support array parameters)
+            var idParams = new List<string>();
+            var i = 0;
+            foreach (var id in ids)
+            {
+                var paramName = $"@id{i}";
+                idParams.Add(paramName);
+                _ = cmd.Parameters.AddWithValue(paramName, id.Value.ToString());
+                i++;
+            }
+
+            var inClause = string.Join(", ", idParams);
+            cmd.CommandText = $"""
+                SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at
+                FROM main.entities v
+                WHERE v.entity_type_id = @entityTypeId AND v.entity_id IN ({inClause}) AND v.pool_id = @poolId
+                """;
+
+            _ = cmd.Parameters.AddWithValue("@entityTypeId", (int)entityType.Id);
+            _ = cmd.Parameters.AddWithValue("@poolId", PoolId.Value);
+
+            Log.ExecutingSql(logger, cmd.CommandText);
+
+            await using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            var results = new List<StoreGetResult>();
+            while (await reader.ReadAsync(ct))
+            {
+                var entityId = Guid.Parse(reader.GetString(0));
+                var jsonValue = reader.GetString(1);
+                var dsoTypeVersion = reader.GetInt32(2);
+                var valueVersion = reader.GetInt32(3);
+                var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
+                var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
+
+                var version = new DataStorageObjectVersion(entityType, (uint)dsoTypeVersion);
+                var dsoType = dataStorageTypeRegistry.Get(version);
+                var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+
+                results.Add(StoreGetResult.IsFound(item, entityId, valueVersion, created, lastUpdated));
+            }
+
+            return results;
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     /// <summary>
@@ -554,66 +734,97 @@ internal sealed class SqliteStorageEngine(
         IReadOnlyList<OutboxEvent> outboxEvents,
         Ct ct)
     {
-        var updateOp = UpdateOperation.For(id, dso, expectedEntityVersion, keys, searchFieldCollection, expiration);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-
-        var outcome = await ExecuteUpdateCoreAsync(cnn, tx, updateOp, ct);
-
-        if (outcome == OperationOutcome.Success)
+        try
         {
-            if (outboxEvents is { Count: > 0 })
+            var updateOp = UpdateOperation.For(id, dso, expectedEntityVersion, keys, searchFieldCollection, expiration);
+
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+            var outcome = await ExecuteUpdateCoreAsync(cnn, tx, updateOp, ct);
+
+            if (outcome == OperationOutcome.Success)
             {
-                await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+                if (outboxEvents is { Count: > 0 })
+                {
+                    await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+                }
+                await tx.CommitAsync(ct);
             }
-            await tx.CommitAsync(ct);
-        }
 
-        return outcome switch
+            return outcome switch
+            {
+                OperationOutcome.Success => UpdateResult.Success,
+                OperationOutcome.DoesNotExist => UpdateResult.DoesNotExist,
+                OperationOutcome.UnexpectedVersion => UpdateResult.UnexpectedVersion,
+                OperationOutcome.KeyConflict => UpdateResult.KeyConflict,
+                _ => throw new InvalidOperationException($"Unexpected outcome from update operation: {outcome}")
+            };
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            OperationOutcome.Success => UpdateResult.Success,
-            OperationOutcome.DoesNotExist => UpdateResult.DoesNotExist,
-            OperationOutcome.UnexpectedVersion => UpdateResult.UnexpectedVersion,
-            OperationOutcome.KeyConflict => UpdateResult.KeyConflict,
-            _ => throw new InvalidOperationException($"Unexpected outcome from update operation: {outcome}")
-        };
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     async Task<DeleteResult> IPartitionedStorage.DeleteAsync(EntityType entityType, Storage.UuidV7 id, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
-        var deleteOp = DeleteOperation.ById(entityType, id);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-
-        var (_, entityDeleted) = await ExecuteDeleteCoreAsync(cnn, tx, deleteOp, ct);
-
-        if (entityDeleted && outboxEvents is { Count: > 0 })
+        try
         {
-            await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
-        }
+            var deleteOp = DeleteOperation.ById(entityType, id);
 
-        await tx.CommitAsync(ct);
-        return DeleteResult.Success;
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+            var (outcome, entityDeleted) = await ExecuteDeleteCoreAsync(cnn, tx, deleteOp, ct);
+
+            if (outcome == OperationOutcome.StillLinked)
+            {
+                return DeleteResult.StillLinked;
+            }
+
+            if (entityDeleted && outboxEvents is { Count: > 0 })
+            {
+                await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+            }
+
+            await tx.CommitAsync(ct);
+            return DeleteResult.Success;
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     async Task<DeleteResult> IPartitionedStorage.DeleteAsync(EntityType entityType, DataStorageKey key, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
-        var deleteOp = DeleteOperation.ByKey(entityType, key);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-
-        var (_, entityDeleted) = await ExecuteDeleteCoreAsync(cnn, tx, deleteOp, ct);
-
-        if (entityDeleted && outboxEvents is { Count: > 0 })
+        try
         {
-            await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
-        }
+            var deleteOp = DeleteOperation.ByKey(entityType, key);
 
-        await tx.CommitAsync(ct);
-        return DeleteResult.Success;
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+            var (outcome, entityDeleted) = await ExecuteDeleteCoreAsync(cnn, tx, deleteOp, ct);
+
+            if (outcome == OperationOutcome.StillLinked)
+            {
+                return DeleteResult.StillLinked;
+            }
+
+            if (entityDeleted && outboxEvents is { Count: > 0 })
+            {
+                await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+            }
+
+            await tx.CommitAsync(ct);
+            return DeleteResult.Success;
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     private static int AddInserts(StringBuilder builder,
@@ -711,114 +922,125 @@ internal sealed class SqliteStorageEngine(
     /// <summary>
     /// Queries entities with the specified pagination strategy.
     /// </summary>
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IPartitionedStorage.QueryAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope>> IPartitionedStorage.QueryAsync(
         EntityType entityType,
         IQueryExpression filter,
         SortParameter sort,
         DataRange dataRange,
         Ct ct)
     {
-        if (dataRange.TokenValue is not null)
+        try
         {
-            return await QueryCursorCoreAsync<TDso>(entityType, filter, sort, dataRange.TokenValue, ct);
-        }
-
-        var (skip, take) = ResolveOffsetAndSize(dataRange);
-        var dsoVersion = TDso.DsoVersion;
-        var entityTypeId = (int)entityType.Id;
-
-        Log.QueryingDsos(logger, entityType, skip, take);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-        var queryClauses = BuildQueryClauses(cmd, filter, sort);
-
-        // Build main query using CTEs
-        string allMatchesSelect;
-        string pagedOrderBy;
-        string outerOrderBy;
-        if (!sort.IsEmpty)
-        {
-            var sortColumn = GetSortColumnName(sort.Field!);
-            var sortDirection = sort.Direction == SortDirection.Ascending ? "ASC" : "DESC";
-            allMatchesSelect = $"SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at, {sortColumn} AS sort_value";
-            pagedOrderBy = $"ORDER BY CASE WHEN sort_value IS NULL THEN 1 ELSE 0 END, sort_value {sortDirection}, entity_id ASC";
-            outerOrderBy = $"ORDER BY CASE WHEN p.sort_value IS NULL THEN 1 ELSE 0 END, p.sort_value {sortDirection}, p.entity_id ASC";
-        }
-        else
-        {
-            allMatchesSelect = "SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at";
-            pagedOrderBy = "ORDER BY entity_id ASC";
-            outerOrderBy = "ORDER BY p.entity_id ASC";
-        }
-
-        var query = $"""
-            WITH all_matches AS (
-                {allMatchesSelect}
-                FROM main.entities v
-                {queryClauses.JoinClause}
-                WHERE v.entity_type_id = @entity_type_id
-                  AND v.pool_id = @pool_id
-                  AND ({queryClauses.WhereClause})
-            ),
-            total AS (
-                SELECT COUNT(*) AS total_count FROM all_matches
-            ),
-            paged AS (
-                SELECT * FROM all_matches
-                {pagedOrderBy}
-                LIMIT @limit OFFSET @offset
-            )
-            SELECT p.entity_id, p.value, p.dso_type_schema_version, p.value_version, p.created_at, p.last_updated_at, t.total_count
-            FROM total t
-            LEFT JOIN paged p ON 1
-            {outerOrderBy}
-            """;
-
-        Dialect.AddParameter(cmd, "@entity_type_id", entityTypeId);
-        Dialect.AddParameter(cmd, "@pool_id", PoolId.Value);
-        _ = cmd.Parameters.AddWithValue("@offset", skip);
-        _ = cmd.Parameters.AddWithValue("@limit", take);
-
-        cmd.CommandText = query;
-
-        Log.ExecutingQuery(logger, query);
-
-        var items = new List<MetadataEnvelope<TDso>>();
-        var totalCount = 0;
-        await using (var reader = await cmd.ExecuteReaderAsync(ct))
-        {
-            var dsoType = dataStorageTypeRegistry.Get(dsoVersion);
-            while (await reader.ReadAsync(ct))
+            if (dataRange.TokenValue is not null)
             {
-                if (totalCount == 0)
-                {
-                    totalCount = Convert.ToInt32(reader.GetInt64(6));
-                }
-
-                if (await reader.IsDBNullAsync(0, ct))
-                {
-                    continue;
-                }
-
-                var entityId = Guid.Parse(reader.GetString(0));
-                var jsonValue = reader.GetString(1);
-                var item = (TDso)JsonSerializer.Deserialize(jsonValue, dsoType)!;
-                var valueVersion = reader.GetInt32(3);
-                var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
-                var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
-                items.Add(new MetadataEnvelope<TDso>(item, entityId, valueVersion, created, lastUpdated));
+                return await QueryCursorCoreAsync(entityType, filter, sort, dataRange.TokenValue, ct);
             }
-        }
 
-        return new QueryResult<MetadataEnvelope<TDso>>
+            var (skip, take) = ResolveOffsetAndSize(dataRange);
+            var entityTypeId = (int)entityType.Id;
+
+            Log.QueryingDsos(logger, entityType, skip, take);
+
+            await using var cnn = await OpenConnectionAsync(ct);
+
+            await using var cmd = cnn.CreateCommand();
+            var queryClauses = BuildQueryClauses(cmd, filter, sort, entityType);
+
+            // Build main query using CTEs
+            string allMatchesSelect;
+            string pagedOrderBy;
+            string outerOrderBy;
+            if (!sort.IsEmpty)
+            {
+                var sortColumn = GetSortColumnName(sort.Field!);
+                var sortDirection = sort.Direction == SortDirection.Ascending ? "ASC" : "DESC";
+                allMatchesSelect = $"SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at, {sortColumn} AS sort_value";
+                pagedOrderBy = $"ORDER BY CASE WHEN sort_value IS NULL THEN 1 ELSE 0 END, sort_value {sortDirection}, entity_id ASC";
+                outerOrderBy = $"ORDER BY CASE WHEN p.sort_value IS NULL THEN 1 ELSE 0 END, p.sort_value {sortDirection}, p.entity_id ASC";
+            }
+            else
+            {
+                allMatchesSelect = "SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at";
+                pagedOrderBy = "ORDER BY entity_id ASC";
+                outerOrderBy = "ORDER BY p.entity_id ASC";
+            }
+
+            var query = $"""
+                WITH all_matches AS (
+                    {allMatchesSelect}
+                    FROM main.entities v
+                    {queryClauses.JoinClause}
+                    WHERE v.entity_type_id = @entity_type_id
+                      AND v.pool_id = @pool_id
+                      AND ({queryClauses.WhereClause})
+                ),
+                total AS (
+                    SELECT COUNT(*) AS total_count FROM all_matches
+                ),
+                paged AS (
+                    SELECT * FROM all_matches
+                    {pagedOrderBy}
+                    LIMIT @limit OFFSET @offset
+                )
+                SELECT p.entity_id, p.value, p.dso_type_schema_version, p.value_version, p.created_at, p.last_updated_at, t.total_count
+                FROM total t
+                LEFT JOIN paged p ON 1
+                {outerOrderBy}
+                """;
+
+            Dialect.AddParameter(cmd, "@entity_type_id", entityTypeId);
+            Dialect.AddParameter(cmd, "@pool_id", PoolId.Value);
+            _ = cmd.Parameters.AddWithValue("@offset", skip);
+            _ = cmd.Parameters.AddWithValue("@limit", take);
+
+            cmd.CommandText = query;
+
+            Log.ExecutingQuery(logger, query);
+
+            var items = new List<MetadataEnvelope>();
+            var totalCount = 0;
+            await using (var reader = await cmd.ExecuteReaderAsync(ct))
+            {
+                while (await reader.ReadAsync(ct))
+                {
+                    if (totalCount == 0)
+                    {
+                        totalCount = Convert.ToInt32(reader.GetInt64(6));
+                    }
+
+                    if (await reader.IsDBNullAsync(0, ct))
+                    {
+                        continue;
+                    }
+
+                    var entityId = Guid.Parse(reader.GetString(0));
+                    var jsonValue = reader.GetString(1);
+                    var dsoTypeVersion = reader.GetInt32(2);
+                    var valueVersion = reader.GetInt32(3);
+                    var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
+                    var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
+
+                    var version = new DataStorageObjectVersion(entityType, (uint)dsoTypeVersion);
+                    var dsoType = dataStorageTypeRegistry.Get(version);
+                    var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+
+                    items.Add(new MetadataEnvelope(item, entityId, valueVersion, created, lastUpdated));
+                }
+            }
+
+            return new QueryResult<MetadataEnvelope>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / take),
+                HasMoreData = skip + take < totalCount,
+                HasPreviousData = skip > 0 && totalCount > 0
+            };
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            Items = items,
-            TotalCount = totalCount,
-            TotalPages = (int)Math.Ceiling((double)totalCount / take),
-            HasMoreData = skip + take < totalCount
-        };
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     /// <summary>
@@ -832,196 +1054,201 @@ internal sealed class SqliteStorageEngine(
         DataRange dataRange,
         Ct ct)
     {
-        if (dataRange.TokenValue is not null)
+        try
         {
-            return await QueryFieldsCursorCoreAsync(entityType, fields, filter, sort, dataRange.TokenValue, ct);
-        }
-
-        var (skip, take) = ResolveOffsetAndSize(dataRange);
-        var entityTypeId = (int)entityType.Id;
-
-        Log.QueryingFieldsDsos(logger, entityType, fields.Count, skip, take);
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-        var queryClauses = BuildQueryClauses(cmd, filter, sort);
-
-        var fieldPaths = fields.Select(f => f.Path).ToList();
-        var fieldConditions = new List<string>();
-        var paramIndex = 0;
-        for (var i = 0; i < fieldPaths.Count; i++)
-        {
-            if (SystemFields.IsSystemField(fieldPaths[i]))
+            if (dataRange.TokenValue is not null)
             {
-                continue;
+                return await QueryFieldsCursorCoreAsync(entityType, fields, filter, sort, dataRange.TokenValue, ct);
             }
 
-            _ = cmd.Parameters.AddWithValue($"@select_field_{paramIndex}", DeterministicGuidGenerator.Create(fieldPaths[i].ToUpperInvariant()).ToByteArray());
-            fieldConditions.Add($"field_sv.field_path = @select_field_{paramIndex}");
-            paramIndex++;
-        }
-        var fieldConditionsClause = fieldConditions.Count > 0
-            ? string.Join(" OR ", fieldConditions)
-            : "1=0";
+            var (skip, take) = ResolveOffsetAndSize(dataRange);
+            var entityTypeId = (int)entityType.Id;
 
-        string cteSelect;
-        string cteJoin;
+            Log.QueryingFieldsDsos(logger, entityType, fields.Count, skip, take);
 
-        if (!sort.IsEmpty)
-        {
-            cteJoin = queryClauses.JoinClause;
-            var sortColumn = GetSortColumnName(sort.Field!);
-            cteSelect = $"SELECT v.entity_id, v.created_at, v.last_updated_at, v.value_version, {sortColumn} AS sort_value, ROW_NUMBER() OVER ({queryClauses.OrderByClause}) AS row_num";
-        }
-        else
-        {
-            cteSelect = "SELECT v.entity_id, v.created_at, v.last_updated_at, v.value_version, ROW_NUMBER() OVER (ORDER BY v.entity_id ASC) AS row_num";
-            cteJoin = "";
-        }
+            await using var cnn = await OpenConnectionAsync(ct);
 
-        var query = $"""
-            WITH all_matches AS (
-                {cteSelect}
-                FROM main.entities v
-                {cteJoin}
-                WHERE v.entity_type_id = @entity_type_id
-                  AND v.pool_id = @pool_id
-                  AND ({queryClauses.WhereClause})
-            ),
-            total AS (
-                SELECT COUNT(*) AS total_count FROM all_matches
-            ),
-            filtered_ids AS (
-                SELECT * FROM all_matches
-                ORDER BY row_num ASC
-                LIMIT @limit OFFSET @offset
-            )
-            SELECT
-                fi.entity_id,
-                field_sv.field_path_text,
-                field_sv.string_value,
-                field_sv.number_value,
-                field_sv.datetime_value,
-                field_sv.boolean_value,
-                field_sv.guid_value,
-                t.total_count,
-                fi.created_at,
-                fi.last_updated_at,
-                fi.value_version
-            FROM total t
-            LEFT JOIN filtered_ids fi ON 1
-            LEFT JOIN main.search_values field_sv
-              ON fi.entity_id = field_sv.entity_id
-              AND field_sv.entity_type_id = @entity_type_id
-              AND field_sv.pool_id = @pool_id
-              AND field_sv.item_index = -1
-              AND ({fieldConditionsClause})
-            ORDER BY fi.row_num, fi.entity_id
-            """;
+            await using var cmd = cnn.CreateCommand();
+            var queryClauses = BuildQueryClauses(cmd, filter, sort, entityType);
 
-        Dialect.AddParameter(cmd, "@entity_type_id", entityTypeId);
-        Dialect.AddParameter(cmd, "@pool_id", PoolId.Value);
-        _ = cmd.Parameters.AddWithValue("@offset", skip);
-        _ = cmd.Parameters.AddWithValue("@limit", take);
-
-        cmd.CommandText = query;
-
-        Log.ExecutingQuery(logger, query);
-
-        var resultsById = new Dictionary<Guid, (Dictionary<string, object?> FieldValues, DateTimeOffset Created, DateTimeOffset LastUpdated, int Version)>();
-        var orderedIds = new List<Guid>();
-        var totalCount = 0;
-        await using (var reader = await cmd.ExecuteReaderAsync(ct))
-        {
-            while (await reader.ReadAsync(ct))
+            var fieldPaths = fields.Select(f => f.Path).ToList();
+            var fieldConditions = new List<string>();
+            var paramIndex = 0;
+            for (var i = 0; i < fieldPaths.Count; i++)
             {
-                if (totalCount == 0)
-                {
-                    totalCount = Convert.ToInt32(reader.GetInt64(7));
-                }
-
-                if (await reader.IsDBNullAsync(0, ct))
+                if (SystemFields.IsSystemField(fieldPaths[i]))
                 {
                     continue;
                 }
 
-                var entityId = Guid.Parse(reader.GetString(0));
-                var fieldPath = await reader.IsDBNullAsync(1, ct) ? null : reader.GetString(1);
+                _ = cmd.Parameters.AddWithValue($"@select_field_{paramIndex}", DeterministicGuidGenerator.Create(fieldPaths[i].ToUpperInvariant()).ToByteArray());
+                fieldConditions.Add($"field_sv.field_path = @select_field_{paramIndex}");
+                paramIndex++;
+            }
+            var fieldConditionsClause = fieldConditions.Count > 0
+                ? string.Join(" OR ", fieldConditions)
+                : "1=0";
 
-                if (!resultsById.TryGetValue(entityId, out var entry))
+            string cteSelect;
+            string cteJoin;
+
+            if (!sort.IsEmpty)
+            {
+                cteJoin = queryClauses.JoinClause;
+                var sortColumn = GetSortColumnName(sort.Field!);
+                cteSelect = $"SELECT v.entity_id, v.created_at, v.last_updated_at, v.value_version, {sortColumn} AS sort_value, ROW_NUMBER() OVER ({queryClauses.OrderByClause}) AS row_num";
+            }
+            else
+            {
+                cteSelect = "SELECT v.entity_id, v.created_at, v.last_updated_at, v.value_version, ROW_NUMBER() OVER (ORDER BY v.entity_id ASC) AS row_num";
+                cteJoin = "";
+            }
+
+            var query = $"""
+                WITH all_matches AS (
+                    {cteSelect}
+                    FROM main.entities v
+                    {cteJoin}
+                    WHERE v.entity_type_id = @entity_type_id
+                      AND v.pool_id = @pool_id
+                      AND ({queryClauses.WhereClause})
+                ),
+                total AS (
+                    SELECT COUNT(*) AS total_count FROM all_matches
+                ),
+                filtered_ids AS (
+                    SELECT * FROM all_matches
+                    ORDER BY row_num ASC
+                    LIMIT @limit OFFSET @offset
+                )
+                SELECT
+                    fi.entity_id,
+                    field_sv.field_path_text,
+                    field_sv.string_value,
+                    field_sv.number_value,
+                    field_sv.datetime_value,
+                    field_sv.boolean_value,
+                    field_sv.guid_value,
+                    t.total_count,
+                    fi.created_at,
+                    fi.last_updated_at,
+                    fi.value_version
+                FROM total t
+                LEFT JOIN filtered_ids fi ON 1
+                LEFT JOIN main.search_values field_sv
+                  ON fi.entity_id = field_sv.entity_id
+                  AND field_sv.entity_type_id = @entity_type_id
+                  AND field_sv.pool_id = @pool_id
+                  AND field_sv.item_index = -1
+                  AND ({fieldConditionsClause})
+                ORDER BY fi.row_num, fi.entity_id
+                """;
+
+            Dialect.AddParameter(cmd, "@entity_type_id", entityTypeId);
+            Dialect.AddParameter(cmd, "@pool_id", PoolId.Value);
+            _ = cmd.Parameters.AddWithValue("@offset", skip);
+            _ = cmd.Parameters.AddWithValue("@limit", take);
+
+            cmd.CommandText = query;
+
+            Log.ExecutingQuery(logger, query);
+
+            var resultsById = new Dictionary<Guid, (Dictionary<string, object?> FieldValues, DateTimeOffset Created, DateTimeOffset LastUpdated, int Version)>();
+            var orderedIds = new List<Guid>();
+            var totalCount = 0;
+            await using (var reader = await cmd.ExecuteReaderAsync(ct))
+            {
+                while (await reader.ReadAsync(ct))
                 {
-                    var fieldValues = new Dictionary<string, object?>();
-                    orderedIds.Add(entityId);
-
-                    foreach (var field in fields)
+                    if (totalCount == 0)
                     {
-                        fieldValues[field.Path] = null;
+                        totalCount = Convert.ToInt32(reader.GetInt64(7));
                     }
 
-                    var created = DateTimeOffset.Parse(reader.GetString(8), null, DateTimeStyles.RoundtripKind);
-                    var lastUpdated = DateTimeOffset.Parse(reader.GetString(9), null, DateTimeStyles.RoundtripKind);
-                    var version = reader.GetInt32(10);
-
-                    // Populate system fields from entity columns
-                    foreach (var field in fields)
+                    if (await reader.IsDBNullAsync(0, ct))
                     {
-                        if (string.Equals(field.Path, SystemFields.Created, StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(field.Path, SystemFields.CreatedAttributeName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            fieldValues[field.Path] = created;
-                        }
-                        else if (string.Equals(field.Path, SystemFields.LastUpdated, StringComparison.OrdinalIgnoreCase) ||
-                                 string.Equals(field.Path, SystemFields.LastUpdatedAttributeName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            fieldValues[field.Path] = lastUpdated;
-                        }
+                        continue;
                     }
 
-                    entry = (fieldValues, created, lastUpdated, version);
-                    resultsById[entityId] = entry;
-                }
+                    var entityId = Guid.Parse(reader.GetString(0));
+                    var fieldPath = await reader.IsDBNullAsync(1, ct) ? null : reader.GetString(1);
 
-                if (fieldPath != null && entry.FieldValues.ContainsKey(fieldPath))
-                {
-                    var field = fields.First(f => f.Path == fieldPath);
-                    var value = await ReadFieldValueAsync(reader, field.Type, 2, ct);
-                    entry.FieldValues[fieldPath] = value;
+                    if (!resultsById.TryGetValue(entityId, out var entry))
+                    {
+                        var fieldValues = new Dictionary<string, object?>();
+                        orderedIds.Add(entityId);
+
+                        foreach (var field in fields)
+                        {
+                            fieldValues[field.Path] = null;
+                        }
+
+                        var created = DateTimeOffset.Parse(reader.GetString(8), null, DateTimeStyles.RoundtripKind);
+                        var lastUpdated = DateTimeOffset.Parse(reader.GetString(9), null, DateTimeStyles.RoundtripKind);
+                        var version = reader.GetInt32(10);
+
+                        // Populate system fields from entity columns
+                        foreach (var field in fields)
+                        {
+                            if (string.Equals(field.Path, SystemFields.Created, StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(field.Path, SystemFields.CreatedAttributeName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                fieldValues[field.Path] = created;
+                            }
+                            else if (string.Equals(field.Path, SystemFields.LastUpdated, StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(field.Path, SystemFields.LastUpdatedAttributeName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                fieldValues[field.Path] = lastUpdated;
+                            }
+                        }
+
+                        entry = (fieldValues, created, lastUpdated, version);
+                        resultsById[entityId] = entry;
+                    }
+
+                    if (fieldPath != null && entry.FieldValues.ContainsKey(fieldPath))
+                    {
+                        var field = fields.First(f => f.Path == fieldPath);
+                        var value = await ReadFieldValueAsync(reader, field.Type, 2, ct);
+                        entry.FieldValues[fieldPath] = value;
+                    }
                 }
             }
+
+            var items = orderedIds
+                .Select(id => new ProjectedResult(id, resultsById[id].FieldValues))
+                .ToList();
+
+            return new QueryResult<ProjectedResult>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / take),
+                HasMoreData = skip + take < totalCount,
+                HasPreviousData = skip > 0 && totalCount > 0
+            };
         }
-
-        var items = orderedIds
-            .Select(id => new ProjectedResult(id, resultsById[id].FieldValues))
-            .ToList();
-
-        return new QueryResult<ProjectedResult>
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            Items = items,
-            TotalCount = totalCount,
-            TotalPages = (int)Math.Ceiling((double)totalCount / take),
-            HasMoreData = skip + take < totalCount
-        };
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     /// <summary>
     /// Cursor-based query core for full entities.
     /// </summary>
-    private async Task<QueryResult<MetadataEnvelope<TDso>>> QueryCursorCoreAsync<TDso>(
+    private async Task<QueryResult<MetadataEnvelope>> QueryCursorCoreAsync(
         EntityType entityType,
         IQueryExpression filter,
         SortParameter sort,
         ContinuationTokenDataRange tokenRange,
-        Ct ct) where TDso : IDataStorageObject
+        Ct ct)
     {
-        ArgumentNullException.ThrowIfNull(sort);
-        if (sort.IsEmpty)
-        {
-            throw new ArgumentException("Sort parameter is required for cursor-based pagination.", nameof(sort));
-        }
-
         var pageSize = tokenRange.Size.Value;
-        var dsoVersion = TDso.DsoVersion;
+        var decoded = CursorToken.Decode(tokenRange.Start, sort, entityType);
+        var traversal = decoded.Direction;
+        var position = decoded.Position;
+
         var entityTypeId = (int)entityType.Id;
 
         Log.QueryingDsos(logger, entityType, 0, pageSize);
@@ -1029,7 +1256,7 @@ internal sealed class SqliteStorageEngine(
         await using var cnn = await OpenConnectionAsync(ct);
 
         await using var cmd = cnn.CreateCommand();
-        var queryClauses = BuildCursorQueryClauses(cmd, entityTypeId, filter, sort, tokenRange);
+        var queryClauses = BuildCursorQueryClauses(cmd, filter, sort, position, traversal, entityType);
 
         var query = $"""
             SELECT v.entity_id, v.value, v.dso_type_schema_version, v.value_version, v.created_at, v.last_updated_at, {queryClauses.SortColumnName}
@@ -1051,49 +1278,47 @@ internal sealed class SqliteStorageEngine(
 
         Log.ExecutingQuery(logger, query);
 
-        var items = new List<(Guid Id, TDso Item, int Version, DateTimeOffset Created, DateTimeOffset LastUpdated, object? SortValue)>();
+        var items = new List<(Guid Id, MetadataEnvelope Item, object? SortValue)>();
         await using (var reader = await cmd.ExecuteReaderAsync(ct))
         {
-            var dsoType = dataStorageTypeRegistry.Get(dsoVersion);
             while (await reader.ReadAsync(ct))
             {
                 var entityId = Guid.Parse(reader.GetString(0));
                 var jsonValue = reader.GetString(1);
-                var item = (TDso)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+                var dsoTypeVersion = reader.GetInt32(2);
                 var valueVersion = reader.GetInt32(3);
                 var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
                 var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
-                var sortValue = await ReadSortValueAsync(reader, sort.Field!, 6, ct);
-                items.Add((entityId, item, valueVersion, created, lastUpdated, sortValue));
+
+                var version = new DataStorageObjectVersion(entityType, (uint)dsoTypeVersion);
+                var dsoType = dataStorageTypeRegistry.Get(version);
+                var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+
+                var sortValue = sort.IsEmpty ? null : await ReadSortValueAsync(reader, sort.Field!, 6, ct);
+                items.Add((entityId, new MetadataEnvelope(item, entityId, valueVersion, created, lastUpdated), sortValue));
             }
         }
 
-        var hasMore = items.Count > pageSize;
-        var pageItems = items.Take(pageSize).ToList();
+        var assembled = CursorPageAssembler.Assemble(
+            items,
+            pageSize,
+            traversal,
+            position,
+            entityType,
+            sort,
+            row => (row.Id, row.SortValue));
 
-        ContinuationToken? nextToken = null;
-        if (pageItems.Count > 0)
-        {
-            var lastItem = pageItems[^1];
-            var token = CreateCursorToken(lastItem.Id, lastItem.SortValue);
-            nextToken = (ContinuationToken)token.Encode();
-        }
+        var resultItems = assembled.ItemsInRequestedOrder
+            .Select(x => x.Item)
+            .ToList();
 
-        ContinuationToken? previousToken = null;
-        if (pageItems.Count > 0)
-        {
-            var firstItem = pageItems[0];
-            var token = CreateCursorToken(firstItem.Id, firstItem.SortValue);
-            previousToken = (ContinuationToken)token.Encode();
-        }
-
-        var resultItems = pageItems.Select(x => new MetadataEnvelope<TDso>(x.Item, x.Id, x.Version, x.Created, x.LastUpdated)).ToList();
-        return new QueryResult<MetadataEnvelope<TDso>>
+        return new QueryResult<MetadataEnvelope>
         {
             Items = resultItems,
-            NextToken = nextToken,
-            PreviousToken = previousToken,
-            HasMoreData = hasMore
+            NextToken = assembled.Next,
+            PreviousToken = assembled.Previous,
+            HasMoreData = assembled.HasMoreData,
+            HasPreviousData = assembled.HasPreviousData
         };
     }
 
@@ -1108,13 +1333,11 @@ internal sealed class SqliteStorageEngine(
         ContinuationTokenDataRange tokenRange,
         Ct ct)
     {
-        ArgumentNullException.ThrowIfNull(sort);
-        if (sort.IsEmpty)
-        {
-            throw new ArgumentException("Sort parameter is required for cursor-based pagination.", nameof(sort));
-        }
-
         var pageSize = tokenRange.Size.Value;
+        var decoded = CursorToken.Decode(tokenRange.Start, sort, entityType);
+        var traversal = decoded.Direction;
+        var position = decoded.Position;
+
         var entityTypeId = (int)entityType.Id;
 
         Log.QueryingFieldsDsos(logger, entityType, fields.Count, 0, pageSize);
@@ -1122,7 +1345,7 @@ internal sealed class SqliteStorageEngine(
         await using var cnn = await OpenConnectionAsync(ct);
 
         await using var cmd = cnn.CreateCommand();
-        var queryClauses = BuildCursorQueryClauses(cmd, entityTypeId, filter, sort, tokenRange);
+        var queryClauses = BuildCursorQueryClauses(cmd, filter, sort, position, traversal, entityType);
 
         var fieldPaths = fields.Select(f => f.Path).ToList();
         var fieldConditions = new List<string>();
@@ -1202,7 +1425,7 @@ internal sealed class SqliteStorageEngine(
                         fieldValues[field.Path] = null;
                     }
 
-                    var sortValue = await ReadSortValueAsync(reader, sort.Field!, 7, ct);
+                    var sortValue = sort.IsEmpty ? null : await ReadSortValueAsync(reader, sort.Field!, 7, ct);
                     var created = DateTimeOffset.Parse(reader.GetString(8), null, DateTimeStyles.RoundtripKind);
                     var lastUpdated = DateTimeOffset.Parse(reader.GetString(9), null, DateTimeStyles.RoundtripKind);
                     var version = reader.GetInt32(10);
@@ -1236,36 +1459,28 @@ internal sealed class SqliteStorageEngine(
             }
         }
 
-        var itemsList = orderedIds.Select(id => (Id: id, resultsByid[id])).ToList();
-        var hasMore = itemsList.Count > pageSize;
-        var pageItems = itemsList.Take(pageSize).ToList();
+        var itemsList = orderedIds.Select(id => (Id: id, Row: resultsByid[id])).ToList();
 
-        ContinuationToken? nextToken = null;
-        if (pageItems.Count > 0)
-        {
-            var lastItem = pageItems[^1];
-            var token = CreateCursorToken(lastItem.Id, lastItem.Item2.SortValue);
-            nextToken = (ContinuationToken)token.Encode();
-        }
+        var assembled = CursorPageAssembler.Assemble(
+            itemsList,
+            pageSize,
+            traversal,
+            position,
+            entityType,
+            sort,
+            row => (row.Id, row.Row.SortValue));
 
-        ContinuationToken? previousToken = null;
-        if (pageItems.Count > 0)
-        {
-            var firstItem = pageItems[0];
-            var token = CreateCursorToken(firstItem.Id, firstItem.Item2.SortValue);
-            previousToken = (ContinuationToken)token.Encode();
-        }
-
-        var items = pageItems
-            .Select(item => new ProjectedResult(item.Id, item.Item2.FieldValues))
+        var items = assembled.ItemsInRequestedOrder
+            .Select(item => new ProjectedResult(item.Id, item.Row.FieldValues))
             .ToList();
 
         return new QueryResult<ProjectedResult>
         {
             Items = items,
-            NextToken = nextToken,
-            PreviousToken = previousToken,
-            HasMoreData = hasMore
+            NextToken = assembled.Next,
+            PreviousToken = assembled.Previous,
+            HasMoreData = assembled.HasMoreData,
+            HasPreviousData = assembled.HasPreviousData
         };
     }
 
@@ -1275,9 +1490,10 @@ internal sealed class SqliteStorageEngine(
     private static QueryClauses BuildQueryClauses(
         SqliteCommand cmd,
         IQueryExpression filter,
-        SortParameter sort)
+        SortParameter sort,
+        EntityType entityType)
     {
-        var whereBuilder = new SqlWhereClauseBuilder(SchemaName, cmd, Dialect);
+        var whereBuilder = new SqlWhereClauseBuilder(SchemaName, cmd, Dialect, LinkFilterTableNames, entityType);
         var whereClause = whereBuilder.BuildWhereClause(filter);
 
         string joinClause;
@@ -1327,16 +1543,43 @@ internal sealed class SqliteStorageEngine(
     /// </summary>
     private static CursorQueryClauses BuildCursorQueryClauses(
         SqliteCommand cmd,
-        int entityTypeId,
         IQueryExpression filter,
         SortParameter sort,
-        ContinuationTokenDataRange tokenRange)
+        CursorPosition position,
+        CursorDirection traversal,
+        EntityType entityType)
     {
-        var whereBuilder = new SqlWhereClauseBuilder(SchemaName, cmd, Dialect);
+        var (whereClause, joinClause, sortColumn) = BuildCursorFilterAndJoin(cmd, filter, sort, entityType);
+
+        var builder = new KeysetSqlBuilder(Dialect, sortColumn, sort.IsEmpty ? SortDirection.Ascending : sort.Direction);
+        var orderByClause = $"ORDER BY {builder.OrderBy(traversal)}";
+        var predicate = builder.StrictlyAfter(traversal, position, "@last_sort_value", "@last_id");
+        var seekClause = predicate.Length == 0 ? "" : $"AND ({predicate})";
+
+        BindCursorPositionParameters(cmd, position, sortColumn);
+
+        return new CursorQueryClauses(whereClause, joinClause, orderByClause, seekClause, sortColumn ?? "NULL");
+    }
+
+    /// <summary>
+    /// Builds the WHERE clause, JOIN clause, and sort column for a cursor query, without the
+    /// ORDER BY/seek predicate (shared between the main query and the opposite-side probe).
+    /// </summary>
+    private static (string WhereClause, string JoinClause, string? SortColumn) BuildCursorFilterAndJoin(
+        SqliteCommand cmd,
+        IQueryExpression filter,
+        SortParameter sort,
+        EntityType entityType)
+    {
+        var whereBuilder = new SqlWhereClauseBuilder(SchemaName, cmd, Dialect, LinkFilterTableNames, entityType);
         var whereClause = whereBuilder.BuildWhereClause(filter);
 
+        if (sort.IsEmpty)
+        {
+            return (whereClause, "", null);
+        }
+
         var sortFieldPath = sort.Field!.Path;
-        var sortDirection = sort.Direction == SortDirection.Ascending ? "ASC" : "DESC";
         var sortColumn = GetSortColumnName(sort.Field!);
 
         string joinClause;
@@ -1358,99 +1601,39 @@ internal sealed class SqliteStorageEngine(
             _ = cmd.Parameters.AddWithValue("@sort_field_path", DeterministicGuidGenerator.Create(sortFieldPath.ToUpperInvariant()).ToByteArray());
         }
 
-        var tokenValue = tokenRange.Start.Value;
-
-        var orderByClause = $"""
-            ORDER BY
-              CASE WHEN {sortColumn} IS NULL THEN 1 ELSE 0 END,
-              {sortColumn} {sortDirection},
-              v.entity_id ASC
-            """;
-
-        // Build seek clause for cursor position
-        var seekClause = "";
-        if (tokenValue != ContinuationToken.Beginning)
-        {
-            var decodedToken = CursorToken.Decode(tokenValue);
-            if (decodedToken != null)
-            {
-                var lastSortParam = "@last_sort_value";
-                var lastIdParam = "@last_id";
-
-                if (decodedToken.GuidValue.HasValue)
-                {
-                    _ = cmd.Parameters.AddWithValue(lastSortParam, decodedToken.GuidValue.Value.ToString());
-                }
-                else if (decodedToken.StringValue != null)
-                {
-                    _ = cmd.Parameters.AddWithValue(lastSortParam, decodedToken.StringValue);
-                }
-                else if (decodedToken.NumberValue.HasValue)
-                {
-                    _ = cmd.Parameters.AddWithValue(lastSortParam, (double)decodedToken.NumberValue.Value);
-                }
-                else if (decodedToken.DateTimeValue.HasValue)
-                {
-                    _ = cmd.Parameters.AddWithValue(lastSortParam, decodedToken.DateTimeValue.Value.UtcDateTime.ToString("O"));
-                }
-                else if (decodedToken.BooleanValue.HasValue)
-                {
-                    _ = cmd.Parameters.AddWithValue(lastSortParam, decodedToken.BooleanValue.Value ? 1 : 0);
-                }
-                else
-                {
-                    _ = cmd.Parameters.AddWithValue(lastSortParam, DBNull.Value);
-                }
-
-                _ = cmd.Parameters.AddWithValue(lastIdParam, decodedToken.Id.ToString());
-
-                if (sort.Direction == SortDirection.Ascending)
-                {
-                    // With NULLS LAST in ascending: non-NULL values first, then NULLs
-                    // If last value was non-NULL, include rows with greater value OR NULL values
-                    // If last value was NULL, only include NULLs with greater ID
-                    seekClause = $"""
-                        AND (
-                          ({sortColumn} > {lastSortParam} OR ({sortColumn} = {lastSortParam} AND v.entity_id > {lastIdParam}))
-                          OR ({sortColumn} IS NULL AND {lastSortParam} IS NOT NULL)
-                          OR ({sortColumn} IS NULL AND {lastSortParam} IS NULL AND v.entity_id > {lastIdParam})
-                        )
-                        """;
-                }
-                else
-                {
-                    // With NULLS LAST in descending: non-NULL values (descending), then NULLs
-                    // If last value was non-NULL, include rows with lesser value OR NULL values
-                    // If last value was NULL, only include NULLs with greater ID
-                    seekClause = $"""
-                        AND (
-                          ({sortColumn} < {lastSortParam} OR ({sortColumn} = {lastSortParam} AND v.entity_id > {lastIdParam}))
-                          OR ({sortColumn} IS NULL AND {lastSortParam} IS NOT NULL)
-                          OR ({sortColumn} IS NULL AND {lastSortParam} IS NULL AND v.entity_id > {lastIdParam})
-                        )
-                        """;
-                }
-            }
-        }
-
-        return new CursorQueryClauses(whereClause, joinClause, orderByClause, seekClause, sortColumn);
+        return (whereClause, joinClause, sortColumn);
     }
 
     /// <summary>
-    /// Creates a cursor token from a sort value and entity ID.
+    /// Binds <c>@last_id</c> and, when the seek predicate references it, <c>@last_sort_value</c>
+    /// for a decoded cursor key position, using the same per-kind conversions as insertion.
     /// </summary>
-    private static CursorToken CreateCursorToken(Guid id, object? sortValue) =>
-        sortValue switch
+    private static void BindCursorPositionParameters(SqliteCommand cmd, CursorPosition position, string? sortColumn)
+    {
+        if (position.Kind != CursorPositionKind.Key)
         {
-            string s => CursorToken.Create(id, s, null, null, null, null),
-            decimal d => CursorToken.Create(id, null, d, null, null, null),
-            DateTime dt => CursorToken.Create(id, null, null, new DateTimeOffset(dt, TimeSpan.Zero), null, null),
-            DateTimeOffset dto => CursorToken.Create(id, null, null, dto, null, null),
-            bool b => CursorToken.Create(id, null, null, null, b, null),
-            Guid g => CursorToken.Create(id, null, null, null, null, g),
-            null => CursorToken.Create(id, null, null, null, null, null),
-            _ => throw new InvalidOperationException($"Unsupported sort value type: {sortValue.GetType().Name}")
+            return;
+        }
+
+        _ = cmd.Parameters.AddWithValue("@last_id", position.Id.ToString());
+
+        if (sortColumn is null || position.ValueKind == CursorValueKind.Null)
+        {
+            return;
+        }
+
+        object boundValue = position.Value switch
+        {
+            string s => s,
+            decimal d => double.Parse(d.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture),
+            DateTimeOffset dto => dto.UtcDateTime.ToString("O"),
+            bool b => b ? 1 : 0,
+            Guid g => g.ToString(),
+            _ => throw new InvalidOperationException($"Unsupported cursor sort value type: {position.Value!.GetType().Name}")
         };
+
+        _ = cmd.Parameters.AddWithValue("@last_sort_value", boundValue);
+    }
 
     /// <summary>
     /// Resolves the skip and take values from a DataRange (offset or page-based).
@@ -1543,7 +1726,7 @@ internal sealed class SqliteStorageEngine(
         return sortField switch
         {
             StringField => reader.GetString(columnIndex),
-            NumberField => Convert.ToDecimal(reader.GetValue(columnIndex), CultureInfo.InvariantCulture),
+            NumberField => ReadDecimalFromDouble(reader.GetValue(columnIndex)),
             DateTimeField => DateTimeOffset.Parse(reader.GetString(columnIndex), CultureInfo.InvariantCulture),
             BooleanField => reader.GetInt64(columnIndex) != 0,
             GuidField or ExactMatchField => Guid.Parse(reader.GetString(columnIndex)),
@@ -1551,35 +1734,77 @@ internal sealed class SqliteStorageEngine(
         };
     }
 
+    /// <summary>
+    /// Converts a stored REAL value to a decimal that exactly matches the double as read,
+    /// instead of rounding through <see cref="Convert.ToDecimal(double)"/> (which rounds to 15
+    /// significant digits and can cause cursor seeks to repeat or skip rows). Values at or beyond
+    /// <see cref="decimal.MaxValue"/> or <see cref="decimal.MinValue"/> are clamped to that bound:
+    /// <c>decimal.Parse</c> of the full round-trippable ("R") representation of a double near those
+    /// bounds can throw <see cref="OverflowException"/> because the double's nearest representable
+    /// value falls just outside the decimal range.
+    /// </summary>
+    private static decimal ReadDecimalFromDouble(object value)
+    {
+        if (value is double d)
+        {
+            return d >= (double)decimal.MaxValue
+                ? decimal.MaxValue
+                : d <= (double)decimal.MinValue
+                    ? decimal.MinValue
+                    : decimal.Parse(d.ToString("R", CultureInfo.InvariantCulture), NumberStyles.Float, CultureInfo.InvariantCulture);
+        }
+
+        return Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+    }
+
     /// <inheritdoc/>
     async Task<LinkResult> IPartitionedStorage.LinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-        var outcome = await ExecuteLinkCoreAsync(cnn, tx, LinkOperation.For(definition, leftEntityId, rightEntityId), ct);
-        if (outcome == OperationOutcome.Success)
+        try
         {
-            if (outboxEvents is { Count: > 0 })
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+            var outcome = await ExecuteLinkCoreAsync(cnn, tx, LinkOperation.For(definition, leftEntityId, rightEntityId), ct);
+            if (outcome == OperationOutcome.Success)
             {
-                await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+                if (outboxEvents is { Count: > 0 })
+                {
+                    await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+                }
+                await tx.CommitAsync(ct);
             }
-            await tx.CommitAsync(ct);
+            return outcome switch
+            {
+                OperationOutcome.AlreadyLinked => LinkResult.AlreadyLinked,
+                OperationOutcome.DoesNotExist => LinkResult.DoesNotExist,
+                _ => LinkResult.Success
+            };
         }
-        return outcome == OperationOutcome.AlreadyLinked ? LinkResult.AlreadyLinked : LinkResult.Success;
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     /// <inheritdoc/>
     async Task<UnlinkResult> IPartitionedStorage.UnlinkAsync(LinkDefinition definition, Storage.UuidV7 leftEntityId, Storage.UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct)
     {
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-        _ = await ExecuteUnlinkCoreAsync(cnn, tx, UnlinkOperation.For(definition, leftEntityId, rightEntityId), ct);
-        if (outboxEvents is { Count: > 0 })
+        try
         {
-            await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+            _ = await ExecuteUnlinkCoreAsync(cnn, tx, UnlinkOperation.For(definition, leftEntityId, rightEntityId), ct);
+            if (outboxEvents is { Count: > 0 })
+            {
+                await ExecuteOutboxInsertBatchCoreAsync(cnn, tx, outboxEvents, ct);
+            }
+            await tx.CommitAsync(ct);
+            return UnlinkResult.Success;
         }
-        await tx.CommitAsync(ct);
-        return UnlinkResult.Success;
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     private async Task<OperationOutcome> ExecuteLinkCoreAsync(
@@ -1592,8 +1817,8 @@ internal sealed class SqliteStorageEngine(
         await using var cmd = cnn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
-            INSERT OR IGNORE INTO main.entity_links (pool_id, link_type_id, left_entity_type_id, left_entity_id, right_entity_type_id, right_entity_id)
-            VALUES (@pool_id, @link_type_id, @left_entity_type_id, @left_entity_id, @right_entity_type_id, @right_entity_id)
+            INSERT OR IGNORE INTO main.entity_links (pool_id, link_type_id, left_entity_type_id, left_entity_id, right_entity_type_id, right_entity_id, restrict_delete)
+            VALUES (@pool_id, @link_type_id, @left_entity_type_id, @left_entity_id, @right_entity_type_id, @right_entity_id, @restrict_delete)
             """;
         _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
         _ = cmd.Parameters.AddWithValue("@link_type_id", (int)op.Definition.Link.Id);
@@ -1601,10 +1826,23 @@ internal sealed class SqliteStorageEngine(
         _ = cmd.Parameters.AddWithValue("@left_entity_id", op.LeftEntityId.Value.ToString());
         _ = cmd.Parameters.AddWithValue("@right_entity_type_id", (int)op.Definition.Right.Id);
         _ = cmd.Parameters.AddWithValue("@right_entity_id", op.RightEntityId.Value.ToString());
+        _ = cmd.Parameters.AddWithValue("@restrict_delete", op.Definition.OnRightDelete == LinkDeleteBehavior.Restrict ? 1 : 0);
 
         Log.ExecutingSql(logger, cmd.CommandText);
 
-        var rowsAffected = await cmd.ExecuteNonQueryAsync(ct);
+        int rowsAffected;
+        try
+        {
+            rowsAffected = await cmd.ExecuteNonQueryAsync(ct);
+        }
+        catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
+        {
+            // INSERT OR IGNORE suppresses UNIQUE/PRIMARY KEY/CHECK/NOT NULL violations, but not
+            // foreign key violations, so any SQLITE_CONSTRAINT (19) reaching here is the left or
+            // right entity not existing in this pool with the definition's entity type.
+            return OperationOutcome.DoesNotExist;
+        }
+
         return rowsAffected == 0 ? OperationOutcome.AlreadyLinked : OperationOutcome.Success;
     }
 
@@ -1695,148 +1933,169 @@ internal sealed class SqliteStorageEngine(
         IReadOnlyList<OutboxEvent> outboxEvents,
         Ct ct)
     {
-        if (operations.Count == 0)
+        try
         {
-            return new BatchResult(true, []);
-        }
-
-        await using var connection = await OpenConnectionAsync(ct);
-        await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(ct);
-
-        var results = new List<OperationResult>();
-
-        for (var i = 0; i < operations.Count; i++)
-        {
-            var outcome = operations[i] switch
+            if (operations.Count == 0)
             {
-                CreateOperation create => await ExecuteCreateCoreAsync(connection, transaction, create, ct),
-                UpdateOperation update => await ExecuteUpdateCoreAsync(connection, transaction, update, ct),
-                DeleteOperation delete => (await ExecuteDeleteCoreAsync(connection, transaction, delete, ct)).Outcome,
-                LinkOperation link => await ExecuteLinkCoreAsync(connection, transaction, link, ct),
-                UnlinkOperation unlink => await ExecuteUnlinkCoreAsync(connection, transaction, unlink, ct),
-                _ => throw new InvalidOperationException($"Unknown operation type: {operations[i].GetType().Name}")
-            };
-
-            results.Add(new OperationResult(i, outcome));
-
-            if (outcome is not OperationOutcome.Success and not OperationOutcome.AlreadyLinked)
-            {
-                return new BatchResult(false, results);
+                return new BatchResult(true, []);
             }
-        }
 
-        if (outboxEvents is { Count: > 0 })
+            await using var connection = await OpenConnectionAsync(ct);
+            await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(ct);
+
+            var results = new List<OperationResult>();
+
+            for (var i = 0; i < operations.Count; i++)
+            {
+                var outcome = operations[i] switch
+                {
+                    CreateOperation create => await ExecuteCreateCoreAsync(connection, transaction, create, ct),
+                    UpdateOperation update => await ExecuteUpdateCoreAsync(connection, transaction, update, ct),
+                    DeleteOperation delete => (await ExecuteDeleteCoreAsync(connection, transaction, delete, ct)).Outcome,
+                    LinkOperation link => await ExecuteLinkCoreAsync(connection, transaction, link, ct),
+                    UnlinkOperation unlink => await ExecuteUnlinkCoreAsync(connection, transaction, unlink, ct),
+                    _ => throw new InvalidOperationException($"Unknown operation type: {operations[i].GetType().Name}")
+                };
+
+                results.Add(new OperationResult(i, outcome));
+
+                if (outcome is not OperationOutcome.Success and not OperationOutcome.AlreadyLinked)
+                {
+                    return new BatchResult(false, results);
+                }
+            }
+
+            if (outboxEvents is { Count: > 0 })
+            {
+                await ExecuteOutboxInsertBatchCoreAsync(connection, transaction, outboxEvents, ct);
+            }
+
+            await transaction.CommitAsync(ct);
+            return new BatchResult(true, results);
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            await ExecuteOutboxInsertBatchCoreAsync(connection, transaction, outboxEvents, ct);
+            throw StorageSchemaMissing(ex);
         }
-
-        await transaction.CommitAsync(ct);
-        return new BatchResult(true, results);
     }
 
     async Task<OutboxEventsPage> ICrossPartitionStorage.GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, Ct ct)
     {
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-        cmd.CommandText = """
-            SELECT sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version
-            FROM main.outbox_subscriber_queue
-            WHERE subscriber_name = @subscriber_name
-            ORDER BY sequence_number ASC
-            LIMIT @limit
-            """;
-        _ = cmd.Parameters.AddWithValue("@limit", count + 1);
-        _ = cmd.Parameters.AddWithValue("@subscriber_name", subscriptionName.ToString());
-
-        Log.ExecutingSql(logger, cmd.CommandText);
-        await using var reader = await cmd.ExecuteReaderAsync(ct);
-
-        var events = new List<PersistedOutboxEvent>();
-        while (await reader.ReadAsync(ct))
+        try
         {
-            var timestamp = DateTimeOffset.Parse(reader.GetString(3), CultureInfo.InvariantCulture);
-            var dsoTypeSchemaVersion = await reader.IsDBNullAsync(11, ct) ? null : (int?)reader.GetInt32(11);
-            var entityTypeId = reader.GetInt32(6);
-            var entityTypeName = reader.GetString(7);
-            var payload = reader.GetString(9);
+            await using var cnn = await OpenConnectionAsync(ct);
 
-            IDataStorageObject? dso = null;
-            if (dsoTypeSchemaVersion.HasValue)
+            await using var cmd = cnn.CreateCommand();
+            cmd.CommandText = """
+                SELECT sequence_number, message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version
+                FROM main.outbox_subscriber_queue
+                WHERE subscriber_name = @subscriber_name
+                ORDER BY sequence_number ASC
+                LIMIT @limit
+                """;
+            _ = cmd.Parameters.AddWithValue("@limit", count + 1);
+            _ = cmd.Parameters.AddWithValue("@subscriber_name", subscriptionName.ToString());
+
+            Log.ExecutingSql(logger, cmd.CommandText);
+            await using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            var events = new List<PersistedOutboxEvent>();
+            while (await reader.ReadAsync(ct))
             {
-                var entityType = new EntityType((uint)entityTypeId, entityTypeName);
-                var dsoVersion = new DataStorageObjectVersion(entityType, (uint)dsoTypeSchemaVersion.Value);
-                if (dataStorageTypeRegistry.TryGet(dsoVersion, out var dsoType))
+                var timestamp = DateTimeOffset.Parse(reader.GetString(3), CultureInfo.InvariantCulture);
+                var dsoTypeSchemaVersion = await reader.IsDBNullAsync(11, ct) ? null : (int?)reader.GetInt32(11);
+                var entityTypeId = reader.GetInt32(6);
+                var entityTypeName = reader.GetString(7);
+                var payload = reader.GetString(9);
+
+                IDataStorageObject? dso = null;
+                if (dsoTypeSchemaVersion.HasValue)
                 {
-                    try
+                    var entityType = new EntityType((uint)entityTypeId, entityTypeName);
+                    var dsoVersion = new DataStorageObjectVersion(entityType, (uint)dsoTypeSchemaVersion.Value);
+                    if (dataStorageTypeRegistry.TryGet(dsoVersion, out var dsoType))
                     {
-                        dso = (IDataStorageObject?)JsonSerializer.Deserialize(payload, dsoType);
-                    }
-                    catch (JsonException)
-                    {
-                        // Malformed payload — leave Dso null so the handler can
-                        // fall back to raw Payload or drop the event.
+                        try
+                        {
+                            dso = (IDataStorageObject?)JsonSerializer.Deserialize(payload, dsoType);
+                        }
+                        catch (JsonException)
+                        {
+                            // Malformed payload — leave Dso null so the handler can
+                            // fall back to raw Payload or drop the event.
+                        }
                     }
                 }
+
+                events.Add(new PersistedOutboxEvent
+                {
+                    SequenceNumber = reader.GetInt64(0),
+                    MessageId = Guid.Parse(reader.GetString(1)),
+                    EventId = Guid.Parse(reader.GetString(2)),
+                    Timestamp = timestamp,
+                    EventName = OutboxEventName.Create(reader.GetString(4)),
+                    SubjectId = Storage.UuidV7.From(Guid.Parse(reader.GetString(5))),
+                    EntityTypeId = entityTypeId,
+                    EntityTypeName = entityTypeName,
+                    PoolId = PoolId.Load(reader.GetInt32(8)),
+                    Payload = payload,
+                    SubscriberName = SubscriberName.Create(reader.GetString(10)),
+                    Dso = dso,
+                });
             }
 
-            events.Add(new PersistedOutboxEvent
+            var hasMore = events.Count > count;
+            if (hasMore)
             {
-                SequenceNumber = reader.GetInt64(0),
-                MessageId = Guid.Parse(reader.GetString(1)),
-                EventId = Guid.Parse(reader.GetString(2)),
-                Timestamp = timestamp,
-                EventName = OutboxEventName.Create(reader.GetString(4)),
-                SubjectId = Storage.UuidV7.From(Guid.Parse(reader.GetString(5))),
-                EntityTypeId = entityTypeId,
-                EntityTypeName = entityTypeName,
-                PoolId = PoolId.Load(reader.GetInt32(8)),
-                Payload = payload,
-                SubscriberName = SubscriberName.Create(reader.GetString(10)),
-                Dso = dso,
-            });
-        }
+                events.RemoveAt(events.Count - 1);
+            }
 
-        var hasMore = events.Count > count;
-        if (hasMore)
+            return new OutboxEventsPage(events, hasMore);
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            events.RemoveAt(events.Count - 1);
+            throw StorageSchemaMissing(ex);
         }
-
-        return new OutboxEventsPage(events, hasMore);
     }
 
     async Task ICrossPartitionStorage.DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct)
     {
-        if (ids.Count == 0)
+        try
         {
-            return;
-        }
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        const int MaxBatchSize = 1000;
-        for (var offset = 0; offset < ids.Count; offset += MaxBatchSize)
-        {
-            var chunk = ids.Skip(offset).Take(MaxBatchSize).ToArray();
-
-            await using var cmd = cnn.CreateCommand();
-
-            var idParams = new List<string>();
-            for (var i = 0; i < chunk.Length; i++)
+            if (ids.Count == 0)
             {
-                var paramName = $"@id{i}";
-                idParams.Add(paramName);
-                _ = cmd.Parameters.AddWithValue(paramName, chunk[i].Value.ToString());
+                return;
             }
 
-            cmd.CommandText = $"""
-                DELETE FROM main.outbox_subscriber_queue
-                WHERE message_id IN ({string.Join(", ", idParams)})
-                """;
+            await using var cnn = await OpenConnectionAsync(ct);
 
-            Log.ExecutingSql(logger, cmd.CommandText);
-            _ = await cmd.ExecuteNonQueryAsync(ct);
+            const int MaxBatchSize = 1000;
+            for (var offset = 0; offset < ids.Count; offset += MaxBatchSize)
+            {
+                var chunk = ids.Skip(offset).Take(MaxBatchSize).ToArray();
+
+                await using var cmd = cnn.CreateCommand();
+
+                var idParams = new List<string>();
+                for (var i = 0; i < chunk.Length; i++)
+                {
+                    var paramName = $"@id{i}";
+                    idParams.Add(paramName);
+                    _ = cmd.Parameters.AddWithValue(paramName, chunk[i].Value.ToString());
+                }
+
+                cmd.CommandText = $"""
+                    DELETE FROM main.outbox_subscriber_queue
+                    WHERE message_id IN ({string.Join(", ", idParams)})
+                    """;
+
+                Log.ExecutingSql(logger, cmd.CommandText);
+                _ = await cmd.ExecuteNonQueryAsync(ct);
+            }
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
         }
     }
 
@@ -2046,90 +2305,297 @@ internal sealed class SqliteStorageEngine(
     {
         var entityType = op.EntityType;
 
-        await using var deleteCmd = cnn.CreateCommand();
-        deleteCmd.Transaction = tx;
-        _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
-        _ = deleteCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-
-        deleteCmd.CommandText = "DELETE FROM main.entities WHERE entity_type_id = @entity_type_id AND pool_id = @pool_id";
-
-        if (op.Id is not null)
+        // Resolve the id up front (by-key deletes look it up via entity_keys) so the same id is
+        // used both to delete links where this entity is an endpoint and to delete the entity
+        // itself. entity_links has no cascading FK (both FKs are NO ACTION): (1) deletes links
+        // where the entity is the left side, and right-side links that are not restricted; (2)
+        // deletes the entity. If a restricted right-side link remains, step 2's FK check fails and
+        // this returns StillLinked. If step 2 fails but no restricted link is found on re-check (a
+        // cascade link was inserted concurrently between the two statements), steps (1) and (2)
+        // are retried exactly once; if the retry (the second and last attempt) hits the same
+        // failure with still no restricted link, the exception is surfaced instead of trying a
+        // third time (matching PostgreSQL/SQL Server/Oracle).
+        var entityId = op.Id?.Value;
+        if (entityId is null && op.Key is not null)
         {
-            Log.DeletingDso(logger, entityType, op.Id.Value);
-            _ = deleteCmd.Parameters.AddWithValue("@entity_id", op.Id.Value.ToString());
+            entityId = await ResolveEntityIdByKeyAsync(cnn, tx, entityType, op.Key, ct);
+        }
 
-            deleteCmd.CommandText += " AND entity_id = @entity_id";
-        }
-        else if (op.Key is not null)
-        {
-            var key = op.Key;
-            _ = deleteCmd.Parameters.AddWithValue("@key_type_id", (int)key.DskVersion.KeyType.Id);
-            _ = deleteCmd.Parameters.AddWithValue("@key_type_version", (int)key.DskVersion.SchemaVersion);
-            _ = deleteCmd.Parameters.AddWithValue("@key_value", key.Value.ToString());
-            deleteCmd.CommandText += """
-                  AND entity_id = (
-                    SELECT entity_id FROM main.entity_keys
-                    WHERE entity_type_id = @entity_type_id
-                      AND key_type_id = @key_type_id
-                      AND key_type_version = @key_type_version
-                      AND key_value = @key_value
-                      AND pool_id = @pool_id
-                  )
-                """;
-        }
-        else
+        if (entityId is null)
         {
             return (OperationOutcome.Success, false);
         }
 
-        deleteCmd.CommandText += " RETURNING entity_id";
-
-        Log.ExecutingSql(logger, deleteCmd.CommandText);
-
-        // Use RETURNING to get the deleted entity_id in a single round-trip
-        var result = await deleteCmd.ExecuteScalarAsync(ct);
-        var deletedEntityId = result is string s ? Guid.Parse(s) : (Guid?)null;
-
-        // Delete entity links (no FK to entities, must be done manually)
-        if (deletedEntityId.HasValue)
+        if (op.Id is not null)
         {
-            await using var linkDeleteCmd = cnn.CreateCommand();
-            linkDeleteCmd.Transaction = tx;
-            linkDeleteCmd.CommandText = """
-                DELETE FROM main.entity_links
-                WHERE pool_id = @pool_id
-                  AND (left_entity_id = @entity_id OR right_entity_id = @entity_id)
-                """;
-            _ = linkDeleteCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-            _ = linkDeleteCmd.Parameters.AddWithValue("@entity_id", deletedEntityId.Value.ToString());
-            Log.ExecutingSql(logger, linkDeleteCmd.CommandText);
-            _ = await linkDeleteCmd.ExecuteNonQueryAsync(ct);
+            Log.DeletingDso(logger, entityType, op.Id.Value);
         }
 
-        return (OperationOutcome.Success, deletedEntityId.HasValue);
+        const int maxAttempts = 2;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            await DeleteCascadingLinksCoreAsync(cnn, tx, entityType, entityId.Value, ct);
+
+            await using var deleteCmd = cnn.CreateCommand();
+            deleteCmd.Transaction = tx;
+            deleteCmd.CommandText = """
+                DELETE FROM main.entities
+                WHERE entity_type_id = @entity_type_id AND pool_id = @pool_id AND entity_id = @entity_id
+                RETURNING entity_id
+                """;
+            _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
+            _ = deleteCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            _ = deleteCmd.Parameters.AddWithValue("@entity_id", entityId.Value.ToString());
+
+            Log.ExecutingSql(logger, deleteCmd.CommandText);
+
+            object? result;
+            try
+            {
+                result = await deleteCmd.ExecuteScalarAsync(ct);
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
+            {
+                if (await HasRestrictedRightLinkAsync(cnn, tx, entityType, entityId.Value, ct))
+                {
+                    return (OperationOutcome.StillLinked, false);
+                }
+
+                // No restricted link remains: a cascading link must have been inserted
+                // concurrently after step (1) ran. Retry both statements once; if the retry
+                // (the last attempt) hits this again with still no restricted link, let the
+                // exception surface instead of trying a third time.
+                if (attempt == maxAttempts - 1)
+                {
+                    throw;
+                }
+
+                continue;
+            }
+
+            var deletedEntityId = result is string s ? Guid.Parse(s) : (Guid?)null;
+            return (OperationOutcome.Success, deletedEntityId.HasValue);
+        }
+
+        throw new UnreachableException("The entity delete loop always returns or throws within its attempts.");
+    }
+
+    /// <summary>
+    /// Resolves the entity id for a by-key delete, or <see langword="null"/> if no such entity exists.
+    /// </summary>
+    private async Task<Guid?> ResolveEntityIdByKeyAsync(
+        SqliteConnection cnn,
+        SqliteTransaction tx,
+        EntityType entityType,
+        DataStorageKey key,
+        Ct ct)
+    {
+        await using var cmd = cnn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT entity_id FROM main.entity_keys
+            WHERE entity_type_id = @entity_type_id
+              AND key_type_id = @key_type_id
+              AND key_type_version = @key_type_version
+              AND key_value = @key_value
+              AND pool_id = @pool_id
+            """;
+        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
+        _ = cmd.Parameters.AddWithValue("@key_type_id", (int)key.DskVersion.KeyType.Id);
+        _ = cmd.Parameters.AddWithValue("@key_type_version", (int)key.DskVersion.SchemaVersion);
+        _ = cmd.Parameters.AddWithValue("@key_value", key.Value.ToString());
+        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+
+        var result = await cmd.ExecuteScalarAsync(ct);
+        return result is string s ? Guid.Parse(s) : null;
+    }
+
+    /// <summary>
+    /// Deletes links where the given entity is the left side, and right-side links that are not
+    /// restricted (<c>restrict_delete = 0</c>). Restricted right-side links are left in place so
+    /// the entity delete's foreign key check can refuse the delete.
+    /// </summary>
+    private async Task DeleteCascadingLinksCoreAsync(
+        SqliteConnection cnn,
+        SqliteTransaction tx,
+        EntityType entityType,
+        Guid entityId,
+        Ct ct)
+    {
+        await using var cmd = cnn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            DELETE FROM main.entity_links
+            WHERE pool_id = @pool_id
+              AND (
+                (left_entity_type_id = @entity_type_id AND left_entity_id = @entity_id)
+                OR (right_entity_type_id = @entity_type_id AND right_entity_id = @entity_id AND restrict_delete = 0)
+              )
+            """;
+        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
+        _ = cmd.Parameters.AddWithValue("@entity_id", entityId.ToString());
+
+        Log.ExecutingSql(logger, cmd.CommandText);
+        _ = await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    /// <summary>
+    /// Returns whether a restricted (<c>restrict_delete = 1</c>) link still exists with the given
+    /// entity as the right side.
+    /// </summary>
+    private async Task<bool> HasRestrictedRightLinkAsync(
+        SqliteConnection cnn,
+        SqliteTransaction tx,
+        EntityType entityType,
+        Guid entityId,
+        Ct ct)
+    {
+        await using var cmd = cnn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT EXISTS(
+                SELECT 1 FROM main.entity_links
+                WHERE pool_id = @pool_id
+                  AND right_entity_type_id = @entity_type_id
+                  AND right_entity_id = @entity_id
+                  AND restrict_delete = 1
+            )
+            """;
+        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+        _ = cmd.Parameters.AddWithValue("@entity_type_id", (int)entityType.Id);
+        _ = cmd.Parameters.AddWithValue("@entity_id", entityId.ToString());
+
+        var result = await cmd.ExecuteScalarAsync(ct);
+        return Convert.ToInt64(result, CultureInfo.InvariantCulture) != 0;
     }
 
 
 
     /// <inheritdoc/>
-    async Task<QueryResult<MetadataEnvelope<TDso>>> IPartitionedStorage.QueryLinksAsync<TDso>(
+    async Task<QueryResult<MetadataEnvelope>> IPartitionedStorage.QueryLinksAsync(
         LinkQueryDescriptor query,
         DataRange dataRange,
         Ct ct)
     {
-        if (dataRange.TokenValue is not null)
+        try
         {
-            throw new NotSupportedException("Cursor-based pagination is not supported for link queries.");
+            if (query.WhereEntityIds is not null)
+            {
+                throw new ArgumentException(
+                    "WhereAny is not supported by QueryLinksAsync. Use QueryLinksByAnchorAsync.", nameof(query));
+            }
+
+            if (dataRange.TokenValue is not null)
+            {
+                throw new NotSupportedException("Cursor-based pagination is not supported for link queries.");
+            }
+
+            var (skip, take) = ResolveOffsetAndSize(dataRange);
+            var sourceEntityTypeId = (int)query.SourceEntityType.Id;
+
+            await using var cnn = await OpenConnectionAsync(ct);
+
+            await using var cmd = cnn.CreateCommand();
+
+            var (joinSql, whereLastJoin) = BuildLinkJoins(query, cmd);
+
+            _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            _ = cmd.Parameters.AddWithValue("@source_entity_type_id", sourceEntityTypeId);
+            _ = cmd.Parameters.AddWithValue("@offset", skip);
+            _ = cmd.Parameters.AddWithValue("@limit", take);
+
+            string whereClause;
+            if (query.WhereEntityId is not null)
+            {
+                _ = cmd.Parameters.AddWithValue("@where_entity_id", query.WhereEntityId.Value.ToString());
+                whereClause = $"{whereLastJoin} = @where_entity_id";
+            }
+            else
+            {
+                whereClause = "1";
+            }
+
+            var mainQuery = $"""
+                SELECT DISTINCT e.entity_id, e.value, e.dso_type_schema_version, e.value_version, e.created_at, e.last_updated_at
+                FROM main.entities e
+                {joinSql}
+                WHERE e.entity_type_id = @source_entity_type_id
+                  AND e.pool_id = @pool_id
+                  AND {whereClause}
+                ORDER BY e.entity_id
+                LIMIT @limit OFFSET @offset
+                """;
+
+            cmd.CommandText = mainQuery;
+            Log.ExecutingQuery(logger, mainQuery);
+
+            var items = new List<MetadataEnvelope>();
+            await using (var reader = await cmd.ExecuteReaderAsync(ct))
+            {
+                while (await reader.ReadAsync(ct))
+                {
+                    var entityId = Guid.Parse(reader.GetString(0));
+                    var jsonValue = reader.GetString(1);
+                    var dsoTypeVersion = reader.GetInt32(2);
+                    var valueVersion = reader.GetInt32(3);
+                    var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
+                    var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
+
+                    var version = new DataStorageObjectVersion(query.SourceEntityType, (uint)dsoTypeVersion);
+                    var dsoType = dataStorageTypeRegistry.Get(version);
+                    var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+
+                    items.Add(new MetadataEnvelope(item, entityId, valueVersion, created, lastUpdated));
+                }
+            }
+
+            // Count query
+            var countQuery = $"""
+                SELECT COUNT(DISTINCT e.entity_id)
+                FROM main.entities e
+                {joinSql}
+                WHERE e.entity_type_id = @source_entity_type_id
+                  AND e.pool_id = @pool_id
+                  AND {whereClause}
+                """;
+
+            await using var countCmd = cnn.CreateCommand();
+            _ = countCmd.Parameters.AddWithValue("@source_entity_type_id", sourceEntityTypeId);
+            _ = countCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            if (query.WhereEntityId is not null)
+            {
+                _ = countCmd.Parameters.AddWithValue("@where_entity_id", query.WhereEntityId.Value.ToString());
+            }
+
+            for (var i = 0; i < query.Joins.Count; i++)
+            {
+                _ = countCmd.Parameters.AddWithValue($"@lt{i}", (int)query.Joins[i].Definition.Link.Id);
+            }
+
+            countCmd.CommandText = countQuery;
+            Log.ExecutingSql(logger, countQuery);
+            var totalCount = Convert.ToInt32(await countCmd.ExecuteScalarAsync(ct), CultureInfo.InvariantCulture);
+
+            return new QueryResult<MetadataEnvelope>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / take),
+                HasMoreData = skip + take < totalCount,
+                HasPreviousData = skip > 0 && totalCount > 0
+            };
         }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
+    }
 
-        var (skip, take) = ResolveOffsetAndSize(dataRange);
-        var dsoVersion = TDso.DsoVersion;
-        var sourceEntityTypeId = (int)query.SourceEntityType.Id;
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        await using var cmd = cnn.CreateCommand();
-
+    private static (StringBuilder JoinSql, string LastFilterColumn) BuildLinkJoins(
+        LinkQueryDescriptor query,
+        SqliteCommand cmd)
+    {
         var joinSql = new StringBuilder();
         var whereLastJoin = "";
 
@@ -2180,86 +2646,166 @@ internal sealed class SqliteStorageEngine(
             }
         }
 
-        _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-        _ = cmd.Parameters.AddWithValue("@source_entity_type_id", sourceEntityTypeId);
-        _ = cmd.Parameters.AddWithValue("@offset", skip);
-        _ = cmd.Parameters.AddWithValue("@limit", take);
+        return (joinSql, whereLastJoin);
+    }
 
-        string whereClause;
-        if (query.WhereEntityId is not null)
+    private static string BuildAnchorInClause(SqliteCommand cmd, IReadOnlySet<Storage.UuidV7> ids)
+    {
+        var idParams = new List<string>(ids.Count);
+        var i = 0;
+        foreach (var id in ids)
         {
-            _ = cmd.Parameters.AddWithValue("@where_entity_id", query.WhereEntityId.Value.ToString());
-            whereClause = $"{whereLastJoin} = @where_entity_id";
+            var paramName = $"@anchor{i}";
+            idParams.Add(paramName);
+            _ = cmd.Parameters.AddWithValue(paramName, id.Value.ToString());
+            i++;
         }
-        else
+
+        return string.Join(", ", idParams);
+    }
+
+    async Task<QueryResult<LinkedEnvelope>> IPartitionedStorage.QueryLinksByAnchorAsync(
+        LinkQueryDescriptor query,
+        DataRange dataRange,
+        Ct ct)
+    {
+        try
         {
-            whereClause = "1";
+            if (query.WhereEntityIds is null)
+            {
+                throw new ArgumentException("QueryLinksByAnchorAsync requires WhereAny to be set.", nameof(query));
+            }
+
+            if (dataRange.TokenValue is not null)
+            {
+                throw new NotSupportedException("Cursor-based pagination is not supported for link queries.");
+            }
+
+            var (skip, take) = ResolveOffsetAndSize(dataRange);
+
+            if (query.WhereEntityIds.Count == 0)
+            {
+                return new QueryResult<LinkedEnvelope> { Items = [], HasMoreData = false, HasPreviousData = false };
+            }
+
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var cmd = cnn.CreateCommand();
+
+            var (joinSql, anchorColumn) = BuildLinkJoins(query, cmd);
+            var inClause = BuildAnchorInClause(cmd, query.WhereEntityIds);
+
+            _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            _ = cmd.Parameters.AddWithValue("@source_entity_type_id", (int)query.SourceEntityType.Id);
+            _ = cmd.Parameters.AddWithValue("@offset", skip);
+            _ = cmd.Parameters.AddWithValue("@limit", take + 1);
+
+            // Dedupe and page on ids only, then fetch the values for the page, so the sort doesn't carry `value` for every skipped row.
+            cmd.CommandText = $"""
+                SELECT p.anchor_id, ent.entity_id, ent.value, ent.dso_type_schema_version, ent.value_version, ent.created_at, ent.last_updated_at
+                FROM (
+                    SELECT DISTINCT {anchorColumn} AS anchor_id, e.entity_id
+                    FROM main.entities e
+                    {joinSql}
+                    WHERE e.entity_type_id = @source_entity_type_id
+                      AND e.pool_id = @pool_id
+                      AND {anchorColumn} IN ({inClause})
+                    ORDER BY anchor_id, e.entity_id
+                    LIMIT @limit OFFSET @offset
+                ) p
+                JOIN main.entities ent ON ent.entity_id = p.entity_id AND ent.pool_id = @pool_id AND ent.entity_type_id = @source_entity_type_id
+                ORDER BY p.anchor_id, ent.entity_id
+                """;
+            Log.ExecutingQuery(logger, cmd.CommandText);
+
+            var items = new List<LinkedEnvelope>();
+            await using (var reader = await cmd.ExecuteReaderAsync(ct))
+            {
+                while (await reader.ReadAsync(ct))
+                {
+                    var anchorId = Storage.UuidV7.From(Guid.Parse(reader.GetString(0)));
+                    var entityId = Guid.Parse(reader.GetString(1));
+                    var jsonValue = reader.GetString(2);
+                    var dsoTypeVersion = reader.GetInt32(3);
+                    var valueVersion = reader.GetInt32(4);
+                    var created = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
+                    var lastUpdated = DateTimeOffset.Parse(reader.GetString(6), null, DateTimeStyles.RoundtripKind);
+
+                    var version = new DataStorageObjectVersion(query.SourceEntityType, (uint)dsoTypeVersion);
+                    var dsoType = dataStorageTypeRegistry.Get(version);
+                    var item = (IDataStorageObject)JsonSerializer.Deserialize(jsonValue, dsoType)!;
+
+                    items.Add(new LinkedEnvelope(anchorId, new MetadataEnvelope(item, entityId, valueVersion, created, lastUpdated)));
+                }
+            }
+
+            var hasMore = items.Count > take;
+            if (hasMore)
+            {
+                items.RemoveAt(items.Count - 1);
+            }
+
+            return new QueryResult<LinkedEnvelope>
+            {
+                Items = items,
+                HasMoreData = hasMore,
+                HasPreviousData = skip > 0 && items.Count > 0
+            };
         }
-
-        var mainQuery = $"""
-            SELECT DISTINCT e.entity_id, e.value, e.dso_type_schema_version, e.value_version, e.created_at, e.last_updated_at
-            FROM main.entities e
-            {joinSql}
-            WHERE e.entity_type_id = @source_entity_type_id
-              AND e.pool_id = @pool_id
-              AND {whereClause}
-            ORDER BY e.entity_id
-            LIMIT @limit OFFSET @offset
-            """;
-
-        cmd.CommandText = mainQuery;
-        Log.ExecutingQuery(logger, mainQuery);
-
-        var items = new List<MetadataEnvelope<TDso>>();
-        var dsoType = dataStorageTypeRegistry.Get(dsoVersion);
-        await using (var reader = await cmd.ExecuteReaderAsync(ct))
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
+            throw StorageSchemaMissing(ex);
+        }
+    }
+
+    async Task<IReadOnlyDictionary<Storage.UuidV7, long>> IPartitionedStorage.CountLinksAsync(
+        LinkQueryDescriptor query,
+        Ct ct)
+    {
+        try
+        {
+            if (query.WhereEntityIds is null)
+            {
+                throw new ArgumentException("CountLinksAsync requires WhereAny to be set.", nameof(query));
+            }
+
+            if (query.WhereEntityIds.Count == 0)
+            {
+                return new Dictionary<Storage.UuidV7, long>();
+            }
+
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var cmd = cnn.CreateCommand();
+
+            var (joinSql, anchorColumn) = BuildLinkJoins(query, cmd);
+            var inClause = BuildAnchorInClause(cmd, query.WhereEntityIds);
+
+            _ = cmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
+            _ = cmd.Parameters.AddWithValue("@source_entity_type_id", (int)query.SourceEntityType.Id);
+
+            cmd.CommandText = $"""
+                SELECT {anchorColumn} AS anchor_id, COUNT(DISTINCT e.entity_id)
+                FROM main.entities e
+                {joinSql}
+                WHERE e.entity_type_id = @source_entity_type_id
+                  AND e.pool_id = @pool_id
+                  AND {anchorColumn} IN ({inClause})
+                GROUP BY {anchorColumn}
+                """;
+            Log.ExecutingSql(logger, cmd.CommandText);
+
+            var counts = query.WhereEntityIds.ToDictionary(id => id, _ => 0L);
+            await using var reader = await cmd.ExecuteReaderAsync(ct);
             while (await reader.ReadAsync(ct))
             {
-                var entityId = Guid.Parse(reader.GetString(0));
-                var jsonValue = reader.GetString(1);
-                var valueVersion = reader.GetInt32(3);
-                var created = DateTimeOffset.Parse(reader.GetString(4), null, DateTimeStyles.RoundtripKind);
-                var lastUpdated = DateTimeOffset.Parse(reader.GetString(5), null, DateTimeStyles.RoundtripKind);
-                var item = (TDso)JsonSerializer.Deserialize(jsonValue, dsoType)!;
-                items.Add(new MetadataEnvelope<TDso>(item, entityId, valueVersion, created, lastUpdated));
+                counts[Storage.UuidV7.From(Guid.Parse(reader.GetString(0)))] = reader.GetInt64(1);
             }
+
+            return counts;
         }
-
-        // Count query
-        var countQuery = $"""
-            SELECT COUNT(DISTINCT e.entity_id)
-            FROM main.entities e
-            {joinSql}
-            WHERE e.entity_type_id = @source_entity_type_id
-              AND e.pool_id = @pool_id
-              AND {whereClause}
-            """;
-
-        await using var countCmd = cnn.CreateCommand();
-        _ = countCmd.Parameters.AddWithValue("@source_entity_type_id", sourceEntityTypeId);
-        _ = countCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-        if (query.WhereEntityId is not null)
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            _ = countCmd.Parameters.AddWithValue("@where_entity_id", query.WhereEntityId.Value.ToString());
+            throw StorageSchemaMissing(ex);
         }
-
-        for (var i = 0; i < query.Joins.Count; i++)
-        {
-            _ = countCmd.Parameters.AddWithValue($"@lt{i}", (int)query.Joins[i].Definition.Link.Id);
-        }
-
-        countCmd.CommandText = countQuery;
-        Log.ExecutingSql(logger, countQuery);
-        var totalCount = Convert.ToInt32(await countCmd.ExecuteScalarAsync(ct), CultureInfo.InvariantCulture);
-
-        return new QueryResult<MetadataEnvelope<TDso>>
-        {
-            Items = items,
-            TotalCount = totalCount,
-            TotalPages = (int)Math.Ceiling((double)totalCount / take),
-            HasMoreData = skip + take < totalCount
-        };
     }
 
     async Task<long> IPartitionedStorage.CountAsync(
@@ -2267,245 +2813,289 @@ internal sealed class SqliteStorageEngine(
         IQueryExpression? filter,
         Ct ct)
     {
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var cmd = cnn.CreateCommand();
-
-        string whereClause;
-        if (filter is null or AllExpression)
+        try
         {
-            whereClause = "1=1";
+            await using var cnn = await OpenConnectionAsync(ct);
+            await using var cmd = cnn.CreateCommand();
+
+            string whereClause;
+            if (filter is null or AllExpression)
+            {
+                whereClause = "1=1";
+            }
+            else
+            {
+                var whereBuilder = new SqlWhereClauseBuilder(SchemaName, cmd, Dialect, LinkFilterTableNames, entityType);
+                whereClause = whereBuilder.BuildWhereClause(filter);
+            }
+
+            var query = $"""
+                SELECT COUNT(*)
+                FROM {SchemaName}.entities v
+                WHERE v.entity_type_id = @entity_type_id
+                  AND v.pool_id = @pool_id
+                  AND ({whereClause})
+                """;
+            var entityTypeId = (int)entityType.Id;
+            _ = cmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+            Dialect.AddParameter(cmd, "@pool_id", PoolId.Value);
+
+            cmd.CommandText = query;
+
+            Log.ExecutingSql(logger, query);
+
+            var result = await cmd.ExecuteScalarAsync(ct);
+            return Convert.ToInt64(result, CultureInfo.InvariantCulture);
         }
-        else
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
         {
-            var whereBuilder = new SqlWhereClauseBuilder(SchemaName, cmd, Dialect);
-            whereClause = whereBuilder.BuildWhereClause(filter);
+            throw StorageSchemaMissing(ex);
         }
-
-        var query = $"""
-            SELECT COUNT(*)
-            FROM {SchemaName}.entities v
-            WHERE v.entity_type_id = @entity_type_id
-              AND v.pool_id = @pool_id
-              AND ({whereClause})
-            """;
-        var entityTypeId = (int)entityType.Id;
-        _ = cmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-        Dialect.AddParameter(cmd, "@pool_id", PoolId.Value);
-
-        cmd.CommandText = query;
-
-        Log.ExecutingSql(logger, query);
-
-        var result = await cmd.ExecuteScalarAsync(ct);
-        return Convert.ToInt64(result, CultureInfo.InvariantCulture);
     }
 
     async Task<int> ICrossPartitionStorage.PurgeExpiredAsync(int batchSize, Ct ct)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(batchSize, StorageConstants.TtlCleanupMaxBatchSize);
-
-        var now = timeProvider.GetUtcNow().UtcDateTime.ToString("O");
-
-        await using var cnn = await OpenConnectionAsync(ct);
-        await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
-
-        // Step 1: Select expired rows (SQLite doesn't have FOR UPDATE SKIP LOCKED, but
-        // the transaction provides database-level locking)
-        var expired = new List<(string PoolId, int EntityTypeId, string EntityId, string EntityTypeName, string Value, int? DsoTypeSchemaVersion, string EventId)>();
-        await using (var selectCmd = cnn.CreateCommand())
+        try
         {
-            selectCmd.Transaction = tx;
-            selectCmd.CommandText = """
-                SELECT pool_id, entity_type_id, entity_id, entity_type_name, value, dso_type_schema_version
-                FROM main.entities
-                WHERE expires_at IS NOT NULL AND expires_at <= @now
-                LIMIT @batchSize
-                """;
-            _ = selectCmd.Parameters.AddWithValue("@now", now);
-            _ = selectCmd.Parameters.AddWithValue("@batchSize", batchSize);
-            Log.ExecutingSql(logger, selectCmd.CommandText);
-            await using var reader = await selectCmd.ExecuteReaderAsync(ct);
-            while (await reader.ReadAsync(ct))
-            {
-                var dsoTypeSchemaVersion = await reader.IsDBNullAsync(5, ct) ? null : (int?)reader.GetInt32(5);
-                expired.Add((
-                    reader.GetString(0),
-                    reader.GetInt32(1),
-                    reader.GetString(2),
-                    reader.GetString(3),
-                    reader.GetString(4),
-                    dsoTypeSchemaVersion,
-                    Guid.CreateVersion7().ToString()));
-            }
-        }
+            ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(batchSize, StorageConstants.TtlCleanupMaxBatchSize);
 
-        if (expired.Count == 0)
-        {
-            return 0;
-        }
+            var now = timeProvider.GetUtcNow().UtcDateTime.ToString("O");
 
-        // Step 2: Insert outbox events per matching subscription
-        if (!outboxSubscriptions.IsEmpty)
-        {
-            var eventName = OutboxEventName.EntityExpired;
-            foreach (var subscription in outboxSubscriptions.Subscriptions)
-            {
-                if (subscription.EventNames.Count > 0 && !subscription.EventNames.Contains(eventName))
-                {
-                    continue;
-                }
-
-                var matchingExpired = subscription.EntityTypeIds.Count > 0
-                    ? expired.Where(e => subscription.EntityTypeIds.Contains(e.EntityTypeId))
-                    : expired;
-
-                foreach (var (poolId, entityTypeId, entityId, entityTypeName, value, dsoTypeSchemaVersion, eventId) in matchingExpired)
-                {
-                    await using var outboxCmd = cnn.CreateCommand();
-                    outboxCmd.Transaction = tx;
-                    outboxCmd.CommandText = """
-                        INSERT INTO main.outbox_subscriber_queue
-                        (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version)
-                        VALUES (@message_id, @event_id, @timestamp, @event_name, @subject_id, @entity_type_id, @entity_type_name, @pool_id, @payload, @subscriber_name, @dso_type_schema_version)
-                        """;
-                    _ = outboxCmd.Parameters.AddWithValue("@message_id", Guid.CreateVersion7().ToString());
-                    _ = outboxCmd.Parameters.AddWithValue("@event_id", eventId);
-                    _ = outboxCmd.Parameters.AddWithValue("@timestamp", now);
-                    _ = outboxCmd.Parameters.AddWithValue("@event_name", eventName.ToString());
-                    _ = outboxCmd.Parameters.AddWithValue("@subject_id", entityId);
-                    _ = outboxCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-                    _ = outboxCmd.Parameters.AddWithValue("@entity_type_name", entityTypeName);
-                    _ = outboxCmd.Parameters.AddWithValue("@pool_id", poolId);
-                    _ = outboxCmd.Parameters.AddWithValue("@payload", value);
-                    _ = outboxCmd.Parameters.AddWithValue("@subscriber_name", subscription.SubscriberName.ToString());
-                    _ = outboxCmd.Parameters.AddWithValue("@dso_type_schema_version", dsoTypeSchemaVersion.HasValue ? dsoTypeSchemaVersion.Value : DBNull.Value);
-                    Log.ExecutingSql(logger, outboxCmd.CommandText);
-                    _ = await outboxCmd.ExecuteNonQueryAsync(ct);
-                }
-            }
-        }
-
-        // Step 3: Delete entity links for expired entities
-        foreach (var (poolId, entityTypeId, entityId, _, _, _, _) in expired)
-        {
-            await using var linkCmd = cnn.CreateCommand();
-            linkCmd.Transaction = tx;
-            linkCmd.CommandText = """
-                DELETE FROM main.entity_links
-                WHERE pool_id = @pool_id
-                  AND (
-                        (left_entity_id = @entity_id AND left_entity_type_id = @entity_type_id)
-                     OR (right_entity_id = @entity_id AND right_entity_type_id = @entity_type_id)
-                  )
-                """;
-            _ = linkCmd.Parameters.AddWithValue("@pool_id", poolId);
-            _ = linkCmd.Parameters.AddWithValue("@entity_id", entityId);
-            _ = linkCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-            Log.ExecutingSql(logger, linkCmd.CommandText);
-            _ = await linkCmd.ExecuteNonQueryAsync(ct);
-        }
-
-        // Step 4: Delete entities (entity_keys and search_values cascade)
-        var deleted = 0;
-        foreach (var (poolId, entityTypeId, entityId, _, _, _, _) in expired)
-        {
-            await using var deleteCmd = cnn.CreateCommand();
-            deleteCmd.Transaction = tx;
-            deleteCmd.CommandText = """
-                DELETE FROM main.entities
-                WHERE pool_id = @pool_id AND entity_type_id = @entity_type_id AND entity_id = @entity_id
-                  AND expires_at <= @now
-                """;
-            _ = deleteCmd.Parameters.AddWithValue("@pool_id", poolId);
-            _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
-            _ = deleteCmd.Parameters.AddWithValue("@entity_id", entityId);
-            _ = deleteCmd.Parameters.AddWithValue("@now", now);
-            Log.ExecutingSql(logger, deleteCmd.CommandText);
-            deleted += await deleteCmd.ExecuteNonQueryAsync(ct);
-        }
-
-        await tx.CommitAsync(ct);
-        return deleted;
-    }
-
-    Task<PurgeResult> IPartitionedStorage.PurgePoolAsync(Ct ct) => ((IPartitionedStorage)this).PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
-
-    async Task<PurgeResult> IPartitionedStorage.PurgePoolAsync(int batchSize, Ct ct)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
-
-        var totalOutboxDeleted = 0;
-        var totalLinksDeleted = 0;
-        var totalEntitiesDeleted = 0;
-
-        await using var cnn = await OpenConnectionAsync(ct);
-
-        while (true)
-        {
-            ct.ThrowIfCancellationRequested();
-
+            await using var cnn = await OpenConnectionAsync(ct);
             await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
 
-            int batchOutbox;
-            int batchLinks;
-            int batchEntities;
-
-            await using (var outboxCmd = cnn.CreateCommand())
+            // Step 1: Select expired rows (SQLite doesn't have FOR UPDATE SKIP LOCKED, but
+            // the transaction provides database-level locking)
+            var expired = new List<(string PoolId, int EntityTypeId, string EntityId, string EntityTypeName, string Value, int? DsoTypeSchemaVersion, string EventId)>();
+            await using (var selectCmd = cnn.CreateCommand())
             {
-                outboxCmd.Transaction = tx;
-                outboxCmd.CommandText = """
-                    DELETE FROM main.outbox_subscriber_queue WHERE rowid IN (
-                        SELECT rowid FROM main.outbox_subscriber_queue WHERE pool_id = @pool_id LIMIT @batch_size
-                    )
+                selectCmd.Transaction = tx;
+                selectCmd.CommandText = """
+                    SELECT pool_id, entity_type_id, entity_id, entity_type_name, value, dso_type_schema_version
+                    FROM main.entities
+                    WHERE expires_at IS NOT NULL AND expires_at <= @now
+                    LIMIT @batchSize
                     """;
-                _ = outboxCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-                _ = outboxCmd.Parameters.AddWithValue("@batch_size", batchSize);
-                Log.ExecutingSql(logger, outboxCmd.CommandText);
-                batchOutbox = await outboxCmd.ExecuteNonQueryAsync(ct);
+                _ = selectCmd.Parameters.AddWithValue("@now", now);
+                _ = selectCmd.Parameters.AddWithValue("@batchSize", batchSize);
+                Log.ExecutingSql(logger, selectCmd.CommandText);
+                await using var reader = await selectCmd.ExecuteReaderAsync(ct);
+                while (await reader.ReadAsync(ct))
+                {
+                    var dsoTypeSchemaVersion = await reader.IsDBNullAsync(5, ct) ? null : (int?)reader.GetInt32(5);
+                    expired.Add((
+                        reader.GetString(0),
+                        reader.GetInt32(1),
+                        reader.GetString(2),
+                        reader.GetString(3),
+                        reader.GetString(4),
+                        dsoTypeSchemaVersion,
+                        Guid.CreateVersion7().ToString()));
+                }
             }
 
-            await using (var linksCmd = cnn.CreateCommand())
+            if (expired.Count == 0)
             {
-                linksCmd.Transaction = tx;
-                linksCmd.CommandText = """
-                    DELETE FROM main.entity_links WHERE rowid IN (
-                        SELECT rowid FROM main.entity_links WHERE pool_id = @pool_id LIMIT @batch_size
-                    )
-                    """;
-                _ = linksCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-                _ = linksCmd.Parameters.AddWithValue("@batch_size", batchSize);
-                Log.ExecutingSql(logger, linksCmd.CommandText);
-                batchLinks = await linksCmd.ExecuteNonQueryAsync(ct);
+                return 0;
             }
 
-            await using (var entitiesCmd = cnn.CreateCommand())
+            // Step 2: Insert outbox events per matching subscription
+            if (!outboxSubscriptions.IsEmpty)
             {
-                entitiesCmd.Transaction = tx;
-                entitiesCmd.CommandText = """
-                    DELETE FROM main.entities WHERE rowid IN (
-                        SELECT rowid FROM main.entities WHERE pool_id = @pool_id LIMIT @batch_size
-                    )
+                var eventName = OutboxEventName.EntityExpired;
+                foreach (var subscription in outboxSubscriptions.Subscriptions)
+                {
+                    if (subscription.EventNames.Count > 0 && !subscription.EventNames.Contains(eventName))
+                    {
+                        continue;
+                    }
+
+                    var matchingExpired = subscription.EntityTypeIds.Count > 0
+                        ? expired.Where(e => subscription.EntityTypeIds.Contains(e.EntityTypeId))
+                        : expired;
+
+                    foreach (var (poolId, entityTypeId, entityId, entityTypeName, value, dsoTypeSchemaVersion, eventId) in matchingExpired)
+                    {
+                        await using var outboxCmd = cnn.CreateCommand();
+                        outboxCmd.Transaction = tx;
+                        outboxCmd.CommandText = """
+                            INSERT INTO main.outbox_subscriber_queue
+                            (message_id, event_id, timestamp, event_name, subject_id, entity_type_id, entity_type_name, pool_id, payload, subscriber_name, dso_type_schema_version)
+                            VALUES (@message_id, @event_id, @timestamp, @event_name, @subject_id, @entity_type_id, @entity_type_name, @pool_id, @payload, @subscriber_name, @dso_type_schema_version)
+                            """;
+                        _ = outboxCmd.Parameters.AddWithValue("@message_id", Guid.CreateVersion7().ToString());
+                        _ = outboxCmd.Parameters.AddWithValue("@event_id", eventId);
+                        _ = outboxCmd.Parameters.AddWithValue("@timestamp", now);
+                        _ = outboxCmd.Parameters.AddWithValue("@event_name", eventName.ToString());
+                        _ = outboxCmd.Parameters.AddWithValue("@subject_id", entityId);
+                        _ = outboxCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+                        _ = outboxCmd.Parameters.AddWithValue("@entity_type_name", entityTypeName);
+                        _ = outboxCmd.Parameters.AddWithValue("@pool_id", poolId);
+                        _ = outboxCmd.Parameters.AddWithValue("@payload", value);
+                        _ = outboxCmd.Parameters.AddWithValue("@subscriber_name", subscription.SubscriberName.ToString());
+                        _ = outboxCmd.Parameters.AddWithValue("@dso_type_schema_version", dsoTypeSchemaVersion.HasValue ? dsoTypeSchemaVersion.Value : DBNull.Value);
+                        Log.ExecutingSql(logger, outboxCmd.CommandText);
+                        _ = await outboxCmd.ExecuteNonQueryAsync(ct);
+                    }
+                }
+            }
+
+            // Step 3: Delete all links touching an expired entity, on either side. entity_links no
+            // longer cascades in the database (both FKs are NO ACTION), so purge must remove these
+            // explicitly; restricted links are removed too — purging an expired entity overrides
+            // Restrict.
+            foreach (var (poolId, entityTypeId, entityId, _, _, _, _) in expired)
+            {
+                await using var linkCmd = cnn.CreateCommand();
+                linkCmd.Transaction = tx;
+                linkCmd.CommandText = """
+                    DELETE FROM main.entity_links
+                    WHERE pool_id = @pool_id
+                      AND (
+                        (left_entity_type_id = @entity_type_id AND left_entity_id = @entity_id)
+                        OR (right_entity_type_id = @entity_type_id AND right_entity_id = @entity_id)
+                      )
                     """;
-                _ = entitiesCmd.Parameters.AddWithValue("@pool_id", PoolId.Value);
-                _ = entitiesCmd.Parameters.AddWithValue("@batch_size", batchSize);
-                Log.ExecutingSql(logger, entitiesCmd.CommandText);
-                batchEntities = await entitiesCmd.ExecuteNonQueryAsync(ct);
+                _ = linkCmd.Parameters.AddWithValue("@pool_id", poolId);
+                _ = linkCmd.Parameters.AddWithValue("@entity_id", entityId);
+                _ = linkCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+                Log.ExecutingSql(logger, linkCmd.CommandText);
+                _ = await linkCmd.ExecuteNonQueryAsync(ct);
+            }
+
+            // Step 4: Delete entities (entity_keys and search_values cascade)
+            var deleted = 0;
+            foreach (var (poolId, entityTypeId, entityId, _, _, _, _) in expired)
+            {
+                await using var deleteCmd = cnn.CreateCommand();
+                deleteCmd.Transaction = tx;
+                deleteCmd.CommandText = """
+                    DELETE FROM main.entities
+                    WHERE pool_id = @pool_id AND entity_type_id = @entity_type_id AND entity_id = @entity_id
+                      AND expires_at <= @now
+                    """;
+                _ = deleteCmd.Parameters.AddWithValue("@pool_id", poolId);
+                _ = deleteCmd.Parameters.AddWithValue("@entity_type_id", entityTypeId);
+                _ = deleteCmd.Parameters.AddWithValue("@entity_id", entityId);
+                _ = deleteCmd.Parameters.AddWithValue("@now", now);
+                Log.ExecutingSql(logger, deleteCmd.CommandText);
+                deleted += await deleteCmd.ExecuteNonQueryAsync(ct);
             }
 
             await tx.CommitAsync(ct);
-
-            totalOutboxDeleted += batchOutbox;
-            totalLinksDeleted += batchLinks;
-            totalEntitiesDeleted += batchEntities;
-
-            if (batchOutbox + batchLinks + batchEntities == 0)
-            {
-                break;
-            }
+            return deleted;
         }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
+    }
 
-        return new PurgeResult(totalEntitiesDeleted, totalLinksDeleted, totalOutboxDeleted);
+    Task<PurgeResult> ICrossPartitionStorage.PurgePoolAsync(PoolId poolId, Ct ct) => ((ICrossPartitionStorage)this).PurgePoolAsync(poolId, StorageConstants.PurgePoolDefaultBatchSize, ct);
+
+    async Task<PurgeResult> ICrossPartitionStorage.PurgePoolAsync(PoolId poolId, int batchSize, Ct ct)
+    {
+        try
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(batchSize, 1);
+
+            var totalOutboxDeleted = 0;
+            var totalLinksDeleted = 0;
+            var totalEntitiesDeleted = 0;
+
+            await using var cnn = await OpenConnectionAsync(ct);
+
+            // Drain entity_links completely before any entity batch: entity_links no longer
+            // cascades in the database (both FKs are NO ACTION), so purging it explicitly first
+            // avoids a foreign key violation on the later entity deletes, and it must be fully
+            // drained (not just one batch per entity batch) because an independent entity batch
+            // could otherwise select an entity that still has links left over from a batch size
+            // smaller than its in-degree.
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+                int batchLinks;
+                await using (var linksCmd = cnn.CreateCommand())
+                {
+                    linksCmd.Transaction = tx;
+                    linksCmd.CommandText = """
+                        DELETE FROM main.entity_links WHERE rowid IN (
+                            SELECT rowid FROM main.entity_links WHERE pool_id = @pool_id LIMIT @batch_size
+                        )
+                        """;
+                    _ = linksCmd.Parameters.AddWithValue("@pool_id", poolId.Value);
+                    _ = linksCmd.Parameters.AddWithValue("@batch_size", batchSize);
+                    Log.ExecutingSql(logger, linksCmd.CommandText);
+                    batchLinks = await linksCmd.ExecuteNonQueryAsync(ct);
+                }
+
+                await tx.CommitAsync(ct);
+                totalLinksDeleted += batchLinks;
+
+                if (batchLinks == 0)
+                {
+                    break;
+                }
+            }
+
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                await using var tx = (SqliteTransaction)await cnn.BeginTransactionAsync(ct);
+
+                int batchOutbox;
+                int batchEntities;
+
+                await using (var outboxCmd = cnn.CreateCommand())
+                {
+                    outboxCmd.Transaction = tx;
+                    outboxCmd.CommandText = """
+                        DELETE FROM main.outbox_subscriber_queue WHERE rowid IN (
+                            SELECT rowid FROM main.outbox_subscriber_queue WHERE pool_id = @pool_id LIMIT @batch_size
+                        )
+                        """;
+                    _ = outboxCmd.Parameters.AddWithValue("@pool_id", poolId.Value);
+                    _ = outboxCmd.Parameters.AddWithValue("@batch_size", batchSize);
+                    Log.ExecutingSql(logger, outboxCmd.CommandText);
+                    batchOutbox = await outboxCmd.ExecuteNonQueryAsync(ct);
+                }
+
+                await using (var entitiesCmd = cnn.CreateCommand())
+                {
+                    entitiesCmd.Transaction = tx;
+                    entitiesCmd.CommandText = """
+                        DELETE FROM main.entities WHERE rowid IN (
+                            SELECT rowid FROM main.entities WHERE pool_id = @pool_id LIMIT @batch_size
+                        )
+                        """;
+                    _ = entitiesCmd.Parameters.AddWithValue("@pool_id", poolId.Value);
+                    _ = entitiesCmd.Parameters.AddWithValue("@batch_size", batchSize);
+                    Log.ExecutingSql(logger, entitiesCmd.CommandText);
+                    batchEntities = await entitiesCmd.ExecuteNonQueryAsync(ct);
+                }
+
+                await tx.CommitAsync(ct);
+
+                totalOutboxDeleted += batchOutbox;
+                totalEntitiesDeleted += batchEntities;
+
+                if (batchOutbox + batchEntities == 0)
+                {
+                    break;
+                }
+            }
+
+            return new PurgeResult(totalEntitiesDeleted, totalLinksDeleted, totalOutboxDeleted);
+        }
+        catch (SqliteException ex) when (IsMissingStorageTable(ex))
+        {
+            throw StorageSchemaMissing(ex);
+        }
     }
 
     private sealed record QueryClauses(string WhereClause, string JoinClause, string OrderByClause);

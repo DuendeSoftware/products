@@ -26,7 +26,6 @@
     <InternalsVisibleTo Include="Duende.Storage.Oracle.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.PostgreSql.Tests" />
     <InternalsVisibleTo Include="Duende.Storage.Benchmarks" />
-    <InternalsVisibleTo Include="Duende.Storage.Samples.EavSchema" />
   </ItemGroup>
 
   <ItemGroup>

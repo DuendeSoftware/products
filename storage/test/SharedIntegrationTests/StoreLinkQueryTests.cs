@@ -4,7 +4,7 @@
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Querying;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.IntegrationTests;
 
@@ -76,10 +76,10 @@ public partial class StoreLinkQueryTests
             .Where(User, userId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("admin");
+        ((RoleDso)result.Items[0].Value).Name.ShouldBe("admin");
     }
 
     [Fact]
@@ -102,10 +102,10 @@ public partial class StoreLinkQueryTests
             .Where(Role, roleId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<UserDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("alice");
+        ((UserDso)result.Items[0].Value).Name.ShouldBe("alice");
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public partial class StoreLinkQueryTests
             .Where(User, UuidV7.New())
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.ShouldBeEmpty();
         result.TotalCount.ShouldBe(0);
@@ -153,8 +153,8 @@ public partial class StoreLinkQueryTests
             .Where(User, userId)
             .Build();
 
-        var page1 = await queryStorage.QueryLinksAsync<GroupDso>(query, DataRange.FromPage(1, 3), _ct);
-        var page2 = await queryStorage.QueryLinksAsync<GroupDso>(query, DataRange.FromPage(2, 3), _ct);
+        var page1 = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 3), _ct);
+        var page2 = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(2, 3), _ct);
 
         page1.Items.Count.ShouldBe(3);
         page1.TotalCount.ShouldBe(5);
@@ -190,9 +190,9 @@ public partial class StoreLinkQueryTests
             .Join(UserRole)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
 
-        result.Items.Count(r => r.Value.Name == "admin").ShouldBe(1);
+        result.Items.Select(e => (RoleDso)e.Value).Count(r => r.Name == "admin").ShouldBe(1);
     }
 
     // =========================================================================
@@ -228,10 +228,10 @@ public partial class StoreLinkQueryTests
             .Where(Role, adminRoleId)
             .Build();
 
-        var result = await queryStorage.QueryLinksAsync<UserDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("alice");
+        ((UserDso)result.Items[0].Value).Name.ShouldBe("alice");
     }
 
     // =========================================================================
@@ -262,7 +262,7 @@ public partial class StoreLinkQueryTests
             .Where(User, userId)
             .Build();
 
-        var result = await queryStoreB.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStoreB.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         result.Items.ShouldBeEmpty();
     }
 
@@ -295,8 +295,8 @@ public partial class StoreLinkQueryTests
             .Where(User, userId)
             .Build();
 
-        var resultA = await queryStoreA.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
-        var resultB = await queryStoreB.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var resultA = await queryStoreA.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
+        var resultB = await queryStoreB.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
 
         // Each space sees only its own link
         resultA.TotalCount.ShouldBe(1);
@@ -333,7 +333,7 @@ public partial class StoreLinkQueryTests
             .Where(User, userId)
             .Build();
 
-        var result = await queryStoreB.QueryLinksAsync<RoleDso>(query, DataRange.FromPage(1, 100), _ct);
+        var result = await queryStoreB.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         result.Items.Count.ShouldBe(1);
     }
 

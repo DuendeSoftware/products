@@ -22,6 +22,8 @@ internal sealed class OracleDialect : ISqlDialect
 
     public string FalseLiteral => "1=0";
 
+    public bool SupportsNullsOrdering => true;
+
     // Oracle LIKE requires an explicit ESCAPE clause to treat backslash as the escape character.
     public string LikeEscapeClause => " ESCAPE '\\'";
 

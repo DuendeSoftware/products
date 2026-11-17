@@ -24,7 +24,7 @@ internal sealed class MsSqlStorageEngineFixtureFactory(AspireFixture aspire) : I
         _ = storage.AddMsSql(_ => db.Connect);
     }
 
-    private static async Task CreateTestDatabasesAsync(IServiceProvider sp, CancellationToken ct)
+    private static async Task CreateTestDatabasesAsync(IServiceProvider sp, Ct ct)
     {
         foreach (var db in sp.GetServices<ProvisionedTestDatabase>())
         {

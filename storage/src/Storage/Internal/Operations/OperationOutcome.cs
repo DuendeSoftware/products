@@ -28,6 +28,7 @@ public enum OperationOutcome
 
     /// <summary>
     /// Update or Delete failed: the entity was not found.
+    /// Link failed: one or both endpoints don't exist in this pool with the definition's entity types.
     /// </summary>
     DoesNotExist,
 
@@ -39,5 +40,10 @@ public enum OperationOutcome
     /// <summary>
     /// Link failed: an identical link (same LinkType, LeftId, RightId) already exists.
     /// </summary>
-    AlreadyLinked
+    AlreadyLinked,
+
+    /// <summary>
+    /// Delete failed: the entity is the right side of a <see cref="LinkDeleteBehavior.Restrict"/> link that still exists.
+    /// </summary>
+    StillLinked
 }

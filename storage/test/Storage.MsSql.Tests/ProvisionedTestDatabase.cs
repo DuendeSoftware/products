@@ -13,7 +13,8 @@ namespace Duende.Storage.MsSql;
 internal sealed class ProvisionedTestDatabase(
     MsSqlTestDatabaseProvisioner provisioner,
     string connectionString,
-    bool exists) : IAsyncDisposable
+    bool exists,
+    bool? caseSensitiveIdentifiers = null) : IAsyncDisposable
 {
     private bool _created = exists;
 
@@ -21,11 +22,11 @@ internal sealed class ProvisionedTestDatabase(
 
     public CreateSqlConnection Connect => () => new SqlConnection(ConnectionString);
 
-    public async Task CreateAsync(CancellationToken ct)
+    public async Task CreateAsync(Ct ct)
     {
         if (!_created)
         {
-            await provisioner.CreateAsync(ConnectionString, ct);
+            await provisioner.CreateAsync(ConnectionString, caseSensitiveIdentifiers, ct);
             _created = true;
         }
     }

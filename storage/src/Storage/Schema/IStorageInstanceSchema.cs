@@ -16,15 +16,16 @@ public interface IStorageInstanceSchema
 
     /// <summary>
     /// Migrates the database schema to the current version. Creates the schema if it does not exist,
-    /// upgrades it if behind, and is a no-op if already current. Calls <see cref="VerifySchemaAsync"/>
-    /// after migration and throws if verification finds errors.
+    /// upgrades it if behind, and applies no migration scripts if already current. Calls
+    /// <see cref="VerifySchemaAsync"/> even when the version is current and throws if verification finds errors.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     Task MigrateAsync(Ct ct);
 
     /// <summary>
     /// Verifies that the actual database schema matches the expected structure.
-    /// Returns a list of discrepancies (missing tables, columns, wrong types, missing indexes, etc.).
+    /// Returns a list of discrepancies, including missing objects, incorrect column types or nullability,
+    /// and incorrect keys, foreign keys, or index key columns.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     Task<SchemaVerificationResult> VerifySchemaAsync(Ct ct);

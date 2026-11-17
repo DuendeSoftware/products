@@ -16,4 +16,7 @@ public enum LinkResult
 
     /// <summary>The exact same link already exists (idempotent — not an error, but callers can detect duplicates).</summary>
     AlreadyLinked,
+
+    /// <summary>One or both endpoints don't exist in this pool with the definition's entity types.</summary>
+    DoesNotExist,
 }

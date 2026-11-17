@@ -24,7 +24,7 @@ public interface IStorageInstanceSchemaFactory
     /// <see cref="StorageInstanceId.Default"/> has not been registered, or no engine-backed database
     /// schema service could be resolved for it.
     /// </exception>
-    Task<IStorageInstanceSchema> GetStorageInstanceSchema(CancellationToken ct) => GetStorageInstanceSchema(StorageInstanceId.Default, ct);
+    Task<IStorageInstanceSchema> GetStorageInstanceSchema(Ct ct) => GetStorageInstanceSchema(StorageInstanceId.Default, ct);
 
     /// <summary>
     /// Gets the <see cref="IStorageInstanceSchema"/> for the specified storage instance, independent of
@@ -36,5 +36,5 @@ public interface IStorageInstanceSchemaFactory
     /// <paramref name="storageInstanceId"/> has not been registered, or no engine-backed database schema
     /// service could be resolved for it.
     /// </exception>
-    Task<IStorageInstanceSchema> GetStorageInstanceSchema(StorageInstanceId storageInstanceId, CancellationToken ct);
+    Task<IStorageInstanceSchema> GetStorageInstanceSchema(StorageInstanceId storageInstanceId, Ct ct);
 }

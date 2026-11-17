@@ -6,7 +6,7 @@ using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.Sqlite;
 
@@ -65,6 +65,21 @@ public sealed class LinkEntitiesHowToTests
     }
     // end-snippet
 
+    // begin-snippet: link-entities-restrict-definition
+    public static class OwnershipLinks
+    {
+        // A Restrict definition: deleting the right-side entity (ContributorDso) fails
+        // while a link of this type still points at it.
+        public static readonly LinkDefinition Owns = new()
+        {
+            Left = OrganizationDso.EntityType,
+            Right = ContributorDso.EntityType,
+            Link = new LinkType(5203, "Owns"),
+            OnRightDelete = LinkDeleteBehavior.Restrict
+        };
+    }
+    // end-snippet
+
     [Fact]
     public async Task Can_link_and_unlink_entities()
     {
@@ -105,7 +120,7 @@ public sealed class LinkEntitiesHowToTests
     }
 
     [Fact]
-    public async Task Linking_does_not_require_either_entity_to_exist()
+    public async Task Linking_requires_both_entities_to_exist()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var fixture = await new SqliteStorageEngineFixtureFactory()
@@ -116,10 +131,73 @@ public sealed class LinkEntitiesHowToTests
             });
         var storage = fixture.PartitionedStorage;
 
-        // Neither ID has a matching entity: Storage does not check referential integrity.
+        // begin-snippet: link-entities-does-not-exist
+        // Neither ID has a matching entity: a foreign key rejects the link.
         var result = await storage.LinkAsync(OrganizationLinks.Membership, UuidV7.New(), UuidV7.New(), [], ct);
+        // result is LinkResult.DoesNotExist
+        // end-snippet
 
-        result.ShouldBe(LinkResult.Success);
+        result.ShouldBe(LinkResult.DoesNotExist);
+    }
+
+    [Fact]
+    public async Task Linking_requires_the_right_entity_type_the_right_pool_and_the_right_storage_instance()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await new SqliteStorageEngineFixtureFactory()
+            .CreateAsync(ct, services =>
+            {
+                services.AddDsoRegistration<OrganizationDso.V1>();
+                services.AddDsoRegistration<ContributorDso.V1>();
+                services.AddDsoRegistration<RepositoryDso.V1>();
+            });
+        var storage = fixture.PartitionedStorage;
+
+        var acmeId = UuidV7.New();
+        var widgetApiId = UuidV7.New();
+        _ = await storage.CreateAsync(acmeId, new OrganizationDso.V1("Acme"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(widgetApiId, new RepositoryDso.V1("widget-api"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+
+        // widgetApiId exists, but as a RepositoryDso, not the ContributorDso the Membership
+        // definition's Right side requires: the foreign key still matches the row, but the
+        // engine checks the stored entity type against the definition and reports DoesNotExist.
+        var wrongType = await storage.LinkAsync(OrganizationLinks.Membership, acmeId, widgetApiId, [], ct);
+        wrongType.ShouldBe(LinkResult.DoesNotExist);
+    }
+
+    [Fact]
+    public async Task Restricted_links_refuse_to_delete_the_right_entity_while_linked()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await new SqliteStorageEngineFixtureFactory()
+            .CreateAsync(ct, services =>
+            {
+                services.AddDsoRegistration<OrganizationDso.V1>();
+                services.AddDsoRegistration<ContributorDso.V1>();
+            });
+        var storage = fixture.PartitionedStorage;
+
+        var acmeId = UuidV7.New();
+        var aliceId = UuidV7.New();
+        _ = await storage.CreateAsync(acmeId, new OrganizationDso.V1("Acme"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(aliceId, new ContributorDso.V1("Alice"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+
+        _ = await storage.LinkAsync(OwnershipLinks.Owns, acmeId, aliceId, [], ct);
+
+        // begin-snippet: link-entities-still-linked
+        // Alice is the right side of a Restrict link, so deleting her is refused.
+        var deleteResult = await storage.DeleteAsync(ContributorDso.EntityType, aliceId, [], ct);
+        // deleteResult is DeleteResult.StillLinked; Alice and the link are both untouched.
+        // end-snippet
+
+        deleteResult.ShouldBe(DeleteResult.StillLinked);
+        (await storage.TryReadAsync(ContributorDso.EntityType, aliceId, ct)).Found.ShouldBeTrue();
+
+        // Deleting the LEFT side of a Restrict link still removes the link; only the right
+        // side is protected.
+        var deleteLeftResult = await storage.DeleteAsync(OrganizationDso.EntityType, acmeId, [], ct);
+        deleteLeftResult.ShouldBe(DeleteResult.Success);
+        (await storage.TryReadAsync(ContributorDso.EntityType, aliceId, ct)).Found.ShouldBeTrue();
     }
 
     [Fact]
@@ -152,7 +230,7 @@ public sealed class LinkEntitiesHowToTests
             .Where(OrganizationDso.EntityType, acmeId)
             .Build();
 
-        var members = await storage.QueryLinksAsync<ContributorDso.V1>(
+        var members = await storage.QueryLinksAsync(
             membersQuery, DataRange.FromPage(1, 100), ct);
 
         // "Which organizations is Alice a member of?" (the same LinkDefinition, traversed right-to-left)
@@ -161,15 +239,15 @@ public sealed class LinkEntitiesHowToTests
             .Where(ContributorDso.EntityType, aliceId)
             .Build();
 
-        var organizations = await storage.QueryLinksAsync<OrganizationDso.V1>(
+        var organizations = await storage.QueryLinksAsync(
             organizationsQuery, DataRange.FromPage(1, 100), ct);
         // end-snippet
 
         members.Items.Count.ShouldBe(2);
-        members.Items.Select(i => i.Value.Name).ShouldBe(["Alice", "Bob"], ignoreOrder: true);
+        members.Items.Select(i => ((ContributorDso.V1)i.Value).Name).ShouldBe(["Alice", "Bob"], ignoreOrder: true);
 
         organizations.Items.Count.ShouldBe(1);
-        organizations.Items[0].Value.Name.ShouldBe("Acme");
+        ((OrganizationDso.V1)organizations.Items[0].Value).Name.ShouldBe("Acme");
     }
 
     [Fact]
@@ -209,12 +287,76 @@ public sealed class LinkEntitiesHowToTests
             .Where(OrganizationDso.EntityType, acmeId)
             .Build();
 
-        var repositories = await storage.QueryLinksAsync<RepositoryDso.V1>(
+        var repositories = await storage.QueryLinksAsync(
             query, DataRange.FromPage(1, 100), ct);
         // end-snippet
 
         repositories.Items.Count.ShouldBe(1);
-        repositories.Items[0].Value.Name.ShouldBe("widget-api");
+        ((RepositoryDso.V1)repositories.Items[0].Value).Name.ShouldBe("widget-api");
+    }
+
+    [Fact]
+    public async Task Query_links_for_many_entities_and_count_them()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await new SqliteStorageEngineFixtureFactory()
+            .CreateAsync(ct, services =>
+            {
+                services.AddDsoRegistration<OrganizationDso.V1>();
+                services.AddDsoRegistration<ContributorDso.V1>();
+            });
+        var storage = fixture.PartitionedStorage;
+
+        var acmeId = UuidV7.New();
+        var globexId = UuidV7.New();
+        var initechId = UuidV7.New();
+        var aliceId = UuidV7.New();
+        var bobId = UuidV7.New();
+
+        _ = await storage.CreateAsync(acmeId, new OrganizationDso.V1("Acme"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(globexId, new OrganizationDso.V1("Globex"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(initechId, new OrganizationDso.V1("Initech"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(aliceId, new ContributorDso.V1("Alice"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(bobId, new ContributorDso.V1("Bob"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+
+        // Alice is on Acme and Globex, Bob is on Acme only, and Initech has no members.
+        _ = await storage.LinkAsync(OrganizationLinks.Membership, acmeId, aliceId, [], ct);
+        _ = await storage.LinkAsync(OrganizationLinks.Membership, globexId, aliceId, [], ct);
+        _ = await storage.LinkAsync(OrganizationLinks.Membership, acmeId, bobId, [], ct);
+
+        // begin-snippet: link-entities-query-by-anchor
+        // "Who are the members of each of these organizations?" in one query.
+        var query = LinkQuery.From(ContributorDso.EntityType)
+            .Join(OrganizationLinks.Membership)
+            .WhereAny(OrganizationDso.EntityType, new HashSet<UuidV7> { acmeId, globexId, initechId })
+            .Build();
+
+        var members = await storage.QueryLinksByAnchorAsync(
+            query, DataRange.FromPage(1, 100), ct);
+
+        foreach (var member in members.Items)
+        {
+            // member.AnchorId is the organization the contributor was reached from.
+            var organizationId = member.AnchorId;
+            var contributor = (ContributorDso.V1)member.Entity.Value;
+        }
+        // end-snippet
+
+        // begin-snippet: link-entities-count-by-anchor
+        // "How many members does each organization have?" in one query.
+        var counts = await storage.CountLinksAsync(query, ct);
+
+        var acmeMembers = counts[acmeId];       // 2
+        var initechMembers = counts[initechId]; // 0, every requested id is present
+        // end-snippet
+
+        members.Items.Count.ShouldBe(3);
+        members.Items.Count(m => m.AnchorId == acmeId).ShouldBe(2);
+        members.Items.Count(m => m.AnchorId == globexId).ShouldBe(1);
+        members.Items.ShouldNotContain(m => m.AnchorId == initechId);
+        acmeMembers.ShouldBe(2);
+        counts[globexId].ShouldBe(1);
+        initechMembers.ShouldBe(0);
     }
 
     [Fact]
@@ -247,7 +389,7 @@ public sealed class LinkEntitiesHowToTests
             .Where(OrganizationDso.EntityType, acmeId)
             .Build();
 
-        var members = await storage.QueryLinksAsync<ContributorDso.V1>(query, DataRange.FromPage(1, 100), ct);
+        var members = await storage.QueryLinksAsync(query, DataRange.FromPage(1, 100), ct);
 
         members.Items.ShouldBeEmpty();
 
@@ -274,7 +416,7 @@ public sealed class LinkEntitiesHowToTests
         _ = await storage.CreateAsync(aliceId, new ContributorDso.V1("Alice"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
         _ = await storage.LinkAsync(OrganizationLinks.Membership, acmeId, aliceId, [], ct);
 
-        var purgeResult = await storage.PurgePoolAsync(ct);
+        var purgeResult = await fixture.DefaultCrossPartitionStorage.PurgePoolAsync(PoolId.Default, ct);
 
         purgeResult.EntitiesDeleted.ShouldBeGreaterThanOrEqualTo(2);
         purgeResult.EntityLinksDeleted.ShouldBeGreaterThanOrEqualTo(1);
@@ -326,6 +468,9 @@ public sealed class LinkEntitiesHowToTests
         var acmeId = UuidV7.New();
         var aliceId = UuidV7.New();
 
+        _ = await storage.CreateAsync(acmeId, new OrganizationDso.V1("Acme"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(aliceId, new ContributorDso.V1("Alice"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], ct);
+
         _ = await storage.LinkAsync(OrganizationLinks.Membership, acmeId, aliceId, [], ct);
 
         // A LinkOperation for a pair that's already linked reports AlreadyLinked for that
@@ -357,13 +502,13 @@ public sealed class LinkEntitiesHowToTests
             .Build();
 
         // Continuation-token ranges are not supported for link queries, only page and offset.
-        _ = await Should.ThrowAsync<NotSupportedException>(() => storage.QueryLinksAsync<ContributorDso.V1>(
+        _ = await Should.ThrowAsync<NotSupportedException>(() => storage.QueryLinksAsync(
             query, DataRange.FromContinuationToken(ContinuationToken.Beginning, size: 10), ct));
 
         // Page and offset ranges both work.
-        var paged = await storage.QueryLinksAsync<ContributorDso.V1>(query, DataRange.FromPage(1, 10), ct);
+        var paged = await storage.QueryLinksAsync(query, DataRange.FromPage(1, 10), ct);
         paged.Items.ShouldBeEmpty();
-        var offset = await storage.QueryLinksAsync<ContributorDso.V1>(query, DataRange.FromOffset(0, 10), ct);
+        var offset = await storage.QueryLinksAsync(query, DataRange.FromOffset(0, 10), ct);
         offset.Items.ShouldBeEmpty();
     }
 }

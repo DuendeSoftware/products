@@ -11,11 +11,15 @@ namespace Duende.Storage.Internal.Querying;
 /// </remarks>
 public sealed class LinkQueryBuilder
 {
+    /// <summary>The maximum number of entity ids accepted by <see cref="WhereAny"/>.</summary>
+    public const int MaxWhereAnyEntityIds = 1000;
+
     private readonly EntityType _source;
     private readonly List<LinkQueryJoin> _joins = [];
     private EntityType? _currentEndpoint;
     private EntityType? _whereEntityType;
     private UuidV7? _whereEntityId;
+    private IReadOnlySet<UuidV7>? _whereEntityIds;
     private bool _whereSet;
 
     internal LinkQueryBuilder(EntityType source)
@@ -62,22 +66,51 @@ public sealed class LinkQueryBuilder
     /// </summary>
     public LinkQueryBuilder Where(EntityType entityType, UuidV7 entityId)
     {
+        EnsureWhereCanBeSet(entityType, nameof(Where));
+
+        _whereEntityType = entityType;
+        _whereEntityId = entityId;
+        _whereSet = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a filter: only return source entities reachable from any of these entities, keeping
+    /// track of which entity each result was reached from. Use it with
+    /// <c>IPartitionedStorage.QueryLinksByAnchorAsync</c> and <c>IPartitionedStorage.CountLinksAsync</c>.
+    /// Mutually exclusive with <see cref="Where"/>, and can only be called once. The entity type must be
+    /// the terminal type of the chain (the endpoint after all joins). An empty set is allowed.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="entityIds"/> has more than <see cref="MaxWhereAnyEntityIds"/> entries
+    /// (thrown when the descriptor is built).
+    /// </exception>
+    public LinkQueryBuilder WhereAny(EntityType entityType, IReadOnlySet<UuidV7> entityIds)
+    {
+        ArgumentNullException.ThrowIfNull(entityIds);
+
+        EnsureWhereCanBeSet(entityType, nameof(WhereAny));
+
+        _whereEntityType = entityType;
+        _whereEntityIds = entityIds;
+        _whereSet = true;
+        return this;
+    }
+
+    private void EnsureWhereCanBeSet(EntityType entityType, string method)
+    {
         if (_whereSet)
         {
-            throw new InvalidOperationException("Where has already been set. Only one Where filter is allowed per query.");
+            throw new InvalidOperationException(
+                "A Where or WhereAny filter has already been set. Only one of them is allowed per query, once.");
         }
 
         if (entityType != _currentEndpoint)
         {
             throw new InvalidOperationException(
                 $"Entity type '{entityType.Name}' is not the terminal type of the link query chain. " +
-                $"Where can only filter on the terminal type '{_currentEndpoint?.Name}'.");
+                $"{method} can only filter on the terminal type '{_currentEndpoint?.Name}'.");
         }
-
-        _whereEntityType = entityType;
-        _whereEntityId = entityId;
-        _whereSet = true;
-        return this;
     }
 
     /// <summary>
@@ -90,7 +123,18 @@ public sealed class LinkQueryBuilder
             throw new InvalidOperationException("At least one Join is required to build a link query.");
         }
 
-        return new LinkQueryDescriptor(_source, _joins.AsReadOnly(), _whereEntityType, _whereEntityId);
+        if (_whereSet && _whereEntityType != _currentEndpoint)
+        {
+            throw new InvalidOperationException(
+                $"The Where or WhereAny filter is on '{_whereEntityType?.Name}', but the chain now ends at '{_currentEndpoint?.Name}'. " +
+                "Add every Join before the filter.");
+        }
+
+        // Copy the joins so a later Join on this builder can't change a descriptor that's already built.
+        return new LinkQueryDescriptor(_source, _joins.ToArray(), _whereEntityType, _whereEntityId)
+        {
+            WhereEntityIds = _whereEntityIds
+        };
     }
 
 }

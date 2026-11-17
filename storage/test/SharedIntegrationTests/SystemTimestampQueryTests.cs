@@ -6,9 +6,9 @@ using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 using Microsoft.Extensions.DependencyInjection;
-using SortDirection = Duende.Storage.Querying.SortDirection;
+using SortDirection = Duende.Storage.Internal.Querying.SortDirection;
 using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 
 namespace Duende.Storage.IntegrationTests;
@@ -65,11 +65,11 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Dec");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Dec");
     }
 
     [Fact]
@@ -101,12 +101,12 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Mar");
-        result.Items.ShouldContain(x => x.Value.Name == "Sep");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Mar");
+        result.Items.Select(e => (TestEntityDso)e.Value).ShouldContain(x => x.Name == "Sep");
     }
 
     [Fact]
@@ -132,11 +132,11 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Second");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Second");
     }
 
     // ── Filtering by last_updated ───────────────────────────────────────
@@ -169,11 +169,11 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("EntityB-updated");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("EntityB-updated");
     }
 
     // ── Sorting by created ──────────────────────────────────────────────
@@ -201,13 +201,13 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, Query.All(), sort, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, Query.All(), sort, page, Ct.None);
 
         // Assert — oldest first: Charlie(t1), Alpha(t2), Bravo(t3)
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.Name.ShouldBe("Charlie");
-        result.Items[1].Value.Name.ShouldBe("Alpha");
-        result.Items[2].Value.Name.ShouldBe("Bravo");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Charlie");
+        ((TestEntityDso)result.Items[1].Value).Name.ShouldBe("Alpha");
+        ((TestEntityDso)result.Items[2].Value).Name.ShouldBe("Bravo");
     }
 
     [Fact]
@@ -233,13 +233,13 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, Query.All(), sort, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, Query.All(), sort, page, Ct.None);
 
         // Assert — newest first: Bravo(t3), Alpha(t2), Charlie(t1)
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.Name.ShouldBe("Bravo");
-        result.Items[1].Value.Name.ShouldBe("Alpha");
-        result.Items[2].Value.Name.ShouldBe("Charlie");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Bravo");
+        ((TestEntityDso)result.Items[1].Value).Name.ShouldBe("Alpha");
+        ((TestEntityDso)result.Items[2].Value).Name.ShouldBe("Charlie");
     }
 
     // ── Sorting by last_updated ─────────────────────────────────────────
@@ -284,13 +284,13 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, Query.All(), sort, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, Query.All(), sort, page, Ct.None);
 
         // Assert: C(t1) < A(t2) < B(t3)
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.Name.ShouldBe("C");
-        result.Items[1].Value.Name.ShouldBe("A");
-        result.Items[2].Value.Name.ShouldBe("B");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("C");
+        ((TestEntityDso)result.Items[1].Value).Name.ShouldBe("A");
+        ((TestEntityDso)result.Items[2].Value).Name.ShouldBe("B");
     }
 
     // ── Combined filter + sort ──────────────────────────────────────────
@@ -323,13 +323,13 @@ public partial class SystemTimestampQueryTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await queryStorage.QueryAsync<TestEntityDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await queryStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert: Dec, Sep, Mar (all >= mar, newest first)
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.Name.ShouldBe("Dec");
-        result.Items[1].Value.Name.ShouldBe("Sep");
-        result.Items[2].Value.Name.ShouldBe("Mar");
+        ((TestEntityDso)result.Items[0].Value).Name.ShouldBe("Dec");
+        ((TestEntityDso)result.Items[1].Value).Name.ShouldBe("Sep");
+        ((TestEntityDso)result.Items[2].Value).Name.ShouldBe("Mar");
     }
 
     // ── Projection of system fields ─────────────────────────────────────

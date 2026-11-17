@@ -6,10 +6,10 @@ using Duende.Storage.IntegrationTests;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
-using Duende.Storage.Internal.Querying.Fields;
+using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.Sqlite;
 
@@ -265,7 +265,7 @@ public sealed class EvolveDsoHowToTests
     }
 
     [Fact]
-    public async Task Query_deserializes_every_matching_row_as_the_requested_type_regardless_of_stored_version()
+    public async Task Query_returns_each_row_as_its_stored_version()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var fixture = await CreateFixtureAsync(ct);
@@ -281,33 +281,22 @@ public sealed class EvolveDsoHowToTests
         var v2 = new ContactCardDsoV2.V2("Grace", "Hopper", "grace@example.com");
         _ = await storage.CreateAsync(v2Id, v2, [], BuildSearchFields($"{v2.FirstName} {v2.LastName}"), Expiration.NoExpiration, [], ct);
 
-        var page = DataRange.FromPage(1, 10);
+        // begin-snippet: evolve-dso-query-then-upgrade
+        var result = await storage.QueryAsync(
+            ContactCardDsoV2.EntityType, Query.All(), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
 
-        var matchAll = new StringField("name").Contains("");
+        // Like a direct read, a query returns each row as the type of the version it was
+        // stored with. Domain code converts older versions the same way.
+        var contacts = result.ConvertTo(envelope => envelope.Value switch
+        {
+            ContactCardDsoV2.V2 storedV2 => storedV2,
+            ContactCardDsoV2.V1 storedV1 => ToV2(storedV1),
+            _ => throw new InvalidOperationException($"Unexpected DSO type {envelope.Value.GetType()}."),
+        });
+        // end-snippet
 
-        // Querying as V2 deserializes BOTH rows using the V2 shape. The V1 row has no
-        // "FirstName"/"LastName" JSON properties, so those come back null rather than
-        // throwing - the row is silently misread, not filtered out or flagged.
-        var asV2 = await storage.QueryAsync<ContactCardDsoV2.V2>(
-            ContactCardDsoV2.EntityType, matchAll, SortParameter.Empty, page, ct);
-
-        asV2.Items.Count.ShouldBe(2);
-        var v1RowReadAsV2 = asV2.Items.Single(i => i.Id == v1Id.Value).Value;
-        v1RowReadAsV2.FirstName.ShouldBeNull();
-        v1RowReadAsV2.LastName.ShouldBeNull();
-        v1RowReadAsV2.Email.ShouldBe("ada@example.com");
-        var v2Row = asV2.Items.Single(i => i.Id == v2Id.Value).Value;
-        v2Row.FirstName.ShouldBe("Grace");
-        v2Row.LastName.ShouldBe("Hopper");
-
-        // Querying as V1 instead deserializes BOTH rows using the V1 shape: the V2 row has
-        // no "FullName" JSON property, so it comes back null - the exact mirror problem.
-        var asV1 = await storage.QueryAsync<ContactCardDsoV2.V1>(
-            ContactCardDsoV2.EntityType, matchAll, SortParameter.Empty, page, ct);
-
-        asV1.Items.Count.ShouldBe(2);
-        var v2RowReadAsV1 = asV1.Items.Single(i => i.Id == v2Id.Value).Value;
-        v2RowReadAsV1.FullName.ShouldBeNull();
-        v2RowReadAsV1.Email.ShouldBe("grace@example.com");
+        result.Items.Single(i => i.Id == v1Id.Value).Value.ShouldBeOfType<ContactCardDsoV2.V1>().ShouldBe(v1);
+        result.Items.Single(i => i.Id == v2Id.Value).Value.ShouldBeOfType<ContactCardDsoV2.V2>().ShouldBe(v2);
+        contacts.Items.ShouldBe([new ContactCardDsoV2.V2("Ada", "Lovelace", "ada@example.com"), v2], ignoreOrder: true);
     }
 }

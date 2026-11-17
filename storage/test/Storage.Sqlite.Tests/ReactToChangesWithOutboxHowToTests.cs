@@ -221,9 +221,8 @@ public sealed class ReactToChangesWithOutboxHowToTests
         var subscriberName = SubscriberName.Create("invoice-notifications-retry");
         var subscription = new InvoiceIssuedSubscription(subscriberName);
         var flakyState = new FlakyHandlerState(failFirstAttempts: 1, throwInsteadOfRetry: true);
-        var timeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
 
-        await using var fixture = await CreateFlakyFixtureAsync(subscription, flakyState, timeProvider);
+        await using var fixture = await CreateFlakyFixtureAsync(subscription, flakyState);
         var storage = fixture.PartitionedStorage;
 
         var invoiceId = UuidV7.New();
@@ -245,19 +244,13 @@ public sealed class ReactToChangesWithOutboxHowToTests
 
         var processor = fixture.ServiceProvider.GetRequiredService<OutboxProcessor>();
 
-        // First pass: the handler throws, so the event is retained for retry and the batch
-        // stops here to preserve delivery order for this subscription.
+        // First pass: the handler throws, so the row stays queued and is retried on the next pass.
         await processor.RunProcessorAsync(_ct);
         flakyState.Attempts.ShouldBe(1);
         (await fixture.DefaultCrossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriberName, 10, _ct))
             .Events.ShouldNotBeEmpty();
 
-        // A pass before the backoff delay elapses is a no-op.
-        await processor.RunProcessorAsync(_ct);
-        flakyState.Attempts.ShouldBe(1);
-
-        // Advance past the base retry delay: the handler now succeeds and the row is deleted.
-        timeProvider.Advance(TimeSpan.FromMinutes(1) + TimeSpan.FromSeconds(1));
+        // Second pass: the handler now succeeds and the row is deleted.
         await processor.RunProcessorAsync(_ct);
 
         flakyState.Attempts.ShouldBe(2);
@@ -272,16 +265,13 @@ public sealed class ReactToChangesWithOutboxHowToTests
         var subscriberName = SubscriberName.Create("invoice-notifications-drop");
         var subscription = new InvoiceIssuedSubscription(subscriberName);
         var flakyState = new FlakyHandlerState(failFirstAttempts: int.MaxValue);
-        var timeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
 
         await using var fixture = await CreateFlakyFixtureAsync(
             subscription,
             flakyState,
-            timeProvider,
             configureOutboxProcessor: options =>
             {
-                options.MaxRetries = 2;
-                options.RetryDelay = TimeSpan.FromSeconds(1);
+                options.MaxRetries = 1;
             });
         var storage = fixture.PartitionedStorage;
 
@@ -304,11 +294,13 @@ public sealed class ReactToChangesWithOutboxHowToTests
 
         var processor = fixture.ServiceProvider.GetRequiredService<OutboxProcessor>();
 
-        await processor.RunProcessorAsync(_ct); // attempt 1
-        timeProvider.Advance(TimeSpan.FromSeconds(2));
-        await processor.RunProcessorAsync(_ct); // attempt 2, reaches MaxRetries
-        timeProvider.Advance(TimeSpan.FromSeconds(5));
-        await processor.RunProcessorAsync(_ct); // force-dropped: deleted without ever succeeding
+        await processor.RunProcessorAsync(_ct); // attempt 1 fails; one retry left
+        flakyState.Attempts.ShouldBe(1);
+        (await fixture.DefaultCrossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriberName, 10, _ct))
+            .Events.ShouldNotBeEmpty();
+
+        await processor.RunProcessorAsync(_ct); // attempt 2 (the only retry) fails: dropped in this pass
+        flakyState.Attempts.ShouldBe(2);
 
         (await fixture.DefaultCrossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriberName, 10, _ct))
             .Events.ShouldBeEmpty();
@@ -357,7 +349,6 @@ public sealed class ReactToChangesWithOutboxHowToTests
     private static Task<IStorageFixture> CreateFixtureAsync(
         IOutboxSubscription subscription,
         RecordingState recordingState,
-        FakeTimeProvider? timeProvider = null,
         Action<OutboxProcessorOptions>? configureOutboxProcessor = null) =>
         StorageFixtureFactory.CreateAsync(services =>
         {
@@ -377,11 +368,6 @@ public sealed class ReactToChangesWithOutboxHowToTests
             services.AddDsoRegistration<InvoiceDso.V1>();
             services.AddDsoRegistration<ProcessedInvoiceEventDso.V1>();
 
-            if (timeProvider is not null)
-            {
-                _ = services.AddSingleton<TimeProvider>(timeProvider);
-            }
-
             if (configureOutboxProcessor is not null)
             {
                 _ = services.Configure(configureOutboxProcessor);
@@ -391,7 +377,6 @@ public sealed class ReactToChangesWithOutboxHowToTests
     private static Task<IStorageFixture> CreateFlakyFixtureAsync(
         IOutboxSubscription subscription,
         FlakyHandlerState flakyState,
-        FakeTimeProvider? timeProvider = null,
         Action<OutboxProcessorOptions>? configureOutboxProcessor = null) =>
         StorageFixtureFactory.CreateAsync(services =>
         {
@@ -400,11 +385,6 @@ public sealed class ReactToChangesWithOutboxHowToTests
                 subscription.SubscriberName.Value);
             _ = services.AddSingleton(flakyState);
             services.AddDsoRegistration<InvoiceDso.V1>();
-
-            if (timeProvider is not null)
-            {
-                _ = services.AddSingleton<TimeProvider>(timeProvider);
-            }
 
             if (configureOutboxProcessor is not null)
             {
@@ -443,9 +423,9 @@ public sealed class ReactToChangesWithOutboxHowToTests
     internal sealed class RecordingInvoiceHandler(IPartitionedStorageFactory partitionedStorageFactory, RecordingState state) : IOutboxSubscriptionHandler
     {
         // The processed-event marker never expires on its own. A queued delivery row has no
-        // bounded lifetime: MaxRetries and the retry backoff only bound how long a message is
-        // retried while a processor instance keeps running, and that retry count lives in
-        // memory, so it resets to zero on every restart. A delivery row can therefore sit in
+        // bounded lifetime: MaxRetries only bounds how many times a message is retried while a
+        // processor instance keeps running, and that count lives in memory, so it resets to
+        // zero on every restart. A delivery row can therefore sit in
         // the queue, surviving any number of restarts, for as long as the processor is down or
         // the subscription falls behind; there's no "worst-case redelivery window" to size an
         // expiration against. Purging this marker on a guessed schedule risks deleting it while

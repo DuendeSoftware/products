@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Storage.Querying;
+using Duende.Storage.Internal.Querying;
 
 namespace Duende.Storage.Internal.Filtering;
 

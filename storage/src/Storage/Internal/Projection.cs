@@ -5,7 +5,7 @@ namespace Duende.Storage.Internal;
 
 /// <summary>
 /// Specifies which attributes to include in query results.
-/// When used, the query returns <see cref="EntityAttributeValue.AttributeValueCollection"/>
+/// When used, the query returns a row containing only the named attribute values,
 /// instead of a fully-typed DTO.
 /// </summary>
 /// <remarks>

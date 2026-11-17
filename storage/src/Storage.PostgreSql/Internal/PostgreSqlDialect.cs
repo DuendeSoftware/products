@@ -19,6 +19,8 @@ internal sealed class PostgreSqlDialect : ISqlDialect
 
     public string FalseLiteral => "FALSE";
 
+    public bool SupportsNullsOrdering => true;
+
     public string EscapeLikeWildcards(string value)
     {
         if (string.IsNullOrEmpty(value))

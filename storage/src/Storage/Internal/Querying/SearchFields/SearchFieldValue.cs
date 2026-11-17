@@ -116,6 +116,7 @@ public sealed record SearchFieldValue
         }
 
         FieldPath = fieldPath.ToUpperInvariant();
+
         FieldPathId = DeterministicGuidGenerator.Create(FieldPath);
         ItemIndex = itemIndex;
         StringValue = stringValue?.ToUpperInvariant();
@@ -138,6 +139,8 @@ public sealed record SearchFieldValue
             throw new ArgumentException("String value cannot be null or empty.", nameof(value));
         }
 
+        ValidateStringValueLength(value);
+
         var guidValue = DeterministicGuidGenerator.Create(value.ToUpperInvariant());
         return new SearchFieldValue(fieldPath, null, value, null, null, null, guidValue);
     }
@@ -154,6 +157,8 @@ public sealed record SearchFieldValue
         {
             throw new ArgumentException("String value cannot be null or empty.", nameof(value));
         }
+
+        ValidateStringValueLength(value);
 
         var guidValue = DeterministicGuidGenerator.Create(value.ToUpperInvariant());
         return new SearchFieldValue(fieldPath, itemIndex, value, null, null, null, guidValue);
@@ -241,5 +246,20 @@ public sealed record SearchFieldValue
 
         var hash = DeterministicGuidGenerator.Create(value.ToUpperInvariant());
         return new SearchFieldValue(fieldPath, itemIndex, null, null, null, null, hash);
+    }
+
+    private static void ValidateStringValueLength(string value)
+    {
+        if (value.Contains('\0', StringComparison.Ordinal))
+        {
+            throw new ArgumentException("String value cannot contain a null character (U+0000).", nameof(value));
+        }
+
+        if (value.Length > SearchFieldValueLimits.MaxStringValueLength)
+        {
+            throw new ArgumentException(
+                $"String value cannot exceed {SearchFieldValueLimits.MaxStringValueLength} characters (was {value.Length}).",
+                nameof(value));
+        }
     }
 }

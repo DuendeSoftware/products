@@ -9,8 +9,7 @@ using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
 using Duende.Storage.Internal.Telemetry;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.Internal;
 
@@ -302,16 +301,16 @@ internal sealed class InstrumentedStorageEngine<TInner>(TInner inner, StorageMet
         }
     }
 
-    public Task<PurgeResult> PurgePoolAsync(Ct ct) => PurgePoolAsync(StorageConstants.PurgePoolDefaultBatchSize, ct);
+    public Task<PurgeResult> PurgePoolAsync(PoolId poolId, Ct ct) => PurgePoolAsync(poolId, StorageConstants.PurgePoolDefaultBatchSize, ct);
 
-    public async Task<PurgeResult> PurgePoolAsync(int batchSize, Ct ct)
+    public async Task<PurgeResult> PurgePoolAsync(PoolId poolId, int batchSize, Ct ct)
     {
         using var activity = StartActivity("Store.PurgePool", null, StorageTelemetryConstants.Operations.PurgePool);
         var start = Stopwatch.GetTimestamp();
         var succeeded = false;
         try
         {
-            var result = await inner.PurgePoolAsync(batchSize, ct);
+            var result = await inner.PurgePoolAsync(poolId, batchSize, ct);
             metrics.RecordSuccess(StorageTelemetryConstants.Operations.PurgePool, dbSystem, null);
             succeeded = true;
             return result;
@@ -403,12 +402,12 @@ internal sealed class InstrumentedStorageEngine<TInner>(TInner inner, StorageMet
         }
     }
 
-    public async Task<QueryResult<MetadataEnvelope<TDso>>> QueryAsync<TDso>(
+    public async Task<QueryResult<MetadataEnvelope>> QueryAsync(
        EntityType entityType,
        IQueryExpression filter,
        SortParameter sort,
        DataRange dataRange,
-       Ct ct) where TDso : IDataStorageObject
+       Ct ct)
     {
         var entityTypeName = entityType.Name;
         using var activity = StartActivity("QueryStore.Query", entityTypeName, StorageTelemetryConstants.Operations.Query);
@@ -416,7 +415,7 @@ internal sealed class InstrumentedStorageEngine<TInner>(TInner inner, StorageMet
         var succeeded = false;
         try
         {
-            var result = await inner.QueryAsync<TDso>(entityType, filter, sort, dataRange, ct);
+            var result = await inner.QueryAsync(entityType, filter, sort, dataRange, ct);
             metrics.RecordSuccess(StorageTelemetryConstants.Operations.Query, dbSystem, entityTypeName);
             succeeded = true;
             return result;
@@ -466,17 +465,17 @@ internal sealed class InstrumentedStorageEngine<TInner>(TInner inner, StorageMet
         }
     }
 
-    public async Task<QueryResult<MetadataEnvelope<TDso>>> QueryLinksAsync<TDso>(
+    public async Task<QueryResult<MetadataEnvelope>> QueryLinksAsync(
         LinkQueryDescriptor query,
         DataRange dataRange,
-        Ct ct) where TDso : IDataStorageObject
+        Ct ct)
     {
         using var activity = StartActivity("QueryStore.QueryLinks", null, StorageTelemetryConstants.Operations.QueryLinks);
         var start = Stopwatch.GetTimestamp();
         var succeeded = false;
         try
         {
-            var result = await inner.QueryLinksAsync<TDso>(query, dataRange, ct);
+            var result = await inner.QueryLinksAsync(query, dataRange, ct);
             metrics.RecordSuccess(StorageTelemetryConstants.Operations.QueryLinks, dbSystem, null);
             succeeded = true;
             return result;
@@ -491,6 +490,61 @@ internal sealed class InstrumentedStorageEngine<TInner>(TInner inner, StorageMet
         {
             var result = succeeded ? StorageTelemetryConstants.TagValues.Success : StorageTelemetryConstants.TagValues.Error;
             metrics.RecordDuration(StorageTelemetryConstants.Operations.QueryLinks, Elapsed(start), dbSystem, result, null);
+        }
+    }
+
+    public async Task<QueryResult<LinkedEnvelope>> QueryLinksByAnchorAsync(
+        LinkQueryDescriptor query,
+        DataRange dataRange,
+        Ct ct)
+    {
+        using var activity = StartActivity("QueryStore.QueryLinksByAnchor", null, StorageTelemetryConstants.Operations.QueryLinksByAnchor);
+        var start = Stopwatch.GetTimestamp();
+        var succeeded = false;
+        try
+        {
+            var result = await inner.QueryLinksByAnchorAsync(query, dataRange, ct);
+            metrics.RecordSuccess(StorageTelemetryConstants.Operations.QueryLinksByAnchor, dbSystem, null);
+            succeeded = true;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            RecordException(activity, ex);
+            metrics.RecordError(StorageTelemetryConstants.Operations.QueryLinksByAnchor, dbSystem, ex, null);
+            throw;
+        }
+        finally
+        {
+            var result = succeeded ? StorageTelemetryConstants.TagValues.Success : StorageTelemetryConstants.TagValues.Error;
+            metrics.RecordDuration(StorageTelemetryConstants.Operations.QueryLinksByAnchor, Elapsed(start), dbSystem, result, null);
+        }
+    }
+
+    public async Task<IReadOnlyDictionary<UuidV7, long>> CountLinksAsync(
+        LinkQueryDescriptor query,
+        Ct ct)
+    {
+        using var activity = StartActivity("QueryStore.CountLinks", null, StorageTelemetryConstants.Operations.CountLinks);
+        var start = Stopwatch.GetTimestamp();
+        var succeeded = false;
+        try
+        {
+            var result = await inner.CountLinksAsync(query, ct);
+            metrics.RecordSuccess(StorageTelemetryConstants.Operations.CountLinks, dbSystem, null);
+            succeeded = true;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            RecordException(activity, ex);
+            metrics.RecordError(StorageTelemetryConstants.Operations.CountLinks, dbSystem, ex, null);
+            throw;
+        }
+        finally
+        {
+            var result = succeeded ? StorageTelemetryConstants.TagValues.Success : StorageTelemetryConstants.TagValues.Error;
+            metrics.RecordDuration(StorageTelemetryConstants.Operations.CountLinks, Elapsed(start), dbSystem, result, null);
         }
     }
 

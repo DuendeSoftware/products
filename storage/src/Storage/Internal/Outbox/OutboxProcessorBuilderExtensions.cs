@@ -17,13 +17,12 @@ public static class OutboxProcessorBuilderExtensions
     extension(IStorageBuilder builder)
     {
         /// <summary>
-        /// Configures how the outbox processor drains subscription queues: batch size, retry count,
-        /// and the retry backoff schedule.
+        /// Configures how the outbox processor drains subscription queues: batch size and retry count.
         /// </summary>
         /// <remarks>
         /// Hosting concerns, meaning whether the processor runs at all and how often, belong to the
         /// host driving it rather than to these options. May be called more than once; each
-        /// callback is applied in registration order.
+        /// callback is applied in registration order. A negative <c>MaxRetries</c> is rejected at startup.
         /// </remarks>
         public IStorageBuilder ConfigureOutboxProcessor(Action<OutboxProcessorOptions> configure)
         {

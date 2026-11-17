@@ -63,6 +63,9 @@ internal static partial class Log
         Message = $"Executing query: {nameof(Parameters.Query)}={{{Parameters.Query}}}")]
     internal static partial void ExecutingQuery(ILogger logger, string query);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Retrying after a deadlock (PostgreSQL 40P01)")]
+    internal static partial void RetryingAfterDeadlock(ILogger logger);
+
     private static class Parameters
     {
         internal const string FromVersion = nameof(FromVersion);

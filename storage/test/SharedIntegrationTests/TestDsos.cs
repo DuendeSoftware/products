@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Storage.Internal;
+using Duende.Storage.Internal.Operations;
 
 namespace Duende.Storage.IntegrationTests;
 
@@ -170,5 +171,35 @@ public static class TestLinkData
         Left = TestDso2.DsoVersion.EntityType,
         Right = TestDso.DsoVersion.EntityType,
         Link = LinkTypeRegistry.GroupRole
+    };
+
+    /// <summary>
+    /// A link, between the same two entity types as <see cref="TestLink"/>, that uses the
+    /// <see cref="LinkDeleteBehavior.Restrict"/> delete behaviour: deleting the right-side entity
+    /// (<see cref="TestDso2"/>) fails with <see cref="DeleteResult.StillLinked"/> while a link of this
+    /// type still exists. Uses its own unused link type id, identified by <c>link_type_id</c> in the
+    /// one <c>entity_links</c> table, so it never shares rows with <see cref="TestLink"/>, even though
+    /// both connect the same entity types.
+    /// </summary>
+    public static readonly LinkDefinition TestLinkRestrict = new()
+    {
+        Left = TestDso.DsoVersion.EntityType,
+        Right = TestDso2.DsoVersion.EntityType,
+        Link = new LinkType(9900, "TestLinkRestrict"),
+        OnRightDelete = LinkDeleteBehavior.Restrict
+    };
+
+    /// <summary>
+    /// The same Restrict delete behaviour as <see cref="TestLinkRestrict"/>, but with its left and right
+    /// entity types swapped (<see cref="TestDso2"/> as left, <see cref="TestDso"/> as right), so the
+    /// restricted entity is type 99 instead of type 100. Lets tests cover both PK orderings of the two
+    /// entity types. Uses its own unused link type id.
+    /// </summary>
+    public static readonly LinkDefinition TestLinkRestrict2 = new()
+    {
+        Left = TestDso2.DsoVersion.EntityType,
+        Right = TestDso.DsoVersion.EntityType,
+        Link = new LinkType(9901, "TestLinkRestrict2"),
+        OnRightDelete = LinkDeleteBehavior.Restrict
     };
 }

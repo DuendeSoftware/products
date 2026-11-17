@@ -7,6 +7,7 @@ using Duende.Storage.Internal.Telemetry;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Duende.Storage.Internal;
 
@@ -28,8 +29,11 @@ internal static class StoreServiceCollectionExtensions
             services.TryAddSingleton<DataStorageTypeRegistry>();
             // Options pattern: ConfigureOutboxProcessor() callers and the host supplying the
             // storage key each contribute an IConfigureOptions, so they compose regardless of
-            // registration order. OutboxProcessor consumes IOptions<T> directly.
-            _ = services.AddOptions<OutboxProcessorOptions>();
+            // registration order. OutboxProcessor consumes IOptions<T> directly. The validator
+            // rejects a negative MaxRetries when the host starts, or on first resolution of
+            // OutboxProcessor when there is no host.
+            _ = services.AddOptions<OutboxProcessorOptions>().ValidateOnStart();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<OutboxProcessorOptions>, OutboxProcessorOptionsValidator>());
             services.TryAddTransient<IAmbientOutboxProcessingContextProvider, DefaultAmbientOutboxProcessingContextProvider>();
 
             _ = services.AddKeyedSingleton<OutboxSubscriptions>(storageInstanceId);

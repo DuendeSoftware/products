@@ -17,7 +17,7 @@ namespace Duende.Storage.Schema;
 internal sealed class DefaultStorageInstanceSchemaFactory(IServiceProvider services)
     : IStorageInstanceSchemaFactory
 {
-    public Task<IStorageInstanceSchema> GetStorageInstanceSchema(StorageInstanceId storageInstanceId, CancellationToken ct)
+    public Task<IStorageInstanceSchema> GetStorageInstanceSchema(StorageInstanceId storageInstanceId, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(storageInstanceId);
 

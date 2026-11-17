@@ -26,6 +26,11 @@ public partial class StoreLinkQueryTests
     private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
 }
 
+public partial class StoreLinkIntegrityTests
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
+}
+
 public partial class StoreOutboxOperations
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
@@ -81,7 +86,17 @@ public partial class QueryStoreCursorPagingTests
     private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
 }
 
-public partial class QueryStoreCursorBidirectionalPagingTests
+public partial class QueryStoreDsoVersionTests
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
+}
+
+public partial class QueryStoreCursorTraversalTests
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
+}
+
+public partial class QueryStoreLinkFilterTests
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new SqliteStorageEngineFixtureFactory();
 }

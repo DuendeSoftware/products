@@ -207,7 +207,6 @@
   </Folder>
   <Folder Name="/storage/" />
   <Folder Name="/storage/hosts/">
-    <Project Path="storage/hosts/EavSchema/EavSchema.csproj" />
     <Project Path="storage/hosts/EntityLinking/EntityLinking.csproj" />
     <Project Path="storage/hosts/GettingStarted/GettingStarted.csproj" />
   </Folder>

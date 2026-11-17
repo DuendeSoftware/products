@@ -97,7 +97,7 @@ public interface IStorageFixtureFactory
     /// Creates a fresh storage fixture backed by a new database.
     /// The returned fixture must be disposed to clean up the database.
     /// </summary>
-    Task<IStorageFixture> CreateAsync(CancellationToken ct, Action<IServiceCollection>? configureServices = null);
+    Task<IStorageFixture> CreateAsync(Ct ct, Action<IServiceCollection>? configureServices = null);
     void AddStorageInstance(IStorageBuilder storage);
 }
 

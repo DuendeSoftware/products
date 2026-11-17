@@ -21,7 +21,7 @@ internal sealed class ProvisionedTestDatabase(
     public string ConnectionString { get; } = connectionString;
     public NpgsqlDataSource DataSource { get; } = NpgsqlDataSource.Create(connectionString);
 
-    public async Task CreateAsync(CancellationToken ct)
+    public async Task CreateAsync(Ct ct)
     {
         if (!_created)
         {

@@ -18,7 +18,7 @@ public abstract record HandleOutcomeResult
     public static HandleOutcomeResult Success() => SuccessResult.Instance;
 
     /// <summary>
-    /// Returns a retry outcome — the event could not be processed and should be retried after a delay.
+    /// Returns a retry outcome — the event could not be processed and should be retried on a later processing pass.
     /// </summary>
     /// <param name="reason">Human-readable reason for the retry request.</param>
     public static HandleOutcomeResult Retry(string reason) => new RetryResult(reason);

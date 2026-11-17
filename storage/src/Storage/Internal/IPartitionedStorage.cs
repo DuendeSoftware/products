@@ -7,8 +7,7 @@ using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.Storage.Internal.Pagination;
 using OutboxEventId = Duende.Storage.Internal.Outbox.OutboxEventId;
 
 namespace Duende.Storage.Internal;
@@ -128,6 +127,8 @@ public interface IPartitionedStorage
 
     /// <summary>
     /// Deletes an entity from the store by its unique identifier, writing outbox events atomically.
+    /// Fails with <see cref="DeleteResult.StillLinked"/>, with no change persisted, if the entity is the right
+    /// side of a <see cref="LinkDeleteBehavior.Restrict"/> link that still exists.
     /// </summary>
     /// <param name="entityType">The type of entity to delete.</param>
     /// <param name="id">The unique identifier of the entity to delete.</param>
@@ -140,6 +141,8 @@ public interface IPartitionedStorage
 
     /// <summary>
     /// Deletes an entity from the store by an alternate key, writing outbox events atomically.
+    /// Fails with <see cref="DeleteResult.StillLinked"/>, with no change persisted, if the entity is the right
+    /// side of a <see cref="LinkDeleteBehavior.Restrict"/> link that still exists.
     /// </summary>
     /// <param name="entityType">The type of entity to delete.</param>
     /// <param name="key">The alternate key identifying the entity to delete.</param>
@@ -153,7 +156,8 @@ public interface IPartitionedStorage
     /// <summary>
     /// Creates a link between two entities, writing outbox events atomically.
     /// The link is unique per (LinkType, LeftId, RightId).
-    /// No referential integrity check — the entities do not need to exist.
+    /// Both entities must already exist in this pool as the entity types the <paramref name="definition"/> names
+    /// (a foreign key enforces this in the database); otherwise the link is rejected.
     /// </summary>
     /// <param name="definition">The link definition describing the relationship schema.</param>
     /// <param name="leftEntityId">The ID of the left-side entity.</param>
@@ -162,7 +166,9 @@ public interface IPartitionedStorage
     /// Pass <c>[]</c> when no events are needed.
     /// Silently ignored when the outbox is not enabled.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns><see cref="LinkResult.Success"/> if created, <see cref="LinkResult.AlreadyLinked"/> if the exact link already exists.</returns>
+    /// <returns><see cref="LinkResult.Success"/> if created, <see cref="LinkResult.AlreadyLinked"/> if the exact link
+    /// already exists, or <see cref="LinkResult.DoesNotExist"/> if one or both endpoints don't exist in this pool
+    /// with the definition's entity types.</returns>
     Task<LinkResult> LinkAsync(LinkDefinition definition, UuidV7 leftEntityId, UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct);
 
     /// <summary>
@@ -180,30 +186,15 @@ public interface IPartitionedStorage
     Task<UnlinkResult> UnlinkAsync(LinkDefinition definition, UuidV7 leftEntityId, UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct);
 
     /// <summary>
-    /// Purges all data for the current pool: entities (which cascades to keys and search_values),
-    /// entity_links, and outbox_subscriber_queue rows. This is a destructive, irreversible operation.
-    /// Deletes are performed in batches to avoid transaction log exhaustion and lock escalation.
-    /// Uses a default batch size of 10,000.
-    /// </summary>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A summary of purged row counts per table.</returns>
-    Task<PurgeResult> PurgePoolAsync(Ct ct);
-
-    /// <summary>
-    /// Purges all data for the current pool: entities (which cascades to keys and search_values),
-    /// entity_links, and outbox_subscriber_queue rows. This is a destructive, irreversible operation.
-    /// Deletes are performed in batches to avoid transaction log exhaustion and lock escalation.
-    /// </summary>
-    /// <param name="batchSize">Maximum number of rows to delete per table per batch iteration.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A summary of purged row counts per table.</returns>
-    Task<PurgeResult> PurgePoolAsync(int batchSize, Ct ct);
-
-    /// <summary>
     /// Executes multiple operations atomically in a single transaction, writing outbox events atomically.
     /// Operations are executed in order until completion or first failure.
     /// If any operation fails, execution stops immediately and all operations are rolled back.
     /// Outbox events are INSERTed after all operations succeed but before the transaction is committed.
+    /// A link operation fails with <see cref="OperationOutcome.DoesNotExist"/> when one or both endpoints
+    /// don't exist in this pool with the link definition's entity types; a delete operation fails with
+    /// <see cref="OperationOutcome.StillLinked"/> when the entity is the right side of a
+    /// <see cref="LinkDeleteBehavior.Restrict"/> link that still exists. Create entities before linking them,
+    /// and unlink or delete the left side before deleting a restricted right side, within the same batch.
     /// </summary>
     /// <param name="operations">The operations to execute.</param>
     /// <param name="outboxEvents">Outbox events to INSERT atomically within the same transaction,
@@ -221,20 +212,21 @@ public interface IPartitionedStorage
 
     /// <summary>
     /// Queries entities with the specified pagination strategy.
+    /// Each item is deserialized as the DSO type registered for the schema version it was stored with,
+    /// the same as a direct read by id, so callers convert older versions themselves.
     /// </summary>
-    /// <typeparam name="TDso">The type of the DSO to query.</typeparam>
     /// <param name="entityType">The entity type to query.</param>
     /// <param name="filter">The filter expression to apply.</param>
     /// <param name="sort">Sort parameter. Use SortParameter.Empty if no sorting is required.</param>
     /// <param name="dataRange">The pagination strategy (page, offset, or continuation token).</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A query result containing items and pagination metadata.</returns>
-    Task<QueryResult<MetadataEnvelope<TDso>>> QueryAsync<TDso>(
+    Task<QueryResult<MetadataEnvelope>> QueryAsync(
         EntityType entityType,
         IQueryExpression filter,
         SortParameter sort,
         DataRange dataRange,
-        Ct ct) where TDso : IDataStorageObject;
+        Ct ct);
 
     /// <summary>
     /// Queries for specific field values with the specified pagination strategy.
@@ -248,7 +240,7 @@ public interface IPartitionedStorage
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A query result containing projected field values and pagination metadata.</returns>
     /// <remarks>
-    /// Only fields that are stored as search fields (EAV indexed values) can be projected.
+    /// Only fields that are stored as search fields (indexed search-field values) can be projected.
     /// Non-indexed attribute values are not written to the search index and will not appear
     /// in projected results, even if the field path is included in <paramref name="fields"/>.
     /// </remarks>
@@ -262,16 +254,57 @@ public interface IPartitionedStorage
 
     /// <summary>
     /// Queries for entities reachable via a chain of link traversals.
+    /// Each item is deserialized as the DSO type registered for the schema version it was stored with.
     /// </summary>
-    /// <typeparam name="TDso">The source entity type to return.</typeparam>
     /// <param name="query">The link query descriptor describing the traversal chain and filter.</param>
     /// <param name="dataRange">The pagination strategy.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A query result containing entities of the source type reachable via the link chain.</returns>
-    Task<QueryResult<MetadataEnvelope<TDso>>> QueryLinksAsync<TDso>(
+    Task<QueryResult<MetadataEnvelope>> QueryLinksAsync(
         LinkQueryDescriptor query,
         DataRange dataRange,
-        Ct ct) where TDso : IDataStorageObject;
+        Ct ct);
+
+    /// <summary>
+    /// Queries the entities reachable from many <c>WhereAny</c> entities in one command, keeping track of
+    /// which entity each result was reached from. Each item is deserialized as the DSO type registered for
+    /// the schema version it was stored with.
+    /// </summary>
+    /// <param name="query">
+    /// The link query descriptor. <see cref="LinkQueryDescriptor.WhereEntityIds"/> must be set;
+    /// otherwise an <see cref="ArgumentException"/> is thrown. An empty set returns an empty result without
+    /// querying the database.
+    /// </param>
+    /// <param name="dataRange">
+    /// The pagination strategy. Only page and offset ranges are supported;
+    /// a continuation token throws <see cref="NotSupportedException"/>.
+    /// </param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>
+    /// Distinct (anchor, entity) pairs, grouped by anchor. The order is stable across pages of the same query,
+    /// but the order of anchors and entities is defined by the database provider and is not <see cref="UuidV7"/> order.
+    /// Anchors without links are absent. <see cref="QueryResult{TItem}.HasPreviousData"/> is <c>true</c> only when the
+    /// range skips items and the page contains items.
+    /// <see cref="QueryResult{TItem}.TotalCount"/> and <see cref="QueryResult{TItem}.TotalPages"/> are <c>null</c>.
+    /// </returns>
+    Task<QueryResult<LinkedEnvelope>> QueryLinksByAnchorAsync(
+        LinkQueryDescriptor query,
+        DataRange dataRange,
+        Ct ct);
+
+    /// <summary>
+    /// Counts the distinct source entities reachable from each <c>WhereAny</c> entity in one command.
+    /// </summary>
+    /// <param name="query">
+    /// The link query descriptor. <see cref="LinkQueryDescriptor.WhereEntityIds"/> must be set;
+    /// otherwise an <see cref="ArgumentException"/> is thrown. An empty set returns an empty dictionary
+    /// without querying the database.
+    /// </param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A count for every requested id, <c>0</c> when it has no links.</returns>
+    Task<IReadOnlyDictionary<UuidV7, long>> CountLinksAsync(
+        LinkQueryDescriptor query,
+        Ct ct);
 
     /// <summary>
     /// Counts entities matching the specified filter, or all entities if no filter is provided.
@@ -321,4 +354,30 @@ public interface ICrossPartitionStorage
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Number of entities deleted.</returns>
     Task<int> PurgeExpiredAsync(int batchSize, Ct ct);
+
+    /// <summary>
+    /// Purges all data for the given pool in this storage instance: entities (which cascades to keys
+    /// and search_values), entity_links, and outbox_subscriber_queue rows. This affects every
+    /// <c>DataCategory</c> stored in this instance for that pool, and only this instance; other
+    /// pools and other storage instances are untouched. This is a destructive, irreversible operation.
+    /// Deletes are performed in batches to avoid transaction log exhaustion and lock escalation.
+    /// Uses a default batch size of 10,000.
+    /// </summary>
+    /// <param name="poolId">The pool whose data is purged.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A summary of purged row counts per table.</returns>
+    Task<PurgeResult> PurgePoolAsync(PoolId poolId, Ct ct);
+
+    /// <summary>
+    /// Purges all data for the given pool in this storage instance: entities (which cascades to keys
+    /// and search_values), entity_links, and outbox_subscriber_queue rows. This affects every
+    /// <c>DataCategory</c> stored in this instance for that pool, and only this instance; other
+    /// pools and other storage instances are untouched. This is a destructive, irreversible operation.
+    /// Deletes are performed in batches to avoid transaction log exhaustion and lock escalation.
+    /// </summary>
+    /// <param name="poolId">The pool whose data is purged.</param>
+    /// <param name="batchSize">Maximum number of rows to delete per table per batch iteration.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A summary of purged row counts per table.</returns>
+    Task<PurgeResult> PurgePoolAsync(PoolId poolId, int batchSize, Ct ct);
 }

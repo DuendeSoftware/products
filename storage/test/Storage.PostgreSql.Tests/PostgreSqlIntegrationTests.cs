@@ -31,6 +31,12 @@ public partial class StoreLinkQueryTests(AspireFixture fixture)
 }
 
 [Collection("PostgreSqlIntegration")]
+public partial class StoreLinkIntegrityTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("PostgreSqlIntegration")]
 public partial class StoreOutboxOperations(AspireFixture fixture)
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
@@ -97,7 +103,13 @@ public partial class QueryStoreCursorPagingTests(AspireFixture fixture)
 }
 
 [Collection("PostgreSqlIntegration")]
-public partial class QueryStoreCursorBidirectionalPagingTests(AspireFixture fixture)
+public partial class QueryStoreDsoVersionTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("PostgreSqlIntegration")]
+public partial class QueryStoreCursorTraversalTests(AspireFixture fixture)
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
 }
@@ -116,6 +128,12 @@ public partial class QueryStorePagingTests(AspireFixture fixture)
 
 [Collection("PostgreSqlIntegration")]
 public partial class QueryStoreSortTests(AspireFixture fixture)
+{
+    private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
+}
+
+[Collection("PostgreSqlIntegration")]
+public partial class QueryStoreLinkFilterTests(AspireFixture fixture)
 {
     private IStorageFixtureFactory FixtureFactory { get; } = new PostgreSqlStorageEngineFixtureFactory(fixture);
 }

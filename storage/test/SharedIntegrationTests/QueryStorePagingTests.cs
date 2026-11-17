@@ -7,9 +7,8 @@ using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
-using SortDirection = Duende.Storage.Querying.SortDirection;
+using Duende.Storage.Internal.Pagination;
+using SortDirection = Duende.Storage.Internal.Querying.SortDirection;
 using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 
 namespace Duende.Storage.IntegrationTests;
@@ -79,13 +78,13 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 3);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.Name.ShouldBe("Item01");
-        result.Items[1].Value.Name.ShouldBe("Item02");
-        result.Items[2].Value.Name.ShouldBe("Item03");
+        ((TestPageDso)result.Items[0].Value).Name.ShouldBe("Item01");
+        ((TestPageDso)result.Items[1].Value).Name.ShouldBe("Item02");
+        ((TestPageDso)result.Items[2].Value).Name.ShouldBe("Item03");
         result.TotalCount.ShouldBe(10);
         result.TotalPages.ShouldBe(4);
         result.HasMoreData.ShouldBeTrue();
@@ -137,30 +136,30 @@ public partial class QueryStorePagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act - Page 1
-        var page1 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 3), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 3), Ct.None);
 
         // Act - Page 2
-        var page2 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 3), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 3), Ct.None);
 
         // Act - Page 3
-        var page3 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 3), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 3), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(3);
-        page1.Items[0].Value.Rank.ShouldBe(1);
-        page1.Items[2].Value.Rank.ShouldBe(3);
+        ((TestPageDso)page1.Items[0].Value).Rank.ShouldBe(1);
+        ((TestPageDso)page1.Items[2].Value).Rank.ShouldBe(3);
         page1.HasMoreData.ShouldBeTrue();
         page1.TotalPages.ShouldBe(4);
 
         page2.Items.Count.ShouldBe(3);
-        page2.Items[0].Value.Rank.ShouldBe(4);
-        page2.Items[2].Value.Rank.ShouldBe(6);
+        ((TestPageDso)page2.Items[0].Value).Rank.ShouldBe(4);
+        ((TestPageDso)page2.Items[2].Value).Rank.ShouldBe(6);
         page2.HasMoreData.ShouldBeTrue();
         page2.TotalPages.ShouldBe(4);
 
         page3.Items.Count.ShouldBe(3);
-        page3.Items[0].Value.Rank.ShouldBe(7);
-        page3.Items[2].Value.Rank.ShouldBe(9);
+        ((TestPageDso)page3.Items[0].Value).Rank.ShouldBe(7);
+        ((TestPageDso)page3.Items[2].Value).Rank.ShouldBe(9);
         page3.HasMoreData.ShouldBeTrue();
         page3.TotalPages.ShouldBe(4);
     }
@@ -218,11 +217,11 @@ public partial class QueryStorePagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act - Navigate to last page
-        var page3 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 3), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 3), Ct.None);
 
         // Assert
         page3.Items.Count.ShouldBe(1);
-        page3.Items[0].Value.Rank.ShouldBe(35);
+        ((TestPageDso)page3.Items[0].Value).Rank.ShouldBe(35);
         page3.TotalCount.ShouldBe(7);
         page3.TotalPages.ShouldBe(3);
         page3.HasMoreData.ShouldBeFalse();
@@ -271,7 +270,7 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -297,9 +296,9 @@ public partial class QueryStorePagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act - Request multiple pages
-        var page1 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 5), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 5), Ct.None);
 
         // Assert - Total count and total pages should be consistent across all pages
         page1.TotalCount.ShouldBe(15);
@@ -329,7 +328,7 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 5);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert - Should only count items matching the filter (11-20 = 10 items)
         result.Items.Count.ShouldBe(5);
@@ -355,7 +354,7 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 3);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Should be ordered by ID when no sort is specified
         result.Items.Count.ShouldBe(3);
@@ -380,12 +379,12 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 4);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(4);
-        result.Items[0].Value.Rank.ShouldBe(90);  // Highest first
-        result.Items[3].Value.Rank.ShouldBe(60);
+        ((TestPageDso)result.Items[0].Value).Rank.ShouldBe(90);  // Highest first
+        ((TestPageDso)result.Items[3].Value).Rank.ShouldBe(60);
         result.TotalCount.ShouldBe(9);
         result.TotalPages.ShouldBe(3);
         result.HasMoreData.ShouldBeTrue();
@@ -408,7 +407,7 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(10, 5); // Page 10 when only 1 page exists
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -434,21 +433,21 @@ public partial class QueryStorePagingTests
         var sort = new SortParameter(new NumberField("rank"), SortDirection.Descending);
 
         // Act - Page 1
-        var page1 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 2), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 2), Ct.None);
 
         // Act - Page 2
-        var page2 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 2), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 2), Ct.None);
 
         // Assert - All items with rank 100 should come before rank 50
         page1.Items.Count.ShouldBe(2);
-        page1.Items[0].Value.Rank.ShouldBe(100);
-        page1.Items[1].Value.Rank.ShouldBe(100);
+        ((TestPageDso)page1.Items[0].Value).Rank.ShouldBe(100);
+        ((TestPageDso)page1.Items[1].Value).Rank.ShouldBe(100);
         page1.TotalCount.ShouldBe(4);
         page1.TotalPages.ShouldBe(2);
         page2.Items.Count.ShouldBe(2);
-        page2.Items[0].Value.Rank.ShouldBe(100);
-        page2.Items[1].Value.Rank.ShouldBe(50);
-        page2.Items[1].Value.Name.ShouldBe("David");
+        ((TestPageDso)page2.Items[0].Value).Rank.ShouldBe(100);
+        ((TestPageDso)page2.Items[1].Value).Rank.ShouldBe(50);
+        ((TestPageDso)page2.Items[1].Value).Name.ShouldBe("David");
     }
 
     [Fact]
@@ -468,19 +467,19 @@ public partial class QueryStorePagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(5);
-        page1.Items[0].Value.Rank.ShouldBe(11);
-        page1.Items[4].Value.Rank.ShouldBe(15);
+        ((TestPageDso)page1.Items[0].Value).Rank.ShouldBe(11);
+        ((TestPageDso)page1.Items[4].Value).Rank.ShouldBe(15);
         page1.TotalCount.ShouldBe(10);
         page1.TotalPages.ShouldBe(2);
 
         page2.Items.Count.ShouldBe(5);
-        page2.Items[0].Value.Rank.ShouldBe(16);
-        page2.Items[4].Value.Rank.ShouldBe(20);
+        ((TestPageDso)page2.Items[0].Value).Rank.ShouldBe(16);
+        ((TestPageDso)page2.Items[4].Value).Rank.ShouldBe(20);
         page2.TotalCount.ShouldBe(10);
         page2.TotalPages.ShouldBe(2);
     }
@@ -499,11 +498,11 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("OnlyOne");
+        ((TestPageDso)result.Items[0].Value).Name.ShouldBe("OnlyOne");
         result.TotalCount.ShouldBe(1);
         result.TotalPages.ShouldBe(1);
         result.HasMoreData.ShouldBeFalse();
@@ -526,7 +525,7 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 100);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(5);
@@ -582,13 +581,13 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 3);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddDays(1));
-        result.Items[1].Value.CreatedAt.ShouldBe(baseDate.AddDays(2));
-        result.Items[2].Value.CreatedAt.ShouldBe(baseDate.AddDays(3));
+        ((TestPageDso)result.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddDays(1));
+        ((TestPageDso)result.Items[1].Value).CreatedAt.ShouldBe(baseDate.AddDays(2));
+        ((TestPageDso)result.Items[2].Value).CreatedAt.ShouldBe(baseDate.AddDays(3));
         result.TotalCount.ShouldBe(10);
         result.TotalPages.ShouldBe(4);
         result.HasMoreData.ShouldBeTrue();
@@ -612,14 +611,14 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(2, 4);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert - Should return most recent dates first, page 2
         result.Items.Count.ShouldBe(4);
-        result.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddHours(8));
-        result.Items[1].Value.CreatedAt.ShouldBe(baseDate.AddHours(7));
-        result.Items[2].Value.CreatedAt.ShouldBe(baseDate.AddHours(6));
-        result.Items[3].Value.CreatedAt.ShouldBe(baseDate.AddHours(5));
+        ((TestPageDso)result.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddHours(8));
+        ((TestPageDso)result.Items[1].Value).CreatedAt.ShouldBe(baseDate.AddHours(7));
+        ((TestPageDso)result.Items[2].Value).CreatedAt.ShouldBe(baseDate.AddHours(6));
+        ((TestPageDso)result.Items[3].Value).CreatedAt.ShouldBe(baseDate.AddHours(5));
         result.TotalCount.ShouldBe(12);
         result.TotalPages.ShouldBe(3);
         result.HasMoreData.ShouldBeTrue();
@@ -674,18 +673,18 @@ public partial class QueryStorePagingTests
         var sort = new SortParameter(new DateTimeField("recordedAt"));
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
 
         // Assert - Should only include items after cutoff (days 6-15 = 10 items)
         page1.Items.Count.ShouldBe(5);
-        page1.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddDays(6));
+        ((TestPageDso)page1.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddDays(6));
         page1.TotalCount.ShouldBe(10);
         page1.TotalPages.ShouldBe(2);
         page1.HasMoreData.ShouldBeTrue();
 
         page2.Items.Count.ShouldBe(5);
-        page2.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddDays(11));
+        ((TestPageDso)page2.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddDays(11));
         page2.TotalCount.ShouldBe(10);
         page2.TotalPages.ShouldBe(2);
         page2.HasMoreData.ShouldBeFalse();
@@ -713,14 +712,14 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 4);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert - false values should come before true (ascending)
         result.Items.Count.ShouldBe(4);
-        result.Items[0].Value.IsActive.ShouldBeFalse();
-        result.Items[1].Value.IsActive.ShouldBeFalse();
-        result.Items[2].Value.IsActive.ShouldBeFalse();
-        result.Items[3].Value.IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[0].Value).IsActive.ShouldBeFalse();
+        ((TestPageDso)result.Items[1].Value).IsActive.ShouldBeFalse();
+        ((TestPageDso)result.Items[2].Value).IsActive.ShouldBeFalse();
+        ((TestPageDso)result.Items[3].Value).IsActive.ShouldBeTrue();
         result.TotalCount.ShouldBe(7);
         result.TotalPages.ShouldBe(2);
         result.HasMoreData.ShouldBeTrue();
@@ -746,13 +745,13 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 4);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert - true values should come before false (descending)
         result.Items.Count.ShouldBe(4);
-        result.Items[0].Value.IsActive.ShouldBeTrue();
-        result.Items[1].Value.IsActive.ShouldBeTrue();
-        result.Items[2].Value.IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[0].Value).IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[1].Value).IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[2].Value).IsActive.ShouldBeTrue();
         result.TotalCount.ShouldBe(10);
         result.TotalPages.ShouldBe(3);
         result.HasMoreData.ShouldBeTrue();
@@ -810,14 +809,14 @@ public partial class QueryStorePagingTests
         var page = DataRange.FromPage(1, 5);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestPageDso>(_testEntityType, filter, sort, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, page, Ct.None);
 
         // Assert - Should include filtered items (rank > 30) sorted by isActive desc
         result.Items.Count.ShouldBe(5);
         // First results should be true (items 4-6 are active and rank > 30)
-        result.Items[0].Value.IsActive.ShouldBeTrue();
-        result.Items[1].Value.IsActive.ShouldBeTrue();
-        result.Items[2].Value.IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[0].Value).IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[1].Value).IsActive.ShouldBeTrue();
+        ((TestPageDso)result.Items[2].Value).IsActive.ShouldBeTrue();
         result.TotalCount.ShouldBe(9); // Items 4-12 = 9 items
         result.TotalPages.ShouldBe(2);
         result.HasMoreData.ShouldBeTrue();
@@ -845,11 +844,11 @@ public partial class QueryStorePagingTests
         // Act - Page through all results
         var retrievedRanks = new HashSet<int>();
         var pageNumber = 1;
-        QueryResult<MetadataEnvelope<TestPageDso>> result;
+        QueryResult<MetadataEnvelope> result;
 
         do
         {
-            result = await partitionedStorage.QueryAsync<TestPageDso>(
+            result = await partitionedStorage.QueryAsync(
                 _testEntityType,
                 filter,
                 SortParameter.Empty,
@@ -859,8 +858,8 @@ public partial class QueryStorePagingTests
             foreach (var item in result.Items)
             {
                 // Track by unique rank values
-                var wasAdded = retrievedRanks.Add(item.Value.Rank);
-                wasAdded.ShouldBeTrue($"Duplicate rank {item.Value.Rank} found - item returned multiple times");
+                var wasAdded = retrievedRanks.Add(((TestPageDso)item.Value).Rank);
+                wasAdded.ShouldBeTrue($"Duplicate rank {((TestPageDso)item.Value).Rank} found - item returned multiple times");
             }
 
             pageNumber++;
@@ -890,28 +889,28 @@ public partial class QueryStorePagingTests
         var pageSize = 7;
 
         // Act - Fetch multiple pages without sort
-        var page1 = await partitionedStorage.QueryAsync<TestPageDso>(
+        var page1 = await partitionedStorage.QueryAsync(
             _testEntityType,
             filter,
             SortParameter.Empty,
             DataRange.FromPage(1, pageSize),
             Ct.None);
 
-        var page2 = await partitionedStorage.QueryAsync<TestPageDso>(
+        var page2 = await partitionedStorage.QueryAsync(
             _testEntityType,
             filter,
             SortParameter.Empty,
             DataRange.FromPage(2, pageSize),
             Ct.None);
 
-        var page3 = await partitionedStorage.QueryAsync<TestPageDso>(
+        var page3 = await partitionedStorage.QueryAsync(
             _testEntityType,
             filter,
             SortParameter.Empty,
             DataRange.FromPage(3, pageSize),
             Ct.None);
 
-        var page4 = await partitionedStorage.QueryAsync<TestPageDso>(
+        var page4 = await partitionedStorage.QueryAsync(
             _testEntityType,
             filter,
             SortParameter.Empty,
@@ -967,11 +966,11 @@ public partial class QueryStorePagingTests
         // Act - Page through all results and collect ranks
         var retrievedRanks = new HashSet<int>();
         var pageNumber = 1;
-        QueryResult<MetadataEnvelope<TestPageDso>> result;
+        QueryResult<MetadataEnvelope> result;
 
         do
         {
-            result = await partitionedStorage.QueryAsync<TestPageDso>(
+            result = await partitionedStorage.QueryAsync(
                 _testEntityType,
                 filter,
                 SortParameter.Empty,
@@ -981,8 +980,8 @@ public partial class QueryStorePagingTests
             foreach (var item in result.Items)
             {
                 // Track by rank to ensure no duplicates
-                var wasAdded = retrievedRanks.Add(item.Value.Rank);
-                wasAdded.ShouldBeTrue($"Duplicate rank {item.Value.Rank} found - item returned multiple times");
+                var wasAdded = retrievedRanks.Add(((TestPageDso)item.Value).Rank);
+                wasAdded.ShouldBeTrue($"Duplicate rank {((TestPageDso)item.Value).Rank} found - item returned multiple times");
             }
 
             pageNumber++;
@@ -1071,11 +1070,11 @@ public partial class QueryStorePagingTests
         // Act - Page through filtered results
         var retrievedRanks = new HashSet<int>();
         var pageNumber = 1;
-        QueryResult<MetadataEnvelope<TestPageDso>> result;
+        QueryResult<MetadataEnvelope> result;
 
         do
         {
-            result = await partitionedStorage.QueryAsync<TestPageDso>(
+            result = await partitionedStorage.QueryAsync(
                 _testEntityType,
                 filter,
                 SortParameter.Empty,
@@ -1084,8 +1083,8 @@ public partial class QueryStorePagingTests
 
             foreach (var item in result.Items)
             {
-                var wasAdded = retrievedRanks.Add(item.Value.Rank);
-                wasAdded.ShouldBeTrue($"Duplicate rank {item.Value.Rank} found");
+                var wasAdded = retrievedRanks.Add(((TestPageDso)item.Value).Rank);
+                wasAdded.ShouldBeTrue($"Duplicate rank {((TestPageDso)item.Value).Rank} found");
             }
 
             pageNumber++;

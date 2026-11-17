@@ -37,7 +37,7 @@ internal sealed class PostgreSqlTestDatabaseProvisioner(string serverConnectionS
     /// <summary>
     /// Creates the database backing <paramref name="connectionString"/>.
     /// </summary>
-    internal async Task CreateAsync(string connectionString, CancellationToken ct)
+    internal async Task CreateAsync(string connectionString, Ct ct)
     {
         var dbName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         await using var ds = NpgsqlDataSource.Create(serverConnectionString);

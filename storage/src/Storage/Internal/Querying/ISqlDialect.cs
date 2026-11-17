@@ -62,4 +62,11 @@ internal interface ISqlDialect
     /// and SQLite returns the identifier unchanged.
     /// </summary>
     string QuoteIdentifier(string identifier) => identifier;
+
+    /// <summary>
+    /// Whether this dialect supports native <c>NULLS FIRST</c>/<c>NULLS LAST</c> ORDER BY syntax.
+    /// PostgreSQL and Oracle support it natively; SQLite and SQL Server emulate null ordering with a
+    /// <c>CASE WHEN ... IS NULL</c> expression instead.
+    /// </summary>
+    bool SupportsNullsOrdering => false;
 }

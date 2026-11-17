@@ -7,7 +7,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.IntegrationTests;
@@ -232,17 +232,17 @@ public partial class StoreTtlTests
             .ShouldBe(CreateResult.Success);
 
         // Before expiry
-        var beforeResult = await queryStorage.QueryAsync<TestDso>(
+        var beforeResult = await queryStorage.QueryAsync(
             EntityType, Query.All(), SortParameter.Empty, DataRange.FromPage(1, 100), _ct);
         beforeResult.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
 
         tp.Advance(TimeSpan.FromHours(2));
 
         // After expiry — both still returned (TTL is best-effort, domain decides)
-        var afterResult = await queryStorage.QueryAsync<TestDso>(
+        var afterResult = await queryStorage.QueryAsync(
             EntityType, Query.All(), SortParameter.Empty, DataRange.FromPage(1, 100), _ct);
-        afterResult.Items.ShouldContain(item => item.Value.Value == value1.Value);
-        afterResult.Items.ShouldContain(item => item.Value.Value == value2.Value);
+        afterResult.Items.Select(e => (TestDso)e.Value).ShouldContain(item => item.Value == value1.Value);
+        afterResult.Items.Select(e => (TestDso)e.Value).ShouldContain(item => item.Value == value2.Value);
     }
 
     [Fact]

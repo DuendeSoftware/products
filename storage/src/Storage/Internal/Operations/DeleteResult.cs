@@ -17,7 +17,8 @@ public enum DeleteResult
     Success,
 
     /// <summary>
-    /// A concurrency conflict occurred during deletion.
+    /// The delete was refused because the entity is the right side of a <see cref="LinkDeleteBehavior.Restrict"/>
+    /// link that still exists.
     /// </summary>
-    ConcurrencyConflict
+    StillLinked
 }

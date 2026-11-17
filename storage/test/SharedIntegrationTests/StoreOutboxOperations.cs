@@ -106,6 +106,8 @@ public partial class StoreOutboxOperations
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
         var evt = MakeEvent();
         var result = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [evt], _ct);
@@ -123,6 +125,8 @@ public partial class StoreOutboxOperations
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
         _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
         var evt = MakeEvent();

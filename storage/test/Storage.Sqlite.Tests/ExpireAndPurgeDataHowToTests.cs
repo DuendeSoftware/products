@@ -9,7 +9,7 @@ using Duende.Storage.Internal.Outbox;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.Sqlite;
@@ -197,7 +197,7 @@ public sealed class ExpireAndPurgeDataHowToTests
         // Storage does not filter expired-but-not-yet-purged rows out of reads or queries.
         var read = await storage.TryReadAsync(SessionTokenDso.EntityType, id, ct);
 
-        var queryResult = await storage.QueryAsync<SessionTokenDso.V1>(
+        var queryResult = await storage.QueryAsync(
             SessionTokenDso.EntityType, Query.All(), SortParameter.Empty, DataRange.FromPage(1, 100), ct);
 
         var count = await storage.CountAsync(SessionTokenDso.EntityType, null, ct);
@@ -314,7 +314,11 @@ public sealed class ExpireAndPurgeDataHowToTests
         var tp = new FakeTimeProvider(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
         await using var fixture = await CreateFixtureAsync(tp, ct);
         var storage = fixture.PartitionedStorage;
+        var crossPartitionStorageFactory = fixture.CrossPartitionStorageFactory;
+        var storageInstanceId = StorageInstanceId.Default;
+        PoolId tenantPoolId = 2;
 
+        storage.SetPoolId(tenantPoolId);
         var id = UuidV7.New();
         // Not expired, so PurgePoolAsync removes it anyway, unlike PurgeExpiredAsync.
         _ = await storage.CreateAsync(
@@ -322,12 +326,14 @@ public sealed class ExpireAndPurgeDataHowToTests
             Expiration.NoExpiration, [], ct);
 
         // begin-snippet: expire-purge-pool
-        // Deletes every entity, link, and outbox row in the pool this IPartitionedStorage is
-        // scoped to, for example, when a tenant (Duende.Spaces space) is deleted outright.
-        var result = await storage.PurgePoolAsync(ct);
+        // Deletes every entity, link, and outbox row for the tenant's pool in this storage instance,
+        // across all data categories, for example, when a tenant (Duende.Spaces space) is deleted outright.
+        // The pool's data may span several storage instances, so call this once per instance.
+        var crossPartitionStorage = await crossPartitionStorageFactory.GetCrossPartitionStorageAsync(storageInstanceId, ct);
+        var result = await crossPartitionStorage.PurgePoolAsync(tenantPoolId, ct);
         // end-snippet
 
-        result.EntitiesDeleted.ShouldBeGreaterThanOrEqualTo(1);
+        result.EntitiesDeleted.ShouldBe(1);
         (await storage.TryReadAsync(SessionTokenDso.EntityType, id, ct)).Found.ShouldBeFalse();
     }
 
@@ -350,7 +356,7 @@ public sealed class ExpireAndPurgeDataHowToTests
             id, new SessionTokenDso.V1("alice", "spa-client"), [], SearchFieldCollection.Empty,
             Expiration.NoExpiration, [], ct);
 
-        var result = await storage.PurgePoolAsync(ct);
+        var result = await crossPartitionStorage.PurgePoolAsync(PoolId.Default, ct);
         result.EntitiesDeleted.ShouldBeGreaterThanOrEqualTo(1);
 
         // Purging a pool deletes any outbox rows it finds; it does not write new EntityExpired

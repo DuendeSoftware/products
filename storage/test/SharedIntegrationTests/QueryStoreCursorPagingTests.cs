@@ -7,8 +7,8 @@ using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
-using SortDirection = Duende.Storage.Querying.SortDirection;
+using Duende.Storage.Internal.Pagination;
+using SortDirection = Duende.Storage.Internal.Querying.SortDirection;
 using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 
 namespace Duende.Storage.IntegrationTests;
@@ -77,13 +77,13 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 3);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items[0].Value.Name.ShouldBe("Item01");
-        result.Items[1].Value.Name.ShouldBe("Item02");
-        result.Items[2].Value.Name.ShouldBe("Item03");
+        ((TestCursorDso)result.Items[0].Value).Name.ShouldBe("Item01");
+        ((TestCursorDso)result.Items[1].Value).Name.ShouldBe("Item02");
+        ((TestCursorDso)result.Items[2].Value).Name.ShouldBe("Item03");
         _ = result.NextToken.ShouldNotBeNull();
         result.HasMoreData.ShouldBeTrue();
     }
@@ -134,30 +134,30 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 3);
 
         // Act - Page 1
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Act - Page 2 using NextToken from page 1
         var cursor2 = DataRange.FromContinuationToken(page1.NextToken!.Value, 3);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor2, Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor2, Ct.None);
 
         // Act - Page 3 using NextToken from page 2
         var cursor3 = DataRange.FromContinuationToken(page2.NextToken!.Value, 3);
-        var page3 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor3, Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor3, Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(3);
-        page1.Items[0].Value.Rank.ShouldBe(1);
-        page1.Items[2].Value.Rank.ShouldBe(3);
+        ((TestCursorDso)page1.Items[0].Value).Rank.ShouldBe(1);
+        ((TestCursorDso)page1.Items[2].Value).Rank.ShouldBe(3);
         page1.HasMoreData.ShouldBeTrue();
 
         page2.Items.Count.ShouldBe(3);
-        page2.Items[0].Value.Rank.ShouldBe(4);
-        page2.Items[2].Value.Rank.ShouldBe(6);
+        ((TestCursorDso)page2.Items[0].Value).Rank.ShouldBe(4);
+        ((TestCursorDso)page2.Items[2].Value).Rank.ShouldBe(6);
         page2.HasMoreData.ShouldBeTrue();
 
         page3.Items.Count.ShouldBe(3);
-        page3.Items[0].Value.Rank.ShouldBe(7);
-        page3.Items[2].Value.Rank.ShouldBe(9);
+        ((TestCursorDso)page3.Items[0].Value).Rank.ShouldBe(7);
+        ((TestCursorDso)page3.Items[2].Value).Rank.ShouldBe(9);
         page3.HasMoreData.ShouldBeTrue();
     }
 
@@ -212,13 +212,13 @@ public partial class QueryStoreCursorPagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act - Navigate to last page
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(ContinuationToken.Beginning, 3), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(page2.NextToken!.Value, 3), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(ContinuationToken.Beginning, 3), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(page2.NextToken!.Value, 3), Ct.None);
 
         // Assert
         page3.Items.Count.ShouldBe(1);
-        page3.Items[0].Value.Rank.ShouldBe(35);
+        ((TestCursorDso)page3.Items[0].Value).Rank.ShouldBe(35);
         _ = page3.NextToken.ShouldNotBeNull(); // Token always set when items exist (enables resumption)
         page3.HasMoreData.ShouldBeFalse();
     }
@@ -265,47 +265,72 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
-        // Assert
+        // Assert — an empty page carries the position it was given: both tokens stay set
         result.Items.Count.ShouldBe(0);
-        result.NextToken.ShouldBeNull();
+        _ = result.NextToken.ShouldNotBeNull();
+        _ = result.PreviousToken.ShouldNotBeNull();
         result.HasMoreData.ShouldBeFalse();
+        result.HasPreviousData.ShouldBeFalse();
     }
 
     [Fact]
-    public async Task QueryCursorWithoutSortShouldThrowArgumentNullExceptionAsync()
+    public async Task QueryCursorWithoutSortShouldNotThrowAndShouldOrderByEntityIdAsync()
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
         var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(partitionedStorage, "Item1", 10);
+        var id1 = await CreateEntityAsync(partitionedStorage, "Item1", 10);
+        var id2 = await CreateEntityAsync(partitionedStorage, "Item2", 20);
+        var id3 = await CreateEntityAsync(partitionedStorage, "Item3", 30);
 
         var filter = Query.All();
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 10);
 
-        // Act & Assert
-        _ = await Should.ThrowAsync<ArgumentNullException>(async () =>
-            await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, null!, cursor, Ct.None));
+        // Act — unsorted cursor queries no longer throw; they order the same way unsorted offset
+        // paging orders them, i.e. the provider's own ORDER BY entity_id (not .NET Guid order:
+        // SQL Server orders uniqueidentifier by byte groups, not .NET's Guid.CompareTo).
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, cursor, Ct.None);
+        var offsetResult = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, DataRange.FromOffset(0, 10), Ct.None);
+        var expectedOrder = offsetResult.Items.Select(i => i.Id).ToList();
+
+        // Assert
+        result.Items.Count.ShouldBe(3);
+        expectedOrder.ToHashSet().SetEquals([id1.Value, id2.Value, id3.Value]).ShouldBeTrue();
+        result.Items.Select(i => i.Id).ShouldBe(expectedOrder);
+        _ = result.NextToken.ShouldNotBeNull();
+        _ = result.PreviousToken.ShouldNotBeNull();
     }
 
     [Fact]
-    public async Task QueryFieldsCursorWithoutSortShouldThrowArgumentNullExceptionAsync()
+    public async Task QueryFieldsCursorWithoutSortShouldNotThrowAndShouldOrderByEntityIdAsync()
     {
         // Arrange
         await using var fixture = await CreateProviderAsync();
         var partitionedStorage = fixture.PartitionedStorage;
 
-        _ = await CreateEntityAsync(partitionedStorage, "Item1", 10);
+        var id1 = await CreateEntityAsync(partitionedStorage, "Item1", 10);
+        var id2 = await CreateEntityAsync(partitionedStorage, "Item2", 20);
 
         var filter = Query.All();
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 10);
         var fields = new List<Field> { new StringField("name") };
 
-        // Act & Assert
-        _ = await Should.ThrowAsync<ArgumentNullException>(async () =>
-            await partitionedStorage.QueryFieldsAsync(_testEntityType, fields, filter, null!, cursor, Ct.None));
+        // Act — unsorted cursor queries no longer throw; they order the same way unsorted offset
+        // paging orders them, i.e. the provider's own ORDER BY entity_id (not .NET Guid order:
+        // SQL Server orders uniqueidentifier by byte groups, not .NET's Guid.CompareTo).
+        var result = await partitionedStorage.QueryFieldsAsync(_testEntityType, fields, filter, SortParameter.Empty, cursor, Ct.None);
+        var offsetResult = await partitionedStorage.QueryFieldsAsync(_testEntityType, fields, filter, SortParameter.Empty, DataRange.FromOffset(0, 10), Ct.None);
+        var expectedOrder = offsetResult.Items.Select(i => i.Id).ToList();
+
+        // Assert
+        result.Items.Count.ShouldBe(2);
+        expectedOrder.ToHashSet().SetEquals([id1.Value, id2.Value]).ShouldBeTrue();
+        result.Items.Select(i => i.Id).ShouldBe(expectedOrder);
+        _ = result.NextToken.ShouldNotBeNull();
+        _ = result.PreviousToken.ShouldNotBeNull();
     }
 
     [Fact]
@@ -326,21 +351,21 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 2);
 
         // Act - Page 1
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Act - Page 2
         var cursor2 = DataRange.FromContinuationToken(page1.NextToken!.Value, 2);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor2, Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor2, Ct.None);
 
         // Assert - All items with rank 100 should come before rank 50
         page1.Items.Count.ShouldBe(2);
-        page1.Items[0].Value.Rank.ShouldBe(100);
-        page1.Items[1].Value.Rank.ShouldBe(100);
+        ((TestCursorDso)page1.Items[0].Value).Rank.ShouldBe(100);
+        ((TestCursorDso)page1.Items[1].Value).Rank.ShouldBe(100);
 
         page2.Items.Count.ShouldBe(2);
-        page2.Items[0].Value.Rank.ShouldBe(100);
-        page2.Items[1].Value.Rank.ShouldBe(50);
-        page2.Items[1].Value.Name.ShouldBe("David");
+        ((TestCursorDso)page2.Items[0].Value).Rank.ShouldBe(100);
+        ((TestCursorDso)page2.Items[1].Value).Rank.ShouldBe(50);
+        ((TestCursorDso)page2.Items[1].Value).Name.ShouldBe("David");
     }
 
     [Fact]
@@ -360,12 +385,12 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 4);
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(4);
-        page1.Items[0].Value.Rank.ShouldBe(90);  // Highest first
-        page1.Items[3].Value.Rank.ShouldBe(60);
+        ((TestCursorDso)page1.Items[0].Value).Rank.ShouldBe(90);  // Highest first
+        ((TestCursorDso)page1.Items[3].Value).Rank.ShouldBe(60);
         page1.HasMoreData.ShouldBeTrue();
     }
 
@@ -387,17 +412,17 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 5);
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 5), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 5), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(5);
-        page1.Items[0].Value.Rank.ShouldBe(11);
-        page1.Items[4].Value.Rank.ShouldBe(15);
+        ((TestCursorDso)page1.Items[0].Value).Rank.ShouldBe(11);
+        ((TestCursorDso)page1.Items[4].Value).Rank.ShouldBe(15);
 
         page2.Items.Count.ShouldBe(5);
-        page2.Items[0].Value.Rank.ShouldBe(16);
-        page2.Items[4].Value.Rank.ShouldBe(20);
+        ((TestCursorDso)page2.Items[0].Value).Rank.ShouldBe(16);
+        ((TestCursorDso)page2.Items[4].Value).Rank.ShouldBe(20);
     }
 
     [Fact]
@@ -414,11 +439,11 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("OnlyOne");
+        ((TestCursorDso)result.Items[0].Value).Name.ShouldBe("OnlyOne");
         _ = result.NextToken.ShouldNotBeNull(); // Token always set when items exist
         result.HasMoreData.ShouldBeFalse();
     }
@@ -441,20 +466,20 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 3);
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(3);
-        page1.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddDays(1));
-        page1.Items[1].Value.CreatedAt.ShouldBe(baseDate.AddDays(2));
-        page1.Items[2].Value.CreatedAt.ShouldBe(baseDate.AddDays(3));
+        ((TestCursorDso)page1.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddDays(1));
+        ((TestCursorDso)page1.Items[1].Value).CreatedAt.ShouldBe(baseDate.AddDays(2));
+        ((TestCursorDso)page1.Items[2].Value).CreatedAt.ShouldBe(baseDate.AddDays(3));
         page1.HasMoreData.ShouldBeTrue();
 
         page2.Items.Count.ShouldBe(3);
-        page2.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddDays(4));
-        page2.Items[1].Value.CreatedAt.ShouldBe(baseDate.AddDays(5));
-        page2.Items[2].Value.CreatedAt.ShouldBe(baseDate.AddDays(6));
+        ((TestCursorDso)page2.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddDays(4));
+        ((TestCursorDso)page2.Items[1].Value).CreatedAt.ShouldBe(baseDate.AddDays(5));
+        ((TestCursorDso)page2.Items[2].Value).CreatedAt.ShouldBe(baseDate.AddDays(6));
     }
 
     [Fact]
@@ -475,14 +500,14 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 4);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Assert - Should return most recent dates first
         result.Items.Count.ShouldBe(4);
-        result.Items[0].Value.CreatedAt.ShouldBe(baseDate.AddHours(8));
-        result.Items[1].Value.CreatedAt.ShouldBe(baseDate.AddHours(7));
-        result.Items[2].Value.CreatedAt.ShouldBe(baseDate.AddHours(6));
-        result.Items[3].Value.CreatedAt.ShouldBe(baseDate.AddHours(5));
+        ((TestCursorDso)result.Items[0].Value).CreatedAt.ShouldBe(baseDate.AddHours(8));
+        ((TestCursorDso)result.Items[1].Value).CreatedAt.ShouldBe(baseDate.AddHours(7));
+        ((TestCursorDso)result.Items[2].Value).CreatedAt.ShouldBe(baseDate.AddHours(6));
+        ((TestCursorDso)result.Items[3].Value).CreatedAt.ShouldBe(baseDate.AddHours(5));
         result.HasMoreData.ShouldBeTrue();
     }
 
@@ -536,14 +561,14 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 4);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
 
         // Assert - false values should come before true (ascending)
         result.Items.Count.ShouldBe(4);
-        result.Items[0].Value.IsActive.ShouldBeFalse();
-        result.Items[1].Value.IsActive.ShouldBeFalse();
-        result.Items[2].Value.IsActive.ShouldBeFalse();
-        result.Items[3].Value.IsActive.ShouldBeTrue();
+        ((TestCursorDso)result.Items[0].Value).IsActive.ShouldBeFalse();
+        ((TestCursorDso)result.Items[1].Value).IsActive.ShouldBeFalse();
+        ((TestCursorDso)result.Items[2].Value).IsActive.ShouldBeFalse();
+        ((TestCursorDso)result.Items[3].Value).IsActive.ShouldBeTrue();
         result.HasMoreData.ShouldBeTrue();
     }
 
@@ -567,13 +592,13 @@ public partial class QueryStoreCursorPagingTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 3);
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, cursor, Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, cursor, Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), Ct.None);
 
         // Assert - true values should come before false (descending)
         page1.Items.Count.ShouldBe(3);
-        page1.Items[0].Value.IsActive.ShouldBeTrue();
-        page1.Items[1].Value.IsActive.ShouldBeTrue();
+        ((TestCursorDso)page1.Items[0].Value).IsActive.ShouldBeTrue();
+        ((TestCursorDso)page1.Items[1].Value).IsActive.ShouldBeTrue();
         // Third item depends on the count of true values
 
         page2.Items.Count.ShouldBe(3);
@@ -626,13 +651,13 @@ public partial class QueryStoreCursorPagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act — page through to the end
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(ContinuationToken.Beginning, 3), _ct);
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), _ct);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(ContinuationToken.Beginning, 3), _ct);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(page1.NextToken!.Value, 3), _ct);
 
         // Assert — we've reached the end
         page2.Items.Count.ShouldBe(2);
-        page2.Items[0].Value.Rank.ShouldBe(40);
-        page2.Items[1].Value.Rank.ShouldBe(50);
+        ((TestCursorDso)page2.Items[0].Value).Rank.ShouldBe(40);
+        ((TestCursorDso)page2.Items[1].Value).Rank.ShouldBe(50);
         page2.HasMoreData.ShouldBeFalse();
         var resumeToken = page2.NextToken.ShouldNotBeNull(); // Token is still set for resumption
 
@@ -641,12 +666,12 @@ public partial class QueryStoreCursorPagingTests
         _ = await CreateEntityAsync(partitionedStorage, "Item07", 70);
 
         // Resume from the saved token — should pick up the new items
-        var page3 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(resumeToken.Value, 3), _ct);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(resumeToken.Value, 3), _ct);
 
         // Assert — the new items are returned
         page3.Items.Count.ShouldBe(2);
-        page3.Items[0].Value.Rank.ShouldBe(60);
-        page3.Items[1].Value.Rank.ShouldBe(70);
+        ((TestCursorDso)page3.Items[0].Value).Rank.ShouldBe(60);
+        ((TestCursorDso)page3.Items[1].Value).Rank.ShouldBe(70);
         page3.HasMoreData.ShouldBeFalse();
         _ = page3.NextToken.ShouldNotBeNull();
     }
@@ -667,18 +692,20 @@ public partial class QueryStoreCursorPagingTests
         var sort = new SortParameter(new NumberField("rank"));
 
         // Act — fetch the only page
-        var page1 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(ContinuationToken.Beginning, 3), _ct);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(ContinuationToken.Beginning, 3), _ct);
 
         page1.Items.Count.ShouldBe(3);
         page1.HasMoreData.ShouldBeFalse();
         var resumeToken = page1.NextToken.ShouldNotBeNull();
 
         // Act — resume with no new data
-        var page2 = await partitionedStorage.QueryAsync<TestCursorDso>(_testEntityType, filter, sort, DataRange.FromContinuationToken(resumeToken.Value, 3), _ct);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromContinuationToken(resumeToken.Value, 3), _ct);
 
-        // Assert — empty result, no token (no items returned)
+        // Assert — empty result, but both tokens stay set (the position they were given)
         page2.Items.Count.ShouldBe(0);
-        page2.NextToken.ShouldBeNull();
+        _ = page2.NextToken.ShouldNotBeNull();
+        _ = page2.PreviousToken.ShouldNotBeNull();
         page2.HasMoreData.ShouldBeFalse();
+        page2.HasPreviousData.ShouldBeTrue();
     }
 }

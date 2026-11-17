@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Storage.EntityAttributeValue;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -47,11 +46,6 @@ public static class StorageBuilderExtensions
                     "method such as AddSqlite(), AddPostgreSql(), AddMsSql(), or AddOracle() for it."));
 
             services.TryAddTransient<IStorageInstanceSchema>(sp => sp.GetRequiredKeyedService<IStorageInstanceSchema>(StorageInstanceId.Default));
-
-            // The default in-memory schema store, built from every registered SchemaConfiguration; for the same id, the
-            // last registered wins. AddDynamicSchemas() replaces this store by appending its own ISchemaStore registration,
-            // which wins over this TryAdd default.
-            services.TryAddSingleton<ISchemaStore, InMemorySchemaStore>();
 
             // Calling the get or add to ensure it's registered.
             _ = services.GetOrAddStorageInstanceRouter();

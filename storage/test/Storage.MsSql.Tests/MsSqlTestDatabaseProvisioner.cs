@@ -22,28 +22,34 @@ internal sealed class MsSqlTestDatabaseProvisioner(string serverConnectionString
     /// released database when one is available; otherwise computes a connection string
     /// for a new database that has not yet been created.
     /// </summary>
-    public ProvisionedTestDatabase Provision()
+    public ProvisionedTestDatabase Provision(bool? caseSensitiveIdentifiers = null)
     {
-        if (_available.TryDequeue(out var connectionString))
+        if (caseSensitiveIdentifiers is null && _available.TryDequeue(out var connectionString))
         {
             return new ProvisionedTestDatabase(this, connectionString, exists: true);
         }
 
         var dbName = $"pool_{Guid.NewGuid():N}";
         var csb = new SqlConnectionStringBuilder(serverConnectionString) { InitialCatalog = dbName };
-        return new ProvisionedTestDatabase(this, csb.ConnectionString, exists: false);
+        return new ProvisionedTestDatabase(this, csb.ConnectionString, exists: false, caseSensitiveIdentifiers);
     }
 
     /// <summary>
     /// Creates the database backing <paramref name="connectionString"/>.
     /// </summary>
-    internal async Task CreateAsync(string connectionString, CancellationToken ct)
+    internal async Task CreateAsync(string connectionString, bool? caseSensitiveIdentifiers, Ct ct)
     {
         var dbName = new SqlConnectionStringBuilder(connectionString).InitialCatalog;
+        var collation = caseSensitiveIdentifiers switch
+        {
+            true => " COLLATE Latin1_General_100_CS_AS_SC",
+            false => " COLLATE Latin1_General_100_CI_AS_SC",
+            null => "",
+        };
         await using var connection = new SqlConnection(serverConnectionString);
         await connection.OpenAsync(ct);
         await using var cmd = connection.CreateCommand();
-        cmd.CommandText = $"CREATE DATABASE [{dbName}]";
+        cmd.CommandText = $"CREATE DATABASE [{dbName}]{collation}";
         _ = await cmd.ExecuteNonQueryAsync(ct);
         _all.Add(connectionString);
     }

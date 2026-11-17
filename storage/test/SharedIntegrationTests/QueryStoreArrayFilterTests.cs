@@ -7,7 +7,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 
 namespace Duende.Storage.IntegrationTests;
@@ -106,12 +106,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -144,11 +144,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Charlie");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Charlie");
     }
 
     [Fact]
@@ -178,12 +178,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Bob");
     }
 
     [Fact]
@@ -211,11 +211,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Alice");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Alice");
     }
 
     [Fact]
@@ -238,7 +238,7 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -260,11 +260,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Bob");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Bob");
     }
 
     [Fact]
@@ -295,11 +295,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("User1");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("User1");
     }
 
     [Fact]
@@ -329,12 +329,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Bob");
     }
 
     [Fact]
@@ -364,12 +364,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -399,13 +399,13 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Bob");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -439,12 +439,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -474,12 +474,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -509,12 +509,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Bob");
     }
 
     [Fact]
@@ -547,13 +547,13 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items.ShouldContain(x => x.Value.Name == "User1");
-        result.Items.ShouldContain(x => x.Value.Name == "User2");
-        result.Items.ShouldContain(x => x.Value.Name == "User4");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "User1");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "User2");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "User4");
     }
 
     [Fact]
@@ -582,12 +582,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "AdminUser");
-        result.Items.ShouldContain(x => x.Value.Name == "SupportUser");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "AdminUser");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "SupportUser");
     }
 
     [Fact]
@@ -621,13 +621,13 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items.ShouldContain(x => x.Value.Name == "User1");
-        result.Items.ShouldContain(x => x.Value.Name == "User2");
-        result.Items.ShouldContain(x => x.Value.Name == "User3");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "User1");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "User2");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "User3");
     }
 
     [Fact]
@@ -660,13 +660,13 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items.ShouldContain(x => x.Value.Name == "TeamA");
-        result.Items.ShouldContain(x => x.Value.Name == "TeamB");
-        result.Items.ShouldContain(x => x.Value.Name == "TeamC");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "TeamA");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "TeamB");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "TeamC");
     }
 
     [Fact]
@@ -697,27 +697,27 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Get pages with size 5 (should be 3 pages: 5+5+5)
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 5), Ct.None);
-        var page4 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 5), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 5), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 5), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 5), Ct.None);
+        var page4 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(4, 5), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(5);
         page1.TotalCount.ShouldBe(15);
         page1.HasMoreData.ShouldBeTrue();
-        page1.Items[0].Value.Name.ShouldBe("User01");
-        page1.Items[4].Value.Name.ShouldBe("User05");
+        ((TestUserDso)page1.Items[0].Value).Name.ShouldBe("User01");
+        ((TestUserDso)page1.Items[4].Value).Name.ShouldBe("User05");
 
         page2.Items.Count.ShouldBe(5);
         page2.HasMoreData.ShouldBeTrue();
-        page2.Items[0].Value.Name.ShouldBe("User06");
-        page2.Items[4].Value.Name.ShouldBe("User10");
+        ((TestUserDso)page2.Items[0].Value).Name.ShouldBe("User06");
+        ((TestUserDso)page2.Items[4].Value).Name.ShouldBe("User10");
 
         page3.Items.Count.ShouldBe(5);
         page3.HasMoreData.ShouldBeFalse();
-        page3.Items[0].Value.Name.ShouldBe("User11");
-        page3.Items[4].Value.Name.ShouldBe("User15");
+        ((TestUserDso)page3.Items[0].Value).Name.ShouldBe("User11");
+        ((TestUserDso)page3.Items[4].Value).Name.ShouldBe("User15");
 
         page4.Items.Count.ShouldBe(0);
     }
@@ -753,18 +753,18 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size 3 creates 2 pages (3+1)
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 3), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 3), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 3), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 3), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(3);
         page1.TotalCount.ShouldBe(4);
-        page1.Items[0].Value.Name.ShouldBe("User03");
-        page1.Items[1].Value.Name.ShouldBe("User06");
-        page1.Items[2].Value.Name.ShouldBe("User09");
+        ((TestUserDso)page1.Items[0].Value).Name.ShouldBe("User03");
+        ((TestUserDso)page1.Items[1].Value).Name.ShouldBe("User06");
+        ((TestUserDso)page1.Items[2].Value).Name.ShouldBe("User09");
 
         page2.Items.Count.ShouldBe(1); // Partial last page
-        page2.Items[0].Value.Name.ShouldBe("User12");
+        ((TestUserDso)page2.Items[0].Value).Name.ShouldBe("User12");
         page2.HasMoreData.ShouldBeFalse();
     }
 
@@ -792,20 +792,20 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size 4 creates 3 pages (4+4+2)
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
 
         // Assert
         page1.TotalCount.ShouldBe(10);
         page1.Items.Count.ShouldBe(4);
-        page1.Items.ShouldAllBe(u => u.Value.Name.StartsWith('A'));
+        page1.Items.Select(e => (TestUserDso)e.Value).ShouldAllBe(u => u.Name.StartsWith('A'));
 
         page2.Items.Count.ShouldBe(4);
-        page2.Items.ShouldAllBe(u => u.Value.Name.StartsWith('A'));
+        page2.Items.Select(e => (TestUserDso)e.Value).ShouldAllBe(u => u.Name.StartsWith('A'));
 
         page3.Items.Count.ShouldBe(2);
-        page3.Items.ShouldAllBe(u => u.Value.Name.StartsWith('A'));
+        page3.Items.Select(e => (TestUserDso)e.Value).ShouldAllBe(u => u.Name.StartsWith('A'));
     }
 
     [Fact]
@@ -833,9 +833,9 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size 6 creates 3 pages (6+6+4)
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 6), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 6), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 6), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 6), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 6), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 6), Ct.None);
 
         // Assert
         page1.TotalCount.ShouldBe(16);
@@ -869,8 +869,8 @@ public partial class QueryStoreArrayFilterTests
         var filter = Query.ArrayFilter("emails", new StringField("type").Equals("work"));
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(2, 10), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, DataRange.FromPage(2, 10), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(0);
@@ -899,21 +899,21 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
-        var page4 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(4, 4), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 4), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 4), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 4), Ct.None);
+        var page4 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(4, 4), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(4);
-        page1.Items[0].Value.Name.ShouldBe("User01");
+        ((TestUserDso)page1.Items[0].Value).Name.ShouldBe("User01");
 
         page2.Items.Count.ShouldBe(4);
-        page2.Items[0].Value.Name.ShouldBe("User05");
+        ((TestUserDso)page2.Items[0].Value).Name.ShouldBe("User05");
 
         page3.Items.Count.ShouldBe(4); // Full last page (not partial)
-        page3.Items[0].Value.Name.ShouldBe("User09");
-        page3.Items[3].Value.Name.ShouldBe("User12");
+        ((TestUserDso)page3.Items[0].Value).Name.ShouldBe("User09");
+        ((TestUserDso)page3.Items[3].Value).Name.ShouldBe("User12");
         page3.HasMoreData.ShouldBeFalse();
 
         // Page 4 should be empty
@@ -938,21 +938,21 @@ public partial class QueryStoreArrayFilterTests
         var sort = new SortParameter(new StringField("name"));
 
         // Act - Page size of 2 creates 3 pages (2+2+1)
-        var page1 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(1, 2), Ct.None);
-        var page2 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(2, 2), Ct.None);
-        var page3 = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, sort, DataRange.FromPage(3, 2), Ct.None);
+        var page1 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(1, 2), Ct.None);
+        var page2 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(2, 2), Ct.None);
+        var page3 = await partitionedStorage.QueryAsync(_testEntityType, filter, sort, DataRange.FromPage(3, 2), Ct.None);
 
         // Assert
         page1.Items.Count.ShouldBe(2);
-        page1.Items[0].Value.Name.ShouldBe("User1");
-        page1.Items[1].Value.Name.ShouldBe("User2");
+        ((TestUserDso)page1.Items[0].Value).Name.ShouldBe("User1");
+        ((TestUserDso)page1.Items[1].Value).Name.ShouldBe("User2");
 
         page2.Items.Count.ShouldBe(2);
-        page2.Items[0].Value.Name.ShouldBe("User3");
-        page2.Items[1].Value.Name.ShouldBe("User4");
+        ((TestUserDso)page2.Items[0].Value).Name.ShouldBe("User3");
+        ((TestUserDso)page2.Items[1].Value).Name.ShouldBe("User4");
 
         page3.Items.Count.ShouldBe(1);
-        page3.Items[0].Value.Name.ShouldBe("User5");
+        ((TestUserDso)page3.Items[0].Value).Name.ShouldBe("User5");
         page3.HasMoreData.ShouldBeFalse();
     }
 
@@ -981,12 +981,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Alice (alice@work.com) and Charlie (charlie@work.com) match
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -1017,11 +1017,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Alice");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Alice");
     }
 
     [Fact]
@@ -1050,11 +1050,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Only Alice has an email where type != "personal"
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Alice");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Alice");
     }
 
     [Fact]
@@ -1082,11 +1082,11 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Only Charlie has no work email
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Charlie");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Charlie");
     }
 
     [Fact]
@@ -1112,12 +1112,12 @@ public partial class QueryStoreArrayFilterTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
+        var result = await partitionedStorage.QueryAsync(_testEntityType, filter, SortParameter.Empty, page, Ct.None);
 
         // Assert - Alice and Bob have email entries, Charlie has none
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Bob");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Bob");
     }
 
 }

@@ -18,7 +18,7 @@ internal sealed class ProvisionedTestDatabase(OracleTestDatabaseProvisioner prov
 
     public CreateOracleConnection Connect => () => new OracleConnection(ConnectionString);
 
-    public async Task CreateAsync(CancellationToken ct)
+    public async Task CreateAsync(Ct ct)
     {
         if (!_created)
         {

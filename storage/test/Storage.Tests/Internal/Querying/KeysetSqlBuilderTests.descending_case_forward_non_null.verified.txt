@@ -1,0 +1,5 @@
+ORDER BY:
+CASE WHEN v.number_value IS NULL THEN 1 ELSE 0 END ASC, v.number_value DESC, v.entity_id ASC
+
+StrictlyAfter:
+(v.number_value < @last_sort_value OR (v.number_value = @last_sort_value AND v.entity_id > @last_id) OR v.number_value IS NULL)

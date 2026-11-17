@@ -9,9 +9,11 @@ namespace Duende.Storage.Internal.Outbox;
 
 /// <summary>
 /// Processes outbox events for all registered <see cref="IOutboxSubscription"/> instances,
-/// dispatching each event to the appropriate keyed <see cref="IOutboxSubscriptionHandler"/>
-/// with retry/backoff semantics. Holds no dependency on any product-specific type; the
-/// caller supplies the storage key and processing knobs through <see cref="OutboxProcessorOptions"/>.
+/// dispatching each event to the appropriate keyed <see cref="IOutboxSubscriptionHandler"/>.
+/// Every event in a page is attempted independently with no ordering guarantee; a failed
+/// event is retried on the next pass, up to <see cref="OutboxProcessorOptions.MaxRetries"/>
+/// times. Holds no dependency on any product-specific type; the caller supplies the storage
+/// key and processing knobs through <see cref="OutboxProcessorOptions"/>.
 /// </summary>
 public sealed class OutboxProcessor(
     ICrossPartitionStorageFactory crossPartitionStorageFactory,
@@ -20,7 +22,6 @@ public sealed class OutboxProcessor(
     IServiceScopeFactory serviceScopeFactory,
     IAmbientOutboxProcessingContextProvider ambientContextProvider,
     IOptions<OutboxProcessorOptions> options,
-    TimeProvider timeProvider,
     ILogger<OutboxProcessor> logger)
 {
     private readonly OutboxProcessorOptions _options = options.Value;
@@ -28,11 +29,12 @@ public sealed class OutboxProcessor(
     private const int MinBatchSize = 1;
     private const int MaxBatchSize = 1000;
 
-    // In-memory retry state (per storage instance, per subscription). Lost on restart is
-    // acceptable per design. Keyed by instance as well as subscription so that a failing
-    // event on one storage instance does not affect retry state for the same subscription
-    // on a different instance.
-    private readonly Dictionary<(StorageInstanceId storageInstanceId, string SubscriberName), RetryState> _retryStates = new();
+    // In-memory failed-attempt counts (per storage instance, per subscription). Lost on
+    // restart is acceptable per design. Keyed by instance as well as subscription so that a
+    // failing event on one storage instance does not affect attempt counts for the same
+    // subscription on a different instance. Rebuilt from each page, so it holds at most
+    // BatchSize entries.
+    private readonly Dictionary<(StorageInstanceId StorageInstanceId, string SubscriberName), Dictionary<OutboxEventId, int>> _failedAttempts = new();
 
     /// <summary>
     /// Runs a single pass over all enabled subscriptions: fetches a batch, dispatches to the
@@ -75,12 +77,14 @@ public sealed class OutboxProcessor(
     private async Task ProcessSubscriptionAsync(IOutboxSubscription subscription, StorageInstanceId storageInstanceId, Ct ct)
     {
         var subscriptionName = subscription.SubscriberName.Value;
-        var retryState = GetRetryState(storageInstanceId, subscriptionName);
+        var key = (storageInstanceId, subscriptionName);
 
-        // If a retry is pending and the delay hasn't elapsed, skip this cycle.
-        if (retryState.RetryAfterUtc is { } retryAfter && timeProvider.GetUtcNow() < retryAfter)
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        var handler = scope.ServiceProvider.GetKeyedService<IOutboxSubscriptionHandler>(subscriptionName);
+
+        if (handler is null)
         {
-            logger.RetryNotYetEligible(LogLevel.Debug, subscriptionName, retryAfter);
+            logger.HandlerNotFound(LogLevel.Warning, subscriptionName);
             return;
         }
 
@@ -90,67 +94,45 @@ public sealed class OutboxProcessor(
 
         if (page.Events.Count == 0)
         {
-            // If we had pending retry state for a message that no longer exists
-            // (e.g. deleted externally), clear the stale state.
-            if (retryState.FailedMessageId is not null)
-            {
-                retryState = RetryState.Clear();
-                SetRetryState(storageInstanceId, subscriptionName, retryState);
-            }
-
+            _ = _failedAttempts.Remove(key);
             return;
         }
 
-        // The message owning the retry slot may have been deleted externally (e.g. by another
-        // process, or a manual cleanup) between cycles. If it's no longer present in this page,
-        // the slot is stale and must be freed before processing the remaining events, otherwise
-        // every other event in this batch stays blocked from ever claiming the slot.
-        //
-        // This can only be inferred safely from a *complete* page (HasMore is false): the page
-        // is fetched in sequence order starting from the oldest pending event, but with a
-        // BatchSize smaller than the subscription's full backlog, the owning message could simply
-        // be further back in the queue than this batch reaches, still present in the store. On
-        // a partial page (HasMore is true), absence proves nothing, so cleanup is deferred until
-        // a cycle sees a complete page (or an empty one, handled above).
-        if (!page.HasMore &&
-            retryState.FailedMessageId is { } failedMessageId &&
-            !page.Events.Any(e => e.MessageId == failedMessageId))
+        // Keep only the counts of rows still in this page, and publish the map before handling
+        // any event, so failures completed earlier in the page survive a later cancellation.
+        var previous = _failedAttempts.GetValueOrDefault(key);
+        var failedAttempts = new Dictionary<OutboxEventId, int>();
+        if (previous is not null)
         {
-            retryState = RetryState.Clear();
-            SetRetryState(storageInstanceId, subscriptionName, retryState);
-        }
-
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
-        var handler = scope.ServiceProvider.GetKeyedService<IOutboxSubscriptionHandler>(subscriptionName);
-
-        if (handler is null)
-        {
-            logger.HandlerNotFound(LogLevel.Warning, subscriptionName);
-            if (retryState.FailedMessageId is not null)
+            foreach (var evt in page.Events)
             {
-                retryState = RetryState.Clear();
-                SetRetryState(storageInstanceId, subscriptionName, retryState);
+                if (previous.TryGetValue(evt.MessageId, out var count))
+                {
+                    failedAttempts[evt.MessageId] = count;
+                }
             }
-
-            return;
         }
+
+        _failedAttempts[key] = failedAttempts;
 
         var processedIds = new List<OutboxEventId>();
-        var stopBatch = false;
+        var maxAttempts = _options.MaxRetries == int.MaxValue ? int.MaxValue : _options.MaxRetries + 1;
 
         foreach (var evt in page.Events)
         {
             ct.ThrowIfCancellationRequested();
 
-            // Force-drop if this event has exceeded max retries.
-            if (IsMaxRetriesExceeded(retryState, evt.MessageId))
+            var failedSoFar = failedAttempts.GetValueOrDefault(evt.MessageId);
+
+            // Attempts already exhausted in an earlier pass whose delete never completed (it was
+            // cancelled or failed): delete the row without calling the handler again.
+            if (failedSoFar > _options.MaxRetries)
             {
-                logger.ForceDrop(LogLevel.Warning, evt.MessageId.Value, subscriptionName, _options.MaxRetries);
                 processedIds.Add(evt.MessageId);
-                retryState = RetryState.Clear();
-                SetRetryState(storageInstanceId, subscriptionName, retryState);
                 continue;
             }
+
+            var attempt = failedSoFar + 1;
 
             HandleOutcomeResult outcome;
 #pragma warning disable CA1031 // A failing context establishment must not stop the batch or the processor
@@ -158,7 +140,7 @@ public sealed class OutboxProcessor(
             {
                 outcome = await ambientContextProvider.ExecuteWithContextAsync(
                     evt,
-                    innerCt => InvokeHandlerAsync(handler, evt, subscriptionName, retryState, innerCt),
+                    innerCt => InvokeHandlerAsync(handler, evt, subscriptionName, attempt, maxAttempts, innerCt),
                     ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -168,23 +150,10 @@ public sealed class OutboxProcessor(
             catch (Exception ex)
             {
                 // Context establishment failed for this event (before the handler was ever
-                // reached). Unlike a handler-level Retry, this must not stop the batch: other
-                // events in this cycle are independent of this one's ambient context and
-                // should still be attempted. The retry slot is per-subscription (not per-message),
-                // shared with handler retries, so if a different message already owns it, this
-                // failure is simply dropped for now and the event is left untouched until that
-                // slot frees up (matching how two concurrently-failing messages are handled in
-                // sequence rather than resetting each other's attempt counts).
-                if (retryState.FailedMessageId is null || retryState.FailedMessageId == evt.MessageId)
-                {
-                    var attempts = NextAttemptCount(retryState, evt.MessageId);
-                    var delay = ComputeDelay(attempts);
-                    var retryAfterUtc = timeProvider.GetUtcNow() + delay;
-                    logger.ContextEstablishmentFailed(LogLevel.Warning, ex, subscriptionName, evt.PoolId.Value, evt.MessageId.Value, attempts, _options.MaxRetries, retryAfterUtc);
-                    retryState = new RetryState(evt.MessageId, attempts, retryAfterUtc);
-                    SetRetryState(storageInstanceId, subscriptionName, retryState);
-                }
-
+                // reached). This must not stop the page: other events in this cycle are
+                // independent of this one's ambient context and are still attempted.
+                logger.ContextEstablishmentFailed(LogLevel.Warning, ex, subscriptionName, evt.PoolId.Value, evt.MessageId.Value, attempt, maxAttempts);
+                RecordFailure(evt, attempt, subscriptionName, failedAttempts, processedIds);
                 continue;
             }
 #pragma warning restore CA1031
@@ -193,62 +162,54 @@ public sealed class OutboxProcessor(
             {
                 case HandleOutcomeResult.SuccessResult:
                     processedIds.Add(evt.MessageId);
-                    if (retryState.FailedMessageId == evt.MessageId)
-                    {
-                        retryState = RetryState.Clear();
-                        SetRetryState(storageInstanceId, subscriptionName, retryState);
-                    }
                     break;
 
                 case HandleOutcomeResult.RetryResult retryResult:
-                    // The retry slot is per-subscription, shared with context-establishment
-                    // failures (see above). If a different message already owns it (e.g. an
-                    // earlier event in this same page failed to establish its context), this
-                    // event must not steal or reset that ownership: doing so would let a later,
-                    // healthier message perpetually mask an earlier poisoned one from ever
-                    // reaching MaxRetries and being force-dropped.
-                    //
-                    // Regardless of who owns the slot, this event itself was retained (it is
-                    // never added to processedIds below), so the batch must still stop here:
-                    // subscription ordering is defined by delivery order, and any event after this
-                    // one must not be processed or deleted while this one remains undelivered.
-                    if (retryState.FailedMessageId is null || retryState.FailedMessageId == evt.MessageId)
-                    {
-                        var retryAttempts = NextAttemptCount(retryState, evt.MessageId);
-                        var backoffDelay = ComputeDelay(retryAttempts);
-                        var retryAfterUtc = timeProvider.GetUtcNow() + backoffDelay;
-                        logger.HandlerRetry(LogLevel.Warning, subscriptionName, evt.MessageId.Value, retryResult.Reason, retryAttempts, _options.MaxRetries, retryAfterUtc);
-                        retryState = new RetryState(evt.MessageId, retryAttempts, retryAfterUtc);
-                        SetRetryState(storageInstanceId, subscriptionName, retryState);
-                    }
-
-                    // Stop processing batch on retry to preserve ordering.
-                    stopBatch = true;
+                    logger.HandlerRetry(LogLevel.Warning, subscriptionName, evt.MessageId.Value, retryResult.Reason, attempt, maxAttempts);
+                    RecordFailure(evt, attempt, subscriptionName, failedAttempts, processedIds);
                     break;
 
                 case HandleOutcomeResult.DropResult dropResult:
                     logger.HandlerDrop(LogLevel.Warning, subscriptionName, evt.MessageId.Value, dropResult.Reason);
                     processedIds.Add(evt.MessageId);
-                    if (retryState.FailedMessageId == evt.MessageId)
-                    {
-                        retryState = RetryState.Clear();
-                        SetRetryState(storageInstanceId, subscriptionName, retryState);
-                    }
                     break;
-            }
-
-            if (stopBatch)
-            {
-                break;
             }
         }
 
         if (processedIds.Count > 0)
         {
             await crossPartitionStorage.DeleteOutboxEventsAsync(processedIds, ct);
+
+            foreach (var id in processedIds)
+            {
+                _ = failedAttempts.Remove(id);
+            }
+        }
+
+        if (failedAttempts.Count == 0)
+        {
+            _ = _failedAttempts.Remove(key);
         }
 
         logger.BatchProcessed(LogLevel.Debug, processedIds.Count, subscriptionName);
+    }
+
+    private void RecordFailure(
+        PersistedOutboxEvent evt,
+        int attempt,
+        string subscriptionName,
+        Dictionary<OutboxEventId, int> failedAttempts,
+        List<OutboxEventId> processedIds)
+    {
+        // Recorded even when exhausted, so a later pass can still delete the row without calling
+        // the handler again if this pass is cancelled before its delete.
+        failedAttempts[evt.MessageId] = attempt;
+
+        if (attempt > _options.MaxRetries)
+        {
+            logger.ForceDrop(LogLevel.Warning, evt.MessageId.Value, subscriptionName, attempt);
+            processedIds.Add(evt.MessageId);
+        }
     }
 
     // Invoked by the ambient context provider's ExecuteWithContextAsync while its established
@@ -261,7 +222,8 @@ public sealed class OutboxProcessor(
         IOutboxSubscriptionHandler handler,
         PersistedOutboxEvent evt,
         string subscriptionName,
-        RetryState retryState,
+        int attempt,
+        int maxAttempts,
         Ct ct)
     {
         try
@@ -275,49 +237,9 @@ public sealed class OutboxProcessor(
                 throw;
             }
 
-            var attempts = NextAttemptCount(retryState, evt.MessageId);
-            logger.HandlerException(LogLevel.Warning, ex, subscriptionName, evt.MessageId.Value, attempts, _options.MaxRetries, ex.Message);
+            logger.HandlerException(LogLevel.Warning, ex, subscriptionName, evt.MessageId.Value, attempt, maxAttempts, ex.Message);
             return HandleOutcomeResult.Retry(ex.Message);
         }
     }
 #pragma warning restore CA1031
-
-    private static int NextAttemptCount(RetryState retryState, OutboxEventId messageId) =>
-        retryState.FailedMessageId == messageId ? retryState.FailedAttempts + 1 : 1;
-
-    private bool IsMaxRetriesExceeded(RetryState state, OutboxEventId messageId) =>
-        state.FailedMessageId == messageId && state.FailedAttempts >= _options.MaxRetries;
-
-    private TimeSpan ComputeDelay(int attempt)
-    {
-        var multiplier = Math.Pow(_options.RetryBackoffMultiplier, attempt - 1);
-        if (double.IsNaN(multiplier) || double.IsInfinity(multiplier) || multiplier <= 0)
-        {
-            return _options.RetryDelay >= TimeSpan.Zero
-                ? _options.RetryDelay
-                : _options.MaxRetryDelay;
-        }
-
-        var ticks = _options.RetryDelay.Ticks * multiplier;
-        if (ticks is > long.MaxValue or < 0)
-        {
-            return _options.MaxRetryDelay;
-        }
-
-        var delay = TimeSpan.FromTicks((long)ticks);
-        return delay > _options.MaxRetryDelay ? _options.MaxRetryDelay : delay;
-    }
-
-    private RetryState GetRetryState(StorageInstanceId storageInstanceId, string subscriptionName) =>
-        _retryStates.TryGetValue((storageInstanceId, subscriptionName), out var state) ? state : RetryState.None;
-
-    private void SetRetryState(StorageInstanceId storageInstanceId, string subscriptionName, RetryState state) =>
-        _retryStates[(storageInstanceId, subscriptionName)] = state;
-
-    private sealed record RetryState(OutboxEventId? FailedMessageId, int FailedAttempts, DateTimeOffset? RetryAfterUtc)
-    {
-        public static readonly RetryState None = new(null, 0, null);
-
-        public static RetryState Clear() => None;
-    }
 }

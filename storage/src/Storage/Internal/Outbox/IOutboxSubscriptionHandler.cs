@@ -19,10 +19,13 @@ public interface IOutboxSubscriptionHandler
     /// A <see cref="HandleOutcomeResult"/> indicating how the job should proceed:
     /// <list type="bullet">
     ///   <item><see cref="HandleOutcomeResult.Success()"/> — event processed; will be deleted.</item>
-    ///   <item><see cref="HandleOutcomeResult.Retry(string)"/> — transient failure; retry after a delay.</item>
+    ///   <item><see cref="HandleOutcomeResult.Retry(string)"/> — transient failure; the row stays and is retried on the next processing pass, up to <c>MaxRetries</c> times.</item>
     ///   <item><see cref="HandleOutcomeResult.Drop(string)"/> — permanent failure; delete without retry.</item>
     /// </list>
-    /// Unhandled exceptions are treated as <see cref="HandleOutcomeResult.Retry(string)"/>.
+    /// Unhandled exceptions, other than cancellation, are treated as <see cref="HandleOutcomeResult.Retry(string)"/>.
     /// </returns>
+    /// <remarks>
+    /// Events can be delivered in any order and more than once; handlers must not assume ordering and should be idempotent.
+    /// </remarks>
     Task<HandleOutcomeResult> HandleAsync(PersistedOutboxEvent item, Ct ct);
 }

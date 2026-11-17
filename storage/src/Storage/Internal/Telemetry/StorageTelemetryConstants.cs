@@ -125,6 +125,12 @@ public static class StorageTelemetryConstants
         /// <summary>Query links operation.</summary>
         public const string QueryLinks = "query_links";
 
+        /// <summary>Query links by anchor operation.</summary>
+        public const string QueryLinksByAnchor = "query_links_by_anchor";
+
+        /// <summary>Count links operation.</summary>
+        public const string CountLinks = "count_links";
+
         /// <summary>Count operation.</summary>
         public const string Count = "count";
     }

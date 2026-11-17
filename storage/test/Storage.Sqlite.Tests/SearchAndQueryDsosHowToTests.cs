@@ -4,14 +4,13 @@
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
+using Duende.Storage.Internal.Pagination;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
-using SortDirection = Duende.Storage.Querying.SortDirection;
+using SortDirection = Duende.Storage.Internal.Querying.SortDirection;
 
 namespace Duende.Storage.Sqlite;
 
@@ -35,6 +34,13 @@ public sealed class SearchAndQueryDsosHowToTests
     }
     // end-snippet
 
+    // begin-snippet: query-map-stored-version
+    private static ArticleDso.V1 ToArticle(IDataStorageObject dso) => dso switch
+    {
+        ArticleDso.V1 v1 => v1,
+        _ => throw new InvalidOperationException($"Unexpected DSO type {dso.GetType().Name}.")
+    };
+    // end-snippet
     // begin-snippet: search-fields-definitions
     private static class Fields
     {
@@ -101,11 +107,11 @@ public sealed class SearchAndQueryDsosHowToTests
         var id = UuidV7.New();
         _ = await storage.CreateAsync(id, article, [], searchFields, Expiration.NoExpiration, [], ct);
 
-        var byTitle = await storage.QueryAsync<ArticleDso.V1>(
+        var byTitle = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Title.Contains("Configuring"), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         byTitle.Items.Count.ShouldBe(1);
 
-        var byTag = await storage.QueryAsync<ArticleDso.V1>(
+        var byTag = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Tags.Contains("how-to"), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         byTag.Items.Count.ShouldBe(1);
     }
@@ -131,12 +137,12 @@ public sealed class SearchAndQueryDsosHowToTests
 
         // Case-insensitive: the stored value is "Ada Lovelace", the query uses different casing.
         var filter = Fields.Author.Equals("ADA LOVELACE");
-        var result = await storage.QueryAsync<ArticleDso.V1>(
+        var result = await storage.QueryAsync(
             ArticleDso.EntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         // end-snippet
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Title.ShouldBe(article.Title);
+        ToArticle(result.Items[0].Value).Title.ShouldBe(article.Title);
     }
 
     [Fact]
@@ -171,11 +177,11 @@ public sealed class SearchAndQueryDsosHowToTests
 
         updateResult.ShouldBe(UpdateResult.Success);
 
-        var byNewTitle = await storage.QueryAsync<ArticleDso.V1>(
+        var byNewTitle = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Title.Contains("published"), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         byNewTitle.Items.Count.ShouldBe(1);
 
-        var byOldTitle = await storage.QueryAsync<ArticleDso.V1>(
+        var byOldTitle = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Title.Contains("draft"), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         byOldTitle.Items.Count.ShouldBe(0);
     }
@@ -209,12 +215,12 @@ public sealed class SearchAndQueryDsosHowToTests
         updateResult.ShouldBe(UpdateResult.Success);
 
         // The old value is no longer queryable on that path ...
-        var byOldAuthor = await storage.QueryAsync<ArticleDso.V1>(
+        var byOldAuthor = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Author.Equals("Ada Lovelace"), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         byOldAuthor.Items.Count.ShouldBe(0);
 
         // ... and neither is any other value on that path: the field has no row at all now.
-        var byAnyAuthor = await storage.QueryAsync<ArticleDso.V1>(
+        var byAnyAuthor = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Author.In(["Ada Lovelace", "Someone Else"]), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         byAnyAuthor.Items.Count.ShouldBe(0);
 
@@ -277,7 +283,7 @@ public sealed class SearchAndQueryDsosHowToTests
 
         // begin-snippet: dynamic-search-fields-query
         var byIndexedValue = new StringField("customFields.priority").Equals("high");
-        var indexedResult = await storage.QueryAsync<ArticleDso.V1>(
+        var indexedResult = await storage.QueryAsync(
             ArticleDso.EntityType, byIndexedValue, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         // end-snippet
         indexedResult.Items.Count.ShouldBe(1);
@@ -289,7 +295,7 @@ public sealed class SearchAndQueryDsosHowToTests
 
         // The un-indexed value is not queryable: there's no search row for it at all.
         var byUnindexedValue = new StringField("customFields.internalNotes").Contains("technical review");
-        var unindexedResult = await storage.QueryAsync<ArticleDso.V1>(
+        var unindexedResult = await storage.QueryAsync(
             ArticleDso.EntityType, byUnindexedValue, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         unindexedResult.Items.Count.ShouldBe(0);
     }
@@ -327,12 +333,12 @@ public sealed class SearchAndQueryDsosHowToTests
             .And(Fields.Title.StartsWith("Configuring").Or(Fields.Tags.Contains("how-to")))
             .And(Fields.Author.In(["Ada Lovelace", "Grace Hopper"]));
 
-        var result = await storage.QueryAsync<ArticleDso.V1>(
+        var result = await storage.QueryAsync(
             ArticleDso.EntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         // end-snippet
 
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Title.ShouldBe(matching.Title);
+        ToArticle(result.Items[0].Value).Title.ShouldBe(matching.Title);
 
         var count = await storage.CountAsync(ArticleDso.EntityType, Fields.Author.Equals("Ada Lovelace"), ct);
         count.ShouldBe(2);
@@ -365,9 +371,9 @@ public sealed class SearchAndQueryDsosHowToTests
 
         while (true)
         {
-            var page = await storage.QueryAsync<ArticleDso.V1>(
+            var page = await storage.QueryAsync(
                 ArticleDso.EntityType, Query.All(), sort, range, ct);
-            titles.AddRange(page.Items.Select(item => item.Value.Title));
+            titles.AddRange(page.Items.Select(item => ToArticle(item.Value).Title));
 
             if (!page.HasMoreData || page.NextToken is not { } nextToken)
             {
@@ -382,21 +388,50 @@ public sealed class SearchAndQueryDsosHowToTests
     }
 
     [Fact]
-    public async Task Continuation_token_paging_requires_a_non_empty_sort()
+    public async Task Continuation_token_paging_works_without_a_sort()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var fixture = await new SqliteStorageEngineFixtureFactory()
             .CreateAsync(ct, services => services.AddDsoRegistration<ArticleDso.V1>());
         var storage = fixture.PartitionedStorage;
 
-        var range = DataRange.FromContinuationToken(ContinuationToken.Beginning, size: 2);
+        var ids = new List<Guid>();
+        for (var i = 0; i < 5; i++)
+        {
+            var article = new ArticleDso.V1(
+                $"Article {i}",
+                "Ada Lovelace",
+                new DateTimeOffset(2026, 1, 1 + i, 0, 0, 0, TimeSpan.Zero),
+                [],
+                new Dictionary<string, string>());
+            var id = UuidV7.New();
+            ids.Add(id.Value);
+            _ = await storage.CreateAsync(id, article, [], BuildSearchFields(article), Expiration.NoExpiration, [], ct);
+        }
 
-        _ = await Should.ThrowAsync<ArgumentException>(() => storage.QueryAsync<ArticleDso.V1>(
-            ArticleDso.EntityType, Query.All(), SortParameter.Empty, range, ct));
+        // Without a sort, cursor paging falls back to a stable default order (entity id),
+        // the same order unsorted offset paging uses, rather than throwing.
+        var range = DataRange.FromContinuationToken(ContinuationToken.Beginning, size: 2);
+        var seen = new List<Guid>();
+        while (true)
+        {
+            var page = await storage.QueryAsync(
+                ArticleDso.EntityType, Query.All(), SortParameter.Empty, range, ct);
+            seen.AddRange(page.Items.Select(item => item.Id));
+
+            if (!page.HasMoreData || page.NextToken is not { } nextToken)
+            {
+                break;
+            }
+
+            range = DataRange.FromContinuationToken(nextToken, size: 2);
+        }
+
+        seen.ShouldBe(ids.OrderBy(id => id.ToString()).ToList());
     }
 
     [Fact]
-    public async Task PreviousToken_only_navigates_backward_when_the_sort_direction_is_reversed()
+    public async Task PreviousToken_navigates_backward_with_the_same_sort()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var fixture = await new SqliteStorageEngineFixtureFactory()
@@ -415,32 +450,87 @@ public sealed class SearchAndQueryDsosHowToTests
                 UuidV7.New(), article, [], BuildSearchFields(article), Expiration.NoExpiration, [], ct);
         }
 
-        var forwardSort = new SortParameter(Fields.PublishedAt);
-        var backwardSort = new SortParameter(Fields.PublishedAt, SortDirection.Descending);
+        var sort = new SortParameter(Fields.PublishedAt);
 
-        var page1 = await storage.QueryAsync<ArticleDso.V1>(
-            ArticleDso.EntityType, Query.All(), forwardSort,
+        var page1 = await storage.QueryAsync(
+            ArticleDso.EntityType, Query.All(), sort,
             DataRange.FromContinuationToken(ContinuationToken.Beginning, size: 2), ct);
-        var page2 = await storage.QueryAsync<ArticleDso.V1>(
-            ArticleDso.EntityType, Query.All(), forwardSort,
+        var page2 = await storage.QueryAsync(
+            ArticleDso.EntityType, Query.All(), sort,
             DataRange.FromContinuationToken(page1.NextToken!.Value, size: 2), ct);
 
-        // Using PreviousToken with the SAME (forward) sort direction does not walk backward:
-        // the sort direction must be reversed for PreviousToken to mean "the page before this one".
+        // PreviousToken navigates backward using the SAME sort: no need to flip the direction.
+        // Items always come back in the requested (forward) order.
         var previousToken = page2.PreviousToken.ShouldNotBeNull();
-        var withSameSortDirection = await storage.QueryAsync<ArticleDso.V1>(
-            ArticleDso.EntityType, Query.All(), forwardSort,
+        var backToPage1 = await storage.QueryAsync(
+            ArticleDso.EntityType, Query.All(), sort,
             DataRange.FromContinuationToken(previousToken.Value, size: 2), ct);
-        withSameSortDirection.Items.Select(i => i.Value.Title).ShouldNotBe(
-            page1.Items.Select(i => i.Value.Title).ToList());
 
-        // Reversing the sort direction makes PreviousToken return the previous page's items
-        // (in reverse order, matching the reversed sort).
-        var withReversedSortDirection = await storage.QueryAsync<ArticleDso.V1>(
-            ArticleDso.EntityType, Query.All(), backwardSort,
-            DataRange.FromContinuationToken(previousToken.Value, size: 2), ct);
-        withReversedSortDirection.Items.Select(i => i.Value.Title).ShouldBe(
-            page1.Items.Select(i => i.Value.Title).Reverse().ToList());
+        backToPage1.Items.Select(i => ToArticle(i.Value).Title).ShouldBe(
+            page1.Items.Select(i => ToArticle(i.Value).Title).ToList());
+    }
+
+    // begin-snippet: page-backward
+    private static async Task<(List<string> Forward, List<string> Backward)> PageForwardThenBackwardAsync(
+        IPartitionedStorage storage, Ct ct)
+    {
+        var sort = new SortParameter(Fields.PublishedAt);
+
+        // Page forward to the last page.
+        var forwardTitles = new List<string>();
+        var range = DataRange.FromContinuationToken(ContinuationToken.Beginning, size: 2);
+        QueryResult<MetadataEnvelope> page;
+        while (true)
+        {
+            page = await storage.QueryAsync(ArticleDso.EntityType, Query.All(), sort, range, ct);
+            forwardTitles.AddRange(page.Items.Select(item => ToArticle(item.Value).Title));
+
+            if (!page.HasMoreData || page.NextToken is not { } nextToken)
+            {
+                break;
+            }
+
+            range = DataRange.FromContinuationToken(nextToken, size: 2);
+        }
+
+        // Page backward from the last page using PreviousToken and the SAME sort.
+        var backwardTitles = new List<string>(page.Items.Select(item => ToArticle(item.Value).Title));
+        while (page.HasPreviousData && page.PreviousToken is { } previousToken)
+        {
+            page = await storage.QueryAsync(
+                ArticleDso.EntityType, Query.All(), sort,
+                DataRange.FromContinuationToken(previousToken, size: 2), ct);
+            backwardTitles.InsertRange(0, page.Items.Select(item => ToArticle(item.Value).Title));
+        }
+
+        return (forwardTitles, backwardTitles);
+    }
+    // end-snippet
+
+    [Fact]
+    public async Task Paging_backward_from_the_last_page_reproduces_the_forward_pages()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await new SqliteStorageEngineFixtureFactory()
+            .CreateAsync(ct, services => services.AddDsoRegistration<ArticleDso.V1>());
+        var storage = fixture.PartitionedStorage;
+
+        for (var i = 0; i < 5; i++)
+        {
+            var article = new ArticleDso.V1(
+                $"Article {i}",
+                "Ada Lovelace",
+                new DateTimeOffset(2026, 1, 1 + i, 0, 0, 0, TimeSpan.Zero),
+                [],
+                new Dictionary<string, string>());
+            _ = await storage.CreateAsync(
+                UuidV7.New(), article, [], BuildSearchFields(article), Expiration.NoExpiration, [], ct);
+        }
+
+        var (forward, backward) = await PageForwardThenBackwardAsync(storage, ct);
+
+        forward.ShouldBe(["Article 0", "Article 1", "Article 2", "Article 3", "Article 4"]);
+        backward.ShouldBe(forward);
     }
 
     [Fact]
@@ -461,13 +551,13 @@ public sealed class SearchAndQueryDsosHowToTests
             UuidV7.New(), article, [], BuildSearchFields(article), Expiration.NoExpiration, [], ct);
 
         // Filtering works: Contains matches an item in the array.
-        var filtered = await storage.QueryAsync<ArticleDso.V1>(
+        var filtered = await storage.QueryAsync(
             ArticleDso.EntityType, Fields.Tags.Contains("storage"), SortParameter.Empty, DataRange.FromPage(1, 10), ct);
         filtered.Items.Count.ShouldBe(1);
 
         // Sorting by a multi-valued field is rejected: there's no single row per entity to sort by.
         var sortByTags = new SortParameter(Fields.Tags);
-        _ = await Should.ThrowAsync<Exception>(() => storage.QueryAsync<ArticleDso.V1>(
+        _ = await Should.ThrowAsync<Exception>(() => storage.QueryAsync(
             ArticleDso.EntityType, Query.All(), sortByTags, DataRange.FromPage(1, 10), ct));
 
         // Projecting a multi-valued field excludes its rows: QueryFieldsAsync only reads the
@@ -566,8 +656,8 @@ public sealed class SearchAndQueryDsosHowToTests
         var sort = new SortParameter(sortField, sortDirection);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var queryResult = await storage.QueryAsync<ArticleDso.V1>(ArticleDso.EntityType, filter, sort, range, ct);
-        var result = queryResult.ConvertTo(envelope => envelope.Value);
+        var queryResult = await storage.QueryAsync(ArticleDso.EntityType, filter, sort, range, ct);
+        var result = queryResult.ConvertTo(envelope => ToArticle(envelope.Value));
         // end-snippet
 
         result.Items.Count.ShouldBe(2);
@@ -625,5 +715,155 @@ public sealed class SearchAndQueryDsosHowToTests
         withUnindexedField.Items.Count.ShouldBe(1);
         withUnindexedField.Items[0].Fields.ShouldContainKey("CUSTOMFIELDS.PRIORITY");
         withUnindexedField.Items[0].Fields["CUSTOMFIELDS.PRIORITY"].ShouldBeNull();
+    }
+
+    // begin-snippet: link-filter-publisher-dso
+    public static class PublisherDso
+    {
+        // Illustrative id only. Real DSOs must use an unused id from the owning product's reserved range.
+        internal static readonly EntityType EntityType = new(9002, nameof(PublisherDso));
+
+        public sealed record V1(string Name) : IDataStorageObject
+        {
+            public static DataStorageObjectVersion DsoVersion { get; } = new(EntityType, 1);
+        }
+    }
+
+    public static class PublisherLinks
+    {
+        // Illustrative id only. Real link types must use an unused id from the owning product's reserved range.
+        public static readonly LinkDefinition Publishes = new()
+        {
+            Left = PublisherDso.EntityType,
+            Right = ArticleDso.EntityType,
+            Link = new LinkType(9201, "Publishes")
+        };
+    }
+
+    private static class PublisherFields
+    {
+        public static readonly StringField Name = new("name");
+    }
+    // end-snippet
+
+    [Fact]
+    public async Task Can_filter_articles_by_their_publisher()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await new SqliteStorageEngineFixtureFactory()
+            .CreateAsync(ct, services =>
+            {
+                services.AddDsoRegistration<ArticleDso.V1>();
+                services.AddDsoRegistration<PublisherDso.V1>();
+            });
+        var storage = fixture.PartitionedStorage;
+
+        var acmePress = UuidV7.New();
+        var othersPress = UuidV7.New();
+        _ = await storage.CreateAsync(acmePress, new PublisherDso.V1("Acme Press"), [],
+            new SearchFieldsBuilder().Add(PublisherFields.Name.Path, "Acme Press").Build(), Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(othersPress, new PublisherDso.V1("Others Press"), [],
+            new SearchFieldsBuilder().Add(PublisherFields.Name.Path, "Others Press").Build(), Expiration.NoExpiration, [], ct);
+
+        var article = new ArticleDso.V1(
+            "Configuring Duende Storage", "Ada Lovelace",
+            new DateTimeOffset(2026, 1, 15, 0, 0, 0, TimeSpan.Zero), ["storage"], new Dictionary<string, string>());
+        var otherArticle = new ArticleDso.V1(
+            "Something Else", "Grace Hopper",
+            new DateTimeOffset(2026, 1, 16, 0, 0, 0, TimeSpan.Zero), [], new Dictionary<string, string>());
+
+        var articleId = UuidV7.New();
+        var otherArticleId = UuidV7.New();
+        _ = await storage.CreateAsync(articleId, article, [], BuildSearchFields(article), Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(otherArticleId, otherArticle, [], BuildSearchFields(otherArticle), Expiration.NoExpiration, [], ct);
+
+        _ = await storage.LinkAsync(PublisherLinks.Publishes, acmePress, articleId, [], ct);
+        _ = await storage.LinkAsync(PublisherLinks.Publishes, othersPress, otherArticleId, [], ct);
+
+        // begin-snippet: link-filter-to-left
+        // "Which articles does Acme Press publish?" (the queried entity, Article, is the
+        // right side of Publishes, so the direction is ToLeft.)
+        var filter = LinkFilter.ToLeft(PublisherLinks.Publishes, PublisherFields.Name.Equals("Acme Press"));
+
+        var result = await storage.QueryAsync(
+            ArticleDso.EntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
+        // end-snippet
+
+        result.Items.Count.ShouldBe(1);
+        ((ArticleDso.V1)result.Items[0].Value).Title.ShouldBe(article.Title);
+
+        // begin-snippet: link-filter-to-right
+        // "Which publishers published the article titled 'Configuring Duende Storage'?"
+        // (the queried entity, Publisher, is the left side of Publishes, so the direction is ToRight.)
+        var publisherFilter = LinkFilter.ToRight(PublisherLinks.Publishes, Fields.Title.Equals("Configuring Duende Storage"));
+
+        var publisherResult = await storage.QueryAsync(
+            PublisherDso.EntityType, publisherFilter, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
+        // end-snippet
+
+        publisherResult.Items.Count.ShouldBe(1);
+        ((PublisherDso.V1)publisherResult.Items[0].Value).Name.ShouldBe("Acme Press");
+    }
+
+    [Fact]
+    public async Task Link_filters_combine_with_other_filters_Not_sort_and_paging()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var fixture = await new SqliteStorageEngineFixtureFactory()
+            .CreateAsync(ct, services =>
+            {
+                services.AddDsoRegistration<ArticleDso.V1>();
+                services.AddDsoRegistration<PublisherDso.V1>();
+            });
+        var storage = fixture.PartitionedStorage;
+
+        var acmePress = UuidV7.New();
+        _ = await storage.CreateAsync(acmePress, new PublisherDso.V1("Acme Press"), [],
+            new SearchFieldsBuilder().Add(PublisherFields.Name.Path, "Acme Press").Build(), Expiration.NoExpiration, [], ct);
+
+        var published = new ArticleDso.V1(
+            "Configuring Duende Storage", "Ada Lovelace",
+            new DateTimeOffset(2026, 1, 15, 0, 0, 0, TimeSpan.Zero), [], new Dictionary<string, string>());
+        var unpublished = new ArticleDso.V1(
+            "Draft Article", "Ada Lovelace",
+            new DateTimeOffset(2026, 1, 16, 0, 0, 0, TimeSpan.Zero), [], new Dictionary<string, string>());
+
+        var publishedId = UuidV7.New();
+        var unpublishedId = UuidV7.New();
+        _ = await storage.CreateAsync(publishedId, published, [], BuildSearchFields(published), Expiration.NoExpiration, [], ct);
+        _ = await storage.CreateAsync(unpublishedId, unpublished, [], BuildSearchFields(unpublished), Expiration.NoExpiration, [], ct);
+
+        _ = await storage.LinkAsync(PublisherLinks.Publishes, acmePress, publishedId, [], ct);
+
+        // begin-snippet: link-filter-and-not
+        // Combine a link filter with an ordinary field filter: articles by Ada Lovelace
+        // that a publisher has picked up.
+        var byAuthorAndPublished = Fields.Author.Equals("Ada Lovelace")
+            .And(LinkFilter.ToLeft(PublisherLinks.Publishes));
+
+        var pickedUp = await storage.QueryAsync(
+            ArticleDso.EntityType, byAuthorAndPublished, SortParameter.Empty, DataRange.FromPage(1, 10), ct);
+
+        // Query.Not negates a link filter: articles no publisher has picked up yet.
+        var stillDrafts = await storage.QueryAsync(
+            ArticleDso.EntityType, Query.Not(LinkFilter.ToLeft(PublisherLinks.Publishes)),
+            SortParameter.Empty, DataRange.FromPage(1, 10), ct);
+        // end-snippet
+
+        pickedUp.Items.Count.ShouldBe(1);
+        ((ArticleDso.V1)pickedUp.Items[0].Value).Title.ShouldBe(published.Title);
+        stillDrafts.Items.Count.ShouldBe(1);
+        ((ArticleDso.V1)stillDrafts.Items[0].Value).Title.ShouldBe(unpublished.Title);
+
+        // begin-snippet: link-filter-sort-and-page
+        // Sort and page results the same way as any other QueryAsync call; TotalCount
+        // counts distinct matching articles, even if several publishers linked to the same one.
+        var anyPublisher = LinkFilter.ToLeft(PublisherLinks.Publishes);
+        var page = await storage.QueryAsync(
+            ArticleDso.EntityType, anyPublisher, new SortParameter(Fields.PublishedAt), DataRange.FromPage(1, 10), ct);
+        // end-snippet
+
+        page.Items.Count.ShouldBe(1);
+        page.TotalCount.ShouldBe(1);
     }
 }

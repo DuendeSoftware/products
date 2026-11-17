@@ -14,17 +14,86 @@ namespace Duende.Storage.Internal.Querying;
 /// Visitor that translates query expression trees to SQL WHERE clauses with parameterized EXISTS subqueries.
 /// All values are parameterized to prevent SQL injection.
 /// </summary>
-internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command, ISqlDialect dialect) : IQueryExpressionVisitor<string>
+internal sealed class SqlWhereClauseBuilder : IQueryExpressionVisitor<string>
 {
-    private readonly string _qualifiedSearchValues = $"{dialect.QuoteIdentifier(schemaName)}.{dialect.QuoteIdentifier("search_values")}";
+    /// <summary>The maximum number of nested <see cref="LinkExistsExpression"/> levels allowed.</summary>
+    private const int MaxLinkNestingDepth = 4;
+
+    private readonly string _schemaName;
+    private readonly DbCommand _command;
+    private readonly ISqlDialect _dialect;
+    private readonly string _alias;
+    private readonly StorageTableNames _tableNames;
+    private readonly EntityType? _queriedEntityType;
+    private readonly int _depth;
+    private readonly string _qualifiedSearchValues;
     private int _parameterCounter;
     private int _subqueryCounter;
+
+    /// <summary>
+    /// Creates a builder for the outer (top-level) query, with the default <c>v</c> alias for the queried entity.
+    /// </summary>
+    public SqlWhereClauseBuilder(string schemaName, DbCommand command, ISqlDialect dialect)
+        : this(schemaName, command, dialect, tableNames: null, queriedEntityType: null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a builder for the outer (top-level) query, with the default <c>v</c> alias for the queried entity,
+    /// optionally supplying the table names needed to compile <see cref="LinkExistsExpression"/> and the entity
+    /// type being queried, used to validate a link filter's direction against it.
+    /// </summary>
+    public SqlWhereClauseBuilder(string schemaName, DbCommand command, ISqlDialect dialect, StorageTableNames? tableNames, EntityType? queriedEntityType)
+        : this(schemaName, command, dialect, "v", tableNames, queriedEntityType, depth: 0, parameterCounter: 0, subqueryCounter: 0)
+    {
+    }
+
+    /// <summary>
+    /// Creates a nested builder — used when compiling a <see cref="LinkExistsExpression"/>'s linked filter — that
+    /// shares the parent's parameter and subquery counters and uses the linked entity's alias.
+    /// </summary>
+    private SqlWhereClauseBuilder(
+        string schemaName,
+        DbCommand command,
+        ISqlDialect dialect,
+        string alias,
+        StorageTableNames? tableNames,
+        EntityType? queriedEntityType,
+        int depth,
+        int parameterCounter,
+        int subqueryCounter)
+    {
+        _schemaName = schemaName;
+        _command = command;
+        _dialect = dialect;
+        _alias = alias;
+        _tableNames = tableNames ?? DefaultTableNames(schemaName, dialect);
+        _queriedEntityType = queriedEntityType;
+        _depth = depth;
+        _parameterCounter = parameterCounter;
+        _subqueryCounter = subqueryCounter;
+        _qualifiedSearchValues = $"{dialect.QuoteIdentifier(schemaName)}.{dialect.QuoteIdentifier("search_values")}";
+    }
+
+    /// <summary>The number of parameters added so far, used to seed a nested builder's counter.</summary>
+    public int ParameterCounter => _parameterCounter;
+
+    /// <summary>The number of subqueries emitted so far, used to seed a nested builder's counter.</summary>
+    public int SubqueryCounter => _subqueryCounter;
+
+    private static StorageTableNames DefaultTableNames(string schemaName, ISqlDialect dialect)
+    {
+        var schema = dialect.QuoteIdentifier(schemaName);
+        return new StorageTableNames(
+            $"{schema}.{dialect.QuoteIdentifier("entities")}",
+            $"{schema}.{dialect.QuoteIdentifier("entity_links")}");
+    }
 
     /// <summary>
     /// Returns the entity table column name for a system/reserved field path, or null if not a system field.
     /// Throws if the field path is a system field but the field type is not DateTimeField.
     /// </summary>
-    private static string? GetSystemColumnName(string fieldPath, Field? field)
+    private string? GetSystemColumnName(string fieldPath, Field? field)
     {
         if (string.Equals(fieldPath, SystemFields.Created, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(fieldPath, SystemFields.CreatedAttributeName, StringComparison.OrdinalIgnoreCase))
@@ -34,7 +103,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
                 throw new InvalidOperationException($"System field '{fieldPath}' must use DateTimeField, not {field.GetType().Name}.");
             }
 
-            return "v.created_at";
+            return $"{_alias}.created_at";
         }
 
         if (string.Equals(fieldPath, SystemFields.LastUpdated, StringComparison.OrdinalIgnoreCase) ||
@@ -45,7 +114,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
                 throw new InvalidOperationException($"System field '{fieldPath}' must use DateTimeField, not {field.GetType().Name}.");
             }
 
-            return "v.last_updated_at";
+            return $"{_alias}.last_updated_at";
         }
 
         return null;
@@ -64,7 +133,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
     /// Converts a field path string to the dialect-specific parameter value (GUID as byte[] for SQLite, Guid for others).
     /// </summary>
     private object FieldPathToParam(string fieldPath) =>
-        dialect.FieldPathToParameterValue(DeterministicGuidGenerator.Create(fieldPath.ToUpperInvariant()));
+        _dialect.FieldPathToParameterValue(DeterministicGuidGenerator.Create(fieldPath.ToUpperInvariant()));
 
     private static object FieldPathToParam(ISqlDialect dialect, string fieldPath) =>
         dialect.FieldPathToParameterValue(DeterministicGuidGenerator.Create(fieldPath.ToUpperInvariant()));
@@ -93,6 +162,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             ArrayFilterExpression arrayFilter => Visit(arrayFilter),
             ArrayContainsExpression arrayContains => Visit(arrayContains),
             PresentExpression present => Visit(present),
+            LinkExistsExpression linkExists => Visit(linkExists),
             _ => throw new NotSupportedException($"Expression type {expression.GetType().Name} is not supported.")
         };
 
@@ -100,7 +170,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
     }
 
     // No filter - match all records
-    public string Visit(AllExpression expression) => dialect.TrueLiteral;
+    public string Visit(AllExpression expression) => _dialect.TrueLiteral;
 
     public string Visit(EqualExpression expression)
     {
@@ -126,9 +196,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} = {valueParam2}
@@ -142,7 +212,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         var value = expression.Value;
 
         var fieldPathParam = AddParameter($"field_path_{_parameterCounter}", FieldPathToParam(fieldPath));
-        var escapedValue = dialect.EscapeLikeWildcards(value);
+        var escapedValue = _dialect.EscapeLikeWildcards(value);
         var valueParam = AddParameter($"value_{_parameterCounter}", $"%{escapedValue}%");
         _parameterCounter++;
 
@@ -152,12 +222,12 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
-                  AND sv{subqueryId}.string_value {dialect.CaseInsensitiveLikeOperator} {valueParam}{dialect.LikeEscapeClause}
+                  AND sv{subqueryId}.string_value {_dialect.CaseInsensitiveLikeOperator} {valueParam}{_dialect.LikeEscapeClause}
             )
             """;
     }
@@ -168,7 +238,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         var value = expression.Value;
 
         var fieldPathParam = AddParameter($"field_path_{_parameterCounter}", FieldPathToParam(fieldPath));
-        var escapedValue = dialect.EscapeLikeWildcards(value);
+        var escapedValue = _dialect.EscapeLikeWildcards(value);
         var valueParam = AddParameter($"value_{_parameterCounter}", $"{escapedValue}%");
         _parameterCounter++;
 
@@ -178,12 +248,12 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
-                  AND sv{subqueryId}.string_value {dialect.CaseInsensitiveLikeOperator} {valueParam}{dialect.LikeEscapeClause}
+                  AND sv{subqueryId}.string_value {_dialect.CaseInsensitiveLikeOperator} {valueParam}{_dialect.LikeEscapeClause}
             )
             """;
     }
@@ -212,9 +282,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} > {valueParam2}
@@ -246,9 +316,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} < {valueParam2}
@@ -280,9 +350,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} >= {valueParam2}
@@ -314,9 +384,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} <= {valueParam2}
@@ -352,9 +422,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} BETWEEN {minParam2} AND {maxParam2}
@@ -376,7 +446,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         if (valuesList.Count == 0)
         {
             // IN with empty list never matches
-            return dialect.FalseLiteral;
+            return _dialect.FalseLiteral;
         }
 
         var systemColumn = GetSystemColumnName(fieldPath, expression.Field);
@@ -416,9 +486,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
                   AND sv{subqueryId}.{columnName} IN ({inClause})
@@ -456,7 +526,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         var filter = expression.Filter;
 
         // Create a scoped builder for array item filters
-        var arrayItemBuilder = new ArrayItemSqlBuilder(schemaName, command, dialect, arrayFieldPath, _parameterCounter, _subqueryCounter);
+        var arrayItemBuilder = new ArrayItemSqlBuilder(_schemaName, _command, _dialect, _alias, arrayFieldPath, _parameterCounter, _subqueryCounter);
         var filterClause = arrayItemBuilder.BuildArrayItemFilter(filter);
 
         // Update counters
@@ -478,7 +548,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         var value = expression.Value;
 
         var fieldPathParam = AddParameter($"field_path_{_parameterCounter}", FieldPathToParam(fieldPath));
-        var escapedValue = dialect.EscapeLikeWildcards(value);
+        var escapedValue = _dialect.EscapeLikeWildcards(value);
         var valueParam = AddParameter($"value_{_parameterCounter}", $"%{escapedValue}");
         _parameterCounter++;
 
@@ -488,12 +558,12 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND {itemIndexCond}
-                  AND sv{subqueryId}.string_value {dialect.CaseInsensitiveLikeOperator} {valueParam}{dialect.LikeEscapeClause}
+                  AND sv{subqueryId}.string_value {_dialect.CaseInsensitiveLikeOperator} {valueParam}{_dialect.LikeEscapeClause}
             )
             """;
     }
@@ -519,9 +589,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             return $"""
                 EXISTS (
                     SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                    WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                      AND sv{subqueryId}.pool_id = v.pool_id
-                      AND sv{subqueryId}.entity_id = v.entity_id
+                    WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                      AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                      AND sv{subqueryId}.entity_id = {_alias}.entity_id
                       AND sv{subqueryId}.field_path = {fieldPathParam}
                       AND sv{subqueryId}.item_index >= 0
                 )
@@ -534,9 +604,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND sv{subqueryId}.item_index = -1
                   AND sv{subqueryId}.{columnName} IS NOT NULL
@@ -559,14 +629,117 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         return $"""
             EXISTS (
                 SELECT 1 FROM {_qualifiedSearchValues} sv{subqueryId}
-                WHERE sv{subqueryId}.entity_type_id = v.entity_type_id
-                  AND sv{subqueryId}.pool_id = v.pool_id
-                  AND sv{subqueryId}.entity_id = v.entity_id
+                WHERE sv{subqueryId}.entity_type_id = {_alias}.entity_type_id
+                  AND sv{subqueryId}.pool_id = {_alias}.pool_id
+                  AND sv{subqueryId}.entity_id = {_alias}.entity_id
                   AND sv{subqueryId}.field_path = {fieldPathParam}
                   AND sv{subqueryId}.item_index >= 0
                   AND sv{subqueryId}.guid_value = {valueParam}
             )
             """;
+    }
+
+    public string Visit(LinkExistsExpression expression)
+    {
+        ValidateDirection(expression);
+
+        if (_depth >= MaxLinkNestingDepth)
+        {
+            throw new InvalidOperationException(
+                $"Link filter nesting exceeds the maximum depth of {MaxLinkNestingDepth}.");
+        }
+
+        var definition = expression.Definition;
+        var linkTable = _tableNames.EntityLinks;
+
+        var subqueryId = _subqueryCounter++;
+        var linkAlias = $"lk{subqueryId}";
+        var linkedAlias = $"le{subqueryId}";
+
+        var linkTypeParam = AddParameter($"link_type_{_parameterCounter}", (int)definition.Link.Id);
+        _parameterCounter++;
+
+        string sourceTypeColumn, sourceIdColumn, targetTypeColumn, targetIdColumn;
+        if (expression.Direction == LinkJoinDirection.LeftToRight)
+        {
+            sourceTypeColumn = "left_entity_type_id";
+            sourceIdColumn = "left_entity_id";
+            targetTypeColumn = "right_entity_type_id";
+            targetIdColumn = "right_entity_id";
+        }
+        else
+        {
+            sourceTypeColumn = "right_entity_type_id";
+            sourceIdColumn = "right_entity_id";
+            targetTypeColumn = "left_entity_type_id";
+            targetIdColumn = "left_entity_id";
+        }
+
+        var sb = new StringBuilder();
+        _ = sb.Append(CultureInfo.InvariantCulture, $"""
+            EXISTS (
+                SELECT 1 FROM {linkTable} {linkAlias}
+                JOIN {_tableNames.Entities} {linkedAlias}
+                  ON {linkedAlias}.pool_id = {linkAlias}.pool_id
+                  AND {linkedAlias}.entity_type_id = {linkAlias}.{targetTypeColumn}
+                  AND {linkedAlias}.entity_id = {linkAlias}.{targetIdColumn}
+                WHERE {linkAlias}.pool_id = {_alias}.pool_id
+                  AND {linkAlias}.link_type_id = {linkTypeParam}
+                  AND {linkAlias}.{sourceTypeColumn} = {_alias}.entity_type_id
+                  AND {linkAlias}.{sourceIdColumn} = {_alias}.entity_id
+            """);
+
+        if (expression.LinkedFilter is not null)
+        {
+            var linkedEntityType = expression.Direction == LinkJoinDirection.LeftToRight ? definition.Right : definition.Left;
+            var childBuilder = new SqlWhereClauseBuilder(
+                _schemaName,
+                _command,
+                _dialect,
+                linkedAlias,
+                _tableNames,
+                linkedEntityType,
+                _depth + 1,
+                _parameterCounter,
+                _subqueryCounter);
+
+            var linkedClause = childBuilder.BuildWhereClause(expression.LinkedFilter);
+            _parameterCounter = childBuilder.ParameterCounter;
+            _subqueryCounter = childBuilder.SubqueryCounter;
+
+            _ = sb.Append(CultureInfo.InvariantCulture, $"""
+
+                  AND ({linkedClause})
+            """);
+        }
+
+        _ = sb.AppendLine();
+        _ = sb.Append(')');
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Validates that the link definition's source side (from the queried entity's point of view) matches the
+    /// entity type being queried, when that type is known.
+    /// </summary>
+    private void ValidateDirection(LinkExistsExpression expression)
+    {
+        if (_queriedEntityType is null)
+        {
+            return;
+        }
+
+        var expectedSource = expression.Direction == LinkJoinDirection.LeftToRight
+            ? expression.Definition.Left
+            : expression.Definition.Right;
+
+        if (expectedSource != _queriedEntityType.Value)
+        {
+            throw new InvalidOperationException(
+                $"Link definition '{expression.Definition.Link.Name}' with direction {expression.Direction} expects the " +
+                $"queried entity to be '{expectedSource.Name}', but the query is for '{_queriedEntityType.Value.Name}'.");
+        }
     }
 
     /// <summary>
@@ -602,7 +775,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
     private string AddParameter(string name, object value)
     {
         var paramName = $"@{name}";
-        dialect.AddParameter(command, paramName, value);
+        _dialect.AddParameter(_command, paramName, value);
         return paramName;
     }
 
@@ -613,6 +786,7 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
         string schemaName,
         DbCommand command,
         ISqlDialect dialect,
+        string alias,
         string arrayFieldPath,
         int parameterCounter,
         int subqueryCounter)
@@ -669,9 +843,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             // WHERE clause
             _ = sb.Append(CultureInfo.InvariantCulture, $"""
 
-                        WHERE sv{subqueryId}_0.entity_type_id = v.entity_type_id
-                          AND sv{subqueryId}_0.pool_id = v.pool_id
-                          AND sv{subqueryId}_0.entity_id = v.entity_id
+                        WHERE sv{subqueryId}_0.entity_type_id = {alias}.entity_type_id
+                          AND sv{subqueryId}_0.pool_id = {alias}.pool_id
+                          AND sv{subqueryId}_0.entity_id = {alias}.entity_id
                           AND sv{subqueryId}_0.item_index IS NOT NULL
                     """);
 
@@ -768,9 +942,9 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
             // WHERE clause
             _ = sb.Append(CultureInfo.InvariantCulture, $"""
 
-                        WHERE sv{subqueryId}_0.entity_type_id = v.entity_type_id
-                          AND sv{subqueryId}_0.pool_id = v.pool_id
-                          AND sv{subqueryId}_0.entity_id = v.entity_id
+                        WHERE sv{subqueryId}_0.entity_type_id = {alias}.entity_type_id
+                          AND sv{subqueryId}_0.pool_id = {alias}.pool_id
+                          AND sv{subqueryId}_0.entity_id = {alias}.entity_id
                           AND sv{subqueryId}_0.item_index IS NOT NULL
                     """);
 
@@ -874,6 +1048,8 @@ internal sealed class SqlWhereClauseBuilder(string schemaName, DbCommand command
                     throw new InvalidOperationException("OR expressions should not reach CollectConditions. This is a bug.");
                 case ArrayFilterExpression:
                     throw new NotSupportedException("Nested array filters are not supported.");
+                case LinkExistsExpression:
+                    throw new NotSupportedException("Link filters (LinkExistsExpression / LinkFilter.Exists) are not supported inside ArrayFilterExpression.");
                 default:
                     throw new NotSupportedException($"Expression type {filter.GetType().Name} is not supported in array filters.");
             }

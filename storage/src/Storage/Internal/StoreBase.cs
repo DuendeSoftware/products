@@ -16,6 +16,16 @@ internal abstract class StoreBase
     protected PoolId PoolId { get; private set; } = -1;
 
     public void SetPoolId(PoolId poolId) => PoolId = poolId;
+
+    /// <summary>
+    /// Creates the exception that an engine throws when its database reports that a Storage table does not exist.
+    /// </summary>
+    /// <param name="databaseException">The provider exception, kept as the inner exception.</param>
+    protected static InvalidOperationException StorageSchemaMissing(Exception databaseException) => new(
+        "The database reports that a Duende Storage table does not exist. " +
+        "The Storage schema may not have been created yet, or the connection string or SchemaName may point to another database or schema. " +
+        "To create the schema, run 'duende storage migrate' or call IStorageInstanceSchema.MigrateAsync.",
+        databaseException);
 }
 
 

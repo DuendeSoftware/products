@@ -8,8 +8,7 @@ using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.Sqlite;
 
@@ -66,20 +65,16 @@ internal sealed class FailingUpdatesStorageFactory(IPartitionedStorageFactory in
         public Task<UnlinkResult> UnlinkAsync(LinkDefinition definition, UuidV7 leftEntityId, UuidV7 rightEntityId, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct) =>
             inner.UnlinkAsync(definition, leftEntityId, rightEntityId, outboxEvents, ct);
 
-        public Task<PurgeResult> PurgePoolAsync(Ct ct) => inner.PurgePoolAsync(ct);
-
-        public Task<PurgeResult> PurgePoolAsync(int batchSize, Ct ct) => inner.PurgePoolAsync(batchSize, ct);
-
         public Task<BatchResult> ExecuteBatchAsync(IReadOnlyList<IStorageOperation> operations, IReadOnlyList<OutboxEvent> outboxEvents, Ct ct) =>
             inner.ExecuteBatchAsync(operations, outboxEvents, ct);
 
-        public Task<QueryResult<MetadataEnvelope<TDso>>> QueryAsync<TDso>(
+        public Task<QueryResult<MetadataEnvelope>> QueryAsync(
             EntityType entityType,
             IQueryExpression filter,
             SortParameter sort,
             DataRange dataRange,
-            Ct ct) where TDso : IDataStorageObject =>
-            inner.QueryAsync<TDso>(entityType, filter, sort, dataRange, ct);
+            Ct ct) =>
+            inner.QueryAsync(entityType, filter, sort, dataRange, ct);
 
         public Task<QueryResult<ProjectedResult>> QueryFieldsAsync(
             EntityType entityType,
@@ -90,9 +85,14 @@ internal sealed class FailingUpdatesStorageFactory(IPartitionedStorageFactory in
             Ct ct) =>
             inner.QueryFieldsAsync(entityType, fields, filter, sort, dataRange, ct);
 
-        public Task<QueryResult<MetadataEnvelope<TDso>>> QueryLinksAsync<TDso>(LinkQueryDescriptor query, DataRange dataRange, Ct ct)
-            where TDso : IDataStorageObject =>
-            inner.QueryLinksAsync<TDso>(query, dataRange, ct);
+        public Task<QueryResult<MetadataEnvelope>> QueryLinksAsync(LinkQueryDescriptor query, DataRange dataRange, Ct ct) =>
+            inner.QueryLinksAsync(query, dataRange, ct);
+
+        public Task<QueryResult<LinkedEnvelope>> QueryLinksByAnchorAsync(LinkQueryDescriptor query, DataRange dataRange, Ct ct) =>
+            inner.QueryLinksByAnchorAsync(query, dataRange, ct);
+
+        public Task<IReadOnlyDictionary<UuidV7, long>> CountLinksAsync(LinkQueryDescriptor query, Ct ct) =>
+            inner.CountLinksAsync(query, ct);
 
         public Task<long> CountAsync(EntityType entityType, IQueryExpression? filter, Ct ct) => inner.CountAsync(entityType, filter, ct);
     }

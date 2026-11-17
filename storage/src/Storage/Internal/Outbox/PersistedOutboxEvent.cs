@@ -21,7 +21,7 @@ public sealed record PersistedOutboxEvent
     /// <summary>When the event occurred.</summary>
     public required DateTimeOffset Timestamp { get; init; }
 
-    /// <summary>Database-assigned monotonic sequence number for ordering and paging events.</summary>
+    /// <summary>Database-assigned monotonic sequence number, used to page the subscription queue. Processing order is not guaranteed.</summary>
     public required long SequenceNumber { get; init; }
 
     /// <summary>The name of the domain event (e.g. "UserCreated").</summary>

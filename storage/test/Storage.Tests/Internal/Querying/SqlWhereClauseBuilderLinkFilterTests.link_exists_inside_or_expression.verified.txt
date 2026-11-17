@@ -1,0 +1,26 @@
+SQL:
+(EXISTS (
+    SELECT 1 FROM main.entity_links lk0
+    JOIN main.entities le0
+      ON le0.pool_id = lk0.pool_id
+      AND le0.entity_type_id = lk0.right_entity_type_id
+      AND le0.entity_id = lk0.right_entity_id
+    WHERE lk0.pool_id = v.pool_id
+      AND lk0.link_type_id = @link_type_0
+      AND lk0.left_entity_type_id = v.entity_type_id
+      AND lk0.left_entity_id = v.entity_id
+)) OR (EXISTS (
+    SELECT 1 FROM main.entity_links lk1
+    JOIN main.entities le1
+      ON le1.pool_id = lk1.pool_id
+      AND le1.entity_type_id = lk1.right_entity_type_id
+      AND le1.entity_id = lk1.right_entity_id
+    WHERE lk1.pool_id = v.pool_id
+      AND lk1.link_type_id = @link_type_1
+      AND lk1.left_entity_type_id = v.entity_type_id
+      AND lk1.left_entity_id = v.entity_id
+))
+
+Parameters:
+@link_type_0 = 9912
+@link_type_1 = 9913

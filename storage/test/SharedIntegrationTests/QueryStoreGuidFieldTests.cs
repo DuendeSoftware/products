@@ -7,7 +7,7 @@ using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 using SortParameter = Duende.Storage.Internal.Querying.Sorting.SortParameter;
 
 namespace Duende.Storage.IntegrationTests;
@@ -130,11 +130,11 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Entity2");
+        ((TestGuidEntityDso)result.Items[0].Value).Name.ShouldBe("Entity2");
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -176,12 +176,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Entity1");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity3");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity3");
     }
 
     [Fact]
@@ -199,12 +199,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "WithGuid");
-        result.Items.ShouldContain(x => x.Value.Name == "AlsoWithGuid");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "WithGuid");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "AlsoWithGuid");
     }
 
     [Fact]
@@ -222,11 +222,11 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Entity1");
+        ((TestGuidEntityDso)result.Items[0].Value).Name.ShouldBe("Entity1");
     }
 
     [Fact]
@@ -242,11 +242,11 @@ public partial class QueryStoreGuidFieldTests
         // Act — query with different casing than what was stored
         var filter = new ExactMatchField("apiKey").Equals("MY-SECRET-KEY");
         var page = DataRange.FromPage(1, 10);
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — should match because both are uppercased before hashing
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Entity1");
+        ((TestGuidEntityDso)result.Items[0].Value).Name.ShouldBe("Entity1");
     }
 
     [Fact]
@@ -263,11 +263,11 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Entity1");
+        ((TestGuidEntityDso)result.Items[0].Value).Name.ShouldBe("Entity1");
     }
 
     [Fact]
@@ -287,13 +287,13 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(3);
-        result.Items.ShouldContain(x => x.Value.Name == "Entity1");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity3");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity4");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity3");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity4");
     }
 
     [Fact]
@@ -312,12 +312,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Entity1");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity2");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity2");
     }
 
     [Fact]
@@ -335,12 +335,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "WithApiKey");
-        result.Items.ShouldContain(x => x.Value.Name == "AlsoWithApiKey");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "WithApiKey");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "AlsoWithApiKey");
     }
 
     [Fact]
@@ -356,7 +356,7 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(0);
@@ -378,12 +378,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Entity1");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity3");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity3");
     }
 
     [Fact]
@@ -402,12 +402,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Included1");
-        result.Items.ShouldContain(x => x.Value.Name == "Included2");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Included1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Included2");
     }
 
     [Fact]
@@ -425,12 +425,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Included1");
-        result.Items.ShouldContain(x => x.Value.Name == "Included2");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Included1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Included2");
     }
 
     [Fact]
@@ -450,11 +450,11 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Match");
+        ((TestGuidEntityDso)result.Items[0].Value).Name.ShouldBe("Match");
     }
 
     [Fact]
@@ -484,11 +484,11 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_userEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Alice");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Alice");
     }
 
     [Fact]
@@ -523,12 +523,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_userEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Alice");
-        result.Items.ShouldContain(x => x.Value.Name == "Charlie");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Alice");
+        result.Items.Select(e => (TestUserDso)e.Value).ShouldContain(x => x.Name == "Charlie");
     }
 
     [Fact]
@@ -561,11 +561,11 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestUserDso>(_userEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_userEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert — Only Alice has a work email with the target correlation ID
         result.Items.Count.ShouldBe(1);
-        result.Items[0].Value.Name.ShouldBe("Alice");
+        ((TestUserDso)result.Items[0].Value).Name.ShouldBe("Alice");
     }
 
     [Fact]
@@ -583,12 +583,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Entity1");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity2");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity2");
     }
 
     [Fact]
@@ -607,12 +607,12 @@ public partial class QueryStoreGuidFieldTests
         var page = DataRange.FromPage(1, 10);
 
         // Act
-        var result = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, SortParameter.Empty, page, _ct);
+        var result = await partitionedStorage.QueryAsync(_guidEntityType, filter, SortParameter.Empty, page, _ct);
 
         // Assert
         result.Items.Count.ShouldBe(2);
-        result.Items.ShouldContain(x => x.Value.Name == "Entity1");
-        result.Items.ShouldContain(x => x.Value.Name == "Entity2");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity1");
+        result.Items.Select(e => (TestGuidEntityDso)e.Value).ShouldContain(x => x.Name == "Entity2");
     }
 
     [Fact]
@@ -632,7 +632,7 @@ public partial class QueryStoreGuidFieldTests
         var cursor = DataRange.FromContinuationToken(ContinuationToken.Beginning, 2);
 
         // Act
-        var page1 = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
+        var page1 = await partitionedStorage.QueryAsync(_guidEntityType, filter, sort, cursor, _ct);
 
         // Assert
         page1.Items.Count.ShouldBe(2);
@@ -656,14 +656,14 @@ public partial class QueryStoreGuidFieldTests
         var sort = new SortParameter(new GuidField("resourceId"));
 
         // Act — page through all results
-        var allItems = new List<MetadataEnvelope<TestGuidEntityDso>>();
+        var allItems = new List<MetadataEnvelope>();
         ContinuationToken? token = null;
         var pageCount = 0;
 
         do
         {
             var cursor = DataRange.FromContinuationToken(token?.Value ?? ContinuationToken.Beginning, 2);
-            var page = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
+            var page = await partitionedStorage.QueryAsync(_guidEntityType, filter, sort, cursor, _ct);
             allItems.AddRange(page.Items);
             token = page.NextToken;
             pageCount++;
@@ -677,7 +677,7 @@ public partial class QueryStoreGuidFieldTests
 
         // Assert — all 5 items returned across pages, no duplicates
         allItems.Count.ShouldBe(5);
-        allItems.Select(x => x.Value.Name).Distinct().Count().ShouldBe(5);
+        allItems.Select(x => ((TestGuidEntityDso)x.Value).Name).Distinct().Count().ShouldBe(5);
         pageCount.ShouldBe(3); // 2 + 2 + 1
     }
 
@@ -697,14 +697,14 @@ public partial class QueryStoreGuidFieldTests
         var sort = new SortParameter(new ExactMatchField("apiKey"));
 
         // Act — page through all results
-        var allItems = new List<MetadataEnvelope<TestGuidEntityDso>>();
+        var allItems = new List<MetadataEnvelope>();
         ContinuationToken? token = null;
         var pageCount = 0;
 
         do
         {
             var cursor = DataRange.FromContinuationToken(token?.Value ?? ContinuationToken.Beginning, 2);
-            var page = await partitionedStorage.QueryAsync<TestGuidEntityDso>(_guidEntityType, filter, sort, cursor, _ct);
+            var page = await partitionedStorage.QueryAsync(_guidEntityType, filter, sort, cursor, _ct);
             allItems.AddRange(page.Items);
             token = page.NextToken;
             pageCount++;
@@ -718,7 +718,7 @@ public partial class QueryStoreGuidFieldTests
 
         // Assert — all 5 items returned across pages, no duplicates
         allItems.Count.ShouldBe(5);
-        allItems.Select(x => x.Value.Name).Distinct().Count().ShouldBe(5);
+        allItems.Select(x => ((TestGuidEntityDso)x.Value).Name).Distinct().Count().ShouldBe(5);
         pageCount.ShouldBe(3); // 2 + 2 + 1
     }
 }

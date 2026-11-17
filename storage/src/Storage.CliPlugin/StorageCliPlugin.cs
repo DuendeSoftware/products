@@ -21,6 +21,7 @@ public sealed class StorageCliPlugin : ICliPlugin
     {
         var storageCommand = new Command("storage", "Commands for managing Duende Storage.");
         storageCommand.Subcommands.Add(MigrateCommand.Create());
+        storageCommand.Subcommands.Add(VerifyCommand.Create());
         return storageCommand;
     }
 }

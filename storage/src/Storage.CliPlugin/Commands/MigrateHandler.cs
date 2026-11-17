@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 using System.Data.Common;
-using System.Text.RegularExpressions;
 using Duende.Storage.Schema;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Storage.CliPlugin.Commands;
 
-internal static partial class MigrateHandler
+internal static class MigrateHandler
 {
-    [GeneratedRegex(@"(password|pwd|user id|uid|username|userid|host|server|data source|datasource|database|port)\s*=\s*([^;]+)",
-        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
-    private static partial Regex SensitiveConnectionStringKeys();
-
     internal static Task<int> RunAsync(string provider, string connectionString, string? schemaName, bool dryRun,
         Ct ct) =>
         RunAsync(provider, connectionString, schemaName, dryRun, Console.Out, Console.Error, ct);
@@ -51,6 +46,13 @@ internal static partial class MigrateHandler
 
             if (result.IsCompatible)
             {
+                var verification = await storageInstanceSchema.VerifySchemaAsync(ct);
+                if (!verification.IsValid)
+                {
+                    await StorageCommandOutput.WriteVerificationErrorsAsync(verification, err);
+                    return 1;
+                }
+
                 await @out.WriteLineAsync($"Schema is already up to date (version {result.CurrentVersion}).");
                 return 0;
             }
@@ -72,19 +74,19 @@ internal static partial class MigrateHandler
         catch (DbException ex)
         {
             await err.WriteLineAsync(
-                $"Failed to connect to the database. Verify your connection string and that the server is reachable.{Environment.NewLine}{SanitizeMessage(ex.Message)}");
+                $"Failed to connect to the database. Verify your connection string and that the server is reachable.{Environment.NewLine}{StorageCommandOutput.SanitizeMessage(ex.Message)}");
             return 1;
         }
         catch (ArgumentException ex)
         {
             await err.WriteLineAsync(
-                $"Invalid connection string or provider configuration. Verify your --connection-string value.{Environment.NewLine}{SanitizeMessage(ex.Message)}");
+                $"Invalid connection string or provider configuration. Verify your --connection-string value.{Environment.NewLine}{StorageCommandOutput.SanitizeMessage(ex.Message)}");
             return 1;
         }
         catch (InvalidOperationException ex)
         {
             await err.WriteLineAsync(
-                $"Migration failed: {SanitizeMessage(ex.Message)}. The database may be in a partially migrated state. Run 'duende storage migrate' again to retry.");
+                $"Migration failed: {StorageCommandOutput.SanitizeMessage(ex.Message)}. The database may be in a partially migrated state. Run 'duende storage migrate' again to retry.");
             return 1;
         }
         catch (OperationCanceledException)
@@ -97,11 +99,8 @@ internal static partial class MigrateHandler
 #pragma warning restore CA1031
         {
             await err.WriteLineAsync(
-                $"An unexpected error occurred: {SanitizeMessage(ex.Message)}{Environment.NewLine}Please file an issue at https://github.com/DuendeSoftware/products-private");
+                $"An unexpected error occurred: {StorageCommandOutput.SanitizeMessage(ex.Message)}{Environment.NewLine}Please file an issue at https://github.com/DuendeSoftware/products-private");
             return 1;
         }
     }
-
-    private static string SanitizeMessage(string message) =>
-        SensitiveConnectionStringKeys().Replace(message, "$1=[redacted]");
 }

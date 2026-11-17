@@ -27,7 +27,7 @@ public static class SaveResult
     /// </summary>
     /// <typeparam name="TId">The type of the saved item's identifier.</typeparam>
     /// <param name="errors">One or more errors that caused the failure.</param>
-    public static SaveResult<TId> Failure<TId>(params StorageError[] errors) where TId : notnull =>
+    public static SaveResult<TId> Failure<TId>(params ErrorResult[] errors) where TId : notnull =>
         new()
         {
             IsSuccess = false,

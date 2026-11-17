@@ -1,0 +1,5 @@
+ORDER BY:
+v.entity_id ASC
+
+StrictlyAfter:
+v.entity_id > @last_id

@@ -99,4 +99,9 @@ public interface IQueryExpressionVisitor<TResult>
     /// Visits an ArrayContainsExpression that checks if a string array contains a specific value.
     /// </summary>
     TResult Visit(ArrayContainsExpression expression);
+
+    /// <summary>
+    /// Visits a LinkExistsExpression that checks whether a linked entity exists, optionally matching an inner filter.
+    /// </summary>
+    TResult Visit(LinkExistsExpression expression);
 }

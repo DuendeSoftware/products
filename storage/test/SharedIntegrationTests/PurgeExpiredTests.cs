@@ -6,7 +6,10 @@ using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Outbox;
 using Duende.Storage.Internal.Querying;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Querying.Fields;
+using Duende.Storage.Internal.Querying.SearchFields;
+using Duende.Storage.Internal.Querying.Sorting;
+using Duende.Storage.Internal.Pagination;
 using Microsoft.Extensions.DependencyInjection;
 using OutboxEventName = Duende.Storage.Internal.Outbox.OutboxEventName;
 using SubscriberName = Duende.Storage.Internal.Outbox.SubscriberName;
@@ -156,7 +159,7 @@ public partial class PurgeExpiredTests
             .Join(testLink)
             .Where(TestDso.DsoVersion.EntityType, leftId)
             .Build();
-        var before = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var before = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         before.Items.Count.ShouldBe(1);
 
         // Advance past expiration and purge
@@ -168,7 +171,7 @@ public partial class PurgeExpiredTests
         (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeFalse();
 
         // Link should be gone too
-        var after = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var after = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         after.Items.ShouldBeEmpty();
     }
 
@@ -247,7 +250,7 @@ public partial class PurgeExpiredTests
             .Join(testLink)
             .Where(TestDso.DsoVersion.EntityType, leftId)
             .Build();
-        var after = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var after = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         after.Items.Count.ShouldBe(1);
     }
 
@@ -442,6 +445,137 @@ public partial class PurgeExpiredTests
         allEvents.Select(e => e.MessageId).Distinct().Count().ShouldBe(4);
     }
 
+    [Fact]
+    public async Task PurgeExpired_should_only_remove_links_for_the_expired_entity_type_when_types_share_a_uuid()
+    {
+        var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+        await using var fixture = await CreateProviderAsync(tp);
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
+
+        // Both entities share the same UUID in the same pool, but have different entity types.
+        var sharedId = UuidV7.New();
+        var testDsoPartnerId = UuidV7.New();
+        var testDso2PartnerId = UuidV7.New();
+
+        var linkFromTestDso = TestLinkData.TestLink; // Left: TestDso, Right: TestDso2
+        var linkFromTestDso2 = TestLinkData.TestLink2; // Left: TestDso2, Right: TestDso
+
+        // sharedId as TestDso expires in 1 hour.
+        (await partitionedStorage.CreateAsync(sharedId, new TestDso($"shared-dso1-{Guid.NewGuid()}"), [], [],
+            Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
+        // sharedId as TestDso2 never expires.
+        (await partitionedStorage.CreateAsync(sharedId, new TestDso2($"shared-dso2-{Guid.NewGuid()}"), [], [],
+            Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+
+        (await partitionedStorage.CreateAsync(testDsoPartnerId, new TestDso($"partner-dso-{Guid.NewGuid()}"), [], [],
+            Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await partitionedStorage.CreateAsync(testDso2PartnerId, new TestDso2($"partner-dso2-{Guid.NewGuid()}"), [], [],
+            Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+
+        // Link where sharedId participates as TestDso (left side) — should be removed by the purge.
+        (await partitionedStorage.LinkAsync(linkFromTestDso, sharedId, testDso2PartnerId, [], _ct)).ShouldBe(LinkResult.Success);
+        // Link where sharedId participates as TestDso2 (left side) — must survive the purge.
+        (await partitionedStorage.LinkAsync(linkFromTestDso2, sharedId, testDsoPartnerId, [], _ct)).ShouldBe(LinkResult.Success);
+        // Link where sharedId participates as TestDso (right side) — should be removed by the purge.
+        (await partitionedStorage.LinkAsync(linkFromTestDso2, testDso2PartnerId, sharedId, [], _ct)).ShouldBe(LinkResult.Success);
+        // Link where sharedId participates as TestDso2 (right side) — must survive the purge.
+        (await partitionedStorage.LinkAsync(linkFromTestDso, testDsoPartnerId, sharedId, [], _ct)).ShouldBe(LinkResult.Success);
+
+        var queryForExpiredSide = LinkQuery.From(TestDso2.DsoVersion.EntityType)
+            .Join(linkFromTestDso)
+            .Where(TestDso.DsoVersion.EntityType, sharedId)
+            .Build();
+        var queryForSurvivingSide = LinkQuery.From(TestDso.DsoVersion.EntityType)
+            .Join(linkFromTestDso2)
+            .Where(TestDso2.DsoVersion.EntityType, sharedId)
+            .Build();
+        var queryForExpiredRightSide = LinkQuery.From(TestDso2.DsoVersion.EntityType)
+            .Join(linkFromTestDso2)
+            .Where(TestDso.DsoVersion.EntityType, sharedId)
+            .Build();
+        var queryForSurvivingRightSide = LinkQuery.From(TestDso.DsoVersion.EntityType)
+            .Join(linkFromTestDso)
+            .Where(TestDso2.DsoVersion.EntityType, sharedId)
+            .Build();
+
+        (await queryStorage.QueryLinksAsync(queryForExpiredSide, DataRange.FromPage(1, 100), _ct)).Items.Count.ShouldBe(1);
+        (await queryStorage.QueryLinksAsync(queryForSurvivingSide, DataRange.FromPage(1, 100), _ct)).Items.Count.ShouldBe(1);
+        (await queryStorage.QueryLinksAsync(queryForExpiredRightSide, DataRange.FromPage(1, 100), _ct)).Items.Count.ShouldBe(1);
+        (await queryStorage.QueryLinksAsync(queryForSurvivingRightSide, DataRange.FromPage(1, 100), _ct)).Items.Count.ShouldBe(1);
+
+        // Advance past expiration and purge.
+        tp.Advance(TimeSpan.FromHours(2));
+        var purged = await fixture.DefaultCrossPartitionStorage.PurgeExpiredAsync(batchSize: 100, _ct);
+        purged.ShouldBeGreaterThanOrEqualTo(1);
+
+        // The TestDso entity with the shared id is gone; the TestDso2 entity with the same id remains.
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, sharedId, _ct)).Found.ShouldBeFalse();
+        (await partitionedStorage.TryReadAsync(TestDso2.DsoVersion.EntityType, sharedId, _ct)).Found.ShouldBeTrue();
+
+        // The links where sharedId was the expired TestDso entity are gone.
+        (await queryStorage.QueryLinksAsync(queryForExpiredSide, DataRange.FromPage(1, 100), _ct)).Items.ShouldBeEmpty();
+        (await queryStorage.QueryLinksAsync(queryForExpiredRightSide, DataRange.FromPage(1, 100), _ct)).Items.ShouldBeEmpty();
+        // The links where sharedId is the still-alive TestDso2 entity remain, on either side.
+        (await queryStorage.QueryLinksAsync(queryForSurvivingSide, DataRange.FromPage(1, 100), _ct)).Items.Count.ShouldBe(1);
+        (await queryStorage.QueryLinksAsync(queryForSurvivingRightSide, DataRange.FromPage(1, 100), _ct)).Items.Count.ShouldBe(1);
+
+        // Recreate the TestDso entity with the same id: an orphaned link row would become reachable again.
+        (await partitionedStorage.CreateAsync(sharedId, new TestDso($"recreated-dso1-{Guid.NewGuid()}"), [], [],
+            Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await queryStorage.QueryLinksAsync(queryForExpiredSide, DataRange.FromPage(1, 100), _ct)).Items.ShouldBeEmpty();
+        (await queryStorage.QueryLinksAsync(queryForExpiredRightSide, DataRange.FromPage(1, 100), _ct)).Items.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task PurgeExpired_should_remove_keys_and_search_values_so_key_can_be_reused()
+    {
+        var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+        await using var fixture = await CreateProviderAsync(tp);
+        var partitionedStorage = fixture.PartitionedStorage;
+
+        var id = UuidV7.New();
+        var key = new TestJsonKeyDsk($"purge-expiry-key-{Guid.NewGuid()}");
+        var searchFieldsBuilder = new SearchFieldsBuilder();
+        _ = searchFieldsBuilder.Add("tag", "purge-expiry-searchable");
+        var searchFields = searchFieldsBuilder.Build();
+
+        (await partitionedStorage.CreateAsync(id, new TestDso($"keyed-{Guid.NewGuid()}"),
+            [DataStorageKey.Create(key)], searchFields, Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct))
+            .ShouldBe(CreateResult.Success);
+
+        // Sanity check: the key and search field resolve before expiry.
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, DataStorageKey.Create(key), _ct)).Found.ShouldBeTrue();
+        var filter = new StringField("tag").Equals("purge-expiry-searchable");
+        (await partitionedStorage.QueryAsync(TestDso.DsoVersion.EntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 100), _ct))
+            .Items.Count.ShouldBe(1);
+
+        tp.Advance(TimeSpan.FromHours(2));
+        var purged = await fixture.DefaultCrossPartitionStorage.PurgeExpiredAsync(batchSize: 100, _ct);
+        purged.ShouldBeGreaterThanOrEqualTo(1);
+
+        // Entity gone.
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, id, _ct)).Found.ShouldBeFalse();
+        // Key lookup no longer resolves.
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, DataStorageKey.Create(key), _ct)).Found.ShouldBeFalse();
+        // Search filter no longer matches.
+        (await partitionedStorage.QueryAsync(TestDso.DsoVersion.EntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 100), _ct))
+            .Items.ShouldBeEmpty();
+
+        // Recreate the same id without search fields: orphaned search values would make the filter match again.
+        (await partitionedStorage.CreateAsync(id, new TestDso($"recreated-{Guid.NewGuid()}"), [], [],
+            Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await partitionedStorage.QueryAsync(TestDso.DsoVersion.EntityType, filter, SortParameter.Empty, DataRange.FromPage(1, 100), _ct))
+            .Items.ShouldBeEmpty();
+
+        // The key can be reused by a new entity — proves the entity_keys row is gone, not just orphaned.
+        var newId = UuidV7.New();
+        (await partitionedStorage.CreateAsync(newId, new TestDso($"reused-key-{Guid.NewGuid()}"),
+            [DataStorageKey.Create(key)], [], Expiration.NoExpiration, [], _ct))
+            .ShouldBe(CreateResult.Success);
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, DataStorageKey.Create(key), _ct)).Found.ShouldBeTrue();
+    }
+
     private async Task<IStorageFixture> CreateProviderAsync(FakeTimeProvider tp) =>
         await FixtureFactory.CreateAsync(_ct, services =>
         {
@@ -450,6 +584,52 @@ public partial class PurgeExpiredTests
             services.AddDsoRegistration<TestDso>();
             services.AddDsoRegistration<TestDso2>();
         });
+
+    [Fact]
+    public async Task PurgeExpired_overrides_Restrict_and_removes_expired_right_side_entity_and_its_linksAsync()
+    {
+        var tp = new FakeTimeProvider(new DateTimeOffset(2025, 6, 1, 0, 0, 0, TimeSpan.Zero));
+        await using var fixture = await CreateProviderAsync(tp);
+        var partitionedStorage = fixture.PartitionedStorage;
+        var queryStorage = fixture.PartitionedStorage;
+
+        var leftId = UuidV7.New();
+        var rightId = UuidV7.New();
+
+        (await partitionedStorage.CreateAsync(leftId, new TestDso($"left-{Guid.NewGuid()}"), [], [],
+            Expiration.NoExpiration, [], _ct)).ShouldBe(CreateResult.Success);
+        (await partitionedStorage.CreateAsync(rightId, new TestDso2($"right-{Guid.NewGuid()}"), [], [],
+            Expiration.InRelative(TimeSpan.FromHours(1)), [], _ct)).ShouldBe(CreateResult.Success);
+        (await partitionedStorage.LinkAsync(TestLinkData.TestLinkRestrict, leftId, rightId, [], _ct)).ShouldBe(LinkResult.Success);
+
+        tp.Advance(TimeSpan.FromHours(2));
+
+        var purged = await fixture.DefaultCrossPartitionStorage.PurgeExpiredAsync(batchSize: 100, _ct);
+        purged.ShouldBeGreaterThanOrEqualTo(1);
+
+        // The expired right-side entity is gone even though it was still Restrict-linked: purge overrides Restrict.
+        (await partitionedStorage.TryReadAsync(TestDso2.DsoVersion.EntityType, rightId, _ct)).Found.ShouldBeFalse();
+
+        // This query-based check can't independently prove the link row itself was cleaned up:
+        // QueryLinksAsync joins entities, so once the right entity is gone (asserted above) it
+        // reports no results regardless of whether a dangling entity_links row happens to survive.
+        // entity_links has NO ACTION FKs to entities on both sides, which makes a dangling row
+        // structurally impossible once an endpoint is deleted — that invariant is independently
+        // proven with a raw (non-join) entity_links row count in StoreLinkConcurrencyTests and
+        // StoreLinkDeadlockStressTests, via the migration fixture's raw-SQL access that this
+        // fixture (IStorageFixture, built through FixtureFactory) doesn't expose. This assertion
+        // instead documents the behaviour actually observable through the public query path: a
+        // consumer never sees a link to a purged entity.
+        var query = LinkQuery.From(TestDso2.DsoVersion.EntityType)
+            .Join(TestLinkData.TestLinkRestrict)
+            .Where(TestDso.DsoVersion.EntityType, leftId)
+            .Build();
+        var after = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
+        after.Items.ShouldBeEmpty();
+
+        // The left entity (not expired) is untouched.
+        (await partitionedStorage.TryReadAsync(TestDso.DsoVersion.EntityType, leftId, _ct)).Found.ShouldBeTrue();
+    }
 
     private async Task<IStorageFixture> CreateProviderAsync(FakeTimeProvider tp, IOutboxSubscription[] subscriptions) =>
         await FixtureFactory.CreateAsync(_ct, services =>

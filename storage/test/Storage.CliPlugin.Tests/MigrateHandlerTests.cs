@@ -84,6 +84,27 @@ public sealed class MigrateHandlerTests
         errorWriter.ToString().ShouldContain("Invalid connection string", Case.Insensitive);
     }
 
+    [Fact]
+    public async Task Handler_rejects_an_already_current_schema_with_structural_drift() =>
+        await AssertCurrentSchemaDriftIsRejectedAsync();
+
+    private static async Task AssertCurrentSchemaDriftIsRejectedAsync()
+    {
+        var connectionString = CreateSqliteInMemoryConnectionString();
+        await using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+        await VerifyHandlerTests.CreateSchemaAsync(connectionString);
+        await VerifyHandlerTests.ExecuteAsync(connection, "DROP INDEX entities_created_at_index;");
+        await using var stdout = new StringWriter();
+        await using var stderr = new StringWriter();
+
+        var result = await MigrateHandler.RunAsync("sqlite", connectionString, null, false, stdout, stderr, Ct.None);
+
+        result.ShouldBe(1);
+        stderr.ToString().ShouldContain("entities_created_at_index");
+        stdout.ToString().ShouldNotContain("up to date", Case.Insensitive);
+    }
+
     private static string CreateSqliteInMemoryConnectionString() =>
         $"Data Source=TestDb{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
 }

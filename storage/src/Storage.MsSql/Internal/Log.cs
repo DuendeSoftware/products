@@ -69,6 +69,14 @@ internal static partial class Log
         Message = $"Executing query: {nameof(Parameters.Query)}={{{Parameters.Query}}}")]
     internal static partial void ExecutingQuery(ILogger logger, string query);
 
+    [LoggerMessage(
+        Level = LogLevel.Debug,
+        Message = $"Retrying delete after a narrow link-insert race: {nameof(Parameters.EntityType)}={{{Parameters.EntityType}}}, {nameof(Parameters.Id)}={{{Parameters.Id}}}")]
+    internal static partial void RetryingDeleteAfterLinkRace(ILogger logger, EntityType entityType, Guid id);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Retrying after a deadlock (SQL Server error 1205)")]
+    internal static partial void RetryingAfterDeadlock(ILogger logger);
+
     private static class Parameters
     {
         internal const string FromVersion = nameof(FromVersion);

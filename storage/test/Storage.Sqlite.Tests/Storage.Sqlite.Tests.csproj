@@ -16,7 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\SharedIntegrationTests\**\*.cs" Link="SharedIntegrationTests\%(Filename)%(Extension)" />
+    <Compile Include="..\SharedIntegrationTests\**\*.cs" Link="SharedIntegrationTests\%(Filename)%(Extension)" Exclude="..\SharedIntegrationTests\StoreLinkDeterministicConcurrencyTests.cs;..\SharedIntegrationTests\IConcurrencyTestFixture.cs" />
   </ItemGroup>
 
+  <!--
+    StoreLinkDeterministicConcurrencyTests needs a second, concurrently blocked connection/transaction
+    (a row lock the engine's own connection waits on, or a real deadlock) to make the entity delete's
+    single repeat and the whole-operation deadlock retry deterministic. SQLite has a single writer
+    (SQLITE_BUSY serializes instead of blocking/deadlocking), so neither schedule is reachable here:
+    excluded above rather than wired with a fixture that can never satisfy it.
+  -->
 </Project>

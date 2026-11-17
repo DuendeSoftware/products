@@ -9,8 +9,8 @@ using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.Storage.Internal.Pagination;
+using Duende.Storage.Internal.Querying;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,7 +81,7 @@ foreach (var p in products)
         searchFields,
         Expiration.NoExpiration,
         outboxEvents: [],
-        CancellationToken.None);
+        Ct.None);
 
     Console.WriteLine(result == CreateResult.Success
         ? $"  Created: {p.Name} ({p.Sku}) — ${p.Price}"
@@ -98,7 +98,7 @@ Console.WriteLine("── Read by SKU key ──");
 var skuLookup = await store.TryReadAsync(
     ProductDso.DsoVersion.EntityType,
     DataStorageKey.Create(new SkuKey("SKU-002")),
-    CancellationToken.None);
+    Ct.None);
 
 if (skuLookup.Found)
 {
@@ -118,16 +118,17 @@ var filter = new AndExpression(
     priceField.GreaterThan(50m),
     inStockField.IsTrue());
 
-var queryResult = await store.QueryAsync<ProductDso>(
+var queryResult = await store.QueryAsync(
     ProductDso.DsoVersion.EntityType,
     filter,
     new SortParameter(priceField, SortDirection.Ascending),
     PagedDataRange.First((DataRangeSize)10),
-    CancellationToken.None);
+    Ct.None);
 
 foreach (var envelope in queryResult)
 {
-    Console.WriteLine($"  {envelope.Value.Name} — ${envelope.Value.Price}");
+    var product = (ProductDso)envelope.Value;
+    Console.WriteLine($"  {product.Name} - ${product.Price}");
 }
 
 Console.WriteLine();
@@ -141,16 +142,17 @@ Console.WriteLine("── Query: name contains 'Mouse' ──");
 var nameField = new StringField("name");
 var nameFilter = nameField.Contains("Mouse");
 
-var mouseResult = await store.QueryAsync<ProductDso>(
+var mouseResult = await store.QueryAsync(
     ProductDso.DsoVersion.EntityType,
     nameFilter,
     SortParameter.Empty,
     PagedDataRange.First((DataRangeSize)10),
-    CancellationToken.None);
+    Ct.None);
 
 foreach (var envelope in mouseResult)
 {
-    Console.WriteLine($"  {envelope.Value.Name} — SKU: {envelope.Value.Sku}");
+    var product = (ProductDso)envelope.Value;
+    Console.WriteLine($"  {product.Name} - SKU: {product.Sku}");
 }
 
 Console.WriteLine();
@@ -180,7 +182,7 @@ if (skuLookup.Found)
         updateSearchFields,
         expiration: null, // keep existing expiration
         outboxEvents: [],
-        CancellationToken.None);
+        Ct.None);
 
     Console.WriteLine(updateResult == UpdateResult.Success
         ? $"  Updated {updated.Name}: ${original.Price} → ${updated.Price}"
@@ -196,12 +198,12 @@ Console.WriteLine();
 var totalCount = await store.CountAsync(
     ProductDso.DsoVersion.EntityType,
     filter: null,
-    CancellationToken.None);
+    Ct.None);
 
 var inStockCount = await store.CountAsync(
     ProductDso.DsoVersion.EntityType,
     inStockField.IsTrue(),
-    CancellationToken.None);
+    Ct.None);
 
 Console.WriteLine($"── Counts: {totalCount} total, {inStockCount} in stock ──");
 Console.WriteLine();
@@ -215,14 +217,14 @@ var deleteResult = await store.DeleteAsync(
     ProductDso.DsoVersion.EntityType,
     DataStorageKey.Create(new SkuKey("SKU-003")),
     outboxEvents: [],
-    CancellationToken.None);
+    Ct.None);
 
 Console.WriteLine($"  Deleted SKU-003: {deleteResult}");
 
 var remainingCount = await store.CountAsync(
     ProductDso.DsoVersion.EntityType,
     filter: null,
-    CancellationToken.None);
+    Ct.None);
 
 Console.WriteLine($"  Remaining products: {remainingCount}");
 Console.WriteLine();

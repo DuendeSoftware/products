@@ -6,7 +6,7 @@ using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,18 +79,18 @@ var dashboardProjectId = UuidV7.New();
 var sdkProjectId = UuidV7.New();
 
 // Teams
-await store.CreateAsync(platformTeamId, new TeamDso("Platform"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
-await store.CreateAsync(mobileTeamId, new TeamDso("Mobile"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
+await store.CreateAsync(platformTeamId, new TeamDso("Platform"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
+await store.CreateAsync(mobileTeamId, new TeamDso("Mobile"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
 
 // Developers
-await store.CreateAsync(aliceId, new DeveloperDso("Alice", "Senior"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
-await store.CreateAsync(bobId, new DeveloperDso("Bob", "Mid"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
-await store.CreateAsync(charlieId, new DeveloperDso("Charlie", "Junior"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
+await store.CreateAsync(aliceId, new DeveloperDso("Alice", "Senior"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
+await store.CreateAsync(bobId, new DeveloperDso("Bob", "Mid"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
+await store.CreateAsync(charlieId, new DeveloperDso("Charlie", "Junior"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
 
 // Projects
-await store.CreateAsync(authProjectId, new ProjectDso("Auth Service"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
-await store.CreateAsync(dashboardProjectId, new ProjectDso("Dashboard"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
-await store.CreateAsync(sdkProjectId, new ProjectDso("Mobile SDK"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], CancellationToken.None);
+await store.CreateAsync(authProjectId, new ProjectDso("Auth Service"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
+await store.CreateAsync(dashboardProjectId, new ProjectDso("Dashboard"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
+await store.CreateAsync(sdkProjectId, new ProjectDso("Mobile SDK"), [], SearchFieldCollection.Empty, Expiration.NoExpiration, [], Ct.None);
 
 Console.WriteLine("  Created 2 teams, 3 developers, 3 projects\n");
 
@@ -101,21 +101,21 @@ Console.WriteLine("  Created 2 teams, 3 developers, 3 projects\n");
 Console.WriteLine("── Creating links ──");
 
 // Platform team members: Alice, Bob
-await store.LinkAsync(teamMember, platformTeamId, aliceId, [], CancellationToken.None);
-await store.LinkAsync(teamMember, platformTeamId, bobId, [], CancellationToken.None);
+await store.LinkAsync(teamMember, platformTeamId, aliceId, [], Ct.None);
+await store.LinkAsync(teamMember, platformTeamId, bobId, [], Ct.None);
 
 // Mobile team members: Charlie, Alice (Alice is on both teams!)
-await store.LinkAsync(teamMember, mobileTeamId, charlieId, [], CancellationToken.None);
-await store.LinkAsync(teamMember, mobileTeamId, aliceId, [], CancellationToken.None);
+await store.LinkAsync(teamMember, mobileTeamId, charlieId, [], Ct.None);
+await store.LinkAsync(teamMember, mobileTeamId, aliceId, [], Ct.None);
 
 // Project assignments
-await store.LinkAsync(projectAssignment, aliceId, authProjectId, [], CancellationToken.None);
-await store.LinkAsync(projectAssignment, aliceId, sdkProjectId, [], CancellationToken.None);
-await store.LinkAsync(projectAssignment, bobId, dashboardProjectId, [], CancellationToken.None);
-await store.LinkAsync(projectAssignment, charlieId, sdkProjectId, [], CancellationToken.None);
+await store.LinkAsync(projectAssignment, aliceId, authProjectId, [], Ct.None);
+await store.LinkAsync(projectAssignment, aliceId, sdkProjectId, [], Ct.None);
+await store.LinkAsync(projectAssignment, bobId, dashboardProjectId, [], Ct.None);
+await store.LinkAsync(projectAssignment, charlieId, sdkProjectId, [], Ct.None);
 
 // Demonstrate idempotent linking — linking again returns AlreadyLinked
-var duplicateResult = await store.LinkAsync(teamMember, platformTeamId, aliceId, [], CancellationToken.None);
+var duplicateResult = await store.LinkAsync(teamMember, platformTeamId, aliceId, [], Ct.None);
 Console.WriteLine($"  Duplicate link result: {duplicateResult}");
 
 Console.WriteLine("  Platform team → Alice, Bob");
@@ -136,14 +136,15 @@ var membersQuery = LinkQuery
     .Where(TeamDso.DsoVersion.EntityType, platformTeamId)  // Starting from Platform team
     .Build();
 
-var members = await store.QueryLinksAsync<DeveloperDso>(
+var members = await store.QueryLinksAsync(
     membersQuery,
     PagedDataRange.First((DataRangeSize)10),
-    CancellationToken.None);
+    Ct.None);
 
 foreach (var m in members)
 {
-    Console.WriteLine($"  {m.Value.Name} ({m.Value.Level})");
+    var developer = (DeveloperDso)m.Value;
+    Console.WriteLine($"  {developer.Name} ({developer.Level})");
 }
 
 Console.WriteLine();
@@ -160,14 +161,14 @@ var aliceProjectsQuery = LinkQuery
     .Where(DeveloperDso.DsoVersion.EntityType, aliceId)
     .Build();
 
-var aliceProjects = await store.QueryLinksAsync<ProjectDso>(
+var aliceProjects = await store.QueryLinksAsync(
     aliceProjectsQuery,
     PagedDataRange.First((DataRangeSize)10),
-    CancellationToken.None);
+    Ct.None);
 
 foreach (var p in aliceProjects)
 {
-    Console.WriteLine($"  {p.Value.Name}");
+    Console.WriteLine($"  {((ProjectDso)p.Value).Name}");
 }
 
 Console.WriteLine();
@@ -186,14 +187,14 @@ var teamProjectsQuery = LinkQuery
     .Where(TeamDso.DsoVersion.EntityType, platformTeamId)
     .Build();
 
-var teamProjects = await store.QueryLinksAsync<ProjectDso>(
+var teamProjects = await store.QueryLinksAsync(
     teamProjectsQuery,
     PagedDataRange.First((DataRangeSize)10),
-    CancellationToken.None);
+    Ct.None);
 
 foreach (var p in teamProjects)
 {
-    Console.WriteLine($"  {p.Value.Name}");
+    Console.WriteLine($"  {((ProjectDso)p.Value).Name}");
 }
 
 Console.WriteLine();
@@ -204,7 +205,7 @@ Console.WriteLine();
 
 Console.WriteLine("── Unlink: Remove Alice from Mobile team ──");
 
-await store.UnlinkAsync(teamMember, mobileTeamId, aliceId, [], CancellationToken.None);
+await store.UnlinkAsync(teamMember, mobileTeamId, aliceId, [], Ct.None);
 
 // Verify — query Mobile team members again
 var mobileQuery = LinkQuery
@@ -213,13 +214,13 @@ var mobileQuery = LinkQuery
     .Where(TeamDso.DsoVersion.EntityType, mobileTeamId)
     .Build();
 
-var mobileMembers = await store.QueryLinksAsync<DeveloperDso>(
+var mobileMembers = await store.QueryLinksAsync(
     mobileQuery,
     PagedDataRange.First((DataRangeSize)10),
-    CancellationToken.None);
+    Ct.None);
 
 Console.Write("  Mobile team now: ");
-Console.WriteLine(string.Join(", ", mobileMembers.Select(m => m.Value.Name)));
+Console.WriteLine(string.Join(", ", mobileMembers.Select(m => ((DeveloperDso)m.Value).Name)));
 
 Console.WriteLine("\nDone!");
 

@@ -3,7 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Duende.Storage.Internal.Querying.Fields;
-using Duende.Storage.Querying;
 
 namespace Duende.Storage.Internal.Querying.Sorting;
 

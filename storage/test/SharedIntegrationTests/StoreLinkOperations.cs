@@ -6,7 +6,7 @@ using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.SearchFields;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.Storage.IntegrationTests;
 
@@ -51,9 +51,9 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.Count.ShouldBe(1);
-        page.Items[0].Value.Value.ShouldBe("right");
+        ((TestDso2)page.Items[0].Value).Value.ShouldBe("right");
     }
 
     [Fact]
@@ -64,6 +64,9 @@ public partial class StoreLinkOperations
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
+
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
         _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
         var second = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
@@ -93,7 +96,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -113,7 +116,7 @@ public partial class StoreLinkOperations
     }
 
     [Fact]
-    public async Task LinkWithoutEntityExistingSucceedsAsync()
+    public async Task LinkWithoutEntityExistingReturnsDoesNotExistAsync()
     {
         await using var fixture = await CreateProviderAsync();
         var partitionedStorage = fixture.PartitionedStorage;
@@ -121,10 +124,10 @@ public partial class StoreLinkOperations
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
 
-        // No entities created — no referential integrity check
+        // No entities created — both endpoints are enforced by foreign keys.
         var result = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
 
-        result.ShouldBe(LinkResult.Success);
+        result.ShouldBe(LinkResult.DoesNotExist);
     }
 
     // =========================================================================
@@ -158,7 +161,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.Count.ShouldBe(1);
     }
 
@@ -193,7 +196,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.Count.ShouldBe(1);
     }
 
@@ -205,6 +208,9 @@ public partial class StoreLinkOperations
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
+
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
         // First link
         _ = await partitionedStorage.LinkAsync(TestLink, leftId, rightId, [], _ct);
@@ -246,7 +252,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -276,7 +282,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -302,7 +308,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(LeftEntityType, leftId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso2>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -330,7 +336,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId1)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -361,7 +367,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -389,7 +395,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -420,7 +426,7 @@ public partial class StoreLinkOperations
             .Join(TestLink)
             .Where(RightEntityType, rightId)
             .Build();
-        var page = await queryStorage.QueryLinksAsync<TestDso>(query, DataRange.FromPage(1, 100), _ct);
+        var page = await queryStorage.QueryLinksAsync(query, DataRange.FromPage(1, 100), _ct);
         page.Items.ShouldBeEmpty();
     }
 
@@ -437,6 +443,9 @@ public partial class StoreLinkOperations
 
         var leftId = UuidV7.New();
         var rightId = UuidV7.New();
+
+        _ = await partitionedStorage.CreateAsync(leftId, new TestDso("left"), [], [], Expiration.NoExpiration, [], _ct);
+        _ = await partitionedStorage.CreateAsync(rightId, new TestDso2("right"), [], [], Expiration.NoExpiration, [], _ct);
 
         const int Concurrency = 10;
         var tasks = Enumerable.Range(0, Concurrency)
