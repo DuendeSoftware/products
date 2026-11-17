@@ -95,7 +95,7 @@ public sealed class MixedProtocolLogoutFlow : IScenario
     public string Description => "OIDC-initiated and upstream-SAML-initiated logout across an upstream SAML IdP, a middle SP/IdP, a downstream OIDC client, and a downstream SAML SP";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         var hosts = await MixedProtocolLogoutHosts.StartAsync(configurator, includeOidcClient: true, topologySuffix: "mixed", ct);
         _upstreamIdentityProvider = hosts.UpstreamIdentityProvider;
@@ -119,7 +119,7 @@ public sealed class MixedProtocolLogoutFlow : IScenario
         ];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_downstreamOidcClient != null)
         {

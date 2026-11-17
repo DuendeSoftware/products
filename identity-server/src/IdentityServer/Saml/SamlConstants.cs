@@ -6,6 +6,9 @@ using System.Security.Cryptography.Xml;
 
 namespace Duende.IdentityServer.Saml;
 
+/// <summary>
+/// Constants for SAML 2.0 values, such as URNs, namespaces, binding names, and default endpoint paths.
+/// </summary>
 public static class SamlConstants
 {
     /// <summary>
@@ -49,6 +52,7 @@ public static class SamlConstants
         public const string SpLogoutCompletionPath = "/saml/slo/sp-complete";
     }
 
+    /// <summary>Names of the SAML request and response parameters used by the front-channel bindings.</summary>
     public static class RequestProperties
     {
         public const string SAMLRequest = "SAMLRequest";
@@ -61,11 +65,13 @@ public static class SamlConstants
     public static class ContentTypes
     {
         /// <summary>
-        /// https://www.iana.org/assignments/media-types/application/samlmetadata+xml
+        /// The media type of SAML metadata documents, <c>application/samlmetadata+xml</c>.
+        /// See https://www.iana.org/assignments/media-types/application/samlmetadata+xml.
         /// </summary>
         public const string Metadata = "application/samlmetadata+xml";
     }
 
+    /// <summary>XML namespaces and namespace prefixes used in SAML messages.</summary>
     public static class Namespaces
     {
         public const string SamlPrefix = "saml";
@@ -79,20 +85,29 @@ public static class SamlConstants
         public const string Xsi = "http://www.w3.org/2001/XMLSchema-instance";
     }
 
+    /// <summary>NameID format URNs.</summary>
     public static class NameIdentifierFormats
     {
+        /// <summary>Email address NameID format.</summary>
         public const string EmailAddress = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+        /// <summary>Persistent NameID format.</summary>
         public const string Persistent = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
+        /// <summary>Transient NameID format.</summary>
         public const string Transient = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
+        /// <summary>Unspecified NameID format.</summary>
         public const string Unspecified = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
     }
 
+    /// <summary>SAML protocol binding URNs.</summary>
     public static class Bindings
     {
+        /// <summary>HTTP-Redirect binding.</summary>
         public const string HttpRedirect = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect";
+        /// <summary>HTTP-POST binding.</summary>
         public const string HttpPost = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST";
     }
 
+    /// <summary>Attribute name format URNs.</summary>
     public static class AttributeNameFormats
     {
         /// <summary>
@@ -101,11 +116,14 @@ public static class SamlConstants
         public const string Uri = "urn:oasis:names:tc:SAML:2.0:attrname-format:uri";
     }
 
+    /// <summary>Claim types that carry SAML-specific information.</summary>
     public static class ClaimTypes
     {
+        /// <summary>Claim type that holds the authentication context class reference of the authentication.</summary>
         public const string AuthnContextClassRef = "saml:acr";
     }
 
+    /// <summary>Reason URNs for a SAML LogoutRequest.</summary>
     public static class LogoutReasons
     {
         public const string User = "urn:oasis:names:tc:SAML:2.0:logout:user";
@@ -152,21 +170,26 @@ public static class SamlConstants
             EcdsaAlgorithms.EcdsaSha512,
         ]);
 
+    /// <summary>Subject confirmation method URNs.</summary>
     public static class SubjectConfirmationMethods
     {
+        /// <summary>Bearer subject confirmation method.</summary>
         public const string Bearer = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
     }
 
+    /// <summary>Authentication context class URNs.</summary>
     public static class AuthnContextClasses
     {
+        /// <summary>Password protected transport authentication context class.</summary>
         public const string PasswordProtectedTransport = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
+        /// <summary>Unspecified authentication context class.</summary>
         public const string Unspecified = "urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified";
     }
 
     /// <summary>
     /// Names of elements
     /// </summary>
-    /// <remarks>The naming of the constants are deriberately not following
+    /// <remarks>The naming of the constants are deliberately not following
     /// casing convention in order to be exactly the same as the contents.
     /// </remarks>
     public static class Elements
@@ -230,7 +253,7 @@ public static class SamlConstants
     /// <summary>
     /// Names of attributes.
     /// </summary>
-    /// <remarks>The naming of the constants are deriberately not following
+    /// <remarks>The naming of the constants are deliberately not following
     /// casing convention in order to be exactly the same as the contents.
     /// </remarks>
     public static class Attributes

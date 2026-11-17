@@ -42,4 +42,22 @@ internal static partial class Log
         EventName = nameof(ExceptionRemovingExpiredSessions),
         Message = "Exception removing expired sessions")]
     internal static partial void ExceptionRemovingExpiredSessions(this ILogger logger, System.Exception exception);
+
+    [LoggerMessage(
+        LogLevel.Debug,
+        EventName = nameof(SkippedNotLeaseHolder),
+        Message = "Skipping server-side session cleanup cycle: another node holds the lease")]
+    internal static partial void SkippedNotLeaseHolder(this ILogger logger);
+
+    [LoggerMessage(
+        LogLevel.Warning,
+        EventName = nameof(LeaseLost),
+        Message = "Server-side session cleanup lease was lost while a cycle was running")]
+    internal static partial void LeaseLost(this ILogger logger);
+
+    [LoggerMessage(
+        LogLevel.Warning,
+        EventName = nameof(LockUnavailable),
+        Message = "Server-side session cleanup could not reach the distributed lock; skipping this cycle")]
+    internal static partial void LockUnavailable(this ILogger logger);
 }

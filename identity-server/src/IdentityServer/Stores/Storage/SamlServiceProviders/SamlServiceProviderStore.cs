@@ -7,8 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores.Storage.SamlServiceProviders;
@@ -33,8 +31,9 @@ internal sealed class SamlServiceProviderStore(
             return null;
         }
 
+        var scopeNames = await repository.GetAllowedScopeNamesAsync(result.Value.Dso.Id, ct);
         logger.SamlServiceProviderFound(LogLevel.Debug, entityId);
-        return MapToModel(result.Value.Dso);
+        return MapToModel(result.Value.Dso, scopeNames);
     }
 
     /// <inheritdoc/>
@@ -47,14 +46,16 @@ internal sealed class SamlServiceProviderStore(
 
         while (true)
         {
-            var range = DataRange.FromPage(pageNumber, PageSize);
-            var request = QueryRequest.Create<SamlServiceProviderFilter, SamlServiceProviderSortField>(range);
+            var range = StorageDataRange.FromPage(pageNumber, PageSize);
+            var request = StorageQueryRequest.Create<SamlServiceProviderFilter, SamlServiceProviderSortField>(range);
             var result = await repository.QueryAsync(request, ct);
+
+            var scopeNamesByServiceProvider = await repository.GetAllowedScopeNamesByServiceProviderIdsAsync(result.Items.Select(dso => dso.Id), ct);
 
             foreach (var dso in result.Items)
             {
                 count++;
-                yield return MapToModel(dso);
+                yield return MapToModel(dso, scopeNamesByServiceProvider.GetValueOrDefault(dso.Id) ?? []);
             }
 
             if (!result.HasMoreData)
@@ -68,7 +69,7 @@ internal sealed class SamlServiceProviderStore(
         logger.SamlServiceProvidersRetrieved(LogLevel.Debug, count);
     }
 
-    private static SamlServiceProvider MapToModel(SamlServiceProviderDso.V1 dso) => new()
+    private static SamlServiceProvider MapToModel(SamlServiceProviderDso.V1 dso, List<string> allowedScopeNames) => new()
     {
         EntityId = dso.EntityId,
         Enabled = dso.Enabled,
@@ -118,7 +119,7 @@ internal sealed class SamlServiceProviderStore(
         AllowIdpInitiated = dso.AllowIdpInitiated,
 
         // Scopes
-        AllowedScopes = new HashSet<string>(dso.AllowedScopes),
+        AllowedScopes = new HashSet<string>(allowedScopeNames),
 
         // Claims
         ClaimMappings = new Dictionary<string, string>(dso.ClaimMappings),

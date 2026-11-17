@@ -1,0 +1,55 @@
+@page
+@model TotpAuthentication.Pages.LoginWith2FAModel
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Two-Factor Authentication</h2>
+
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                Enter the 6-digit code from your authenticator app.
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            <form method="post">
+                <div class="mb-4">
+                    <label asp-for="Code" class="form-label fw-semibold">Authenticator Code</label>
+                    <input asp-for="Code" type="text" class="form-control form-control-lg text-center"
+                           placeholder="000000" maxlength="7" pattern="[0-9]*" inputmode="numeric" required autofocus />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                    <div class="form-text">Enter the code from your authenticator app</div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-shield-check me-2"></i>Verify & Sign In
+                    </button>
+                    <a asp-page="/Login" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Login
+                    </a>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-muted mb-2">Don't have access to your authenticator device?</p>
+                <a asp-page="/LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-link">
+                    <i class="bi bi-key me-2"></i>Use a recovery code instead
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

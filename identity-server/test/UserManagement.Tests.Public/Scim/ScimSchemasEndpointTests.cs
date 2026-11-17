@@ -1,0 +1,198 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Net;
+using System.Text.Json;
+using Duende.IdentityServer.DataExtensions;
+using Duende.UserManagement;
+using Duende.UserManagement.Scim;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Duende.Platform.UserManagement.Scim;
+
+public sealed class ScimSchemasEndpointTests(ITestOutputHelper output, WebServerFixture serverFixture)
+    : IAsyncDisposable
+{
+    private const string ListRoute = "/scim/Schemas";
+    private const string UserSchemaUrn = "urn:ietf:params:scim:schemas:core:2.0:User";
+    private readonly ScimFixture Fixture = new(output, serverFixture);
+
+    [Fact]
+    public async Task list_includes_User_schema()
+    {
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync(ListRoute);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("totalResults").GetInt32().ShouldBeGreaterThan(0);
+        var resources = body.RootElement.GetProperty("Resources").EnumerateArray().ToList();
+        resources.ShouldContain(s => s.GetProperty("id").GetString() == UserSchemaUrn);
+    }
+
+    [Fact]
+    public async Task get_User_schema_includes_userName_attribute()
+    {
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        body.RootElement.GetProperty("id").GetString().ShouldBe(UserSchemaUrn);
+        body.RootElement.GetProperty("name").GetString().ShouldBe("User");
+        var attributes = body.RootElement.GetProperty("attributes").EnumerateArray().ToList();
+        attributes.ShouldContain(a => a.GetProperty("name").GetString() == "userName");
+    }
+
+    [Fact]
+    public async Task get_User_schema_userName_is_required_with_server_uniqueness()
+    {
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var userName = body.RootElement.GetProperty("attributes").EnumerateArray()
+            .Single(a => a.GetProperty("name").GetString() == "userName");
+        userName.GetProperty("required").GetBoolean().ShouldBeTrue();
+        userName.GetProperty("uniqueness").GetString().ShouldBe("server");
+    }
+
+    [Fact]
+    public async Task get_User_schema_includes_required_dynamic_attribute()
+    {
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterAttributeDefinitionAsync(
+            "employeeNumber",
+            ScalarDataType.String,
+            "Employee number",
+            isUnique: false,
+            isRequired: true);
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var employeeNumber = body.RootElement.GetProperty("attributes").EnumerateArray()
+            .Single(a => a.GetProperty("name").GetString() == "employeeNumber");
+        employeeNumber.GetProperty("required").GetBoolean().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task get_User_schema_includes_password_when_ChangePassword_enabled()
+    {
+        Fixture.ConfigureScimCapabilities += opts => opts.ChangePassword = true;
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var password = body.RootElement.GetProperty("attributes").EnumerateArray()
+            .Single(a => a.GetProperty("name").GetString() == "password");
+        password.GetProperty("mutability").GetString().ShouldBe("writeOnly");
+        password.GetProperty("returned").GetString().ShouldBe("never");
+    }
+
+    [Fact]
+    public async Task get_User_schema_excludes_password_when_ChangePassword_disabled()
+    {
+        Fixture.ConfigureScimCapabilities += opts => opts.ChangePassword = false;
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var attributes = body.RootElement.GetProperty("attributes").EnumerateArray().ToList();
+        attributes.ShouldNotContain(a => a.GetProperty("name").GetString() == "password");
+    }
+
+    [Fact]
+    public async Task get_User_schema_meta_has_location()
+    {
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var meta = body.RootElement.GetProperty("meta");
+        meta.GetProperty("resourceType").GetString().ShouldBe("Schema");
+        ShouldlyExtensions.ShouldContain(meta.GetProperty("location").GetString()!, UserSchemaUrn);
+    }
+
+    [Fact]
+    public async Task get_User_schema_returns_complete_default_schema_without_duplicates()
+    {
+        Fixture.ConfigureScimCapabilities += options => options.ChangePassword = true;
+        await Fixture.InitializeAsync();
+        await Fixture.RegisterScimUserSchemaAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var attributes = body.RootElement.GetProperty("attributes").EnumerateArray().ToList();
+        // ChangePassword is enabled, so the endpoint injects the capability-driven
+        // "password" attribute on top of the default schema's attributes.
+        attributes.Count.ShouldBe(DefaultScimUserSchema.AttributeDefinitions.Count + 1);
+        attributes.Select(attribute => attribute.GetProperty("name").GetString())
+            .Distinct(StringComparer.OrdinalIgnoreCase).Count().ShouldBe(attributes.Count);
+
+        var name = attributes.Single(attribute => attribute.GetProperty("name").GetString() == "name");
+        name.GetProperty("type").GetString().ShouldBe("complex");
+        name.GetProperty("subAttributes").GetArrayLength().ShouldBe(6);
+
+        var profileUrl = attributes.Single(attribute => attribute.GetProperty("name").GetString() == "profileUrl");
+        profileUrl.GetProperty("type").GetString().ShouldBe("string");
+    }
+
+    [Fact]
+    public async Task get_User_schema_preserves_custom_mapper_metadata_for_userName()
+    {
+        Fixture.ConfigureServices += services =>
+            services.AddSingleton<IScimSchemaMapper, CustomScimSchemaMapper>();
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/{UserSchemaUrn}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var userName = body.RootElement.GetProperty("attributes").EnumerateArray()
+            .Single(attribute => attribute.GetProperty("name").GetString() == "userName");
+        userName.GetProperty("description").GetString().ShouldBe("Mapped by the custom mapper.");
+        userName.GetProperty("required").GetBoolean().ShouldBeTrue();
+        userName.GetProperty("uniqueness").GetString().ShouldBe("server");
+    }
+
+    [Fact]
+    public async Task get_unknown_schema_returns_404()
+    {
+        await Fixture.InitializeAsync();
+
+        var response = await Fixture.Client.GetAsync($"{ListRoute}/urn:unknown:schema");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Fixture.DisposeAsync();
+        GC.SuppressFinalize(this);
+    }
+
+    private sealed class CustomScimSchemaMapper : IScimSchemaMapper
+    {
+        public ScimSchemaAttributeModel Map(Duende.IdentityServer.DataExtensions.AttributeDefinition definition) =>
+            new()
+            {
+                Name = definition.Code.Value,
+                Type = "string",
+                Description = "Mapped by the custom mapper."
+            };
+    }
+}

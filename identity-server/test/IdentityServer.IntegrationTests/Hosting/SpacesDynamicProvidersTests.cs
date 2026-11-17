@@ -14,13 +14,15 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Hosting.DynamicProviders;
+using Duende.IdentityServer.Hosting.DynamicProviders.Store;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage.IdentityProviders;
 using Duende.Spaces;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.AspNetCore.Authentication;
@@ -216,6 +218,44 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
                 options.KeyManagement.Enabled = false;
                 options.Caching.IdentityProviderCacheDuration = cacheDuration;
             });
+
+    // No AddIdentityProviderStoreCache: deleting the space and sweeping its dynamic-provider
+    // cache entries is independent of the identity provider store's own caching, so this uses
+    // the plain storage-backed store, same as CreateStorageFixtureAsync.
+    private async Task<(Fixture Fixture, FakeTimeProvider TimeProvider)> CreateCacheIdleTimeoutFixtureAsync(string name, TimeSpan idleTimeout)
+    {
+        var timeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
+
+        var fixture = await CreateFixtureAsync(
+            name,
+            _ => { },
+            options =>
+            {
+                options.KeyManagement.Enabled = false;
+                options.DynamicProviders.CacheIdleTimeout = idleTimeout;
+            },
+            services =>
+            {
+                // Registered after AddIdentityServer (configureServices runs last), so this fake
+                // clock wins resolution for both the tracker (which resolves TimeProvider from
+                // the root provider) and the options cache (which the dynamic-provider factory
+                // in IdentityServerBuilderDynamicProviderExtensions also resolves from the root
+                // provider).
+                services.AddSingleton<TimeProvider>(timeProvider);
+            });
+
+        return (fixture, timeProvider);
+    }
+
+    private static (bool OptionsCached, bool Tracked) ReadCacheState(KestrelBasedTestServer mainServer, SpaceId spaceId, string scheme)
+    {
+        using var scope = mainServer.Services.CreateScope();
+        var optionsCache = (SpaceAwareDynamicOptionsMonitorCache<OpenIdConnectOptions>)scope.ServiceProvider
+            .GetRequiredService<IOptionsMonitorCache<OpenIdConnectOptions>>();
+        var tracker = scope.ServiceProvider.GetRequiredService<IdentityProviderOptionsMonitorCache>();
+
+        return (optionsCache.ContainsDynamic(spaceId, scheme), tracker.IsTracked(spaceId, scheme));
+    }
 
     private async Task<(Fixture Fixture, MutableClientIdHolder Holder)> CreateStaticSchemeFixtureAsync(string name, string staticScheme)
     {
@@ -553,7 +593,7 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
             var getResult = await admin.GetAsync(providerId, _ct);
             getResult.Found.ShouldBeTrue($"Provider {providerId} not found in space {spaceId}");
 
-            var toUpdate = getResult.Item.ToUpdate();
+            var toUpdate = getResult.Item!.ToUpdate();
             toUpdate.ExtendedProperties.Set(AttributeCode.Create(nameof(OidcProvider.ClientId)), newClientId);
 
             var updateResult = await admin.UpdateAsync(providerId, toUpdate, getResult.Version!, _ct);
@@ -910,6 +950,69 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
     }
 
     [Fact]
+    public async Task held_request_after_an_idle_sweep_removes_the_tracker_entry_self_heals_on_the_next_request()
+    {
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (fixture, timeProvider) = await CreateCacheIdleTimeoutFixtureAsync(
+            nameof(held_request_after_an_idle_sweep_removes_the_tracker_entry_self_heals_on_the_next_request),
+            idleTimeout);
+        await using var _ = fixture;
+
+        var spaceAdmin = fixture.MainServer.GetRequiredService<ISpaceAdmin>();
+        var createSpaceAResult = await spaceAdmin.CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space A", MatchPatterns = [new SpaceMatchPattern { Path = "/space-a" }] },
+            _ct);
+        createSpaceAResult.IsSuccess.ShouldBeTrue($"Create space A failed: {createSpaceAResult}");
+        var spaceAId = createSpaceAResult.Id!.Value;
+
+        var createSpaceBResult = await spaceAdmin.CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space B", MatchPatterns = [new SpaceMatchPattern { Path = "/space-b" }] },
+            _ct);
+        createSpaceBResult.IsSuccess.ShouldBeTrue($"Create space B failed: {createSpaceBResult}");
+
+        var idpAuthority = fixture.IdpServer.BuildUrl("/").ToString().TrimEnd('/');
+        var providerId = await CreateOidcProviderInSpaceAsync(fixture.MainServer, spaceAId, OidcScheme, idpAuthority, "client-v1");
+
+        using var mainClient = fixture.MainServer.CreateClient();
+        ExtractClientId(await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).ShouldBe("client-v1");
+
+        // R1 holds a request-scoped copy of the v1 provider (captured when it resolves the
+        // scheme), then blocks before it builds options from it.
+        var heldRequest = mainClient.GetAsync("/t/space-a/test/load-scheme-then-wait-then-challenge", _ct);
+        await _heldRequestLoadedScheme.Task.WaitAsync(_ct);
+
+        await UpdateOidcProviderClientIdInSpaceAsync(fixture.MainServer, spaceAId, providerId, "client-v2");
+
+        // A challenge tracks v2: the tracker and options cache entries for (space A, my-oidc)
+        // are now v2.
+        ExtractClientId(await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).ShouldBe("client-v2");
+
+        // Advance the clock past the idle timeout: the v2 entries need no further use for the
+        // full timeout, as the bug report requires.
+        timeProvider.Advance(idleTimeout + idleTimeout);
+
+        // Trigger the sweep via a non-dynamic request (through space B), so it evicts the v2
+        // entries without itself touching (and so repopulating) space A's my-oidc entries.
+        (await mainClient.GetAsync("/t/space-b/.well-known/openid-configuration", _ct)).StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var postSweepState = ReadCacheState(fixture.MainServer, spaceAId, OidcScheme);
+        postSweepState.OptionsCached.ShouldBeFalse("the v2 options entry must have been reclaimed as idle before R1 resumes");
+        postSweepState.Tracked.ShouldBeFalse("the v2 tracker entry must have been reclaimed as idle before R1 resumes");
+
+        _releaseHeldRequest.SetResult();
+        var r1ClientId = ExtractClientId(await heldRequest);
+
+        var nextChallenge = await mainClient.GetAsync("/t/space-a/test/challenge", _ct);
+        var nextClientId = ExtractClientId(nextChallenge);
+
+        TestContext.Current.TestOutputHelper?.WriteLine($"R1 observed client_id: {r1ClientId}");
+        TestContext.Current.TestOutputHelper?.WriteLine($"Next challenge observed client_id: {nextClientId}");
+
+        nextClientId.ShouldBe("client-v2",
+            "the next challenge after the held request completes must self-heal to the current provider");
+    }
+
+    [Fact]
     public async Task update_in_space_a_does_not_affect_space_b_when_store_is_storage_without_wrapper() =>
         await RunUpdateInSpaceADoesNotAffectSpaceBAsync(CreateStorageFixtureAsync,
             nameof(update_in_space_a_does_not_affect_space_b_when_store_is_storage_without_wrapper));
@@ -1201,6 +1304,132 @@ public sealed class SpacesDynamicProvidersTests(WebServerFixture webServerFixtur
         restrictedAuthorize.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         restrictedAuthorize.Headers.Location!.ToString().ShouldNotStartWith("https://rp.example/callback");
         restrictedAuthorize.Headers.Location!.ToString().ShouldContain("/account/login");
+    }
+
+    [Fact]
+    public async Task deleted_spaces_cached_dynamic_provider_entries_are_swept_by_a_non_dynamic_request_through_the_middleware()
+    {
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (fixture, timeProvider) = await CreateCacheIdleTimeoutFixtureAsync(
+            nameof(deleted_spaces_cached_dynamic_provider_entries_are_swept_by_a_non_dynamic_request_through_the_middleware),
+            idleTimeout);
+        await using var _ = fixture;
+
+        var spaceAdmin = fixture.MainServer.GetRequiredService<ISpaceAdmin>();
+
+        var createSpaceAResult = await spaceAdmin.CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space A", MatchPatterns = [new SpaceMatchPattern { Path = "/space-a" }] },
+            _ct);
+        createSpaceAResult.IsSuccess.ShouldBeTrue($"Create space A failed: {createSpaceAResult}");
+        var spaceAId = createSpaceAResult.Id!.Value;
+
+        var createSpaceBResult = await spaceAdmin.CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space B", MatchPatterns = [new SpaceMatchPattern { Path = "/space-b" }] },
+            _ct);
+        createSpaceBResult.IsSuccess.ShouldBeTrue($"Create space B failed: {createSpaceBResult}");
+
+        var idpAuthority = fixture.IdpServer.BuildUrl("/").ToString().TrimEnd('/');
+
+        await CreateOidcProviderInSpaceAsync(fixture.MainServer, spaceAId, OidcScheme, idpAuthority, "client-a");
+        await CreateSamlProviderInSpaceAsync(fixture.MainServer, spaceAId, "https://space-a-idp.example/sso", "space-a-sp-entity");
+
+        using var mainClient = fixture.MainServer.CreateClient();
+
+        // Populate the tracker and both (OIDC and SAML) options caches for space A.
+        ExtractClientId(await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).ShouldBe("client-a");
+        (await mainClient.GetAsync("/t/space-a/test/saml-challenge", _ct)).StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+
+        var oidcBeforeDelete = ReadCacheState(fixture.MainServer, spaceAId, OidcScheme);
+        oidcBeforeDelete.OptionsCached.ShouldBeTrue("space A's OIDC options entry must exist before the delete");
+        oidcBeforeDelete.Tracked.ShouldBeTrue("space A's OIDC tracker entry must exist before the delete");
+
+        var deleteResult = await spaceAdmin.DeleteAsync(spaceAId, _ct);
+        deleteResult.IsSuccess.ShouldBeTrue($"Delete space A failed: {deleteResult}");
+
+        // Space A's requests now 404; its cache entries only leave via the idle sweep.
+        (await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        timeProvider.Advance(idleTimeout + idleTimeout);
+
+        // ONLY a non-dynamic request, through space B (never resolving a dynamic scheme, OIDC or
+        // SAML), passes through the middleware; the tracker's own request-level sweep trigger
+        // must still reclaim space A's idle entries in both options caches.
+        (await mainClient.GetAsync("/t/space-b/.well-known/openid-configuration", _ct)).StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var oidcAfterSweep = ReadCacheState(fixture.MainServer, spaceAId, OidcScheme);
+        oidcAfterSweep.OptionsCached.ShouldBeFalse(
+            "space A's OIDC options entry must have been swept by a non-dynamic request's opportunistic sweep");
+        oidcAfterSweep.Tracked.ShouldBeFalse(
+            "space A's tracker entry must have been swept by a non-dynamic request's opportunistic sweep");
+
+        using var scope2 = fixture.MainServer.Services.CreateScope();
+        var samlOptionsCache = (SpaceAwareDynamicOptionsMonitorCache<Duende.IdentityServer.Internal.Saml.Sp.AspNetCore.Saml2Options>)scope2.ServiceProvider
+            .GetRequiredService<IOptionsMonitorCache<Duende.IdentityServer.Internal.Saml.Sp.AspNetCore.Saml2Options>>();
+        samlOptionsCache.ContainsDynamic(spaceAId, SamlScheme).ShouldBeFalse(
+            "space A's SAML options entry must have been swept too, even though no SAML request ever ran after the delete");
+    }
+
+    [Fact]
+    public async Task deleted_spaces_cached_dynamic_provider_entries_are_swept_after_idle_timeout_and_space_works_again_after_undelete()
+    {
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (fixture, timeProvider) = await CreateCacheIdleTimeoutFixtureAsync(
+            nameof(deleted_spaces_cached_dynamic_provider_entries_are_swept_after_idle_timeout_and_space_works_again_after_undelete),
+            idleTimeout);
+        await using var _ = fixture;
+
+        var spaceAdmin = fixture.MainServer.GetRequiredService<ISpaceAdmin>();
+
+        var createSpaceAResult = await spaceAdmin.CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space A", MatchPatterns = [new SpaceMatchPattern { Path = "/space-a" }] },
+            _ct);
+        createSpaceAResult.IsSuccess.ShouldBeTrue($"Create space A failed: {createSpaceAResult}");
+        var spaceAId = createSpaceAResult.Id!.Value;
+
+        var createSpaceBResult = await spaceAdmin.CreateAsync(
+            new CreateSpaceConfiguration { Name = "Space B", MatchPatterns = [new SpaceMatchPattern { Path = "/space-b" }] },
+            _ct);
+        createSpaceBResult.IsSuccess.ShouldBeTrue($"Create space B failed: {createSpaceBResult}");
+        var spaceBId = createSpaceBResult.Id!.Value;
+
+        var idpAuthority = fixture.IdpServer.BuildUrl("/").ToString().TrimEnd('/');
+
+        await CreateOidcProviderInSpaceAsync(fixture.MainServer, spaceAId, OidcScheme, idpAuthority, "client-a-v1");
+        await CreateOidcProviderInSpaceAsync(fixture.MainServer, spaceBId, OidcScheme, idpAuthority, "client-b");
+
+        using var mainClient = fixture.MainServer.CreateClient();
+
+        // Populate both caches (tracker + options) for space A.
+        ExtractClientId(await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).ShouldBe("client-a-v1");
+
+        var beforeDelete = ReadCacheState(fixture.MainServer, spaceAId, OidcScheme);
+        beforeDelete.OptionsCached.ShouldBeTrue("space A's options entry must exist before the delete, or this test cannot prove the sweep runs");
+        beforeDelete.Tracked.ShouldBeTrue("space A's tracker entry must exist before the delete, or this test cannot prove the sweep runs");
+
+        var deleteResult = await spaceAdmin.DeleteAsync(spaceAId, _ct);
+        deleteResult.IsSuccess.ShouldBeTrue($"Delete space A failed: {deleteResult}");
+
+        // Space A's requests now 404; its cache entries only leave via the idle sweep.
+        (await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        timeProvider.Advance(idleTimeout + idleTimeout);
+
+        // Any other dynamic-provider request triggers the opportunistic sweep across all spaces.
+        ExtractClientId(await mainClient.GetAsync("/t/space-b/test/challenge", _ct)).ShouldBe("client-b");
+
+        var afterSweep = ReadCacheState(fixture.MainServer, spaceAId, OidcScheme);
+        afterSweep.OptionsCached.ShouldBeFalse("space A's options entry must have been swept after the idle timeout");
+        afterSweep.Tracked.ShouldBeFalse("space A's tracker entry must have been swept after the idle timeout");
+
+        var spaceBState = ReadCacheState(fixture.MainServer, spaceBId, OidcScheme);
+        spaceBState.OptionsCached.ShouldBeTrue("space B's options entry must remain: it was used right before the sweep");
+        spaceBState.Tracked.ShouldBeTrue("space B's tracker entry must remain: it was used right before the sweep");
+
+        var undeleteResult = await spaceAdmin.UndeleteAsync(spaceAId, _ct);
+        undeleteResult.IsSuccess.ShouldBeTrue($"Undelete space A failed: {undeleteResult}");
+
+        // Space A works again, with its entries rebuilt from the store (not left stale).
+        ExtractClientId(await mainClient.GetAsync("/t/space-a/test/challenge", _ct)).ShouldBe("client-a-v1");
     }
 }
 

@@ -68,4 +68,13 @@ public class ServerSideSessionOptions
     /// Defaults to 100. Tune this value to balance cleanup throughput against database load.
     /// </remarks>
     public int RemoveExpiredSessionsBatchSize { get; set; } = 100;
+
+    /// <summary>
+    /// Gets or sets the lease settings used to coordinate the expired-session cleanup job across nodes.
+    /// </summary>
+    /// <remarks>
+    /// Only has an effect when coordinated, which requires Duende Storage (the default storage
+    /// instance) or Spaces to be registered. See <see cref="BackgroundJobLeaseOptions"/>.
+    /// </remarks>
+    public BackgroundJobLeaseOptions Lease { get; set; } = new();
 }

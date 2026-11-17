@@ -6,6 +6,9 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.DependencyInjection;
 using SecretHashAlgorithm = Duende.IdentityServer.Admin.SecretHashAlgorithm;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
@@ -115,15 +118,15 @@ public sealed class ClientStoreTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var updated = getResult.Item.ToUpdate();
+        var updated = getResult.Item!.ToUpdate();
         updated.ClientName = "After Update";
         updated.AllowedScopes = ["api1", "api2"];
         updated.AccessTokenLifetime = 7200;
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, updated, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, updated, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
         var client = await clientStore.FindClientByIdAsync(clientId, _ct);
@@ -158,7 +161,7 @@ public sealed class ClientStoreTests : IAsyncLifetime
         var before = await clientStore.FindClientByIdAsync(clientId, _ct);
         before.ShouldNotBeNull();
 
-        var deleteResult = await admin.DeleteAsync(createResult.Id, _ct);
+        var deleteResult = await admin.DeleteAsync(createResult.Id!, _ct);
         deleteResult.IsSuccess.ShouldBeTrue($"Delete failed: {deleteResult}");
 
         var after = await clientStore.FindClientByIdAsync(clientId, _ct);
@@ -301,7 +304,7 @@ public sealed class ClientStoreTests : IAsyncLifetime
         before.ShouldNotBeNull();
         before.ClientSecrets.ShouldNotBeEmpty();
 
-        var deleteResult = await admin.DeleteSecretAsync(storageId, secretResult.Id, _ct);
+        var deleteResult = await admin.DeleteSecretAsync(storageId, secretResult.Id!, _ct);
         deleteResult.IsSuccess.ShouldBeTrue($"DeleteSecret failed: {deleteResult}");
 
         var after = await clientStore.FindClientByIdAsync(clientId, _ct);
@@ -342,6 +345,28 @@ public sealed class ClientStoreTests : IAsyncLifetime
         secret.Value.ShouldNotBeNullOrWhiteSpace();
     }
 
+    [Fact]
+    public async Task client_store_does_not_return_client_rejected_by_validator()
+    {
+        var toggle = new RejectClientsToggle();
+        await using var provider = await StorageTestFixture.CreateProviderAsync(builder =>
+        {
+            builder.Services.AddSingleton(toggle);
+            builder.AddClientConfigurationValidator<ToggleClientsValidator>();
+        }, _ct);
+        using var scope = provider.CreateScope();
+        var admin = scope.ServiceProvider.GetRequiredService<IClientAdmin>();
+        var store = scope.ServiceProvider.GetRequiredService<IClientStore>();
+        var created = await admin.CreateAsync(new CreateClient { ClientId = $"client_{Guid.NewGuid():N}" }, _ct);
+        created.IsSuccess.ShouldBeTrue($"Create failed: {created}");
+        var clientId = (await admin.GetAsync(created.Id!, _ct)).Item!.ClientId;
+        (await store.FindClientByIdAsync(clientId, _ct)).ShouldNotBeNull();
+
+        toggle.Reject = true;
+
+        (await store.FindClientByIdAsync(clientId, _ct)).ShouldBeNull();
+    }
+
     private async Task<ClientId> CreateClientAsync(IClientAdmin admin, string clientId)
     {
         var result = await admin.CreateAsync(
@@ -355,9 +380,32 @@ public sealed class ClientStoreTests : IAsyncLifetime
             },
             _ct);
         result.IsSuccess.ShouldBeTrue($"CreateClient failed: {result}");
-        return result.Id;
+        return result.Id!;
     }
+
+    private sealed class RejectClientsToggle
+    {
+        public bool Reject { get; set; }
+    }
+
+    private sealed class ToggleClientsValidator(RejectClientsToggle toggle) : IClientConfigurationValidator
+    {
+        public Task ValidateAsync(ClientConfigurationValidationContext context, Ct ct)
+        {
+            if (toggle.Reject)
+            {
+                context.SetError("Client is rejected.");
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
     public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 
-    public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
+    public async ValueTask InitializeAsync()
+    {
+        await _fixture.InitializeAsync();
+        await _fixture.EnsureApiScopesAsync("api1", "api2");
+    }
 }

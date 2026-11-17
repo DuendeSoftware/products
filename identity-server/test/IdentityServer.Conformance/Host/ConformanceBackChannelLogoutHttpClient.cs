@@ -29,7 +29,7 @@ internal sealed partial class ConformanceBackChannelLogoutHttpClient : IBackChan
         _internalHost = internalHost;
     }
 
-    public async Task PostAsync(string url, Dictionary<string, string> payload, CancellationToken ct)
+    public async Task PostAsync(string url, Dictionary<string, string> payload, Ct ct)
     {
         var internalUrl = url.Replace(
             $"https://{_externalHost}", $"https://{_internalHost}", StringComparison.OrdinalIgnoreCase);

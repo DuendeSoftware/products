@@ -7,8 +7,8 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Internal.Saml.Sp.AspNetCore;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Storage.IdentityProviders;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +24,7 @@ public static class IdentityServerBuilderSamlDynamicProviderExtensions
         /// <summary>
         /// Adds the SAML 2.0 dynamic provider feature.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The builder, to allow chaining.</returns>
         public IIdentityServerBuilder AddSamlDynamicProvider()
         {
             builder.AddDynamicProvider<Saml2Handler, Saml2Options, SamlProvider, SamlConfigureOptions>("saml");

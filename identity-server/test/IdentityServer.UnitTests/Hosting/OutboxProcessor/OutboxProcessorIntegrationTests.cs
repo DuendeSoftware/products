@@ -70,9 +70,9 @@ public class OutboxProcessorIntegrationTests
         var sp = services.BuildServiceProvider();
         await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
 
-        var partitionedStorage = await sp.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Operational, CancellationToken.None);
+        var partitionedStorage = await sp.GetRequiredService<IPartitionedStorageFactory>().GetPartitionedStorageAsync(DataCategoryName.Operational, Ct.None);
         var crossPartitionStorage = await sp.GetRequiredService<ICrossPartitionStorageFactory>()
-            .GetCrossPartitionStorageAsync(StorageInstanceId.Default, CancellationToken.None);
+            .GetCrossPartitionStorageAsync(StorageInstanceId.Default, Ct.None);
         var dataProtectionProvider = sp.GetRequiredService<IDataProtectionProvider>();
 
         // Create a valid serialized session payload
@@ -110,17 +110,17 @@ public class OutboxProcessorIntegrationTests
             new SearchFieldCollection([]),
             Expiration.NoExpiration,
             [outboxEvent],
-            CancellationToken.None);
+            Ct.None);
 
         // Verify event exists before processor run
-        var pageBefore = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, CancellationToken.None);
+        var pageBefore = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, Ct.None);
         pageBefore.Events.Count.ShouldBeGreaterThan(0);
 
         // Act: drive the processor exactly as OutboxProcessorHost does.
-        await sp.GetRequiredService<StorageOutboxProcessor>().RunProcessorAsync(CancellationToken.None);
+        await sp.GetRequiredService<StorageOutboxProcessor>().RunProcessorAsync(Ct.None);
 
         // Assert event consumed (re-query outbox returns empty)
-        var pageAfter = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, CancellationToken.None);
+        var pageAfter = await crossPartitionStorage.GetOutboxEventsForSubscriptionAsync(subscriptionName, 100, Ct.None);
         pageAfter.Events.Count.ShouldBe(0);
 
         // Coordination service was called
@@ -197,6 +197,8 @@ public class OutboxProcessorIntegrationTests
         services.AddSingleton(_options);
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<ClientRepository>();
+        services.AddScoped<Duende.IdentityServer.Stores.Storage.ApiScopes.ApiScopeRepository>();
+        services.AddScoped<Duende.IdentityServer.Stores.Storage.IdentityResources.IdentityResourceRepository>();
         services.AddScoped<PersistedGrantRepository>();
         services.AddScoped<IClientStore, ClientStore>();
         services.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
@@ -386,7 +388,6 @@ public class OutboxProcessorIntegrationTests
         DeviceCodeLifetime = 300,
         CoordinateLifetimeWithUserSession = coordinateLifetime,
         AllowedGrantTypes = ["authorization_code", "refresh_token"],
-        AllowedScopes = ["openid", "offline_access"],
         RedirectUris = [],
         PostLogoutRedirectUris = [],
         AllowedIdentityTokenSigningAlgorithms = [],

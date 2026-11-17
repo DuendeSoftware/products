@@ -62,7 +62,7 @@ public static class MixedProtocolLogoutHosts
         IScenarioConfigurator configurator,
         bool includeOidcClient,
         string topologySuffix,
-        CancellationToken ct)
+        Ct ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(topologySuffix);
 

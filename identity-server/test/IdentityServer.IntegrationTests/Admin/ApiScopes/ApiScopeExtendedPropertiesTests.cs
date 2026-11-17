@@ -5,7 +5,7 @@
 
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiScopes;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,21 +40,21 @@ public sealed class ApiScopeExtendedPropertiesTests : IAsyncLifetime
         var admin = _fixture.ApiScopeAdmin;
         var scope = new CreateApiScope { Name = $"scope_{Guid.NewGuid():N}" };
         scope.ExtendedProperties.Set(TestApiScopeAttributes.Owner, "platform-team");
-        scope.ExtendedProperties.Set(TestApiScopeAttributes.Version, 2);
+        scope.ExtendedProperties.Set(TestApiScopeAttributes.Version!, 2);
 
         var createResult = await admin.CreateAsync(scope, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.ExtendedProperties.Count.ShouldBe(2);
 
         loaded.ExtendedProperties.TryGet(TestApiScopeAttributes.Owner.Code, out var ownerAttr).ShouldBeTrue();
         ownerAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("platform-team");
 
-        loaded.ExtendedProperties.TryGet(TestApiScopeAttributes.Version.Code, out var versionAttr).ShouldBeTrue();
+        loaded.ExtendedProperties.TryGet(TestApiScopeAttributes.Version!.Code, out var versionAttr).ShouldBeTrue();
         versionAttr.ShouldBeOfType<AttributeValue<int>>().TypedValue.ShouldBe(2);
     }
 
@@ -67,18 +67,18 @@ public sealed class ApiScopeExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(scope, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestApiScopeAttributes.Owner, "security-team");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.ExtendedProperties.TryGet(TestApiScopeAttributes.Owner.Code, out var attr).ShouldBeTrue();
+        afterUpdate.Item!.ExtendedProperties.TryGet(TestApiScopeAttributes.Owner.Code, out var attr).ShouldBeTrue();
         attr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("security-team");
     }
 
@@ -91,13 +91,13 @@ public sealed class ApiScopeExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(scope, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("bad_attr"), "value");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();

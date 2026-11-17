@@ -5,7 +5,7 @@
 
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Models;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin.IdentityProviders;
 

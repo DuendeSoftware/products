@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <title>Platform User Management - @ViewData["Title"]</title>
+
+  <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark duende-header sticky-top">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" asp-area="" asp-page="/Index">
+          <img src="~/duende-white.svg" alt="Duende Software" class="icon-banner me-2" />
+          <span class="ms-1">Platform User Management</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto align-items-lg-center">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+              <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-page="/Users/Index">
+                  <i class="bi bi-people me-1"></i>Users
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-page="/Import/Index">
+                  <i class="bi bi-upload me-1"></i>Import
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-page="/Schema/Index">
+                  <i class="bi bi-diagram-3 me-1"></i>Schema
+                </a>
+              </li>
+            }
+          </ul>
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+              <li class="nav-item">
+                <span class="nav-link text-white-50">
+                  <i class="bi bi-person-circle me-1"></i>@User.GetDisplayName()
+                </span>
+              </li>
+              <li class="nav-item ms-lg-3">
+                <a class="nav-link fw-bold" asp-area="" asp-page="/Account/Logout">
+                  <span class="text-white-50">Log out</span>
+                  <i class="bi bi-box-arrow-right ms-1"></i>
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <div class="container-fluid container-lg body-container">
+    <main role="main">
+      @RenderBody()
+    </main>
+  </div>
+
+  <footer class="footer text-muted">
+    <div class="container-fluid container-lg">
+      Copyright &copy; 2021-2026 Duende Software. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="~/js/site.js" asp-append-version="true"></script>
+
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -54,7 +54,7 @@ public sealed class SamlFederatedLogoutFlow : IScenario
     public string Description => "Upstream-IdP-initiated SAML federated logout across an upstream IdP, a middle SP/IdP, and a downstream SAML SP";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         var hosts = await MixedProtocolLogoutHosts.StartAsync(configurator, includeOidcClient: false, topologySuffix: "fed", ct);
         _upstreamIdentityProvider = hosts.UpstreamIdentityProvider;
@@ -71,7 +71,7 @@ public sealed class SamlFederatedLogoutFlow : IScenario
         ];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_downstreamServiceProvider != null)
         {

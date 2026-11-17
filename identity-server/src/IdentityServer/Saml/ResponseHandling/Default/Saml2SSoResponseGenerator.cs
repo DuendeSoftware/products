@@ -41,6 +41,13 @@ public class Saml2SSoResponseGenerator(
 {
     private readonly SamlOptions _samlOptions = identityServerOptions.Value.Saml;
     /// <inheritdoc/>
+    /// <remarks>
+    /// If the <see cref="ISamlNameIdGenerator"/> returns an error, no SAML error response is sent to the service provider.
+    /// For SP-initiated SSO, the user is redirected to the IdentityServer error page and only the error message is used.
+    /// For IdP-initiated SSO, <c>DefaultIdpInitiatedSsoService</c> returns a generic failure result without the original
+    /// error message, and the host is responsible for handling it; no automatic redirect occurs.
+    /// The status codes of the error never reach the service provider.
+    /// </remarks>
     public async Task<Saml2FrontChannelResult> CreateResponse(ValidatedAuthnRequest validatedAuthnRequest, Ct ct)
     {
         var nameIdResult = await CreateSubjectNameIdAsync(validatedAuthnRequest, ct);

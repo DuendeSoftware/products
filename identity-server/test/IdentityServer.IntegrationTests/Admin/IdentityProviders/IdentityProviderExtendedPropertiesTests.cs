@@ -5,7 +5,7 @@
 
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +34,7 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "validation_failed");
+        result.Errors!.ShouldContain(e => e.Code == "validation_failed");
         var error = result.Errors.First(e => e.Code == "validation_failed");
         error.Message.ShouldContain("bogus_attribute");
     }
@@ -52,17 +52,17 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("bad_attr"), "value");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
-        updateResult.Errors.ShouldContain(e => e.Code == "validation_failed");
+        updateResult.Errors!.ShouldContain(e => e.Code == "validation_failed");
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "validation_failed");
+        result.Errors!.ShouldContain(e => e.Code == "validation_failed");
         var error = result.Errors.First(e => e.Code == "validation_failed");
         error.Message.ShouldContain("SomeAttr");
         error.Message.ShouldContain("is not defined in the schema");
@@ -153,7 +153,7 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "validation_failed");
+        result.Errors!.ShouldContain(e => e.Code == "validation_failed");
     }
 
     [Fact]
@@ -174,9 +174,9 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var result = await admin.CreateAsync(provider, _ct);
         result.IsSuccess.ShouldBeTrue($"Create failed - schema override not working: {result}");
 
-        var getResult = await admin.GetAsync(result.Id, _ct);
+        var getResult = await admin.GetAsync(result.Id!, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.ExtendedProperties.TryGet(TestIdentityProviderAttributes.TenantId.Code, out var attr).ShouldBeTrue();
+        getResult.Item!.ExtendedProperties.TryGet(TestIdentityProviderAttributes.TenantId.Code, out var attr).ShouldBeTrue();
         attr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("override-works");
     }
 
@@ -198,10 +198,10 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.ExtendedProperties.Count.ShouldBe(3);
 
         loaded.ExtendedProperties.TryGet(AttributeCode.Create("Authority"), out var authorityAttr).ShouldBeTrue();
@@ -227,18 +227,18 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestIdentityProviderAttributes.TenantId, "updated-tenant");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.ExtendedProperties.TryGet(TestIdentityProviderAttributes.TenantId.Code, out var attr).ShouldBeTrue();
+        afterUpdate.Item!.ExtendedProperties.TryGet(TestIdentityProviderAttributes.TenantId.Code, out var attr).ShouldBeTrue();
         attr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("updated-tenant");
     }
 
@@ -267,9 +267,9 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
         // Verify admin round-trip
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.ExtendedProperties.Count.ShouldBe(8);
+        getResult.Item!.ExtendedProperties.Count.ShouldBe(8);
 
         // Verify store produces correct OidcProvider typed accessors
         var loaded = await store.GetBySchemeAsync(scheme, _ct);
@@ -331,14 +331,14 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.ExtendedProperties.Count.ShouldBe(5);
+        getResult.Item!.ExtendedProperties.Count.ShouldBe(5);
 
-        getResult.Item.ExtendedProperties.TryGet(AttributeCode.Create("IdpEntityId"), out var entityAttr).ShouldBeTrue();
+        getResult.Item!.ExtendedProperties.TryGet(AttributeCode.Create("IdpEntityId"), out var entityAttr).ShouldBeTrue();
         entityAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("https://idp.example.com/saml");
 
-        getResult.Item.ExtendedProperties.TryGet(AttributeCode.Create("BindingType"), out var bindingAttr).ShouldBeTrue();
+        getResult.Item!.ExtendedProperties.TryGet(AttributeCode.Create("BindingType"), out var bindingAttr).ShouldBeTrue();
         bindingAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("post");
     }
 
@@ -395,20 +395,20 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var afterCreate = await admin.GetAsync(createResult.Id, _ct);
+        var afterCreate = await admin.GetAsync(createResult.Id!, _ct);
         afterCreate.Found.ShouldBeTrue();
-        afterCreate.Item.ExtendedProperties.TryGet(AttributeCode.Create("AuthnRequestSigningBehavior"), out var createdAttr).ShouldBeTrue();
+        afterCreate.Item!.ExtendedProperties.TryGet(AttributeCode.Create("AuthnRequestSigningBehavior"), out var createdAttr).ShouldBeTrue();
         createdAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Always");
 
-        var toUpdate = afterCreate.Item.ToUpdate();
+        var toUpdate = afterCreate.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("AuthnRequestSigningBehavior"), "Never");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, afterCreate.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, afterCreate.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.ExtendedProperties.TryGet(AttributeCode.Create("AuthnRequestSigningBehavior"), out var updatedAttr).ShouldBeTrue();
+        afterUpdate.Item!.ExtendedProperties.TryGet(AttributeCode.Create("AuthnRequestSigningBehavior"), out var updatedAttr).ShouldBeTrue();
         updatedAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Never");
     }
 
@@ -427,7 +427,7 @@ public sealed class IdentityProviderExtendedPropertiesTests : IAsyncLifetime
         var result = await admin.CreateAsync(provider, _ct);
 
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "validation_failed");
+        result.Errors!.ShouldContain(e => e.Code == "validation_failed");
     }
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();

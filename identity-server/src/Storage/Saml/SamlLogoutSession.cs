@@ -26,8 +26,9 @@ public sealed class SamlLogoutSession
     public required Dictionary<string, ExpectedSpLogout> ExpectedResponses { get; init; }
 
     /// <summary>
-    /// The number of SPs that could not be notified (disabled, no SLO URL,
-    /// unsupported binding, or request generation failure). When greater than zero,
+    /// The number of SPs that could not be notified (unknown or disabled, no SLO URL,
+    /// unsupported binding, or request generation failure). The SP that initiated the logout is
+    /// skipped but not counted. When greater than zero,
     /// the best achievable outcome is PartialLogout.
     /// </summary>
     public int SkippedSpCount { get; init; }

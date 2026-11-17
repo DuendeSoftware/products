@@ -3,9 +3,11 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
 using Duende.Spaces;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
@@ -106,10 +108,17 @@ internal sealed record SpacesDataProtectionTestHostOptions
     public bool FallbackToDefault { get; init; }
 
     /// <summary>
-    /// When <c>true</c>, the authentication ticket is stored by the operational storage and the background
+    /// When <c>true</c>, server-side sessions are on. The authentication ticket is stored by the operational storage,
+    /// or by the in-memory session store when <see cref="InMemoryOperationalStores"/> is set. The background
     /// outbox processor is disabled (see <see cref="SpacesDataProtectionTestHost.RunOutboxProcessorAsync"/>).
     /// </summary>
     public bool ServerSideSessions { get; init; }
+
+    /// <summary>
+    /// When <c>true</c>, the host does not call <c>AddOperationalStorage()</c>, so grants and server-side sessions
+    /// use the in-memory stores. Configuration still comes from the storage.
+    /// </summary>
+    public bool InMemoryOperationalStores { get; init; }
 
     public SpacesSigningKeyStore SigningKeyStore { get; init; } = SpacesSigningKeyStore.DeveloperCredential;
 
@@ -118,4 +127,16 @@ internal sealed record SpacesDataProtectionTestHostOptions
     /// back-channel logout.
     /// </summary>
     public IBackChannelLogoutService? BackChannelLogoutService { get; init; }
+
+    /// <summary>Applied to <c>IdentityServerOptions.KeyManagement</c> after the host's own settings.</summary>
+    public Action<KeyManagementOptions>? ConfigureKeyManagement { get; init; }
+
+    /// <summary>
+    /// Invoked last in the host's service configuration, after <c>AddSpaces()</c>, so a test can decorate
+    /// services the host registered (for example <c>ISigningKeyStore</c>) or register its own.
+    /// </summary>
+    public Action<IServiceCollection>? ConfigureServices { get; init; }
+
+    /// <summary>Invoked with the IdentityServer builder before storage and Spaces are added, to register more clients or resources.</summary>
+    public Action<IIdentityServerBuilder>? ConfigureBuilder { get; init; }
 }

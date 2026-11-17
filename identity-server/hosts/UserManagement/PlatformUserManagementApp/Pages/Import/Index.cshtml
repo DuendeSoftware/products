@@ -1,0 +1,61 @@
+@page
+@model PlatformUserManagementApp.Pages.Import.IndexModel
+@{
+    ViewData["Title"] = "Import Users";
+}
+
+<h2 class="brand-title mb-3">Import from ASP.NET Identity</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-upload me-2"></i>Import users</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">
+            Import users from an ASP.NET Identity PostgreSQL database into the Duende Platform user store.
+            The following data will be migrated:
+        </p>
+        <ul class="text-muted">
+            <li><strong>User profiles</strong> — username, email, and all SCIM claims stored in <code>AspNetUserClaims</code></li>
+            <li><strong>Password hashes</strong> — migrated to Platform password authenticators</li>
+            <li><strong>Passkey credentials</strong> — migrated to Platform passkey authenticators</li>
+            <li><strong>Email OTP</strong> — email address registered as OTP authenticator</li>
+        </ul>
+        <p class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>If a user already exists, they will be <strong>overwritten</strong> with the imported data.
+        </p>
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>@Model.ErrorMessage
+            </div>
+        }
+
+        @if (Model.Result is not null)
+        {
+            <div class="alert @(Model.Result.Failed == 0 ? "alert-success" : "alert-warning")">
+                <strong>Import complete:</strong>
+                @Model.Result.Created created, @Model.Result.Overwritten overwritten, @Model.Result.Failed failed.
+                @if (Model.Result.Errors.Count > 0)
+                {
+                    <ul class="mt-2 mb-0">
+                        @foreach (var error in Model.Result.Errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
+        <form method="post">
+            <p class="text-muted">
+                The connection string to the ASP.NET Identity database is provided via Aspire service discovery.
+            </p>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-upload me-2"></i>Start import
+            </button>
+        </form>
+    </div>
+</div>

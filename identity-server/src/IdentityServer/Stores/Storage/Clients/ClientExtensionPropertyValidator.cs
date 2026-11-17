@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Admin.Clients;
-using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores.Storage.Clients;
 

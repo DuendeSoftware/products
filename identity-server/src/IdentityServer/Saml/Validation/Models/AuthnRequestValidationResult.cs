@@ -7,7 +7,7 @@ using Duende.IdentityServer.Validation;
 namespace Duende.IdentityServer.Saml.Validation;
 
 /// <summary>
-/// Result of AuthnRequestValidation
+/// Result of validating an <c>AuthnRequest</c>.
 /// </summary>
 public class AuthnRequestValidationResult : ValidationResult
 {
@@ -29,7 +29,7 @@ public class AuthnRequestValidationResult : ValidationResult
     /// <param name="validatedAuthnRequest">The AuthnRequest validation context</param>
     /// <param name="saml2ErrorCode">Error code (a Saml2 status code)</param>
     /// <param name="errorDescription">Error description</param>
-    /// <returns></returns>
+    /// <returns>An invalid validation result that carries the error code and description.</returns>
     public static AuthnRequestValidationResult InValid(
         ValidatedAuthnRequest validatedAuthnRequest,
         string saml2ErrorCode,

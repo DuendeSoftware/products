@@ -1,0 +1,31 @@
+@page
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+
+@{
+    ViewData["Title"] = "Logout";
+
+    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container text-center">
+            <h2 class="mb-4 brand-title">Signed Out</h2>
+
+            <div class="alert alert-success" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                You have been successfully signed out.
+            </div>
+
+            <div class="d-grid gap-2">
+                <a asp-page="/Login" class="btn btn-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In Again
+                </a>
+                <a asp-page="/Index" class="btn btn-outline-primary">
+                    <i class="bi bi-house me-2"></i>Go to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

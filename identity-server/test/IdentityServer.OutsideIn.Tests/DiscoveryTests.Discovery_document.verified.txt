@@ -1,0 +1,132 @@
+﻿{
+  Steps: [
+    {
+      Request: GET {sut}/.well-known/openid-configuration,
+      Status: 200 OK
+    }
+  ],
+  Result: {
+    Status: 200 OK,
+    Headers: {
+      Content-Type: application/json; charset=UTF-8
+    },
+    Body: {
+      authorization_endpoint: {sut}/connect/authorize,
+      authorization_response_iss_parameter_supported: true,
+      backchannel_authentication_endpoint: {sut}/connect/ciba,
+      backchannel_authentication_request_signing_alg_values_supported: [
+        RS256,
+        RS384,
+        RS512,
+        PS256,
+        PS384,
+        PS512,
+        ES256,
+        ES384,
+        ES512
+      ],
+      backchannel_logout_session_supported: true,
+      backchannel_logout_supported: true,
+      backchannel_token_delivery_modes_supported: [
+        poll
+      ],
+      backchannel_user_code_parameter_supported: true,
+      check_session_iframe: {sut}/connect/checksession,
+      code_challenge_methods_supported: [
+        plain,
+        S256
+      ],
+      device_authorization_endpoint: {sut}/connect/deviceauthorization,
+      dpop_signing_alg_values_supported: [
+        RS256,
+        RS384,
+        RS512,
+        PS256,
+        PS384,
+        PS512,
+        ES256,
+        ES384,
+        ES512
+      ],
+      end_session_endpoint: {sut}/connect/endsession,
+      frontchannel_logout_session_supported: true,
+      frontchannel_logout_supported: true,
+      grant_types_supported: [
+        authorization_code,
+        client_credentials,
+        refresh_token,
+        implicit,
+        password,
+        urn:ietf:params:oauth:grant-type:device_code,
+        urn:openid:params:grant-type:ciba
+      ],
+      id_token_signing_alg_values_supported: [
+        RS256
+      ],
+      introspection_endpoint: {sut}/connect/introspect,
+      introspection_endpoint_auth_methods_supported: [
+        client_secret_basic,
+        client_secret_post
+      ],
+      introspection_signing_alg_values_supported: [
+        RS256
+      ],
+      issuer: {sut},
+      jwks_uri: {sut}/.well-known/openid-configuration/jwks,
+      prompt_values_supported: [
+        none,
+        login,
+        consent,
+        select_account
+      ],
+      pushed_authorization_request_endpoint: {sut}/connect/par,
+      request_object_signing_alg_values_supported: [
+        RS256,
+        RS384,
+        RS512,
+        PS256,
+        PS384,
+        PS512,
+        ES256,
+        ES384,
+        ES512
+      ],
+      request_parameter_supported: true,
+      require_pushed_authorization_requests: false,
+      response_modes_supported: [
+        form_post,
+        query,
+        fragment
+      ],
+      response_types_supported: [
+        code,
+        token,
+        id_token,
+        id_token token,
+        code id_token,
+        code token,
+        code id_token token
+      ],
+      revocation_endpoint: {sut}/connect/revocation,
+      revocation_endpoint_auth_methods_supported: [
+        client_secret_basic,
+        client_secret_post
+      ],
+      scopes_supported: [
+        offline_access
+      ],
+      subject_types_supported: [
+        public
+      ],
+      token_endpoint: {sut}/connect/token,
+      token_endpoint_auth_methods_supported: [
+        client_secret_basic,
+        client_secret_post
+      ],
+      userinfo_endpoint: {sut}/connect/userinfo,
+      userinfo_signing_alg_values_supported: [
+        RS256
+      ]
+    }
+  }
+}

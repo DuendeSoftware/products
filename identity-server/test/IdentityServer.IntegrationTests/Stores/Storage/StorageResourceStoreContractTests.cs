@@ -9,6 +9,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.IdentityServer.Stores.Storage.ApiResources;
+using Duende.IdentityServer.Stores.Storage.ApiScopes;
 using Duende.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -55,24 +56,21 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
         result.IsSuccess.ShouldBeTrue($"Seeding identity resource '{resource.Name}' failed: {result}");
     }
 
-    // NOTE: ApiResource seeding cannot go through IApiResourceAdmin: ApiResourceAdmin.CreateAsync
-    // resolves every Scopes entry against ApiScopeRepository and rejects scope names that don't
-    // already exist as a seeded ApiScope ("Scope '{name}' does not exist."). Most base
-    // ResourceStoreContractTests cases build an ApiResource via CreateApiResourceTestResource(),
-    // which assigns a random scope name without ever seeding a matching ApiScope first, so the
-    // admin API cannot express this seed data. Kept on the internal repository.
+    // Seeded through the repository rather than IApiResourceAdmin because the admin hashes secret
+    // values, and the secrets on the given ApiResource are already hashed and must be stored as they are.
     protected override async Task SeedApiResourceAsync(ApiResource resource)
     {
-        var repo = _provider.GetRequiredService<ApiResourceRepository>();
+        var ct = TestContext.Current.CancellationToken;
+        var scopes = new List<(string Name, Guid Id)>();
+        foreach (var scopeName in resource.Scopes)
+        {
+            scopes.Add((scopeName, await FindOrCreateApiScopeAsync(scopeName, ct)));
+        }
 
-        // Build scope references — StorageResourceStore.FindApiResourcesByScopeNameAsync queries via
-        // ApiResourceRepository.FindByScopeNamesAsync which matches on the scope Name search field
-        // (not the reference ID). We use random Guids for scope reference IDs since only the name matters.
-        var scopeRefs = resource.Scopes.Select(s => new ApiScopeReferenceDso.V1(Guid.NewGuid(), s)).ToList();
-
+        var id = UuidV7.New();
         var dso = new ApiResourceDso.V1
         {
-            Id = Guid.NewGuid(),
+            Id = id.Value,
             Name = resource.Name,
             Enabled = resource.Enabled,
             DisplayName = resource.DisplayName,
@@ -80,12 +78,25 @@ public class StorageResourceStoreContractTests : ResourceStoreContractTests
             ShowInDiscoveryDocument = resource.ShowInDiscoveryDocument,
             RequireResourceIndicator = resource.RequireResourceIndicator,
             UserClaims = resource.UserClaims.ToList(),
-            Scopes = scopeRefs,
             AllowedAccessTokenSigningAlgorithms = resource.AllowedAccessTokenSigningAlgorithms.ToList(),
             ApiSecrets = resource.ApiSecrets.Select(s => new ApiResourceDso.SecretDso(
                 Guid.NewGuid(), s.Value ?? "", s.Description, s.Expiration, s.Type ?? "SharedSecret", "Sha256")).ToList()
         };
-        await repo.CreateAsync(UuidV7.New(), dso, TestContext.Current.CancellationToken);
+        var result = await _provider.GetRequiredService<ApiResourceRepository>().CreateAsync(id, dso, scopes, ct);
+        result.Kind.ShouldBe(ApiResourceBatchOutcomeKind.Success);
+    }
+
+    private async Task<Guid> FindOrCreateApiScopeAsync(string name, Ct ct)
+    {
+        var existing = await _provider.GetRequiredService<ApiScopeRepository>().TryReadByNameAsync(name, ct);
+        if (existing is not null)
+        {
+            return existing.Value.Dso.Id;
+        }
+
+        var result = await _provider.GetRequiredService<IApiScopeAdmin>().CreateAsync(new CreateApiScope { Name = name }, ct);
+        result.IsSuccess.ShouldBeTrue($"Seeding API scope '{name}' failed: {result}");
+        return result.Id!.Value;
     }
 
     protected override async Task SeedApiScopeAsync(ApiScope scope)

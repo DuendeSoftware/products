@@ -8,7 +8,6 @@ namespace Duende.IdentityServer.Validation;
 /// <summary>
 /// Default SAML service provider configuration validator.
 /// </summary>
-/// <seealso cref="ISamlServiceProviderConfigurationValidator" />
 public class DefaultSamlServiceProviderConfigurationValidator : ISamlServiceProviderConfigurationValidator
 {
     /// <summary>
@@ -16,7 +15,7 @@ public class DefaultSamlServiceProviderConfigurationValidator : ISamlServiceProv
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>A task that completes when validation is finished. Errors are reported through the context.</returns>
     public async Task ValidateAsync(SamlServiceProviderConfigurationValidationContext context, Ct ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultSamlServiceProviderConfigurationValidator.Validate");
@@ -43,10 +42,10 @@ public class DefaultSamlServiceProviderConfigurationValidator : ISamlServiceProv
     }
 
     /// <summary>
-    /// Validates that the EntityId is not null or empty.
+    /// Validates that the EntityId is not null, empty, or whitespace.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
+    /// <returns>A task that completes when validation is finished. Errors are reported through the context.</returns>
     protected virtual Task ValidateEntityIdAsync(SamlServiceProviderConfigurationValidationContext context)
     {
         if (string.IsNullOrWhiteSpace(context.ServiceProvider.EntityId))
@@ -58,10 +57,11 @@ public class DefaultSamlServiceProviderConfigurationValidator : ISamlServiceProv
     }
 
     /// <summary>
-    /// Validates that at least one Assertion Consumer Service URL is configured.
+    /// Validates that at least one Assertion Consumer Service URL is configured and that every
+    /// Assertion Consumer Service URL uses the HTTP-POST binding.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
+    /// <returns>A task that completes when validation is finished. Errors are reported through the context.</returns>
     protected virtual Task ValidateAssertionConsumerServiceUrlsAsync(SamlServiceProviderConfigurationValidationContext context)
     {
         if (context.ServiceProvider.AssertionConsumerServiceUrls is not { Count: > 0 })
@@ -88,7 +88,7 @@ public class DefaultSamlServiceProviderConfigurationValidator : ISamlServiceProv
     /// Validates that at least one allowed scope is configured.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
+    /// <returns>A task that completes when validation is finished. Errors are reported through the context.</returns>
     protected virtual Task ValidateAllowedScopesAsync(SamlServiceProviderConfigurationValidationContext context)
     {
         if (context.ServiceProvider.AllowedScopes is not { Count: > 0 })
@@ -103,7 +103,7 @@ public class DefaultSamlServiceProviderConfigurationValidator : ISamlServiceProv
     /// Validates lifetime-related configuration settings.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
+    /// <returns>A task that completes when validation is finished. Errors are reported through the context.</returns>
     protected virtual Task ValidateLifetimesAsync(SamlServiceProviderConfigurationValidationContext context)
     {
         if (context.ServiceProvider.AssertionLifetime.HasValue && context.ServiceProvider.AssertionLifetime.Value <= TimeSpan.Zero)

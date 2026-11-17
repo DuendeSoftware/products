@@ -1,0 +1,113 @@
+@page
+@model AuthenticationFlowWithWebComponent.Pages.EnableAuthenticatorModel
+@{
+    ViewData["Title"] = "Enable Authenticator";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Enable Two-Factor Authentication</h2>
+
+            @if (!string.IsNullOrEmpty(Model.StatusMessage))
+            {
+                <div class="alert alert-success" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>@Model.StatusMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            <div class="alert alert-info" role="alert">
+                <h5 class="alert-heading">Setup Instructions</h5>
+                <ol class="mb-0">
+                    <li>Download an authenticator app like Microsoft Authenticator, Google Authenticator, or Authy</li>
+                    <li>Scan the QR code or manually enter the key below</li>
+                    <li>Enter the 6-digit code from your authenticator app to verify</li>
+                </ol>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header fw-bold">
+                    <i class="bi bi-qr-code me-2"></i>Step 1: Scan QR Code
+                </div>
+                <div class="card-body text-center">
+                    <div id="qrCode" class="mb-3"></div>
+                    <div id="qrCodeData" data-url="@Model.AuthenticatorUri" style="display: none;"></div>
+                    <p class="text-muted small mb-0">Scan this QR code with your authenticator app</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header fw-bold">
+                    <i class="bi bi-key me-2"></i>Step 2: Or Enter Key Manually
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">If you can't scan the QR code, enter this key manually:</p>
+                    <div class="input-group">
+                        <input type="text" class="form-control font-monospace" value="@Model.SharedKey" readonly />
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('@Model.SharedKey')">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                    <p class="text-muted small mt-2 mb-0">Spaces and casing do not matter</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header fw-bold">
+                    <i class="bi bi-shield-check me-2"></i>Step 3: Verify Code
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="Code" class="form-label fw-semibold">Verification Code</label>
+                            <input asp-for="Code" type="text" class="form-control form-control-lg text-center" 
+                                   placeholder="000000" maxlength="7" pattern="[0-9]*" inputmode="numeric" required autofocus />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                            <div class="form-text">Enter the 6-digit code from your authenticator app</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>Verify & Enable
+                            </button>
+                            <a asp-page="/Profile" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var qrCodeData = document.getElementById('qrCodeData');
+            if (qrCodeData) {
+                var url = qrCodeData.getAttribute('data-url');
+                new QRCode(document.getElementById('qrCode'), {
+                    text: url,
+                    width: 200,
+                    height: 200
+                });
+            }
+        });
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Key copied to clipboard!');
+            });
+        }
+    </script>
+}

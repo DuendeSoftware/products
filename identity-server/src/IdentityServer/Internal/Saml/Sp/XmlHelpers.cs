@@ -8,9 +8,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
 using System.Xml.Linq;
+using Duende.IdentityServer.Internal.Saml.Sp.Configuration;
 using Duende.IdentityServer.Internal.Saml.Sp.Exceptions;
 using Duende.IdentityServer.Internal.Saml.Sp.Helpers;
 using Duende.IdentityServer.Internal.Saml.Sp.Tokens;
+using Duende.IdentityServer.Saml.Infrastructure;
 
 namespace Duende.IdentityServer.Internal.Saml.Sp
 {
@@ -47,6 +49,9 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
     /// </summary>
     internal static class XmlHelpers
     {
+        internal static string GetDirectTextContents(XmlElement element) =>
+            Duende.IdentityServer.Saml.Xml.XmlHelpers.GetDirectTextContents(element);
+
         extension(XmlDocument xmlDocument)
         {
             /// <summary>
@@ -262,7 +267,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
                     return null;
                 }
 
-                return xmlElement.InnerText.Trim();
+                return XmlHelpers.GetDirectTextContents(xmlElement).Trim();
             }
 
             internal string GetRequiredAttributeValue(string attributeName)
@@ -409,6 +414,37 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
             xmlDoc.LoadXml(source);
 
             return xmlDoc;
+        }
+
+        /// <summary>
+        /// Loads inbound XML with the configured element depth limit and prohibits DTDs.
+        /// </summary>
+        public static XmlDocument XmlDocumentFromInboundString(string source, IOptions options)
+        {
+            if (string.IsNullOrEmpty(source))
+            {
+                throw new XmlException("The SAML message is empty.");
+            }
+
+            var maxNestingDepth = options?.SPOptions.MaxXmlNestingDepth ?? SecureXmlParser.DefaultMaxNestingDepth;
+
+            return SecureXmlParser.LoadXmlDocument(source, int.MaxValue, maxNestingDepth);
+        }
+
+        /// <summary>
+        /// Rejects an already loaded node whose elements, offset by <paramref name="depthOffset"/>, exceed the depth limit.
+        /// </summary>
+        public static void EnsureNestingDepthWithinLimit(XmlNode node, int depthOffset, int maxNestingDepth)
+        {
+            using var reader = new XmlNodeReader(node);
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element && reader.Depth + depthOffset > maxNestingDepth)
+                {
+                    throw new XmlException(
+                        $"XML document exceeds the maximum element nesting depth of {maxNestingDepth}.");
+                }
+            }
         }
 
         /// <summary>

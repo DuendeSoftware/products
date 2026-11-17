@@ -1,0 +1,49 @@
+@page
+@model LoginVerifyModel
+@{
+    ViewData["Title"] = "Verify Login";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Verify Your Email</h2>
+
+            <div class="alert alert-info mb-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                We've sent a verification code to <strong>@Model.Email</strong>
+            </div>
+            <div class="alert alert-info mb-4" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              We simulate sending of the emails via MailPit. You can view the sent emails <a target="_blank" rel="noopener noreferrer" href="http://localhost:8026">here.</a>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            <form method="post">
+                <div class="mb-4">
+                    <label asp-for="Code" class="form-label fw-semibold">Verification Code</label>
+                    <input asp-for="Code" type="text" class="form-control form-control-lg" placeholder="Enter the code" required autofocus />
+                    <div class="form-text">Check your email inbox for the code</div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Verify and Sign In
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <a asp-page="/Login" class="text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Login
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

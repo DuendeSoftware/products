@@ -40,6 +40,6 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
     {
         await diagnosticSummary.PrintSummary(ct);
 
-        await base.StopAsync(ct);
+        await base.StopAsync(ct).ConfigureAwait(false);
     }
 }

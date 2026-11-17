@@ -4,7 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Models;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace Duende.IdentityServer.Admin.Clients;
 

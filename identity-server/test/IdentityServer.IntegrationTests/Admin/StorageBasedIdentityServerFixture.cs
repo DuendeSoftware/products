@@ -98,6 +98,36 @@ public sealed class StorageBasedIdentityServerFixture : IAsyncLifetime
 
         // Create a persistent admin scope for this fixture's lifetime
         _adminScope = _server.Services.CreateScope();
+
+        // Seed the storage-backed API scope/identity resource that back the in-memory
+        // IResourceStore configured above, so IClientAdmin's allowed-scope existence check
+        // (which reads from storage) accepts "scope1" and "openid" the way existing tests expect.
+        // Uses the internal repositories directly rather than IApiScopeAdmin/IIdentityResourceAdmin,
+        // which are registered as unsupported stubs when an in-memory resource store is configured.
+        var apiScopeRepository = _adminScope.ServiceProvider.GetRequiredService<Duende.IdentityServer.Stores.Storage.ApiScopes.ApiScopeRepository>();
+        var scope1Id = Duende.Storage.UuidV7.New();
+        await apiScopeRepository.CreateAsync(scope1Id, new Duende.IdentityServer.Stores.Storage.ApiScopeDso.V1
+        {
+            Id = scope1Id.Value,
+            Name = "scope1",
+            Enabled = true,
+            ShowInDiscoveryDocument = true,
+            Required = false,
+            Emphasize = false,
+            UserClaims = []
+        }, ct);
+        var identityResourceRepository = _adminScope.ServiceProvider.GetRequiredService<Duende.IdentityServer.Stores.Storage.IdentityResources.IdentityResourceRepository>();
+        var openidId = Duende.Storage.UuidV7.New();
+        await identityResourceRepository.CreateAsync(openidId, new Duende.IdentityServer.Stores.Storage.IdentityResourceDso.V1
+        {
+            Id = openidId.Value,
+            Name = "openid",
+            Enabled = true,
+            ShowInDiscoveryDocument = true,
+            Required = false,
+            Emphasize = false,
+            UserClaims = []
+        }, ct);
     }
 
     public Uri BuildUri(string path) => _server!.BuildUrl(path);

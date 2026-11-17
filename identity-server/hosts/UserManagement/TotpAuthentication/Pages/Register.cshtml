@@ -1,0 +1,51 @@
+@page
+@model TotpAuthentication.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<partial name="_RegistrationProgress" model="@("Register")" />
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Create Account</h2>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            <form method="post">
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+                    <input asp-for="Email" type="email" class="form-control form-control-lg" placeholder="Enter your email" required autofocus />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-envelope me-2"></i>Send Verification Code
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted small">
+                        We'll send a verification code to your email address to begin registration.
+                    </p>
+                </div>
+
+                <div class="text-center mt-3">
+                    <span class="text-muted">Already have an account?</span>
+                    <a asp-page="/Login" class="ms-1">Sign In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

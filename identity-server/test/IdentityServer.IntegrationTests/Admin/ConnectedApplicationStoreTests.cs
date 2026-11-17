@@ -230,7 +230,12 @@ public sealed class ConnectedApplicationStoreTests : IAsyncLifetime
         clientIndex.ShouldBeLessThan(samlIndex);
     }
 
-    public ValueTask InitializeAsync() => _fixture.InitializeAsync();
+    public async ValueTask InitializeAsync()
+    {
+        await _fixture.InitializeAsync();
+        await _fixture.EnsureApiScopesAsync("api1");
+        await _fixture.EnsureIdentityResourcesAsync("openid");
+    }
 
     public ValueTask DisposeAsync() => _fixture.DisposeAsync();
 }

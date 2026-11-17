@@ -721,6 +721,52 @@ public class IntrospectionTests
         introspectionResponse.IsError.ShouldBeFalse();
     }
 
+    [Theory]
+    [Trait("Category", Category)]
+    [InlineData(null)]
+    [InlineData("made-up-secret")]
+    public async Task public_client_should_not_be_able_to_introspect_its_own_token(string clientSecret)
+    {
+        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "ro.public",
+            UserName = "bob",
+            Password = "bob",
+            Scope = "api1"
+        });
+        tokenResponse.IsError.ShouldBeFalse(tokenResponse.Error);
+
+        var form = new Dictionary<string, string>
+        {
+            { "client_id", "ro.public" },
+            { "token", tokenResponse.AccessToken }
+        };
+        if (clientSecret != null)
+        {
+            form.Add("client_secret", clientSecret);
+        }
+
+        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_only_client_should_not_be_able_to_introspect()
+    {
+        var form = new Dictionary<string, string>
+        {
+            { "client_id", "implicit" },
+            { "token", "any-token" }
+        };
+
+        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
     [Fact]
     [Trait("Category", Category)]
     public async Task jwt_response_type_requested_returns_jwt_response()

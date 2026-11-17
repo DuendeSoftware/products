@@ -224,7 +224,7 @@ public sealed class SpacesMtlsIdentityServerFixture : IAsyncDisposable
     /// <c>SetSpace</c> context used to create the client.
     /// </summary>
     private static async Task CorrectHashedX509ThumbprintAsync(
-        ClientRepository clientRepository, ClientId clientId, string rawThumbprint, CancellationToken ct)
+        ClientRepository clientRepository, ClientId clientId, string rawThumbprint, Ct ct)
     {
         var existing = await clientRepository.TryReadByIdAsync(clientId.Value, ct)
             ?? throw new InvalidOperationException($"Client {clientId} was not found immediately after creation.");
@@ -323,7 +323,7 @@ public sealed class SpacesMtlsIdentityServerFixture : IAsyncDisposable
         }
     }
 
-    private static void EnsureSuccess<TId>(SaveResult<TId> result, string operation, string context)
+    private static void EnsureSuccess<TId>(Duende.IdentityServer.Models.SaveResult<TId> result, string operation, string context)
         where TId : notnull
     {
         if (!result.IsSuccess)

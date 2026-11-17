@@ -11,7 +11,7 @@ using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.IdentityServer.Stores.Storage.PersistedGrants;
 
@@ -80,7 +80,7 @@ internal sealed class PersistedGrantRepository(IPartitionedStorageFactory partit
             PersistedGrantDso.EntityType,
             DataStorageKey.Create(PersistedGrantKeyDskV1.Create(key)),
             ct);
-        return result.Found ? ((PersistedGrantDso.V1)result.Dso, result.Version.Value) : null;
+        return result.Found ? (PersistedGrantDso.ToCurrent(result.Dso), result.Version.Value) : null;
     }
 
     // === DELETE ===
@@ -105,10 +105,10 @@ internal sealed class PersistedGrantRepository(IPartitionedStorageFactory partit
         while (true)
         {
             var range = DataRange.FromPage(pageNumber, 200);
-            var result = await partitionedStorage.QueryAsync<PersistedGrantDso.V1>(
+            var result = await partitionedStorage.QueryAsync(
                 PersistedGrantDso.EntityType, filterExpr, SortParameter.Empty, range, ct);
 
-            results.AddRange(result.Items.Select(e => e.Value));
+            results.AddRange(result.Items.Select(e => PersistedGrantDso.ToCurrent(e.Value)));
 
             if (!result.HasMoreData)
             {

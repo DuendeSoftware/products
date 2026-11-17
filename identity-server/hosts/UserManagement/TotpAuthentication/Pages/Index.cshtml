@@ -1,0 +1,142 @@
+@page
+@using Duende.IdentityModel
+@model TotpAuthentication.Pages.IndexModel
+@{
+  ViewData["Title"] = "Home page";
+}
+
+<div class="persona-hero text-center">
+  <h1>Welcome to Persona TOTP Authentication</h1>
+  <p class="lead m-0">
+    A demonstration of TOTP (Time-based One-Time Password) authentication using Duende Persona.
+  </p>
+</div>
+
+<div class="mt-4">
+
+  @if (User.Identity?.IsAuthenticated == true)
+  {
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+            User Information
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="fw-bold">User ID</div>
+              <div>@User.FindFirst(JwtClaimTypes.Subject)?.Value</div>
+            </div>
+            <div class="mb-3">
+              <div class="fw-bold">Email</div>
+              <div>@User.Identity.Name</div>
+            </div>
+            @if (Model.Has2FA)
+            {
+              <div class="mb-3">
+                <div class="fw-bold">Two-Factor Authentication</div>
+                <div class="text-success">
+                  <i class="bi bi-shield-check me-2"></i>Enabled
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="fw-bold">Recovery Codes Available</div>
+                <div>
+                  @if (Model.RecoveryCodesLeft == 0)
+                  {
+                    <span class="text-danger">
+                      <i class="bi bi-exclamation-triangle me-2"></i>@Model.RecoveryCodesLeft
+                    </span>
+                  }
+                  else if (Model.RecoveryCodesLeft <= 3)
+                  {
+                    <span class="text-warning">
+                      <i class="bi bi-exclamation-circle me-2"></i>@Model.RecoveryCodesLeft
+                    </span>
+                  }
+                  else
+                  {
+                    <span class="text-success">
+                      <i class="bi bi-check-circle me-2"></i>@Model.RecoveryCodesLeft
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+            else
+            {
+              <div class="mb-3">
+                <div class="fw-bold">Two-Factor Authentication</div>
+                <div class="text-warning">
+                  <i class="bi bi-shield-exclamation me-2"></i>Not Enabled
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+            Actions
+          </div>
+          <div class="card-body">
+            @if (!Model.Has2FA)
+            {
+              <a asp-page="/EnableAuthenticator" class="btn btn-primary w-100 mb-3">
+                <i class="bi bi-shield-lock me-2"></i>Enable Two-Factor Authentication
+              </a>
+            }
+            else
+            {
+              <a asp-page="/Manage2FA" class="btn btn-primary w-100 mb-3">
+                <i class="bi bi-gear me-2"></i>Manage Two-Factor Authentication
+              </a>
+            }
+            <a asp-page="/Logout" class="btn btn-outline-primary w-100">
+              <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (User.Claims.Any())
+    {
+      <h3 class="mt-4 mb-3">Authentication Claims</h3>
+      <div class="card shadow-sm">
+        <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+          Claims
+        </div>
+        <div class="card-body">
+          @foreach (var claim in User.Claims)
+          {
+            <div class="mb-3">
+              <div class="fw-bold">@claim.Type.Split('/').Last()</div>
+              <div>@claim.Value</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+  else
+  {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5 class="card-title mb-3">You are not signed in</h5>
+        <p class="text-muted mb-4">Sign in or register to use TOTP authentication</p>
+
+        <div class="d-flex gap-3 justify-content-center">
+          <a asp-page="/Login" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+          </a>
+          <a asp-page="/Register" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-person-plus me-2"></i>Register
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

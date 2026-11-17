@@ -14,6 +14,8 @@ internal class Program
 
         var cn = builder.Configuration.GetConnectionString("DefaultConnection");
 
+        _ = builder.Services.AddSingleton(TimeProvider.System);
+
         _ = builder.Services.AddOperationalDbContext(options =>
         {
             options.ConfigureDbContext = b =>

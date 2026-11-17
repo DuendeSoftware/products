@@ -4,8 +4,8 @@
 #nullable enable
 
 using Duende.IdentityServer.Admin.IdentityResources;
-using Duende.Storage;
-using Duende.Storage.Querying;
+
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Admin;
 

@@ -58,15 +58,13 @@ public class CachingOptions
     /// </remarks>
     public TimeSpan SamlServiceProviderStoreExpiration { get; set; } = Default;
 
-
     /// <summary>
     /// Gets or sets the timeout for concurrency locking in the default cache.
     /// </summary>
     /// <remarks>
-    /// Defaults to 60 seconds. This property is no longer used by configuration-store caching
-    /// (HybridCache provides built-in stampede protection). It is still used internally by
-    /// KeyManager for key-management locking.
+    /// Defaults to 60 seconds. This property no longer has any effect. Key-management locking is now
+    /// configured via <see cref="KeyManagementOptions.KeyCreationLockTimeout"/>.
     /// </remarks>
-    [Obsolete("CacheLockTimeout is no longer used by configuration-store caching (HybridCache provides built-in stampede protection). It is still used internally by KeyManager for key-management locking.")]
+    [Obsolete("CacheLockTimeout no longer has any effect. Key-management locking is now configured via KeyManagementOptions.KeyCreationLockTimeout. This property will be removed in a future major version.")]
     public TimeSpan CacheLockTimeout { get; set; } = TimeSpan.FromSeconds(60);
 }

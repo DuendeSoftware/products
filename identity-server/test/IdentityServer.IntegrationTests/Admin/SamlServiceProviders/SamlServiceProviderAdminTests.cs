@@ -7,8 +7,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
-using Duende.Storage;
-using Duende.Storage.Querying;
+using DataVersion = Duende.IdentityServer.Models.DataVersion;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -103,10 +102,10 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.EntityId.ShouldBe(config.EntityId);
         loaded.Enabled.ShouldBeTrue();
         loaded.DisplayName.ShouldBe("Test SP");
@@ -122,7 +121,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         loaded.RequireSignedLogoutResponses.ShouldBe(false);
         loaded.Certificates.ShouldNotBeNull();
         loaded.Certificates!.Count.ShouldBe(1);
-        loaded.Certificates[0].Id.ShouldNotBe(Guid.Empty);
+        loaded.Certificates[0].Id!.ShouldNotBe(Guid.Empty);
         loaded.Certificates[0].Subject.ShouldNotBeNullOrEmpty();
         loaded.Certificates[0].Thumbprint.ShouldNotBeNullOrEmpty();
         loaded.Certificates[0].NotAfter.ShouldNotBeNull();
@@ -148,7 +147,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var getResult = await admin.GetByEntityIdAsync(config.EntityId, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.EntityId.ShouldBe(config.EntityId);
+        getResult.Item!.EntityId.ShouldBe(config.EntityId);
     }
 
     [Fact]
@@ -163,7 +162,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var second = await admin.CreateAsync(config, _ct);
         second.IsSuccess.ShouldBeFalse();
-        second.Errors.ShouldContain(e => e.Code == "already_exists");
+        second.Errors!.ShouldContain(e => e.Code == "already_exists");
     }
 
     [Fact]
@@ -174,7 +173,53 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "required");
+        result.Errors!.ShouldContain(e => e.Code == "required");
+    }
+
+    [Fact]
+    public async Task create_with_null_allowed_scopes_succeeds_with_no_scopes()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = null!;
+
+        var result = await admin.CreateAsync(config, _ct);
+        result.IsSuccess.ShouldBeTrue($"Create failed: {result}");
+
+        var getResult = await admin.GetByEntityIdAsync(config.EntityId, _ct);
+        getResult.Found.ShouldBeTrue();
+        getResult.Item!.AllowedScopes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task update_with_null_allowed_scopes_succeeds_with_no_scopes()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var createResult = await admin.CreateAsync(CreateMinimalConfig(), _ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var update = new UpdateSamlServiceProvider
+        {
+            EntityId = (await admin.GetAsync(createResult.Id!, _ct)).Item!.EntityId,
+            AssertionConsumerServiceUrls =
+            [
+                new SamlIndexedEndpointConfiguration
+                {
+                    Location = "https://sp.example.com/acs",
+                    Binding = SamlBinding.HttpPost,
+                    Index = 0,
+                    IsDefault = true
+                }
+            ],
+            AllowedScopes = null!
+        };
+
+        var updateResult = await admin.UpdateAsync(createResult.Id!, update, (DataVersion)1, _ct);
+        updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
+
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
+        getResult.Found.ShouldBeTrue();
+        getResult.Item!.AllowedScopes.ShouldBeEmpty();
     }
 
     [Fact]
@@ -205,7 +250,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "invalid_value");
+        result.Errors!.ShouldContain(e => e.Code == "invalid_value");
     }
 
     [Fact]
@@ -229,7 +274,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "invalid_value");
+        result.Errors!.ShouldContain(e => e.Code == "invalid_value");
     }
 
     [Fact]
@@ -244,7 +289,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "invalid_value");
+        result.Errors!.ShouldContain(e => e.Code == "invalid_value");
     }
 
     [Fact]
@@ -256,7 +301,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "invalid_value");
+        result.Errors!.ShouldContain(e => e.Code == "invalid_value");
     }
 
     [Fact]
@@ -268,7 +313,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.CreateAsync(config, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "invalid_value");
+        result.Errors!.ShouldContain(e => e.Code == "invalid_value");
     }
 
     // === Update ===
@@ -282,20 +327,20 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item.ToUpdate();
+        var loaded = getResult.Item!.ToUpdate();
         loaded.DisplayName = "Updated Name";
         loaded.AllowIdpInitiated = true;
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, loaded, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, loaded, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue();
 
-        var reloaded = await admin.GetAsync(createResult.Id, _ct);
-        reloaded.Item.ShouldNotBeNull();
-        reloaded.Item.DisplayName.ShouldBe("Updated Name");
-        reloaded.Item.AllowIdpInitiated.ShouldBeTrue();
+        var reloaded = await admin.GetAsync(createResult.Id!, _ct);
+        reloaded.Item!.ShouldNotBeNull();
+        reloaded.Item!.DisplayName.ShouldBe("Updated Name");
+        reloaded.Item!.AllowIdpInitiated.ShouldBeTrue();
     }
 
     [Fact]
@@ -307,16 +352,16 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
-        var loaded = getResult.Item.ToUpdate();
+        var loaded = getResult.Item!.ToUpdate();
         loaded.ShouldNotBeNull();
         loaded.DisplayName = "V1";
 
         var staleVersion = (DataVersion)999;
-        var updateResult = await admin.UpdateAsync(createResult.Id, loaded, staleVersion, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, loaded, staleVersion, _ct);
         updateResult.IsSuccess.ShouldBeFalse();
-        updateResult.Errors.ShouldContain(e => e.Code == "version_conflict");
+        updateResult.Errors!.ShouldContain(e => e.Code == "version_conflict");
     }
 
     [Fact]
@@ -341,7 +386,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var result = await admin.UpdateAsync(Guid.CreateVersion7(), config, (DataVersion)1, _ct);
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Code == "not_found");
+        result.Errors!.ShouldContain(e => e.Code == "not_found");
     }
 
     // === Delete ===
@@ -355,11 +400,142 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var deleteResult = await admin.DeleteAsync(createResult.Id, _ct);
+        var deleteResult = await admin.DeleteAsync(createResult.Id!, _ct);
         deleteResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeFalse();
+    }
+
+    // === Allowed scope resolution ===
+
+    [Fact]
+    public async Task create_with_unknown_scope_name_returns_validation_error()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = ["does_not_exist"];
+
+        var result = await admin.CreateAsync(config, _ct);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.ShouldNotBeNull();
+        result.Errors.ShouldContain(e => e.Code == "invalid_value" && e.PropertyNames != null && e.PropertyNames.Contains("AllowedScopes"));
+    }
+
+    [Fact]
+    public async Task create_with_api_scope_name_returns_validation_error_saying_identity_resources_only()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var apiScopeName = $"scope_{Guid.NewGuid():N}";
+        (await _fixture.ApiScopeAdmin.CreateAsync(new Duende.IdentityServer.Admin.ApiScopes.CreateApiScope { Name = apiScopeName }, _ct))
+            .IsSuccess.ShouldBeTrue();
+
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = [apiScopeName];
+
+        var result = await admin.CreateAsync(config, _ct);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.ShouldNotBeNull();
+        result.Errors.ShouldContain(e => e.Code == "invalid_value"
+            && e.PropertyNames != null && e.PropertyNames.Contains("AllowedScopes")
+            && e.Message.Contains("identity resources", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task create_with_allowed_scope_naming_an_identity_resource_succeeds()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var identityResourceName = $"idres_{Guid.NewGuid():N}";
+        (await _fixture.IdentityResourceAdmin.CreateAsync(
+            new Duende.IdentityServer.Admin.IdentityResources.CreateIdentityResource { Name = identityResourceName }, _ct))
+            .IsSuccess.ShouldBeTrue();
+
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = [identityResourceName];
+
+        var result = await admin.CreateAsync(config, _ct);
+
+        result.IsSuccess.ShouldBeTrue($"Create failed: {result}");
+    }
+
+    [Fact]
+    public async Task renaming_an_identity_resource_is_reflected_in_saml_sp_get_and_store()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var oldName = $"idres_{Guid.NewGuid():N}";
+        var newName = $"idres_renamed_{Guid.NewGuid():N}";
+
+        var createdResource = await _fixture.IdentityResourceAdmin.CreateAsync(
+            new Duende.IdentityServer.Admin.IdentityResources.CreateIdentityResource { Name = oldName }, _ct);
+        createdResource.IsSuccess.ShouldBeTrue();
+
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = [oldName];
+        var createResult = await admin.CreateAsync(config, _ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var resourceGet = await _fixture.IdentityResourceAdmin.GetAsync(createdResource.Id!, _ct);
+        resourceGet.Found.ShouldBeTrue();
+        var resourceUpdate = resourceGet.Item!.ToUpdate();
+        resourceUpdate.Name = newName;
+        var renameResult = await _fixture.IdentityResourceAdmin.UpdateAsync(createdResource.Id!, resourceUpdate, resourceGet.Version!, _ct);
+        renameResult.IsSuccess.ShouldBeTrue($"Rename failed: {renameResult}");
+
+        var spGet = await admin.GetAsync(createResult.Id!, _ct);
+        spGet.Found.ShouldBeTrue();
+        spGet.Item!.AllowedScopes.ShouldBe([newName]);
+
+        var fromStore = await _fixture.SamlServiceProviderStore.FindByEntityIdAsync(config.EntityId, _ct);
+        fromStore.ShouldNotBeNull();
+        fromStore!.AllowedScopes.ShouldBe(new HashSet<string> { newName });
+    }
+
+    [Fact]
+    public async Task deleting_an_identity_resource_allowed_by_a_saml_sp_is_refused_naming_the_sp()
+    {
+        var resourceName = $"idres_{Guid.NewGuid():N}";
+        var createdResource = await _fixture.IdentityResourceAdmin.CreateAsync(
+            new Duende.IdentityServer.Admin.IdentityResources.CreateIdentityResource { Name = resourceName }, _ct);
+        createdResource.IsSuccess.ShouldBeTrue();
+
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = [resourceName];
+        var createResult = await _fixture.SamlServiceProviderAdmin.CreateAsync(config, _ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var deleteResult = await _fixture.IdentityResourceAdmin.DeleteAsync(createdResource.Id!, _ct);
+
+        deleteResult.IsSuccess.ShouldBeFalse();
+        deleteResult.Errors.ShouldNotBeNull();
+        deleteResult.Errors.ShouldContain(e => e.Code == "validation_failed" && e.Message.Contains(config.EntityId, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task list_reports_allowed_scope_count()
+    {
+        var admin = _fixture.SamlServiceProviderAdmin;
+        var identityResourceName1 = $"idres_{Guid.NewGuid():N}";
+        var identityResourceName2 = $"idres_{Guid.NewGuid():N}";
+
+        (await _fixture.IdentityResourceAdmin.CreateAsync(
+            new Duende.IdentityServer.Admin.IdentityResources.CreateIdentityResource { Name = identityResourceName1 }, _ct))
+            .IsSuccess.ShouldBeTrue();
+        (await _fixture.IdentityResourceAdmin.CreateAsync(
+            new Duende.IdentityServer.Admin.IdentityResources.CreateIdentityResource { Name = identityResourceName2 }, _ct))
+            .IsSuccess.ShouldBeTrue();
+
+        var config = CreateMinimalConfig();
+        config.AllowedScopes = [identityResourceName1, identityResourceName2];
+        var createResult = await admin.CreateAsync(config, _ct);
+        createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
+
+        var result = await admin.QueryAsync(
+            QueryRequest.Create<SamlServiceProviderFilter, SamlServiceProviderSortField>(new SamlServiceProviderFilter { EntityId = config.EntityId }), _ct);
+
+        var listItem = result.Results.ShouldHaveSingleItem();
+        listItem.AllowedScopeCount.ShouldBe(2);
     }
 
     // === Query ===
@@ -381,7 +557,7 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
 
         var request = QueryRequest.Create<SamlServiceProviderFilter, SamlServiceProviderSortField>();
         var result = await admin.QueryAsync(request, _ct);
-        result.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
+        result.Results.Count.ShouldBeGreaterThanOrEqualTo(2);
     }
 
     // === Certificate handling ===
@@ -401,10 +577,10 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
-        getResult.Item.ShouldNotBeNull();
-        var cert = getResult.Item.Certificates![0];
-        cert.Id.ShouldNotBe(Guid.Empty);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
+        getResult.Item!.ShouldNotBeNull();
+        var cert = getResult.Item!.Certificates![0];
+        cert.Id!.ShouldNotBe(Guid.Empty);
         cert.Base64Data.ShouldNotBeNullOrEmpty();
         cert.Subject.ShouldNotBeNullOrEmpty();
         cert.Thumbprint.ShouldNotBeNullOrEmpty();
@@ -433,9 +609,9 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
-        getResult.Item.ShouldNotBeNull();
-        var storedBase64 = getResult.Item.Certificates![0].Base64Data;
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
+        getResult.Item!.ShouldNotBeNull();
+        var storedBase64 = getResult.Item!.Certificates![0].Base64Data;
 
         // Verify the stored cert can be loaded and contains no private key
         var storedBytes = Convert.FromBase64String(storedBase64);
@@ -459,9 +635,9 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(config, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
-        getResult.Item.ShouldNotBeNull();
-        var loaded = getResult.Item.ToUpdate();
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
+        getResult.Item!.ShouldNotBeNull();
+        var loaded = getResult.Item!.ToUpdate();
 
         // Replace with a different cert
         loaded.Certificates =
@@ -469,12 +645,12 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
             new SamlCertificateInput { Base64Data = cert2, Use = KeyUse.Encryption }
         ];
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, loaded, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, loaded, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue();
 
-        var reloaded = await admin.GetAsync(createResult.Id, _ct);
+        var reloaded = await admin.GetAsync(createResult.Id!, _ct);
         reloaded.Item!.Certificates!.Count.ShouldBe(1);
-        reloaded.Item.Certificates[0].Use.ShouldBe(KeyUse.Encryption);
+        reloaded.Item!.Certificates[0].Use.ShouldBe(KeyUse.Encryption);
     }
 
     // === M-3: Update to existing entity ID returns AlreadyExists ===
@@ -492,15 +668,15 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         result2.IsSuccess.ShouldBeTrue();
 
         // Try to update SP2's entity ID to match SP1's
-        var getResult = await admin.GetAsync(result2.Id, _ct);
+        var getResult = await admin.GetAsync(result2.Id!, _ct);
         getResult.Found.ShouldBeTrue();
-        var loaded = getResult.Item.ToUpdate();
+        var loaded = getResult.Item!.ToUpdate();
         loaded.ShouldNotBeNull();
         loaded.EntityId = config1.EntityId;
 
-        var updateResult = await admin.UpdateAsync(result2.Id, loaded, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(result2.Id!, loaded, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeFalse();
-        updateResult.Errors.ShouldContain(e => e.Code == "already_exists");
+        updateResult.Errors!.ShouldContain(e => e.Code == "already_exists");
     }
 
     // === M-4: GetByEntityId not found ===
@@ -540,17 +716,21 @@ public sealed class SamlServiceProviderAdminTests : IAsyncLifetime
         var result2 = await admin.CreateAsync(config2, _ct);
         result2.IsSuccess.ShouldBeTrue();
 
-        var get1 = await admin.GetAsync(result1.Id, _ct);
-        get1.Item.ShouldNotBeNull();
-        var get2 = await admin.GetAsync(result2.Id, _ct);
-        get2.Item.ShouldNotBeNull();
+        var get1 = await admin.GetAsync(result1.Id!, _ct);
+        get1.Item!.ShouldNotBeNull();
+        var get2 = await admin.GetAsync(result2.Id!, _ct);
+        get2.Item!.ShouldNotBeNull();
 
         // Same input cert produces identical normalized output
-        get1.Item.Certificates![0].Base64Data.ShouldBe(get2.Item.Certificates![0].Base64Data);
-        get1.Item.Certificates[0].Thumbprint.ShouldBe(get2.Item.Certificates[0].Thumbprint);
+        get1.Item!.Certificates![0].Base64Data.ShouldBe(get2.Item!.Certificates![0].Base64Data);
+        get1.Item!.Certificates[0].Thumbprint.ShouldBe(get2.Item!.Certificates[0].Thumbprint);
     }
 
-    public ValueTask InitializeAsync() => _fixture.InitializeAsync();
+    public async ValueTask InitializeAsync()
+    {
+        await _fixture.InitializeAsync();
+        await _fixture.EnsureIdentityResourcesAsync("openid", "profile");
+    }
 
     public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

@@ -12,8 +12,7 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
         AppHostServices.TemplateIs,
         AppHostServices.TemplateIsEmpty,
         AppHostServices.TemplateIsInMem,
-        AppHostServices.TemplateIsAspid,
-        AppHostServices.TemplateIsEF
+        AppHostServices.TemplateIsAspid
     ];
 
     public Uri UrlTo(string clientName)

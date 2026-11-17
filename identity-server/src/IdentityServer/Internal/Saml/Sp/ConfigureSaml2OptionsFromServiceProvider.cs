@@ -58,6 +58,7 @@ internal sealed class ConfigureSaml2OptionsFromServiceProvider : IConfigureNamed
 
         var spOptions = _spOptionsMonitor.Get(_scheme);
 
+        options.SPOptions.TimeProvider = _timeProvider;
         options.SPOptions.ModulePath = string.IsNullOrWhiteSpace(spOptions.ModulePath)
             ? SamlServiceProviderDefaults.ModulePath
             : spOptions.ModulePath;
@@ -75,6 +76,7 @@ internal sealed class ConfigureSaml2OptionsFromServiceProvider : IConfigureNamed
         }
 
         options.SPOptions.MaxRelayStateLength = spOptions.MaxRelayStateLength;
+        options.SPOptions.MaxXmlNestingDepth = spOptions.MaxXmlNestingDepth;
 
         options.SPOptions.AuthenticateRequestSigningBehavior = AuthnRequestSigningBehaviorMapper.Map(spOptions.AuthnRequestSigningBehavior);
 

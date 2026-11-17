@@ -43,7 +43,7 @@ public sealed class AutomaticTokenManagement : IScenario
     /// <summary>Advance the shared clock. All hosts see the same time.</summary>
     public void AdvanceTime(TimeSpan duration) => TimeProvider.Advance(duration);
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         var fakeTime = TimeProvider;
 
@@ -127,7 +127,7 @@ public sealed class AutomaticTokenManagement : IScenario
         Links = [_identityServer.Link, _webApp.Link, _api.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {

@@ -3,7 +3,7 @@
 
 using System.Text.Json;
 using Duende.IdentityServer.Admin.ApiResources;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace IdentityServer.UnitTests.Admin;
 

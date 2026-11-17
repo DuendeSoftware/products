@@ -59,7 +59,7 @@ public sealed class SamlReturnUrlParserTests
     [Fact]
     public async Task ParseAsync_ReturnsNullForNonSamlUrl()
     {
-        var result = await _subject.ParseAsync("/connect/authorize/callback", CancellationToken.None);
+        var result = await _subject.ParseAsync("/connect/authorize/callback", Ct.None);
         result.ShouldBeNull();
     }
 
@@ -67,7 +67,7 @@ public sealed class SamlReturnUrlParserTests
     public async Task ParseAsync_ReturnsNullWhenStateNotFound()
     {
         var url = "/Saml2/SSO/Callback?samlStateId=" + Guid.NewGuid();
-        var result = await _subject.ParseAsync(url, CancellationToken.None);
+        var result = await _subject.ParseAsync(url, Ct.None);
         result.ShouldBeNull();
     }
 
@@ -80,7 +80,7 @@ public sealed class SamlReturnUrlParserTests
             AssertionConsumerService = DefaultAcs
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         result.ShouldNotBeNull();
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
@@ -97,7 +97,7 @@ public sealed class SamlReturnUrlParserTests
             AuthnRequestData = new StoredAuthnRequestData { ForceAuthn = true }
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
         samlResult.PromptModes.ShouldContain("login");
@@ -113,7 +113,7 @@ public sealed class SamlReturnUrlParserTests
             AuthnRequestData = new StoredAuthnRequestData { IsPassive = true }
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
         samlResult.PromptModes.ShouldContain("none");
@@ -135,7 +135,7 @@ public sealed class SamlReturnUrlParserTests
             AuthnRequestData = authnContext
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
         samlResult.Tenant.ShouldBe("acme");
@@ -151,7 +151,7 @@ public sealed class SamlReturnUrlParserTests
             AuthnRequestData = new StoredAuthnRequestData { IdpHintProviderId = "https://idp.example.com" }
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
         samlResult.IdP.ShouldBe("https://idp.example.com");
@@ -170,7 +170,7 @@ public sealed class SamlReturnUrlParserTests
             }
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
         samlResult.LoginHint.ShouldBe("alice@example.com");
@@ -187,7 +187,7 @@ public sealed class SamlReturnUrlParserTests
             AuthnRequestData = null
         });
 
-        var result = await _subject.ParseAsync(CallbackUrl(stateId), CancellationToken.None);
+        var result = await _subject.ParseAsync(CallbackUrl(stateId), Ct.None);
 
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();
         samlResult.IdP.ShouldBeNull();
@@ -201,7 +201,7 @@ public sealed class SamlReturnUrlParserTests
     {
         state.CreatedUtc = DateTimeOffset.UtcNow;
         state.ExpiresAtUtc = DateTime.UtcNow.AddMinutes(15);
-        return await _stateStore.StoreSigninRequestStateAsync(state, CancellationToken.None);
+        return await _stateStore.StoreSigninRequestStateAsync(state, Ct.None);
     }
 
     private static string CallbackUrl(Guid stateId) =>
@@ -256,7 +256,7 @@ public sealed class SamlReturnUrlParserTests
         });
 
         var url = $"https://idp.example.com/Saml2/SSO/Callback?samlStateId={stateId}";
-        var result = await parser.ParseAsync(url, CancellationToken.None);
+        var result = await parser.ParseAsync(url, Ct.None);
 
         result.ShouldNotBeNull();
         var samlResult = result.ShouldBeOfType<SamlAuthenticationContext>();

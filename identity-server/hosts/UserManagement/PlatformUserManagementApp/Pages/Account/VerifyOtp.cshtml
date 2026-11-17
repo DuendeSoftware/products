@@ -1,0 +1,48 @@
+@page
+@model PlatformUserManagementApp.Pages.Account.VerifyOtpModel
+@{
+    ViewData["Title"] = "Verify OTP";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-2 brand-title text-center">Check your email</h2>
+            @if (Model.Email is not null)
+            {
+                <p class="text-muted text-center mb-4">
+                    We sent a one-time password to <strong>@Model.Email</strong>.
+                </p>
+            }
+
+            @if (Model.ErrorMessages.Count > 0)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @foreach (var error in Model.ErrorMessages)
+                    {
+                        <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+                    }
+                </div>
+            }
+
+            <form method="post">
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="mb-4">
+                    <label asp-for="Otp" class="form-label">One-time password</label>
+                    <input asp-for="Otp" class="form-control form-control-lg text-center"
+                           autocomplete="one-time-code" maxlength="9" autofocus />
+                    <span asp-validation-for="Otp" class="text-danger small"></span>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Verify
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

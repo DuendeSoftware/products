@@ -1,0 +1,151 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Duende.IdentityServer;
+using Duende.Storage;
+using Duende.IdentityServer.DataExtensions.Internal;
+using Duende.Storage.Internal;
+using Duende.Storage.Schema;
+using Duende.Storage.Sqlite;
+using Duende.UserManagement.Authentication;
+using Duende.UserManagement.Authentication.Otp;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+namespace Duende.UserManagement;
+#pragma warning restore IDE0130
+
+public sealed class UsersServiceProviderFactory
+{
+    public static async Task<ServiceProvider> CreateAsync() => await CreateAsync(false);
+
+    public static async Task<ServiceProvider> CreateAsync(bool addDataProtection) =>
+        await CreateUsersBuilderAsync(null, addDataProtection);
+
+    public static async Task<ServiceProvider> CreateAsync(Action<IUserManagementBuilder> configureBuilder) =>
+        await CreateUsersBuilderAsync(
+            configureOptions: null,
+            addDataProtection: false,
+            configureBuilder: configureBuilder);
+
+
+    public static async Task<ServiceProvider> CreateAsync(Action<IServiceCollection> configureServices, Action<IUserManagementBuilder> configureBuilder) =>
+        await CreateUsersBuilderAsync(
+            configureOptions: null,
+            addDataProtection: false,
+            configureServices: configureServices,
+            configureBuilder: configureBuilder);
+
+    public static async Task<ServiceProvider> CreateWithOptionsAsync(Action<UserAuthenticationOptions> configureOptions) =>
+        await CreateWithOptionsAsync(configureOptions, false);
+
+    public static async Task<ServiceProvider> CreateWithOptionsAsync(Action<UserAuthenticationOptions> configureOptions, bool addDataProtection)
+    {
+        var sp = await CreateUsersBuilderAsync(configureOptions, addDataProtection);
+        return sp;
+    }
+
+    public static async Task<ServiceProvider> CreateUsersBuilderAsync(
+        Action<UserAuthenticationOptions>? configureOptions,
+        bool addDataProtection,
+        Action<IServiceCollection>? configureServices = null,
+        Action<IUserManagementBuilder>? configureBuilder = null,
+        Guid? dbId = null)
+    {
+        var services = CreateUsersBuilder(configureOptions,
+            addDataProtection,
+            dbId: dbId,
+            configureServices: configureServices,
+            configureBuilder: configureBuilder);
+
+        var sp = services.BuildServiceProvider();
+        await sp.GetRequiredService<IStorageInstanceSchema>().MigrateAsync(Ct.None);
+        return sp;
+    }
+
+    public static IServiceCollection CreateUsersBuilder(
+        Action<UserAuthenticationOptions>? configureOptions,
+        bool addDataProtection,
+        Action<IUserManagementBuilder>? configureBuilder = null,
+        Action<IServiceCollection>? configureServices = null,
+        Guid? dbId = null,
+        IServiceCollection? services = null)
+    {
+        services ??= new ServiceCollection();
+
+        dbId ??= Guid.NewGuid();
+        _ = services
+            .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
+            .AddLogging()
+            .AddSingleton(new FakeTimeProvider())
+            .AddSingleton<TimeProvider>(provider => provider.GetRequiredService<FakeTimeProvider>())
+            .AddSingleton(new FakeOtpDispatcher())
+            .AddSingleton<IOtpDispatcher>(provider => provider.GetRequiredService<FakeOtpDispatcher>());
+
+        _ = services.AddStorageInternal(storage => storage.AddSqliteInMemory(dbId.Value.ToString()));
+        // These tests create their profile schema at runtime through ISchemaAdmin.
+        services.AddDynamicSchemaStorage();
+        _ = services.AddIdentityServerBuilder().AddUserManagement(StorageInstanceId.Default, users =>
+        {
+            configureBuilder?.Invoke(users);
+
+            // modules registered unconditionally by AddUserManagement
+        });
+
+        _ = services.Configure<UserAuthenticationOptions>(options =>
+        {
+            options.Passkeys.ServerDomain = "example.com";
+            options.Passkeys.AllowedOrigins = ["https://example.com"];
+        });
+
+        if (configureOptions != null)
+        {
+            _ = services.Configure(configureOptions);
+        }
+
+        if (addDataProtection)
+        {
+            _ = services.AddDataProtection();
+        }
+        else
+        {
+            _ = services.AddSingleton<IDataProtectionProvider, NoopDataProtectionProvider>();
+        }
+
+        configureServices?.Invoke(services);
+
+        // Register last so the spy wraps the router as finally configured by configureServices.
+        _ = DataCategoryNameRecorder.RegisterAsSpy(services);
+
+        return services;
+    }
+}
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+internal sealed class NoopDataProtectionProvider : IDataProtectionProvider
+{
+    public IDataProtector CreateProtector(string purpose) => new NoopDataProtector();
+
+    private sealed class NoopDataProtector : IDataProtector
+    {
+        public IDataProtector CreateProtector(string purpose) => new NoopDataProtector();
+
+        public byte[] Protect(byte[] plaintext) => plaintext;
+
+        public byte[] Unprotect(byte[] protectedData) => protectedData;
+    }
+}
+
+public static class ServicesCollectionExtensions
+{
+    extension(IServiceCollection services)
+    {
+        public IServiceCollection DisableDataProtection()
+        {
+            _ = services.AddSingleton<IDataProtectionProvider, NoopDataProtectionProvider>();
+
+            return services;
+        }
+    }
+}

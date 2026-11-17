@@ -6,8 +6,6 @@
 using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.Models;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores.Storage.Clients;
@@ -26,7 +24,12 @@ internal sealed class ClientStore(
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
 
         var result = await repository.TryReadByClientIdAsync(clientId, ct);
-        var model = result is null ? null : MapToClient(result.Value.Dso);
+        Client? model = null;
+        if (result is not null)
+        {
+            var scopeNames = await repository.GetAllowedScopeNamesAsync(result.Value.Dso.Id, ct);
+            model = MapToClient(result.Value.Dso, scopeNames);
+        }
 
         logger.ClientFound(LogLevel.Debug, clientId, model != null);
 
@@ -43,14 +46,16 @@ internal sealed class ClientStore(
 
         while (true)
         {
-            var range = DataRange.FromPage(pageNumber, PageSize);
-            var request = QueryRequest.Create<ClientFilter, ClientSortField>(range);
+            var range = StorageDataRange.FromPage(pageNumber, PageSize);
+            var request = StorageQueryRequest.Create<ClientFilter, ClientSortField>(range);
             var result = await repository.QueryAsync(request, ct);
+
+            var scopeNamesByClient = await repository.GetAllowedScopeNamesByClientIdsAsync(result.Items.Select(dso => dso.Id), ct);
 
             foreach (var dso in result.Items)
             {
                 clientCount++;
-                yield return MapToClient(dso);
+                yield return MapToClient(dso, scopeNamesByClient.GetValueOrDefault(dso.Id) ?? []);
             }
 
             if (!result.HasMoreData)
@@ -64,7 +69,7 @@ internal sealed class ClientStore(
         logger.ClientsRetrieved(LogLevel.Debug, clientCount);
     }
 
-    private static Client MapToClient(ClientDso.V1 dso) => new()
+    private static Client MapToClient(ClientDso.V1 dso, List<string> allowedScopeNames) => new()
     {
         // Identity
         Enabled = dso.Enabled,
@@ -137,7 +142,7 @@ internal sealed class ClientStore(
 
         // Collections
         AllowedGrantTypes = new List<string>(dso.AllowedGrantTypes),
-        AllowedScopes = new List<string>(dso.AllowedScopes),
+        AllowedScopes = allowedScopeNames,
         RedirectUris = new List<string>(dso.RedirectUris),
         PostLogoutRedirectUris = new List<string>(dso.PostLogoutRedirectUris),
         AllowedIdentityTokenSigningAlgorithms = new HashSet<string>(dso.AllowedIdentityTokenSigningAlgorithms),

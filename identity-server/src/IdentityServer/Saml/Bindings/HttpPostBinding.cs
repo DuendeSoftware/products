@@ -77,7 +77,7 @@ public class HttpPostBinding : FrontChannelBinding
         }
 
         var xml = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
-        var xd = SecureXmlParser.LoadXmlDocument(xml, _options.Saml.MaxMessageSize);
+        var xd = SecureXmlParser.LoadXmlDocument(xml, _options.Saml.MaxMessageSize, _options.Saml.MaxXmlNestingDepth);
 
         var relayState = httpRequest.Form[SamlConstants.RequestProperties.RelayState].SingleOrDefault();
         if (relayState != null && Encoding.UTF8.GetByteCount(relayState) > _options.Saml.MaxRelayStateLength)

@@ -3,10 +3,12 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Admin.ApiResources;
 using Duende.IdentityServer.Admin.ApiScopes;
 using Duende.Storage;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+
+using Duende.IdentityServer.Models;
+using DataVersion = Duende.IdentityServer.Models.DataVersion;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -34,10 +36,10 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(apiScope, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.Name.ShouldBe(apiScope.Name);
         loaded.DisplayName.ShouldBe(apiScope.DisplayName);
         loaded.Description.ShouldBe(apiScope.Description);
@@ -65,8 +67,8 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
 
         var getResult = await admin.GetByNameAsync(name, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.Name.ShouldBe(name);
-        getResult.Item.DisplayName.ShouldBe("ByName Test");
+        getResult.Item!.Name.ShouldBe(name);
+        getResult.Item!.DisplayName.ShouldBe("ByName Test");
     }
 
     [Fact]
@@ -78,9 +80,9 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var result = await admin.CreateAsync(apiScope, _ct);
 
         result.IsSuccess.ShouldBeTrue($"Create failed: {result}");
-        result.Id.Value.ShouldNotBe(Guid.Empty);
-        result.Version.ShouldNotBeNull();
-        result.Version.Value.ShouldBe(1);
+        result.Id!.Value.ShouldNotBe(Guid.Empty);
+        result.Version!.ShouldNotBeNull();
+        result.Version!.Value.ShouldBe(1);
     }
 
     [Fact]
@@ -95,7 +97,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var second = await admin.CreateAsync(new CreateApiScope { Name = name }, _ct);
         second.IsSuccess.ShouldBeFalse();
         second.Errors.ShouldNotBeNull();
-        second.Errors.ShouldContain(e => e.Code == "already_exists");
+        second.Errors!.ShouldContain(e => e.Code == "already_exists");
     }
 
     [Fact]
@@ -112,22 +114,22 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(apiScope, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.DisplayName = "Updated";
         toUpdate.Description = "Updated description";
         toUpdate.Enabled = false;
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.DisplayName.ShouldBe("Updated");
-        afterUpdate.Item.Description.ShouldBe("Updated description");
-        afterUpdate.Item.Enabled.ShouldBeFalse();
+        afterUpdate.Item!.DisplayName.ShouldBe("Updated");
+        afterUpdate.Item!.Description.ShouldBe("Updated description");
+        afterUpdate.Item!.Enabled.ShouldBeFalse();
     }
 
     [Fact]
@@ -139,15 +141,15 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(apiScope, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
         var wrongVersion = (DataVersion)999;
-        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item.ToUpdate(), wrongVersion, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, getResult.Item!.ToUpdate(), wrongVersion, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
-        updateResult.Errors.ShouldContain(e => e.Code == "version_conflict");
+        updateResult.Errors!.ShouldContain(e => e.Code == "version_conflict");
     }
 
     [Fact]
@@ -161,7 +163,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "not_found");
+        result.Errors!.ShouldContain(e => e.Code == "not_found");
     }
 
     [Fact]
@@ -175,14 +177,14 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var createB = await admin.CreateAsync(new CreateApiScope { Name = nameB }, _ct);
         createB.IsSuccess.ShouldBeTrue();
 
-        var getB = await admin.GetAsync(createB.Id, _ct);
+        var getB = await admin.GetAsync(createB.Id!, _ct);
         getB.Found.ShouldBeTrue();
-        var configB = getB.Item.ToUpdate();
+        var configB = getB.Item!.ToUpdate();
         configB.Name = nameA; // rename B to A's name
 
-        var updateResult = await admin.UpdateAsync(createB.Id, configB, getB.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createB.Id!, configB, getB.Version!, _ct);
         updateResult.IsSuccess.ShouldBeFalse();
-        updateResult.Errors.ShouldContain(e => e.Code == "already_exists");
+        updateResult.Errors!.ShouldContain(e => e.Code == "already_exists");
     }
 
     [Fact]
@@ -194,10 +196,10 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(apiScope, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var deleteResult = await admin.DeleteAsync(createResult.Id, _ct);
+        var deleteResult = await admin.DeleteAsync(createResult.Id!, _ct);
         deleteResult.IsSuccess.ShouldBeTrue($"Delete failed: {deleteResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeFalse();
     }
 
@@ -211,7 +213,7 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "required" && e.PropertyNames != null && e.PropertyNames.Contains("Name"));
+        result.Errors!.ShouldContain(e => e.Code == "required" && e.PropertyNames != null && e.PropertyNames.Contains("Name"));
     }
 
     [Fact]
@@ -229,8 +231,8 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
                 new ApiScopeFilter { Name = uniquePart }),
             _ct);
 
-        result.Items.ShouldAllBe(s => s.Name.Contains(uniquePart));
-        result.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
+        result.Results.ShouldAllBe(s => s.Name.Contains(uniquePart));
+        result.Results.Count.ShouldBeGreaterThanOrEqualTo(2);
     }
 
     [Fact]
@@ -248,8 +250,8 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
                 new ApiScopeFilter { Name = enabledName, Enabled = true }),
             _ct);
 
-        enabledResult.Items.ShouldContain(s => s.Name == enabledName);
-        enabledResult.Items.ShouldNotContain(s => s.Name == disabledName);
+        enabledResult.Results.ShouldContain(s => s.Name == enabledName);
+        enabledResult.Results.ShouldNotContain(s => s.Name == disabledName);
     }
 
     [Fact]
@@ -266,22 +268,116 @@ public sealed class ApiScopeAdminTests : IAsyncLifetime
         var page1 = await admin.QueryAsync(
             QueryRequest.Create<ApiScopeFilter, ApiScopeSortField>(
                 new ApiScopeFilter { Name = prefix },
-                (DataRange)DataRange.FromPage(1, (DataRangeSize)2)),
+                DataRange.FromPage(1, 2)),
             _ct);
 
-        page1.Items.Count.ShouldBe(2);
+        page1.Results.Count.ShouldBe(2);
 
         var page2 = await admin.QueryAsync(
             QueryRequest.Create<ApiScopeFilter, ApiScopeSortField>(
                 new ApiScopeFilter { Name = prefix },
-                (DataRange)DataRange.FromPage(2, (DataRangeSize)2)),
+                DataRange.FromPage(2, 2)),
             _ct);
 
-        page2.Items.Count.ShouldBe(2);
+        page2.Results.Count.ShouldBe(2);
 
-        var page1Ids = page1.Items.Select(s => s.Id).ToHashSet();
-        var page2Ids = page2.Items.Select(s => s.Id).ToHashSet();
+        var page1Ids = page1.Results.Select(s => s.Id!).ToHashSet();
+        var page2Ids = page2.Results.Select(s => s.Id!).ToHashSet();
         page1Ids.Intersect(page2Ids).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task renaming_scope_renames_it_on_api_resources_that_use_it()
+    {
+        var admin = _fixture.ApiScopeAdmin;
+        var originalName = $"scope_{Guid.NewGuid():N}";
+        var newName = $"scope_{Guid.NewGuid():N}";
+        var createScope = await admin.CreateAsync(new CreateApiScope { Name = originalName }, _ct);
+        createScope.IsSuccess.ShouldBeTrue();
+        var createResource = await _fixture.ApiResourceAdmin.CreateAsync(
+            new CreateApiResource { Name = $"api_{Guid.NewGuid():N}", Scopes = [originalName] },
+            _ct);
+        createResource.IsSuccess.ShouldBeTrue();
+
+        var scope = await admin.GetAsync(createScope.Id!, _ct);
+        var toUpdate = scope.Item!.ToUpdate();
+        toUpdate.Name = newName;
+        (await admin.UpdateAsync(createScope.Id!, toUpdate, scope.Version!, _ct)).IsSuccess.ShouldBeTrue();
+
+        var resource = await _fixture.ApiResourceAdmin.GetAsync(createResource.Id!, _ct);
+        resource.Item!.Scopes.ShouldBe([newName]);
+    }
+
+    [Fact]
+    public async Task deleting_scope_used_by_api_resource_is_refused()
+    {
+        var admin = _fixture.ApiScopeAdmin;
+        var scopeName = $"scope_{Guid.NewGuid():N}";
+        var resourceName = $"api_{Guid.NewGuid():N}";
+        var createScope = await admin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct);
+        createScope.IsSuccess.ShouldBeTrue();
+        var createResource = await _fixture.ApiResourceAdmin.CreateAsync(
+            new CreateApiResource { Name = resourceName, Scopes = [scopeName] },
+            _ct);
+        createResource.IsSuccess.ShouldBeTrue();
+
+        var deleteResult = await admin.DeleteAsync(createScope.Id!, _ct);
+
+        deleteResult.IsSuccess.ShouldBeFalse();
+        deleteResult.Errors!.ShouldContain(e => e.Code == "validation_failed" && e.Message.Contains(resourceName));
+        (await admin.GetAsync(createScope.Id!, _ct)).Found.ShouldBeTrue();
+        var resource = await _fixture.ApiResourceAdmin.GetAsync(createResource.Id!, _ct);
+        resource.Item!.Scopes.ShouldBe([scopeName]);
+    }
+
+    [Fact]
+    public async Task deleting_scope_succeeds_after_api_resources_stop_using_it()
+    {
+        var admin = _fixture.ApiScopeAdmin;
+        var scopeName = $"scope_{Guid.NewGuid():N}";
+        var createScope = await admin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct);
+        createScope.IsSuccess.ShouldBeTrue();
+        var resourceAdmin = _fixture.ApiResourceAdmin;
+        var createResource = await resourceAdmin.CreateAsync(
+            new CreateApiResource { Name = $"api_{Guid.NewGuid():N}", Scopes = [scopeName] },
+            _ct);
+        createResource.IsSuccess.ShouldBeTrue();
+        var resource = await resourceAdmin.GetAsync(createResource.Id!, _ct);
+        var toUpdate = resource.Item!.ToUpdate();
+        toUpdate.Scopes = [];
+        (await resourceAdmin.UpdateAsync(createResource.Id!, toUpdate, resource.Version!, _ct)).IsSuccess.ShouldBeTrue();
+
+        var deleteResult = await admin.DeleteAsync(createScope.Id!, _ct);
+
+        deleteResult.IsSuccess.ShouldBeTrue($"Delete failed: {deleteResult}");
+        (await admin.GetAsync(createScope.Id!, _ct)).Found.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task deleting_already_deleted_scope_is_idempotent()
+    {
+        var admin = _fixture.ApiScopeAdmin;
+        var scopeName = $"scope_{Guid.NewGuid():N}";
+        var createScope = await admin.CreateAsync(new CreateApiScope { Name = scopeName }, _ct);
+        createScope.IsSuccess.ShouldBeTrue();
+
+        (await admin.DeleteAsync(createScope.Id!, _ct)).IsSuccess.ShouldBeTrue();
+
+        // Deleting again, now that the scope is already gone, must still succeed (idempotent),
+        // relying on the database rather than a check-then-delete read.
+        var secondDelete = await admin.DeleteAsync(createScope.Id!, _ct);
+        secondDelete.IsSuccess.ShouldBeTrue($"Delete failed: {secondDelete}");
+    }
+
+    [Fact]
+    public async Task deleting_scope_that_never_existed_is_idempotent()
+    {
+        var admin = _fixture.ApiScopeAdmin;
+        ApiScopeId neverExisted = UuidV7.New().Value;
+
+        var deleteResult = await admin.DeleteAsync(neverExisted, _ct);
+
+        deleteResult.IsSuccess.ShouldBeTrue($"Delete failed: {deleteResult}");
     }
 
     public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();

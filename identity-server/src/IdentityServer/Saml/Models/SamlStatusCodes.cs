@@ -20,13 +20,13 @@ public static class SamlStatusCodes
     /// <summary>The SAML responder could not process the request because the version of the request message was incorrect.</summary>
     public const string VersionMismatch = "urn:oasis:names:tc:SAML:2.0:status:VersionMismatch";
 
-    /// <summary>The responding provider cannot authenticate the principal by means of the currently deployed authentication authority.</summary>
+    /// <summary>The specified authentication context requirements cannot be met by the responder.</summary>
     public const string NoAuthnContext = "urn:oasis:names:tc:SAML:2.0:status:NoAuthnContext";
 
     /// <summary>The authentication attempt failed.</summary>
     public const string AuthnFailed = "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed";
 
-    /// <summary>The responding provider cannot permit a subject confirmation based on the requirements of the requester.</summary>
+    /// <summary>The responding provider cannot or will not support the requested name identifier policy.</summary>
     public const string InvalidNameIdPolicy = "urn:oasis:names:tc:SAML:2.0:status:InvalidNameIDPolicy";
 
     /// <summary>The SAML responder or SAML authority is able to process the request but has chosen not to respond.</summary>

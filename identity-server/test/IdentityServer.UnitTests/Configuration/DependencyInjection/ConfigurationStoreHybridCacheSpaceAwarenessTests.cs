@@ -6,7 +6,6 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Stores;
 using Duende.Spaces;
-using Duende.Spaces.Internal;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,7 +32,7 @@ public class ConfigurationStoreHybridCacheSpaceAwarenessTests
 
     private static IServiceCollection AddSpacesWithFakeAccessor(IServiceCollection services)
     {
-        services.AddSpacesInternal();
+        services.AddIdentityServerBuilder().AddSpaces(_ => { });
 
         // Avoid the license-gated default accessor; the factory only needs an accessor instance.
         services.AddSingleton<ISpaceContextAccessor, FakeSpaceContextAccessor>();
@@ -184,10 +183,10 @@ public class ConfigurationStoreHybridCacheSpaceAwarenessTests
         public override ValueTask<T> GetOrCreateAsync<TState, T>(
             string key,
             TState state,
-            Func<TState, CancellationToken, ValueTask<T>> factory,
+            Func<TState, Ct, ValueTask<T>> factory,
             HybridCacheEntryOptions? options = null,
             IEnumerable<string>? tags = null,
-            CancellationToken cancellationToken = default)
+            Ct cancellationToken = default)
         {
             GetOrCreateCalls++;
             return factory(state, cancellationToken);
@@ -198,10 +197,10 @@ public class ConfigurationStoreHybridCacheSpaceAwarenessTests
             T value,
             HybridCacheEntryOptions? options = null,
             IEnumerable<string>? tags = null,
-            CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+            Ct cancellationToken = default) => ValueTask.CompletedTask;
 
-        public override ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+        public override ValueTask RemoveAsync(string key, Ct cancellationToken = default) => ValueTask.CompletedTask;
 
-        public override ValueTask RemoveByTagAsync(string tag, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+        public override ValueTask RemoveByTagAsync(string tag, Ct cancellationToken = default) => ValueTask.CompletedTask;
     }
 }

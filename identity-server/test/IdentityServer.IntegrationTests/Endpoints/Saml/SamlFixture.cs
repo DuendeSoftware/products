@@ -279,7 +279,7 @@ public class SamlFixture : IAsyncLifetime
     /// </summary>
     public void ClearServiceProvidersAsync() => _serviceProviders.Clear();
 
-    public async Task<string?> GetErrorMessage(Uri? requestMessageRequestUri, CancellationToken ct)
+    public async Task<string?> GetErrorMessage(Uri? requestMessageRequestUri, Ct ct)
     {
         requestMessageRequestUri.ShouldNotBeNull();
 
@@ -294,7 +294,7 @@ public class SamlFixture : IAsyncLifetime
         return error.Data.ErrorDescription;
     }
 
-    public async Task<string?> GetErrorFromRedirect(HttpResponseMessage response, CancellationToken ct)
+    public async Task<string?> GetErrorFromRedirect(HttpResponseMessage response, Ct ct)
     {
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Redirect);
         var location = response.Headers.Location;

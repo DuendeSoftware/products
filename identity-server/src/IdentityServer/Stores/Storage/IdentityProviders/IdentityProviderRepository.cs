@@ -12,9 +12,7 @@ using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
-using StorageSortDirection = Duende.Storage.Querying.SortDirection;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
 
@@ -53,7 +51,7 @@ internal sealed class IdentityProviderRepository(IPartitionedStorageFactory part
     {
         var partitionedStorage = await GetPartitionedStorage(ct);
         var result = await partitionedStorage.TryReadAsync(IdentityProviderDso.EntityType, UuidV7.From(id), ct);
-        return result.Found ? ((IdentityProviderDso.V1)result.Dso, result.Version.Value) : null;
+        return result.Found ? (IdentityProviderDso.ToCurrent(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(IdentityProviderDso.V1 Dso, int Version)?> TryReadBySchemeAsync(string scheme, Ct ct)
@@ -63,7 +61,7 @@ internal sealed class IdentityProviderRepository(IPartitionedStorageFactory part
             IdentityProviderDso.EntityType,
             DataStorageKey.Create(IdentityProviderSchemeDskV1.Create(scheme)),
             ct);
-        return result.Found ? ((IdentityProviderDso.V1)result.Dso, result.Version.Value) : null;
+        return result.Found ? (IdentityProviderDso.ToCurrent(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, IdentityProviderDso.V1 dso, int expectedVersion, Ct ct) =>
@@ -89,14 +87,14 @@ internal sealed class IdentityProviderRepository(IPartitionedStorageFactory part
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await partitionedStorage.QueryAsync<IdentityProviderDso.V1>(
+        var result = await partitionedStorage.QueryAsync(
             IdentityProviderDso.EntityType,
             filter,
             sort,
             range,
             ct);
 
-        return result.ConvertTo(e => e.Value);
+        return result.ConvertTo(e => IdentityProviderDso.ToCurrent(e.Value));
     }
 
     private static SearchFieldCollection BuildSearchFields(IdentityProviderDso.V1 dso)

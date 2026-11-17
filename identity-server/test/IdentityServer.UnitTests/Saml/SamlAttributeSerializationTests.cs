@@ -103,7 +103,7 @@ public sealed class SamlAttributeSerializationTests
 
         var doc = _writer.Write(response);
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var parsed = await _reader.ReadResponseAsync(traverser, CancellationToken.None);
+        var parsed = await _reader.ReadResponseAsync(traverser, Ct.None);
 
         var attribute = parsed.Assertions.Single().Attributes.Single();
         attribute.Name.ShouldBe("email");
@@ -123,7 +123,7 @@ public sealed class SamlAttributeSerializationTests
 
         var doc = _writer.Write(response);
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var parsed = await _reader.ReadResponseAsync(traverser, CancellationToken.None);
+        var parsed = await _reader.ReadResponseAsync(traverser, Ct.None);
 
         var attribute = parsed.Assertions.Single().Attributes.Single();
         attribute.Name.ShouldBe("urn:oid:0.9.2342.19200300.100.1.3");
@@ -142,7 +142,7 @@ public sealed class SamlAttributeSerializationTests
 
         var doc = _writer.Write(response);
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var parsed = await _reader.ReadResponseAsync(traverser, CancellationToken.None);
+        var parsed = await _reader.ReadResponseAsync(traverser, Ct.None);
 
         var attribute = parsed.Assertions.Single().Attributes.Single();
         attribute.NameFormat.ShouldBeNull();
@@ -271,7 +271,7 @@ public sealed class SamlAttributeSerializationTests
         var doc = new XmlDocument();
         doc.LoadXml(xml);
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var response = await _reader.ReadResponseAsync(traverser, CancellationToken.None);
+        var response = await _reader.ReadResponseAsync(traverser, Ct.None);
         return response.Assertions.Single().Attributes.Single();
     }
 }

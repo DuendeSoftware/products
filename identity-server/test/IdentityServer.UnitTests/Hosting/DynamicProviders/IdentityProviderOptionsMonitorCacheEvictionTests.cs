@@ -55,11 +55,32 @@ public class IdentityProviderOptionsMonitorCacheEvictionTests
     private static (
         IdentityProviderOptionsMonitorCache Subject,
         IOptionsMonitorCache<OpenIdConnectOptions> OptionsCache,
-        ISpaceContextAccessor Accessor) CreateSubject(HttpContextAccessor httpContextAccessor)
+        ISpaceContextAccessor Accessor) CreateSubject(HttpContextAccessor httpContextAccessor) =>
+        CreateSubject(httpContextAccessor, null, null);
+
+    private static (
+        IdentityProviderOptionsMonitorCache Subject,
+        IOptionsMonitorCache<OpenIdConnectOptions> OptionsCache,
+        ISpaceContextAccessor Accessor) CreateSubject(
+            HttpContextAccessor httpContextAccessor,
+            TimeProvider? timeProvider,
+            TimeSpan? cacheIdleTimeout)
     {
         var services = new ServiceCollection().AddLogging();
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
-        services.AddIdentityServer().AddSpaces(_ => { });
+        if (timeProvider != null)
+        {
+            services.AddSingleton(timeProvider);
+        }
+
+        services.AddIdentityServer(options =>
+            {
+                if (cacheIdleTimeout.HasValue)
+                {
+                    options.DynamicProviders.CacheIdleTimeout = cacheIdleTimeout.Value;
+                }
+            })
+            .AddSpaces(_ => { });
         services.AddSingleton<IHttpContextAccessor>(httpContextAccessor);
 
         var provider = services.BuildServiceProvider();
@@ -201,7 +222,6 @@ public class IdentityProviderOptionsMonitorCacheEvictionTests
         optionsCache.TryAdd("my-oidc", new OpenIdConnectOptions()).ShouldBeFalse();
         subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://none2")).ShouldBeTrue();
     }
-
     [Fact]
     public void Remove_many_distinct_nonexistent_scheme_names_does_not_add_tracker_or_options_entries()
     {
@@ -322,5 +342,250 @@ public class IdentityProviderOptionsMonitorCacheEvictionTests
         }
 
         subject.EnsureCacheUpdated(CreateIdentityProvider(composedName, "https://composed1")).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void idle_tracker_and_options_entries_are_swept_after_idle_timeout_elapses()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var time = new FakeTimeProvider();
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (subject, optionsCache, accessor) = CreateSubject(httpContextAccessor, time, idleTimeout);
+
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.GetOrAdd("my-oidc", () => new OpenIdConnectOptions { Authority = "https://a1" });
+        }
+
+        time.Advance(idleTimeout + idleTimeout);
+
+        // Trigger a sweep via another space's call.
+        using (accessor.SetSpace(SpaceId.New()))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://trigger")).ShouldBeFalse();
+        }
+
+        using (accessor.SetSpace(spaceId))
+        {
+            // Tracker entry was swept: a changed provider is treated as a first observation
+            // (returns false), not an update.
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a2")).ShouldBeFalse();
+
+            // Options entry was swept too.
+            optionsCache.TryAdd("my-oidc", new OpenIdConnectOptions()).ShouldBeTrue();
+        }
+    }
+
+    [Fact]
+    public void tracker_entry_touched_by_get_latest_provider_within_idle_timeout_survives_a_sweep()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var time = new FakeTimeProvider();
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (subject, _, accessor) = CreateSubject(httpContextAccessor, time, idleTimeout);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+        }
+
+        for (var i = 0; i < 6; i++)
+        {
+            time.Advance(TimeSpan.FromMinutes(4));
+            using (accessor.SetSpace(spaceId))
+            {
+                subject.GetLatestProvider("my-oidc").ShouldNotBeNull();
+            }
+        }
+
+        using (accessor.SetSpace(spaceId))
+        {
+            // Still the original entry: an unchanged provider does not evict options, which it
+            // only would if the tracker had been swept and treated this as a first observation.
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            subject.GetLatestProvider("my-oidc").ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public void tracker_entry_touched_between_sweeps_idle_check_and_eviction_cas_survives_the_sweep()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var time = new FakeTimeProvider();
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (subject, optionsCache, accessor) = CreateSubject(httpContextAccessor, time, idleTimeout);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.GetOrAdd("my-oidc", () => new OpenIdConnectOptions { Authority = "https://a1" });
+        }
+
+        time.Advance(idleTimeout + idleTimeout);
+
+        // Forces the interleaving the fix closes: sweep decided the entry idle but hasn't CAS'd
+        // it to evicted yet; a lookup touches it in that window, which must make the CAS fail.
+        subject.OnEntryDecidedIdle = entry => entry.Touch(time);
+
+        using (accessor.SetSpace(spaceId))
+        {
+            // Still treated as an unchanged provider (not a first observation), proving the
+            // tracker entry survived the race.
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+        }
+    }
+
+    [Fact]
+    public void ensure_cache_updated_after_idle_sweep_treats_unchanged_provider_as_first_observation()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var time = new FakeTimeProvider();
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (subject, optionsCache, accessor) = CreateSubject(httpContextAccessor, time, idleTimeout);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.GetOrAdd("my-oidc", () => new OpenIdConnectOptions { Authority = "https://a1" });
+        }
+
+        time.Advance(idleTimeout + idleTimeout);
+
+        using (accessor.SetSpace(SpaceId.New()))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://trigger")).ShouldBeFalse();
+        }
+
+        using (accessor.SetSpace(spaceId))
+        {
+            // Even for the *same* provider the entry was tracking, the swept-away entry must be
+            // treated as "not seen": first-observation semantics (returns false, options are
+            // freshly evictable).
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.TryAdd("my-oidc", new OpenIdConnectOptions()).ShouldBeTrue();
+        }
+    }
+
+    [Fact]
+    public void get_latest_provider_after_idle_sweep_returns_null()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var time = new FakeTimeProvider();
+        var idleTimeout = TimeSpan.FromMinutes(10);
+        var (subject, _, accessor) = CreateSubject(httpContextAccessor, time, idleTimeout);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+        }
+
+        time.Advance(idleTimeout + idleTimeout);
+
+        using (accessor.SetSpace(SpaceId.New()))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://trigger")).ShouldBeFalse();
+        }
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.GetLatestProvider("my-oidc").ShouldBeNull();
+        }
+    }
+
+    [Fact]
+    public void infinite_cache_idle_timeout_disables_tracker_expiry()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var time = new FakeTimeProvider();
+        var (subject, optionsCache, accessor) = CreateSubject(httpContextAccessor, time, Timeout.InfiniteTimeSpan);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.GetOrAdd("my-oidc", () => new OpenIdConnectOptions { Authority = "https://a1" });
+        }
+
+        time.Advance(TimeSpan.FromDays(365));
+
+        using (accessor.SetSpace(SpaceId.New()))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://trigger")).ShouldBeFalse();
+        }
+
+        using (accessor.SetSpace(spaceId))
+        {
+            // Still treated as an update (not a first observation), so the tracker entry survived.
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a2")).ShouldBeTrue();
+        }
+    }
+
+    [Fact]
+    public void ensure_cache_updated_for_an_already_evicted_entry_treats_unchanged_provider_as_first_observation_and_keeps_a_live_entry()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var (subject, optionsCache, accessor) = CreateSubject(httpContextAccessor);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.GetOrAdd("my-oidc", () => new OpenIdConnectOptions { Authority = "https://a1" });
+        }
+
+        // Mark the tracker entry evicted in place, without going through the sweep (which would
+        // also remove it from the dictionary), so EnsureCacheUpdated observes a dictionary entry
+        // whose Touch fails, independent of any sweep timing.
+        var entry = subject.GetEntryForTest(spaceId, "my-oidc");
+        entry.ShouldNotBeNull();
+        entry.TryMarkEvicted(entry.LastUsedTicksRaw).ShouldBeTrue();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            // Unchanged provider, but the entry was evicted: must be treated as a first
+            // observation (returns false) and must evict the options entry too.
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+            optionsCache.TryAdd("my-oidc", new OpenIdConnectOptions()).ShouldBeTrue();
+
+            // A fresh, live entry must have been installed in place of the evicted one.
+            subject.GetEntryForTest(spaceId, "my-oidc").ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public void get_latest_provider_for_an_already_evicted_entry_returns_null()
+    {
+        var (httpContextAccessor, schemeCache) = BuildHttpContext();
+        MarkDynamic(schemeCache, "my-oidc");
+        var (subject, _, accessor) = CreateSubject(httpContextAccessor);
+        var spaceId = SpaceId.New();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.EnsureCacheUpdated(CreateIdentityProvider("my-oidc", "https://a1")).ShouldBeFalse();
+        }
+
+        var entry = subject.GetEntryForTest(spaceId, "my-oidc");
+        entry.ShouldNotBeNull();
+        entry.TryMarkEvicted(entry.LastUsedTicksRaw).ShouldBeTrue();
+
+        using (accessor.SetSpace(spaceId))
+        {
+            subject.GetLatestProvider("my-oidc").ShouldBeNull();
+        }
     }
 }

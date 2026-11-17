@@ -48,7 +48,7 @@ public sealed class ScenarioFixture<T> : IAsyncLifetime
 
         // Not running — start it ourselves
         var configurator = new TestScenarioConfigurator(_output);
-        await _scenario.StartAsync(configurator, CancellationToken.None);
+        await _scenario.StartAsync(configurator, Ct.None);
         _ownedByFixture = true;
     }
 
@@ -57,7 +57,7 @@ public sealed class ScenarioFixture<T> : IAsyncLifetime
         // Only stop if we started it
         if (_ownedByFixture)
         {
-            await _scenario.StopAsync(CancellationToken.None);
+            await _scenario.StopAsync(Ct.None);
         }
     }
 

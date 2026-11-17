@@ -19,7 +19,7 @@ using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Storage.IdentityProviders;
 using Duende.Spaces;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.AspNetCore.Authentication;
@@ -468,7 +468,7 @@ internal sealed class SpacesFederationTestHost : IAsyncDisposable
             var getResult = await admin.GetAsync(providerId, ct);
             getResult.Found.ShouldBeTrue($"Provider {providerId} not found in space {spaceId}");
 
-            var toUpdate = getResult.Item.ToUpdate();
+            var toUpdate = getResult.Item!.ToUpdate();
             toUpdate.ExtendedProperties.Set(AttributeCode.Create(nameof(OidcProvider.Authority)), newAuthority);
 
             var updateResult = await admin.UpdateAsync(providerId, toUpdate, getResult.Version!, ct);
@@ -512,7 +512,7 @@ internal sealed class SpacesFederationTestHost : IAsyncDisposable
             var getResult = await admin.GetAsync(providerId, ct);
             getResult.Found.ShouldBeTrue($"Provider {providerId} not found in space {spaceId}");
 
-            var toUpdate = getResult.Item.ToUpdate();
+            var toUpdate = getResult.Item!.ToUpdate();
             toUpdate.ExtendedProperties.Set(AttributeCode.Create(nameof(SamlProvider.IdpEntityId)), $"{newIdpUri}/Saml2");
             toUpdate.ExtendedProperties.Set(AttributeCode.Create(nameof(SamlProvider.SingleSignOnServiceUrl)), $"{newIdpUri}/Saml2/SSO");
             toUpdate.ExtendedProperties.Set(AttributeCode.Create(nameof(SamlProvider.SingleLogoutServiceUrl)), $"{newIdpUri}/Saml2/SLO");

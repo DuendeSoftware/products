@@ -7,20 +7,22 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
+using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores.Storage.ApiScopes;
+using Duende.IdentityServer.Stores.Storage.IdentityResources;
 using Duende.IdentityServer.Validation;
-using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
-using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Stores.Storage.SamlServiceProviders;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 internal sealed class SamlServiceProviderAdmin(
     SamlServiceProviderRepository repository,
+    ApiScopeRepository apiScopeRepository,
+    IdentityResourceRepository identityResourceRepository,
     ISamlServiceProviderConfigurationValidator validator,
     ISchemaStore schemaStore) : ISamlServiceProviderAdmin
 {
@@ -48,17 +50,25 @@ internal sealed class SamlServiceProviderAdmin(
             return SaveResult.Failure<SamlServiceProviderId>(extError);
         }
 
-        var id = UuidV7.New();
+        var (scopes, scopeError) = await ResolveAllowedScopesAsync(input.AllowedScopes, ct);
+        if (scopeError is not null)
+        {
+            return SaveResult.Failure<SamlServiceProviderId>(scopeError);
+        }
+
+        var id = Duende.Storage.UuidV7.New();
         var dso = MapToDso(id.Value, input, forceNewCertIds: true);
 
-        var result = await repository.CreateAsync(id, dso, ct);
+        var result = await repository.CreateAsync(id, dso, scopes, ct);
 
-        return result switch
+        return result.Kind switch
         {
-            CreateResult.Success => SaveResult.Success<SamlServiceProviderId>(id.Value, (DataVersion)1),
-            CreateResult.AlreadyExists or CreateResult.KeyConflict =>
+            SamlServiceProviderBatchOutcomeKind.Success => SaveResult.Success<SamlServiceProviderId>(id.Value, (DataVersion)(1)),
+            SamlServiceProviderBatchOutcomeKind.AlreadyExists or SamlServiceProviderBatchOutcomeKind.KeyConflict =>
                 SaveResult.Failure<SamlServiceProviderId>(StorageError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId)),
-            _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
+            SamlServiceProviderBatchOutcomeKind.ScopeDoesNotExist =>
+                SaveResult.Failure<SamlServiceProviderId>(StorageError.InvalidValue("AllowedScopes", $"Scope '{result.ScopeName}' does not exist.")),
+            _ => throw new InvalidOperationException($"Unexpected SamlServiceProviderBatchOutcome: {result.Kind}")
         };
     }
 
@@ -71,8 +81,9 @@ internal sealed class SamlServiceProviderAdmin(
         }
 
         var (dso, version) = result.Value;
+        var scopeNames = await repository.GetAllowedScopeNamesAsync(dso.Id, ct);
         var schema = await schemaStore.GetAsync(SchemaId.SamlServiceProvider, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, scopeNames, schema), (DataVersion)(version));
     }
 
     public async Task<GetResult<SamlServiceProviderConfiguration>> GetByEntityIdAsync(string entityId, Ct ct)
@@ -84,8 +95,9 @@ internal sealed class SamlServiceProviderAdmin(
         }
 
         var (dso, version) = result.Value;
+        var scopeNames = await repository.GetAllowedScopeNamesAsync(dso.Id, ct);
         var schema = await schemaStore.GetAsync(SchemaId.SamlServiceProvider, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, scopeNames, schema), (DataVersion)(version));
     }
 
     public async Task<SaveResult<SamlServiceProviderId>> UpdateAsync(SamlServiceProviderId id, UpdateSamlServiceProvider serviceProvider, DataVersion expectedVersion, Ct ct)
@@ -117,17 +129,31 @@ internal sealed class SamlServiceProviderAdmin(
             return SaveResult.Failure<SamlServiceProviderId>(extError);
         }
 
+        var (scopes, scopeError) = await ResolveAllowedScopesAsync(input.AllowedScopes, ct);
+        if (scopeError is not null)
+        {
+            return SaveResult.Failure<SamlServiceProviderId>(scopeError);
+        }
+
         var dso = MapToDso(idValue, input);
 
-        var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
+        var currentScopes = await repository.GetAllowedScopesAsync(idValue, ct);
+        var currentScopeIds = currentScopes.Select(s => s.Id).ToHashSet();
+        var requestedScopeIds = scopes.Select(s => s.Id).ToHashSet();
+        var scopesToLink = scopes.Where(s => !currentScopeIds.Contains(s.Id)).ToList();
+        var scopesToUnlink = currentScopes.Where(s => !requestedScopeIds.Contains(s.Id)).ToList();
 
-        return result switch
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(idValue), dso, expectedVersion.Value, scopesToLink, scopesToUnlink, ct);
+
+        return result.Kind switch
         {
-            UpdateResult.Success => SaveResult.Success<SamlServiceProviderId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
-            UpdateResult.UnexpectedVersion => SaveResult.Failure<SamlServiceProviderId>(StorageError.VersionConflict()),
-            UpdateResult.DoesNotExist => SaveResult.Failure<SamlServiceProviderId>(StorageError.NotFound("samlServiceProvider", idValue.ToString())),
-            UpdateResult.KeyConflict => SaveResult.Failure<SamlServiceProviderId>(StorageError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId)),
-            _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
+            SamlServiceProviderBatchOutcomeKind.Success => SaveResult.Success<SamlServiceProviderId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+            SamlServiceProviderBatchOutcomeKind.UnexpectedVersion => SaveResult.Failure<SamlServiceProviderId>(StorageError.VersionConflict()),
+            SamlServiceProviderBatchOutcomeKind.DoesNotExist => SaveResult.Failure<SamlServiceProviderId>(StorageError.NotFound("samlServiceProvider", idValue.ToString())),
+            SamlServiceProviderBatchOutcomeKind.KeyConflict => SaveResult.Failure<SamlServiceProviderId>(StorageError.AlreadyExists("samlServiceProvider", serviceProvider.EntityId)),
+            SamlServiceProviderBatchOutcomeKind.ScopeDoesNotExist =>
+                SaveResult.Failure<SamlServiceProviderId>(StorageError.InvalidValue("AllowedScopes", $"Scope '{result.ScopeName}' does not exist.")),
+            _ => throw new InvalidOperationException($"Unexpected SamlServiceProviderBatchOutcome: {result.Kind}")
         };
     }
 
@@ -138,15 +164,19 @@ internal sealed class SamlServiceProviderAdmin(
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success<SamlServiceProviderId>(idValue, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success<SamlServiceProviderId>(idValue, (DataVersion)(0)),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
-    public async Task<Duende.Storage.Querying.QueryResult<SamlServiceProviderListItem>> QueryAsync(QueryRequest<SamlServiceProviderFilter, SamlServiceProviderSortField> request, Ct ct)
+    public async Task<QueryResult<SamlServiceProviderListItem>> QueryAsync(QueryRequest<SamlServiceProviderFilter, SamlServiceProviderSortField> request, Ct ct)
     {
-        var result = await repository.QueryAsync(request, ct);
-        return result.ConvertTo(MapToListItem);
+        var result = await StorageMapping.ExecuteQueryAsync(() => repository.QueryAsync(request.ToStorage(), ct));
+
+        var serviceProviderIds = result.Items.Select(dso => dso.Id).ToList();
+        var scopeCounts = await repository.CountAllowedScopesByServiceProviderIdsAsync(serviceProviderIds, ct);
+
+        return result.ConvertTo(dso => MapToListItem(dso, scopeCounts.GetValueOrDefault(dso.Id))).ToModel(request.Range);
     }
 
     // === Common input shape shared by Create/Update ===
@@ -390,6 +420,48 @@ internal sealed class SamlServiceProviderAdmin(
         }
     }
 
+    // === Allowed scope resolution ===
+
+    /// <summary>
+    /// Resolves allowed-scope names into identity-resource links by exact name, deduplicating names so a
+    /// name requested more than once is linked only once. SAML service providers can only allow identity
+    /// resources (<see cref="Saml.Services.Default.DefaultSamlResourceResolver"/> fails every sign-in
+    /// otherwise); an API scope name is refused with a message saying so, and an unknown name is refused
+    /// as not existing. This is the single point that resolves scope names at save time, so the link
+    /// target ids are known for the storage batch.
+    /// </summary>
+    private async Task<(List<SamlAllowedScopeLink> Scopes, StorageError? Error)> ResolveAllowedScopesAsync(List<string>? scopeNames, Ct ct)
+    {
+        if (scopeNames is null || scopeNames.Count == 0)
+        {
+            return ([], null);
+        }
+
+        var names = scopeNames.Distinct(StringComparer.Ordinal).ToList();
+
+        var identityResources = await identityResourceRepository.FindByExactNamesAsync(names, ct);
+
+        var scopes = new List<SamlAllowedScopeLink>(names.Count);
+        foreach (var name in names)
+        {
+            if (identityResources.TryGetValue(name, out var identityResource))
+            {
+                scopes.Add(new SamlAllowedScopeLink(name, identityResource.Id));
+                continue;
+            }
+
+            var apiScope = await apiScopeRepository.TryReadByNameAsync(name, ct);
+            if (apiScope is not null)
+            {
+                return ([], StorageError.InvalidValue("AllowedScopes", $"Scope '{name}' is an API scope. SAML service providers can only use identity resources."));
+            }
+
+            return ([], StorageError.InvalidValue("AllowedScopes", $"Scope '{name}' does not exist."));
+        }
+
+        return (scopes, null);
+    }
+
     // === Mapping: Input → Domain Model (for validator) ===
 
     private static SamlServiceProvider MapToModel(SamlSpInput sp) =>
@@ -482,9 +554,6 @@ internal sealed class SamlServiceProviderAdmin(
             // SSO
             AllowIdpInitiated = sp.AllowIdpInitiated,
 
-            // Scopes
-            AllowedScopes = sp.AllowedScopes?.AsReadOnly() ?? [],
-
             // Claims
             ClaimMappings = sp.ClaimMappings != null
                 ? new Dictionary<string, string>(sp.ClaimMappings)
@@ -517,7 +586,7 @@ internal sealed class SamlServiceProviderAdmin(
         return certificates.Select(c =>
         {
             // Always assign new IDs on create; on update, preserve existing IDs
-            var certId = forceNewIds || c.Id == Guid.Empty ? UuidV7.New().Value : c.Id;
+            var certId = forceNewIds || c.Id == Guid.Empty ? Duende.Storage.UuidV7.New().Value : c.Id;
 
             // Normalize: re-export as DER to strip any private key material
             var rawBytes = Convert.FromBase64String(c.Base64Data);
@@ -531,7 +600,7 @@ internal sealed class SamlServiceProviderAdmin(
 
     // === Mapping: DSO → Configuration ===
 
-    private static SamlServiceProviderConfiguration MapToConfiguration(SamlServiceProviderDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
+    private static SamlServiceProviderConfiguration MapToConfiguration(SamlServiceProviderDso.V1 dso, List<string> scopeNames, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             EntityId = dso.EntityId,
@@ -590,7 +659,7 @@ internal sealed class SamlServiceProviderAdmin(
             AllowIdpInitiated = dso.AllowIdpInitiated,
 
             // Scopes
-            AllowedScopes = [.. dso.AllowedScopes],
+            AllowedScopes = scopeNames,
 
             // Claims
             ClaimMappings = new Dictionary<string, string>(dso.ClaimMappings),
@@ -609,7 +678,7 @@ internal sealed class SamlServiceProviderAdmin(
             ExtendedProperties = EavMapper.ToAttributeValues(dso.ExtendedAttributeValues ?? [], schema).ToList()
         };
 
-    private static SamlServiceProviderListItem MapToListItem(SamlServiceProviderDso.V1 dso) =>
+    private static SamlServiceProviderListItem MapToListItem(SamlServiceProviderDso.V1 dso, int allowedScopeCount) =>
         new()
         {
             Id = dso.Id,
@@ -618,6 +687,6 @@ internal sealed class SamlServiceProviderAdmin(
             Enabled = dso.Enabled,
             Description = dso.Description,
             CertificateCount = dso.Certificates.Count,
-            AllowedScopeCount = dso.AllowedScopes.Count
+            AllowedScopeCount = allowedScopeCount
         };
 }

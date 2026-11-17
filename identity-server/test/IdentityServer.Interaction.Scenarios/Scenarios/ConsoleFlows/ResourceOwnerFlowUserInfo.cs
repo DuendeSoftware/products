@@ -22,7 +22,7 @@ public sealed class ResourceOwnerFlowUserInfo : IScenario
     public string Description => "Resource Owner Password Credentials with UserInfo: obtain a token for identity scopes and retrieve user claims";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         _identityServer = new IdentityServerTestHost(configurator, "identity-server");
         _identityServer.AddDefaultUsers();
@@ -44,7 +44,7 @@ public sealed class ResourceOwnerFlowUserInfo : IScenario
         Links = [_identityServer.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_identityServer != null)
         {

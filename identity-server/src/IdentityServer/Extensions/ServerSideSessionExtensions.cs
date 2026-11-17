@@ -30,6 +30,7 @@ internal static class ServerSideSessionExtensions
                 Renewed = other.Renewed,
                 Expires = other.Expires,
                 Ticket = other.Ticket,
+                Version = other.Version,
             };
             return item;
         }

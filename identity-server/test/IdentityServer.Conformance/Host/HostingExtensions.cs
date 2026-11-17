@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Configuration.Validation.DynamicClientRegistration;
 using Duende.IdentityServer.Hosting.LocalApiAuthentication;
 using Duende.IdentityServer.Hosts.Shared.Configuration;
 using Duende.IdentityServer.Services;
@@ -80,10 +81,10 @@ internal static partial class HostingExtensions
             // Static clients for the OidcCore plan (static_client variant).
             // Logout and FAPI 2.0 plans register clients dynamically via DCR.
             .AddInMemoryClients(ConformanceClients.Get())
-            .AddInMemoryIdentityResources(TestResources.IdentityResources)
+            .AddInMemoryIdentityResources(ConformanceResources.IdentityResources)
             .AddInMemoryApiResources(TestResources.ApiResources)
             .AddInMemoryApiScopes(TestResources.ApiScopes)
-            .AddTestUsers(TestUsers.Users)
+            .AddTestUsers(ConformanceResources.Users)
             .AddJwtBearerClientAuthentication()
             // FAPI 2.0 conformance requires that redirect URIs with additional query
             // parameters are accepted when the base URI matches a registered URI.
@@ -91,6 +92,7 @@ internal static partial class HostingExtensions
 
         builder.Services.AddIdentityServerConfiguration(opt => { })
             .AddInMemoryClientConfigurationStore();
+        builder.Services.AddTransient<IDynamicClientRegistrationValidator, ConformanceDynamicClientRegistrationValidator>();
 
         // Backchannel logout HTTP client — rewrites localhost→nginx for Docker networking.
         builder.Services.AddHttpClient<ConformanceBackChannelLogoutHttpClient>()

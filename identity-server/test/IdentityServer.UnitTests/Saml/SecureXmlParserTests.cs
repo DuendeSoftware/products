@@ -167,6 +167,34 @@ public class SecureXmlParserTests
 
     [Fact]
     [Trait("Category", Category)]
+    public void load_xml_document_with_nesting_at_max_depth_should_succeed()
+    {
+        var depth = SecureXmlParser.DefaultMaxNestingDepth;
+        var nestedXml = string.Concat(Enumerable.Repeat("<n>", depth + 1)) +
+                        string.Concat(Enumerable.Repeat("</n>", depth + 1));
+
+        var doc = SecureXmlParser.LoadXmlDocument(nestedXml);
+
+        doc.OuterXml.ShouldBe(nestedXml);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void load_xml_document_with_nesting_beyond_max_depth_should_throw_xml_exception()
+    {
+        var depth = SecureXmlParser.DefaultMaxNestingDepth + 1;
+        var nestedXml = string.Concat(Enumerable.Repeat("<n>", depth + 1)) +
+                        string.Concat(Enumerable.Repeat("</n>", depth + 1));
+
+        var exception = Should.Throw<XmlException>(() =>
+            SecureXmlParser.LoadXmlDocument(nestedXml));
+
+        var inner = exception.InnerException.ShouldBeOfType<XmlException>();
+        inner.Message.ShouldContain($"maximum element nesting depth of {SecureXmlParser.DefaultMaxNestingDepth}");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public void load_xml_document_with_comments_should_preserve_comments()
     {
         // Arrange - XML with comments

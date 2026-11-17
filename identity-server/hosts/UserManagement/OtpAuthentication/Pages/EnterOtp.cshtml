@@ -1,0 +1,56 @@
+@page
+@model EnterOtpModel
+@{
+  ViewData["Title"] = "Enter OTP";
+}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-container">
+      <h2 class="mb-4 brand-title text-center">Enter OTP</h2>
+
+      @if (Model.ErrorMessages.Count > 0)
+      {
+        <div class="alert alert-danger mb-4" role="alert">
+          @foreach (var error in Model.ErrorMessages)
+          {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+          }
+        </div>
+      }
+
+      @if (Model.Email is not null)
+      {
+        <div class="alert alert-info mb-4" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          We've sent an OTP to <strong>@Model.Email</strong>
+        </div>
+        <div class="alert alert-info mb-4" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          We simulate sending emails using MailPit. You can view sent emails <a target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                href="http://localhost:8026">here.</a>
+        </div>
+      }
+
+      <form method="post">
+        <input type="hidden" asp-for="ReturnUrl"/>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors alert alert-danger" role="alert"></div>
+
+        <div class="mb-4">
+          <label asp-for="Otp" class="form-label fw-semibold">One-Time Password (OTP)</label>
+          <input asp-for="Otp" type="text" class="form-control form-control-lg" placeholder="Enter the OTP" required
+                 autofocus/>
+          <span asp-validation-for="Otp" class="text-danger"></span>
+          <div class="form-text">Check your email inbox for the OTP</div>
+        </div>
+
+        <div class="d-grid mb-3">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-circle me-2"></i>Log in
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

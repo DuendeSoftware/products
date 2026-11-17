@@ -37,7 +37,7 @@ internal sealed class SamlSigninStateRepository(IPartitionedStorageFactory parti
 
         var partitionedStorage = await GetPartitionedStorage(ct);
         var result = await partitionedStorage.TryReadAsync(SamlSigninStateDso.EntityType, UuidV7.From(id), ct);
-        return result.Found ? ((SamlSigninStateDso.V1)result.Dso, result.Version.Value) : null;
+        return result.Found ? (SamlSigninStateDso.ToCurrent(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(

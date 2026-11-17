@@ -20,7 +20,7 @@ internal sealed class ServerSideSessionStore(
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetSession");
 
         var result = await repository.TryReadByKeyAsync(key, ct);
-        return result is null ? null : ServerSideSessionRepository.DsoToModel(result.Value.Dso);
+        return result is null ? null : MapToModel(result.Value.Dso, result.Value.Version);
     }
 
     /// <inheritdoc/>
@@ -37,7 +37,7 @@ internal sealed class ServerSideSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task UpdateSessionAsync(ServerSideSession session, Ct ct)
+    public async Task<bool> UpdateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.UpdateSession");
 
@@ -45,16 +45,19 @@ internal sealed class ServerSideSessionStore(
         if (current is null)
         {
             logger.NoServerSideSessionKeyFoundUpdateSkipped(session.Key);
-            return;
+            return false;
         }
 
         var (id, version, _) = current.Value;
-        var result = await repository.UpdateAsync(id, version, session, ct);
+        var expectedVersion = session.Version == 0 ? version : session.Version;
+        var result = await repository.UpdateAsync(id, expectedVersion, session, ct);
 
         if (result is UpdateResult.DoesNotExist or UpdateResult.UnexpectedVersion or UpdateResult.KeyConflict)
         {
             logger.SessionWithKeyKeyCouldNotBeUpdated(session.Key, result);
         }
+
+        return result == UpdateResult.Success;
     }
 
     /// <inheritdoc/>
@@ -73,7 +76,7 @@ internal sealed class ServerSideSessionStore(
         filter.Validate();
 
         var results = await repository.QueryByFilterAsync(filter, ct);
-        return results.Select(r => ServerSideSessionRepository.DsoToModel(r.Dso)).ToArray();
+        return results.Select(r => MapToModel(r.Dso, r.Version)).ToArray();
     }
 
     /// <inheritdoc/>
@@ -133,48 +136,29 @@ internal sealed class ServerSideSessionStore(
         }
 
         // Encode both forward and backward tokens so the caller can navigate either direction.
-        // Format: "nextToken|previousToken" (either part may be empty).
-        // The repository normalizes token semantics so NextToken always means "forward"
-        // and PreviousToken always means "backward", regardless of query direction.
+        // Format: "nextToken|previousToken" (either part may be empty). The repository always
+        // queries in ascending order, so NextToken/PreviousToken (and HasMoreData/HasPreviousData)
+        // keep their natural forward/backward meaning regardless of navigation direction.
         var nextVal = storageResult.NextToken?.Value ?? string.Empty;
         var prevVal = storageResult.PreviousToken?.Value ?? string.Empty;
         var resultsToken = $"{nextVal}|{prevVal}";
 
-        // Determine HasPrevResults and HasNextResults.
-        // HasMoreData indicates whether more items exist in the queried sort direction:
-        // - Forward nav or initial: more pages ahead
-        // - Backward nav: more pages behind (query used reversed sort)
-        bool hasPrevResults;
-        bool hasNextResults;
-        if (filter?.ResultsToken == null)
-        {
-            // Initial query — no previous results
-            hasPrevResults = false;
-            hasNextResults = storageResult.HasMoreData;
-        }
-        else if (!filter.RequestPriorResults)
-        {
-            // Navigated forward — there are always previous results
-            hasPrevResults = true;
-            hasNextResults = storageResult.HasMoreData;
-        }
-        else
-        {
-            // Navigated backward — more data in the reversed sort means more pages behind
-            hasPrevResults = storageResult.HasMoreData;
-            // We navigated backward from a later page, so there are always next results
-            hasNextResults = true;
-        }
-
         return new QueryResult<ServerSideSession>
         {
             ResultsToken = resultsToken,
-            HasPrevResults = hasPrevResults,
-            HasNextResults = hasNextResults,
+            HasPrevResults = storageResult.HasPreviousData,
+            HasNextResults = storageResult.HasMoreData,
             TotalCount = storageResult.TotalCount,
             TotalPages = storageResult.TotalPages,
             CurrentPage = null,
             Results = storageResult.Items.Select(ServerSideSessionRepository.DsoToModel).ToArray()
         };
+    }
+
+    private static ServerSideSession MapToModel(ServerSideSessionDso.V1 dso, int version)
+    {
+        var session = ServerSideSessionRepository.DsoToModel(dso);
+        session.Version = version;
+        return session;
     }
 }

@@ -4,7 +4,7 @@
   "planName": "fapi2-security-profile-id2-test-plan",
   "variant": {
     "fapi_profile": "plain_fapi",
-    "authorization_request_type": "pushed",
+    "authorization_request_type": "simple",
     "openid": "openid_connect",
     "client_auth_type": "private_key_jwt",
     "sender_constrain": "dpop"
@@ -19,7 +19,7 @@
       "client_name": "OIDF Conformance Suite",
       "redirect_uri": "https://localhost:8443/test/a/duende-is-fapi2/callback",
       "client_id": "fapi2-conformance-client",
-      "scope": "openid profile",
+      "scope": "openid profile offline_access",
       "jwks": {
         "keys": [
           {
@@ -43,7 +43,7 @@
       "client_name": "OIDF Conformance Suite 2",
       "redirect_uri": "https://localhost:8443/test/a/duende-is-fapi2/callback",
       "client_id": "fapi2-conformance-client-2",
-      "scope": "openid profile",
+      "scope": "openid profile offline_access",
       "jwks": {
         "keys": [
           {

@@ -4,7 +4,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Stores.Storage;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin.ApiResources;
 

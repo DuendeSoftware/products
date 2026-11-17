@@ -10,6 +10,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Web;
 using System.Xml;
+using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
 using Microsoft.Net.Http.Headers;
 
@@ -64,7 +65,7 @@ internal static class SamlTestHelpers
     /// </summary>
     public static SamlLogoutResponseData ExtractSamlLogoutResponseFromRedirect(HttpResponseMessage response)
     {
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBeOneOf(HttpStatusCode.Redirect, HttpStatusCode.SeeOther);
         var location = response.Headers.Location;
         location.ShouldNotBeNull();
 
@@ -1135,5 +1136,36 @@ internal static class SamlTestHelpers
             ?? throw new InvalidOperationException("SAMLResult did not have a NameID");
 
         return (samlResult.Assertion.AuthnStatement.SessionIndex, nameId);
+    }
+
+    /// <summary>
+    /// Builds a samlp:Extensions element for a protocol message root. Extensions is depth 1,
+    /// so the nested elements run from depth 2 down to <paramref name="deepestElementDepth"/>.
+    /// </summary>
+    public static string ExtensionsNestedTo(int deepestElementDepth) =>
+        $"<samlp:Extensions>{Nested(deepestElementDepth - 1, """<n xmlns="urn:test:nesting">""", "<n>", "</n>", "value")}</samlp:Extensions>";
+
+    public static string Nested(int count, string firstOpen, string open, string close, string text)
+    {
+        var xml = new StringBuilder(firstOpen);
+        for (var i = 1; i < count; i++)
+        {
+            xml.Append(open);
+        }
+
+        xml.Append(text);
+        for (var i = 0; i < count; i++)
+        {
+            xml.Append(close);
+        }
+
+        return xml.ToString();
+    }
+
+    public static void ShouldBeMalformedXmlRejection(HttpResponseMessage response, ExceptionRecorder recorder)
+    {
+        response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        var exception = recorder.Exception.ShouldNotBeNull();
+        (exception as XmlException ?? exception.InnerException).ShouldBeOfType<XmlException>();
     }
 }

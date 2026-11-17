@@ -5,6 +5,7 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
@@ -254,6 +255,7 @@ public class SeparateDatabaseStorageTests : IAsyncLifetime
             storageInstanceRouter,
             crossPartitionStorageFactory,
             options,
+            _provider.GetRequiredService<IDistributedLock>(),
             TimeProvider.System,
             _provider.GetRequiredService<ILogger<StoragePurgeHost>>());
 

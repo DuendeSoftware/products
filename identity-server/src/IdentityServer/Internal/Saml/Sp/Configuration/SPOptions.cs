@@ -7,6 +7,7 @@ using Duende.IdentityServer.Internal.Saml.Sp.Helpers;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
 using Duende.IdentityServer.Internal.Saml.Sp.Protocol;
 using Duende.IdentityServer.Internal.Saml.Sp.Tokens;
+using Duende.IdentityServer.Saml.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
@@ -37,6 +38,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
         /// Maximum length (in bytes) of SAML RelayState to persist in auth properties.
         /// </summary>
         public int MaxRelayStateLength { get; set; } = 1024;
+
+        /// <summary>
+        /// Maximum element nesting depth of an inbound SAML message.
+        /// </summary>
+        public int MaxXmlNestingDepth { get; set; } = SecureXmlParser.DefaultMaxNestingDepth;
 
         /// <summary>
         /// Recommendation of cache refresh interval to those who reads our
@@ -104,6 +110,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Configuration
                 entityId = value;
             }
         }
+
+        /// <summary>
+        /// The time provider used to check the expiry of the bearer subject confirmation of an assertion.
+        /// </summary>
+        public TimeProvider TimeProvider { get; set; } = TimeProvider.System;
 
         private string modulePath = "/Saml2";
 

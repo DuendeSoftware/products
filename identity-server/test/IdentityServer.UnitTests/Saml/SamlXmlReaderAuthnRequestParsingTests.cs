@@ -22,7 +22,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         var xml = CreateAuthnRequestXml(includeSignature: true, includeExtensions: false);
         var traverser = new XmlTraverser(xml);
 
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Issuer!.Value.ShouldBe("https://sp.example.com");
     }
@@ -35,7 +35,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         var xml = CreateAuthnRequestXml(includeSignature: true, includeExtensions: true);
         var traverser = new XmlTraverser(xml);
 
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Issuer!.Value.ShouldBe("https://sp.example.com");
         result.Extensions.ShouldNotBeNull();
@@ -49,7 +49,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         var xml = CreateAuthnRequestXml(includeSignature: false, includeExtensions: false);
         var traverser = new XmlTraverser(xml);
 
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Issuer!.Value.ShouldBe("https://sp.example.com");
     }
@@ -63,7 +63,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
             includeSignature: true, includeExtensions: false, includeNameIdPolicy: true);
         var traverser = new XmlTraverser(xml);
 
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Issuer!.Value.ShouldBe("https://sp.example.com");
         result.NameIdPolicy.ShouldNotBeNull();
@@ -90,7 +90,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         authnRequest.AppendChild(issuer);
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.AssertionConsumerServiceIndex.ShouldBe(3);
         result.AttributeConsumingServiceIndex.ShouldBe(7);
@@ -121,7 +121,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         authnRequest.AppendChild(conditions);
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Conditions.ShouldNotBeNull();
         result.Conditions.NotBefore.ShouldNotBeNull();
@@ -159,7 +159,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         var traverser = new XmlTraverser(doc.DocumentElement!);
 
         var ex = await Should.ThrowAsync<SamlXmlException>(
-            () => reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None));
+            () => reader.ReadAuthnRequestAsync(traverser, null, Ct.None));
         ex.Message.ShouldBe("All child nodes under Conditions have not been processed.");
     }
 
@@ -196,7 +196,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         var traverser = new XmlTraverser(doc.DocumentElement!);
 
         var ex = await Should.ThrowAsync<SamlXmlException>(
-            () => reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None));
+            () => reader.ReadAuthnRequestAsync(traverser, null, Ct.None));
         ex.Message.ShouldBe("RequestedAuthnContext must contain either AuthnContextClassRef or AuthnContextDeclRef elements, but not both");
     }
 
@@ -228,7 +228,7 @@ public sealed class SamlXmlReaderAuthnRequestParsingTests
         authnRequest.AppendChild(requestedAuthnContext);
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         traverser.Errors.ShouldBeEmpty();
         result.RequestedAuthnContext.ShouldNotBeNull();

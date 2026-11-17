@@ -66,7 +66,7 @@ public class LicensingFixture : IAsyncLifetime
             {
                 webapp.UseIdentityServer();
 
-                webapp.MapGet("/account/login", async (HttpContext c, CancellationToken ct) =>
+                webapp.MapGet("/account/login", async (HttpContext c, Ct ct) =>
                 {
                     await c.SignInAsync(new IdentityServerUser("sub"));
                 });

@@ -1,0 +1,173 @@
+:root {
+    --duende-purple: #512bd4;
+    --duende-purple-lighter: #e8e0ff;
+    --duende-header-bg: #5E2D91;
+}
+
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+a.navbar-brand .icon-banner {
+  margin-top: -4px;
+  height: 2.5rem;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: 0 50%;
+}
+
+.site-header {
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+}
+
+.duende-header {
+  background-color: var(--duende-header-bg) !important;
+  padding: 0.5rem 1rem;
+}
+
+.duende-header .navbar-brand {
+  color: white;
+  font-size: 1rem;
+}
+
+.duende-header .navbar-brand .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.duende-header .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+}
+
+.duende-header .nav-link:hover {
+  color: white;
+}
+
+.duende-header .nav-link.fw-bold {
+  color: white;
+}
+
+.body-container {
+  margin-top: 60px;
+  padding-bottom: 40px;
+}
+
+.footer {
+    background-color: #fff;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    line-height: 60px;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+}
+
+.form-container {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+}
+
+.brand-title {
+    color: var(--duende-purple);
+    font-weight: 500;
+}
+
+.platform-hero {
+    padding: 2rem 0;
+    margin-bottom: 1rem;
+}
+
+.platform-hero h1 {
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.platform-hero .lead {
+    color: #666;
+    font-size: 1.15rem;
+}
+
+/* List group styles matching Duende */
+.list-group-item {
+  color: #444;
+  background-color: #fff;
+}
+
+.list-group-item.disabled,
+.list-group-item:disabled {
+  color: #5c507c;
+  background-color: #fff;
+}
+
+.list-group-item.active,
+.list-group-item:hover,
+.list-group-item:focus {
+  z-index: 2;
+  color: #444;
+  background-color: #eee;
+  border-color: #eee;
+}
+
+.list-group-item.active {
+  font-weight: 700;
+}
+
+.list-group-item.active:hover {
+  background-color: #fff;
+}
+
+.list-group-item.disabled:hover {
+  color: #5c507c;
+}
+
+/* Card styling */
+.card {
+    border-radius: 0.5rem;
+}
+
+/* Table improvements */
+.table {
+    background-color: #fff;
+}
+
+code {
+    color: #593d88;
+}

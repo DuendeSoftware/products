@@ -7,12 +7,13 @@ using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Validation;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+
+using Duende.IdentityServer.Models;
+using DataVersion = Duende.IdentityServer.Models.DataVersion;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin.IdentityProviders;
 
@@ -31,7 +32,7 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
             },
             _ct);
         result.IsSuccess.ShouldBeTrue($"CreateProvider failed: {result}");
-        return result.Id;
+        return result.Id!;
     }
 
     [Fact]
@@ -51,14 +52,14 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
 
         var createResult = await admin.CreateAsync(provider, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
-        createResult.Id.Value.ShouldNotBe(Guid.Empty);
-        createResult.Version.ShouldNotBeNull();
-        createResult.Version.Value.ShouldBe(1);
+        createResult.Id!.Value.ShouldNotBe(Guid.Empty);
+        createResult.Version!.ShouldNotBeNull();
+        createResult.Version!.Value.ShouldBe(1);
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.Scheme.ShouldBe(provider.Scheme);
         loaded.DisplayName.ShouldBe(provider.DisplayName);
         loaded.Enabled.ShouldBe(provider.Enabled);
@@ -86,8 +87,8 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
 
         var getResult = await admin.GetBySchemeAsync(scheme, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.Scheme.ShouldBe(scheme);
-        getResult.Item.DisplayName.ShouldBe("ByScheme Test");
+        getResult.Item!.Scheme.ShouldBe(scheme);
+        getResult.Item!.DisplayName.ShouldBe("ByScheme Test");
     }
 
     [Fact]
@@ -146,20 +147,20 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
             _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.DisplayName = "Updated";
         toUpdate.Enabled = false;
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.DisplayName.ShouldBe("Updated");
-        afterUpdate.Item.Enabled.ShouldBeFalse();
+        afterUpdate.Item!.DisplayName.ShouldBe("Updated");
+        afterUpdate.Item!.Enabled.ShouldBeFalse();
     }
 
     [Fact]
@@ -172,11 +173,11 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
             _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
         var wrongVersion = (DataVersion)999;
-        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item.ToUpdate(), wrongVersion, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, getResult.Item!.ToUpdate(), wrongVersion, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
@@ -210,10 +211,10 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
             _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var deleteResult = await admin.DeleteAsync(createResult.Id, _ct);
+        var deleteResult = await admin.DeleteAsync(createResult.Id!, _ct);
         deleteResult.IsSuccess.ShouldBeTrue($"Delete failed: {deleteResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeFalse();
     }
 
@@ -230,11 +231,11 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
         var result = await admin.QueryAsync(
             QueryRequest.Create<IdentityProviderFilter, IdentityProviderSortField>(
                 new IdentityProviderFilter { Scheme = prefix },
-                (DataRange)DataRange.FromPage(1, (DataRangeSize)100)),
+                DataRange.FromPage(1, 100)),
             _ct);
 
-        result.Items.ShouldNotBeNull();
-        result.Items.Count.ShouldBe(3);
+        result.Results.ShouldNotBeNull();
+        result.Results.Count.ShouldBe(3);
     }
 
     [Fact]
@@ -252,8 +253,8 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
                 new IdentityProviderFilter { Scheme = uniquePart }),
             _ct);
 
-        result.Items.ShouldAllBe(p => p.Scheme.Contains(uniquePart));
-        result.Items.Count.ShouldBe(2);
+        result.Results.ShouldAllBe(p => p.Scheme.Contains(uniquePart));
+        result.Results.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -275,16 +276,16 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
                 new IdentityProviderFilter { Scheme = enabledScheme, Enabled = true }),
             _ct);
 
-        enabledResult.Items.ShouldContain(p => p.Scheme == enabledScheme);
-        enabledResult.Items.ShouldNotContain(p => p.Scheme == disabledScheme);
+        enabledResult.Results.ShouldContain(p => p.Scheme == enabledScheme);
+        enabledResult.Results.ShouldNotContain(p => p.Scheme == disabledScheme);
 
         var disabledResult = await admin.QueryAsync(
             QueryRequest.Create<IdentityProviderFilter, IdentityProviderSortField>(
                 new IdentityProviderFilter { Scheme = disabledScheme, Enabled = false }),
             _ct);
 
-        disabledResult.Items.ShouldContain(p => p.Scheme == disabledScheme);
-        disabledResult.Items.ShouldNotContain(p => p.Scheme == enabledScheme);
+        disabledResult.Results.ShouldContain(p => p.Scheme == disabledScheme);
+        disabledResult.Results.ShouldNotContain(p => p.Scheme == enabledScheme);
     }
 
     [Fact]
@@ -307,8 +308,8 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
                 new IdentityProviderFilter { Type = uniqueType }),
             _ct);
 
-        result.Items.ShouldContain(p => p.Scheme == withTypeScheme);
-        result.Items.ShouldNotContain(p => p.Scheme == withoutTypeScheme);
+        result.Results.ShouldContain(p => p.Scheme == withTypeScheme);
+        result.Results.ShouldNotContain(p => p.Scheme == withoutTypeScheme);
     }
 
     [Fact]
@@ -331,8 +332,8 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
                 new IdentityProviderFilter { DisplayName = uniqueName }),
             _ct);
 
-        result.Items.ShouldContain(p => p.Scheme == matchScheme);
-        result.Items.ShouldNotContain(p => p.Scheme == noMatchScheme);
+        result.Results.ShouldContain(p => p.Scheme == matchScheme);
+        result.Results.ShouldNotContain(p => p.Scheme == noMatchScheme);
     }
 
     [Fact]
@@ -354,8 +355,8 @@ public sealed class IdentityProviderAdminTests : IAsyncLifetime
                 SortBy.Field<IdentityProviderSortField>(IdentityProviderSortField.Scheme)),
             _ct);
 
-        result.Items.Count.ShouldBe(3);
-        var schemes = result.Items.Select(p => p.Scheme).ToList();
+        result.Results.Count.ShouldBe(3);
+        var schemes = result.Results.Select(p => p.Scheme).ToList();
         schemes.ShouldBe(schemes.OrderBy(s => s, StringComparer.Ordinal).ToList());
     }
 

@@ -5,14 +5,12 @@
 
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.IdentityProviders;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
+using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
-using Duende.Storage.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
@@ -47,7 +45,7 @@ internal sealed class IdentityProviderAdmin(
             return SaveResult.Failure<IdentityProviderId>(validationError);
         }
 
-        var id = UuidV7.New();
+        var id = Duende.Storage.UuidV7.New();
         var dso = MapToDso(id.Value, provider.Scheme, provider.DisplayName, provider.Enabled, provider.Type, provider.ExtendedProperties);
 
         var result = await repository.CreateAsync(id, dso, ct);
@@ -55,7 +53,7 @@ internal sealed class IdentityProviderAdmin(
         return result switch
         {
             CreateResult.Success => LogAndReturn(
-                SaveResult.Success<IdentityProviderId>(id.Value, (DataVersion)1),
+                SaveResult.Success<IdentityProviderId>(id.Value, (DataVersion)(1)),
                 () => logger.ProviderCreated(LogLevel.Debug, id.Value, provider.Scheme)),
             CreateResult.AlreadyExists or CreateResult.KeyConflict =>
                 LogAndReturn<SaveResult<IdentityProviderId>>(
@@ -77,7 +75,7 @@ internal sealed class IdentityProviderAdmin(
 
         var (dso, version) = result.Value;
         var schema = await schemaStore.GetAsync(SchemaId.BuildIdentityProviderId(dso.Type), ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)(version));
     }
 
     public async Task<GetResult<IdentityProviderConfiguration>> GetBySchemeAsync(string scheme, Ct ct)
@@ -91,7 +89,7 @@ internal sealed class IdentityProviderAdmin(
 
         var (dso, version) = result.Value;
         var schema = await schemaStore.GetAsync(SchemaId.BuildIdentityProviderId(dso.Type), ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)(version));
     }
 
     public async Task<SaveResult<IdentityProviderId>> UpdateAsync(IdentityProviderId id, UpdateIdentityProvider provider, DataVersion expectedVersion, Ct ct)
@@ -125,7 +123,7 @@ internal sealed class IdentityProviderAdmin(
         }
 
         var dso = MapToDso(idValue, provider.Scheme, provider.DisplayName, provider.Enabled, provider.Type, provider.ExtendedProperties);
-        var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(idValue), dso, expectedVersion.Value, ct);
 
         return result switch
         {
@@ -154,17 +152,17 @@ internal sealed class IdentityProviderAdmin(
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success<IdentityProviderId>(idValue, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success<IdentityProviderId>(idValue, (DataVersion)(0)),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
-    public async Task<Duende.Storage.Querying.QueryResult<IdentityProviderListItem>> QueryAsync(QueryRequest<IdentityProviderFilter, IdentityProviderSortField> request, Ct ct)
+    public async Task<QueryResult<IdentityProviderListItem>> QueryAsync(QueryRequest<IdentityProviderFilter, IdentityProviderSortField> request, Ct ct)
     {
         logger.QueryingProviders(LogLevel.Debug);
 
-        var result = await repository.QueryAsync(request, ct);
-        return result.ConvertTo(MapToListItem);
+        var result = await StorageMapping.ExecuteQueryAsync(() => repository.QueryAsync(request.ToStorage(), ct));
+        return result.ConvertTo(MapToListItem).ToModel(request.Range);
     }
 
     private async Task<StorageError?> ValidateExtendedPropertiesAsync(string type, AttributeValueCollection extendedProperties, Ct ct)

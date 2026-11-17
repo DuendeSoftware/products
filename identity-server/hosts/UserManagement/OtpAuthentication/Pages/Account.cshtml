@@ -1,0 +1,64 @@
+@page
+@model AccountModel
+@{
+  ViewData["Title"] = "Account";
+}
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-8">
+
+    @if (Model.ErrorMessages.Count > 0)
+    {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @foreach (var error in Model.ErrorMessages)
+        {
+          <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+        }
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    }
+
+    <!-- profile -->
+    <div class="card shadow-sm">
+      <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+        <i class="bi bi-person-circle me-2"></i>Profile
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+          <div class="mb-4">
+            <span class="fw-bold"><i class="bi bi-envelope me-1"></i>Email Address:</span>
+            <span>@Model.Email</span>
+          </div>
+
+          <div class="mb-4 mt-4">
+            <label asp-for="Name" class="form-label fw-bold">
+              <i class="bi bi-person me-1"></i>Name
+            </label>
+            <input asp-for="Name" class="form-control" placeholder="Enter your full name" title="@Model.NameDescription"/>
+            <span asp-validation-for="Name" class="text-danger"></span>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i>Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <partial name="_ValidationScriptsPartial" />
+}

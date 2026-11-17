@@ -71,7 +71,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator();
         var request = CreateRequest(subject: null);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
     }
@@ -83,7 +83,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator();
         var request = CreateRequest(subject: null, isPassive: true);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsError.ShouldBeTrue();
         response.StatusCode.ShouldBe(SamlStatusCodes.Responder);
@@ -97,7 +97,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator();
         var request = CreateRequest(subject: AuthenticatedUser(), forceAuthn: false);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeFalse();
         response.IsError.ShouldBeFalse();
@@ -113,7 +113,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
             forceAuthn: true,
             trustLevel: TrustLevel.ConfiguredKey);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
     }
@@ -129,7 +129,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
             isPassive: true,
             trustLevel: TrustLevel.ConfiguredKey);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsError.ShouldBeTrue();
         response.StatusCode.ShouldBe(SamlStatusCodes.Responder);
@@ -146,7 +146,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
             forceAuthn: true,
             trustLevel: TrustLevel.None);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
     }
@@ -161,7 +161,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
             forceAuthn: true,
             trustLevel: TrustLevel.TLS);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
     }
@@ -174,7 +174,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator(profileService);
         var request = CreateRequest(subject: AuthenticatedUser());
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
         profileService.IsActiveWasCalled.ShouldBeTrue();
@@ -189,7 +189,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator(profileService);
         var request = CreateRequest(subject: AuthenticatedUser(), isPassive: true);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsError.ShouldBeTrue();
         response.StatusCode.ShouldBe(SamlStatusCodes.Responder);
@@ -204,7 +204,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator(profileService);
         var request = CreateRequest(subject: AuthenticatedUser());
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeFalse();
         response.IsError.ShouldBeFalse();
@@ -222,7 +222,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var generator = CreateGenerator(profileService);
         var request = CreateRequest(subject: unauthenticatedPrincipal);
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
         profileService.IsActiveWasCalled.ShouldBeFalse();
@@ -237,7 +237,7 @@ public sealed class Saml2SsoInteractionResponseGeneratorTests
         var request = CreateRequest(subject: AuthenticatedUser(), sp: null);
         request.Saml2Sp = null;
 
-        var response = await generator.ProcessInteractionAsync(request, CancellationToken.None);
+        var response = await generator.ProcessInteractionAsync(request, Ct.None);
 
         response.IsLogin.ShouldBeTrue();
         profileService.IsActiveWasCalled.ShouldBeFalse();

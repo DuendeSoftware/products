@@ -6,6 +6,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.Shared;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -170,7 +171,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             }.Distinct();
         }
 
-        var handler = new JsonWebTokenHandler() { MaximumTokenSizeInBytes = _options.InputLengthRestrictions.Jwt };
+        var handler = new NonCachedJsonWebTokenHandler { MaximumTokenSizeInBytes = _options.InputLengthRestrictions.Jwt };
         var result = await handler.ValidateTokenAsync(jwtTokenString, tokenValidationParameters);
         if (!result.IsValid)
         {

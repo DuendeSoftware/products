@@ -3,7 +3,7 @@
 
 #nullable enable
 
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
 using Duende.Storage.Internal;
 
 namespace Duende.IdentityServer.Stores.Storage;
@@ -11,6 +11,16 @@ namespace Duende.IdentityServer.Stores.Storage;
 internal static class ApiResourceDso
 {
     internal static readonly EntityType EntityType = new(2102, "ApiResourceDso");
+
+    /// <summary>
+    /// Converts a stored ApiResourceDso of any registered version to the current version (V1).
+    /// A future V2 adds an arm here that upconverts older versions.
+    /// </summary>
+    internal static V1 ToCurrent(IDataStorageObject dso) => dso switch
+    {
+        V1 v1 => v1,
+        _ => throw new InvalidOperationException($"Unexpected {nameof(ApiResourceDso)} type {dso.GetType()}.")
+    };
 
     internal sealed record V1 : IDataStorageObject
     {
@@ -24,7 +34,6 @@ internal static class ApiResourceDso
         public required bool ShowInDiscoveryDocument { get; init; }
         public required bool RequireResourceIndicator { get; init; }
         public required IReadOnlyList<string> UserClaims { get; init; }
-        public required IReadOnlyList<ApiScopeReferenceDso.V1> Scopes { get; init; }
         public required IReadOnlyList<string> AllowedAccessTokenSigningAlgorithms { get; init; }
         public required IReadOnlyList<SecretDso> ApiSecrets { get; init; }
 

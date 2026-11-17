@@ -58,7 +58,6 @@ public sealed class Fapi2ConformanceTests(Fapi2ConformanceSuiteFixture fixture, 
     [Fact] public async Task EnsureClientAssertionWithNoSubFails() => await SimpleLogin("fapi2-security-profile-id2-ensure-client-assertion-with-no-sub-fails");
     [Fact] public async Task EnsureClientAssertionWithTokenEndpointAudSucceeds() => await SimpleLogin("fapi2-security-profile-id2-ensure-client-assertion-with-token-endpoint-aud-succeeds");
     [Fact] public async Task DpopNegativeTests() => await SimpleLogin("fapi2-security-profile-id2-dpop-negative-tests");
-    [Fact] public async Task RefreshToken() => await SimpleLogin("fapi2-security-profile-id2-refresh-token");
     [Fact] public async Task ParTestPushedAuthorizationUrlAsAudienceForClientJwtAssertion() => await SimpleLogin("fapi2-security-profile-id2-par-test-pushed-authorization-url-as-audience-for-client-JWT-assertion");
     [Fact] public async Task ParEnsureJwtClientAssertionsNbf8SecondsInFutureIsAccepted() => await SimpleLogin("fapi2-security-profile-id2-par-ensure-jwt-client-assertions-nbf-8-seconds-in-the-future-is-accepted");
     [Fact] public async Task ParEnsureJwtClientAssertionsNbfOver60SecondsInFutureFails() => await SimpleLogin("fapi2-security-profile-id2-par-ensure-jwt-client-assertions-nbf-over-60-seconds-in-the-future-fails");
@@ -91,6 +90,30 @@ public sealed class Fapi2ConformanceTests(Fapi2ConformanceSuiteFixture fixture, 
 
             // Suite verifies the token endpoint rejects the expired code
             await AssertPassedAsync(moduleId);
+        }
+        catch
+        {
+            await CaptureModuleDetailsAsync(moduleId);
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task RefreshToken()
+    {
+        await fixture.LoginAutomation.ResetContextAsync();
+        var moduleId = await StartModuleAsync("fapi2-security-profile-id2-refresh-token");
+        try
+        {
+            // First client: authorize and get a refresh token, which the suite then exercises.
+            var step1 = await NextStep(moduleId);
+            await Authorize(moduleId, step1);
+
+            // The suite then sends an authorize request for the second client.
+            var step2 = await NextStep(moduleId);
+            await Authorize(moduleId, step2);
+
+            await AssertPassedAsync(moduleId, step2);
         }
         catch
         {

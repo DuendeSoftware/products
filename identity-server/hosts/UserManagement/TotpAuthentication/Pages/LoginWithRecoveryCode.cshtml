@@ -1,0 +1,60 @@
+@page
+@model TotpAuthentication.Pages.LoginWithRecoveryCodeModel
+@{
+    ViewData["Title"] = "Recovery Code Login";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Recovery Code Verification</h2>
+
+            <div class="alert alert-info" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-info-circle-fill me-2"></i>Using a Recovery Code
+                </h5>
+                <p class="mb-0">
+                    Enter one of your recovery codes to access your account. Each recovery code can only be used once.
+                    This login will not remember your device.
+                </p>
+            </div>
+
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.RecoveryCode" class="form-label fw-semibold">Recovery Code</label>
+                    <input asp-for="Input.RecoveryCode"
+                           type="text"
+                           class="form-control form-control-lg text-center font-monospace"
+                           placeholder="XXXXX-XXXXX-XXX"
+                           autocomplete="off"
+                           autofocus
+                           required />
+                    <span asp-validation-for="Input.RecoveryCode" class="text-danger"></span>
+                    <div class="form-text">
+                        Enter the recovery code exactly as shown (spaces and dashes are optional)
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-shield-check me-2"></i>Log In with Recovery Code
+                    </button>
+                    <a asp-page="/LoginWith2FA" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Authenticator Login
+                    </a>
+                </div>
+            </form>
+
+            <div class="alert alert-warning mt-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Important:</strong> After using a recovery code, generate new recovery codes from your account settings.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

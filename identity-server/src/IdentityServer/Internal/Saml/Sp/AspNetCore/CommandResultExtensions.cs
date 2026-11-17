@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Security.Claims;
 using System.Text;
 using Duende.IdentityServer.Internal.Saml.Sp.Commands;
 using Microsoft.AspNetCore.Authentication;
@@ -107,6 +108,12 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
                         && !authProps.Items.ContainsKey("relayState"))
                     {
                         authProps.Items["relayState"] = relayState;
+                    }
+
+                    if (schemeName != null)
+                    {
+                        commandResult.Principal.Identities.First()
+                            .AddClaim(new Claim(Saml2ClaimTypes.Scheme, schemeName));
                     }
 
                     await httpContext.SignInAsync(signInScheme, commandResult.Principal, authProps);

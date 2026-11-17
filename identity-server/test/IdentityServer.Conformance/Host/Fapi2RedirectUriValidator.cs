@@ -11,6 +11,7 @@ namespace Duende.IdentityServer.Conformance.Host;
 /// while allowing additional query parameters. This is needed for FAPI 2.0
 /// conformance testing where the conformance suite appends query parameters
 /// (e.g., ?dummy1=lorem&amp;dummy2=ipsum) to the registered redirect URI.
+/// Only authorize redirect URIs are relaxed this way.
 /// </summary>
 internal sealed class Fapi2RedirectUriValidator : IRedirectUriValidator
 {
@@ -24,8 +25,12 @@ internal sealed class Fapi2RedirectUriValidator : IRedirectUriValidator
         Task.FromResult(IsValid(context.RequestedUri, context.Client.RedirectUris));
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Post-logout redirect URIs require an exact match. The RP-initiated logout
+    /// conformance plan checks that a URI with an added query is rejected.
+    /// </remarks>
     public Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client, Ct ct) =>
-        Task.FromResult(IsValid(requestedUri, client.PostLogoutRedirectUris));
+        Task.FromResult(client.PostLogoutRedirectUris.Contains(requestedUri, StringComparer.Ordinal));
 
     private static bool IsValid(string requestedUri, ICollection<string> registeredUris)
     {

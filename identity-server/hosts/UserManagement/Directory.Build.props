@@ -1,0 +1,12 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+  <PropertyGroup>
+    <!-- The IS hosts' parent sets AnalysisMode=AllDisabledByDefault; UM hosts opt into the full Recommended set. -->
+    <AnalysisMode>Recommended</AnalysisMode>
+    <NoWarn>$(NoWarn);CA1054</NoWarn><!-- URI parameters should not be strings -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn><!-- Consider making public types internal -->
+    <NoWarn>$(NoWarn);CA1873</NoWarn><!-- Avoid potentially expensive logging -->
+    <NoWarn>$(NoWarn);CA1848</NoWarn><!-- Use the LoggerMessage delegates -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn><!-- Missing XML comment - not required in samples -->
+  </PropertyGroup>
+</Project>

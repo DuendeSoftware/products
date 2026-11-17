@@ -4,7 +4,7 @@
 #nullable enable
 
 using System.Text.Json;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
 
 namespace Duende.IdentityServer.Stores.Storage;
 

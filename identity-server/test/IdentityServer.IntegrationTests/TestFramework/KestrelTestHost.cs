@@ -31,7 +31,7 @@ internal class KestrelTestHost : IAsyncDisposable
         ITestOutputHelper output,
         Action<IServiceCollection> configureServices,
         Action<WebApplication> configureApp,
-        CancellationToken ct)
+        Ct ct)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
         builder.Logging.ClearProviders();

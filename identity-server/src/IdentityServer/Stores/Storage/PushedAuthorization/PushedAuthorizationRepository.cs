@@ -44,7 +44,7 @@ internal sealed class PushedAuthorizationRepository(IPartitionedStorageFactory p
             PushedAuthorizationDso.EntityType,
             DataStorageKey.Create(ReferenceValueHashDskV1.Create(referenceValueHash)),
             ct);
-        return result.Found ? (PushedAuthorizationDso.V1)result.Dso : null;
+        return result.Found ? PushedAuthorizationDso.ToCurrent(result.Dso) : null;
     }
 
     internal async Task<DeleteResult> DeleteByHashAsync(string referenceValueHash, Ct ct) =>

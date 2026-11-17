@@ -1,0 +1,74 @@
+@page
+@model IndexModel
+@{
+  ViewData["Title"] = "Home";
+}
+
+<div class="platform-hero text-center">
+  <h1>OTP Authentication</h1>
+  <p class="lead m-0">
+    A demonstration of Duende Software's Platform product features for modern identity and user management.
+  </p>
+</div>
+
+<div class="mt-4">
+
+  @if (User.Identity?.IsAuthenticated == true)
+  {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body text-center py-4">
+        <h5 class="card-title mb-3">
+          <i class="bi bi-person-check-fill text-success me-2"></i>You are logged in
+        </h5>
+        <p class="text-muted mb-4">Welcome, @User.GetDisplayName()</p>
+
+        <div class="d-flex gap-2 justify-content-center">
+          <a asp-page="/Account" class="btn btn-primary">
+            <i class="bi bi-person-circle me-2"></i>Manage account
+          </a>
+          <a asp-page="/Logout" class="btn btn-outline-primary">
+            <i class="bi bi-box-arrow-right me-2"></i>Log out
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+            User.Claims
+          </div>
+          <div class="card-body">
+            @if (User.Claims.Any())
+            {
+              @foreach (var claim in User.Claims)
+              {
+                <div class="mb-3">
+                  <div class="fw-bold">@claim.Type.Split('/').Last()</div>
+                  <div>@claim.Value</div>
+                </div>
+              }
+            }
+            else
+            {
+              <div class="mb-3">
+                <div>(none)</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+  else
+  {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <a asp-page="/Login" class="btn btn-primary btn-lg">
+          <i class="bi bi-envelope-check me-2"></i>Log in
+        </a>
+      </div>
+    </div>
+  }
+</div>

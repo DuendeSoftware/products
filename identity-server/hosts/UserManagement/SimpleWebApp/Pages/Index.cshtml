@@ -1,0 +1,50 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="home-page">
+    <h2>Welcome to Simple Web App</h2>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="authenticated">
+            <h3>You are authenticated!</h3>
+            <p>Hello, <strong>@User.Identity.Name</strong></p>
+
+            <h4>Your Claims:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim Type</th>
+                        <th>Claim Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in User.Claims)
+                    {
+                        <tr>
+                            <td>@claim.Type</td>
+                            <td>@claim.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="actions">
+                <a href="/Profile" class="button">View Profile</a>
+                <a href="https://identity-server.dev.localhost:6100/Account/Profile" class="button">Edit Profile</a>
+                <a href="/Logout" class="button secondary">Logout</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="unauthenticated">
+            <p>You are not logged in.</p>
+            <p>This application uses IdentityServer with Persona OTP authentication.</p>
+            <a href="/Login" class="button">Login</a>
+        </div>
+    }
+</div>

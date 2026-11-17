@@ -187,3 +187,12 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+ALTER TABLE [ServerSideSessions] ADD [Version] int NOT NULL DEFAULT 1;
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261105173619_ServerSideSessionVersion', N'10.0.7');
+
+COMMIT;
+GO
+

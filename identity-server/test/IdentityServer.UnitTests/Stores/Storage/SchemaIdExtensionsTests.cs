@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Stores.Storage;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace UnitTests.Stores.Storage;
 

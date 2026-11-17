@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Xml;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -59,6 +60,14 @@ internal sealed class SingleSignOnServiceEndpoint(
             return new Saml2FrontChannelResult
             {
                 Error = "Invalid base64 encoding in SAML signin request"
+            };
+        }
+        catch (XmlException e)
+        {
+            logger.SamlParsingError(e);
+            return new Saml2FrontChannelResult
+            {
+                Error = "The SAML request could not be processed"
             };
         }
 

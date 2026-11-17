@@ -127,7 +127,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
                 EncryptedXml.ReplaceElement(elementToEncrypt, encryptedData, false);
             }
 
-            internal XmlElement Decrypt(AsymmetricAlgorithm key)
+            internal XmlElement Decrypt(AsymmetricAlgorithm key, int maxNestingDepth)
             {
                 var xmlDoc = XmlHelpers.XmlDocumentFromString(elementToEncrypt.OuterXml);
 
@@ -135,17 +135,26 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Helpers
 
                 exml.DecryptDocument();
 
+                // Measure depth from the root of the message the encrypted element came from.
+                var depthOffset = 0;
+                for (var parent = elementToEncrypt.ParentNode; parent is XmlElement; parent = parent.ParentNode)
+                {
+                    depthOffset++;
+                }
+
+                XmlHelpers.EnsureNestingDepthWithinLimit(xmlDoc, depthOffset, maxNestingDepth);
+
                 return xmlDoc.DocumentElement;
             }
         }
 
         extension(IEnumerable<XmlElement> elements)
         {
-            internal IEnumerable<XmlElement> Decrypt(AsymmetricAlgorithm key)
+            internal IEnumerable<XmlElement> Decrypt(AsymmetricAlgorithm key, int maxNestingDepth)
             {
                 foreach (var element in elements)
                 {
-                    yield return element.Decrypt(key);
+                    yield return element.Decrypt(key, maxNestingDepth);
                 }
             }
         }

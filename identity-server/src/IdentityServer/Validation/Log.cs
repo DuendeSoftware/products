@@ -893,6 +893,12 @@ internal static partial class Log
     internal static partial void ClientCertificateNotPresent(this ILogger logger);
 
     [LoggerMessage(
+        EventName = nameof(ClientCertificateRejectedByAuthenticationScheme),
+        Level = LogLevel.Debug,
+        Message = "Client certificate rejected by the client certificate authentication scheme")]
+    internal static partial void ClientCertificateRejectedByAuthenticationScheme(this ILogger logger);
+
+    [LoggerMessage(
         EventName = nameof(NoPostBodyFound),
         Level = LogLevel.Debug,
         Message = "No post body found")]
@@ -1277,6 +1283,42 @@ internal static partial class Log
     internal static partial void JWTTooLong(this ILogger logger);
 
     [LoggerMessage(
+        EventName = nameof(IdTokenHintHasNoSubClaim),
+        Level = LogLevel.Information,
+        Message = "id_token_hint has no sub claim")]
+    internal static partial void IdTokenHintHasNoSubClaim(this ILogger logger);
+
+    [LoggerMessage(
+        EventName = nameof(IdTokenHintCouldNotBeParsed),
+        Level = LogLevel.Information,
+        Message = "id_token_hint could not be parsed as a JWT")]
+    internal static partial void IdTokenHintCouldNotBeParsed(this ILogger logger);
+
+    [LoggerMessage(
+        EventName = nameof(IdentityTokenJwtTypesContainsReservedType),
+        Level = LogLevel.Warning,
+        Message = "IdentityTokenJwtTypes contains '{Type}', which is reserved for another kind of token and will be ignored")]
+    internal static partial void IdentityTokenJwtTypesContainsReservedType(this ILogger logger, string type);
+
+    [LoggerMessage(
+        EventName = nameof(IdTokenHintHasLogoutTokenShape),
+        Level = LogLevel.Information,
+        Message = "id_token_hint has an events claim containing the back-channel logout event")]
+    internal static partial void IdTokenHintHasLogoutTokenShape(this ILogger logger);
+
+    [LoggerMessage(
+        EventName = nameof(IdTokenHintHasAccessTokenShape),
+        Level = LogLevel.Information,
+        Message = "id_token_hint carries both client_id and scope claims, the shape of an access token, and was rejected")]
+    internal static partial void IdTokenHintHasAccessTokenShape(this ILogger logger);
+
+    [LoggerMessage(
+        EventName = nameof(IdTokenHintHasUnexpectedType),
+        Level = LogLevel.Information,
+        Message = "id_token_hint has an unexpected typ header: {Type}")]
+    internal static partial void IdTokenHintHasUnexpectedType(this ILogger logger, string type);
+
+    [LoggerMessage(
         EventName = nameof(NoClientIdSuppliedCanTFindIdIn),
         Level = LogLevel.Information,
         Message = "No clientId supplied, can't find id in identity token.")]
@@ -1389,6 +1431,12 @@ internal static partial class Log
         Level = LogLevel.Debug,
         Message = "X509 name secret validator cannot process {Type}")]
     internal static partial void X509NameSecretValidatorCannotProcess(this ILogger logger, object? @type);
+
+    [LoggerMessage(
+        EventName = nameof(SelfSignedCertificateCannotMatchX509NameSecret),
+        Level = LogLevel.Debug,
+        Message = "Self-signed certificates cannot match an x509 name secret")]
+    internal static partial void SelfSignedCertificateCannotMatchX509NameSecret(this ILogger logger);
 
     [LoggerMessage(
         EventName = nameof(NoSubjectNameFoundInX509Certificate),

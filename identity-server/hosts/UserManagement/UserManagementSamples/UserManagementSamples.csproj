@@ -1,0 +1,32 @@
+<Project Sdk="Aspire.AppHost.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>af0731fd-baa9-44e4-bb8f-63d3b4640018</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <!-- Pins a patched version of a transitive dependency of the Aspire packages (GHSA-qhrr-8q5h-9q3h). -->
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspNetIdentityApp\AspNetIdentityApp.csproj" />
+    <ProjectReference Include="..\ExternalAuthentication\ExternalAuthentication.csproj" />
+    <ProjectReference Include="..\MfaStepUp\MfaStepUp.csproj" />
+    <ProjectReference Include="..\OtpAuthentication\OtpAuthentication.csproj" />
+    <ProjectReference Include="..\PasswordValidation\PasswordValidation.csproj" />
+    <ProjectReference Include="..\PasskeyAuthentication\PasskeyAuthentication.csproj" />
+    <ProjectReference Include="..\PasskeyAuthentication.Sdk\PasskeyAuthentication.Sdk.csproj" />
+    <ProjectReference Include="..\PasskeyAuthenticationAs2FA\PasskeyAuthenticationAs2FA.csproj" />
+    <ProjectReference Include="..\OtpIdentityServer\OtpIdentityServer.csproj" />
+    <ProjectReference Include="..\PlatformUserManagementApp\PlatformUserManagementApp.csproj" />
+    <ProjectReference Include="..\SimpleWebApp\SimpleWebApp.csproj" />
+    <ProjectReference Include="..\TotpAuthentication\TotpAuthentication.csproj" />
+    <ProjectReference Include="..\UserSearch\UserSearch.csproj" />
+    <ProjectReference Include="..\WebComponent\AuthenticationFlowWithWebComponent\AuthenticationFlowWithWebComponent.csproj" />
+  </ItemGroup>
+
+</Project>

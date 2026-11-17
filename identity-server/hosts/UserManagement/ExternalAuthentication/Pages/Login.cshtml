@@ -1,0 +1,44 @@
+@page
+@model ExternalAuthentication.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Sign In</h2>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+                </div>
+            }
+
+            <div class="mb-3">
+                <p class="text-center text-muted">Choose a provider to sign in:</p>
+            </div>
+
+            <form method="post">
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+
+                <div class="d-grid gap-3">
+                    @foreach (var provider in Model.ExternalProviders)
+                    {
+                        <button type="submit" name="provider" value="@provider.Name" class="btn btn-outline-primary btn-lg">
+                            Sign in with @provider.DisplayName
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

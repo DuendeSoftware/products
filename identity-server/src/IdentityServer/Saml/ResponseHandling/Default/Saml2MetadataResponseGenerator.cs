@@ -39,7 +39,12 @@ public class Saml2MetadataResponseGenerator(
     /// <summary>
     /// Generate the EntityDescriptor
     /// </summary>
-    /// <returns></returns>
+    /// <param name="issuer">Entity Id of IdentityServer</param>
+    /// <param name="signingKeys">The certificates to publish as signing keys in the metadata</param>
+    /// <param name="options">Saml options</param>
+    /// <param name="baseUrl">Base url of IdentityServer</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The entity descriptor for IdentityServer acting as a SAML identity provider.</returns>
     protected virtual Task<EntityDescriptor> GenerateEntityDescriptorAsync(string issuer,
         IEnumerable<X509Certificate2> signingKeys, SamlOptions options, string baseUrl, Ct ct)
     {

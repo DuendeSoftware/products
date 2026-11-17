@@ -1,0 +1,77 @@
+@page
+@model LoginModel
+@{
+  ViewData["Title"] = "Log in";
+}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-container">
+      <h2 class="mb-4 brand-title text-center">Log in</h2>
+
+      @if (Model.ErrorMessages.Count > 0)
+      {
+        <div class="alert alert-danger mb-4" role="alert">
+          @foreach (var error in Model.ErrorMessages)
+          {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+          }
+        </div>
+      }
+
+      <div id="passkey-status" class="d-none" role="alert"></div>
+
+      <form method="post">
+        <input type="hidden" asp-for="ReturnUrl"/>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors alert alert-danger" role="alert"></div>
+
+        <div class="mb-4">
+          <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+          <input asp-for="Email" type="email" class="form-control form-control-lg"
+                 placeholder="Enter your email address" required autofocus autocomplete="email"/>
+          <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-envelope-check me-2"></i>Send one-time password (OTP)
+          </button>
+          <button type="button" id="passkey-discoverable-login-btn" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-fingerprint me-2"></i>Use passkey with discoverable credentials
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script src="~/js/site.js"></script>
+  <script src="~/js/passkeys.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const passkeyStatus = document.querySelector('div#passkey-status');
+
+      const getSafeReturnUrl = () => {
+        const returnUrl = document.querySelector('input[name="ReturnUrl"]')?.value;
+        if (!returnUrl || !URL.canParse(returnUrl, location.origin)) return '/';
+        const parsed = new URL(returnUrl, location.origin);
+        return parsed.origin === location.origin ? parsed.href : '/';
+      };
+
+      document.querySelector('button#passkey-discoverable-login-btn').addEventListener('click', async function () {
+        try {
+          const { challengeId, options } = await beginAuthentication();
+          const credential = await getCredential(options);
+          await completeAuthentication(challengeId, credential);
+        } catch (error) {
+          showStatus(passkeyStatus, error.message, true);
+          return;
+        }
+
+        window.location.href = getSafeReturnUrl();
+      });
+    });
+  </script>
+}

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!-- TODO: Fix these in platform test code and remove suppressions -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1829</NoWarn><!-- Use Length/Count property instead of Count() -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn><!-- Naming rule violation -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Storage.Sqlite" />
+    <PackageReference Include="MartinCostello.Logging.XUnit.v3" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+    <ProjectReference Include="..\..\testing\UserManagement.TestInfrastructure\UserManagement.TestInfrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Shared with UserManagement.Tests.Public/Import/AspNetIdentityPasswordHashAlgorithm.cs (same file,
+      compiled into both assemblies) so the how-to's registration snippet here uses the real,
+      test-verified adapter instead of a stand-in. IdentityServer8.UnitTests has no InternalsVisibleTo
+      and can't reference UserManagement.Tests.Public directly.
+    -->
+    <Compile Include="..\UserManagement.Tests.Public\Import\AspNetIdentityPasswordHashAlgorithm.cs" Link="Import\AspNetIdentityPasswordHashAlgorithm.cs" />
+  </ItemGroup>
+
+</Project>

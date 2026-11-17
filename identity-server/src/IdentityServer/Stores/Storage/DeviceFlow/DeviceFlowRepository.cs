@@ -50,7 +50,7 @@ internal sealed class DeviceFlowRepository(IPartitionedStorageFactory partitione
             DataStorageKey.Create(DeviceCodeDskV1.Create(deviceCode)),
             ct);
         return result.Found
-            ? ((DeviceFlowDso.V1)result.Dso, UuidV7.From(result.Id.Value), result.Version.Value)
+            ? (DeviceFlowDso.ToCurrent(result.Dso), UuidV7.From(result.Id.Value), result.Version.Value)
             : null;
     }
 
@@ -63,7 +63,7 @@ internal sealed class DeviceFlowRepository(IPartitionedStorageFactory partitione
             DataStorageKey.Create(UserCodeDskV1.Create(userCode)),
             ct);
         return result.Found
-            ? ((DeviceFlowDso.V1)result.Dso, UuidV7.From(result.Id.Value), result.Version.Value)
+            ? (DeviceFlowDso.ToCurrent(result.Dso), UuidV7.From(result.Id.Value), result.Version.Value)
             : null;
     }
 

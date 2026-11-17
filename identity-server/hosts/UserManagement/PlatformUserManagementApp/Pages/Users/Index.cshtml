@@ -1,0 +1,209 @@
+@page
+@model PlatformUserManagementApp.Pages.Users.IndexModel
+@using Duende.IdentityServer.DataExtensions
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="brand-title mb-0">Users</h2>
+    <a asp-page="/Users/Create" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>New user
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Query builder</h5>
+    </div>
+    <div class="card-body">
+        <div id="query-builder" class="mb-3">
+            <div id="clauses"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="add-clause-btn">
+                <i class="bi bi-plus me-1"></i>Add clause
+            </button>
+        </div>
+
+        <form method="get" id="filter-form">
+            <div class="mb-3">
+                <label for="Filter" class="form-label fw-semibold">SCIM filter expression</label>
+                <input type="text" id="Filter" name="Filter" class="form-control font-monospace"
+                       value="@Model.Filter" placeholder='e.g. displayName co "Alice" or userType eq "Employee"' />
+                <div class="form-text">
+                    Supports SCIM filter syntax: <code>eq</code>, <code>ne</code>, <code>co</code>, <code>sw</code>, <code>ew</code>, <code>gt</code>, <code>lt</code>, <code>ge</code>, <code>le</code>, <code>pr</code>
+                </div>
+            </div>
+            @if (Model.FilterError is not null)
+            {
+                <div class="alert alert-warning py-2">
+                    <i class="bi bi-exclamation-triangle me-2"></i>@Model.FilterError
+                </div>
+            }
+            <div class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label for="SortField" class="form-label">Sort by</label>
+                    <select id="SortField" name="SortField" class="form-select">
+                        <option value="">— none —</option>
+                        @foreach (var attr in Model.Schema.Keys.OrderBy(k => k.Value))
+                        {
+                            <option value="@attr.Value" selected="@(Model.SortField == attr.Value)">@attr.Value</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                    <a asp-page="/Users/Index" class="btn btn-outline-secondary ms-1">Clear</a>
+                </div>
+            </div>
+            <input type="hidden" name="CurrentPage" value="1" />
+        </form>
+    </div>
+</div>
+
+@if (Model.Users.Count == 0)
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>No users found.
+        @if (!string.IsNullOrWhiteSpace(Model.Filter))
+        {
+            <span>Try adjusting your filter.</span>
+        }
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>@Model.TotalCount user(s) found</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Display name</th>
+                        <th>Username</th>
+                        <th>User type</th>
+                        <th>Active</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        var displayName = user.Attributes.TryGetValue(ScimSchema.DisplayName.Code, out var dn) ? dn.UntypedValue?.ToString() : null;
+                        var userName = user.Attributes.TryGetValue(ScimSchema.UserName.Code, out var un) ? un.UntypedValue?.ToString() : null;
+                        var userType = user.Attributes.TryGetValue(ScimSchema.UserType.Code, out var ut) ? ut.UntypedValue?.ToString() : null;
+                        var active = user.Attributes.TryGetValue(ScimSchema.Active.Code, out var ac) ? ac.UntypedValue : null;
+                        var subjectId = user.SubjectId.ToString();
+                        <tr>
+                            <td>@(displayName ?? "—")</td>
+                            <td><code>@(userName ?? "—")</code></td>
+                            <td>@(userType ?? "—")</td>
+                            <td>
+                                @if (active is true)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (active is false)
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-page="/Users/Detail" asp-route-id="@subjectId" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-page="/Users/Edit" asp-route-id="@subjectId" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-3" aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="/Users/Index"
+                           asp-route-Filter="@Model.Filter"
+                           asp-route-SortField="@Model.SortField"
+                           asp-route-CurrentPage="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}
+
+@section Scripts {
+    <script>
+        // Schema attribute names for the query builder
+        const schemaAttrs = [@Html.Raw(string.Join(", ", Model.Schema.Keys.Select(k => $"\"{k.Value}\"")))];
+        const operators = ['eq', 'ne', 'co', 'sw', 'ew', 'pr', 'gt', 'lt', 'ge', 'le'];
+        const filterInput = document.getElementById('Filter');
+        const clausesDiv = document.getElementById('clauses');
+
+        function buildClauseHtml(index) {
+            const combiner = index === 0 ? '' : `
+                <select class="form-select form-select-sm combiner" style="width:80px">
+                    <option value="and">AND</option>
+                    <option value="or">OR</option>
+                </select>`;
+            const attrOptions = schemaAttrs.map(a => `<option value="${a}">${a}</option>`).join('');
+            const opOptions = operators.map(o => `<option value="${o}">${o}</option>`).join('');
+            return `<div class="d-flex gap-2 align-items-center mb-2 clause-row" data-index="${index}">
+                ${combiner}
+                <select class="form-select form-select-sm attr-select" style="width:200px">${attrOptions}</select>
+                <select class="form-select form-select-sm op-select" style="width:80px">${opOptions}</select>
+                <input type="text" class="form-control form-control-sm val-input" placeholder="value" style="width:160px" />
+                <button type="button" class="btn btn-sm btn-outline-danger remove-clause-btn"><i class="bi bi-x"></i></button>
+            </div>`;
+        }
+
+        let clauseCount = 0;
+
+        document.getElementById('add-clause-btn').addEventListener('click', () => {
+            clausesDiv.insertAdjacentHTML('beforeend', buildClauseHtml(clauseCount++));
+            syncFilterFromBuilder();
+            attachClauseListeners();
+        });
+
+        function attachClauseListeners() {
+            clausesDiv.querySelectorAll('.clause-row').forEach(row => {
+                row.querySelectorAll('select, input').forEach(el => {
+                    el.removeEventListener('input', syncFilterFromBuilder);
+                    el.addEventListener('input', syncFilterFromBuilder);
+                });
+                const removeBtn = row.querySelector('.remove-clause-btn');
+                removeBtn.onclick = () => { row.remove(); syncFilterFromBuilder(); };
+            });
+        }
+
+        function syncFilterFromBuilder() {
+            const rows = clausesDiv.querySelectorAll('.clause-row');
+            const parts = [];
+            rows.forEach((row, i) => {
+                const combiner = i === 0 ? '' : (row.querySelector('.combiner')?.value ?? 'and');
+                const attr = row.querySelector('.attr-select').value;
+                const op = row.querySelector('.op-select').value;
+                const val = row.querySelector('.val-input').value;
+                const clause = op === 'pr' ? `${attr} pr` : `${attr} ${op} "${val}"`;
+                parts.push(i === 0 ? clause : `${combiner} ${clause}`);
+            });
+            filterInput.value = parts.join(' ');
+        }
+    </script>
+}

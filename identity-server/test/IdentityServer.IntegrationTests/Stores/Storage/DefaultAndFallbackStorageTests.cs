@@ -6,7 +6,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Operations;
@@ -263,7 +263,7 @@ public sealed class DefaultAndFallbackStorageTests
         return readResult.Found;
     }
 
-    private static async Task<GetResult<SchemaConfiguration>> GetSchemaViaFreshProviderAsync(
+    private static async Task<Duende.IdentityServer.Models.GetResult<SchemaConfiguration>> GetSchemaViaFreshProviderAsync(
         string dataSourceName, SchemaId schemaId, Ct ct)
     {
         var services = new ServiceCollection();

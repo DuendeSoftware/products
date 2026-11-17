@@ -36,11 +36,18 @@ public interface IServerSideSessionStore
     Task CreateSessionAsync(ServerSideSession session, Ct ct);
 
     /// <summary>
-    /// Replaces the stored data for an existing session with the provided values.
+    /// Replaces the stored data for an existing session, only if the session was not changed or removed since it was read,
+    /// that is, while its <see cref="ServerSideSession.Version"/> is still the stored version.
+    /// A session with version 0 was not read from the store and is saved without this check.
+    /// A session that no longer exists is never created again.
     /// </summary>
     /// <param name="session">The session containing updated data to persist.</param>
     /// <param name="ct">The cancellation token.</param>
-    Task UpdateSessionAsync(ServerSideSession session, Ct ct);
+    /// <returns>
+    /// <see langword="true"/> if the session was saved; <see langword="false"/> if nothing was saved because the session
+    /// was changed or removed since it was read.
+    /// </returns>
+    Task<bool> UpdateSessionAsync(ServerSideSession session, Ct ct);
 
     /// <summary>
     /// Removes the session identified by the specified key.

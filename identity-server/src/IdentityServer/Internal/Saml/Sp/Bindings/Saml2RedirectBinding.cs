@@ -18,6 +18,8 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
 {
     class Saml2RedirectBinding : Saml2Binding
     {
+        private static readonly string[] SamlParameterNames = ["SAMLRequest", "SAMLResponse", "RelayState", "SigAlg", "Signature"];
+
         public override CommandResult Bind(ISaml2Message message, ILoggerAdapter logger)
         {
             return Bind(message, logger, null);
@@ -86,6 +88,15 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
                 throw new ArgumentNullException(nameof(request));
             }
 
+            foreach (var parameterName in SamlParameterNames)
+            {
+                if (request.QueryString[parameterName].Skip(1).Any())
+                {
+                    throw new BadFormatSamlResponseException(
+                        $"The HTTP-Redirect message has more than one {parameterName} parameter.");
+                }
+            }
+
             var encodedPayload = request.QueryString["SAMLRequest"].FirstOrDefault() ?? request.QueryString["SAMLResponse"].First();
             try
             {
@@ -99,8 +110,9 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
                         {
                             decompressedStream.CopyTo(deCompressed);
 
-                            var xml = XmlHelpers.XmlDocumentFromString(
-                                Encoding.UTF8.GetString(deCompressed.GetBuffer(), 0, (int)deCompressed.Length));
+                            var xml = XmlHelpers.XmlDocumentFromInboundString(
+                                Encoding.UTF8.GetString(deCompressed.GetBuffer(), 0, (int)deCompressed.Length),
+                                options);
 
                             options?.SPOptions.Logger.WriteVerbose("Http Redirect binding extracted message\n" + xml.OuterXml);
 
@@ -127,7 +139,10 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
                 return TrustLevel.None;
             }
 
-            var issuer = documentElement["Issuer", Saml2Namespaces.Saml2Name]?.InnerText;
+            var issuerElement = documentElement["Issuer", Saml2Namespaces.Saml2Name];
+            var issuer = issuerElement is null
+                ? null
+                : XmlHelpers.GetDirectTextContents(issuerElement);
 
             if (string.IsNullOrEmpty(issuer))
             {
@@ -148,26 +163,29 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
         {
             // Can't use the query string params as found in HttpReqeustData
             // because they are already unescaped and we need the exact format
-            // of the original data.
-            var rawQueryStringParams = request.Url.Query.TrimStart('?').Split('&').Select(qp => qp.Split('=')).ToDictionary(kv => kv[0], kv => kv[1]);
+            // of the original data. The raw values come from the same split as
+            // HttpRequestData.QueryString, so the signed text is the text the SP uses.
+            var rawQueryStringParams = QueryStringHelper.ParseRawQueryString(request.Url.Query);
 
             var msgParam = "";
-            if (rawQueryStringParams.TryGetValue("SAMLRequest", out string msg))
+            var msg = rawQueryStringParams["SAMLRequest"].SingleOrDefault();
+            if (msg != null)
             {
                 msgParam = "SAMLRequest=" + msg;
             }
             else
             {
-                msgParam = "SAMLResponse=" + rawQueryStringParams["SAMLResponse"];
+                msgParam = "SAMLResponse=" + rawQueryStringParams["SAMLResponse"].Single();
             }
 
             var relayStateParam = "";
-            if (rawQueryStringParams.TryGetValue("RelayState", out string relayState))
+            var relayState = rawQueryStringParams["RelayState"].SingleOrDefault();
+            if (relayState != null)
             {
                 relayStateParam = "&RelayState=" + relayState;
             }
 
-            var signedString = string.Format(CultureInfo.InvariantCulture, "{0}{1}&SigAlg={2}", msgParam, relayStateParam, rawQueryStringParams["SigAlg"]);
+            var signedString = string.Format(CultureInfo.InvariantCulture, "{0}{1}&SigAlg={2}", msgParam, relayStateParam, rawQueryStringParams["SigAlg"].Single());
 
             var sigAlg = request.QueryString["SigAlg"].Single();
 
@@ -178,7 +196,9 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
             var hashAlg = signatureDescription.CreateDigest();
             hashAlg.ComputeHash(Encoding.UTF8.GetBytes(signedString));
 
-            var signature = Convert.FromBase64String(request.QueryString["Signature"].Single());
+            var encodedSignature = request.QueryString["Signature"].SingleOrDefault()
+                ?? throw new InvalidSignatureException(string.Format(CultureInfo.InvariantCulture, "Message from {0} has a SigAlg but no Signature", idp.EntityId.Id));
+            var signature = Convert.FromBase64String(encodedSignature);
 
             if (!idp.SigningKeys.Any(kic => signatureDescription.CreateDeformatter(((AsymmetricSecurityKey)kic.CreateKey()).GetAsymmetricAlgorithm(sigAlg, false)).VerifySignature(hashAlg, signature)))
             {

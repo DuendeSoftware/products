@@ -162,7 +162,9 @@ bool ApiIsEnabled(string name)
 }
 
 IResourceBuilder<ProjectResource>? RegisterTemplateIfEnabled<T>(string name, int port) where T : IProjectMetadata, new() =>
-    RegisterClientIfEnabled<T>(name, useLaunchProfile: false)?.WithHttpsEndpoint(port: port);
+    RegisterClientIfEnabled<T>(name, useLaunchProfile: false)?
+        .WithHttpsEndpoint(port: port)
+        .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
 
 IResourceBuilder<ProjectResource>? RegisterClientIfEnabled<T>(string name, bool explicitStart = false, bool useLaunchProfile = true) where T : IProjectMetadata, new()
 {

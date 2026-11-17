@@ -1,0 +1,77 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+#nullable enable
+
+using Duende.Storage;
+using Duende.Storage.Internal;
+using Duende.Storage.Internal.Operations;
+using Duende.UserManagement.Internal.Storage;
+using Microsoft.Extensions.Options;
+
+namespace Duende.UserManagement.Authentication.Passkeys.Internal.Storage;
+
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+internal sealed class PasskeyAuthenticationChallengeRepository(
+    IPartitionedStorageFactory partitionedStorageFactory,
+    IOptions<UserAuthenticationOptions> options) : IPasskeyAuthenticationChallengeStore
+{
+    public async Task<CreateResult> CreateAsync(PasskeyAuthenticationChallenge challenge, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var expiration = Expiration.InRelative(options.Value.Passkeys.ChallengeTimeout);
+
+        return await partitionedStorage.CreateAsync(
+            challenge.Id.Uuid.Value,
+            ToDso(challenge),
+            [],
+            [],
+            expiration,
+            [],
+            ct);
+    }
+
+    public async Task<PasskeyAuthenticationChallenge?> TryReadAsync(
+        PasskeyAuthenticationChallengeId challengeId, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(
+            PasskeyAuthenticationChallengeDso.EntityType,
+            challengeId.Uuid.Value,
+            ct);
+
+        if (!result.Found)
+        {
+            return null;
+        }
+
+        var challenge = ToEntity(result.Dso);
+
+        return challenge;
+    }
+
+    public async Task<DeleteResult> DeleteAsync(PasskeyAuthenticationChallengeId challengeId, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        return await partitionedStorage.DeleteAsync(
+            PasskeyAuthenticationChallengeDso.EntityType,
+            challengeId.Uuid.Value,
+            [],
+            ct);
+    }
+
+    private static PasskeyAuthenticationChallengeDso.V1 ToDso(PasskeyAuthenticationChallenge challenge) => new(
+        challenge.Id.Uuid.Value,
+        challenge.Challenge,
+        challenge.UserSubjectId?.Value,
+        challenge.CreatedAt);
+
+    private static PasskeyAuthenticationChallenge ToEntity(IDataStorageObject value) => ToEntity(PasskeyAuthenticationChallengeDso.ToCurrent(value));
+
+    private static PasskeyAuthenticationChallenge ToEntity(PasskeyAuthenticationChallengeDso.V1 dso) =>
+        PasskeyAuthenticationChallenge.Load(
+            PasskeyAuthenticationChallengeId.From(dso.Id),
+            dso.Challenge,
+            dso.UserSubjectId is not null ? (UserSubjectId?)UserSubjectId.Load(dso.UserSubjectId) : null,
+            dso.CreatedAt);
+}

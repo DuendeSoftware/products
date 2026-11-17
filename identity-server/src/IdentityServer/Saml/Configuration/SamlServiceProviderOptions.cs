@@ -102,6 +102,12 @@ public sealed class SamlServiceProviderOptions
     public int MaxRelayStateLength { get; set; } = 1024;
 
     /// <summary>
+    /// Maximum element nesting depth of an inbound SAML message. The root is depth 0;
+    /// text, comments and attributes do not add element depth. Defaults to 32.
+    /// </summary>
+    public int MaxXmlNestingDepth { get; set; } = 32;
+
+    /// <summary>
     /// Base64-encoded X.509 certificate (with private key, PKCS#12) used by the SP to sign
     /// outbound SAML messages (AuthnRequests, LogoutResponses). Required when the remote
     /// IdP expects signed requests or when single logout is used.

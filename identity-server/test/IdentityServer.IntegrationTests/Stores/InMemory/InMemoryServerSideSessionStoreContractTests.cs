@@ -12,6 +12,7 @@ namespace Duende.IdentityServer.IntegrationTests.Stores.InMemory;
 /// </summary>
 public class InMemoryServerSideSessionStoreContractTests : ServerSideSessionStoreContractTests
 {
-    protected override StoreHandle<IServerSideSessionStore> CreateStore() =>
-        new(new InMemoryServerSideSessionStore(TimeProvider.System));
+    private readonly InMemoryServerSideSessionStore _store = new(TimeProvider.System);
+
+    protected override StoreHandle<IServerSideSessionStore> CreateStore() => new(_store);
 }

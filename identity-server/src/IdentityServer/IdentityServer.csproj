@@ -6,6 +6,7 @@
     <Description>OpenID Connect and OAuth 2.0 Framework for ASP.NET Core</Description>
     <AssemblyName>Duende.IdentityServer</AssemblyName>
     <RootNamespace>Duende.IdentityServer</RootNamespace>
+    <NoWarn>$(NoWarn);CA1812</NoWarn> <!-- never instantiated internal class-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,8 +15,8 @@
 
   <ItemGroup>
     <PackageReference Include="Duende.Private.Licensing" />
-    <PackageReference Include="Duende.Spaces" />
     <PackageReference Include="Duende.Storage" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" />
@@ -45,10 +46,16 @@
     <EmbeddedResource Include="Endpoints\Results\iframe-completion.js" />
     <None Remove="Hosting\FederatedSignOut\federated-signout.js" />
     <EmbeddedResource Include="Hosting\FederatedSignOut\federated-signout.js" />
+    <None Remove="UserManagement\Authentication\Passkeys\passkeys.js" />
+    <EmbeddedResource Include="UserManagement\Authentication\Passkeys\passkeys.js" LogicalName="Duende.UserManagement.Authentication.Passkeys.passkeys.js" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Stores\Storage\Internal\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\shared\JsonWebTokens\NonCachedJsonWebTokenHandler.cs" Link="NonCachedJsonWebTokenHandler.cs" />
   </ItemGroup>
 
 </Project>

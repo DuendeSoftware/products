@@ -69,13 +69,25 @@ internal static partial class Log
 
     [LoggerMessage(
         LogLevel.Debug,
-        EventName = nameof(SessionOverwriteDetectedForKeyKeyRevokingGrants),
-        Message = "Session overwrite detected for key {Key}; revoking grants for prior subject id {SubjectId} and session id {SessionId}")]
-    internal static partial void SessionOverwriteDetectedForKeyKeyRevokingGrants(this ILogger logger, object key, object subjectId, object sessionId);
+        EventName = nameof(SessionReplacementDetectedForKey),
+        Message = "Session replacement detected for key {Key}; previous subject id {SubjectId} and session id {SessionId}")]
+    internal static partial void SessionReplacementDetectedForKey(this ILogger logger, object key, object subjectId, object sessionId);
 
     [LoggerMessage(
         LogLevel.Debug,
         EventName = nameof(RemovingAuthenticationTicketFromStoreForKeyKey),
         Message = "Removing AuthenticationTicket from store for key {Key}")]
     internal static partial void RemovingAuthenticationTicketFromStoreForKeyKey(this ILogger logger, object key);
+
+    [LoggerMessage(
+        LogLevel.Warning,
+        EventName = nameof(CouldNotReadPreviousSessionTicketForKey),
+        Message = "Could not read the previous session's ticket for key {Key} (subject {SubjectId}, session {SessionId}); continuing session replacement with the session record's data")]
+    internal static partial void CouldNotReadPreviousSessionTicketForKey(this ILogger logger, object key, object subjectId, object sessionId);
+
+    [LoggerMessage(
+        LogLevel.Debug,
+        EventName = nameof(SkippingRenewalOfTicketForKeyBecauseOnlyDatesDiffer),
+        Message = "Skipping renewal of AuthenticationTicket for key {Key}: the stored session changed since it was read, but the ticket only differs from the one that was read in its dates")]
+    internal static partial void SkippingRenewalOfTicketForKeyBecauseOnlyDatesDiffer(this ILogger logger, object key);
 }

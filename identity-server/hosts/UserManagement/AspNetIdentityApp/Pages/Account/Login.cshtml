@@ -1,0 +1,57 @@
+@page
+@model AspNetIdentityApp.Pages.Account.LoginModel
+@{
+  ViewData["Title"] = "Log in";
+}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-container">
+      <h2 class="mb-4 brand-title text-center">Log in</h2>
+
+      <div class="alert alert-info small mb-3">
+        <i class="bi bi-info-circle me-1"></i><strong>Demo credentials:</strong>
+        <code>alice.johnson</code> / <code>Pass123$</code>
+      </div>
+
+      @if (Model.ErrorMessages.Count > 0)
+      {
+        <div class="alert alert-danger mb-4" role="alert">
+          @foreach (var error in Model.ErrorMessages)
+          {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+          }
+        </div>
+      }
+
+      <form method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors alert alert-danger" role="alert"></div>
+
+        <div class="mb-3">
+          <label asp-for="UserName" class="form-label fw-semibold">Username</label>
+          <input asp-for="UserName" type="text" class="form-control form-control-lg"
+                 placeholder="Enter your username" required autofocus autocomplete="username" />
+          <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+          <label asp-for="Password" class="form-label fw-semibold">Password</label>
+          <input asp-for="Password" type="password" class="form-control form-control-lg"
+                 placeholder="Enter your password" required autocomplete="current-password" />
+          <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Log in
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <partial name="_ValidationScriptsPartial" />
+}

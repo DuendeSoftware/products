@@ -55,4 +55,12 @@ public class ServerSideSession
     /// The serialized ticket
     /// </summary>
     public string Ticket { get; set; } = default!;
+
+    /// <summary>
+    /// The version of the stored session at the time this instance was read. <see cref="Stores.IServerSideSessionStore.GetSessionAsync"/>
+    /// and <see cref="Stores.IServerSideSessionStore.GetSessionsAsync"/> set it.
+    /// <see cref="Stores.IServerSideSessionStore.UpdateSessionAsync"/> saves the session only while this is still the stored version.
+    /// 0 means the session was not read from the store, and the save is not checked.
+    /// </summary>
+    public int Version { get; set; }
 }

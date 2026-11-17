@@ -47,12 +47,11 @@ public class SessionExpirationHandlerTests
             ShowInDiscoveryDocument = false,
             Required = false,
             Emphasize = false,
-            UserClaims = [],
-            ReferencedByApiResources = []
+            UserClaims = []
         };
-        var evt = CreateEvent(dso);
+        var evt = CreateEvent(dso, ApiScopeDso.EntityType);
 
-        var result = await handler.HandleAsync(evt, CancellationToken.None);
+        var result = await handler.HandleAsync(evt, Ct.None);
 
         result.ShouldBeOfType<HandleOutcomeResult.DropResult>();
     }
@@ -63,7 +62,7 @@ public class SessionExpirationHandlerTests
         var handler = CreateHandler();
         var evt = CreateEvent<ServerSideSessionDso.V1>(null);
 
-        var result = await handler.HandleAsync(evt, CancellationToken.None);
+        var result = await handler.HandleAsync(evt, Ct.None);
 
         result.ShouldBeOfType<HandleOutcomeResult.DropResult>();
     }
@@ -75,7 +74,7 @@ public class SessionExpirationHandlerTests
         var payload = CreateValidSessionDso("sub_123", "sid_456");
         var evt = CreateEvent(payload);
 
-        var result = await handler.HandleAsync(evt, CancellationToken.None);
+        var result = await handler.HandleAsync(evt, Ct.None);
 
         result.ShouldBeOfType<HandleOutcomeResult.SuccessResult>();
         _coordinationService.ProcessedSessions.Count.ShouldBe(1);
@@ -91,7 +90,7 @@ public class SessionExpirationHandlerTests
         var dso = CreateValidSessionDso("sub_err", "sid_err");
         var evt = CreateEvent(dso);
 
-        var result = await handler.HandleAsync(evt, CancellationToken.None);
+        var result = await handler.HandleAsync(evt, Ct.None);
 
         result.ShouldBeOfType<HandleOutcomeResult.RetryResult>();
         var retry = (HandleOutcomeResult.RetryResult)result;
@@ -117,7 +116,7 @@ public class SessionExpirationHandlerTests
         };
         var evt = CreateEvent(dso);
 
-        var result = await handler.HandleAsync(evt, CancellationToken.None);
+        var result = await handler.HandleAsync(evt, Ct.None);
 
         result.ShouldBeOfType<HandleOutcomeResult.DropResult>();
     }
@@ -167,8 +166,10 @@ public class SessionExpirationHandlerTests
         return dso;
     }
 
-    private static PersistedOutboxEvent CreateEvent<T>(T? dso) where T : class, IDataStorageObject =>
-        new()
+    private static PersistedOutboxEvent CreateEvent<T>(T? dso, EntityType? entityType = null) where T : class, IDataStorageObject
+    {
+        var resolvedEntityType = entityType ?? ServerSideSessionDso.EntityType;
+        return new()
         {
             MessageId = OutboxEventId.New(),
             EventId = OutboxEventId.New(),
@@ -176,11 +177,12 @@ public class SessionExpirationHandlerTests
             SequenceNumber = 1,
             EventName = OutboxEventName.EntityExpired,
             SubjectId = UuidV7.New(),
-            EntityTypeName = "ServerSideSessionDso",
-            EntityTypeId = 2107,
+            EntityTypeName = resolvedEntityType.Name,
+            EntityTypeId = (int)resolvedEntityType.Id,
             PoolId = 0,
             Payload = JsonSerializer.Serialize(dso),
             Dso = dso,
             SubscriberName = SubscriberName.Create("SessionExpiration")
         };
+    }
 }

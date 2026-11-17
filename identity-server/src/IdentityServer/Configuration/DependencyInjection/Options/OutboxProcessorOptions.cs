@@ -42,4 +42,13 @@ public class OutboxProcessorOptions
     /// time between host startup and the first <see cref="ProcessInterval"/>.
     /// </remarks>
     public bool FuzzStartup { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the lease settings used to coordinate this job across nodes.
+    /// </summary>
+    /// <remarks>
+    /// Only has an effect when coordinated, which requires Duende Storage (the default storage
+    /// instance) or Spaces to be registered. See <see cref="BackgroundJobLeaseOptions"/>.
+    /// </remarks>
+    public BackgroundJobLeaseOptions Lease { get; set; } = new();
 }

@@ -60,7 +60,6 @@ public class RegisteredImplementationsDiagnosticEntryTests
         var registeredImplementations = result.RootElement.GetProperty("RegisteredImplementations");
         registeredImplementations.TryGetProperty("Root", out _).ShouldBeTrue();
         registeredImplementations.TryGetProperty("Hosting", out _).ShouldBeTrue();
-        registeredImplementations.TryGetProperty("Infrastructure", out _).ShouldBeTrue();
         registeredImplementations.TryGetProperty("ResponseHandling", out _).ShouldBeTrue();
         registeredImplementations.TryGetProperty("Services", out _).ShouldBeTrue();
         registeredImplementations.TryGetProperty("Stores", out _).ShouldBeTrue();

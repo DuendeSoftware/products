@@ -43,7 +43,7 @@ public sealed class HybridBackChannel : IScenario
     public string Description => "Hybrid flow with back-channel logout notification";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         // 1. Start IdentityServer
         _identityServer = new IdentityServerTestHost(configurator, "identity-server");
@@ -199,7 +199,7 @@ public sealed class HybridBackChannel : IScenario
         return user;
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {

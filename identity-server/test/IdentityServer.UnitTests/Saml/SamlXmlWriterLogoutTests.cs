@@ -361,7 +361,7 @@ public sealed class SamlXmlWriterLogoutTests
         // Read it back
         var reader = new SamlXmlReader();
         var traverser = new Duende.IdentityServer.Saml.Xml.XmlTraverser(doc.DocumentElement!);
-        var readBack = reader.ReadLogoutResponseAsync(traverser, null, CancellationToken.None).GetAwaiter().GetResult();
+        var readBack = reader.ReadLogoutResponseAsync(traverser, null, Ct.None).GetAwaiter().GetResult();
 
         readBack.Status.StatusCode.Value.ShouldBe(SamlStatusCodes.Requester);
         readBack.Status.StatusCode.NestedStatusCode.ShouldNotBeNull();

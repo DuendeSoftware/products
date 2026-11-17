@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Duende.IdentityServer.OutsideIn.Harness</RootNamespace>
+    <!--
+      This project lives under test/ so it automatically picks up test/Directory.Build.props (and,
+      through it, test.props), which assume a runnable xunit test project. It is a class library
+      consumed by test projects instead, so the two settings below are overridden here.
+    -->
+    <IsTestProject>false</IsTestProject>
+    <OutputType>Library</OutputType>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Duende.Storage.Sqlite" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Verify.XunitV3" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+    <PackageReference Include="Yarp.ReverseProxy" />
+    <!--
+      test.props (imported through test/Directory.Build.props) unconditionally adds the xunit v3 runner,
+      which requires an executable output. This project is a class library, not a test project, so remove it.
+    -->
+    <PackageReference Remove="xunit.v3.core.mtp-v2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Remove="Xunit" />
+    <AssemblyAttribute Remove="Xunit.CaptureConsole" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+  </ItemGroup>
+</Project>

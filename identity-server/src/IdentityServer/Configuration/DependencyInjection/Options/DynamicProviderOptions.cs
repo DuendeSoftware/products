@@ -4,9 +4,12 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Hosting.DynamicProviders.Store;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -69,6 +72,38 @@ public class DynamicProviderOptions
     public bool SignOutSchemeSetExplicitly => _signOutScheme != null;
 
     /// <summary>
+    /// Gets or sets how long cached authentication handler options and identity provider records for a
+    /// dynamic provider in a given space may go unused before they are released.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to one hour. An entry for a <c>(space, scheme)</c> combination that is not used again
+    /// within this time is removed from the dynamic provider caches and rebuilt from the store the next
+    /// time it is needed. This bounds the memory the caches use across many spaces, including spaces
+    /// that were deleted or are simply idle. Reclamation runs during request processing, at most once
+    /// per quarter of this timeout, on every request handled by <c>IdentityServerMiddleware</c> — not
+    /// only ones that resolve a dynamic scheme, so idle entries are reclaimed even while only
+    /// static-only, local-login, token, or other-provider-type traffic arrives. Set to
+    /// <see cref="Timeout.InfiniteTimeSpan"/> to disable expiry and keep every entry indefinitely. Must
+    /// be a positive value or <see cref="Timeout.InfiniteTimeSpan"/>.
+    /// </remarks>
+    public TimeSpan CacheIdleTimeout
+    {
+        get => _cacheIdleTimeout;
+        set
+        {
+            if (value != Timeout.InfiniteTimeSpan && value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    $"{nameof(CacheIdleTimeout)} must be greater than zero or {nameof(Timeout)}.{nameof(Timeout.InfiniteTimeSpan)}.");
+            }
+
+            _cacheIdleTimeout = value;
+        }
+    }
+
+    private TimeSpan _cacheIdleTimeout = TimeSpan.FromHours(1);
+
+    /// <summary>
     /// Registers a provider configuration model and authentication handler for the protocol type being used.
     /// </summary>
     public void AddProviderType<THandler, TOptions, TIdentityProvider>(string type)
@@ -97,6 +132,7 @@ public class DynamicProviderOptions
             OptionsType = typeof(TOptions),
             IdentityProviderType = identityProviderType,
             CopyConstructor = (baseModel) => (IdentityProvider)ctor.Invoke([baseModel]),
+            HasSpaceAwareOptionsCache = services => services.GetService<IOptionsMonitorCache<TOptions>>() is ISpaceAwareDynamicOptionsCache,
         });
     }
 
@@ -134,5 +170,11 @@ public class DynamicProviderOptions
         /// to create a derived <see cref="IdentityProvider"/> from a base instance.
         /// </summary>
         internal Func<IdentityProvider, IdentityProvider> CopyConstructor { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or sets a delegate that reports whether the options cache registered for
+        /// <see cref="OptionsType"/> keeps dynamic provider options separate per space.
+        /// </summary>
+        internal Func<IServiceProvider, bool> HasSpaceAwareOptionsCache { get; set; } = default!;
     }
 }

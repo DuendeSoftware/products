@@ -3,7 +3,7 @@
 
 using System.Text.Json;
 using Duende.IdentityServer.Stores.Storage;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
 
 namespace UnitTests.Stores.Storage;
 

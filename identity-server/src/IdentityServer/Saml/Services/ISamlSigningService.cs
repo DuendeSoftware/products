@@ -16,8 +16,8 @@ public interface ISamlSigningService
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The signing certificate with private key.</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when no signing credential is available, when the credential is not an X509 certificate,
-    /// or when the certificate does not have a private key.
+    /// Thrown when no signing credential is available, when the credential is neither an X509 certificate nor an RSA key
+    /// managed by automatic key management, or when the credential does not have a private key.
     /// </exception>
     Task<X509Certificate2> GetSigningCertificateAsync(Ct ct);
 
@@ -27,7 +27,7 @@ public interface ISamlSigningService
     /// <param name="ct">The cancellation token.</param>
     /// <returns>Base64-encoded certificate bytes.</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when no signing credential is available or when the credential is not an X509 certificate.
+    /// Thrown when no signing credential is available, when the credential is neither an X509 certificate nor an RSA key managed by automatic key management, or when the signing certificate does not have a private key.
     /// </exception>
     Task<string> GetSigningCertificateBase64Async(Ct ct);
 

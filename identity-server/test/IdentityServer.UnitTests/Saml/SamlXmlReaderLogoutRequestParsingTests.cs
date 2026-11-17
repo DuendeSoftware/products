@@ -28,7 +28,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
             notOnOrAfter: "2025-01-01T00:05:00Z");
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         result.Id.ShouldBe("_test-id");
         result.Version.ShouldBe("2.0");
@@ -52,7 +52,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
         var doc = CreateLogoutRequestDoc(nameIdValue: "user@example.com");
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         result.Issuer!.Value.ShouldBe("https://sp.example.com");
         result.NameId.ShouldNotBeNull();
@@ -77,7 +77,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
             nameIdNameQualifier: "https://idp.example.com");
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         result.NameId!.Format.ShouldBe("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent");
         result.NameId.SPNameQualifier.ShouldBe("https://sp.example.com");
@@ -94,7 +94,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
             sessionIndex: "_abc-session-456");
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         result.SessionIndex.ShouldBe("_abc-session-456");
     }
@@ -114,7 +114,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
         var traverser = new XmlTraverser(doc.DocumentElement!);
 
         await Should.ThrowAsync<Exception>(async () =>
-            await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None));
+            await reader.ReadLogoutRequestAsync(traverser, null, Ct.None));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
         var doc = CreateLogoutRequestDoc(nameIdValue: "user@example.com");
 
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         result.HasTrustedSignature.ShouldBeFalse();
     }
@@ -159,7 +159,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
         // The reader should read the root element's content (attacker-controlled),
         // but since there is no valid signature, TrustLevel should be None/untrusted.
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         // Without a valid signature, the request must not be trusted
         result.HasTrustedSignature.ShouldBeFalse();
@@ -191,7 +191,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
         var traverser = new XmlTraverser(doc.DocumentElement!);
 
         await Should.ThrowAsync<Exception>(async () =>
-            await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None));
+            await reader.ReadLogoutRequestAsync(traverser, null, Ct.None));
     }
 
     [Fact]
@@ -214,7 +214,7 @@ public sealed class SamlXmlReaderLogoutRequestParsingTests
         // when CurrentNode is null (no more children). The NameID will be null,
         // and downstream validation should reject the request.
         var traverser = new XmlTraverser(doc.DocumentElement!);
-        var result = await reader.ReadLogoutRequestAsync(traverser, null, CancellationToken.None);
+        var result = await reader.ReadLogoutRequestAsync(traverser, null, Ct.None);
 
         result.NameId.ShouldBeNull();
     }

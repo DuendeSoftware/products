@@ -47,7 +47,7 @@ public sealed class JarUriJwt : IScenario
     public string Description => "JAR via request_uri with private_key_jwt client authentication";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         // 1. Start IdentityServer with JWT bearer client authentication and request_uri support
         _identityServer = new IdentityServerTestHost(configurator, "identity-server",
@@ -193,7 +193,7 @@ public sealed class JarUriJwt : IScenario
         Links = [_identityServer.Link, _webApp.Link, _api.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {
@@ -393,7 +393,7 @@ internal sealed class JarUriJwtClientAssertionService(
     public Task<ClientAssertion?> GetClientAssertionAsync(
         ClientCredentialsClientName? clientName = null,
         TokenRequestParameters? parameters = null,
-        CancellationToken ct = default) =>
+        Ct ct = default) =>
         Task.FromResult<ClientAssertion?>(new ClientAssertion
         {
             Type = OidcConstants.ClientAssertionTypes.JwtBearer,

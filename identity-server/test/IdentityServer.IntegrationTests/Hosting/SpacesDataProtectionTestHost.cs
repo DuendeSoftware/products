@@ -105,16 +105,21 @@ internal sealed class SpacesDataProtectionTestHost : IAsyncDisposable
                     ])
                     .AddInMemoryIdentityResources([new IdentityResources.OpenId()]);
 
+                options.ConfigureBuilder?.Invoke(builder);
+
                 if (options.SigningKeyStore == SpacesSigningKeyStore.DeveloperCredential)
                 {
                     _ = builder.AddDeveloperSigningCredential(persistKey: false);
                 }
 
-                _ = builder.AddStorage(storageBuilder => storageBuilder.AddSqliteInMemory(storage.DatabaseName))
-                    .AddConfigurationStorage()
-                    .AddOperationalStorage();
+                var storageBuilder = builder.AddStorage(storageOptions => storageOptions.AddSqliteInMemory(storage.DatabaseName))
+                    .AddConfigurationStorage();
+                if (!options.InMemoryOperationalStores)
+                {
+                    _ = storageBuilder.AddOperationalStorage();
+                }
 
-                // Registered after AddOperationalStorage() so the explicit choice wins over its default.
+                // Registered after AddOperationalStorage(), when it's called, so the explicit choice wins over its default.
                 if (options.SigningKeyStore == SpacesSigningKeyStore.FileSystem)
                 {
                     _ = builder.AddSigningKeyStore<FileSystemKeyStore>();
@@ -142,6 +147,8 @@ internal sealed class SpacesDataProtectionTestHost : IAsyncDisposable
                         spaces.FallbackToDefault = options.FallbackToDefault;
                     });
                 }
+
+                options.ConfigureServices?.Invoke(services);
             },
             webapp =>
             {
@@ -243,6 +250,14 @@ internal sealed class SpacesDataProtectionTestHost : IAsyncDisposable
             cookies,
             ct);
 
+    /// <summary>Creates a client for the server, disposed with the host. Address a space through <see cref="SpacesTestSpace.Issuer"/>.</summary>
+    public HttpClient CreateClient()
+    {
+        var client = new HttpClient(_server.CreateHandler(allowAutoRedirect: false), disposeHandler: true) { BaseAddress = _server.BaseAddress };
+        _clients.Add(client);
+        return client;
+    }
+
     /// <summary>Sends a GET without cookies to the space.</summary>
     public async Task<string> GetStringAsync(SpacesTestSpace space, string path, Ct ct)
     {
@@ -300,12 +315,13 @@ internal sealed class SpacesDataProtectionTestHost : IAsyncDisposable
         {
             identityServerOptions.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
         }
+
+        options.ConfigureKeyManagement?.Invoke(identityServerOptions.KeyManagement);
     }
 
     private async Task<HttpResponseMessage> SendAsync(string url, IReadOnlyDictionary<string, string> cookies, Ct ct)
     {
-        var client = new HttpClient(_server.CreateHandler(allowAutoRedirect: false), disposeHandler: true) { BaseAddress = _server.BaseAddress };
-        _clients.Add(client);
+        var client = CreateClient();
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         if (cookies.Count > 0)

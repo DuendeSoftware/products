@@ -823,7 +823,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Message.ShouldNotBeNull();
         result.Error.ShouldBeNull();
@@ -836,7 +836,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Message!.Destination.ShouldBe(AcsUrl);
     }
@@ -848,7 +848,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest(relayState: RelayStateValue);
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Message!.RelayState.ShouldBe(RelayStateValue);
     }
@@ -860,7 +860,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Message!.Binding.ShouldBe(SamlConstants.Bindings.HttpPost);
         result.Message.Name.ShouldBe(SamlConstants.RequestProperties.SAMLResponse);
@@ -873,7 +873,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         var xml = result.Message!.Xml.OuterXml;
         xml.ShouldContain(SamlStatusCodes.Responder);
@@ -886,7 +886,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         var xml = result.Message!.Xml.OuterXml;
         xml.ShouldContain(SamlStatusCodes.NoPassive);
@@ -899,7 +899,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         var xml = result.Message!.Xml.OuterXml;
         xml.ShouldContain(IdpEntityId);
@@ -912,7 +912,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         var xml = result.Message!.Xml.OuterXml;
         xml.ShouldContain(RequestId);
@@ -925,7 +925,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         var xml = result.Message!.Xml.OuterXml;
         xml.ShouldContain(AcsUrl);
@@ -938,7 +938,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator();
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         var xml = result.Message!.Xml.OuterXml;
         xml.ShouldNotContain("<saml:Assertion");
@@ -951,7 +951,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator(signingBehavior: SamlSigningBehavior.DoNotSign);
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Message!.SigningCertificate.ShouldBeNull();
     }
@@ -966,7 +966,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         var generator = CreateErrorTestGenerator(signingBehavior: SamlSigningBehavior.SignResponse, signingCertificate: cert);
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Message!.SigningCertificate.ShouldBe(cert);
     }
@@ -987,7 +987,7 @@ public sealed class Saml2SsoResponseGeneratorTests
             new DefaultSamlNameIdGenerator(idServerOptions));
         var request = CreateErrorTestRequest();
 
-        var result = await generator.CreateErrorResponse(request, NoPassiveError(), CancellationToken.None);
+        var result = await generator.CreateErrorResponse(request, NoPassiveError(), Ct.None);
 
         result.Error.ShouldNotBeNull();
         result.Message.ShouldBeNull();
@@ -1017,7 +1017,7 @@ public sealed class Saml2SsoResponseGeneratorTests
         public Task<string> GetSigningCertificateBase64Async(Ct ct) =>
             Task.FromResult(Convert.ToBase64String(certificate?.RawData ?? []));
 
-        public Task<IReadOnlyList<X509Certificate2>> GetAllSigningCertificatesAsync(CancellationToken ct) =>
+        public Task<IReadOnlyList<X509Certificate2>> GetAllSigningCertificatesAsync(Ct ct) =>
             Task.FromResult<IReadOnlyList<X509Certificate2>>(certificate == null ? [] : [certificate]);
     }
 

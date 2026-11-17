@@ -60,6 +60,7 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
         // Set the SP module path to the dynamic provider path prefix + /Saml2
         // so the handler intercepts paths like /federation/{scheme}/Saml2/Acs
         options.SPOptions.ModulePath = context.PathPrefix + "/Saml2";
+        options.SPOptions.TimeProvider = _timeProvider;
 
         // Set SP entity ID: customer override > provider config > IdentityServer issuer
         var entityId = publicOptions?.SpEntityId
@@ -119,6 +120,11 @@ internal sealed class SamlConfigureOptions : ConfigureAuthenticationOptions<Saml
                 $"MaxRelayStateLength must be non-negative for provider '{provider.Scheme}'.");
         }
         options.SPOptions.MaxRelayStateLength = maxRelayStateLength;
+
+        if (publicOptions?.MaxXmlNestingDepth is { } maxXmlNestingDepth)
+        {
+            options.SPOptions.MaxXmlNestingDepth = maxXmlNestingDepth;
+        }
 
         // Wire up the LogoutResponseCreated notification so the AuthenticationRequestHandlerWrapper
         // can intercept IdP-initiated logout and trigger federated sign-out for downstream clients.

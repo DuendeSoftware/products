@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
@@ -19,10 +22,15 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class ServerSideTicketStore : IServerSideTicketStore
 {
+    private const string SessionVersionItem = "idsrv.server_session_version";
+    private const string SessionFingerprintItem = "idsrv.server_session_fingerprint";
+    private const string IssuedItem = ".issued";
+    private const string ExpiresItem = ".expires";
+
     private readonly IdentityServerOptions _options;
     private readonly IIssuerNameService _issuerNameService;
     private readonly IServerSideSessionStore _store;
-    private readonly IPersistedGrantStore _persistedGrantStore;
+    private readonly ISessionReplacementService _sessionReplacementService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IDataProtector _protector;
     private readonly ILogger<ServerSideTicketStore> _logger;
@@ -34,7 +42,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     /// <param name="options"></param>
     /// <param name="issuerNameService"></param>
     /// <param name="store"></param>
-    /// <param name="persistedGrantStore"></param>
+    /// <param name="sessionReplacementService"></param>
     /// <param name="dataProtectionProvider"></param>
     /// <param name="httpContextAccessor"></param>
     /// <param name="logger"></param>
@@ -43,7 +51,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         IdentityServerOptions options,
         IIssuerNameService issuerNameService,
         IServerSideSessionStore store,
-        IPersistedGrantStore persistedGrantStore,
+        ISessionReplacementService sessionReplacementService,
         IDataProtectionProvider dataProtectionProvider,
         IHttpContextAccessor httpContextAccessor,
         ILogger<ServerSideTicketStore> logger,
@@ -52,7 +60,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         _options = options;
         _issuerNameService = issuerNameService;
         _store = store;
-        _persistedGrantStore = persistedGrantStore;
+        _sessionReplacementService = sessionReplacementService;
         _httpContextAccessor = httpContextAccessor;
         _protector = dataProtectionProvider.CreateProtector("Duende.SessionManagement.ServerSideTicketStore");
         _logger = logger;
@@ -66,7 +74,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(ticket);
 
-        ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
+        ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None));
 
         var key = CryptoRandom.CreateUniqueId(format: CryptoRandom.OutputFormat.Hex);
 
@@ -78,6 +86,9 @@ public class ServerSideTicketStore : IServerSideTicketStore
     private async Task CreateNewSessionAsync(string key, AuthenticationTicket ticket)
     {
         _logger.CreatingEntryInStoreForAuthenticationTicketKeyKey(key, ticket.GetExpiration());
+
+        ticket.Properties.Items.Remove(SessionVersionItem);
+        ticket.Properties.Items.Remove(SessionFingerprintItem);
 
         var session = new ServerSideSession
         {
@@ -92,7 +103,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             Ticket = ticket.Serialize(_protector)
         };
 
-        await _store.CreateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+        await _store.CreateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
     }
 
     /// <inheritdoc />
@@ -104,7 +115,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         _logger.RetrieveAuthenticationTicketForKeyKey(key);
 
-        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
         if (session == null)
         {
             _logger.NoTicketFoundInStoreForKey(key);
@@ -115,14 +126,16 @@ public class ServerSideTicketStore : IServerSideTicketStore
         if (ticket != null)
         {
             _logger.TicketLoadedForKeyKeyWithExpirationExpiration(key, ticket.GetExpiration());
+            ticket.Properties.Items[SessionVersionItem] = session.Version.ToString(CultureInfo.InvariantCulture);
+            ticket.Properties.Items[SessionFingerprintItem] = ComputeFingerprint(ticket);
             return ticket;
         }
 
-        // if we failed to get a ticket, then remove DB record 
+        // if we failed to get a ticket, then remove DB record
         _logger.FailedToDeserializeAuthenticationTicketFromStoreDeleting(key);
         await RemoveAsync(key);
 
-        return ticket;
+        return null;
     }
 
     /// <inheritdoc />
@@ -132,13 +145,19 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(ticket);
 
-        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+        var versionRead = ticket.Properties.Items.Remove(SessionVersionItem, out var versionText)
+            ? int.Parse(versionText, CultureInfo.InvariantCulture)
+            : 0;
+        var fingerprintRead = ticket.Properties.Items.Remove(SessionFingerprintItem, out var fingerprintText) ? fingerprintText : null;
+        var fingerprintToSave = ComputeFingerprint(ticket);
+
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
         if (session == null)
         {
-            // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
-            await CreateNewSessionAsync(key, ticket);
             return;
         }
+
+        session.Version = versionRead;
 
         _logger.RenewingAuthenticationTicketForKeyKeyWithExpirationExpiration(key, ticket.GetExpiration());
 
@@ -149,36 +168,103 @@ public class ServerSideTicketStore : IServerSideTicketStore
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         if (isNew)
         {
-            _logger.SessionOverwriteDetectedForKeyKeyRevokingGrants(key, session.SubjectId, session.SessionId);
+            _logger.SessionReplacementDetectedForKey(key, session.SubjectId, session.SessionId);
 
-            await _persistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
+            var previousSession = AsUserSessions([session]).SingleOrDefault();
+            if (previousSession == null)
             {
-                SubjectId = session.SubjectId,
-                SessionId = session.SessionId,
-                Types = [
-                    IdentityServerConstants.PersistedGrantTypes.RefreshToken,
-                    IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
-                    IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,
-                    IdentityServerConstants.PersistedGrantTypes.BackChannelAuthenticationRequest,
-                ]
-            }, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+                _logger.CouldNotReadPreviousSessionTicketForKey(key, session.SubjectId, session.SessionId);
+            }
+
+            await _sessionReplacementService.ProcessReplacementAsync(new SessionReplacementContext
+            {
+                PreviousSubjectId = session.SubjectId,
+                PreviousSessionId = session.SessionId,
+                PreviousSession = previousSession,
+                NewSubjectId = sub,
+                NewSessionId = sid
+            }, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
+
+            if (session.SubjectId != sub)
+            {
+                await _store.DeleteSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
+                return;
+            }
 
             session.Created = ticket.GetIssued(_timeProvider);
-            session.SubjectId = sub;
             session.SessionId = sid;
         }
 
         if (ticket.GetIssuer() == null)
         {
             // when issuing a new cookie on top of an existing cookie, the AuthenticationTicket passed above is new (and not the prior one loaded from the ticket store)
-            ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? default));
+            ticket.SetIssuer(await _issuerNameService.GetCurrentAsync(_httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None));
         }
         session.Renewed = ticket.GetIssued(_timeProvider);
         session.Expires = ticket.GetExpiration();
         session.DisplayName = name;
         session.Ticket = ticket.Serialize(_protector);
 
-        await _store.UpdateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+        if (!await _store.UpdateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None))
+        {
+            if (fingerprintRead == fingerprintToSave)
+            {
+                _logger.SkippingRenewalOfTicketForKeyBecauseOnlyDatesDiffer(key);
+                return;
+            }
+
+            throw new ServerSideSessionConflictException();
+        }
+    }
+
+    /// <summary>
+    /// Hashes everything the store saves from a ticket except when it was issued and when it expires, so that two tickets
+    /// with the same fingerprint differ only in those dates. The lifetime between the two dates is included: a cookie
+    /// renewal keeps it, so it still matches, while a save that shortens or lengthens the session does not.
+    /// The claims come from the same lite form that is serialized, and claims and items are sorted so that the order
+    /// they were added in does not change the result.
+    /// </summary>
+    private static string ComputeFingerprint(AuthenticationTicket ticket)
+    {
+        var canonical = new StringBuilder();
+
+        var lifetime = ticket.Properties.ExpiresUtc - ticket.Properties.IssuedUtc;
+        Append(canonical, "scheme", ticket.AuthenticationScheme);
+        Append(canonical, "lifetime", lifetime?.Ticks.ToString(CultureInfo.InvariantCulture));
+
+        var principal = ticket.Principal.ToClaimsPrincipalLite();
+        Append(canonical, "authentication-type", principal.AuthenticationType);
+
+        foreach (var claim in principal.Claims
+                     .OrderBy(c => c.Type, StringComparer.Ordinal)
+                     .ThenBy(c => c.Value, StringComparer.Ordinal)
+                     .ThenBy(c => c.ValueType, StringComparer.Ordinal)
+                     .ThenBy(c => c.Issuer, StringComparer.Ordinal))
+        {
+            Append(canonical, "claim", claim.Type, claim.Value, claim.ValueType, claim.Issuer);
+        }
+
+        foreach (var item in ticket.Properties.Items.OrderBy(i => i.Key, StringComparer.Ordinal))
+        {
+            if (item.Key is IssuedItem or ExpiresItem or SessionVersionItem or SessionFingerprintItem or IdentityServerConstants.ForceCookieRenewalFlag)
+            {
+                continue;
+            }
+
+            Append(canonical, "item", item.Key, item.Value);
+        }
+
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(canonical.ToString())));
+
+        static void Append(StringBuilder builder, params string[] parts)
+        {
+            foreach (var part in parts)
+            {
+                builder.Append(part?.Length ?? -1).Append(':').Append(part);
+            }
+
+            builder.Append('\n');
+        }
     }
 
     /// <inheritdoc />
@@ -193,7 +279,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         // There is a somewhat rare scenario where a session has expired and a request to IdentityServer happens prior
         // to the cleanup job running. When that happens, the session is removed but none of the processing to trigger
         // backchannel logouts, etc. happens so we need a way to kick that off and are doing so here.
-        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
         if (session != null)
         {
             var userSession = AsUserSessions([session]).SingleOrDefault();
@@ -203,7 +289,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             }
         }
 
-        await _store.DeleteSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
+        await _store.DeleteSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? Ct.None);
     }
 
     /// <inheritdoc/>

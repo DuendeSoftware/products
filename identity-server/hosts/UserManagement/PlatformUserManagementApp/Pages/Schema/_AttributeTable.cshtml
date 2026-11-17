@@ -1,0 +1,51 @@
+@using Duende.IdentityServer.DataExtensions
+@model List<AttributeDefinition>
+
+@{
+    string FormatType(AttributeType type) => type switch
+    {
+        ScalarAttributeType s => s.DataType.ToString(),
+        ComplexAttributeType c => $"Complex ({string.Join(", ", c.Properties.Keys)})",
+        ListAttributeType l => $"List<{FormatType(l.ElementType)}>",
+        _ => type.GetType().Name
+    };
+}
+
+<table class="table table-sm table-hover mb-0 ms-3">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th class="text-center">Unique</th>
+            <th class="text-center">Order</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var attr in Model)
+        {
+            <tr>
+                <td><code>@attr.Code</code></td>
+                <td><span class="badge bg-secondary">@FormatType(attr.AttributeType)</span></td>
+                <td class="text-muted">@attr.Description</td>
+                <td class="text-center">
+                    @if (attr.IsUnique)
+                    {
+                        <i class="bi bi-check-circle text-success"></i>
+                    }
+                </td>
+                <td class="text-center">@attr.Order</td>
+                <td class="text-end">
+                    <form method="post" asp-page="/Schema/Index" asp-page-handler="RemoveAttribute" class="d-inline">
+                        <input type="hidden" name="attrName" value="@attr.Code" />
+                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                onclick="return confirm('Remove attribute \'@attr.Code\'?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

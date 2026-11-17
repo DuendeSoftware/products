@@ -1,0 +1,80 @@
+@page
+@model RegisterModel
+@{
+  ViewData["Title"] = "Complete Your Profile";
+}
+
+<div class="persona-hero text-center">
+  <h1>Welcome!</h1>
+  <p class="lead m-0">
+    Complete your profile to get started
+  </p>
+</div>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+        <i class="bi bi-person-plus-fill me-2"></i>Profile Setup
+      </div>
+      <div class="card-body">
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        }
+
+        <form method="post">
+          <input type="hidden" asp-for="ReturnUrl" />
+          <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-envelope me-1"></i>Email Address
+            </label>
+            <input type="text" class="form-control" value="@Model.Email" disabled readonly />
+            <div class="form-text">Your email address is verified and cannot be changed.</div>
+          </div>
+
+          <div class="mb-3">
+            <label asp-for="GivenName" class="form-label fw-bold">
+              <i class="bi bi-person me-1"></i>First Name
+            </label>
+            <input asp-for="GivenName" type="text" class="form-control" placeholder="Enter your first name" />
+            <span asp-validation-for="GivenName" class="text-danger"></span>
+          </div>
+
+          <div class="mb-3">
+            <label asp-for="FamilyName" class="form-label fw-bold">
+              <i class="bi bi-person me-1"></i>Last Name
+            </label>
+            <input asp-for="FamilyName" type="text" class="form-control" placeholder="Enter your last name" />
+            <span asp-validation-for="FamilyName" class="text-danger"></span>
+          </div>
+
+          <div class="mb-4">
+            <label asp-for="Picture" class="form-label fw-bold">
+              <i class="bi bi-image me-1"></i>Profile Picture URL
+            </label>
+            <input asp-for="Picture" type="url" class="form-control" placeholder="https://example.com/avatar.jpg" />
+            <span asp-validation-for="Picture" class="text-danger"></span>
+            <div class="form-text">Optional: Enter a URL to your profile picture.</div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-check-circle me-1"></i>Complete Registration
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <partial name="_ValidationScriptsPartial" />
+}

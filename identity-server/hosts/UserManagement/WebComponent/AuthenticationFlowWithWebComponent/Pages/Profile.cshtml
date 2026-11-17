@@ -1,0 +1,104 @@
+@page
+@using Duende.IdentityModel
+@model AuthenticationFlowWithWebComponent.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="persona-hero text-center">
+    <h1>Your Profile</h1>
+    <p class="lead m-0">
+        Manage your account information and security settings
+    </p>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10 col-lg-8">
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@Model.StatusMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+                <i class="bi bi-person me-2"></i>Profile Information
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="fw-bold">User ID</div>
+                    <div>@User.FindFirst(JwtClaimTypes.Subject)?.Value</div>
+                </div>
+                <div class="mb-0">
+                    <div class="fw-bold">Email</div>
+                    <div>@User.Identity?.Name</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+                <i class="bi bi-shield-check me-2"></i>Security Settings
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+                    <div>
+                        <div class="fw-bold mb-1">Two-Factor Authentication</div>
+                        @if (Model.Has2FA)
+                        {
+                            <div class="text-success">
+                                <i class="bi bi-shield-check me-1"></i>Enabled
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-warning">
+                                <i class="bi bi-shield-exclamation me-1"></i>Not Enabled
+                            </div>
+                        }
+                    </div>
+                    <div>
+                        @if (!Model.Has2FA)
+                        {
+                            <a asp-page="/EnableAuthenticator" class="btn btn-primary">
+                                <i class="bi bi-shield-lock me-1"></i>Enable 2FA
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-page="/Manage2FA" class="btn btn-outline-primary">
+                                <i class="bi bi-gear me-1"></i>Manage 2FA
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Has2FA)
+                {
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Your account is protected with two-factor authentication. You'll need your authenticator app to sign in.
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Enable two-factor authentication to add an extra layer of security to your account.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-page="/Index" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Home
+            </a>
+            <a href="/api/auth/logout" class="btn btn-outline-danger ms-auto">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+</div>

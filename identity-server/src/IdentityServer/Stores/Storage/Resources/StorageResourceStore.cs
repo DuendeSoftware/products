@@ -11,8 +11,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Storage.ApiResources;
 using Duende.IdentityServer.Stores.Storage.ApiScopes;
 using Duende.IdentityServer.Stores.Storage.IdentityResources;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores.Storage.Resources;
@@ -38,7 +36,7 @@ internal sealed class StorageResourceStore(
             return [];
         }
 
-        var dsos = await identityResourceRepository.FindByNamesAsync(names, ct);
+        var dsos = (await identityResourceRepository.FindByExactNamesAsync(names, ct)).Values;
         var results = dsos.Select(MapToIdentityResource).ToList();
 
         if (logger.IsEnabled(LogLevel.Debug))
@@ -61,7 +59,7 @@ internal sealed class StorageResourceStore(
             return [];
         }
 
-        var dsos = await apiScopeRepository.FindByNamesAsync(names, ct);
+        var dsos = (await apiScopeRepository.FindByExactNamesAsync(names, ct)).Values;
         var results = dsos.Select(MapToApiScope).ToList();
 
         if (logger.IsEnabled(LogLevel.Debug))
@@ -84,8 +82,8 @@ internal sealed class StorageResourceStore(
             return [];
         }
 
-        var dsos = await apiResourceRepository.FindByScopeNamesAsync(names, ct);
-        var results = dsos.Select(MapToApiResource).ToList();
+        var apiResources = await apiResourceRepository.FindByScopeNamesAsync(names, ct);
+        var results = await MapToApiResourcesAsync(apiResources.OrderBy(d => d.Name, StringComparer.Ordinal), ct);
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
@@ -108,7 +106,7 @@ internal sealed class StorageResourceStore(
         }
 
         var dsos = await apiResourceRepository.FindByNamesAsync(names, ct);
-        var results = dsos.Select(MapToApiResource).ToList();
+        var results = await MapToApiResourcesAsync(dsos, ct);
 
         if (results.Count > 0)
         {
@@ -152,8 +150,8 @@ internal sealed class StorageResourceStore(
 
         while (true)
         {
-            var range = DataRange.FromPage(pageNumber, PageSize);
-            var request = QueryRequest.Create<IdentityResourceFilter, IdentityResourceSortField>(range);
+            var range = StorageDataRange.FromPage(pageNumber, PageSize);
+            var request = StorageQueryRequest.Create<IdentityResourceFilter, IdentityResourceSortField>(range);
             var result = await identityResourceRepository.QueryAsync(request, ct);
 
             foreach (var dso in result.Items)
@@ -179,14 +177,11 @@ internal sealed class StorageResourceStore(
 
         while (true)
         {
-            var range = DataRange.FromPage(pageNumber, PageSize);
-            var request = QueryRequest.Create<ApiResourceFilter, ApiResourceSortField>(range);
+            var range = StorageDataRange.FromPage(pageNumber, PageSize);
+            var request = StorageQueryRequest.Create<ApiResourceFilter, ApiResourceSortField>(range);
             var result = await apiResourceRepository.QueryAsync(request, ct);
 
-            foreach (var dso in result.Items)
-            {
-                results.Add(MapToApiResource(dso));
-            }
+            results.AddRange(await MapToApiResourcesAsync(result.Items, ct));
 
             if (!result.HasMoreData)
             {
@@ -206,8 +201,8 @@ internal sealed class StorageResourceStore(
 
         while (true)
         {
-            var range = DataRange.FromPage(pageNumber, PageSize);
-            var request = QueryRequest.Create<ApiScopeFilter, ApiScopeSortField>(range);
+            var range = StorageDataRange.FromPage(pageNumber, PageSize);
+            var request = StorageQueryRequest.Create<ApiScopeFilter, ApiScopeSortField>(range);
             var result = await apiScopeRepository.QueryAsync(request, ct);
 
             foreach (var dso in result.Items)
@@ -226,7 +221,17 @@ internal sealed class StorageResourceStore(
         return results;
     }
 
-    private static ApiResource MapToApiResource(ApiResourceDso.V1 dso) => new()
+    private async Task<List<ApiResource>> MapToApiResourcesAsync(IEnumerable<ApiResourceDso.V1> dsos, Ct ct)
+    {
+        var dsoList = dsos.ToList();
+        var scopesByResource = await apiResourceRepository.GetScopesByResourceAsync(dsoList.Select(d => d.Id), ct);
+
+        return dsoList
+            .Select(dso => MapToApiResource(dso, scopesByResource[dso.Id].Select(s => s.Name)))
+            .ToList();
+    }
+
+    private static ApiResource MapToApiResource(ApiResourceDso.V1 dso, IEnumerable<string> scopeNames) => new()
     {
         Name = dso.Name,
         Enabled = dso.Enabled,
@@ -235,7 +240,7 @@ internal sealed class StorageResourceStore(
         ShowInDiscoveryDocument = dso.ShowInDiscoveryDocument,
         RequireResourceIndicator = dso.RequireResourceIndicator,
         UserClaims = new HashSet<string>(dso.UserClaims),
-        Scopes = new HashSet<string>(dso.Scopes.Select(s => s.Name)),
+        Scopes = new HashSet<string>(scopeNames),
         AllowedAccessTokenSigningAlgorithms = new HashSet<string>(dso.AllowedAccessTokenSigningAlgorithms),
         Properties = EavPropertyMapper.ExtractStringProperties(dso.ExtendedAttributeValues),
         ApiSecrets = dso.ApiSecrets.Select(s => new Secret

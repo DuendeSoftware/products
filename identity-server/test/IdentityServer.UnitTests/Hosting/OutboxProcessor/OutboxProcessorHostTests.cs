@@ -5,6 +5,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.OutboxProcessor;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Outbox;
@@ -14,7 +15,6 @@ using UnitTests.Common;
 
 // This file's own namespace is also named OutboxProcessor, which shadows the Storage type of the
 // same name, so it is aliased here.
-using StorageOutboxProcessor = Duende.Storage.Internal.Outbox.OutboxProcessor;
 using StorageOutboxProcessorOptions = Duende.Storage.Internal.Outbox.OutboxProcessorOptions;
 
 namespace UnitTests.Hosting.OutboxProcessor;
@@ -48,7 +48,7 @@ public class OutboxProcessorHostTests
         await Task.Delay(50);
         _crossPartitionStorageFactory.CycleCount.ShouldBe(0, "the store must never be queried while the processor is disabled");
 
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class OutboxProcessorHostTests
         _time.Advance(TimeSpan.FromMilliseconds(1));
         await WaitForCyclesAsync(1);
 
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public class OutboxProcessorHostTests
         _time.Advance(TimeSpan.FromSeconds(1));
         await WaitForCyclesAsync(1);
 
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class OutboxProcessorHostTests
         _time.Advance(TimeSpan.FromSeconds(29));
         await WaitForCyclesAsync(1);
 
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public class OutboxProcessorHostTests
         _time.Advance(TimeSpan.FromSeconds(5));
         await WaitForCyclesAsync(3);
 
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public class OutboxProcessorHostTests
         _time.Advance(TimeSpan.FromSeconds(5));
         await WaitForCyclesAsync(1);
 
-        var stop = await Record.ExceptionAsync(() => host.StopAsync(CancellationToken.None));
+        var stop = await Record.ExceptionAsync(() => host.StopAsync(Ct.None));
         stop.ShouldBeNull("cancelling the delay is the normal shutdown path, not a failure");
 
         var executeTask = host.ExecuteTask.ShouldNotBeNull();
@@ -164,11 +164,11 @@ public class OutboxProcessorHostTests
 
         var host = CreateHost();
 
-        await host.StartAsync(CancellationToken.None);
+        await host.StartAsync(Ct.None);
 
         host.ExecuteTask.ShouldBeNull("StartAsync must short-circuit before BackgroundService starts executing");
 
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     private OutboxProcessorHost CreateHost()
@@ -180,22 +180,18 @@ public class OutboxProcessorHostTests
         services.AddKeyedTransient<IOutboxSubscriptionHandler>(
             subscription.SubscriberName.Value,
             (_, _) => new TestHandler());
+        services.AddSingleton<ICrossPartitionStorageFactory>(_crossPartitionStorageFactory);
+        services.AddSingleton<IStorageInstanceRouter>(_storageInstanceRouter);
+        services.AddSingleton<IOutboxSubscription>(subscription);
+        services.AddSingleton<IAmbientOutboxProcessingContextProvider, PassThroughAmbientOutboxProcessingContextProvider>();
+        services.AddSingleton(Options.Create(new StorageOutboxProcessorOptions()));
 
         var sp = services.BuildServiceProvider();
 
-        var processor = new StorageOutboxProcessor(
-            _crossPartitionStorageFactory,
-            _storageInstanceRouter,
-            [subscription],
-            sp.GetRequiredService<IServiceScopeFactory>(),
-            new PassThroughAmbientOutboxProcessingContextProvider(),
-            Options.Create(new StorageOutboxProcessorOptions()),
-            _time,
-            TestLogger.Create<StorageOutboxProcessor>());
-
         return new OutboxProcessorHost(
-            processor,
+            new OutboxProcessorFactory(sp),
             _options,
+            new InProcessDistributedLock(),
             _time,
             TestLogger.Create<OutboxProcessorHost>());
     }
@@ -204,7 +200,7 @@ public class OutboxProcessorHostTests
     // the fake clock cannot race ahead of the timer the loop is about to register.
     private static async Task StartAndSettleAsync(OutboxProcessorHost host)
     {
-        await host.StartAsync(CancellationToken.None);
+        await host.StartAsync(Ct.None);
         await Task.Delay(100);
     }
 

@@ -38,9 +38,10 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Bindings
                 encodedMessage = request.Form["SAMLRequest"];
             }
 
-            var xmlDoc = XmlHelpers.XmlDocumentFromString(
+            var xmlDoc = XmlHelpers.XmlDocumentFromInboundString(
                 Encoding.UTF8.GetString(
-                    Convert.FromBase64String(encodedMessage)));
+                    Convert.FromBase64String(encodedMessage)),
+                options);
 
             options?.SPOptions.Logger.WriteVerbose("Http POST binding extracted message\n" + xmlDoc.OuterXml);
 

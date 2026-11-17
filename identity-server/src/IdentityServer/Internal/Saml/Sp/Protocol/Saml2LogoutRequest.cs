@@ -43,7 +43,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
             var request = new Saml2LogoutRequest()
             {
                 NameId = new Saml2NameIdentifier(
-                    xml["NameID", Saml2Namespaces.Saml2Name].InnerText),
+                    XmlHelpers.GetDirectTextContents(xml["NameID", Saml2Namespaces.Saml2Name])),
                 RelayState = null
             };
 
@@ -58,7 +58,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Protocol
             var sessionIndexElement = xml["SessionIndex", Saml2Namespaces.Saml2PName];
             if (sessionIndexElement != null)
             {
-                request.SessionIndex = sessionIndexElement.InnerText;
+                request.SessionIndex = XmlHelpers.GetDirectTextContents(sessionIndexElement);
             }
 
             return request;

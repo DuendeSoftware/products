@@ -23,7 +23,7 @@ public sealed class ResourceOwnerFlowPublic : IScenario
     public string Description => "Resource Owner Password Credentials (public client): obtain token with username/password (no client secret), call API";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         _identityServer = new IdentityServerTestHost(configurator, "identity-server");
         _identityServer.AddDefaultUsers();
@@ -50,7 +50,7 @@ public sealed class ResourceOwnerFlowPublic : IScenario
         Links = [_identityServer.Link, _api.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {

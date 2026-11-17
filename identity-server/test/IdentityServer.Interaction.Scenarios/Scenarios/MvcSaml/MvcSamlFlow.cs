@@ -25,7 +25,7 @@ public sealed class MvcSamlFlow : IScenario
     public string Description => "MVC app acting as a SAML SP, with IdentityServer as the IdP";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         // Generate a self-signed SP signing certificate
         var spCert = CreateSpSigningCertificate();
@@ -96,7 +96,7 @@ public sealed class MvcSamlFlow : IScenario
         Links = [_identityServer.Link, _samlClient.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_samlClient != null)
         {

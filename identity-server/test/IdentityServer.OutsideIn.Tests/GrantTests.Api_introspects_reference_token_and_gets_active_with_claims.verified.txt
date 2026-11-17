@@ -1,0 +1,124 @@
+﻿{
+  Steps: [
+    {
+      Request: GET {sut}/connect/authorize,
+      Query: {
+        client_id: {client:web},
+        code_challenge: {CodeChallenge_1},
+        code_challenge_method: S256,
+        redirect_uri: {web}/manual-callback,
+        response_type: code,
+        scope: openid api1,
+        state: s1
+      },
+      Status: 303 See Other
+    },
+    {
+      Request: GET {sut}/account/login,
+      Query: {
+        ReturnUrl: {
+          Url: {sut}/connect/authorize/callback,
+          Query: {
+            client_id: {client:web},
+            code_challenge: {CodeChallenge_1},
+            code_challenge_method: S256,
+            redirect_uri: {web}/manual-callback,
+            response_type: code,
+            scope: openid api1,
+            state: s1
+          }
+        }
+      },
+      Status: 200 OK
+    },
+    {
+      Request: POST {sut}/account/login,
+      Query: {
+        ReturnUrl: {
+          Url: {sut}/connect/authorize/callback,
+          Query: {
+            client_id: {client:web},
+            code_challenge: {CodeChallenge_1},
+            code_challenge_method: S256,
+            redirect_uri: {web}/manual-callback,
+            response_type: code,
+            scope: openid api1,
+            state: s1
+          }
+        }
+      },
+      Form: {
+        password: {password:alice},
+        returnUrl: {
+          Url: {sut}/connect/authorize/callback,
+          Query: {
+            client_id: {client:web},
+            code_challenge: {CodeChallenge_1},
+            code_challenge_method: S256,
+            redirect_uri: {web}/manual-callback,
+            response_type: code,
+            scope: openid api1,
+            state: s1
+          }
+        },
+        username: {username:alice}
+      },
+      Status: 302 Found,
+      SetCookies: [
+        idsrv.session ({sut}, secure, samesite=none),
+        idsrv ({sut}, secure, httponly, samesite=none)
+      ]
+    },
+    {
+      Request: GET {sut}/connect/authorize/callback,
+      Query: {
+        client_id: {client:web},
+        code_challenge: {CodeChallenge_1},
+        code_challenge_method: S256,
+        redirect_uri: {web}/manual-callback,
+        response_type: code,
+        scope: openid api1,
+        state: s1
+      },
+      Status: 303 See Other,
+      SetCookies: [
+        ConsentResponse.{ConsentResponse_1} ({sut}, secure, httponly, deleted),
+        idsrv ({sut}, secure, httponly, samesite=none)
+      ]
+    },
+    {
+      Request: GET {web}/manual-callback,
+      Query: {
+        code: {Code_1},
+        iss: {sut},
+        session_state: {SessionState_1},
+        state: s1
+      },
+      Status: 404 Not Found
+    }
+  ],
+  Result: {
+    Status: 200 OK,
+    Headers: {
+      Cache-Control: no-store, no-cache, max-age=0,
+      Content-Type: application/json; charset=UTF-8,
+      Pragma: no-cache
+    },
+    Body: {
+      active: true,
+      amr: pwd,
+      aud: {resource:api},
+      auth_time: {Start},
+      client_id: {client:web},
+      exp: {Start+1h},
+      iat: {Start},
+      idp: local,
+      iss: {sut},
+      jti: {Jti_1},
+      nbf: {Start},
+      scope: api1,
+      sid: {Sid_1},
+      sub: {user:alice}
+    }
+  }
+}

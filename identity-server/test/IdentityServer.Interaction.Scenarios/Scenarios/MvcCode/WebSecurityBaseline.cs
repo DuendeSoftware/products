@@ -53,7 +53,7 @@ public sealed class WebSecurityBaseline : IScenario
     public string Description => "DPoP + JAR + PAR + private_key_jwt + back-channel logout";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         // 1. Start IdentityServer with JWT bearer client authentication
         _identityServer = new IdentityServerTestHost(configurator, "identity-server",
@@ -309,7 +309,7 @@ public sealed class WebSecurityBaseline : IScenario
         return user;
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {
@@ -522,7 +522,7 @@ internal sealed class WebBaselineClientAssertionService(
     public Task<ClientAssertion?> GetClientAssertionAsync(
         ClientCredentialsClientName? clientName = null,
         TokenRequestParameters? parameters = null,
-        CancellationToken ct = default) =>
+        Ct ct = default) =>
         Task.FromResult<ClientAssertion?>(new ClientAssertion
         {
             Type = OidcConstants.ClientAssertionTypes.JwtBearer,

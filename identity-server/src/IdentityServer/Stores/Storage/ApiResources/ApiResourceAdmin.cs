@@ -7,13 +7,12 @@ using System.Security.Cryptography;
 using System.Text;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiResources;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
+using Duende.IdentityServer.Internal;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Storage.ApiScopes;
-using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
-using Duende.Storage.Querying;
 using SecretHashAlgorithm = Duende.IdentityServer.Admin.SecretHashAlgorithm;
 
 namespace Duende.IdentityServer.Stores.Storage.ApiResources;
@@ -35,38 +34,25 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             return SaveResult.Failure<ApiResourceId>(extendedPropertiesError);
         }
 
-        var scopeRefsResult = await ResolveScopeRefsAsync(resource.Scopes, ct);
-        if (scopeRefsResult.Error is not null)
+        var (scopes, scopeError) = await ResolveScopesAsync(resource.Scopes, ct);
+        if (scopeError is not null)
         {
-            return SaveResult.Failure<ApiResourceId>(scopeRefsResult.Error);
+            return SaveResult.Failure<ApiResourceId>(scopeError);
         }
 
-        var scopeRefs = scopeRefsResult.ScopeRefs;
-        var id = UuidV7.New();
-        var dso = MapToDso(id.Value, resource.Name, resource.Enabled, resource.DisplayName, resource.Description, resource.ShowInDiscoveryDocument, resource.RequireResourceIndicator, resource.UserClaims, resource.AllowedAccessTokenSigningAlgorithms, resource.ExtendedProperties, scopeRefs, existingSecrets: null);
+        var id = Duende.Storage.UuidV7.New();
+        var dso = MapToDso(id.Value, resource.Name, resource.Enabled, resource.DisplayName, resource.Description, resource.ShowInDiscoveryDocument, resource.RequireResourceIndicator, resource.UserClaims, resource.AllowedAccessTokenSigningAlgorithms, resource.ExtendedProperties, existingSecrets: null);
 
-        if (scopeRefs.Count > 0)
+        var outcome = await repository.CreateAsync(id, dso, scopes, ct);
+        return outcome.Kind switch
         {
-            var result = await repository.CreateWithScopesAsync(id, dso, scopeRefs, ct);
-            return result switch
-            {
-                CreateResult.Success => SaveResult.Success<ApiResourceId>(id.Value, (DataVersion)1),
-                CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                    SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
-                _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
-            };
-        }
-        else
-        {
-            var result = await repository.CreateAsync(id, dso, ct);
-            return result switch
-            {
-                CreateResult.Success => SaveResult.Success<ApiResourceId>(id.Value, (DataVersion)1),
-                CreateResult.AlreadyExists or CreateResult.KeyConflict =>
-                    SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
-                _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
-            };
-        }
+            ApiResourceBatchOutcomeKind.Success => SaveResult.Success<ApiResourceId>(id.Value, (DataVersion)(1)),
+            ApiResourceBatchOutcomeKind.AlreadyExists or ApiResourceBatchOutcomeKind.KeyConflict =>
+                SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
+            ApiResourceBatchOutcomeKind.ScopeDoesNotExist =>
+                SaveResult.Failure<ApiResourceId>(StorageError.InvalidValue("Scopes", $"Scope '{outcome.ScopeName}' does not exist.")),
+            _ => throw new InvalidOperationException($"Unexpected ApiResourceBatchOutcome: {outcome.Kind}")
+        };
     }
 
     public async Task<GetResult<ApiResourceConfiguration>> GetAsync(ApiResourceId id, Ct ct)
@@ -78,8 +64,9 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         }
 
         var (dso, version) = result.Value;
+        var scopeNames = await GetScopeNamesAsync(dso.Id, ct);
         var schema = await schemaStore.GetAsync(SchemaId.ApiResource, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, scopeNames, schema), (DataVersion)(version));
     }
 
     public async Task<GetResult<ApiResourceConfiguration>> GetByNameAsync(string name, Ct ct)
@@ -91,8 +78,9 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         }
 
         var (dso, version) = result.Value;
+        var scopeNames = await GetScopeNamesAsync(dso.Id, ct);
         var schema = await schemaStore.GetAsync(SchemaId.ApiResource, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, scopeNames, schema), (DataVersion)(version));
     }
 
     public async Task<SaveResult<ApiResourceId>> UpdateAsync(ApiResourceId id, UpdateApiResource resource, DataVersion expectedVersion, Ct ct)
@@ -118,65 +106,33 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             return SaveResult.Failure<ApiResourceId>(extendedPropertiesError);
         }
 
-        var scopeRefsResult = await ResolveScopeRefsAsync(resource.Scopes, ct);
-        if (scopeRefsResult.Error is not null)
+        var (scopes, scopeError) = await ResolveScopesAsync(resource.Scopes, ct);
+        if (scopeError is not null)
         {
-            return SaveResult.Failure<ApiResourceId>(scopeRefsResult.Error);
+            return SaveResult.Failure<ApiResourceId>(scopeError);
         }
 
-        var newScopeRefs = scopeRefsResult.ScopeRefs;
-        var dso = MapToDso(idValue, resource.Name, resource.Enabled, resource.DisplayName, resource.Description, resource.ShowInDiscoveryDocument, resource.RequireResourceIndicator, resource.UserClaims, resource.AllowedAccessTokenSigningAlgorithms, resource.ExtendedProperties, newScopeRefs, existingSecrets: existingDso.ApiSecrets);
+        var dso = MapToDso(idValue, resource.Name, resource.Enabled, resource.DisplayName, resource.Description, resource.ShowInDiscoveryDocument, resource.RequireResourceIndicator, resource.UserClaims, resource.AllowedAccessTokenSigningAlgorithms, resource.ExtendedProperties, existingSecrets: existingDso.ApiSecrets);
 
-        // Diff scopes. On rename, treat all existing scopes as removed and all new scopes as added
-        // so that back-references on ApiScope are updated with the new resource name.
-        List<ApiScopeReferenceDso.V1> addedScopeRefs;
-        List<Guid> removedScopeIds;
-        var isRename = resource.Name != existingDso.Name;
+        var currentScopes = await repository.GetScopesAsync(idValue, ct);
+        var currentScopeIds = currentScopes.Select(s => s.Id).ToHashSet();
+        var requestedScopeIds = scopes.Select(s => s.Id).ToHashSet();
+        var scopesToLink = scopes.Where(s => !currentScopeIds.Contains(s.Id)).ToList();
+        var scopesToUnlink = currentScopes.Where(s => !requestedScopeIds.Contains(s.Id)).Select(s => (s.Name, s.Id)).ToList();
 
-        if (isRename)
+        var outcome = await repository.UpdateAsync(
+            Duende.Storage.UuidV7.From(idValue), dso, expectedVersion.Value, scopesToLink, scopesToUnlink, ct);
+
+        return outcome.Kind switch
         {
-            addedScopeRefs = new List<ApiScopeReferenceDso.V1>(newScopeRefs);
-            removedScopeIds = existingDso.Scopes.Select(s => s.Id).ToList();
-        }
-        else
-        {
-            var existingScopeIdSet = existingDso.Scopes.ToDictionary(s => s.Id);
-            var newScopeIdSet = newScopeRefs.ToDictionary(s => s.Id);
-
-            addedScopeRefs = newScopeRefs.Where(s => !existingScopeIdSet.ContainsKey(s.Id)).ToList();
-            removedScopeIds = existingDso.Scopes
-                .Where(s => !newScopeIdSet.ContainsKey(s.Id))
-                .Select(s => s.Id)
-                .ToList();
-        }
-
-        if (addedScopeRefs.Count > 0 || removedScopeIds.Count > 0)
-        {
-            var result = await repository.UpdateWithScopeChangesAsync(
-                UuidV7.From(idValue), dso, expectedVersion.Value, addedScopeRefs, removedScopeIds, ct);
-
-            return result switch
-            {
-                UpdateResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
-                UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiResourceId>(StorageError.VersionConflict()),
-                UpdateResult.DoesNotExist => SaveResult.Failure<ApiResourceId>(StorageError.NotFound("api_resource", idValue.ToString())),
-                UpdateResult.KeyConflict => SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
-                _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
-            };
-        }
-        else
-        {
-            var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
-
-            return result switch
-            {
-                UpdateResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
-                UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiResourceId>(StorageError.VersionConflict()),
-                UpdateResult.DoesNotExist => SaveResult.Failure<ApiResourceId>(StorageError.NotFound("api_resource", idValue.ToString())),
-                UpdateResult.KeyConflict => SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
-                _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
-            };
-        }
+            ApiResourceBatchOutcomeKind.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+            ApiResourceBatchOutcomeKind.UnexpectedVersion => SaveResult.Failure<ApiResourceId>(StorageError.VersionConflict()),
+            ApiResourceBatchOutcomeKind.ResourceDoesNotExist => SaveResult.Failure<ApiResourceId>(StorageError.NotFound("api_resource", idValue.ToString())),
+            ApiResourceBatchOutcomeKind.KeyConflict => SaveResult.Failure<ApiResourceId>(StorageError.AlreadyExists("api_resource", resource.Name)),
+            ApiResourceBatchOutcomeKind.ScopeDoesNotExist =>
+                SaveResult.Failure<ApiResourceId>(StorageError.InvalidValue("Scopes", $"Scope '{outcome.ScopeName}' does not exist.")),
+            _ => throw new InvalidOperationException($"Unexpected ApiResourceBatchOutcome: {outcome.Kind}")
+        };
     }
 
     public async Task<SaveResult<ApiResourceId>> DeleteAsync(ApiResourceId id, Ct ct)
@@ -185,32 +141,25 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         var existing = await repository.TryReadByIdAsync(idValue, ct);
         if (existing is null)
         {
-            return SaveResult.Success<ApiResourceId>(idValue, (DataVersion)0); // idempotent: already gone
+            return SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(0)); // idempotent: already gone
         }
 
-        var (dso, _) = existing.Value;
-
-        DeleteResult result;
-        if (dso.Scopes.Count > 0)
-        {
-            result = await repository.DeleteWithScopeCleanupAsync(idValue, dso.Scopes, ct);
-        }
-        else
-        {
-            result = await repository.DeleteAsync(idValue, ct);
-        }
+        var result = await repository.DeleteAsync(idValue, ct);
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success<ApiResourceId>(idValue, (DataVersion)(0)),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
     public async Task<QueryResult<ApiResourceListItem>> QueryAsync(QueryRequest<ApiResourceFilter, ApiResourceSortField> request, Ct ct)
     {
-        var result = await repository.QueryAsync(request, ct);
-        return result.ConvertTo(MapToListItem);
+        var result = await StorageMapping.ExecuteQueryAsync(() => repository.QueryAsync(request.ToStorage(), ct));
+
+        var scopeCounts = await repository.CountScopesByResourceAsync(result.Items.Select(dso => dso.Id), ct);
+
+        return result.ConvertTo(dso => MapToListItem(dso, scopeCounts[dso.Id])).ToModel(request.Range);
     }
 
     public async Task<SaveResult<ApiResourceSecretId>> CreateSecretAsync(
@@ -238,7 +187,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
 
         var (value, algorithmName) = ShapeSecret(plaintextValue, hashAlgorithm, type);
 
-        var secretId = UuidV7.New().Value;
+        var secretId = Duende.Storage.UuidV7.New().Value;
         var newSecret = new ApiResourceDso.SecretDso(
             Id: secretId,
             Value: value,
@@ -250,7 +199,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         var updatedSecrets = dso.ApiSecrets.Append(newSecret).ToList();
         var updatedDso = dso with { ApiSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(apiResourceIdValue), updatedDso, version, ct);
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(apiResourceIdValue), updatedDso, version, ct);
 
         return result switch
         {
@@ -282,7 +231,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         var updatedSecrets = dso.ApiSecrets.Where(s => s.Id != secretIdValue).ToList();
         var updatedDso = dso with { ApiSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(apiResourceIdValue), updatedDso, version, ct);
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(apiResourceIdValue), updatedDso, version, ct);
 
         return result switch
         {
@@ -358,38 +307,32 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         return null;
     }
 
-    private sealed record ScopeRefsResult(IReadOnlyList<ApiScopeReferenceDso.V1> ScopeRefs, StorageError? Error)
-    {
-        internal static ScopeRefsResult Success(IReadOnlyList<ApiScopeReferenceDso.V1> refs) => new(refs, null);
-        internal static ScopeRefsResult Failure(StorageError error) => new([], error);
-    }
-
-    private async Task<ScopeRefsResult> ResolveScopeRefsAsync(List<string>? scopeNames, Ct ct)
+    private async Task<(List<(string Name, Guid Id)> Scopes, StorageError? Error)> ResolveScopesAsync(List<string>? scopeNames, Ct ct)
     {
         if (scopeNames is null || scopeNames.Count == 0)
         {
-            return ScopeRefsResult.Success([]);
+            return ([], null);
         }
 
-        var distinctNames = scopeNames.Distinct(StringComparer.Ordinal).ToList();
-        var foundScopes = await scopeRepository.FindByNamesAsync(distinctNames, ct);
-        var foundByName = foundScopes.ToDictionary(s => s.Name, StringComparer.Ordinal);
-
-        // Validate all requested scopes exist
-        foreach (var name in distinctNames)
+        var found = await scopeRepository.FindByExactNamesAsync(scopeNames, ct);
+        var scopes = new List<(string Name, Guid Id)>(scopeNames.Count);
+        foreach (var name in scopeNames)
         {
-            if (!foundByName.ContainsKey(name))
+            if (!found.TryGetValue(name, out var dso))
             {
-                return ScopeRefsResult.Failure(
-                    StorageError.InvalidValue("Scopes", $"Scope '{name}' does not exist."));
+                return ([], StorageError.InvalidValue("Scopes", $"Scope '{name}' does not exist."));
             }
+
+            scopes.Add((name, dso.Id));
         }
 
-        var refs = distinctNames
-            .Select(name => new ApiScopeReferenceDso.V1(foundByName[name].Id, name))
-            .ToList();
+        return (scopes, null);
+    }
 
-        return ScopeRefsResult.Success(refs);
+    private async Task<List<string>> GetScopeNamesAsync(Guid resourceId, Ct ct)
+    {
+        var scopes = await repository.GetScopesAsync(resourceId, ct);
+        return scopes.Select(s => s.Name).Order(StringComparer.Ordinal).ToList();
     }
 
     private static ApiResourceDso.V1 MapToDso(
@@ -403,7 +346,6 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
         List<string>? userClaims,
         List<string>? allowedAccessTokenSigningAlgorithms,
         AttributeValueCollection extendedProperties,
-        IReadOnlyList<ApiScopeReferenceDso.V1> scopeRefs,
         IReadOnlyList<ApiResourceDso.SecretDso>? existingSecrets)
     {
         var secrets = existingSecrets ?? [];
@@ -418,14 +360,13 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             ShowInDiscoveryDocument = showInDiscoveryDocument,
             RequireResourceIndicator = requireResourceIndicator,
             UserClaims = userClaims?.AsReadOnly() ?? [],
-            Scopes = scopeRefs,
             AllowedAccessTokenSigningAlgorithms = allowedAccessTokenSigningAlgorithms?.AsReadOnly() ?? [],
             ApiSecrets = secrets,
             ExtendedAttributeValues = EavMapper.ToDsoList(extendedProperties)
         };
     }
 
-    private static ApiResourceConfiguration MapToConfiguration(ApiResourceDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
+    private static ApiResourceConfiguration MapToConfiguration(ApiResourceDso.V1 dso, List<string> scopeNames, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             Name = dso.Name,
@@ -435,7 +376,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             ShowInDiscoveryDocument = dso.ShowInDiscoveryDocument,
             RequireResourceIndicator = dso.RequireResourceIndicator,
             UserClaims = new List<string>(dso.UserClaims),
-            Scopes = dso.Scopes.Select(s => s.Name).ToList(),
+            Scopes = scopeNames,
             AllowedAccessTokenSigningAlgorithms = new List<string>(dso.AllowedAccessTokenSigningAlgorithms),
             ExtendedProperties = EavMapper.ToAttributeValues(dso.ExtendedAttributeValues ?? [], schema).ToList(),
             ApiSecrets = dso.ApiSecrets
@@ -449,7 +390,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
                 .ToList()
         };
 
-    private static ApiResourceListItem MapToListItem(ApiResourceDso.V1 dso) =>
+    private static ApiResourceListItem MapToListItem(ApiResourceDso.V1 dso, int scopeCount) =>
         new()
         {
             Id = dso.Id,
@@ -457,7 +398,7 @@ internal sealed class ApiResourceAdmin(ApiResourceRepository repository, ApiScop
             DisplayName = dso.DisplayName,
             Enabled = dso.Enabled,
             Description = dso.Description,
-            ScopeCount = dso.Scopes.Count
+            ScopeCount = scopeCount
         };
 
     private static string HashSecret(string plaintext, SecretHashAlgorithm algorithm)

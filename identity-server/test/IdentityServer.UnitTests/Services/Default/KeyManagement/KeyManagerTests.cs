@@ -5,7 +5,7 @@
 using System.Diagnostics;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Internal;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
 using Microsoft.Extensions.Logging;
@@ -15,7 +15,7 @@ namespace UnitTests.Services.Default.KeyManagement;
 
 public class KeyManagerTests
 {
-    private KeyManager _subject;
+    private DistributedKeyManager _subject;
 
     private readonly Ct _ct = TestContext.Current.CancellationToken;
 
@@ -35,14 +35,14 @@ public class KeyManagerTests
 
         _options.KeyManagement.SigningAlgorithms = new[] { _rsaOptions };
 
-        _subject = new KeyManager(
+        _subject = new DistributedKeyManager(
             _options,
             _mockKeyStore,
             _mockKeyStoreCache,
             _mockKeyProtector,
             _mockTimeProvider,
-            new NopConcurrencyLock<KeyManager>(),
-            new LoggerFactory().CreateLogger<KeyManager>(),
+            new InProcessDistributedLock(),
+            new LoggerFactory().CreateLogger<DistributedKeyManager>(),
             new TestIssuerNameService());
     }
 
@@ -100,14 +100,14 @@ public class KeyManagerTests
 
         var a = () =>
         {
-            _subject = new KeyManager(
+            _subject = new DistributedKeyManager(
                 _options,
                 _mockKeyStore,
                 _mockKeyStoreCache,
                 _mockKeyProtector,
                 _mockTimeProvider,
-                new NopConcurrencyLock<KeyManager>(),
-                new LoggerFactory().CreateLogger<KeyManager>(),
+                new InProcessDistributedLock(),
+                new LoggerFactory().CreateLogger<DistributedKeyManager>(),
                 new TestIssuerNameService());
         };
         a.ShouldThrow<Exception>();

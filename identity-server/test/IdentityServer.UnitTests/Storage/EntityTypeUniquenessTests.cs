@@ -38,6 +38,28 @@ public class EntityTypeUniquenessTests
         duplicateNames.ShouldBeEmpty();
     }
 
+    [Fact]
+    public void LinkType_ids_are_unique()
+    {
+        var linkTypes = DiscoverLinkTypes();
+        linkTypes.ShouldNotBeEmpty();
+
+        var duplicateIds = linkTypes
+            .GroupBy(lt => lt.Id)
+            .Where(g => g.Count() > 1)
+            .Select(g => $"Duplicate LinkType Id {g.Key}: {string.Join(", ", g.Select(lt => lt.Name))}")
+            .ToList();
+
+        duplicateIds.ShouldBeEmpty();
+    }
+
+    private static List<LinkType> DiscoverLinkTypes() =>
+        typeof(IdentityServerConstants).Assembly.DefinedTypes
+            .SelectMany(type => type.DeclaredFields
+                .Where(f => f.IsStatic && f.FieldType == typeof(LinkDefinition))
+                .Select(f => ((LinkDefinition)f.GetValue(null)!).Link))
+            .ToList();
+
     private static List<EntityType> DiscoverEntityTypes()
     {
         var assembly = typeof(IdentityServerConstants).Assembly;

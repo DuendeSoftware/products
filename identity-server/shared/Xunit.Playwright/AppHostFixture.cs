@@ -81,23 +81,18 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
 
         _app = await appHost.BuildAsync();
 
-        var resourceNotificationService = _app.Services
-            .GetRequiredService<ResourceNotificationService>();
-
         await _app.StartAsync();
 
-        // Wait for all the services so that their logs are mostly written.
-
+        // Wait until all the services are healthy, not just running, so that they accept requests
+        // and their logs are mostly written. A resource without health checks counts as healthy
+        // once it is running. Several apps start at once with 'dotnet run', so allow plenty of time.
         foreach (var resource in routes.ServiceNames)
         {
             try
             {
-
-                await resourceNotificationService.WaitForResourceAsync(
-                        resource,
-                        KnownResourceStates.Running
-                    )
-                    .WaitAsync(TimeSpan.FromSeconds(30));
+                _ = await _app.ResourceNotifications
+                    .WaitForResourceHealthyAsync(resource)
+                    .WaitAsync(TimeSpan.FromMinutes(2));
             }
             catch (Exception)
             {

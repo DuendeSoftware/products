@@ -16,6 +16,7 @@ public interface ISamlLogoutNotificationService
     /// </summary>
     /// <param name="context">The context for the logout notification.</param>
     /// <param name="ct">The cancellation token.</param>
+    /// <returns>The logout request messages that were generated and the number of service providers that were skipped.</returns>
     Task<SamlLogoutNotificationResult> GetSamlFrontChannelLogoutsAsync(LogoutNotificationContext context, Ct ct);
 }
 

@@ -15,7 +15,7 @@ public class SamlAttribute
 #pragma warning restore CA1711
 {
     /// <summary>
-    /// Name of attribute
+    /// Name of attribute.
     /// </summary>
     public string Name { get; set; } = default!;
 

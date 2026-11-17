@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Duende.UserManagement.Tests.Internal</AssemblyName>
+    <RootNamespace>Duende.Platform.UserManagement</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Namespace does not match folder structure --> <!--todo: remove-->
+    <NoWarn>$(NoWarn);IDE0130</NoWarn>
+
+    <!-- async suffix for test methods -->
+    <NoWarn>$(NoWarn);IDE0106</NoWarn>
+
+    <!-- TODO: Fix these in platform test code and remove suppressions -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1829</NoWarn><!-- Use Length/Count property instead of Count() -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn><!-- Naming rule violation -->
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\..\testing\UserManagement.TestInfrastructure\UserManagement.TestInfrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- MimeKit is a direct dependency to override netDumbster's transitive MimeKit 3.1.1,
+         which has known vulnerabilities (GHSA-g7hc-96xr-gvvx, GHSA-gmc6-fwg3-75m5). -->
+    <PackageReference Include="MimeKit" />
+    <PackageReference Include="netDumbster" />
+    <PackageReference Include="System.Drawing.Common" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="Verify.XunitV3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Time.Testing" />
+    <Using Include="Shouldly" />
+  </ItemGroup>
+</Project>

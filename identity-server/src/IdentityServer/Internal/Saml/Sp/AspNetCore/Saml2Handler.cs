@@ -137,7 +137,15 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.AspNetCore
                     options.SPOptions.ModulePath.Length).TrimStart('/');
 
                 var requestData = context.ToHttpRequestData(options.CookieManager, dataProtector.Unprotect);
-                var commandResult = CommandFactory.GetCommand(commandName).Run(requestData, options, _timeProvider);
+                var command = CommandFactory.GetCommand(commandName);
+                if (command is LogoutCommand)
+                {
+                    var session = await context.AuthenticateAsync(options.SignOutScheme ?? options.SignInScheme);
+                    requestData.User = session.Succeeded ? session.Principal : null;
+                    requestData.SchemeName = _schemeName;
+                }
+
+                var commandResult = command.Run(requestData, options, _timeProvider);
 
                 await commandResult.Apply(
                     context, dataProtector, options.CookieManager, options.SignInScheme, options.SignOutScheme, emitSameSiteNone, _schemeName, requestData.RelayState, options.SPOptions.MaxRelayStateLength);

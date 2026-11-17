@@ -32,10 +32,12 @@ internal sealed class SessionExpirationHandler(
     /// <inheritdoc />
     public async Task<HandleOutcomeResult> HandleAsync(PersistedOutboxEvent item, Ct ct)
     {
-        if (item.Dso is not ServerSideSessionDso.V1 dso)
+        if (item.Dso is null || item.EntityTypeId != ServerSideSessionDso.EntityType.Id)
         {
-            return HandleOutcomeResult.Drop($"Expected ServerSideSessionDso.V1, got {item.Dso?.GetType().Name ?? "null"}");
+            return HandleOutcomeResult.Drop($"Expected ServerSideSessionDso, got {item.Dso?.GetType().Name ?? "null"}");
         }
+
+        var dso = ServerSideSessionDso.ToCurrent(item.Dso);
 
         ServerSideSession session;
         try

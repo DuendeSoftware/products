@@ -54,6 +54,19 @@ public class KeyManagementOptions
     public TimeSpan InitializationDuration { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
+    /// Gets or sets how long to wait to acquire the lock used to coordinate signing key creation and
+    /// rotation with other threads in this process and, when Duende Storage (default instance) or Spaces
+    /// is registered, with other nodes.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to 60 seconds. If the lock cannot be acquired within this time and the store already has
+    /// a usable signing key, that key is returned instead of waiting further; otherwise key retrieval
+    /// fails. Must be greater than zero and expressible in whole milliseconds that fit in
+    /// <see cref="int"/>.
+    /// </remarks>
+    public TimeSpan KeyCreationLockTimeout { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>
     /// Gets or sets the delay between re-loading keys from the store during the initialization period,
     /// giving other server instances time to write their newly created keys.
     /// </summary>
@@ -177,6 +190,11 @@ public class KeyManagementOptions
         if (InitializationSynchronizationDelay < TimeSpan.Zero)
         {
             throw new Exception(nameof(InitializationSynchronizationDelay) + " must be greater than or equal to zero.");
+        }
+
+        if (KeyCreationLockTimeout <= TimeSpan.Zero || KeyCreationLockTimeout.TotalMilliseconds > int.MaxValue)
+        {
+            throw new Exception(nameof(KeyCreationLockTimeout) + " must be greater than zero and no more than Int32.MaxValue milliseconds.");
         }
 
         if (InitializationKeyCacheDuration < TimeSpan.Zero)

@@ -1,0 +1,29 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@model ProfileModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="profile-page">
+    <h2>Your Profile</h2>
+    
+    <div class="profile-info">
+        <dl>
+            <dt>Name:</dt>
+            <dd>@User.Identity?.Name</dd>
+            
+            <dt>Email:</dt>
+            <dd>@User.FindFirst("email")?.Value</dd>
+            
+            <dt>Subject ID:</dt>
+            <dd>@User.FindFirst("sub")?.Value</dd>
+        </dl>
+    </div>
+    
+    <div class="actions">
+        <a href="https://identity-server.dev.localhost:6100/Account/Profile" class="button">Edit Profile</a>
+        <a href="/" class="button secondary">Back to Home</a>
+    </div>
+</div>

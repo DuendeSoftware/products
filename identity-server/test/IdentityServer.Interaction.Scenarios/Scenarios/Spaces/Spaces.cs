@@ -23,7 +23,7 @@ internal partial class Spaces : IScenario
     public string Description => "Demonstrates how Spaces works";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         // 1. Start IdentityServer
         _identityServer = new IdentityServerTestHost(configurator, "identity-server",
@@ -88,7 +88,7 @@ internal partial class Spaces : IScenario
             new ScenarioLink("space2", new Uri(_identityServer.Link.Url, "/t/space2/"))];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_identityServer != null)
         {

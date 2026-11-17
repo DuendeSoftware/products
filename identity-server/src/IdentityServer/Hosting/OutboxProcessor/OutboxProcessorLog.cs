@@ -28,6 +28,26 @@ internal static partial class OutboxProcessorLog
     internal static partial void DelayException(this ILogger logger, LogLevel logLevel, Exception exception);
 
     [LoggerMessage(
+        EventName = nameof(SkippedNotLeaseHolder),
+        Message = "Skipping outbox processor cycle: another node holds the lease")]
+    internal static partial void SkippedNotLeaseHolder(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(LeaseLost),
+        Message = "Outbox processor lease was lost while a cycle was running")]
+    internal static partial void LeaseLost(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(LockUnavailable),
+        Message = "Outbox processor could not reach the distributed lock; skipping this cycle")]
+    internal static partial void LockUnavailable(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(NewLeaseFreshProcessor),
+        Message = "Outbox processor lease newly acquired; creating a fresh processor")]
+    internal static partial void NewLeaseFreshProcessor(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
         EventName = "SessionHandlerDrop",
         Message = "Dropping outbox event {MessageId}: {Reason}")]
     internal static partial void SessionHandlerPayloadDrop(this ILogger logger, LogLevel logLevel, Guid messageId, string reason);

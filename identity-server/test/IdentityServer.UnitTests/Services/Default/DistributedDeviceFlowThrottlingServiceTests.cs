@@ -119,7 +119,7 @@ internal class TestCache : IDistributedCache
         return null;
     }
 
-    public Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken()) => Task.FromResult(Get(key));
+    public Task<byte[]> GetAsync(string key, Ct token = new Ct()) => Task.FromResult(Get(key));
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
     {
@@ -128,7 +128,7 @@ internal class TestCache : IDistributedCache
         Items.Add(key, new Tuple<byte[], DistributedCacheEntryOptions>(value, options));
     }
 
-    public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = new CancellationToken())
+    public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, Ct token = new Ct())
     {
         Set(key, value, options);
         return Task.CompletedTask;
@@ -136,9 +136,9 @@ internal class TestCache : IDistributedCache
 
     public void Refresh(string key) => throw new NotImplementedException();
 
-    public Task RefreshAsync(string key, CancellationToken token = new CancellationToken()) => throw new NotImplementedException();
+    public Task RefreshAsync(string key, Ct token = new Ct()) => throw new NotImplementedException();
 
     public void Remove(string key) => throw new NotImplementedException();
 
-    public Task RemoveAsync(string key, CancellationToken token = new CancellationToken()) => throw new NotImplementedException();
+    public Task RemoveAsync(string key, Ct token = new Ct()) => throw new NotImplementedException();
 }

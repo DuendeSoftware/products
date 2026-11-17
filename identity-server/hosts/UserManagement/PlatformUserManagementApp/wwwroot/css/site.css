@@ -1,0 +1,939 @@
+/* ==========================================================================
+   Duende Platform – Bootstrap-free stylesheet
+   Replaces Bootstrap 5 CSS with only the utilities and components actually used.
+   Theme inspired by Bootswatch Pulse (purple accent).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Custom Properties
+   -------------------------------------------------------------------------- */
+:root {
+    --duende-purple: #512bd4;
+    --duende-purple-lighter: #e8e0ff;
+    --duende-header-bg: #5E2D91;
+    --bs-body-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --bs-body-color: #212529;
+    --bs-body-bg: #fff;
+    --bs-border-color: #dee2e6;
+    --bs-border-radius: 0.375rem;
+    --bs-primary: #512bd4;
+    --bs-primary-rgb: 81, 43, 212;
+    --bs-success: #198754;
+    --bs-danger: #dc3545;
+    --bs-warning: #ffc107;
+    --bs-info: #0dcaf0;
+    --bs-secondary: #6c757d;
+    --bs-light: #f8f9fa;
+    --bs-focus-ring: 0 0 0 0.25rem rgba(81, 43, 212, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & Base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 768px) {
+    html { font-size: 16px; }
+}
+
+body {
+    margin: 0 0 60px;
+    font-family: var(--bs-body-font-family);
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--duende-purple); text-decoration: none; }
+a:hover { color: #3a1fa0; text-decoration: underline; }
+
+img, svg { vertical-align: middle; }
+
+h1, h2, h3, h4, h5, h6 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; line-height: 1.2; }
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p { margin-top: 0; margin-bottom: 1rem; }
+hr { margin: 1rem 0; border: 0; border-top: 1px solid var(--bs-border-color); opacity: 0.25; }
+label { display: inline-block; }
+
+/* --------------------------------------------------------------------------
+   3. Layout – Containers
+   -------------------------------------------------------------------------- */
+.container-fluid {
+    width: 100%;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container-lg {
+    width: 100%;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 992px) {
+    .container-lg { max-width: 960px; }
+}
+@media (min-width: 1200px) {
+    .container-lg { max-width: 1140px; }
+}
+@media (min-width: 1400px) {
+    .container-lg { max-width: 1320px; }
+}
+
+/* --------------------------------------------------------------------------
+   4. Layout – Grid (flexbox-based)
+   -------------------------------------------------------------------------- */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -0.75rem;
+    margin-left: -0.75rem;
+}
+
+.row > * {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 100%;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+}
+
+/* Row gutters */
+.row.g-2 { margin-right: -0.375rem; margin-left: -0.375rem; row-gap: 0.5rem; }
+.row.g-2 > * { padding-right: 0.375rem; padding-left: 0.375rem; }
+.row.g-3 { margin-right: -0.5rem; margin-left: -0.5rem; row-gap: 1rem; }
+.row.g-3 > * { padding-right: 0.5rem; padding-left: 0.5rem; }
+
+@media (min-width: 768px) {
+    .col-md-2  { flex: 0 0 auto; width: 16.666667%; }
+    .col-md-3  { flex: 0 0 auto; width: 25%; }
+    .col-md-4  { flex: 0 0 auto; width: 33.333333%; }
+    .col-md-5  { flex: 0 0 auto; width: 41.666667%; }
+    .col-md-6  { flex: 0 0 auto; width: 50%; }
+    .col-md-8  { flex: 0 0 auto; width: 66.666667%; }
+    .col-md-12 { flex: 0 0 auto; width: 100%; }
+}
+
+.col-auto { flex: 0 0 auto; width: auto; }
+
+@media (min-width: 992px) {
+    .col-lg-4 { flex: 0 0 auto; width: 33.333333%; }
+    .col-lg-6 { flex: 0 0 auto; width: 50%; }
+    .col-lg-8 { flex: 0 0 auto; width: 66.666667%; }
+}
+
+/* --------------------------------------------------------------------------
+   5. Display Utilities
+   -------------------------------------------------------------------------- */
+.d-flex    { display: flex !important; }
+.d-grid    { display: grid !important; }
+.d-inline  { display: inline !important; }
+.d-block   { display: block !important; }
+.d-none    { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   6. Flexbox Utilities
+   -------------------------------------------------------------------------- */
+.flex-column  { flex-direction: column !important; }
+.flex-wrap    { flex-wrap: wrap !important; }
+.flex-grow-1  { flex-grow: 1 !important; }
+
+.justify-content-center  { justify-content: center !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-end     { justify-content: flex-end !important; }
+
+.align-items-center { align-items: center !important; }
+.align-items-end    { align-items: flex-end !important; }
+
+@media (min-width: 992px) {
+    .align-items-lg-center { align-items: center !important; }
+    .ms-lg-3 { margin-left: 1rem !important; }
+}
+
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+
+/* --------------------------------------------------------------------------
+   7. Spacing Utilities
+   -------------------------------------------------------------------------- */
+/* Margin */
+.m-0  { margin: 0 !important; }
+.ms-1 { margin-left: 0.25rem !important; }
+.ms-2 { margin-left: 0.5rem !important; }
+.ms-3 { margin-left: 1rem !important; }
+.ms-auto { margin-left: auto !important; }
+.me-1 { margin-right: 0.25rem !important; }
+.me-2 { margin-right: 0.5rem !important; }
+.me-auto { margin-right: auto !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mt-4 { margin-top: 1.5rem !important; }
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+
+/* Padding */
+.p-2  { padding: 0.5rem !important; }
+.p-3  { padding: 1rem !important; }
+.px-3 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+.py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+
+/* Width */
+.w-100 { width: 100% !important; }
+
+/* --------------------------------------------------------------------------
+   8. Typography Utilities
+   -------------------------------------------------------------------------- */
+.text-center    { text-align: center !important; }
+.text-end       { text-align: right !important; }
+.text-muted     { color: #6c757d !important; }
+.text-danger    { color: var(--bs-danger) !important; }
+.text-success   { color: var(--bs-success) !important; }
+.text-primary   { color: var(--bs-primary) !important; }
+.text-secondary { color: var(--bs-secondary) !important; }
+.text-white-50  { color: rgba(255, 255, 255, 0.5) !important; }
+.text-uppercase { text-transform: uppercase !important; }
+
+.fw-bold     { font-weight: 700 !important; }
+.fw-semibold { font-weight: 600 !important; }
+.fw-normal   { font-weight: 400 !important; }
+
+.fs-1 { font-size: 2.5rem !important; }
+
+.lead { font-size: 1.25rem; font-weight: 300; }
+.small, small { font-size: 0.875em; }
+.font-monospace { font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important; }
+
+/* --------------------------------------------------------------------------
+   9. Borders & Visual Utilities
+   -------------------------------------------------------------------------- */
+.border    { border: 1px solid var(--bs-border-color) !important; }
+.rounded   { border-radius: var(--bs-border-radius) !important; }
+.shadow    { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; }
+.shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; }
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+/* --------------------------------------------------------------------------
+   10. Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border-radius: var(--bs-border-radius);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    text-decoration: none;
+    color: var(--bs-body-color);
+    background-color: transparent;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: var(--bs-focus-ring);
+    outline: 0;
+}
+
+.btn:disabled, .btn.disabled {
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+.btn-primary:hover {
+    color: #fff;
+    background-color: #4025b0;
+    border-color: #3b22a5;
+}
+.btn-primary:active {
+    background-color: #3b22a5;
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    background-color: transparent;
+}
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-secondary {
+    color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+    background-color: transparent;
+}
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+}
+
+.btn-outline-danger {
+    color: var(--bs-danger);
+    border-color: var(--bs-danger);
+    background-color: transparent;
+}
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: var(--bs-danger);
+    border-color: var(--bs-danger);
+}
+
+.btn-lg {
+    padding: 0.5rem 1rem;
+    font-size: 1.25rem;
+    border-radius: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+
+.btn-close {
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: 0.25em;
+    color: #000;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: 0.375rem;
+    opacity: 0.5;
+    cursor: pointer;
+}
+.btn-close:hover { opacity: 0.75; }
+.btn-close:focus { opacity: 1; box-shadow: var(--bs-focus-ring); outline: 0; }
+
+/* --------------------------------------------------------------------------
+   11. Cards
+   -------------------------------------------------------------------------- */
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.card-header:first-child { border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0; }
+
+.card-body {
+    flex: 1 1 auto;
+    padding: 1rem;
+}
+
+.card-footer {
+    padding: 0.75rem 1rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-top: 1px solid var(--bs-border-color);
+}
+.card-footer:last-child { border-radius: 0 0 calc(0.5rem - 1px) calc(0.5rem - 1px); }
+
+/* --------------------------------------------------------------------------
+   12. Badges
+   -------------------------------------------------------------------------- */
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+    color: #fff;
+}
+
+.bg-success   { background-color: var(--bs-success) !important; }
+.bg-secondary { background-color: var(--bs-secondary) !important; }
+.bg-light     { background-color: var(--bs-light) !important; color: #212529 !important; }
+
+/* --------------------------------------------------------------------------
+   13. Alerts
+   -------------------------------------------------------------------------- */
+.alert {
+    position: relative;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--bs-border-radius);
+}
+
+.alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
+.alert-danger  { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
+.alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
+.alert-info    { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
+
+.alert-dismissible { padding-right: 3rem; }
+.alert-dismissible .btn-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 1.25rem 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   14. Fade / Collapse
+   -------------------------------------------------------------------------- */
+.fade {
+    transition: opacity 0.15s linear;
+    opacity: 0;
+}
+.fade.show { opacity: 1; }
+
+.collapse { display: none; }
+.collapse.show { display: block; }
+
+/* --------------------------------------------------------------------------
+   15. Tables
+   -------------------------------------------------------------------------- */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    vertical-align: top;
+    border-color: var(--bs-border-color);
+    background-color: #fff;
+    caption-side: bottom;
+    border-collapse: collapse;
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.5rem;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--bs-border-color);
+}
+
+.table > thead {
+    vertical-align: bottom;
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.table-sm > :not(caption) > * > * {
+    padding: 0.25rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* --------------------------------------------------------------------------
+   15b. Pagination
+   -------------------------------------------------------------------------- */
+.pagination {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    gap: 0.25rem;
+}
+
+.pagination.justify-content-center { justify-content: center; }
+
+.page-item .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--bs-primary);
+    background-color: #fff;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    text-decoration: none;
+    transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+
+.page-item .page-link:hover {
+    color: #fff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.page-item.active .page-link {
+    color: #fff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   16. Forms
+   -------------------------------------------------------------------------- */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    appearance: none;
+}
+
+.form-control:focus {
+    color: var(--bs-body-color);
+    background-color: #fff;
+    border-color: #a895ea;
+    outline: 0;
+    box-shadow: var(--bs-focus-ring);
+}
+
+.form-control::placeholder { color: #6c757d; opacity: 1; }
+.form-control:disabled { background-color: #e9ecef; opacity: 1; }
+
+.form-control-lg { padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.5rem; }
+.form-control-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: 0.25rem; }
+
+.form-select {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    appearance: none;
+}
+
+.form-select:focus {
+    border-color: #a895ea;
+    outline: 0;
+    box-shadow: var(--bs-focus-ring);
+}
+
+.form-select-sm {
+    padding: 0.25rem 2rem 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+
+.form-check {
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 1.5em;
+    margin-bottom: 0.125rem;
+}
+
+.form-check-input {
+    width: 1em;
+    height: 1em;
+    margin-top: 0.25em;
+    margin-left: -1.5em;
+    vertical-align: top;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 0.25em;
+    appearance: none;
+    float: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-check-input[type="radio"] { border-radius: 50%; }
+
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.form-check-input:checked[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+.form-check-input:checked[type="radio"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+.form-check-input:focus {
+    border-color: #a895ea;
+    outline: 0;
+    box-shadow: var(--bs-focus-ring);
+}
+
+.form-check-label { cursor: pointer; }
+
+.form-label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-text {
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #6c757d;
+}
+
+/* --------------------------------------------------------------------------
+   17. Navbar
+   -------------------------------------------------------------------------- */
+.navbar {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.navbar > .container-fluid,
+.navbar > .container-lg {
+    display: flex;
+    flex-wrap: inherit;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-brand {
+    padding-top: 0.3125rem;
+    padding-bottom: 0.3125rem;
+    margin-right: 1rem;
+    font-size: 1.25rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .navbar-brand:focus {
+    color: #fff;
+}
+
+.navbar-nav {
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+.nav-item { /* no special styles needed */ }
+
+.nav-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--duende-purple);
+    text-decoration: none;
+    transition: color 0.15s ease-in-out;
+}
+.nav-link:hover, .nav-link:focus { color: #3a1fa0; }
+
+.navbar-dark .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+}
+.navbar-dark .nav-link:hover,
+.navbar-dark .nav-link:focus {
+    color: #fff;
+}
+
+.navbar-toggler {
+    padding: 0.25rem 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--bs-border-radius);
+    cursor: pointer;
+    transition: box-shadow 0.15s ease-in-out;
+}
+.navbar-toggler:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.15);
+}
+
+.navbar-toggler-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255,0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+
+.navbar-collapse {
+    flex-basis: 100%;
+    flex-grow: 1;
+    align-items: center;
+}
+
+/* On small screens, collapse hides content */
+.navbar-collapse:not(.show) {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .navbar-expand-lg .navbar-nav {
+        flex-direction: row;
+    }
+    .navbar-expand-lg .navbar-collapse {
+        display: flex !important;
+        flex-basis: auto;
+    }
+    .navbar-expand-lg .navbar-toggler {
+        display: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   18. Validation (ASP.NET)
+   -------------------------------------------------------------------------- */
+.validation-summary-errors {
+    color: var(--bs-danger);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+.validation-summary-errors ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
+
+.field-validation-error {
+    color: var(--bs-danger);
+    font-size: 0.875em;
+}
+
+/* --------------------------------------------------------------------------
+   19. Custom – Duende Header
+   -------------------------------------------------------------------------- */
+.site-header {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.duende-header {
+    background-color: var(--duende-header-bg) !important;
+    padding: 0.5rem 1rem;
+}
+
+.duende-header .navbar-brand {
+    color: white;
+    font-size: 1rem;
+}
+
+.duende-header .navbar-brand .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.duende-header .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+}
+
+.duende-header .nav-link:hover {
+    color: white;
+}
+
+.duende-header .nav-link.fw-bold {
+    color: white;
+}
+
+a.navbar-brand {
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
+}
+
+a.navbar-brand .icon-banner {
+    margin-top: -4px;
+    height: 2.5rem;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: 0 50%;
+}
+
+/* --------------------------------------------------------------------------
+   20. Custom – Page Layout
+   -------------------------------------------------------------------------- */
+.body-container {
+    margin-top: 60px;
+    padding-bottom: 40px;
+}
+
+.footer {
+    background-color: #fff;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    line-height: 60px;
+    text-align: center;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.form-container {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--bs-border-color);
+}
+
+.brand-title {
+    color: var(--duende-purple);
+    font-weight: 500;
+}
+
+.platform-hero {
+    padding: 2rem 0;
+    margin-bottom: 1rem;
+}
+
+.platform-hero h1 {
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.platform-hero .lead {
+    color: #666;
+    font-size: 1.15rem;
+}
+
+/* --------------------------------------------------------------------------
+   21. Custom – List Group
+   -------------------------------------------------------------------------- */
+.list-group-item {
+    color: #444;
+    background-color: #fff;
+}
+
+.list-group-item.disabled,
+.list-group-item:disabled {
+    color: #5c507c;
+    background-color: #fff;
+}
+
+.list-group-item.active,
+.list-group-item:hover,
+.list-group-item:focus {
+    z-index: 2;
+    color: #444;
+    background-color: #eee;
+    border-color: #eee;
+}
+
+.list-group-item.active {
+    font-weight: 700;
+}
+
+.list-group-item.active:hover {
+    background-color: #fff;
+}
+
+.list-group-item.disabled:hover {
+    color: #5c507c;
+}
+
+/* --------------------------------------------------------------------------
+   22. Custom – Modal Overlay (passkey naming)
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-overlay .modal-dialog {
+    max-width: 500px;
+    width: 100%;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   23. Code
+   -------------------------------------------------------------------------- */
+code {
+    color: #593d88;
+    font-size: 0.875em;
+    word-wrap: break-word;
+}

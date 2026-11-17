@@ -5,6 +5,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Outbox;
@@ -26,13 +27,13 @@ public class StoragePurgeHostTests
         _options.StoragePurge.EnablePurge = false;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
         // StartAsync returns Task.CompletedTask when disabled
         await host.StartAsync(cts.Token);
-        await host.StopAsync(CancellationToken.None);
+        await host.StopAsync(Ct.None);
     }
 
     [Fact]
@@ -42,11 +43,11 @@ public class StoragePurgeHostTests
         _options.StoragePurge.BatchSize = 100;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull();
@@ -58,11 +59,11 @@ public class StoragePurgeHostTests
         _options.StoragePurge.EnablePurge = false;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull();
@@ -75,11 +76,11 @@ public class StoragePurgeHostTests
 
         var storageInstanceRouter = new SimpleStorageInstanceRouter();
         var crossPartitionStorageFactory = new ThrowingCrossPartitionStorageFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull();
@@ -91,7 +92,7 @@ public class StoragePurgeHostTests
         _options.StoragePurge.EnablePurge = true;
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
@@ -111,11 +112,11 @@ public class StoragePurgeHostTests
         _options.StoragePurge.BatchSize = 0; // Below minimum — should be clamped to 1
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull();
@@ -128,11 +129,11 @@ public class StoragePurgeHostTests
         _options.StoragePurge.BatchSize = 5000; // Above maximum — should be clamped to 1000
 
         var (storageInstanceRouter, crossPartitionStorageFactory) = CreateStoreFactory();
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull();
@@ -151,11 +152,11 @@ public class StoragePurgeHostTests
         var crossPartitionStorageFactory = new SelectivelyThrowingCrossPartitionStorageFactory(
             throwFor: failingStorageInstanceId,
             (healthyStorageInstanceId, healthyStorage));
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull("a failing instance must not abort purging of the remaining instances");
@@ -176,11 +177,11 @@ public class StoragePurgeHostTests
         var crossPartitionStorageFactory = new MappedCrossPartitionStorageFactory(
             (failingStorageInstanceId, failingStorage),
             (healthyStorageInstanceId, healthyStorage));
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull("a failing instance must not abort purging of the remaining instances");
@@ -205,11 +206,11 @@ public class StoragePurgeHostTests
         var crossPartitionStorageFactory = new MappedCrossPartitionStorageFactory(
             (failingStorageInstanceId, failingStorage),
             (healthyStorageInstanceId, healthyStorage));
-        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, TimeProvider.System, _logger);
+        var host = new StoragePurgeHost(storageInstanceRouter, crossPartitionStorageFactory, _options, new InProcessDistributedLock(), TimeProvider.System, _logger);
 
         var exception = await Record.ExceptionAsync(async () =>
         {
-            await host.RunPurgeAsync(CancellationToken.None);
+            await host.RunPurgeAsync(Ct.None);
         });
 
         exception.ShouldBeNull("an unrequested OperationCanceledException must not abort purging of the remaining instances");
@@ -227,7 +228,7 @@ public class StoragePurgeHostTests
 
         var sp = services.BuildServiceProvider();
         var schema = sp.GetRequiredKeyedService<Duende.Storage.Schema.IStorageInstanceSchema>(StorageInstanceId.Default);
-        schema.MigrateAsync(CancellationToken.None).GetAwaiter().GetResult();
+        schema.MigrateAsync(Ct.None).GetAwaiter().GetResult();
 
         return (new SimpleStorageInstanceRouter(), new SimpleCrossPartitionStorageFactory(sp));
     }
@@ -249,13 +250,13 @@ public class StoragePurgeHostTests
 
     private sealed class SimpleCrossPartitionStorageFactory(IServiceProvider services) : ICrossPartitionStorageFactory
     {
-        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, CancellationToken ct) =>
+        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, Ct ct) =>
             Task.FromResult(services.GetRequiredKeyedService<ICrossPartitionStorage>(storageInstanceId));
     }
 
     private sealed class ThrowingCrossPartitionStorageFactory : ICrossPartitionStorageFactory
     {
-        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, CancellationToken ct) =>
+        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, Ct ct) =>
             throw new InvalidOperationException("Simulated factory failure");
     }
 
@@ -280,7 +281,7 @@ public class StoragePurgeHostTests
     {
         private readonly Dictionary<StorageInstanceId, ICrossPartitionStorage> _map = mappings.ToDictionary(m => m.StorageInstanceId, m => m.CrossPartitionStorage);
 
-        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, CancellationToken ct) =>
+        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, Ct ct) =>
             storageInstanceId == throwFor
                 ? throw new InvalidOperationException($"Simulated factory failure for instance '{storageInstanceId.Value}'.")
                 : Task.FromResult(_map[storageInstanceId]);
@@ -290,7 +291,7 @@ public class StoragePurgeHostTests
     {
         private readonly Dictionary<StorageInstanceId, ICrossPartitionStorage> _map = mappings.ToDictionary(m => m.StorageInstanceId, m => m.CrossPartitionStorage);
 
-        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, CancellationToken ct) =>
+        public Task<ICrossPartitionStorage> GetCrossPartitionStorageAsync(StorageInstanceId storageInstanceId, Ct ct) =>
             Task.FromResult(_map[storageInstanceId]);
     }
 
@@ -300,37 +301,45 @@ public class StoragePurgeHostTests
 
         public int PurgeCallCount => Volatile.Read(ref _purgeCallCount);
 
-        public Task<OutboxEventsPage> GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, CancellationToken ct) =>
+        public Task<OutboxEventsPage> GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, Ct ct) =>
             Task.FromResult(new OutboxEventsPage([], HasMore: false));
 
-        public Task DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, CancellationToken ct) => Task.CompletedTask;
+        public Task DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct) => Task.CompletedTask;
 
-        public Task<int> PurgeExpiredAsync(int batchSize, CancellationToken ct)
+        public Task<int> PurgeExpiredAsync(int batchSize, Ct ct)
         {
             _ = Interlocked.Increment(ref _purgeCallCount);
             return Task.FromResult(0);
         }
+
+        public Task<PurgeResult> PurgePoolAsync(PoolId poolId, Ct ct) => throw new NotSupportedException();
+
+        public Task<PurgeResult> PurgePoolAsync(PoolId poolId, int batchSize, Ct ct) => throw new NotSupportedException();
     }
 
     private sealed class ThrowingPurgeCrossPartitionStorage : ICrossPartitionStorage
     {
-        public Task<OutboxEventsPage> GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, CancellationToken ct) =>
+        public Task<OutboxEventsPage> GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, Ct ct) =>
             Task.FromResult(new OutboxEventsPage([], HasMore: false));
 
-        public Task DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, CancellationToken ct) => Task.CompletedTask;
+        public Task DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct) => Task.CompletedTask;
 
-        public Task<int> PurgeExpiredAsync(int batchSize, CancellationToken ct) =>
+        public Task<int> PurgeExpiredAsync(int batchSize, Ct ct) =>
             throw new InvalidOperationException("Simulated purge failure");
+
+        public Task<PurgeResult> PurgePoolAsync(PoolId poolId, Ct ct) => throw new NotSupportedException();
+
+        public Task<PurgeResult> PurgePoolAsync(PoolId poolId, int batchSize, Ct ct) => throw new NotSupportedException();
     }
 
     private sealed class UnrequestedCancellationCrossPartitionStorage : ICrossPartitionStorage
     {
-        public Task<OutboxEventsPage> GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, CancellationToken ct) =>
+        public Task<OutboxEventsPage> GetOutboxEventsForSubscriptionAsync(SubscriberName subscriptionName, int count, Ct ct) =>
             Task.FromResult(new OutboxEventsPage([], HasMore: false));
 
-        public Task DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, CancellationToken ct) => Task.CompletedTask;
+        public Task DeleteOutboxEventsAsync(IReadOnlyList<OutboxEventId> ids, Ct ct) => Task.CompletedTask;
 
-        public Task<int> PurgeExpiredAsync(int batchSize, CancellationToken ct)
+        public Task<int> PurgeExpiredAsync(int batchSize, Ct ct)
         {
             // Throws an OperationCanceledException whose token is unrelated to (and not
             // cancelled via) the caller-supplied ct, simulating a store-internal timeout. The
@@ -339,8 +348,15 @@ public class StoragePurgeHostTests
             unrelatedCts.Cancel();
             throw new OperationCanceledException("Simulated store-internal timeout", unrelatedCts.Token);
         }
+
+        public Task<PurgeResult> PurgePoolAsync(PoolId poolId, Ct ct) => throw new NotSupportedException();
+
+        public Task<PurgeResult> PurgePoolAsync(PoolId poolId, int batchSize, Ct ct) => throw new NotSupportedException();
     }
 }
+
+
+
 
 
 

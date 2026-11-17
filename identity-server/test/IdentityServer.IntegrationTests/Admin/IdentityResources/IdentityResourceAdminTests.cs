@@ -6,9 +6,10 @@
 using Duende.IdentityServer.Admin.IdentityResources;
 using Duende.IdentityServer.IntegrationTests.Admin.IdentityResources;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
+using Duende.IdentityServer.DataExtensions;
+
+using Duende.IdentityServer.Models;
+using DataVersion = Duende.IdentityServer.Models.DataVersion;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -37,10 +38,10 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.Name.ShouldBe(resource.Name);
         loaded.DisplayName.ShouldBe(resource.DisplayName);
         loaded.Description.ShouldBe(resource.Description);
@@ -71,8 +72,8 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
 
         var getResult = await admin.GetByNameAsync(name, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.Name.ShouldBe(name);
-        getResult.Item.DisplayName.ShouldBe("ByName Test");
+        getResult.Item!.Name.ShouldBe(name);
+        getResult.Item!.DisplayName.ShouldBe("ByName Test");
     }
 
     [Fact]
@@ -84,9 +85,9 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var result = await admin.CreateAsync(resource, _ct);
 
         result.IsSuccess.ShouldBeTrue($"Create failed: {result}");
-        result.Id.Value.ShouldNotBe(Guid.Empty);
-        result.Version.ShouldNotBeNull();
-        result.Version.Value.ShouldBe(1);
+        result.Id!.Value.ShouldNotBe(Guid.Empty);
+        result.Version!.ShouldNotBeNull();
+        result.Version!.Value.ShouldBe(1);
     }
 
     [Fact]
@@ -101,7 +102,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var second = await admin.CreateAsync(new CreateIdentityResource { Name = name }, _ct);
         second.IsSuccess.ShouldBeFalse();
         second.Errors.ShouldNotBeNull();
-        second.Errors.ShouldContain(e => e.Code == "already_exists");
+        second.Errors!.ShouldContain(e => e.Code == "already_exists");
     }
 
     [Fact]
@@ -118,22 +119,22 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.DisplayName = "Updated";
         toUpdate.Description = "Updated description";
         toUpdate.Enabled = false;
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.DisplayName.ShouldBe("Updated");
-        afterUpdate.Item.Description.ShouldBe("Updated description");
-        afterUpdate.Item.Enabled.ShouldBeFalse();
+        afterUpdate.Item!.DisplayName.ShouldBe("Updated");
+        afterUpdate.Item!.Description.ShouldBe("Updated description");
+        afterUpdate.Item!.Enabled.ShouldBeFalse();
     }
 
     [Fact]
@@ -145,15 +146,15 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
         var wrongVersion = (DataVersion)999;
-        var updateResult = await admin.UpdateAsync(createResult.Id, getResult.Item.ToUpdate(), wrongVersion, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, getResult.Item!.ToUpdate(), wrongVersion, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
-        updateResult.Errors.ShouldContain(e => e.Code == "version_conflict");
+        updateResult.Errors!.ShouldContain(e => e.Code == "version_conflict");
     }
 
     [Fact]
@@ -167,7 +168,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "not_found");
+        result.Errors!.ShouldContain(e => e.Code == "not_found");
     }
 
     [Fact]
@@ -181,14 +182,14 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var createB = await admin.CreateAsync(new CreateIdentityResource { Name = nameB }, _ct);
         createB.IsSuccess.ShouldBeTrue();
 
-        var getB = await admin.GetAsync(createB.Id, _ct);
+        var getB = await admin.GetAsync(createB.Id!, _ct);
         getB.Found.ShouldBeTrue();
-        var configB = getB.Item.ToUpdate();
+        var configB = getB.Item!.ToUpdate();
         configB.Name = nameA; // rename B to A's name
 
-        var updateResult = await admin.UpdateAsync(createB.Id, configB, getB.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createB.Id!, configB, getB.Version!, _ct);
         updateResult.IsSuccess.ShouldBeFalse();
-        updateResult.Errors.ShouldContain(e => e.Code == "already_exists");
+        updateResult.Errors!.ShouldContain(e => e.Code == "already_exists");
     }
 
     [Fact]
@@ -200,10 +201,10 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(resource, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var deleteResult = await admin.DeleteAsync(createResult.Id, _ct);
+        var deleteResult = await admin.DeleteAsync(createResult.Id!, _ct);
         deleteResult.IsSuccess.ShouldBeTrue($"Delete failed: {deleteResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeFalse();
     }
 
@@ -217,7 +218,7 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
 
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeNull();
-        result.Errors.ShouldContain(e => e.Code == "required" && e.PropertyNames != null && e.PropertyNames.Contains("Name"));
+        result.Errors!.ShouldContain(e => e.Code == "required" && e.PropertyNames != null && e.PropertyNames.Contains("Name"));
     }
 
     [Fact]
@@ -235,8 +236,8 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
                 new IdentityResourceFilter { Name = uniquePart }),
             _ct);
 
-        result.Items.ShouldAllBe(r => r.Name.Contains(uniquePart));
-        result.Items.Count.ShouldBeGreaterThanOrEqualTo(2);
+        result.Results.ShouldAllBe(r => r.Name.Contains(uniquePart));
+        result.Results.Count.ShouldBeGreaterThanOrEqualTo(2);
     }
 
     [Fact]
@@ -254,8 +255,8 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
                 new IdentityResourceFilter { Name = enabledName, Enabled = true }),
             _ct);
 
-        enabledResult.Items.ShouldContain(r => r.Name == enabledName);
-        enabledResult.Items.ShouldNotContain(r => r.Name == disabledName);
+        enabledResult.Results.ShouldContain(r => r.Name == enabledName);
+        enabledResult.Results.ShouldNotContain(r => r.Name == disabledName);
     }
 
     [Fact]
@@ -272,21 +273,21 @@ public sealed class IdentityResourceAdminTests : IAsyncLifetime
         var page1 = await admin.QueryAsync(
             QueryRequest.Create<IdentityResourceFilter, IdentityResourceSortField>(
                 new IdentityResourceFilter { Name = prefix },
-                (DataRange)DataRange.FromPage(1, (DataRangeSize)2)),
+                DataRange.FromPage(1, 2)),
             _ct);
 
-        page1.Items.Count.ShouldBe(2);
+        page1.Results.Count.ShouldBe(2);
 
         var page2 = await admin.QueryAsync(
             QueryRequest.Create<IdentityResourceFilter, IdentityResourceSortField>(
                 new IdentityResourceFilter { Name = prefix },
-                (DataRange)DataRange.FromPage(2, (DataRangeSize)2)),
+                DataRange.FromPage(2, 2)),
             _ct);
 
-        page2.Items.Count.ShouldBe(2);
+        page2.Results.Count.ShouldBe(2);
 
-        var page1Ids = page1.Items.Select(r => r.Id).ToHashSet();
-        var page2Ids = page2.Items.Select(r => r.Id).ToHashSet();
+        var page1Ids = page1.Results.Select(r => r.Id!).ToHashSet();
+        var page2Ids = page2.Results.Select(r => r.Id!).ToHashSet();
         page1Ids.Intersect(page2Ids).ShouldBeEmpty();
     }
 

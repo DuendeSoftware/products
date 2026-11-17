@@ -28,7 +28,7 @@ internal class FakeDistributedCache(TimeProvider timeProvider) : IDistributedCac
         return null;
     }
 
-    public Task<byte[]?> GetAsync(string key, CancellationToken token = default) => Task.FromResult(Get(key));
+    public Task<byte[]?> GetAsync(string key, Ct token = default) => Task.FromResult(Get(key));
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
     {
@@ -39,7 +39,7 @@ internal class FakeDistributedCache(TimeProvider timeProvider) : IDistributedCac
         _items[key] = new CacheEntry(value, absoluteExpiration);
     }
 
-    public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+    public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, Ct token = default)
     {
         Set(key, value, options);
         return Task.CompletedTask;
@@ -47,7 +47,7 @@ internal class FakeDistributedCache(TimeProvider timeProvider) : IDistributedCac
 
     public void Remove(string key) => _items.Remove(key);
 
-    public Task RemoveAsync(string key, CancellationToken token = default)
+    public Task RemoveAsync(string key, Ct token = default)
     {
         Remove(key);
         return Task.CompletedTask;
@@ -58,5 +58,5 @@ internal class FakeDistributedCache(TimeProvider timeProvider) : IDistributedCac
         // not currently needed
     }
 
-    public Task RefreshAsync(string key, CancellationToken token = default) => Task.CompletedTask;
+    public Task RefreshAsync(string key, Ct token = default) => Task.CompletedTask;
 }

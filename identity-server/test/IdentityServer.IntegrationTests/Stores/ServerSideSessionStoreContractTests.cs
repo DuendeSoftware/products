@@ -213,4 +213,99 @@ public abstract class ServerSideSessionStoreContractTests : IAsyncLifetime
         result.Results.Count.ShouldBeInRange(1, 2);
         result.HasNextResults.ShouldBeTrue();
     }
+
+    [Fact]
+    public async Task UpdateSessionAsync_WhenTheSessionWasSavedSinceItWasRead_IsRefusedAndKeepsTheNewerSession()
+    {
+        await using var handle = CreateStore();
+        var aliceSession = CreateTestSession(expires: DateTime.UtcNow.AddHours(1));
+        await handle.Store.CreateSessionAsync(aliceSession, _ct);
+        var tokenCallSessionRead = await handle.Store.GetSessionAsync(aliceSession.Key, _ct);
+
+        var browserSessionSave = await handle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        browserSessionSave!.Ticket = "browser_ticket";
+        await handle.Store.UpdateSessionAsync(browserSessionSave, _ct);
+        tokenCallSessionRead!.Ticket = "token_call_ticket";
+
+        var tokenCallSaveAccepted = await handle.Store.UpdateSessionAsync(tokenCallSessionRead, _ct);
+
+        tokenCallSaveAccepted.ShouldBeFalse("a save based on a read older than the stored session must be refused");
+        var storedSession = await handle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        storedSession!.Ticket.ShouldBe("browser_ticket", "the refused save must leave the newer session in the store");
+    }
+
+    [Fact]
+    public async Task UpdateSessionAsync_WhenTheSessionWasDeletedSinceItWasRead_IsRefusedAndDoesNotRecreateIt()
+    {
+        await using var handle = CreateStore();
+        var aliceSession = CreateTestSession(expires: DateTime.UtcNow.AddHours(1));
+        await handle.Store.CreateSessionAsync(aliceSession, _ct);
+        var tokenCallSessionRead = await handle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        await handle.Store.DeleteSessionAsync(aliceSession.Key, _ct);
+
+        var tokenCallSaveAfterSignOutAccepted = await handle.Store.UpdateSessionAsync(tokenCallSessionRead!, _ct);
+
+        tokenCallSaveAfterSignOutAccepted.ShouldBeFalse("a save of a deleted session must be refused");
+        var storedSession = await handle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        storedSession.ShouldBeNull("a refused save must not bring back a deleted session");
+    }
+
+    [Fact]
+    public async Task UpdateSessionAsync_WhenTheSessionWasNotReadFromTheStore_SavesWithoutTheVersionCheck()
+    {
+        await using var handle = CreateStore();
+        var aliceSession = CreateTestSession(expires: DateTime.UtcNow.AddHours(1));
+        await handle.Store.CreateSessionAsync(aliceSession, _ct);
+        var replacementBuiltWithoutRead = CreateTestSession(key: aliceSession.Key, subjectId: aliceSession.SubjectId, sessionId: aliceSession.SessionId, expires: aliceSession.Expires, ticket: "replacement_ticket");
+
+        var replacementAccepted = await handle.Store.UpdateSessionAsync(replacementBuiltWithoutRead, _ct);
+
+        replacementAccepted.ShouldBeTrue("a session that was not read from the store has version 0 and is saved without the check");
+        var storedSession = await handle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        storedSession!.Ticket.ShouldBe("replacement_ticket", "a session not read from the store must be saved as given");
+    }
+
+    [Fact]
+    public async Task DeleteSessionAsync_WhenTheTokenCallStoreSavedTheSessionAfterTheSignOutStore_RemovesSession()
+    {
+        await using var signOutHandle = CreateStore();
+        await using var tokenCallHandle = CreateStore();
+        var aliceSession = CreateTestSession(expires: DateTime.UtcNow.AddHours(1));
+        await signOutHandle.Store.CreateSessionAsync(aliceSession, _ct);
+
+        var signOutStoreSessionSave = await signOutHandle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        var signOutStoreSaveAccepted = await signOutHandle.Store.UpdateSessionAsync(signOutStoreSessionSave!, _ct);
+        var tokenCallStoreSessionSave = await tokenCallHandle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        var tokenCallStoreSaveAccepted = await tokenCallHandle.Store.UpdateSessionAsync(tokenCallStoreSessionSave!, _ct);
+
+        signOutStoreSaveAccepted.ShouldBeTrue("precondition: the sign-out store saves the session");
+        tokenCallStoreSaveAccepted.ShouldBeTrue("precondition: the token call's store saves the session after the sign-out store did");
+
+        await signOutHandle.Store.DeleteSessionAsync(aliceSession.Key, _ct);
+
+        var storedSession = await tokenCallHandle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        storedSession.ShouldBeNull("sign-out must delete the session even when the token call's store saved it after the sign-out store did");
+    }
+
+    [Fact]
+    public async Task DeleteSessionsAsync_WhenTheTokenCallStoreSavedTheSessionAfterTheSignOutStore_RemovesMatchingSessions()
+    {
+        await using var signOutHandle = CreateStore();
+        await using var tokenCallHandle = CreateStore();
+        var aliceSession = CreateTestSession(expires: DateTime.UtcNow.AddHours(1));
+        await signOutHandle.Store.CreateSessionAsync(aliceSession, _ct);
+
+        var signOutStoreSessionSave = await signOutHandle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        var signOutStoreSaveAccepted = await signOutHandle.Store.UpdateSessionAsync(signOutStoreSessionSave!, _ct);
+        var tokenCallStoreSessionSave = await tokenCallHandle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        var tokenCallStoreSaveAccepted = await tokenCallHandle.Store.UpdateSessionAsync(tokenCallStoreSessionSave!, _ct);
+
+        signOutStoreSaveAccepted.ShouldBeTrue("precondition: the sign-out store saves the session");
+        tokenCallStoreSaveAccepted.ShouldBeTrue("precondition: the token call's store saves the session after the sign-out store did");
+
+        await signOutHandle.Store.DeleteSessionsAsync(new SessionFilter { SubjectId = aliceSession.SubjectId }, _ct);
+
+        var storedSession = await tokenCallHandle.Store.GetSessionAsync(aliceSession.Key, _ct);
+        storedSession.ShouldBeNull("removing a user's sessions must delete them even when the token call's store saved one after the sign-out store did");
+    }
 }

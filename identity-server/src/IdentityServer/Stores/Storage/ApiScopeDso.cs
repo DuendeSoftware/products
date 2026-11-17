@@ -3,7 +3,7 @@
 
 #nullable enable
 
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
 using Duende.Storage.Internal;
 
 namespace Duende.IdentityServer.Stores.Storage;
@@ -11,6 +11,16 @@ namespace Duende.IdentityServer.Stores.Storage;
 internal static class ApiScopeDso
 {
     internal static readonly EntityType EntityType = new(2112, "ApiScopeDso");
+
+    /// <summary>
+    /// Converts a stored ApiScopeDso of any registered version to the current version (V1).
+    /// A future V2 adds an arm here that upconverts older versions.
+    /// </summary>
+    internal static V1 ToCurrent(IDataStorageObject dso) => dso switch
+    {
+        V1 v1 => v1,
+        _ => throw new InvalidOperationException($"Unexpected {nameof(ApiScopeDso)} type {dso.GetType()}.")
+    };
 
     internal sealed record V1 : IDataStorageObject
     {
@@ -26,6 +36,5 @@ internal static class ApiScopeDso
         public required bool Emphasize { get; init; }
         public required IReadOnlyList<string> UserClaims { get; init; }
         public IReadOnlyList<AttributeValueDso.V1>? ExtendedAttributeValues { get; init; }
-        public IReadOnlyList<ApiResourceReferenceDso.V1> ReferencedByApiResources { get; init; } = [];
     }
 }

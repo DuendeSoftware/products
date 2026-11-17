@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Services;
@@ -56,6 +57,13 @@ public class IdentityServerMiddleware
         IIssuerNameService issuerNameService,
         ISessionCoordinationService sessionCoordinationService)
     {
+        // Opportunistically reclaims idle dynamic-provider cache entries (per-space options and
+        // tracker records) on every request, not only ones that resolve a dynamic scheme. This is
+        // what lets a deleted space's cache entries go away even while only static-only,
+        // local-login, token, or other-provider-type traffic keeps arriving. The cache's own
+        // throttle makes this at most a timestamp read/compare on requests where it isn't due.
+        context.RequestServices.GetService<IdentityProviderOptionsMonitorCache>()?.SweepIdleEntriesIfDue();
+
         // this will check the authentication session and from it emit the check session
         // cookie needed from JS-based signout clients.
         await userSession.EnsureSessionIdCookieAsync(context.RequestAborted);

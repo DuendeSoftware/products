@@ -3,7 +3,7 @@
 
 #nullable enable
 
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
 using Duende.Storage.Internal;
 
 namespace Duende.IdentityServer.Stores.Storage;
@@ -11,6 +11,16 @@ namespace Duende.IdentityServer.Stores.Storage;
 internal static class ClientDso
 {
     internal static readonly EntityType EntityType = new(2100, "ClientDso");
+
+    /// <summary>
+    /// Converts a stored ClientDso of any registered version to the current version (V1).
+    /// A future V2 adds an arm here that upconverts older versions.
+    /// </summary>
+    internal static V1 ToCurrent(IDataStorageObject dso) => dso switch
+    {
+        V1 v1 => v1,
+        _ => throw new InvalidOperationException($"Unexpected {nameof(ClientDso)} type {dso.GetType()}.")
+    };
 
     internal sealed record V1 : IDataStorageObject
     {
@@ -88,7 +98,6 @@ internal static class ClientDso
 
         // Collections
         public required IReadOnlyList<string> AllowedGrantTypes { get; init; }
-        public required IReadOnlyList<string> AllowedScopes { get; init; }
         public required IReadOnlyList<string> RedirectUris { get; init; }
         public required IReadOnlyList<string> PostLogoutRedirectUris { get; init; }
         public required IReadOnlyList<string> AllowedIdentityTokenSigningAlgorithms { get; init; }

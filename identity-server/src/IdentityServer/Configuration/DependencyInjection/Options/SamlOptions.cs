@@ -149,6 +149,12 @@ public class SamlOptions
     public int MaxMessageSize { get; set; } = 1_048_576;
 
     /// <summary>
+    /// Maximum element nesting depth of an inbound SAML message. The root is depth 0;
+    /// text, comments and attributes do not add element depth. Defaults to 32.
+    /// </summary>
+    public int MaxXmlNestingDepth { get; set; } = 32;
+
+    /// <summary>
     /// Gets or sets the endpoint options for SAML.
     /// </summary>
     public SamlEndpointOptions Endpoints { get; set; } = new();

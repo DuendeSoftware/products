@@ -39,6 +39,12 @@ public class X509NameSecretValidator : ISecretValidator
             throw new InvalidOperationException("Credential is not a x509 certificate.");
         }
 
+        if (cert.SubjectName.RawData.AsSpan().SequenceEqual(cert.IssuerName.RawData))
+        {
+            _logger.SelfSignedCertificateCannotMatchX509NameSecret();
+            return fail;
+        }
+
         var name = cert.Subject;
         if (name == null)
         {

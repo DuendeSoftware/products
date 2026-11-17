@@ -16,9 +16,8 @@ public sealed class ServerSideSessionTests_PartitionedStorage : ServerSideSessio
 {
     public ServerSideSessionTests_PartitionedStorage()
     {
-        // Must be registered after AddServerSideSessions() (in base) so that
-        // AddStorage()'s server-side session store registration replaces the
-        // in-memory store registered by AddServerSideSessions().
+        // The base registers server-side sessions first. AddOperationalStorage()
+        // then selects the storage-backed store instead of the in-memory store.
         _pipeline.OnPostConfigureServices += services =>
         {
             services.AddOperationalStorageForTesting();

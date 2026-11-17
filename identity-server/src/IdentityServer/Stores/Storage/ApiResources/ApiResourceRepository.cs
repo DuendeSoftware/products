@@ -13,15 +13,37 @@ using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
-using StorageSortDirection = Duende.Storage.Querying.SortDirection;
+using Duende.Storage.Internal.Pagination;
 
 namespace Duende.IdentityServer.Stores.Storage.ApiResources;
 
-#pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ApiResourceRepository(IPartitionedStorageFactory partitionedStorageFactory)
+/// <summary>
+/// The outcome of a batch operation that creates or updates an API resource together with its scope links.
+/// </summary>
+internal enum ApiResourceBatchOutcomeKind
 {
+    Success,
+    AlreadyExists,
+    KeyConflict,
+    UnexpectedVersion,
+    ResourceDoesNotExist,
+    ScopeDoesNotExist
+}
+
+/// <summary>
+/// The outcome of a batch operation, naming the scope when <see cref="Kind"/> is
+/// <see cref="ApiResourceBatchOutcomeKind.ScopeDoesNotExist"/>.
+/// </summary>
+internal readonly record struct ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind Kind, string? ScopeName = null)
+{
+    public static readonly ApiResourceBatchOutcome Success = new(ApiResourceBatchOutcomeKind.Success);
+}
+
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+internal sealed class ApiResourceRepository(IPartitionedStorageFactory partitionedStorageFactory, ApiScopeRepository apiScopeRepository)
+{
+    private const int LinkPageSize = 200;
+
     private Task<IPartitionedStorage> GetPartitionedStorage(Ct ct) => partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.Configuration, ct);
 
     internal enum Keys
@@ -33,79 +55,31 @@ internal sealed class ApiResourceRepository(IPartitionedStorageFactory partition
     {
         public static readonly StringField Name = new("Name");
         public static readonly BooleanField Enabled = new("Enabled");
-        public static readonly StringArrayField Scope = new("Scope");
+        public static readonly GuidField ApiResourceId = new("ApiResourceId");
     }
 
-    internal async Task<CreateResult> CreateAsync(UuidV7 id, ApiResourceDso.V1 dso, Ct ct)
+    internal async Task<ApiResourceBatchOutcome> CreateAsync(UuidV7 id, ApiResourceDso.V1 dso, IReadOnlyList<(string Name, Guid Id)> scopes, Ct ct)
     {
-        var partitionedStorage = await GetPartitionedStorage(ct);
-        return await partitionedStorage.CreateAsync(
-            id,
-            dso,
-            [DataStorageKey.Create(ApiResourceNameDskV1.Create(dso.Name))],
-            BuildSearchFields(dso),
-            Expiration.NoExpiration,
-            [],
-            ct);
-    }
-
-    internal async Task<CreateResult> CreateWithScopesAsync(
-        UuidV7 id,
-        ApiResourceDso.V1 dso,
-        IReadOnlyList<ApiScopeReferenceDso.V1> scopeRefs,
-        Ct ct)
-    {
-        // Fall back to simple create when there are no scope relationships
-        if (scopeRefs.Count == 0)
+        var operations = new List<IStorageOperation>
         {
-            return await CreateAsync(id, dso, ct);
+            CreateOperation.For(id, dso, BuildKeys(dso), BuildSearchFields(dso), Expiration.NoExpiration)
+        };
+
+        foreach (var scope in scopes)
+        {
+            operations.Add(LinkOperation.For(ApiResourceLinkDefinitions.ApiResourceScope, id, UuidV7.From(scope.Id)));
         }
 
         var partitionedStorage = await GetPartitionedStorage(ct);
-        var operations = new List<IStorageOperation>();
-
-        // First operation: create the ApiResource
-        operations.Add(CreateOperation.For(
-            id,
-            dso,
-            [DataStorageKey.Create(ApiResourceNameDskV1.Create(dso.Name))],
-            BuildSearchFields(dso),
-            Expiration.NoExpiration));
-
-        // For each scope, read and update with the new back-reference
-        foreach (var scopeRef in scopeRefs)
-        {
-            var scopeResult = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
-            if (!scopeResult.Found)
-            {
-                // Scope was deleted — treat as concurrency conflict
-                return CreateResult.KeyConflict;
-            }
-
-            var scopeDso = (ApiScopeDso.V1)scopeResult.Dso;
-            var updatedReferences = scopeDso.ReferencedByApiResources.ToList();
-            updatedReferences.Add(new ApiResourceReferenceDso.V1(id.Value, dso.Name));
-
-            var updatedScopeDso = scopeDso with { ReferencedByApiResources = updatedReferences };
-
-            operations.Add(UpdateOperation.For(
-                UuidV7.From(scopeRef.Id),
-                updatedScopeDso,
-                scopeResult.Version.Value,
-                [DataStorageKey.Create(ApiScopeNameDskV1.Create(scopeDso.Name))],
-                BuildScopeSearchFields(updatedScopeDso),
-                Expiration.NoExpiration));
-        }
-
         var batchResult = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
-        return MapBatchToCreateResult(batchResult);
+        return MapBatchToCreateOutcome(batchResult, scopes);
     }
 
     internal async Task<(ApiResourceDso.V1 Dso, int Version)?> TryReadByIdAsync(Guid id, Ct ct)
     {
         var partitionedStorage = await GetPartitionedStorage(ct);
         var result = await partitionedStorage.TryReadAsync(ApiResourceDso.EntityType, UuidV7.From(id), ct);
-        return result.Found ? ((ApiResourceDso.V1)result.Dso, result.Version.Value) : null;
+        return result.Found ? (ApiResourceDso.ToCurrent(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<(ApiResourceDso.V1 Dso, int Version)?> TryReadByNameAsync(string name, Ct ct)
@@ -115,7 +89,7 @@ internal sealed class ApiResourceRepository(IPartitionedStorageFactory partition
             ApiResourceDso.EntityType,
             DataStorageKey.Create(ApiResourceNameDskV1.Create(name)),
             ct);
-        return result.Found ? ((ApiResourceDso.V1)result.Dso, result.Version.Value) : null;
+        return result.Found ? (ApiResourceDso.ToCurrent(result.Dso), result.Version.Value) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(UuidV7 id, ApiResourceDso.V1 dso, int expectedVersion, Ct ct) =>
@@ -123,339 +97,381 @@ internal sealed class ApiResourceRepository(IPartitionedStorageFactory partition
             id,
             dso,
             expectedVersion,
-            [DataStorageKey.Create(ApiResourceNameDskV1.Create(dso.Name))],
+            BuildKeys(dso),
             BuildSearchFields(dso),
             expiration: Expiration.NoExpiration,
             outboxEvents: [],
             ct);
 
-    internal async Task<UpdateResult> UpdateWithScopeChangesAsync(
+    internal async Task<ApiResourceBatchOutcome> UpdateAsync(
         UuidV7 id,
         ApiResourceDso.V1 dso,
         int expectedVersion,
-        IReadOnlyList<ApiScopeReferenceDso.V1> addedScopeRefs,
-        IReadOnlyList<Guid> removedScopeIds,
+        IReadOnlyList<(string Name, Guid Id)> scopesToLink,
+        IReadOnlyList<(string Name, Guid Id)> scopesToUnlink,
         Ct ct)
     {
-        // Fall back to simple update when there are no scope relationship changes
-        if (addedScopeRefs.Count == 0 && removedScopeIds.Count == 0)
+        var operations = new List<IStorageOperation>
         {
-            return await UpdateAsync(id, dso, expectedVersion, ct);
+            UpdateOperation.For(id, dso, expectedVersion, BuildKeys(dso), BuildSearchFields(dso), Expiration.NoExpiration)
+        };
+
+        // index 0 is the UpdateOperation above; everything after it is a link operation naming a scope.
+        var scopeOperationNames = new List<string?> { null };
+
+        foreach (var scope in scopesToUnlink)
+        {
+            operations.Add(UnlinkOperation.For(ApiResourceLinkDefinitions.ApiResourceScope, id, UuidV7.From(scope.Id)));
+            scopeOperationNames.Add(scope.Name);
+        }
+
+        foreach (var scope in scopesToLink)
+        {
+            operations.Add(LinkOperation.For(ApiResourceLinkDefinitions.ApiResourceScope, id, UuidV7.From(scope.Id)));
+            scopeOperationNames.Add(scope.Name);
         }
 
         var partitionedStorage = await GetPartitionedStorage(ct);
-        var operations = new List<IStorageOperation>();
-
-        // First operation: update the ApiResource
-        operations.Add(UpdateOperation.For(
-            id,
-            dso,
-            expectedVersion,
-            [DataStorageKey.Create(ApiResourceNameDskV1.Create(dso.Name))],
-            BuildSearchFields(dso),
-            Expiration.NoExpiration));
-
-        // Partition scope changes: scopes in both added and removed lists are "renames"
-        // (the resource name changed but the scope is still referenced). Process each scope
-        // entity at most once to avoid two UpdateOperations targeting the same entity ID,
-        // which would cause a version conflict within the batch.
-        var addedById = addedScopeRefs.ToDictionary(s => s.Id);
-        var removedIdSet = removedScopeIds.ToHashSet();
-
-        // Scopes that need a back-reference rename (present in both added and removed)
-        foreach (var scopeRef in addedScopeRefs.Where(s => removedIdSet.Contains(s.Id)))
-        {
-            var scopeResult = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
-            if (!scopeResult.Found)
-            {
-                // Scope was deleted — treat as concurrency conflict
-                return UpdateResult.KeyConflict;
-            }
-
-            var scopeDso = (ApiScopeDso.V1)scopeResult.Dso;
-            var updatedReferences = scopeDso.ReferencedByApiResources
-                .Where(r => r.Id != id.Value)
-                .Append(new ApiResourceReferenceDso.V1(id.Value, dso.Name))
-                .ToList();
-
-            var updatedScopeDso = scopeDso with { ReferencedByApiResources = updatedReferences };
-
-            operations.Add(UpdateOperation.For(
-                UuidV7.From(scopeRef.Id),
-                updatedScopeDso,
-                scopeResult.Version.Value,
-                [DataStorageKey.Create(ApiScopeNameDskV1.Create(scopeDso.Name))],
-                BuildScopeSearchFields(updatedScopeDso),
-                Expiration.NoExpiration));
-        }
-
-        // Scopes added (not in the removed list — genuinely new scope references)
-        foreach (var scopeRef in addedScopeRefs.Where(s => !removedIdSet.Contains(s.Id)))
-        {
-            var scopeResult = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
-            if (!scopeResult.Found)
-            {
-                // Scope was deleted — treat as concurrency conflict
-                return UpdateResult.KeyConflict;
-            }
-
-            var scopeDso = (ApiScopeDso.V1)scopeResult.Dso;
-            var updatedReferences = scopeDso.ReferencedByApiResources.ToList();
-            updatedReferences.Add(new ApiResourceReferenceDso.V1(id.Value, dso.Name));
-
-            var updatedScopeDso = scopeDso with { ReferencedByApiResources = updatedReferences };
-
-            operations.Add(UpdateOperation.For(
-                UuidV7.From(scopeRef.Id),
-                updatedScopeDso,
-                scopeResult.Version.Value,
-                [DataStorageKey.Create(ApiScopeNameDskV1.Create(scopeDso.Name))],
-                BuildScopeSearchFields(updatedScopeDso),
-                Expiration.NoExpiration));
-        }
-
-        // Scopes removed (not in the added list — genuinely dropped scope references)
-        foreach (var scopeId in removedScopeIds.Where(sid => !addedById.ContainsKey(sid)))
-        {
-            var scopeResult = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeId), ct);
-            if (!scopeResult.Found)
-            {
-                // Scope was already deleted — nothing to update, skip
-                continue;
-            }
-
-            var scopeDso = (ApiScopeDso.V1)scopeResult.Dso;
-            var updatedReferences = scopeDso.ReferencedByApiResources
-                .Where(r => r.Id != id.Value)
-                .ToList();
-
-            var updatedScopeDso = scopeDso with { ReferencedByApiResources = updatedReferences };
-
-            operations.Add(UpdateOperation.For(
-                UuidV7.From(scopeId),
-                updatedScopeDso,
-                scopeResult.Version.Value,
-                [DataStorageKey.Create(ApiScopeNameDskV1.Create(scopeDso.Name))],
-                BuildScopeSearchFields(updatedScopeDso),
-                Expiration.NoExpiration));
-        }
-
         var batchResult = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
-        return MapBatchToUpdateResult(batchResult);
+        return MapBatchToUpdateOutcome(batchResult, scopeOperationNames);
     }
 
     internal async Task<DeleteResult> DeleteAsync(Guid id, Ct ct) =>
         await (await GetPartitionedStorage(ct)).DeleteAsync(ApiResourceDso.EntityType, UuidV7.From(id), [], ct);
 
-    internal async Task<DeleteResult> DeleteWithScopeCleanupAsync(
-        Guid id,
-        IReadOnlyList<ApiScopeReferenceDso.V1> scopeRefs,
-        Ct ct)
-    {
-        // Fall back to simple delete when there are no scope relationships
-        if (scopeRefs.Count == 0)
-        {
-            return await DeleteAsync(id, ct);
-        }
-
-        var partitionedStorage = await GetPartitionedStorage(ct);
-        var operations = new List<IStorageOperation>();
-
-        // For each scope, read and update to remove the back-reference
-        foreach (var scopeRef in scopeRefs)
-        {
-            var scopeResult = await partitionedStorage.TryReadAsync(ApiScopeDso.EntityType, UuidV7.From(scopeRef.Id), ct);
-            if (!scopeResult.Found)
-            {
-                // Scope was already deleted — nothing to update, skip
-                continue;
-            }
-
-            var scopeDso = (ApiScopeDso.V1)scopeResult.Dso;
-            var updatedReferences = scopeDso.ReferencedByApiResources
-                .Where(r => r.Id != id)
-                .ToList();
-
-            var updatedScopeDso = scopeDso with { ReferencedByApiResources = updatedReferences };
-
-            operations.Add(UpdateOperation.For(
-                UuidV7.From(scopeRef.Id),
-                updatedScopeDso,
-                scopeResult.Version.Value,
-                [DataStorageKey.Create(ApiScopeNameDskV1.Create(scopeDso.Name))],
-                BuildScopeSearchFields(updatedScopeDso),
-                Expiration.NoExpiration));
-        }
-
-        // Last operation: delete the ApiResource by ID
-        operations.Add(DeleteOperation.ById(ApiResourceDso.EntityType, UuidV7.From(id)));
-
-        var batchResult = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
-        return MapBatchToDeleteResult(batchResult);
-    }
-
     internal async Task<QueryResult<ApiResourceDso.V1>> QueryAsync(
         QueryRequest<ApiResourceFilter, ApiResourceSortField> request,
         Ct ct)
     {
+        var filterValue = request.Filter?.FilterValue;
+        IQueryFilterExpression? scopeLinkFilter = null;
+        if (!string.IsNullOrWhiteSpace(filterValue?.Scope))
+        {
+            scopeLinkFilter = await BuildExactScopeNameLinkFilterAsync(filterValue.Scope, ct);
+        }
+
         var partitionedStorage = await GetPartitionedStorage(ct);
-        var filter = BuildFilter(request.Filter?.FilterValue);
+        var filter = BuildFilter(filterValue, scopeLinkFilter);
         var sort = BuildSort(request.Sort);
         var range = request.Range ?? DataRange.FromPage(1, DataRangeSize.Default);
 
-        var result = await partitionedStorage.QueryAsync<ApiResourceDso.V1>(
+        var result = await partitionedStorage.QueryAsync(
             ApiResourceDso.EntityType,
             filter,
             sort,
             range,
             ct);
 
-        return result.ConvertTo(e => e.Value);
+        return result.ConvertTo(e => ApiResourceDso.ToCurrent(e.Value));
     }
 
     internal async Task<List<ApiResourceDso.V1>> FindByNamesAsync(IEnumerable<string> names, Ct ct)
     {
-        var nameList = names.Distinct(StringComparer.Ordinal).ToList();
+        var nameSet = new HashSet<string>(names, StringComparer.Ordinal);
 
-        if (nameList.Count == 0)
+        if (nameSet.Count == 0)
         {
             return [];
         }
 
         var partitionedStorage = await GetPartitionedStorage(ct);
-        var filter = Fields.Name.In(nameList);
+        var found = new List<ApiResourceDso.V1>();
 
-        var result = await partitionedStorage.QueryAsync<ApiResourceDso.V1>(
-            ApiResourceDso.EntityType,
-            filter,
-            new SortParameter(Fields.Name),
-            // Capped at 1000 — exceeding this many API resources by name lookup is implausible in practice.
-            DataRange.FromPage(1, (DataRangeSize)1000),
-            ct);
+        foreach (var chunk in nameSet.Chunk(NameFilterLimits.MaxNamesPerQuery))
+        {
+            var filter = Fields.Name.In(chunk);
 
-        return result.Items.Select(e => e.Value).ToList();
+            var page = 1;
+            bool hasMoreData;
+            do
+            {
+                var result = await partitionedStorage.QueryAsync(
+                    ApiResourceDso.EntityType,
+                    filter,
+                    new SortParameter(Fields.Name),
+                    DataRange.FromPage(page++, DataRangeSize.MaxValue),
+                    ct);
+
+                // Storage string filters ignore case, but API resource names are unique only by exact match,
+                // so keep only exact ordinal matches.
+                found.AddRange(result.Items
+                    .Select(e => ApiResourceDso.ToCurrent(e.Value))
+                    .Where(dso => nameSet.Contains(dso.Name)));
+
+                hasMoreData = result.HasMoreData;
+            }
+            while (hasMoreData);
+        }
+
+        return found.OrderBy(dso => dso.Name, StringComparer.Ordinal).ToList();
     }
 
-    internal async Task<List<ApiResourceDso.V1>> FindByScopeNamesAsync(IEnumerable<string> scopeNames, Ct ct)
+    internal async Task<List<ApiScopeDso.V1>> GetScopesAsync(Guid resourceId, Ct ct) =>
+        await QueryAllLinkedAsync(ScopesByResourceQuery(resourceId), e => ApiScopeDso.ToCurrent(e.Value), ct);
+
+    /// <summary>
+    /// Loads the scopes of many API resources in one query per page of links.
+    /// Every requested id has an entry, which is empty when the API resource has no scopes.
+    /// </summary>
+    internal async Task<Dictionary<Guid, List<ApiScopeDso.V1>>> GetScopesByResourceAsync(IEnumerable<Guid> resourceIds, Ct ct)
+    {
+        var scopesByResource = resourceIds.Distinct().ToDictionary(id => id, _ => new List<ApiScopeDso.V1>());
+        if (scopesByResource.Count == 0)
+        {
+            return scopesByResource;
+        }
+
+        var partitionedStorage = await GetPartitionedStorage(ct);
+
+        foreach (var chunk in scopesByResource.Keys.Chunk(LinkQueryBuilder.MaxWhereAnyEntityIds))
+        {
+            var query = ScopesByResourcesQuery(chunk);
+            var pageNumber = 1;
+
+            while (true)
+            {
+                var page = await partitionedStorage.QueryLinksByAnchorAsync(
+                    query, DataRange.FromPage(pageNumber, (DataRangeSize)LinkPageSize), ct);
+
+                foreach (var item in page.Items)
+                {
+                    scopesByResource[item.AnchorId.Value].Add(ApiScopeDso.ToCurrent(item.Entity.Value));
+                }
+
+                if (!page.HasMoreData)
+                {
+                    break;
+                }
+
+                pageNumber++;
+            }
+        }
+
+        return scopesByResource;
+    }
+
+    /// <summary>
+    /// Counts the scopes of many API resources in one query. Every requested id has an entry.
+    /// </summary>
+    internal async Task<Dictionary<Guid, int>> CountScopesByResourceAsync(IEnumerable<Guid> resourceIds, Ct ct)
+    {
+        var ids = resourceIds.Distinct().ToList();
+        var counts = new Dictionary<Guid, int>(ids.Count);
+        if (ids.Count == 0)
+        {
+            return counts;
+        }
+
+        var partitionedStorage = await GetPartitionedStorage(ct);
+
+        foreach (var chunk in ids.Chunk(LinkQueryBuilder.MaxWhereAnyEntityIds))
+        {
+            var result = await partitionedStorage.CountLinksAsync(ScopesByResourcesQuery(chunk), ct);
+            foreach (var (anchorId, count) in result)
+            {
+                counts[anchorId.Value] = (int)count;
+            }
+        }
+
+        return counts;
+    }
+
+    internal async Task<QueryResult<ApiResourceDso.V1>> QueryByScopeIdAsync(Guid scopeId, DataRange range, Ct ct)
     {
         var partitionedStorage = await GetPartitionedStorage(ct);
-        var scopeList = scopeNames.Distinct(StringComparer.Ordinal).ToList();
+        var result = await partitionedStorage.QueryLinksAsync(ResourcesByScopeQuery(scopeId), range, ct);
+        return result.ConvertTo(e => ApiResourceDso.ToCurrent(e.Value));
+    }
 
-        if (scopeList.Count == 0)
+    /// <summary>
+    /// Finds all API resources linked to any of the API scopes with the given exact, case-sensitive names.
+    /// </summary>
+    internal async Task<List<ApiResourceDso.V1>> FindByScopeNamesAsync(IReadOnlyCollection<string> scopeNames, Ct ct)
+    {
+        var scopesByName = await apiScopeRepository.FindByExactNamesAsync(scopeNames, ct);
+        if (scopesByName.Count == 0)
         {
             return [];
         }
 
-        IQueryFilterExpression? filter = null;
-        foreach (var scope in scopeList)
+        var scopeIds = scopesByName.Values.Select(s => s.Id).ToList();
+        var filter = LinkFilter.ToRight(ApiResourceLinkDefinitions.ApiResourceScope, ApiScopeRepository.Fields.Id.In(scopeIds));
+
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var resultsById = new Dictionary<Guid, ApiResourceDso.V1>();
+        var pageNumber = 1;
+
+        while (true)
         {
-            var scopeFilter = Fields.Scope.Contains(scope);
-            filter = filter is null ? scopeFilter : filter.Or(scopeFilter);
+            var page = await partitionedStorage.QueryAsync(
+                ApiResourceDso.EntityType,
+                filter,
+                new SortParameter(Fields.Name),
+                DataRange.FromPage(pageNumber, (DataRangeSize)LinkPageSize),
+                ct);
+
+            foreach (var item in page.Items)
+            {
+                var resourceDso = ApiResourceDso.ToCurrent(item.Value);
+                resultsById[resourceDso.Id] = resourceDso;
+            }
+
+            if (!page.HasMoreData)
+            {
+                return resultsById.Values.ToList();
+            }
+
+            pageNumber++;
         }
-
-        var result = await partitionedStorage.QueryAsync<ApiResourceDso.V1>(
-            ApiResourceDso.EntityType,
-            filter!,
-            new SortParameter(Fields.Name),
-            // Intentional single-page cap. >1000 API resources per scope is implausible in practice.
-            // If pagination is ever needed, extract to a loop matching the GetAll* pattern.
-            DataRange.FromPage(1, (DataRangeSize)1000),
-            ct);
-
-        return result.Items.Select(e => e.Value).ToList();
     }
 
-    private static SearchFieldCollection BuildSearchFields(ApiResourceDso.V1 dso)
-    {
-        var builder = new SearchFieldsBuilder()
-            .Add(Fields.Name.Path, dso.Name)
-            .Add(Fields.Enabled.Path, dso.Enabled);
-
-        var scopeIndex = 0;
-        foreach (var scope in dso.Scopes)
-        {
-            _ = builder.Add(Fields.Scope.Path, scopeIndex++, scope.Name);
-        }
-
-        return builder.Build();
-    }
-
-    private static SearchFieldCollection BuildScopeSearchFields(ApiScopeDso.V1 dso) =>
-        new SearchFieldsBuilder()
-            .Add(ApiScopeRepository.Fields.Name.Path, dso.Name)
-            .Add(ApiScopeRepository.Fields.Enabled.Path, dso.Enabled)
+    private static LinkQueryDescriptor ScopesByResourceQuery(Guid resourceId) =>
+        StorageQuerying.LinkQuery
+            .From(ApiScopeDso.EntityType)
+            .Join(ApiResourceLinkDefinitions.ApiResourceScope)
+            .Where(ApiResourceDso.EntityType, UuidV7.From(resourceId))
             .Build();
 
-    private static CreateResult MapBatchToCreateResult(BatchResult batchResult)
+    private static LinkQueryDescriptor ScopesByResourcesQuery(IEnumerable<Guid> resourceIds) =>
+        StorageQuerying.LinkQuery
+            .From(ApiScopeDso.EntityType)
+            .Join(ApiResourceLinkDefinitions.ApiResourceScope)
+            .WhereAny(ApiResourceDso.EntityType, resourceIds.Select(UuidV7.From).ToHashSet())
+            .Build();
+
+    private static LinkQueryDescriptor ResourcesByScopeQuery(Guid scopeId) =>
+        StorageQuerying.LinkQuery
+            .From(ApiResourceDso.EntityType)
+            .Join(ApiResourceLinkDefinitions.ApiResourceScope)
+            .Where(ApiScopeDso.EntityType, UuidV7.From(scopeId))
+            .Build();
+
+    private async Task<List<TDso>> QueryAllLinkedAsync<TDso>(LinkQueryDescriptor query, Func<MetadataEnvelope, TDso> toCurrent, Ct ct)
+    {
+        var partitionedStorage = await GetPartitionedStorage(ct);
+        var items = new List<TDso>();
+        var pageNumber = 1;
+
+        while (true)
+        {
+            var result = await partitionedStorage.QueryLinksAsync(query, DataRange.FromPage(pageNumber, (DataRangeSize)LinkPageSize), ct);
+            items.AddRange(result.Items.Select(toCurrent));
+
+            if (!result.HasMoreData)
+            {
+                return items;
+            }
+
+            pageNumber++;
+        }
+    }
+
+    /// <summary>
+    /// Builds a filter expression that matches API resources linked to the API scope with the given exact,
+    /// case-sensitive name. If no scope has that exact name, the returned filter never matches, so the query
+    /// still runs through the normal paged path (continuation tokens stay valid).
+    /// </summary>
+    private async Task<IQueryFilterExpression> BuildExactScopeNameLinkFilterAsync(string scopeName, Ct ct)
+    {
+        var scope = await apiScopeRepository.TryReadByNameAsync(scopeName, ct);
+        if (scope is null)
+        {
+            return Fields.ApiResourceId.In(Array.Empty<Guid>());
+        }
+
+        return LinkFilter.ToRight(ApiResourceLinkDefinitions.ApiResourceScope, ApiScopeRepository.Fields.Id.Equals(scope.Value.Dso.Id));
+    }
+
+    private static IReadOnlyList<DataStorageKey> BuildKeys(ApiResourceDso.V1 dso) =>
+        [DataStorageKey.Create(ApiResourceNameDskV1.Create(dso.Name))];
+
+    private static SearchFieldCollection BuildSearchFields(ApiResourceDso.V1 dso) =>
+        new SearchFieldsBuilder()
+            .Add(Fields.Name.Path, dso.Name)
+            .Add(Fields.Enabled.Path, dso.Enabled)
+            .Add(Fields.ApiResourceId.Path, dso.Id)
+            .Build();
+
+    private static ApiResourceBatchOutcome MapBatchToCreateOutcome(BatchResult batchResult, IReadOnlyList<(string Name, Guid Id)> scopes)
     {
         if (batchResult.Success)
         {
-            return CreateResult.Success;
+            return ApiResourceBatchOutcome.Success;
         }
 
-        var failedOp = batchResult.Results.FirstOrDefault(r => r.Outcome != OperationOutcome.Success);
-        if (failedOp is null)
+        var failure = FirstFailure(batchResult);
+
+        // Index 0 is the CreateOperation for the resource itself; anything after it is a scope link.
+        if (failure.Index == 0)
         {
-            return CreateResult.KeyConflict;
+            return failure.Outcome switch
+            {
+                OperationOutcome.AlreadyExists => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.AlreadyExists),
+                _ => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.KeyConflict)
+            };
         }
 
-        return failedOp.Outcome switch
+        var scopeName = scopes[failure.Index - 1].Name;
+        return failure.Outcome switch
         {
-            OperationOutcome.AlreadyExists => CreateResult.AlreadyExists,
-            OperationOutcome.KeyConflict => CreateResult.KeyConflict,
-            OperationOutcome.DoesNotExist => CreateResult.KeyConflict, // Scope was deleted
-            OperationOutcome.UnexpectedVersion => CreateResult.KeyConflict, // Concurrent modification
-            _ => CreateResult.KeyConflict
+            OperationOutcome.DoesNotExist => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.ScopeDoesNotExist, scopeName),
+            _ => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.KeyConflict)
         };
     }
 
-    private static UpdateResult MapBatchToUpdateResult(BatchResult batchResult)
+    private static ApiResourceBatchOutcome MapBatchToUpdateOutcome(BatchResult batchResult, List<string?> scopeOperationNames)
     {
         if (batchResult.Success)
         {
-            return UpdateResult.Success;
+            return ApiResourceBatchOutcome.Success;
         }
 
-        var failedOp = batchResult.Results.FirstOrDefault(r => r.Outcome != OperationOutcome.Success);
-        if (failedOp is null)
+        var failure = FirstFailure(batchResult);
+
+        // Index 0 is the UpdateOperation for the resource itself; anything after it is a scope link/unlink.
+        if (failure.Index == 0)
         {
-            return UpdateResult.KeyConflict;
+            return failure.Outcome switch
+            {
+                OperationOutcome.DoesNotExist => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.ResourceDoesNotExist),
+                OperationOutcome.UnexpectedVersion => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.UnexpectedVersion),
+                _ => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.KeyConflict)
+            };
         }
 
-        return failedOp.Outcome switch
+        var scopeName = scopeOperationNames[failure.Index];
+        return failure.Outcome switch
         {
-            OperationOutcome.DoesNotExist => failedOp.Index == 0 ? UpdateResult.DoesNotExist : UpdateResult.KeyConflict,
-            OperationOutcome.UnexpectedVersion => failedOp.Index == 0 ? UpdateResult.UnexpectedVersion : UpdateResult.KeyConflict,
-            OperationOutcome.KeyConflict => UpdateResult.KeyConflict,
-            _ => UpdateResult.KeyConflict
+            OperationOutcome.DoesNotExist => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.ScopeDoesNotExist, scopeName),
+            _ => new ApiResourceBatchOutcome(ApiResourceBatchOutcomeKind.KeyConflict)
         };
     }
 
-    // DeleteResult only has Success currently
-    private static DeleteResult MapBatchToDeleteResult(BatchResult batchResult) => DeleteResult.Success;
+    private static OperationResult FirstFailure(BatchResult batchResult) =>
+        batchResult.Results.First(r => r.Outcome is not (OperationOutcome.Success or OperationOutcome.AlreadyLinked));
 
-    private static IQueryExpression BuildFilter(ApiResourceFilter? filter)
+    private static IQueryExpression BuildFilter(ApiResourceFilter? filter, IQueryFilterExpression? scopeLinkFilter)
     {
-        if (filter is null)
+        if (filter is null && scopeLinkFilter is null)
         {
             return AllExpression.Instance;
         }
 
         var expressions = new List<IQueryFilterExpression>();
 
-        if (!string.IsNullOrWhiteSpace(filter.Name))
+        if (!string.IsNullOrWhiteSpace(filter?.Name))
         {
             expressions.Add(Fields.Name.Contains(filter.Name));
         }
 
-        if (filter.Enabled.HasValue)
+        if (filter?.Enabled is not null)
         {
             expressions.Add(Fields.Enabled.Equals(filter.Enabled.Value));
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.Scope))
+        if (scopeLinkFilter is not null)
         {
-            expressions.Add(Fields.Scope.Contains(filter.Scope));
+            expressions.Add(scopeLinkFilter);
         }
 
         if (expressions.Count == 0)

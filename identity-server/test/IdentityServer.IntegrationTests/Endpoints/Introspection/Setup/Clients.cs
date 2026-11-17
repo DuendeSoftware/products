@@ -72,6 +72,23 @@ internal class Clients
                 AllowOfflineAccess = true,
                 AccessTokenType = AccessTokenType.Reference
             },
+            new Client
+            {
+                ClientId = "ro.public",
+                RequireClientSecret = false,
+
+                AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                AllowedScopes = { "api1" },
+                AccessTokenType = AccessTokenType.Reference
+            },
+            new Client
+            {
+                ClientId = "implicit",
+
+                AllowedGrantTypes = GrantTypes.Implicit,
+                RedirectUris = { "https://client/callback" },
+                AllowedScopes = { "api1" }
+            },
             // Dedicated client for a telemetry test. This caller must not be shared with any other
             // test in the assembly: telemetry measurements are captured via a process-wide Meter, so
             // a caller value reused by another (possibly parallel) test would make the measurement

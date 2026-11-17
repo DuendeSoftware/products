@@ -92,6 +92,18 @@ internal static partial class Log
     internal static partial void FailedToCreateAndThenLoadNewKeys(this ILogger logger);
 
     [LoggerMessage(
+        LogLevel.Warning,
+        EventName = nameof(FailedToObtainNewKeyLockReReadingFromStore),
+        Message = "Failed to obtain the signing key creation lock within KeyCreationLockTimeout; re-reading keys from the store.")]
+    internal static partial void FailedToObtainNewKeyLockReReadingFromStore(this ILogger logger);
+
+    [LoggerMessage(
+        LogLevel.Information,
+        EventName = nameof(TimedOutWaitingForNewKeyLockButFoundUsableKeys),
+        Message = "Timed out waiting for the signing key creation lock, but the store already has a usable signing key; returning it without creating a new one.")]
+    internal static partial void TimedOutWaitingForNewKeyLockButFoundUsableKeys(this ILogger logger);
+
+    [LoggerMessage(
         LogLevel.Trace,
         EventName = nameof(KeyRotationNotRequiredForAlgAlgNew),
         Message = "Key rotation not required for alg {Alg}; New key expected to be created in {KeyRotiation}")]

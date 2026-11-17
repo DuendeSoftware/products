@@ -1,0 +1,81 @@
+@page
+@model AuthenticationFlowWithWebComponent.Pages.ShowRecoveryCodesModel
+@{
+    ViewData["Title"] = "Recovery Codes";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Recovery Codes</h2>
+
+            <div class="alert alert-success" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-check-circle-fill me-2"></i>Two-Factor Authentication Enabled!
+                </h5>
+                <p class="mb-0">Your authenticator app has been successfully configured.</p>
+            </div>
+
+            <div class="alert alert-warning" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Important: Save Your Recovery Codes
+                </h5>
+                <p class="mb-0">
+                    Store these recovery codes in a secure location. You can use them to access your account
+                    if you lose access to your authenticator app.
+                </p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header fw-bold">
+                    <i class="bi bi-shield-lock me-2"></i>Your Recovery Codes
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        @if (Model.RecoveryCodes != null)
+                        {
+                            @foreach (var recoveryCode in Model.RecoveryCodes)
+                            {
+                                <div class="col-6">
+                                    <div class="alert alert-secondary mb-0 text-center font-monospace">
+                                        @recoveryCode
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyAllCodes()">
+                            <i class="bi bi-clipboard me-2"></i>Copy All Codes
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="printCodes()">
+                            <i class="bi bi-printer me-2"></i>Print Codes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <a asp-page="/Profile" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle me-2"></i>Done
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function copyAllCodes() {
+            let codes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RecoveryCodes));
+            let text = codes.join('\n');
+            navigator.clipboard.writeText(text).then(function () {
+                alert('Recovery codes copied to clipboard!');
+            });
+        }
+
+        function printCodes() {
+            window.print();
+        }
+    </script>
+}

@@ -27,8 +27,8 @@ using Duende.IdentityServer.Stores.Storage.SamlSigninState;
 using Duende.IdentityServer.Stores.Storage.ServerSideSessions;
 using Duende.IdentityServer.Stores.Storage.SigningKeys;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal;
 using Duende.Storage.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
@@ -73,7 +73,7 @@ public class DuendeStorageRegistrationTests
         builder.AddStorage(_ => _.AddSqliteInMemory()).AddConfigurationStorage().AddOperationalStorage();
         using var sp = BuildAndMigrate(services);
 
-        sp.GetRequiredService<IClientStore>().ShouldBeOfType<ClientStore>();
+        sp.GetRequiredService<IClientStore>().ShouldBeOfType<ValidatingClientStore<ClientStore>>();
         sp.GetRequiredService<IIdentityProviderStore>().ShouldBeOfType<IdentityProviderStore>();
         sp.GetRequiredService<ISamlServiceProviderStore>().ShouldBeOfType<SamlServiceProviderStore>();
         sp.GetRequiredService<IResourceStore>().ShouldBeOfType<StorageResourceStore>();
@@ -318,7 +318,7 @@ public class DuendeStorageRegistrationTests
         using var sp = BuildAndMigrate(services);
 
         var store = sp.GetRequiredService<IResourceStore>();
-        var resources = store.GetAllResourcesAsync(CancellationToken.None).GetAwaiter().GetResult();
+        var resources = store.GetAllResourcesAsync(Ct.None).GetAwaiter().GetResult();
 
         resources.ApiResources.Count.ShouldBe(1);
         resources.IdentityResources.ShouldBeEmpty();

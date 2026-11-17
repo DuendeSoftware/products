@@ -5,18 +5,27 @@
 
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.ApiScopes;
-using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
+using Duende.IdentityServer.Internal;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores.Storage.ApiResources;
+using Duende.IdentityServer.Stores.Storage.Clients;
+using Duende.IdentityServer.Stores.Storage.IdentityResources;
 using Duende.Storage.Internal.Operations;
-using Duende.Storage.Querying;
 
 namespace Duende.IdentityServer.Stores.Storage.ApiScopes;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore schemaStore) : IApiScopeAdmin
+internal sealed class ApiScopeAdmin(
+    ApiScopeRepository repository,
+    IdentityResourceRepository identityResourceRepository,
+    ApiResourceRepository resourceRepository,
+    ClientRepository clientRepository,
+    ISchemaStore schemaStore) : IApiScopeAdmin
 {
+    private const int MaxResourcesInError = 20;
+
     public async Task<SaveResult<ApiScopeId>> CreateAsync(CreateApiScope scope, Ct ct)
     {
         var structuralError = ValidateStructure(scope.Name, scope.UserClaims);
@@ -31,17 +40,26 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
             return SaveResult.Failure<ApiScopeId>(extendedPropertiesError);
         }
 
-        var id = UuidV7.New();
+        var id = Duende.Storage.UuidV7.New();
         var dso = MapToDso(id.Value, scope.Name, scope.Enabled, scope.DisplayName, scope.Description, scope.ShowInDiscoveryDocument, scope.Required, scope.Emphasize, scope.UserClaims, scope.ExtendedProperties);
+
+        // The ScopeNameDso guard catches concurrent creates of the same name, but a row saved before the
+        // guard existed has no guard to catch against. This read catches that legacy case.
+        if (await identityResourceRepository.TryReadByNameAsync(scope.Name, ct) is not null)
+        {
+            return SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("identity_resource", scope.Name));
+        }
 
         var result = await repository.CreateAsync(id, dso, ct);
 
-        return result switch
+        return result.Kind switch
         {
-            CreateResult.Success => SaveResult.Success<ApiScopeId>(id.Value, (DataVersion)1),
-            CreateResult.AlreadyExists or CreateResult.KeyConflict =>
+            ScopeNameBatchOutcomeKind.Success => SaveResult.Success<ApiScopeId>(id.Value, (DataVersion)(1)),
+            ScopeNameBatchOutcomeKind.AlreadyExists =>
                 SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("api_scope", scope.Name)),
-            _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
+            ScopeNameBatchOutcomeKind.NameTakenByOtherKind =>
+                SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("identity_resource", scope.Name)),
+            _ => throw new InvalidOperationException($"Unexpected ScopeNameBatchOutcomeKind: {result.Kind}")
         };
     }
 
@@ -55,7 +73,7 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
 
         var (dso, version) = result.Value;
         var schema = await schemaStore.GetAsync(SchemaId.ApiScope, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)(version));
     }
 
     public async Task<GetResult<ApiScopeConfiguration>> GetByNameAsync(string name, Ct ct)
@@ -68,7 +86,7 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
 
         var (dso, version) = result.Value;
         var schema = await schemaStore.GetAsync(SchemaId.ApiScope, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)(version));
     }
 
     public async Task<SaveResult<ApiScopeId>> UpdateAsync(ApiScopeId id, UpdateApiScope scope, DataVersion expectedVersion, Ct ct)
@@ -94,15 +112,24 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
 
         var dso = MapToDso(idValue, scope.Name, scope.Enabled, scope.DisplayName, scope.Description, scope.ShowInDiscoveryDocument, scope.Required, scope.Emphasize, scope.UserClaims, scope.ExtendedProperties);
 
-        var result = await repository.UpdateAsync(UuidV7.From(idValue), dso, expectedVersion.Value, ct);
-
-        return result switch
+        var previousName = existing.Value.Dso.Name;
+        if (!string.Equals(previousName, scope.Name, StringComparison.Ordinal)
+            && await identityResourceRepository.TryReadByNameAsync(scope.Name, ct) is not null)
         {
-            UpdateResult.Success => SaveResult.Success<ApiScopeId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
-            UpdateResult.UnexpectedVersion => SaveResult.Failure<ApiScopeId>(StorageError.VersionConflict()),
-            UpdateResult.DoesNotExist => SaveResult.Failure<ApiScopeId>(StorageError.NotFound("api_scope", idValue.ToString())),
-            UpdateResult.KeyConflict => SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("api_scope", scope.Name)),
-            _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
+            return SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("identity_resource", scope.Name));
+        }
+
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(idValue), dso, expectedVersion.Value, existing.Value.Dso.Name, ct);
+
+        return result.Kind switch
+        {
+            ScopeNameBatchOutcomeKind.Success => SaveResult.Success<ApiScopeId>(idValue, (DataVersion)(expectedVersion.Value + 1)),
+            ScopeNameBatchOutcomeKind.UnexpectedVersion => SaveResult.Failure<ApiScopeId>(StorageError.VersionConflict()),
+            ScopeNameBatchOutcomeKind.DoesNotExist => SaveResult.Failure<ApiScopeId>(StorageError.NotFound("api_scope", idValue.ToString())),
+            ScopeNameBatchOutcomeKind.AlreadyExists => SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("api_scope", scope.Name)),
+            ScopeNameBatchOutcomeKind.NameTakenByOtherKind =>
+                SaveResult.Failure<ApiScopeId>(StorageError.AlreadyExists("identity_resource", scope.Name)),
+            _ => throw new InvalidOperationException($"Unexpected ScopeNameBatchOutcomeKind: {result.Kind}")
         };
     }
 
@@ -113,15 +140,58 @@ internal sealed class ApiScopeAdmin(ApiScopeRepository repository, ISchemaStore 
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success<ApiScopeId>(idValue, (DataVersion)0),
+            // Deleting an already-missing scope is idempotent: Storage reports Success either way.
+            DeleteResult.Success => SaveResult.Success<ApiScopeId>(idValue, (DataVersion)(0)),
+            DeleteResult.StillLinked => SaveResult.Failure<ApiScopeId>(await BuildInUseErrorAsync(idValue, ct)),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
     public async Task<QueryResult<ApiScopeListItem>> QueryAsync(QueryRequest<ApiScopeFilter, ApiScopeSortField> request, Ct ct)
     {
-        var result = await repository.QueryAsync(request, ct);
-        return result.ConvertTo(MapToListItem);
+        var result = await StorageMapping.ExecuteQueryAsync(() => repository.QueryAsync(request.ToStorage(), ct));
+        return result.ConvertTo(MapToListItem).ToModel(request.Range);
+    }
+
+    private async Task<StorageError> BuildInUseErrorAsync(Guid scopeId, Ct ct)
+    {
+        var fragments = new List<string>();
+
+        var resources = await resourceRepository.QueryByScopeIdAsync(scopeId, StorageDataRange.FromPage(1, MaxResourcesInError), ct);
+        AppendUsageFragment(fragments, "API resources", resources, r => r.Name);
+
+        var clients = await clientRepository.QueryByAllowedApiScopeIdAsync(scopeId, StorageDataRange.FromPage(1, MaxResourcesInError), ct);
+        AppendUsageFragment(fragments, "clients", clients, c => c.ClientId);
+
+        if (fragments.Count == 0)
+        {
+            return StorageError.ValidationFailed(
+                "The API scope is still in use. Remove its references before deleting it.");
+        }
+
+        return StorageError.ValidationFailed(
+            $"The API scope is used by {string.Join(" and ", fragments)}. Remove it from them before deleting it.");
+    }
+
+    /// <summary>
+    /// Appends a "&lt;label&gt; 'name1', 'name2' and N more" fragment to <paramref name="fragments"/> for a
+    /// page of entities that are using the scope being deleted, if the page is non-empty.
+    /// </summary>
+    private static void AppendUsageFragment<T>(List<string> fragments, string label, Duende.Storage.Internal.Querying.QueryResult<T> page, Func<T, string> nameSelector)
+    {
+        if (page.Items.Count == 0)
+        {
+            return;
+        }
+
+        var names = string.Join(", ", page.Items.Select(i => $"'{nameSelector(i)}'"));
+        var remaining = (page.TotalCount ?? page.Items.Count) - page.Items.Count;
+        if (remaining > 0)
+        {
+            names += $" and {remaining} more";
+        }
+
+        fragments.Add($"{label} {names}");
     }
 
     private async Task<StorageError?> ValidateExtendedPropertiesAsync(AttributeValueCollection extendedProperties, Ct ct)

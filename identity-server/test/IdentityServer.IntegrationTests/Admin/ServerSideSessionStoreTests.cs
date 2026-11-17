@@ -5,6 +5,7 @@
 
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 
@@ -623,6 +624,80 @@ public sealed class ServerSideSessionStoreTests : IAsyncLifetime
         forwardToPage3.Results.Select(r => r.Key).ShouldBe(page3.Results.Select(r => r.Key));
         forwardToPage3.HasNextResults.ShouldBeFalse();
         forwardToPage3.HasPrevResults.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task QuerySessionsAsync_with_equal_CreatedAt_paging_to_the_last_page_and_back_shows_each_session_once()
+    {
+        var frozenTime = new FakeTimeProvider(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        await using var provider = await StorageTestFixture.CreateProviderAsync(builder =>
+        {
+            builder.Services.AddSingleton<TimeProvider>(frozenTime);
+            builder.Services.AddSingleton<IServerSideSessionsMarker, NopIServerSideSessionsMarker>();
+        }, _ct);
+        using var scope = provider.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IServerSideSessionStore>();
+        var subjectId = $"sub_{Guid.NewGuid():N}";
+        for (var i = 0; i < 7; i++)
+        {
+            await store.CreateSessionAsync(BuildSession(subjectId: subjectId), _ct);
+        }
+
+        var page = await store.QuerySessionsAsync(_ct, new SessionQuery { SubjectId = subjectId, CountRequested = 2 });
+        page.HasPrevResults.ShouldBeFalse();
+        var forward = page.Results.Select(r => r.Key).ToList();
+        while (page.HasNextResults)
+        {
+            page = await store.QuerySessionsAsync(_ct, new SessionQuery
+            {
+                SubjectId = subjectId,
+                CountRequested = 2,
+                ResultsToken = page.ResultsToken
+            });
+            forward.AddRange(page.Results.Select(r => r.Key));
+        }
+
+        var backward = page.Results.Select(r => r.Key).ToList();
+        while (page.HasPrevResults)
+        {
+            page = await store.QuerySessionsAsync(_ct, new SessionQuery
+            {
+                SubjectId = subjectId,
+                CountRequested = 2,
+                ResultsToken = page.ResultsToken,
+                RequestPriorResults = true
+            });
+            backward.InsertRange(0, page.Results.Select(r => r.Key));
+        }
+
+        forward.Count.ShouldBe(7);
+        forward.ShouldBeUnique();
+        backward.ShouldBe(forward);
+    }
+
+    [Fact]
+    public async Task QuerySessionsAsync_requesting_prior_results_from_the_first_page_returns_the_first_page_again()
+    {
+        var store = BuildStore();
+        var subjectId = $"sub_{Guid.NewGuid():N}";
+        for (var i = 0; i < 3; i++)
+        {
+            await store.CreateSessionAsync(BuildSession(subjectId: subjectId), _ct);
+        }
+
+        var page1 = await store.QuerySessionsAsync(_ct, new SessionQuery { SubjectId = subjectId, CountRequested = 2 });
+
+        var beforePage1 = await store.QuerySessionsAsync(_ct, new SessionQuery
+        {
+            SubjectId = subjectId,
+            CountRequested = 2,
+            ResultsToken = page1.ResultsToken,
+            RequestPriorResults = true
+        });
+
+        beforePage1.Results.Select(r => r.Key).ShouldBe(page1.Results.Select(r => r.Key));
+        beforePage1.HasPrevResults.ShouldBeFalse();
+        beforePage1.HasNextResults.ShouldBeTrue();
     }
 
     [Fact]

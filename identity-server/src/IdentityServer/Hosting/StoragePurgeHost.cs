@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Hosting.Coordination;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.Storage.Internal;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,7 @@ internal sealed class StoragePurgeHost(
     IStorageInstanceRouter storageInstanceRouter,
     ICrossPartitionStorageFactory crossPartitionStorageFactory,
     IdentityServerOptions options,
+    IDistributedLock @lock,
     TimeProvider timeProvider,
     ILogger<StoragePurgeHost> logger) : BackgroundService
 {
@@ -23,6 +26,15 @@ internal sealed class StoragePurgeHost(
     private const int MaxBatchSize = 1000;
     private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(1);
 
+    private readonly SingleNodeJob _job = new(
+        LockName.StoragePurge,
+        LeaseReleaseMode.AfterEachRun,
+        () => ResolveInterval(options),
+        () => options.StoragePurge.Lease,
+        @lock,
+        timeProvider,
+        logger);
+
     /// <inheritdoc />
     public override Task StartAsync(Ct ct) =>
         !options.StoragePurge.EnablePurge
@@ -30,14 +42,18 @@ internal sealed class StoragePurgeHost(
             : base.StartAsync(ct);
 
     /// <inheritdoc />
+    public override async Task StopAsync(Ct ct)
+    {
+        await base.StopAsync(ct);
+        await _job.ReleaseAsync(ct);
+    }
+
+    /// <inheritdoc />
     protected override async Task ExecuteAsync(Ct stoppingToken)
     {
         logger.StartingPurge(LogLevel.Debug);
 
-        var interval = options.StoragePurge.PurgeInterval < MinInterval
-            ? MinInterval
-            : options.StoragePurge.PurgeInterval;
-
+        var interval = ResolveInterval(options);
         var intervalSeconds = (int)interval.TotalSeconds;
 
         // Start the first run at a random interval.
@@ -64,13 +80,35 @@ internal sealed class StoragePurgeHost(
                 break;
             }
 
-            await RunPurgeAsync(stoppingToken);
+            var result = await RunCycleAsync(stoppingToken);
+            switch (result)
+            {
+                case SingleNodeJobRunResult.SkippedNotLeaseHolder:
+                    logger.SkippedNotLeaseHolder(LogLevel.Debug);
+                    break;
+                case SingleNodeJobRunResult.LeaseLost:
+                    logger.LeaseLost(LogLevel.Warning);
+                    break;
+                case SingleNodeJobRunResult.LockUnavailable:
+                    logger.LockUnavailable(LogLevel.Warning);
+                    break;
+                case SingleNodeJobRunResult.Ran:
+                    break;
+            }
 
-            delay = interval;
+            delay = _job.NextDelay(interval);
         }
 
         logger.StoppingPurge(LogLevel.Debug);
     }
+
+    internal Task<SingleNodeJobRunResult> RunCycleAsync(Ct ct) =>
+        _job.RunAsync(ctx => RunPurgeAsync(ctx.CancellationToken), ct);
+
+    private static TimeSpan ResolveInterval(IdentityServerOptions options) =>
+        options.StoragePurge.PurgeInterval < MinInterval
+            ? MinInterval
+            : options.StoragePurge.PurgeInterval;
 
     internal async Task RunPurgeAsync(Ct ct)
     {

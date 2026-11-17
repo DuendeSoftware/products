@@ -15,6 +15,14 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// <summary>
 /// Implementation of IKeyManager that creates, stores, and rotates signing keys.
 /// </summary>
+/// <remarks>
+/// Retained for source compatibility with code built against earlier versions of IdentityServer (for example,
+/// third-party <see cref="IKeyManager"/> implementations that inject <see cref="IConcurrencyLock{T}"/> typed to
+/// this class). IdentityServer itself no longer registers or uses this type: <c>AddKeyManagement()</c> registers
+/// an internal implementation that coordinates key creation across nodes sharing Duende Storage or Spaces. This
+/// class still only coordinates within this process.
+/// </remarks>
+#pragma warning disable CS0618 // IConcurrencyLock<T> is obsolete but retained for source compatibility
 public class KeyManager : IKeyManager
 {
     private readonly IdentityServerOptions _options;
@@ -58,6 +66,7 @@ public class KeyManager : IKeyManager
         _logger = logger;
         _issuerNameService = issuerNameService;
     }
+#pragma warning restore CS0618
 
     /// <inheritdoc />
     public async Task<IReadOnlyCollection<KeyContainer>> GetCurrentKeysAsync(Ct ct)
@@ -132,7 +141,7 @@ public class KeyManager : IKeyManager
             _logger.EnteringNewKeyLock();
 
             // need to create new key, but another thread might have already so acquiring lock.
-#pragma warning disable CS0618 // CacheLockTimeout is obsolete but still used by KeyManager for IConcurrencyLock
+#pragma warning disable CS0618 // IConcurrencyLock<T> is obsolete but retained for source compatibility
             if (false == await _newKeyLock.LockAsync((int)_options.Caching.CacheLockTimeout.TotalMilliseconds))
 #pragma warning restore CS0618
             {

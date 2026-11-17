@@ -5,7 +5,7 @@
 
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,10 +45,10 @@ public sealed class ClientExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.ExtendedProperties.Count.ShouldBe(2);
 
         var deptAttr = loaded.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
@@ -69,9 +69,9 @@ public sealed class ClientExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
-        getResult.Item.ExtendedProperties.Count.ShouldBe(0);
+        getResult.Item!.ExtendedProperties.Count.ShouldBe(0);
     }
 
     [Fact]
@@ -83,18 +83,18 @@ public sealed class ClientExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestClientAttributes.Department, "Finance");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        var deptAttr = afterUpdate.Item.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
+        var deptAttr = afterUpdate.Item!.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
         deptAttr.ShouldNotBeNull();
         deptAttr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Finance");
     }
@@ -108,13 +108,13 @@ public sealed class ClientExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("bad_attr"), "value");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
@@ -131,18 +131,18 @@ public sealed class ClientExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Remove(TestClientAttributes.Department.Code);
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update (clear) failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.ExtendedProperties.Count.ShouldBe(0);
+        afterUpdate.Item!.ExtendedProperties.Count.ShouldBe(0);
     }
 
     [Fact]

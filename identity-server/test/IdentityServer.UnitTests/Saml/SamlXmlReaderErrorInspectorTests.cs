@@ -202,11 +202,8 @@ public sealed class SamlXmlReaderErrorInspectorTests
     [Trait("Category", Category)]
     public void GetTextContentsReportsErrorForNonTextContent()
     {
-        // An element that should contain only text but has a child element
         const string xml = """
-            <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
-                <saml:Nested>unexpected</saml:Nested>
-            </saml:Issuer>
+            <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://<saml:Nested>unexpected</saml:Nested>idp.example.com</saml:Issuer>
             """;
 
         var doc = new XmlDocument();
@@ -215,7 +212,7 @@ public sealed class SamlXmlReaderErrorInspectorTests
         var rootTraverser = new XmlTraverser(doc.DocumentElement!);
         var text = rootTraverser.GetTextContents();
 
-        text.ShouldBe("unexpected");
+        text.ShouldBe("https://idp.example.com");
         rootTraverser.Errors.Count.ShouldBe(1);
 
         var error = rootTraverser.Errors.Single();
@@ -266,7 +263,7 @@ public sealed class SamlXmlReaderErrorInspectorTests
     public void GetTextContentsAllowsComments()
     {
         const string xml = """
-            <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"><!-- a comment -->https://idp.example.com</saml:Issuer>
+            <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://idp.<!-- a comment -->example.com</saml:Issuer>
             """;
 
         var doc = new XmlDocument();

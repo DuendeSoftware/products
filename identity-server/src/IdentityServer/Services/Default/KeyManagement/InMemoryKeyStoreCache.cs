@@ -15,15 +15,7 @@ internal sealed class InMemoryKeyStoreCache(
     InMemoryKeyStoreCacheState state,
     ISpaceContextAccessor? spaceContextAccessor) : ISigningKeyStoreCache
 {
-    private string GetPartitionKey()
-    {
-        if (spaceContextAccessor is null || !spaceContextAccessor.IsSpaceIdConfigured())
-        {
-            return "__default__";
-        }
-
-        return spaceContextAccessor.GetSpaceId().Value.ToString();
-    }
+    private string GetPartitionKey() => SigningKeyPartition.For(spaceContextAccessor);
 
     /// <summary>
     /// Returns cached keys.

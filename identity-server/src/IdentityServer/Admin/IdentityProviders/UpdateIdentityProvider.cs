@@ -3,7 +3,7 @@
 
 #nullable enable
 
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace Duende.IdentityServer.Admin.IdentityProviders;
 

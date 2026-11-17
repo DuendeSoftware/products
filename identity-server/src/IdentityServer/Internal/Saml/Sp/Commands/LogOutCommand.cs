@@ -20,9 +20,10 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
     internal class LogoutCommand : ICommand
     {
         /// <summary>
-        /// Run the command, initiating or handling the logout sequence.
+        /// Run the command for the scheme that received the request. A received LogoutRequest is
+        /// compared with the session user in <see cref="HttpRequestData.User"/>.
         /// </summary>
-        /// <param name="request">Request data.</param>
+        /// <param name="request">Request data, with the session user if there is a session.</param>
         /// <param name="options">Options</param>
         /// <param name="timeProvider">The time provider.</param>
         /// <returns>CommandResult</returns>
@@ -86,6 +87,7 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
                 {
                     case "LogoutRequest":
                         VerifyMessageIsSigned(unbindResult, options);
+                        VerifyRelayStateIsCoveredByBindingSignature(binding, unbindResult);
                         commandResult = HandleRequest(unbindResult, request, options);
                         break;
                     case "LogoutResponse":
@@ -113,7 +115,10 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
         {
             if (unbindResult.TrustLevel < TrustLevel.Signature)
             {
-                var issuer = unbindResult.Data["Issuer", Saml2Namespaces.Saml2Name]?.InnerText;
+                var issuerElement = unbindResult.Data["Issuer", Saml2Namespaces.Saml2Name];
+                var issuer = issuerElement is null
+                    ? null
+                    : XmlHelpers.GetDirectTextContents(issuerElement);
 
                 if (issuer == null)
                 {
@@ -129,8 +134,21 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
                     throw new UnsuccessfulSamlOperationException(string.Format(CultureInfo.InvariantCulture,
                         "Received a {0} from {1} that cannot be processed because it is not signed.",
                         unbindResult.Data.LocalName,
-                        unbindResult.Data["Issuer", Saml2Namespaces.Saml2Name].InnerText));
+                        issuer));
                 }
+            }
+        }
+
+        // On HTTP-Redirect, RelayState is a query parameter (SAML 2.0 Bindings 3.4.4.1). Only the
+        // query string signature covers it; an XML signature on the message does not.
+        private static void VerifyRelayStateIsCoveredByBindingSignature(Saml2Binding binding, UnbindResult unbindResult)
+        {
+            if (binding is Saml2RedirectBinding
+                && unbindResult.RelayState != null
+                && unbindResult.TrustLevel < TrustLevel.Signature)
+            {
+                throw new InvalidSignatureException(
+                    "RelayState on an HTTP-Redirect LogoutRequest must be covered by the query string signature.");
             }
         }
 
@@ -268,7 +286,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
                     idp.EntityId.Id));
             }
 
-            var response = new Saml2LogoutResponse(Saml2StatusCode.Success)
+            var sessionUser = httpRequest.User?.Identity?.IsAuthenticated == true ? httpRequest.User : null;
+            var namesSessionUser = sessionUser != null && LogoutRequestNamesSessionUser(sessionUser, httpRequest.SchemeName, request);
+            var status = sessionUser == null || namesSessionUser ? Saml2StatusCode.Success : Saml2StatusCode.Requester;
+
+            var response = new Saml2LogoutResponse(status)
             {
                 DestinationUrl = idp.SingleLogoutServiceResponseUrl,
                 SigningCertificate = options.SPOptions.SigningServiceCertificate,
@@ -284,6 +306,14 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
                 + ", responding with logout response " + response.Id);
 
 
+            if (!namesSessionUser)
+            {
+                options.SPOptions.Logger.WriteInformation("Logout request " + request.Id + " from " + request.Issuer.Id
+                    + (sessionUser == null ? " arrived without a session; nothing to end." : " does not name the current session; the session is not ended."));
+                return Saml2Binding.Get(idp.SingleLogoutServiceBinding)
+                    .Bind(response, options.SPOptions.Logger, options.Notifications.LogoutResponseXmlCreated);
+            }
+
             // NOTE: this has been minimized to not interfere with federated logout. However,
             // we need to keep a result with TerminateLocalSession set to true in order for the
             // logout to be handled properly.
@@ -292,6 +322,41 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
                 TerminateLocalSession = true
             };
             return result;
+        }
+
+        /// <summary>
+        /// Returns whether the logout request names the session's user (SAML 2.0 Core, section
+        /// 3.7.3.1). The user carries the SAML sign-in as claims: the handler adds the scheme,
+        /// NameID and SessionIndex at sign-in, and an external login callback copies them into the
+        /// session, as it copies <c>sid</c> for OpenID Connect. Only the first session index of a
+        /// request is read. The request must come from the IdP that issued the NameID claim, which
+        /// is the IdP that signed the user in: the scheme alone does not say so, because the IdP of
+        /// a dynamic scheme can be changed while its sessions stay. A session whose user does not
+        /// carry the claims (a callback that does not copy them, a session from before this check, a
+        /// sign-in without a SessionIndex, a session not from SAML) cannot be compared and is ended,
+        /// as before.
+        /// </summary>
+        private static bool LogoutRequestNamesSessionUser(ClaimsPrincipal user, string scheme, Saml2LogoutRequest request)
+        {
+            var schemeClaim = user.FindFirst(Saml2ClaimTypes.Scheme);
+            var nameIdClaim = user.FindFirst(Saml2ClaimTypes.LogoutNameIdentifier);
+            var sessionIndexClaim = user.FindFirst(Saml2ClaimTypes.SessionIndex);
+            if (schemeClaim == null || nameIdClaim == null || sessionIndexClaim == null)
+            {
+                return true;
+            }
+
+            var nameId = nameIdClaim.ToSaml2NameIdentifier();
+
+            var cameThroughSessionScheme = schemeClaim.Value == scheme;
+            var sentBySessionIdp = request.Issuer?.Id == nameIdClaim.Issuer;
+            var namesSessionUser = request.NameId.Value == nameId.Value;
+            var namesSameFormatWhenSent = request.NameId.Format == null
+                || request.NameId.Format.OriginalString == nameId.Format?.OriginalString;
+            var namesThisSessionWhenIndexed = request.SessionIndex == null
+                || request.SessionIndex == sessionIndexClaim.Value;
+
+            return cameThroughSessionScheme && sentBySessionIdp && namesSessionUser && namesSameFormatWhenSent && namesThisSessionWhenIndexed;
         }
 
         private static CommandResult HandleResponse(

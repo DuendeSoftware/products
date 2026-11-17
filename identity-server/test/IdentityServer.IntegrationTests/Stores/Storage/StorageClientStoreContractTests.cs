@@ -6,8 +6,9 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Storage;
 using Duende.IdentityServer.Stores.Storage.Clients;
+using Duende.IdentityServer.Validation;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Stores.Storage;
@@ -18,7 +19,7 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
     private ServiceProvider _provider = null!;
     private readonly List<ServiceProvider> _isolatedProviders = [];
 
-    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddConfigurationStorage());
+    public override async ValueTask InitializeAsync() => _provider = await StorageContractTestServices.CreateAsync(_dbName, b => b.AddConfigurationStorage().AddClientConfigurationValidator<NopClientConfigurationValidator>());
 
     public override async ValueTask DisposeAsync()
     {
@@ -42,7 +43,7 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
     protected override async Task<StoreHandle<IClientStore>> CreateIsolatedStoreAsync()
     {
         var isolatedDbName = $"StorageClientContractIsolated_{Guid.NewGuid():N}";
-        var provider = await StorageContractTestServices.CreateAsync(isolatedDbName, b => b.AddConfigurationStorage());
+        var provider = await StorageContractTestServices.CreateAsync(isolatedDbName, b => b.AddConfigurationStorage().AddClientConfigurationValidator<NopClientConfigurationValidator>());
         _isolatedProviders.Add(provider);
 
         return new StoreHandle<IClientStore>(provider.GetRequiredService<IClientStore>());
@@ -55,8 +56,48 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
     protected override async Task SeedClientAsync(Client client)
     {
         var repo = _provider.GetRequiredService<ClientRepository>();
-        var dso = MapToDso(client);
-        await repo.CreateAsync(UuidV7.New(), dso, TestContext.Current.CancellationToken);
+        var id = UuidV7.New();
+        var dso = MapToDso(client, id.Value);
+        var scopes = await ResolveScopeLinksAsync(client.AllowedScopes, TestContext.Current.CancellationToken);
+        await repo.CreateAsync(id, dso, scopes, TestContext.Current.CancellationToken);
+    }
+
+    // Contract fixtures name scopes that don't need to exist for IClientStore's own behavior (it reads
+    // stored data, not admin-validated input), but allowed scopes are now Storage links, so each name must
+    // resolve to an API scope entity. Creates one per unique name, reusing it across seed calls.
+    private async Task<List<ScopeLink>> ResolveScopeLinksAsync(ICollection<string> scopeNames, Ct ct)
+    {
+        var apiScopeRepository = _provider.GetRequiredService<Duende.IdentityServer.Stores.Storage.ApiScopes.ApiScopeRepository>();
+        var links = new List<ScopeLink>(scopeNames.Count);
+
+        foreach (var name in scopeNames.Distinct(StringComparer.Ordinal))
+        {
+            var existing = await apiScopeRepository.TryReadByNameAsync(name, ct);
+            Guid scopeId;
+            if (existing is not null)
+            {
+                scopeId = existing.Value.Dso.Id;
+            }
+            else
+            {
+                var id = UuidV7.New();
+                scopeId = id.Value;
+                await apiScopeRepository.CreateAsync(id, new Duende.IdentityServer.Stores.Storage.ApiScopeDso.V1
+                {
+                    Id = scopeId,
+                    Name = name,
+                    Enabled = true,
+                    ShowInDiscoveryDocument = true,
+                    Required = false,
+                    Emphasize = false,
+                    UserClaims = []
+                }, ct);
+            }
+
+            links.Add(new ScopeLink(name, scopeId, ScopeLinkKind.ApiScope));
+        }
+
+        return links;
     }
 
     protected override async Task SeedClientsAsync(IEnumerable<Client> clients)
@@ -69,9 +110,9 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
 
     // NOTE: This mapping must be kept in sync with ClientDso.V1 as fields are added.
     // If tests start failing after a ClientDso.V1 change, check here first.
-    private static ClientDso.V1 MapToDso(Client client) => new()
+    private static ClientDso.V1 MapToDso(Client client, Guid id) => new()
     {
-        Id = Guid.NewGuid(),
+        Id = id,
         ClientId = client.ClientId,
         Enabled = client.Enabled,
         ProtocolType = client.ProtocolType,
@@ -120,7 +161,6 @@ public class StorageClientStoreContractTests : ClientStoreContractTests
         CibaLifetime = client.CibaLifetime,
         PollingInterval = client.PollingInterval,
         AllowedGrantTypes = client.AllowedGrantTypes.ToList(),
-        AllowedScopes = client.AllowedScopes.ToList(),
         RedirectUris = client.RedirectUris.ToList(),
         PostLogoutRedirectUris = client.PostLogoutRedirectUris.ToList(),
         AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms.ToList(),

@@ -1,0 +1,129 @@
+@page
+@model AspNetIdentityApp.Pages.Account.EnrollPasskeyModel
+@{
+  ViewData["Title"] = "Add a passkey";
+}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-container">
+      <h2 class="mb-2 brand-title text-center">Add a passkey</h2>
+      <p class="text-muted text-center mb-4">
+        Passkeys let you sign in faster and more securely using your device's biometrics or PIN.
+      </p>
+
+      @if (Model.ErrorMessages.Count > 0)
+      {
+        <div class="alert alert-danger mb-4" role="alert">
+          @foreach (var error in Model.ErrorMessages)
+          {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+          }
+        </div>
+      }
+
+      <div id="passkey-status" class="alert d-none" role="alert"></div>
+
+      <div class="d-grid gap-2">
+        <button type="button" id="enroll-passkey-btn" class="btn btn-primary btn-lg">
+          <i class="bi bi-fingerprint me-2"></i>Register a passkey
+        </button>
+        <a asp-page="/Account/Welcome" asp-route-ReturnUrl="@Model.ReturnUrl" class="btn btn-outline-secondary btn-lg">
+          <i class="bi bi-skip-forward me-2"></i>Skip for now
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script>
+    const enrollBtn = document.getElementById('enroll-passkey-btn');
+    const statusDiv = document.getElementById('passkey-status');
+
+    function showStatus(message, isError) {
+      statusDiv.textContent = message;
+      statusDiv.className = 'alert ' + (isError ? 'alert-danger' : 'alert-success');
+    }
+
+    enrollBtn.addEventListener('click', async () => {
+      enrollBtn.disabled = true;
+      showStatus('Starting passkey registration...', false);
+
+      try {
+        // Get registration options from server
+        const optionsResponse = await fetch('/Account/EnrollPasskey?handler=Options', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!optionsResponse.ok) {
+          throw new Error('Failed to get registration options');
+        }
+
+        const options = await optionsResponse.json();
+
+        // Decode base64url values
+        options.challenge = base64urlToBuffer(options.challenge);
+        options.user.id = base64urlToBuffer(options.user.id);
+        if (options.excludeCredentials) {
+          options.excludeCredentials = options.excludeCredentials.map(c => ({
+            ...c,
+            id: base64urlToBuffer(c.id)
+          }));
+        }
+
+        // Create credential
+        const credential = await navigator.credentials.create({ publicKey: options });
+
+        // Send credential to server
+        const registerResponse = await fetch('/Account/EnrollPasskey?handler=Register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: credential.id,
+            rawId: bufferToBase64url(credential.rawId),
+            type: credential.type,
+            response: {
+              attestationObject: bufferToBase64url(credential.response.attestationObject),
+              clientDataJSON: bufferToBase64url(credential.response.clientDataJSON)
+            }
+          })
+        });
+
+        if (!registerResponse.ok) {
+          throw new Error('Failed to register passkey');
+        }
+
+        showStatus('Passkey registered successfully! Redirecting...', false);
+        setTimeout(() => {
+          window.location.href = '@Url.Page("/Account/Welcome", new { ReturnUrl = Model.ReturnUrl })';
+        }, 1500);
+
+      } catch (err) {
+        showStatus('Failed to register passkey: ' + err.message, true);
+        enrollBtn.disabled = false;
+      }
+    });
+
+    function base64urlToBuffer(base64url) {
+      const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+      const binary = atob(base64);
+      const buffer = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) buffer[i] = binary.charCodeAt(i);
+      return buffer.buffer;
+    }
+
+    function bufferToBase64url(buffer) {
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (const b of bytes) binary += String.fromCharCode(b);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+  </script>
+  <partial name="_ValidationScriptsPartial" />
+}

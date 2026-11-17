@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <title>Passkey Authentication - @ViewData["Title"]</title>
+
+  <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <script type="importmap"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/pulse/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    .duende-header {
+      background-color: #5e2d91;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .body-container {
+      min-height: calc(100vh - 180px);
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    .form-container {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .brand-title {
+      color: #512bd4;
+    }
+    .platform-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 3rem 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+    .footer {
+      margin-top: 3rem;
+      padding: 1.5rem 0;
+      border-top: 1px solid #dee2e6;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark duende-header sticky-top">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" asp-area="" asp-page="/Index">
+          <img src="~/duende-white.svg" alt="Duende Software" class="icon-banner me-2" />
+          <span class="ms-1">Passkey Authentication</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+              <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-page="/Account">
+                  <i class="bi bi-person-circle me-1"></i>@User.GetDisplayName()
+                </a>
+              </li>
+              <li class="nav-item ms-lg-3">
+                <a class="nav-link fw-bold" asp-area="" asp-page="/Logout" asp-route-ReturnUrl="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)">
+                  <span class="text-white-50">Log out</span>
+                  <i class="bi bi-box-arrow-right ms-1"></i>
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <div class="container-fluid container-lg body-container">
+    <main role="main">
+      @RenderBody()
+    </main>
+  </div>
+
+  <footer class="footer text-muted">
+    <div class="container-fluid container-lg">
+      Copyright &copy; 2021-2026 Duende Software. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -470,7 +470,7 @@ public abstract class ConformanceSuiteFixture : IAsyncLifetime
         return string.IsNullOrWhiteSpace(stdout) ? stderr : stdout;
     }
 
-    private async Task WaitForConformanceSuiteAsync(CancellationToken ct = default)
+    private async Task WaitForConformanceSuiteAsync(Ct ct = default)
     {
         var handler = new HttpClientHandler
         {

@@ -42,6 +42,21 @@ internal static partial class StoragePurgeLog
         EventName = nameof(PurgeException),
         Message = $"Exception purging expired entities from storage instance {{{LogParameters.StorageInstanceId}}}")]
     internal static partial void PurgeException(this ILogger logger, LogLevel logLevel, Exception exception, StorageInstanceId storageInstanceId);
+
+    [LoggerMessage(
+        EventName = nameof(SkippedNotLeaseHolder),
+        Message = "Skipping storage purge cycle: another node holds the lease")]
+    internal static partial void SkippedNotLeaseHolder(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(LeaseLost),
+        Message = "Storage purge lease was lost while a cycle was running")]
+    internal static partial void LeaseLost(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        EventName = nameof(LockUnavailable),
+        Message = "Storage purge could not reach the distributed lock; skipping this cycle")]
+    internal static partial void LockUnavailable(this ILogger logger, LogLevel logLevel);
 }
 
 internal static class LogParameters

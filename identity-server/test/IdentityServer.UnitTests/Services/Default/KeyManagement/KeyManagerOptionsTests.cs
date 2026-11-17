@@ -20,6 +20,21 @@ public class KeyManagerOptionsTests
         a.ShouldThrow<Exception>();
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1000)]
+    [InlineData((double)int.MaxValue + 1)]
+    public void KeyCreationLockTimeout_should_be_greater_than_zero_and_within_semaphore_limit(double milliseconds)
+    {
+        var subject = new KeyManagementOptions
+        {
+            KeyCreationLockTimeout = TimeSpan.FromMilliseconds(milliseconds),
+        };
+
+        var a = () => subject.Validate();
+        a.ShouldThrow<Exception>();
+    }
+
     [Fact]
     public void InitializationDuration_should_be_greater_than_or_equal_to_zero()
     {

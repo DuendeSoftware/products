@@ -13,14 +13,34 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class InMemoryPersistedGrantStore : IPersistedGrantStore
 {
-    private readonly ConcurrentDictionary<string, PersistedGrant> _repository = new ConcurrentDictionary<string, PersistedGrant>();
+    private readonly PartitionedState<PersistedGrantState> _state;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemoryPersistedGrantStore"/> class.
+    /// It holds a single partition and isn't split by space; to partition by space use
+    /// <see cref="InMemoryPersistedGrantStore(InMemoryStoreState)"/>.
+    /// </summary>
+    public InMemoryPersistedGrantStore() : this(new InMemoryStoreState())
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemoryPersistedGrantStore"/> class
+    /// that partitions its data using the given state source.
+    /// </summary>
+    /// <param name="state">The state source, which decides how data is partitioned.</param>
+    public InMemoryPersistedGrantStore(InMemoryStoreState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        _state = new(state.CurrentSpace);
+    }
 
     /// <inheritdoc/>
     public Task StoreAsync(PersistedGrant grant, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Store");
 
-        _repository[grant.Key] = grant;
+        _state.Current.Items[grant.Key] = grant;
 
         return Task.CompletedTask;
     }
@@ -30,7 +50,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Get");
 
-        if (key != null && _repository.TryGetValue(key, out var token))
+        if (key != null && _state.TryGetCurrent(out var state) && state.Items.TryGetValue(key, out var token))
         {
             return Task.FromResult(token);
         }
@@ -45,7 +65,12 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
 
         filter.Validate();
 
-        var items = Filter(filter);
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.FromResult<IReadOnlyCollection<PersistedGrant>>([]);
+        }
+
+        var items = Filter(state, filter);
 
         return Task.FromResult<IReadOnlyCollection<PersistedGrant>>(items);
     }
@@ -55,7 +80,10 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Remove");
 
-        _repository.TryRemove(key, out _);
+        if (_state.TryGetCurrent(out var state))
+        {
+            state.Items.TryRemove(key, out _);
+        }
 
         return Task.CompletedTask;
     }
@@ -67,20 +95,25 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
 
         filter.Validate();
 
-        var items = Filter(filter);
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.CompletedTask;
+        }
+
+        var items = Filter(state, filter);
 
         foreach (var item in items)
         {
-            _repository.TryRemove(item.Key, out _);
+            state.Items.TryRemove(item.Key, out _);
         }
 
         return Task.CompletedTask;
     }
 
-    private PersistedGrant[] Filter(PersistedGrantFilter filter)
+    private static PersistedGrant[] Filter(PersistedGrantState state, PersistedGrantFilter filter)
     {
         var query =
-            from item in _repository
+            from item in state.Items
             select item.Value;
 
         if (filter.ClientIds.Count > 0)
@@ -123,4 +156,9 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
         var items = query.ToArray();
         return items;
     }
+}
+
+internal sealed class PersistedGrantState
+{
+    public ConcurrentDictionary<string, PersistedGrant> Items { get; } = new();
 }

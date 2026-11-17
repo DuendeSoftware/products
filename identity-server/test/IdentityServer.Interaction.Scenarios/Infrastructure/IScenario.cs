@@ -33,12 +33,12 @@ public interface IScenario
     /// logging (and optionally OTel) already wired.
     /// </param>
     /// <param name="ct">Cancellation token.</param>
-    Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct);
+    Task StartAsync(IScenarioConfigurator configurator, Ct ct);
 
     /// <summary>
     /// Stops and disposes all WebApplication instances for this scenario.
     /// </summary>
-    Task StopAsync(CancellationToken ct);
+    Task StopAsync(Ct ct);
 
     Command[] GetCommands();
 }

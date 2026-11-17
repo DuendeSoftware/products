@@ -74,6 +74,12 @@ internal static partial class Log
     internal static partial void UsingSchemeAsDefaultASPNETCoreScheme5(this ILogger logger, object scheme);
 
     [LoggerMessage(
+        LogLevel.Warning,
+        EventName = nameof(SigningKeysSharedAcrossSpaces),
+        Message = "Spaces is in use and the signing keys are shared across spaces ({Reason}). Only the issuer separates spaces: a token issued in one space can be accepted in another if their issuers are the same, so do not set IssuerUri. Use automatic key management with operational storage to give each space its own signing keys.")]
+    internal static partial void SigningKeysSharedAcrossSpaces(this ILogger logger, string reason);
+
+    [LoggerMessage(
         LogLevel.Debug,
         EventName = nameof(CustomIssuerUriSetToValue),
         Message = "Custom IssuerUri set to {Value}")]

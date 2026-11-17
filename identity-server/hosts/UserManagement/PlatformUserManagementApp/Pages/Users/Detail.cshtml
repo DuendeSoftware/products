@@ -1,0 +1,332 @@
+@page "{id}"
+@model PlatformUserManagementApp.Pages.Users.DetailModel
+@using Duende.IdentityServer.DataExtensions
+@{
+    ViewData["Title"] = "User Detail";
+    const int horizontalThreshold = 4;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="brand-title mb-0">User Detail</h2>
+    <div>
+        <a asp-page="/Users/Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Id" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger me-2"
+                    onclick="return confirm('Are you sure you want to delete this user? This cannot be undone.');">
+                <i class="bi bi-trash me-1"></i>Delete
+            </button>
+        </form>
+        <a asp-page="/Users/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+@if (Model.UserProfile is null)
+{
+    <div class="alert alert-warning">User not found.</div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>@(Model.UserProfile.Attributes.TryGetValue(ScimSchema.DisplayName.Code, out var dn) ? dn.UntypedValue : "Unknown user")</strong>
+            <span class="text-muted ms-2 small">@Model.Id</span>
+        </div>
+        <div class="card-body">
+            @{
+                var orderedGroups = Model.Groups.Values.OrderBy(g => g.Order).ToList();
+                var grouped = Model.Schema.Values
+                    .Where(d => d.GroupCode is not null)
+                    .ToLookup(d => d.GroupCode!.Value);
+                var ungrouped = Model.Schema.Values
+                    .Where(d => d.GroupCode is null)
+                    .OrderBy(d => d.Order).ThenBy(d => d.Code.Value)
+                    .ToList();
+            }
+            @foreach (var group in orderedGroups)
+            {
+                var definitions = grouped[group.Code.Value].OrderBy(d => d.Order).ThenBy(d => d.Code.Value).ToList();
+                if (definitions.Count == 0)
+                {
+                    continue;
+                }
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">@group.DisplayName?.Value</h6>
+                @if (group.Description is not null)
+                {
+                    <p class="text-muted small mb-2">@group.Description</p>
+                }
+
+                @foreach (var definition in definitions)
+                {
+                    var hasValue = Model.UserProfile.Attributes.TryGetValue(definition.Code, out var attr);
+
+                    @if (definition.AttributeType is ListAttributeType listType && listType.ElementType is ComplexAttributeType complexElement)
+                    {
+                        @* List of complex objects *@
+                        @if (hasValue && attr!.UntypedValue is IReadOnlyList<object> list && list.Count > 0)
+                        {
+                            var isHorizontal = complexElement.Properties.Count <= horizontalThreshold;
+                            @foreach (var item in list)
+                            {
+                                @if (item is IReadOnlyDictionary<string, object> dict)
+                                {
+                                    @if (isHorizontal)
+                                    {
+                                        <div class="border rounded p-2 mb-2 bg-light d-flex gap-2 align-items-center">
+                                            @foreach (var (propName, _) in complexElement.Properties)
+                                            {
+                                                @if (dict.TryGetValue(propName.Value, out var propVal))
+                                                {
+                                                    <div style="flex: 1 1 0%">
+                                                        <span class="text-muted small">@propName.Value:</span>
+                                                        @if (propVal is bool bv)
+                                                        {
+                                                            <span class="badge @(bv ? "bg-success" : "bg-secondary")">@(bv ? "true" : "false")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <strong>@(propVal?.ToString() ?? "—")</strong>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="border rounded p-2 mb-2 bg-light">
+                                            <div class="row">
+                                                @foreach (var (propName, _) in complexElement.Properties)
+                                                {
+                                                    @if (dict.TryGetValue(propName.Value, out var propVal))
+                                                    {
+                                                        <div class="col-md-6 mb-1">
+                                                            <span class="text-muted small">@propName.Value:</span>
+                                                            @if (propVal is bool bv)
+                                                            {
+                                                                <span class="badge @(bv ? "bg-success" : "bg-secondary")">@(bv ? "true" : "false")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <strong>@(propVal?.ToString() ?? "—")</strong>
+                                                            }
+                                                        </div>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted small">None</p>
+                        }
+                    }
+                    else if (definition.AttributeType is ComplexAttributeType complexType)
+                    {
+                        @* Single complex object *@
+                        @if (hasValue && attr!.UntypedValue is IReadOnlyDictionary<string, object> dict)
+                        {
+                            var isHorizontal = complexType.Properties.Count <= horizontalThreshold;
+                            @if (isHorizontal)
+                            {
+                                <div class="border rounded p-2 mb-2 bg-light d-flex gap-2 align-items-center">
+                                    @foreach (var (propName, _) in complexType.Properties)
+                                    {
+                                        @if (dict.TryGetValue(propName.Value, out var propVal))
+                                        {
+                                            <div style="flex: 1 1 0%">
+                                                <span class="text-muted small">@propName.Value:</span>
+                                                @if (propVal is bool bv)
+                                                {
+                                                    <span class="badge @(bv ? "bg-success" : "bg-secondary")">@(bv ? "true" : "false")</span>
+                                                }
+                                                else
+                                                {
+                                                    <strong>@(propVal?.ToString() ?? "—")</strong>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="border rounded p-2 mb-2 bg-light">
+                                    <div class="row">
+                                        @foreach (var (propName, _) in complexType.Properties)
+                                        {
+                                            @if (dict.TryGetValue(propName.Value, out var propVal))
+                                            {
+                                                <div class="col-md-6 mb-1">
+                                                    <span class="text-muted small">@propName.Value:</span>
+                                                    @if (propVal is bool bv)
+                                                    {
+                                                        <span class="badge @(bv ? "bg-success" : "bg-secondary")">@(bv ? "true" : "false")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <strong>@(propVal?.ToString() ?? "—")</strong>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted small">Not set</p>
+                        }
+                    }
+                    else
+                    {
+                        @* Scalar attribute *@
+                        <dl class="row">
+                            <dt class="col-sm-4 text-truncate" title="@definition.Code.Value">@definition.Code.Value</dt>
+                            <dd class="col-sm-8">
+                                @if (hasValue && attr!.UntypedValue is bool b)
+                                {
+                                    <span class="badge @(b ? "bg-success" : "bg-secondary")">@(b ? "true" : "false")</span>
+                                }
+                                else
+                                {
+                                    @(hasValue ? attr!.UntypedValue?.ToString() ?? "—" : "—")
+                                }
+                            </dd>
+                        </dl>
+                    }
+                }
+            }
+            @* Ungrouped attributes *@
+            @if (ungrouped.Count > 0)
+            {
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">Other</h6>
+                <dl class="row">
+                    @foreach (var definition in ungrouped)
+                    {
+                        var hasValue = Model.UserProfile.Attributes.TryGetValue(definition.Code, out var attr);
+                        <dt class="col-sm-4 text-truncate" title="@definition.Code.Value">@definition.Code.Value</dt>
+                        <dd class="col-sm-8">
+                            @if (hasValue && attr!.UntypedValue is bool b)
+                            {
+                                <span class="badge @(b ? "bg-success" : "bg-secondary")">@(b ? "true" : "false")</span>
+                            }
+                            else
+                            {
+                                @(hasValue ? attr!.UntypedValue?.ToString() ?? "—" : "—")
+                            }
+                        </dd>
+                    }
+                </dl>
+            }
+        </div>
+    </div>
+
+    @* Authenticators section *@
+    <div class="card">
+        <div class="card-header">
+            <strong>Authenticators</strong>
+        </div>
+        <div class="card-body">
+            @if (Model.Authenticators is null)
+            {
+                <p class="text-muted">No authenticator record found for this user.</p>
+            }
+            else
+            {
+                var auth = Model.Authenticators;
+
+                <h6 class="text-uppercase text-muted small mt-2 mb-2">Password</h6>
+                <p>@(auth.HasPassword ? "Set" : "Not set")</p>
+
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">OTP Addresses</h6>
+                @if (auth.OtpAddresses.Count == 0)
+                {
+                    <p class="text-muted">None</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush mb-2">
+                        @foreach (var otp in auth.OtpAddresses)
+                        {
+                            <li class="list-group-item px-0">
+                                <span class="badge bg-info me-2">@otp.Channel</span>
+                                @otp.SubjectId
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">External Authenticators</h6>
+                @if (auth.ExternalAuthenticatorAddresses.Count == 0)
+                {
+                    <p class="text-muted">None</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush mb-2">
+                        @foreach (var ext in auth.ExternalAuthenticatorAddresses)
+                        {
+                            <li class="list-group-item px-0">
+                                <span class="badge bg-secondary me-2">@ext.Name</span>
+                                @ext.SubjectId
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">TOTP Devices</h6>
+                @if (auth.TotpDeviceNames.Count == 0)
+                {
+                    <p class="text-muted">None</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush mb-2">
+                        @foreach (var deviceName in auth.TotpDeviceNames)
+                        {
+                            <li class="list-group-item px-0">@deviceName</li>
+                        }
+                    </ul>
+                }
+
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">Passkeys</h6>
+                @if (auth.Passkeys.Count == 0)
+                {
+                    <p class="text-muted">None</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush mb-2">
+                        @foreach (var passkey in auth.Passkeys)
+                        {
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@passkey.Name</strong>
+                                    <span class="text-muted small ms-2">Created @passkey.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                                </div>
+                                <form method="post" asp-page-handler="RemovePasskey" asp-route-id="@Model.Id"
+                                      asp-route-credentialId="@passkey.CredentialId.ToBase64String()">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Remove this passkey?');">
+                                        <i class="bi bi-trash me-1"></i>Remove
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <h6 class="text-uppercase text-muted small mt-3 mb-2">Recovery Codes</h6>
+                <p>@auth.RecoveryCodeCount remaining</p>
+            }
+        </div>
+    </div>
+}

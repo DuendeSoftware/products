@@ -233,7 +233,7 @@ public static class IdentityServerBuilderExtensionsInMemory
         /// Adds the in-memory SAML service provider store.
         /// </summary>
         /// <param name="serviceProviders">The SAML service providers.</param>
-        /// <returns></returns>
+        /// <returns>The builder, to allow chaining.</returns>
         public IIdentityServerBuilder AddInMemorySamlServiceProviders(IEnumerable<SamlServiceProvider> serviceProviders)
         {
             builder.Services.AddSingleton(serviceProviders);

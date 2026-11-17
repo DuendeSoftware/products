@@ -153,7 +153,11 @@ public sealed class SamlServiceProviderStoreTests : IAsyncLifetime
         allSps.ShouldContain(sp => sp.EntityId == entityId2);
     }
 
-    public ValueTask InitializeAsync() => _fixture.InitializeAsync();
+    public async ValueTask InitializeAsync()
+    {
+        await _fixture.InitializeAsync();
+        await _fixture.EnsureIdentityResourcesAsync("openid", "profile");
+    }
 
     public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

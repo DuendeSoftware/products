@@ -5,6 +5,7 @@
 using System.Collections.Concurrent;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
+using Duende.Spaces;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -13,27 +14,46 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class InMemoryServerSideSessionStore : IServerSideSessionStore
 {
-    private readonly ConcurrentDictionary<string, ServerSideSession> _store = new();
+    private readonly PartitionedState<ServerSideSessionState> _state;
     private readonly TimeProvider _timeProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InMemoryServerSideSessionStore"/> class.
+    /// It holds a single partition and isn't split by space; to partition by space use
+    /// <see cref="InMemoryServerSideSessionStore(TimeProvider, InMemoryStoreState)"/>.
     /// </summary>
     /// <param name="timeProvider">The time provider.</param>
     public InMemoryServerSideSessionStore(TimeProvider timeProvider)
+        : this(timeProvider, new InMemoryStoreState())
     {
-        ArgumentNullException.ThrowIfNull(timeProvider);
-        _timeProvider = timeProvider;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemoryServerSideSessionStore"/> class
+    /// that partitions its data using the given state source.
+    /// </summary>
+    /// <param name="timeProvider">The time provider.</param>
+    /// <param name="state">The state source, which decides how data is partitioned.</param>
+    /// <remarks>
+    /// The session cleanup reaches every space only when the registered <see cref="IServerSideSessionStore"/>
+    /// is this store itself. If it is wrapped (decorated), only the Default space is cleaned.
+    /// </remarks>
+    public InMemoryServerSideSessionStore(TimeProvider timeProvider, InMemoryStoreState state)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        ArgumentNullException.ThrowIfNull(state);
+        _timeProvider = timeProvider;
+        _state = new(state.CurrentSpace);
+    }
 
+    internal IEnumerable<SpaceId> SpaceIds => _state.Partitions.Select(x => x.Key);
 
     /// <inheritdoc />
     public Task CreateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.CreateSession");
 
-        if (!_store.TryAdd(session.Key, session.Clone()))
+        if (!_state.Current.Items.TryAdd(session.Key, WithVersion(session, 1)))
         {
             throw new Exception("Key already exists");
         }
@@ -45,17 +65,42 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetSession");
 
-        _store.TryGetValue(key, out var item);
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.FromResult<ServerSideSession>(null);
+        }
+
+        state.Items.TryGetValue(key, out var item);
         return Task.FromResult(item?.Clone());
     }
 
     /// <inheritdoc />
-    public Task UpdateSessionAsync(ServerSideSession session, Ct ct)
+    public Task<bool> UpdateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.UpdateSession");
 
-        _store[session.Key] = session.Clone();
-        return Task.CompletedTask;
+        var items = _state.Current.Items;
+        while (items.TryGetValue(session.Key, out var storedSession))
+        {
+            if (session.Version != 0 && session.Version != storedSession.Version)
+            {
+                return Task.FromResult(false);
+            }
+
+            if (items.TryUpdate(session.Key, WithVersion(session, storedSession.Version + 1), storedSession))
+            {
+                return Task.FromResult(true);
+            }
+        }
+
+        return Task.FromResult(false);
+    }
+
+    private static ServerSideSession WithVersion(ServerSideSession session, int version)
+    {
+        var storedSession = session.Clone();
+        storedSession.Version = version;
+        return storedSession;
     }
 
     /// <inheritdoc />
@@ -63,7 +108,11 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.DeleteSession");
 
-        _store.TryRemove(key, out _);
+        if (_state.TryGetCurrent(out var state))
+        {
+            state.Items.TryRemove(key, out _);
+        }
+
         return Task.CompletedTask;
     }
 
@@ -76,7 +125,12 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         filter.Validate();
 
-        var query = _store.Values.AsQueryable();
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.FromResult((IReadOnlyCollection<ServerSideSession>)Array.Empty<ServerSideSession>());
+        }
+
+        var query = state.Items.Values.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
@@ -97,7 +151,13 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         filter.Validate();
 
-        var query = _store.Values.AsQueryable();
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.CompletedTask;
+        }
+
+        var items = state.Items;
+        var query = items.Values.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
@@ -111,7 +171,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         foreach (var key in keys)
         {
-            _store.TryRemove(key, out _);
+            items.TryRemove(key, out _);
         }
 
         return Task.CompletedTask;
@@ -123,7 +183,13 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetAndRemoveExpiredSession");
 
-        var results = _store.Values
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.FromResult((IReadOnlyCollection<ServerSideSession>)Array.Empty<ServerSideSession>());
+        }
+
+        var items = state.Items;
+        var results = items.Values
             .Where(x => x.Expires < _timeProvider.GetUtcNow().UtcDateTime)
             .OrderBy(x => x.Key)
             .Take(count)
@@ -131,7 +197,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         foreach (var item in results)
         {
-            _store.Remove(item.Key, out _);
+            items.Remove(item.Key, out _);
         }
 
         return Task.FromResult((IReadOnlyCollection<ServerSideSession>)results);
@@ -172,7 +238,18 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             countRequested = 25;
         }
 
-        var query = _store.Values.AsQueryable();
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.FromResult(new QueryResult<ServerSideSession>
+            {
+                TotalCount = 0,
+                TotalPages = 0,
+                CurrentPage = 0,
+                Results = Array.Empty<ServerSideSession>()
+            });
+        }
+
+        var query = state.Items.Values.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.DisplayName) ||
             !string.IsNullOrWhiteSpace(filter.SubjectId) ||
@@ -297,4 +374,9 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         return Task.FromResult(result);
     }
+}
+
+internal sealed class ServerSideSessionState
+{
+    public ConcurrentDictionary<string, ServerSideSession> Items { get; } = new();
 }

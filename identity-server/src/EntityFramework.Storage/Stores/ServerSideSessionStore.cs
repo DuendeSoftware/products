@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.EntityFramework.Extensions;
+using System.Data.Common;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -101,6 +101,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
                 Renewed = entity.Renewed,
                 Expires = entity.Expires,
                 Ticket = entity.Data,
+                Version = entity.Version,
             };
         }
 
@@ -111,7 +112,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc/>
-    public virtual async Task UpdateSessionAsync(ServerSideSession session, Ct ct)
+    public virtual async Task<bool> UpdateSessionAsync(ServerSideSession session, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.UpdateSession");
 
@@ -122,7 +123,12 @@ public class ServerSideSessionStore : IServerSideSessionStore
         if (entity == null)
         {
             Log.NoServerSideSessionValueFoundInDatabase(Logger, session.Key);
-            return;
+            return false;
+        }
+
+        if (session.Version != 0 && session.Version != entity.Version)
+        {
+            return false;
         }
 
         entity.Scheme = session.Scheme;
@@ -133,15 +139,24 @@ public class ServerSideSessionStore : IServerSideSessionStore
         entity.Renewed = session.Renewed;
         entity.Expires = session.Expires;
         entity.Data = session.Ticket;
+        entity.Version++;
 
         try
         {
             await Context.SaveChangesAsync(ct);
             Log.UpdatedServerSideSessionValueInDatabase(Logger, session.Key);
+            return true;
         }
         catch (DbUpdateException ex)
         {
             Log.ExceptionUpdatingExistingServerSideSessionValueIn(Logger, session.Key, ex.Message);
+
+            foreach (var entry in ex.Entries)
+            {
+                entry.State = EntityState.Detached;
+            }
+
+            return false;
         }
     }
 
@@ -160,14 +175,12 @@ public class ServerSideSessionStore : IServerSideSessionStore
             return;
         }
 
-        Context.ServerSideSessions.Remove(entity);
-
         try
         {
-            await Context.SaveChangesAsync(ct);
+            await Context.ServerSideSessions.Where(x => x.Id == entity.Id).ExecuteDeleteAsync(ct);
             Log.DeletedServerSideSessionValueInDatabase(Logger, key);
         }
-        catch (DbUpdateException ex)
+        catch (DbException ex)
         {
             Log.ExceptionDeletingServerSideSessionValueInDatabase(Logger, key, ex.Message);
         }
@@ -197,6 +210,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             Renewed = entity.Renewed,
             Expires = entity.Expires,
             Ticket = entity.Data,
+            Version = entity.Version,
         }).ToArray();
 
         Log.FoundValueServerSideSessionsForValue(Logger, results.Length, filter);
@@ -215,14 +229,14 @@ public class ServerSideSessionStore : IServerSideSessionStore
             .ToArrayAsync(ct);
         entities = Filter(entities.AsQueryable(), filter).ToArray();
 
-        Context.ServerSideSessions.RemoveRange(entities);
+        var sessionRowIdsToDelete = entities.Select(x => x.Id).ToArray();
 
         try
         {
-            await Context.SaveChangesAsync(ct);
+            await Context.ServerSideSessions.Where(x => sessionRowIdsToDelete.Contains(x.Id)).ExecuteDeleteAsync(ct);
             Log.RemovedValueServerSideSessionsFromDatabaseFor(Logger, entities.Length, filter);
         }
-        catch (DbUpdateException ex)
+        catch (DbException ex)
         {
             Log.ErrorRemovingValueServerSideSessionsFromDatabase(Logger, entities.Length, filter, ex.Message);
         }
@@ -248,23 +262,35 @@ public class ServerSideSessionStore : IServerSideSessionStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideSessionStore.GetAndRemoveExpiredSessions");
 
+        var now = TimeProvider.GetUtcNow().UtcDateTime;
         var entities = await Context.ServerSideSessions
-                            .Where(x => x.Expires < TimeProvider.GetUtcNow().UtcDateTime)
+                            .AsNoTracking()
+                            .Where(x => x.Expires < now)
                             .OrderBy(x => x.Id)
                             .Take(count)
                             .ToArrayAsync(ct);
 
+        // The deletes run in one transaction, so a failure part way through deletes nothing: a session that is
+        // deleted but not returned would never get its expiration processing (logout, token revocation).
+        // A transaction the caller already started is used as is; otherwise the execution strategy runs it,
+        // because a retrying strategy (EnableRetryOnFailure) refuses a transaction started outside it.
+        var database = ((DbContext)Context).Database;
+        var removed = database.CurrentTransaction != null
+            ? await DeleteStillExpiredAsync(entities, now, ct)
+            : await database.CreateExecutionStrategy().ExecuteAsync(async (Ct attemptCt) =>
+            {
+                await using var tx = await database.BeginTransactionAsync(attemptCt);
+                var deleted = await DeleteStillExpiredAsync(entities, now, attemptCt);
+                await tx.CommitAsync(attemptCt);
+                return deleted;
+            }, ct);
+
         if (entities.Length > 0)
         {
-            Context.ServerSideSessions.RemoveRange(entities);
-
-            var list = await Context.SaveChangesWithConcurrencyCheckAsync<Entities.ServerSideSession>(Logger, ct);
-            entities = entities.Except(list).ToArray();
-
-            Log.FoundAndRemovedValueExpiredServerSideSessions(Logger, entities.Length);
+            Log.FoundAndRemovedValueExpiredServerSideSessions(Logger, removed.Count);
         }
 
-        var results = entities.Select(entity => new ServerSideSession
+        var results = removed.Select(entity => new ServerSideSession
         {
             Key = entity.Key,
             Scheme = entity.Scheme,
@@ -278,6 +304,26 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }).ToArray();
 
         return results;
+    }
+
+    // Deletes each session only while it is still expired, so a session renewed since it was selected stays,
+    // and returns the sessions it deleted.
+    private async Task<List<Entities.ServerSideSession>> DeleteStillExpiredAsync(Entities.ServerSideSession[] entities, DateTime now, Ct ct)
+    {
+        var removed = new List<Entities.ServerSideSession>(entities.Length);
+        foreach (var entity in entities)
+        {
+            var deleted = await Context.ServerSideSessions
+                .Where(x => x.Id == entity.Id && x.Expires < now)
+                .ExecuteDeleteAsync(ct);
+
+            if (deleted > 0)
+            {
+                removed.Add(entity);
+            }
+        }
+
+        return removed;
     }
 
     /// <inheritdoc/>

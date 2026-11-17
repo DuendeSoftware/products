@@ -15,6 +15,11 @@ namespace Duende.IdentityServer.Stores;
 /// Keys are stored as <see cref="SerializedKey"/> objects whose <c>Data</c> property
 /// contains the authoritative, optionally data-protected, serialized key material.
 /// </summary>
+/// <remarks>
+/// When Spaces is used, IdentityServer caches keys and synchronizes their creation per Space, and treats
+/// work that runs without a Space as the Default Space. A store that keeps keys per Space must therefore
+/// return the Default Space's keys when no Space is set, as Spaces-aware storage does.
+/// </remarks>
 public interface ISigningKeyStore
 {
     /// <summary>

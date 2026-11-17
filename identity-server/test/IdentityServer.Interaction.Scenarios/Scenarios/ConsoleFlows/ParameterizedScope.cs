@@ -33,7 +33,7 @@ public sealed class ParameterizedScope : IScenario
     public string Description => "Client credentials flow: request a parameterized scope and expose its value as a token claim";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         _identityServer = new IdentityServerTestHost(
             configurator,
@@ -65,7 +65,7 @@ public sealed class ParameterizedScope : IScenario
         Links = [_identityServer.Link, _api.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {
@@ -176,7 +176,7 @@ public sealed class ScenarioParameterizedScopeParser(ILogger<DefaultScopeParser>
 
 public sealed class ScenarioParameterizedScopeTokenRequestValidator : ICustomTokenRequestValidator
 {
-    public Task ValidateAsync(CustomTokenRequestValidationContext context, CancellationToken ct)
+    public Task ValidateAsync(CustomTokenRequestValidationContext context, Ct ct)
     {
         ArgumentNullException.ThrowIfNull(context);
         var transaction = context.Result?.ValidatedRequest.ValidatedResources.ParsedScopes

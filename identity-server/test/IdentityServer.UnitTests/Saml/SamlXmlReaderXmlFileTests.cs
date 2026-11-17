@@ -22,7 +22,7 @@ public sealed class SamlXmlReaderXmlFileTests
     {
         var traverser = XmlTestData.GetXmlTraverser<SamlXmlReaderXmlFileTests>();
 
-        var result = await _reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await _reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Id.ShouldBe("x123");
         result.Version.ShouldBe("2.0");
@@ -35,7 +35,7 @@ public sealed class SamlXmlReaderXmlFileTests
     {
         var traverser = XmlTestData.GetXmlTraverser<SamlXmlReaderXmlFileTests>();
 
-        var result = await _reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None);
+        var result = await _reader.ReadAuthnRequestAsync(traverser, null, Ct.None);
 
         result.Id.ShouldBe("x123");
         result.IssueInstant.ShouldBe(new DateTimeUtc(2023, 11, 24, 22, 44, 14));
@@ -97,7 +97,7 @@ public sealed class SamlXmlReaderXmlFileTests
             }
         };
 
-        await _reader.ReadAuthnRequestAsync(traverser, errorInspector, CancellationToken.None);
+        await _reader.ReadAuthnRequestAsync(traverser, errorInspector, Ct.None);
 
         capturedContext.ShouldNotBeNull();
         capturedContext!.Errors.Count.ShouldBeGreaterThan(0);
@@ -111,7 +111,7 @@ public sealed class SamlXmlReaderXmlFileTests
         var traverser = XmlTestData.GetXmlTraverser<SamlXmlReaderXmlFileTests>();
 
         var ex = await Should.ThrowAsync<SamlXmlException>(
-            _reader.ReadAuthnRequestAsync(traverser, null, CancellationToken.None));
+            _reader.ReadAuthnRequestAsync(traverser, null, Ct.None));
 
         ex.Message.ShouldContain("Version");
     }

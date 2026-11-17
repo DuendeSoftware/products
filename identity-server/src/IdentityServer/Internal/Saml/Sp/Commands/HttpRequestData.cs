@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 using System.Collections.ObjectModel;
 using System.Security.Claims;
+using Duende.IdentityServer.Internal.Saml.Sp.Exceptions;
 using Duende.IdentityServer.Internal.Saml.Sp.Helpers;
 namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
 {
@@ -122,7 +123,13 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
             InitBasicFields(httpMethod, url, applicationPath, formData);
             User = user;
 
-            var relayState = QueryString["RelayState"].SingleOrDefault();
+            var relayStates = QueryString["RelayState"].ToList();
+            if (relayStates.Count > 1)
+            {
+                throw new BadFormatSamlResponseException("The request has more than one RelayState query parameter.");
+            }
+
+            var relayState = relayStates.SingleOrDefault();
             if (relayState == null)
             {
                 Form.TryGetValue("RelayState", out relayState);
@@ -223,5 +230,10 @@ namespace Duende.IdentityServer.Internal.Saml.Sp.Commands
         /// User (if any) associated with the request
         /// </summary>
         public ClaimsPrincipal User { get; set; }
+
+        /// <summary>
+        /// Authentication scheme that received the request
+        /// </summary>
+        public string SchemeName { get; set; }
     }
 }

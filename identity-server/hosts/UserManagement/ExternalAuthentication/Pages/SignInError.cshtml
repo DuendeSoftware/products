@@ -1,0 +1,28 @@
+@page
+@model ExternalAuthentication.Pages.SignInErrorModel
+@{
+    ViewData["Title"] = "Sign-in Error";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Sign-in Error</h2>
+
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>@Model.ErrorTitle</strong>
+                <p class="mb-0 mt-2">@Model.ErrorMessage</p>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a asp-page="/Login" class="btn btn-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Try Again
+                </a>
+                <a asp-page="/Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-house me-2"></i>Go to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

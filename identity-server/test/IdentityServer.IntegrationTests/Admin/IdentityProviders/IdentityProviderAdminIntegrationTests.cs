@@ -10,7 +10,7 @@ using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.AspNetCore.Authentication;

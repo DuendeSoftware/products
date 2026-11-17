@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "All": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile All",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "AuthenticationFlowWithWebComponent": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile AuthenticationFlowWithWebComponent",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "ExternalAuthentication": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile ExternalAuthentication",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "OtpAuthentication": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile OtpAuthentication",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "PasskeyAuthentication": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile PasskeyAuthentication",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "PasskeyAuthenticationAs2FA": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile PasskeyAuthenticationAs2FA",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "PasskeyAuthenticationSdk": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile PasskeyAuthenticationSdk",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "OtpIdentityServer": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile OtpIdentityServer",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "TotpAuthentication": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile TotpAuthentication",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "MfaStepUp": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile MfaStepUp",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    },
+    "UserManagement": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17000;http://localhost:15099",
+      "commandLineArgs": "--profile UserManagement",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21299",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22131"
+      }
+    }
+  }
+}

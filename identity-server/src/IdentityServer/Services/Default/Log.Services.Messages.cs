@@ -444,6 +444,12 @@ internal static partial class Log
 
     [LoggerMessage(
         LogLevel.Debug,
+        EventName = nameof(DueToSessionReplacementRemovingTokensForSubject),
+        Message = "Due to session replacement, removing tokens for subject id {SubjectId} and session id {SessionId} for clients {ClientIds}")]
+    internal static partial void DueToSessionReplacementRemovingTokensForSubject(this ILogger logger, object subjectId, object sessionId, object clientIds);
+
+    [LoggerMessage(
+        LogLevel.Debug,
         EventName = nameof(DueToExpiredSessionInvokingBackchannelLogoutFor),
         Message = "Due to expired session, invoking backchannel logout for subject id {SubjectId} and session id {SessionId}")]
     internal static partial void DueToExpiredSessionInvokingBackchannelLogoutFor(this ILogger logger, object subjectId, object sessionId);

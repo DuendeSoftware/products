@@ -4,7 +4,7 @@
 #nullable enable
 
 using System.Diagnostics.CodeAnalysis;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace Duende.IdentityServer.IntegrationTests.Admin;
 

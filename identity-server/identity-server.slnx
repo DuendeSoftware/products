@@ -25,6 +25,22 @@
     <Project Path="hosts/UI/AspNetIdentity/UI.AspNetIdentity.csproj" />
     <Project Path="hosts/UI/EntityFramework/UI.EntityFramework.csproj" />
     <Project Path="hosts/UI/Main/UI.Main.csproj" />
+    <Project Path="hosts/UserManagement/AspNetIdentityApp/AspNetIdentityApp.csproj" />
+    <Project Path="hosts/UserManagement/ExternalAuthentication/ExternalAuthentication.csproj" />
+    <Project Path="hosts/UserManagement/MfaStepUp/MfaStepUp.csproj" />
+    <Project Path="hosts/UserManagement/OtpAuthentication/OtpAuthentication.csproj" />
+    <Project Path="hosts/UserManagement/OtpIdentityServer/OtpIdentityServer.csproj" />
+    <Project Path="hosts/UserManagement/PasskeyAuthentication.Sdk/PasskeyAuthentication.Sdk.csproj" />
+    <Project Path="hosts/UserManagement/PasskeyAuthentication/PasskeyAuthentication.csproj" />
+    <Project Path="hosts/UserManagement/PasskeyAuthenticationAs2FA/PasskeyAuthenticationAs2FA.csproj" />
+    <Project Path="hosts/UserManagement/PasswordValidation/PasswordValidation.csproj" />
+    <Project Path="hosts/UserManagement/PlatformUserManagementApp/PlatformUserManagementApp.csproj" />
+    <Project Path="hosts/UserManagement/ScimDev/ScimDev.csproj" />
+    <Project Path="hosts/UserManagement/SimpleWebApp/SimpleWebApp.csproj" />
+    <Project Path="hosts/UserManagement/TotpAuthentication/TotpAuthentication.csproj" />
+    <Project Path="hosts/UserManagement/UserManagementSamples/UserManagementSamples.csproj" />
+    <Project Path="hosts/UserManagement/UserSearch/UserSearch.csproj" />
+    <Project Path="hosts/UserManagement/WebComponent/AuthenticationFlowWithWebComponent/AuthenticationFlowWithWebComponent.csproj" />
   </Folder>
   <Folder Name="/migrations/">
     <Project Path="migrations/AspNetIdentityDb/AspNetIdentityDb.csproj" />
@@ -64,6 +80,15 @@
     <Project Path="test/IdentityServer.Interaction.Scenarios/IdentityServer.Interaction.Scenarios.csproj" />
     <Project Path="test/IdentityServer.Interaction.Tests/IdentityServer.Interaction.Tests.csproj" />
     <Project Path="test/IdentityServer.Interaction.UI/IdentityServer.Interaction.UI.csproj" />
+    <Project Path="test/IdentityServer.OutsideIn.Harness/IdentityServer.OutsideIn.Harness.csproj" />
+    <Project Path="test/IdentityServer.OutsideIn.Tests/IdentityServer.OutsideIn.Tests.csproj" />
     <Project Path="test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
+    <Project Path="test/Spaces.Tests/Spaces.Tests.csproj" />
+    <Project Path="test/UserManagement.IdentityServer.Tests/UserManagement.IdentityServer.Tests.csproj" />
+    <Project Path="test/UserManagement.Tests.Internal/UserManagement.Tests.Internal.csproj" />
+    <Project Path="test/UserManagement.Tests.Public/UserManagement.Tests.Public.csproj" />
+  </Folder>
+  <Folder Name="/testing/">
+    <Project Path="testing/UserManagement.TestInfrastructure/UserManagement.TestInfrastructure.csproj" />
   </Folder>
 </Solution>

@@ -18,4 +18,5 @@ public class ServerSideSession
     public DateTime Renewed { get; set; }
     public DateTime? Expires { get; set; }
     public string Data { get; set; }
+    public int Version { get; set; }
 }

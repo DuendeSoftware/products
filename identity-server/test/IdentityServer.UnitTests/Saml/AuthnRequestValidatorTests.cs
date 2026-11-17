@@ -34,7 +34,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(version: "2.0");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -46,7 +46,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(version: "1.1");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.VersionMismatch);
@@ -61,7 +61,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(timeProvider: timeProvider);
         var request = CreateValidatedAuthnRequest(issueInstant: now.UtcDateTime);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -77,7 +77,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(timeProvider: timeProvider, samlOptions: samlOptions);
         var request = CreateValidatedAuthnRequest(issueInstant: now.UtcDateTime.Add(clockSkew).AddSeconds(1));
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -95,7 +95,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(timeProvider: timeProvider, samlOptions: samlOptions);
         var request = CreateValidatedAuthnRequest(issueInstant: now.UtcDateTime.Add(-maxAge).AddSeconds(-1));
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -113,7 +113,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(timeProvider: timeProvider, samlOptions: samlOptions);
         var request = CreateValidatedAuthnRequest(issueInstant: now.UtcDateTime.Add(clockSkew));
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -146,7 +146,7 @@ public sealed class AuthnRequestValidatorTests
         var request = CreateValidatedAuthnRequest(
             issueInstant: now.UtcDateTime.Add(defaultClockSkew).AddMinutes(1));
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -179,7 +179,7 @@ public sealed class AuthnRequestValidatorTests
         var request = CreateValidatedAuthnRequest(
             issueInstant: now.UtcDateTime.Add(-defaultMaxAge).AddMinutes(-1));
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -191,7 +191,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(destination: null);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -218,7 +218,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(destination: null, trustLevel: TrustLevel.ConfiguredKey);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -232,7 +232,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(destination: ExpectedDestination);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -244,7 +244,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(destination: "https://evil.example.com/Saml2/SSO");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -258,7 +258,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(destination: "https://evil.example.com/Saml2/SSO");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.ErrorDescription!.ShouldNotContain(IdpOrigin);
@@ -271,7 +271,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(acsUrl: "https://sp.example.com/acs");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldNotBeNull();
@@ -285,7 +285,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(acsUrl: "https://evil.example.com/acs");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -299,7 +299,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(acsUrl: "not-a-valid-uri");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -330,7 +330,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(firstUrl);
@@ -343,7 +343,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(acsUrl: "https://evil.example.com/acs");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.ErrorDescription!.ShouldNotContain("evil.example.com");
@@ -366,7 +366,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(acsUrl: "https://sp.example.com/acs", acsIndex: 0);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -382,7 +382,7 @@ public sealed class AuthnRequestValidatorTests
             acsUrl: "https://sp.example.com/acs",
             protocolBinding: SamlBinding.HttpPost);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldNotBeNull();
@@ -397,7 +397,7 @@ public sealed class AuthnRequestValidatorTests
             acsUrl: "https://sp.example.com/acs",
             protocolBinding: SamlBinding.HttpRedirect);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldNotBeNull();
@@ -411,7 +411,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(acsUrl: "https://sp.example.com/acs");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -436,7 +436,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(acsIndex: 3);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(acs);
@@ -449,7 +449,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(acsIndex: 99);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -483,7 +483,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(defaultAcs);
@@ -517,7 +517,7 @@ public sealed class AuthnRequestValidatorTests
             acsUrl: "https://sp.example.com/acs",
             protocolBinding: SamlBinding.HttpRedirect);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(redirectAcs);
@@ -550,7 +550,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(acsUrl: "https://sp.example.com/acs");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(redirectAcs);
@@ -582,7 +582,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(acsUrl: "https://sp.example.com/acs");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(postAcs);
@@ -619,7 +619,7 @@ public sealed class AuthnRequestValidatorTests
         // because ToUrn() throws for unknown SamlBinding values.
         request.AuthnRequest!.ProtocolBinding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact";
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.AssertionConsumerService.ShouldBe(redirectAcs);
@@ -648,7 +648,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.ConfiguredKey);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -675,7 +675,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.None);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -704,7 +704,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.TLS);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -733,7 +733,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.None);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -760,7 +760,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.None);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.ErrorDescription.ShouldBe("The AuthnRequest signature is missing or not trusted");
@@ -788,7 +788,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, wantAuthnRequestsSigned: true);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.None);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.ErrorDescription.ShouldBe("The AuthnRequest signature is missing or not trusted");
@@ -816,7 +816,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, wantAuthnRequestsSigned: true);
         var request = CreateValidatedAuthnRequest(trustLevel: TrustLevel.None);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -828,7 +828,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -841,7 +841,7 @@ public sealed class AuthnRequestValidatorTests
         var request = CreateValidatedAuthnRequest(
             nameIdPolicy: new SamlpNs.NameIdPolicy { Format = SamlConstants.NameIdentifierFormats.EmailAddress });
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -854,7 +854,7 @@ public sealed class AuthnRequestValidatorTests
         var request = CreateValidatedAuthnRequest(
             nameIdPolicy: new SamlpNs.NameIdPolicy { Format = "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName" });
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -867,7 +867,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -879,7 +879,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedAuthnRequest(scoping: new SamlpNs.Scoping());
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -902,7 +902,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Responder);
@@ -927,7 +927,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, resourceStore: resourceStore);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.ValidatedResources.ShouldNotBeNull();
@@ -953,7 +953,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, resourceStore: resourceStore);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Responder);
@@ -979,7 +979,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, resourceStore: resourceStore);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.RequestedClaimTypes.ShouldBe(["name"]);
@@ -1004,7 +1004,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, resourceStore: resourceStore);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.RequestedClaimTypes.ShouldContain("name");
@@ -1032,7 +1032,7 @@ public sealed class AuthnRequestValidatorTests
         var validator = CreateValidator(sp: sp, resourceStore: resourceStore);
         var request = CreateValidatedAuthnRequest();
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Responder);

@@ -3,6 +3,7 @@
 
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
@@ -98,11 +99,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 var client = await ClientStore.FindClientByIdAsync(clientId, ct); // i don't think we care if it's an enabled client at this point
                 if (client != null)
                 {
-                    var shouldCoordinate =
-                        client.CoordinateLifetimeWithUserSession == true ||
-                        (Options.Authentication.CoordinateClientLifetimesWithUserSession && client.CoordinateLifetimeWithUserSession != false);
-
-                    if (shouldCoordinate)
+                    if (client.ShouldCoordinateLifetimeWithUserSession(Options))
                     {
                         clientsToCoordinate.Add(clientId);
                     }
@@ -149,11 +146,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
             if (client != null)
             {
-                var shouldCoordinate =
-                    client.CoordinateLifetimeWithUserSession == true ||
-                    (Options.Authentication.CoordinateClientLifetimesWithUserSession && client.CoordinateLifetimeWithUserSession != false);
-
-                if (shouldCoordinate)
+                if (client.ShouldCoordinateLifetimeWithUserSession(Options))
                 {
                     // this implies they should also be contacted for backchannel logout below
                     clientsToCoordinate.Add(clientId);
@@ -205,11 +198,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     {
         if (ServerSideSessionStore != null)
         {
-            var shouldCoordinate =
-                request.Client.CoordinateLifetimeWithUserSession == true ||
-                (Options.Authentication.CoordinateClientLifetimesWithUserSession && request.Client.CoordinateLifetimeWithUserSession != false);
-
-            if (shouldCoordinate)
+            if (request.Client.ShouldCoordinateLifetimeWithUserSession(Options))
             {
                 var sessions = await ServerSideSessionStore.GetSessionsAsync(new SessionFilter
                 {
@@ -252,12 +241,19 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                             ticket.Properties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, string.Empty);
                             ticket.Properties.IssuedUtc = session.Renewed;
                             ticket.Properties.ExpiresUtc = session.Expires;
-                            await ServerSideTicketStore.RenewAsync(session.Key, ticket);
+                            try
+                            {
+                                await ServerSideTicketStore.RenewAsync(session.Key, ticket);
+                            }
+                            catch (ServerSideSessionConflictException)
+                            {
+                                // the session was saved after it was read; skip this extension, the next token call extends it again
+                            }
 #pragma warning restore CA2016
                         }
                         else
                         {
-                            await ServerSideSessionStore.UpdateSessionAsync(session, ct);
+                            _ = await ServerSideSessionStore.UpdateSessionAsync(session, ct);
                         }
                     }
                 }

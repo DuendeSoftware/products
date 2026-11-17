@@ -11,6 +11,7 @@ using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Stores;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -56,6 +57,12 @@ public sealed class ApiResourceAdminAuthenticationFixture : IAsyncLifetime
             services =>
             {
                 services.AddRouting();
+
+                services.AddAuthentication().AddCertificate(options =>
+                {
+                    options.AllowedCertificateTypes = CertificateTypes.SelfSigned;
+                    options.RevocationMode = X509RevocationMode.NoCheck;
+                });
 
                 services.AddIdentityServer(options =>
                     {

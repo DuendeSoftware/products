@@ -24,6 +24,11 @@ internal static class SecureXmlParser
     internal const int DefaultMaxMessageSize = 1_048_576; // 1MB
 
     /// <summary>
+    /// Default maximum element nesting depth for SAML messages. The root element is depth 0.
+    /// </summary>
+    internal const int DefaultMaxNestingDepth = 32;
+
+    /// <summary>
     /// Creates secure XML reader settings configured to prevent common XML attacks.
     /// </summary>
     private static XmlReaderSettings CreateSecureSettings(int maxMessageSize) => new()
@@ -175,9 +180,9 @@ internal static class SecureXmlParser
     }
 
     internal static XmlDocument LoadXmlDocument(string xml)
-        => LoadXmlDocument(xml, DefaultMaxMessageSize);
+        => LoadXmlDocument(xml, DefaultMaxMessageSize, DefaultMaxNestingDepth);
 
-    internal static XmlDocument LoadXmlDocument(string xml, int maxMessageSize)
+    internal static XmlDocument LoadXmlDocument(string xml, int maxMessageSize, int maxNestingDepth)
     {
         if (string.IsNullOrEmpty(xml))
         {
@@ -193,6 +198,8 @@ internal static class SecureXmlParser
 
         try
         {
+            EnsureNestingDepthWithinLimit(xml, maxMessageSize, maxNestingDepth);
+
             using var stringReader = new StringReader(xml);
             using var xmlReader = XmlReader.Create(stringReader, CreateSecureSettings(maxMessageSize));
 
@@ -207,6 +214,24 @@ internal static class SecureXmlParser
                 "Failed to parse XML document with secure settings. " +
                 "The document may contain prohibited constructs (DTD, external entities) or be malformed.",
                 ex);
+        }
+    }
+
+    // Scans the document before it is loaded so the loaded document is produced exactly as before.
+    // The root element is depth 0 and only element start tags are checked, so text, whitespace,
+    // comments and attributes inside the deepest allowed element are accepted.
+    private static void EnsureNestingDepthWithinLimit(string xml, int maxMessageSize, int maxNestingDepth)
+    {
+        using var stringReader = new StringReader(xml);
+        using var xmlReader = XmlReader.Create(stringReader, CreateSecureSettings(maxMessageSize));
+
+        while (xmlReader.Read())
+        {
+            if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Depth > maxNestingDepth)
+            {
+                throw new XmlException(
+                    $"XML document exceeds the maximum element nesting depth of {maxNestingDepth}.");
+            }
         }
     }
 }

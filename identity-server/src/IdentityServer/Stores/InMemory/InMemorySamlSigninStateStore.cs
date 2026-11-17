@@ -11,11 +11,43 @@ namespace Duende.IdentityServer.Stores;
 /// <summary>
 /// In-memory implementation of <see cref="ISamlSigninStateStore"/>.
 /// </summary>
-public sealed class InMemorySamlSigninStateStore(
-    TimeProvider timeProvider,
-    ILogger<InMemorySamlSigninStateStore> logger) : ISamlSigninStateStore
+public sealed class InMemorySamlSigninStateStore : ISamlSigninStateStore
 {
-    private readonly ConcurrentDictionary<Guid, SamlAuthenticationState> _store = new();
+    private readonly TimeProvider _timeProvider;
+    private readonly ILogger<InMemorySamlSigninStateStore> _logger;
+    private readonly PartitionedState<SamlSigninState> _state;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemorySamlSigninStateStore"/> class.
+    /// </summary>
+    /// <param name="timeProvider">The time provider.</param>
+    /// <param name="logger">The logger.</param>
+    /// <remarks>
+    /// This overload holds a single partition and isn't split by space; to partition by space use
+    /// <see cref="InMemorySamlSigninStateStore(TimeProvider, ILogger{InMemorySamlSigninStateStore}, InMemoryStoreState)"/>.
+    /// </remarks>
+    public InMemorySamlSigninStateStore(TimeProvider timeProvider, ILogger<InMemorySamlSigninStateStore> logger)
+        : this(timeProvider, logger, new InMemoryStoreState())
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemorySamlSigninStateStore"/> class
+    /// that partitions its data using the given state source.
+    /// </summary>
+    /// <param name="timeProvider">The time provider.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="state">The state source, which decides how data is partitioned.</param>
+    public InMemorySamlSigninStateStore(
+        TimeProvider timeProvider,
+        ILogger<InMemorySamlSigninStateStore> logger,
+        InMemoryStoreState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        _timeProvider = timeProvider;
+        _logger = logger;
+        _state = new(state.CurrentSpace);
+    }
 
     /// <inheritdoc/>
     public Task<Guid> StoreSigninRequestStateAsync(SamlAuthenticationState state, Ct ct)
@@ -26,22 +58,29 @@ public sealed class InMemorySamlSigninStateStore(
         }
 
         var id = Guid.NewGuid();
-        _store[id] = state;
+        _state.Current.Items[id] = state;
         return Task.FromResult(id);
     }
 
     /// <inheritdoc/>
     public Task<SamlAuthenticationState?> RetrieveSigninRequestStateAsync(Guid stateId, Ct ct)
     {
-        if (!_store.TryGetValue(stateId, out var state))
+        if (!_state.TryGetCurrent(out var current))
+        {
+            return Task.FromResult<SamlAuthenticationState?>(null);
+        }
+
+        var items = current.Items;
+
+        if (!items.TryGetValue(stateId, out var state))
         {
             return Task.FromResult<SamlAuthenticationState?>(null);
         }
 
         // Enforce TTL — return null for expired state (same as not found)
-        if (timeProvider.GetUtcNow().UtcDateTime > state.ExpiresAtUtc)
+        if (_timeProvider.GetUtcNow().UtcDateTime > state.ExpiresAtUtc)
         {
-            _store.TryRemove(stateId, out _);
+            items.TryRemove(stateId, out _);
             return Task.FromResult<SamlAuthenticationState?>(null);
         }
 
@@ -51,28 +90,45 @@ public sealed class InMemorySamlSigninStateStore(
     /// <inheritdoc/>
     public Task RemoveSigninRequestStateAsync(Guid stateId, Ct ct)
     {
-        _store.TryRemove(stateId, out _);
+        if (_state.TryGetCurrent(out var current))
+        {
+            current.Items.TryRemove(stateId, out _);
+        }
+
         return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
     public Task UpdateSigninRequestStateAsync(Guid stateId, SamlAuthenticationState state, Ct ct)
     {
-        if (!_store.TryGetValue(stateId, out var existing))
+        if (!_state.TryGetCurrent(out var current))
         {
-            logger.SAMLSigninStateStateIdNotFoundForUpdate(stateId);
+            _logger.SAMLSigninStateStateIdNotFoundForUpdate(stateId);
+            return Task.CompletedTask;
+        }
+
+        var items = current.Items;
+
+        if (!items.TryGetValue(stateId, out var existing))
+        {
+            _logger.SAMLSigninStateStateIdNotFoundForUpdate(stateId);
             return Task.CompletedTask;
         }
 
         // Enforce TTL — do not update expired state
-        if (timeProvider.GetUtcNow().UtcDateTime > existing.ExpiresAtUtc)
+        if (_timeProvider.GetUtcNow().UtcDateTime > existing.ExpiresAtUtc)
         {
-            _store.TryRemove(stateId, out _);
-            logger.SAMLSigninStateStateIdExpiredCannotUpdate(stateId);
+            items.TryRemove(stateId, out _);
+            _logger.SAMLSigninStateStateIdExpiredCannotUpdate(stateId);
             return Task.CompletedTask;
         }
 
-        _store[stateId] = state;
+        items[stateId] = state;
         return Task.CompletedTask;
     }
+}
+
+internal sealed class SamlSigninState
+{
+    public ConcurrentDictionary<Guid, SamlAuthenticationState> Items { get; } = new();
 }

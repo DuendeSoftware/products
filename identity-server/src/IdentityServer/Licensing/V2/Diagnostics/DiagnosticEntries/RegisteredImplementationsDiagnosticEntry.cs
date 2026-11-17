@@ -42,11 +42,6 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
             ]
         },
         {
-            "Infrastructure", [
-                new(typeof(IConcurrencyLock<>), [typeof(DefaultConcurrencyLock<>)]),
-            ]
-        },
-        {
             "ResponseHandling", [
                 new(typeof(IAuthorizeInteractionResponseGenerator), [typeof(AuthorizeInteractionResponseGenerator)]),
                 new(typeof(IAuthorizeResponseGenerator), [typeof(AuthorizeResponseGenerator)]),
@@ -104,7 +99,10 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IIdentityServerInteractionService), [typeof(DefaultIdentityServerInteractionService)]),
                 new(typeof(IIssuerNameService), [typeof(DefaultIssuerNameService)]),
                 new(typeof(IJwtRequestUriHttpClient), [typeof(DefaultJwtRequestUriHttpClient)]),
-                new(typeof(IKeyManager), [typeof(KeyManager)]),
+#pragma warning disable CS0618 // IConcurrencyLock<T> is obsolete but still tracked for registrations of the obsolete type
+                new(typeof(IConcurrencyLock<>), [typeof(DefaultConcurrencyLock<>)]),
+#pragma warning restore CS0618
+                new(typeof(IKeyManager), [typeof(DistributedKeyManager)]),
                 new(typeof(IKeyMaterialService), [typeof(DefaultKeyMaterialService)]),
                 new(typeof(ILogoutNotificationService), [typeof(LogoutNotificationService)]),
                 new(typeof(IPersistedGrantService), [typeof(DefaultPersistedGrantService)]),
@@ -117,6 +115,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IServerUrls), [typeof(DefaultServerUrls)]),
                 new(typeof(ISessionCoordinationService), [typeof(DefaultSessionCoordinationService)]),
                 new(typeof(ISessionManagementService), []),
+                new(typeof(ISessionReplacementService), [typeof(DefaultSessionReplacementService)]),
                 new(typeof(ISigningKeyProtector), [typeof(DataProtectionKeyProtector)]),
                 new(typeof(ISigningKeyStoreCache), [typeof(InMemoryKeyStoreCache)]),
                 new(typeof(ITokenCreationService), [typeof(DefaultTokenCreationService)]),
@@ -160,6 +159,9 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(ISigningKeyStore), [typeof(FileSystemKeyStore)]),
                 new(typeof(IUserConsentStore), [typeof(DefaultUserConsentStore)]),
                 new(typeof(IValidationKeysStore), []),
+                new(typeof(Duende.IdentityServer.DataExtensions.ISchemaAdmin), [typeof(Duende.IdentityServer.DataExtensions.Internal.StorageSchemaAdmin)]),
+                new(typeof(Duende.IdentityServer.DataExtensions.ISchemaStore), [typeof(Duende.IdentityServer.DataExtensions.InMemorySchemaStore)]),
+                new(typeof(Duende.IdentityServer.DataExtensions.IReadOnlyAttributeSchema), []),
             ]
         },
         {

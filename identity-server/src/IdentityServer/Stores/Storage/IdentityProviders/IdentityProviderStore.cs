@@ -5,8 +5,6 @@
 
 using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Models;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores.Storage.IdentityProviders;
@@ -29,8 +27,8 @@ internal sealed class IdentityProviderStore(
 
         while (true)
         {
-            var range = DataRange.FromPage(pageNumber, PageSize);
-            var request = QueryRequest.Create<IdentityProviderFilter, IdentityProviderSortField>(range);
+            var range = StorageDataRange.FromPage(pageNumber, PageSize);
+            var request = StorageQueryRequest.Create<IdentityProviderFilter, IdentityProviderSortField>(range);
             var result = await repository.QueryAsync(request, ct);
 
             foreach (var dso in result.Items)

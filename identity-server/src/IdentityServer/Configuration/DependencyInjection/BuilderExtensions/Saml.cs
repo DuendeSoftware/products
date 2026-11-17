@@ -40,7 +40,7 @@ public static class IdentityServerBuilderExtensionsSaml
         /// Registers all SAML services and endpoints, and enables the SAML endpoints
         /// in <see cref="EndpointsOptions"/>.
         /// </remarks>
-        /// <returns></returns>
+        /// <returns>The builder, to allow chaining.</returns>
         public IIdentityServerBuilder AddSaml() =>
             builder.AddSaml(_ => { });
 
@@ -49,7 +49,7 @@ public static class IdentityServerBuilderExtensionsSaml
         /// </summary>
         /// <param name="configureSaml">Action to configure SAML options. Endpoint paths configured here
         /// are used for routing registration.</param>
-        /// <returns></returns>
+        /// <returns>The builder, to allow chaining.</returns>
         public IIdentityServerBuilder AddSaml(Action<SamlOptions> configureSaml)
         {
             ArgumentNullException.ThrowIfNull(builder);
@@ -141,7 +141,7 @@ public static class IdentityServerBuilderExtensionsSaml
         /// service provider configuration on load using the registered <see cref="ISamlServiceProviderConfigurationValidator"/>.
         /// </summary>
         /// <typeparam name="T">The type of the <see cref="ISamlServiceProviderStore"/> implementation.</typeparam>
-        /// <returns></returns>
+        /// <returns>The builder, to allow chaining.</returns>
         public IIdentityServerBuilder AddSamlServiceProviderStore<T>()
             where T : class, ISamlServiceProviderStore
         {
@@ -152,11 +152,12 @@ public static class IdentityServerBuilderExtensionsSaml
 
         /// <summary>
         /// Registers a caching decorator around a custom <see cref="ISamlServiceProviderStore"/> implementation.
-        /// The decorator maintains an in-memory cache of <c>SamlServiceProvider</c> configuration objects to reduce
-        /// repeated store lookups. Cache duration is configurable via <see cref="IdentityServerOptions.Caching"/>.
+        /// The decorator caches <c>SamlServiceProvider</c> configuration objects in a <c>HybridCache</c> to reduce
+        /// repeated store lookups. The cache duration is configured with
+        /// <see cref="CachingOptions.SamlServiceProviderStoreExpiration"/> on <see cref="IdentityServerOptions.Caching"/>.
         /// </summary>
         /// <typeparam name="T">The type of the concrete service provider store class that is registered in DI.</typeparam>
-        /// <returns></returns>
+        /// <returns>The builder, to allow chaining.</returns>
         public IIdentityServerBuilder AddSamlServiceProviderStoreCache<T>()
             where T : class, ISamlServiceProviderStore
         {

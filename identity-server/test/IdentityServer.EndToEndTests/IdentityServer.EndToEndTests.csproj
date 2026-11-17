@@ -27,4 +27,14 @@
     <ProjectReference Include="..\..\aspire\AppHosts\All\All.csproj" />
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\templates\src\UI\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.Template.UI.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\templates\src\IdentityServer\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.Template.IdentityServer.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\templates\src\IdentityServerAspNetIdentity\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.Template.IdentityServerAspNetIdentity.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\templates\src\IdentityServerEntityFramework\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.Template.IdentityServerEntityFramework.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\templates\src\IdentityServerInMem\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.Template.IdentityServerInMem.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\hosts\UI\Main\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.Host.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\test\IdentityServer.Interaction.UI\IdentityServerHost\wwwroot\js\signin-redirect.js" LogicalName="RedirectScripts.TestHost.signin-redirect.js" />
+    <EmbeddedResource Include="..\..\src\IdentityServer\Hosting\FederatedSignOut\federated-signout.js" />
+  </ItemGroup>
 </Project>

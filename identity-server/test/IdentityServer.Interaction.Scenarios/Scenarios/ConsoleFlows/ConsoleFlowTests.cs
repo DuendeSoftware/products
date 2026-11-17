@@ -55,7 +55,7 @@ public sealed class ConsoleFlowTests
         var scenario = (IScenario)Activator.CreateInstance(scenarioType)!;
 
         var configurator = new MinimalConfigurator();
-        await scenario.StartAsync(configurator, CancellationToken.None);
+        await scenario.StartAsync(configurator, Ct.None);
 
         try
         {
@@ -73,7 +73,7 @@ public sealed class ConsoleFlowTests
         }
         finally
         {
-            await scenario.StopAsync(CancellationToken.None);
+            await scenario.StopAsync(Ct.None);
         }
     }
 

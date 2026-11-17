@@ -8,13 +8,16 @@ using System.Net;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
+using Duende.IdentityServer.DataExtensions;
 using Duende.IdentityServer.Endpoints;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
+using Duende.IdentityServer.Hosting.DynamicProviders.Store;
 using Duende.IdentityServer.Hosting.FederatedSignOut;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
@@ -240,11 +243,17 @@ public static class IdentityServerBuilderExtensionsCore
             builder.Services.TryAddTransient<ISamlServiceProviderStore, EmptySamlServiceProviderStore>();
             builder.Services.TryAddScoped<ISamlLogoutNotificationService, NopSamlLogoutNotificationService>();
 
+            // The in-memory operational stores use one partition, the Default space. AddSpaces replaces
+            // GetSpaceIdOrDefault so they are partitioned by the current space.
+            builder.Services.TryAddSingleton<GetSpaceIdOrDefault>(static () => SpaceId.Default);
+            builder.Services.TryAddSingleton(sp => new InMemoryStoreState(sp.GetRequiredService<GetSpaceIdOrDefault>()));
+
             // SP logout completion endpoint dependencies — registered here so the endpoint
             // is available for both the static AddSamlServiceProvider() path and the
             // AddSaml()/AddSamlDynamicProvider() paths.
             builder.Services.TryAddSingleton<RsaCertificateFactory>();
             builder.Services.TryAddSingleton<ISamlLogoutSessionStore, InMemorySamlLogoutSessionStore>();
+            builder.Services.TryAddSingleton<ISchemaStore, InMemorySchemaStore>();
             builder.Services.TryAddScoped<ISamlSigningService, SamlSigningService>();
             builder.Services.TryAddTransient<ISamlXmlWriter, SamlXmlWriter>();
             builder.Services.TryAddTransient<ISaml2IssuerNameService, Saml2IssuerNameService>();
@@ -252,7 +261,7 @@ public static class IdentityServerBuilderExtensionsCore
 
             builder.Services.TryAddTransient<IConnectedApplicationStore, ConnectedApplicationStore>();
 
-            builder.Services.TryAddSingleton(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
+            builder.Services.TryAddSingleton<IDistributedLock, InProcessDistributedLock>();
 
             builder.Services.TryAddTransient<IClientStore, EmptyClientStore>();
             builder.Services.TryAddTransient<IResourceStore, EmptyResourceStore>();
@@ -368,6 +377,7 @@ public static class IdentityServerBuilderExtensionsCore
             builder.Services.TryAddTransient<IBackChannelLogoutService, DefaultBackChannelLogoutService>();
             builder.Services.TryAddTransient<IScopeParser, DefaultScopeParser>();
             builder.Services.TryAddTransient<ISessionCoordinationService, DefaultSessionCoordinationService>();
+            builder.Services.TryAddTransient<ISessionReplacementService, DefaultSessionReplacementService>();
             builder.Services.TryAddTransient<IReplayCache, DefaultReplayCache>();
             builder.Services.TryAddSingleton(TimeProvider.System);
             builder.Services.TryAddTransient<IUiLocalesService, DefaultUiLocalesService>();
@@ -397,7 +407,10 @@ public static class IdentityServerBuilderExtensionsCore
         public IIdentityServerBuilder AddKeyManagement()
         {
             builder.Services.TryAddTransient<IAutomaticKeyManagerKeyStore, AutomaticKeyManagerKeyStore>();
-            builder.Services.TryAddTransient<IKeyManager, KeyManager>();
+            builder.Services.TryAddTransient<IKeyManager, DistributedKeyManager>();
+#pragma warning disable CS0618 // IConcurrencyLock<T> is obsolete but kept registered for source compatibility
+            builder.Services.TryAddSingleton(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
+#pragma warning restore CS0618
             builder.Services.TryAddTransient<ISigningKeyProtector, DataProtectionKeyProtector>();
             builder.Services.TryAddSingleton<InMemoryKeyStoreCacheState>();
             builder.Services.TryAddScoped<ISigningKeyStoreCache>(sp =>
@@ -433,6 +446,7 @@ public static class IdentityServerBuilderExtensionsCore
             // internal, space-aware constructor can be used: the built-in DI container only activates public
             // constructors, and ISpaceContextAccessor may not be registered when Spaces isn't in use.
             builder.Services.AddScoped(sp => new DynamicAuthenticationSchemeCache(sp.GetService<ISpaceContextAccessor>()));
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SpacesOptions>, DynamicProviderOptionsCacheSpacesValidator>());
 
             return builder;
         }

@@ -1,0 +1,58 @@
+@page
+@model PlatformUserManagementApp.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container">
+            <h2 class="mb-4 brand-title text-center">Sign in</h2>
+
+            <div class="alert alert-info small mb-3">
+                <i class="bi bi-info-circle me-1"></i><strong>Demo credentials:</strong>
+                <code>admin@@example.com</code> / <code>AdminPassword1234!#</code>
+            </div>
+
+            @if (Model.ErrorMessages.Count > 0)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @foreach (var error in Model.ErrorMessages)
+                    {
+                        <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+                    }
+                </div>
+            }
+
+            <div id="passkey-status" class="alert d-none" role="alert"></div>
+
+            <form method="post">
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="mb-3">
+                    <label asp-for="UserName" class="form-label">Username</label>
+                    <input asp-for="UserName" class="form-control" autocomplete="username" autofocus />
+                    <span asp-validation-for="UserName" class="text-danger small"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign in
+                    </button>
+                    <button type="button" id="passkey-discoverable-login-btn" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-fingerprint me-2"></i>Sign in with passkey
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="/passkeys/js"></script>
+    <script src="~/js/passkeys-ui.js"></script>
+}

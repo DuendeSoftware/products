@@ -16,6 +16,6 @@ public interface ISamlServiceProviderConfigurationValidator
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>A task that completes when validation is finished. Errors are reported through the context.</returns>
     Task ValidateAsync(SamlServiceProviderConfigurationValidationContext context, Ct ct);
 }

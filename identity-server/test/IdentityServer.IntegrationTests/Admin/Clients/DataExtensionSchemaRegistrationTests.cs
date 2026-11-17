@@ -8,8 +8,8 @@ using Duende.IdentityServer.Admin.Clients;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.IntegrationTests.TestFramework.TestIsolation;
 using Duende.IdentityServer.Stores.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,14 +40,14 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var dept = getResult.Item.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
+        var dept = getResult.Item!.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
         dept.ShouldNotBeNull();
         dept.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Engineering");
 
-        var cc = getResult.Item.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.CostCenter.Code);
+        var cc = getResult.Item!.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.CostCenter.Code);
         cc.ShouldNotBeNull();
         cc.ShouldBeOfType<AttributeValue<int>>().TypedValue.ShouldBe(42);
     }
@@ -127,14 +127,14 @@ public sealed class DataExtensionSchemaRegistrationTests(WebServerFixture webApp
         var createResult = await admin.CreateAsync(client, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var dept = getResult.Item.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
+        var dept = getResult.Item!.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.Department.Code);
         dept.ShouldNotBeNull();
         dept.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("Finance");
 
-        var cc = getResult.Item.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.CostCenter.Code);
+        var cc = getResult.Item!.ExtendedProperties.FirstOrDefault(x => x.Code == TestClientAttributes.CostCenter.Code);
         cc.ShouldNotBeNull();
         cc.ShouldBeOfType<AttributeValue<int>>().TypedValue.ShouldBe(99);
     }

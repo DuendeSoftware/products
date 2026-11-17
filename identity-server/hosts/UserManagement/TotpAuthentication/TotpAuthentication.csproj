@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <NoWarn>$(NoWarn);IDE0058</NoWarn><!-- Expression value is never used --><!-- TODO: remove and make required code changes -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="Duende.Storage.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\IdentityServer\IdentityServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" /><!-- Added for development purposes, remove this once dev is done -->
+  </ItemGroup>
+
+</Project>

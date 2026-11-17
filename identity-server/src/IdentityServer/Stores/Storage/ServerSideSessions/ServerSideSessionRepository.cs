@@ -6,13 +6,12 @@
 using Duende.Storage;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
+using Duende.Storage.Internal.Pagination;
 using Duende.Storage.Internal.Querying;
 using Duende.Storage.Internal.Querying.Expressions;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
-using Duende.Storage.Querying;
 using IdentityServerModels = Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores.Storage.ServerSideSessions;
@@ -57,7 +56,7 @@ internal sealed class ServerSideSessionRepository(IPartitionedStorageFactory par
             ServerSideSessionDso.EntityType,
             DataStorageKey.Create(SessionKeyDskV1.Create(key)),
             ct);
-        return result.Found ? (result.Id.Value, result.Version.Value, (ServerSideSessionDso.V1)result.Dso) : null;
+        return result.Found ? (result.Id.Value, result.Version.Value, ServerSideSessionDso.ToCurrent(result.Dso)) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(Guid id, int version, IdentityServerModels.ServerSideSession session, Ct ct) =>
@@ -95,14 +94,14 @@ internal sealed class ServerSideSessionRepository(IPartitionedStorageFactory par
 
         while (true)
         {
-            var result = await partitionedStorage.QueryAsync<ServerSideSessionDso.V1>(
+            var result = await partitionedStorage.QueryAsync(
                 ServerSideSessionDso.EntityType,
                 filterExpr,
                 SortParameter.Empty,
                 DataRange.FromPage(page, DataRangeSize.MaxValue),
                 ct);
 
-            results.AddRange(result.Items.Select(e => (e.Id, e.Version, e.Value)));
+            results.AddRange(result.Items.Select(e => (e.Id, e.Version, ServerSideSessionDso.ToCurrent(e.Value))));
 
             if (!result.HasMoreData)
             {
@@ -139,21 +138,24 @@ internal sealed class ServerSideSessionRepository(IPartitionedStorageFactory par
 
         var partitionedStorage = await GetPartitionedStorage(ct);
         var size = Math.Min(count, DataRangeSize.MaxValue);
-        var result = await partitionedStorage.QueryAsync<ServerSideSessionDso.V1>(
+        var result = await partitionedStorage.QueryAsync(
             ServerSideSessionDso.EntityType,
             Fields.Expires.LessThan(timeProvider.GetUtcNow()),
             new SortParameter(SystemFields.CreatedAtField),
             DataRange.FromPage(1, size),
             ct);
 
-        return result.Items.Select(e => (e.Id, e.Value)).ToArray();
+        return result.Items.Select(e => (e.Id, ServerSideSessionDso.ToCurrent(e.Value))).ToArray();
     }
 
     /// <summary>
     /// Queries sessions using the store's native continuation-token pagination.
     /// When a ResultsToken is present, it is decoded as "nextToken|previousToken" and the
     /// appropriate token is used based on RequestPriorResults. When no token is present,
-    /// starts from the beginning. Sort order is determined by the store (creation order via ID).
+    /// starts from the beginning. Sort order is always ascending by creation time: the store's
+    /// continuation tokens already encode which direction they continue in, so re-querying with
+    /// a PreviousToken walks backward (and returns items in forward order) without changing the
+    /// sort itself. Reusing a token with a different sort is rejected by the store.
     /// </summary>
     internal async Task<QueryResult<ServerSideSessionDso.V1>> QueryPagedAsync(
         SessionQuery? filter,
@@ -183,36 +185,42 @@ internal sealed class ServerSideSessionRepository(IPartitionedStorageFactory par
         }
 
         var dataRange = DataRange.FromContinuationToken(token, pageSize);
+        var sort = new SortParameter(SystemFields.CreatedAtField);
 
-        var sort = filter.RequestPriorResults
-            ? new SortParameter(SystemFields.CreatedAtField, SortDirection.Descending)
-            : new SortParameter(SystemFields.CreatedAtField);
+        Task<QueryResult<MetadataEnvelope>> QueryFromBeginningAsync() =>
+            partitionedStorage.QueryAsync(
+                ServerSideSessionDso.EntityType,
+                filterExpr,
+                sort,
+                DataRange.FromContinuationToken((ContinuationToken?)null, pageSize),
+                ct);
 
-        var result = await partitionedStorage.QueryAsync<ServerSideSessionDso.V1>(
-            ServerSideSessionDso.EntityType,
-            filterExpr,
-            sort,
-            dataRange,
-            ct);
-
-        var converted = result.ConvertTo(e => e.Value);
-
-        // When navigating backward, the query used a reversed sort order.
-        // We need to normalize the result so that the caller always sees:
-        // - Items in forward (ascending) order
-        // - NextToken = token to get the next forward page
-        // - PreviousToken = token to get the previous (backward) page
-        if (filter.RequestPriorResults)
+        QueryResult<MetadataEnvelope> result;
+        try
         {
-            converted = converted with
-            {
-                Items = converted.Items.Reverse().ToArray(),
-                NextToken = result.PreviousToken,
-                PreviousToken = result.NextToken
-            };
+            result = await partitionedStorage.QueryAsync(
+                ServerSideSessionDso.EntityType,
+                filterExpr,
+                sort,
+                dataRange,
+                ct);
+        }
+        catch (InvalidContinuationTokenException)
+        {
+            // An unrecognized or tampered-with token: treat it as "start from the beginning"
+            // rather than surfacing a store-internal exception to callers.
+            result = await QueryFromBeginningAsync();
         }
 
-        return converted;
+        // Storage hands the first page a usable PreviousToken, so a caller can step back
+        // before it and get an empty page with no way forward. Show the first page instead.
+        var steppedBackBeforeFirstPage = filter.RequestPriorResults && token is not null && result.Items.Count == 0;
+        if (steppedBackBeforeFirstPage)
+        {
+            result = await QueryFromBeginningAsync();
+        }
+
+        return result.ConvertTo(e => ServerSideSessionDso.ToCurrent(e.Value));
     }
 
     internal static IdentityServerModels.ServerSideSession DsoToModel(ServerSideSessionDso.V1 dso) =>

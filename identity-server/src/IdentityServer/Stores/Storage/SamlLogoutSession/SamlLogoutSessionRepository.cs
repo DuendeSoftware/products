@@ -39,7 +39,7 @@ internal sealed class SamlLogoutSessionRepository(IPartitionedStorageFactory par
         var partitionedStorage = await GetPartitionedStorage(ct);
         var key = DataStorageKey.Create(SamlLogoutSessionLogoutIdDskV1.Create(logoutId));
         var result = await partitionedStorage.TryReadAsync(SamlLogoutSessionDso.EntityType, key, ct);
-        return result.Found ? ((SamlLogoutSessionDso.V1)result.Dso, result.Version.Value, result.Id.Value) : null;
+        return result.Found ? (SamlLogoutSessionDso.ToCurrent(result.Dso), result.Version.Value, result.Id.Value) : null;
     }
 
     internal async Task<(SamlLogoutSessionDso.V1 Dso, int Version, Guid Id)?> TryReadByRequestIdAsync(string requestId, Ct ct)
@@ -47,7 +47,7 @@ internal sealed class SamlLogoutSessionRepository(IPartitionedStorageFactory par
         var partitionedStorage = await GetPartitionedStorage(ct);
         var key = DataStorageKey.Create(SamlLogoutSessionRequestIdDskV1.Create(requestId));
         var result = await partitionedStorage.TryReadAsync(SamlLogoutSessionDso.EntityType, key, ct);
-        return result.Found ? ((SamlLogoutSessionDso.V1)result.Dso, result.Version.Value, result.Id.Value) : null;
+        return result.Found ? (SamlLogoutSessionDso.ToCurrent(result.Dso), result.Version.Value, result.Id.Value) : null;
     }
 
     internal async Task<UpdateResult> UpdateAsync(

@@ -10,7 +10,7 @@ using Duende.IdentityServer.Admin.IdentityProviders;
 using Duende.IdentityServer.Admin.IdentityResources;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace IdentityServer.UnitTests.Admin;
 

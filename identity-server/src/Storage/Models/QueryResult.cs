@@ -18,6 +18,12 @@ public class QueryResult<T>
     public string ResultsToken { get; init; } = default!;
 
     /// <summary>
+    /// The token that indicates the previous set of results. This is used to go back to the previous page.
+    /// If null, then there is no previous set of results.
+    /// </summary>
+    public string? PreviousToken { get; init; }
+
+    /// <summary>
     /// True if there is a previous set of results.
     /// </summary>
     public bool HasPrevResults { get; set; }

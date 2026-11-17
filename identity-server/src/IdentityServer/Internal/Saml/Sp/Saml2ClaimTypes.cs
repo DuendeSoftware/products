@@ -21,5 +21,11 @@ namespace Duende.IdentityServer.Internal.Saml.Sp
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout")]
         public const string LogoutNameIdentifier = ClaimTypeNamespace + "/LogoutNameIdentifier";
+
+        /// <summary>
+        /// The authentication scheme of the SAML handler that signed the user in, so that an
+        /// IdP-initiated logout request is only matched through that scheme.
+        /// </summary>
+        public const string Scheme = ClaimTypeNamespace + "/Scheme";
     }
 }

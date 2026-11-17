@@ -10,7 +10,6 @@ using Duende.Storage.Internal.Operations;
 using Duende.Storage.Internal.Querying.Fields;
 using Duende.Storage.Internal.Querying.SearchFields;
 using Duende.Storage.Internal.Querying.Sorting;
-using Duende.Storage.Pagination;
 
 namespace Duende.IdentityServer.Stores.Storage.SigningKeys;
 
@@ -37,14 +36,14 @@ internal sealed class KeyRepository(IPartitionedStorageFactory partitionedStorag
 
         while (true)
         {
-            var result = await partitionedStorage.QueryAsync<KeyDso.V1>(
+            var result = await partitionedStorage.QueryAsync(
                 KeyDso.EntityType,
                 Fields.Use.Equals(use),
                 SortParameter.Empty,
-                DataRange.FromPage(page, DataRangeSize.MaxValue),
+                StorageDataRange.FromPage(page, Duende.Storage.Internal.Pagination.DataRangeSize.MaxValue),
                 ct);
 
-            results.AddRange(result.Items.Select(e => DsoToModel(e.Value)));
+            results.AddRange(result.Items.Select(e => DsoToModel(KeyDso.ToCurrent(e.Value))));
 
             if (!result.HasMoreData)
             {

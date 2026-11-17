@@ -151,6 +151,12 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 return Invalid("Error validating id token hint", validatedRequest);
             }
 
+            var hintCheckFailure = IdentityTokenHintChecks.Validate(idTokenHint, tokenValidationResult, Options, Logger);
+            if (hintCheckFailure != null)
+            {
+                return Invalid(hintCheckFailure, validatedRequest);
+            }
+
             validatedRequest.SetClient(tokenValidationResult.Client);
 
             if (isAuthenticated)
@@ -276,12 +282,12 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     /// in the token and the current session has a session ID, the two are compared. If no <c>sid</c>
     /// is present, or the current session has no session ID, the <c>sub</c> claim is compared
     /// against the authenticated user's subject ID as a fallback.
-    /// If neither claim is present, the hint is treated as valid.
+    /// If neither claim is present, the hint gives no basis for matching it to the signed-in user
+    /// and is rejected.
     /// <para>
-    /// <b>Security note</b>: Returning <see cref="EndSessionHintValidationResult.Valid"/> unconditionally
-    /// (i.e., accepting any id_token_hint regardless of sub/sid match) creates a cross-user logout
-    /// vector. An attacker holding any valid id_token_hint can silently log out other users when the
-    /// signout prompt is suppressed. Ensure custom overrides apply appropriate validation logic.
+    /// Overrides must still match the hint to the signed-in user. Returning
+    /// <see cref="EndSessionHintValidationResult.Valid"/> without comparing <c>sid</c> or <c>sub</c>
+    /// lets a hint issued for one user end another user's session without a sign-out prompt.
     /// </para>
     /// </remarks>
     protected virtual Task<EndSessionHintValidationResult> ValidateIdTokenHintAsync(
@@ -312,9 +318,11 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 return Task.FromResult(EndSessionHintValidationResult.Invalid(
                     "Current user does not match identity token"));
             }
+            return Task.FromResult(EndSessionHintValidationResult.Valid());
         }
 
-        return Task.FromResult(EndSessionHintValidationResult.Valid());
+        return Task.FromResult(EndSessionHintValidationResult.Invalid(
+            "id_token_hint has no sub or sid claim"));
     }
 
     /// <inheritdoc />

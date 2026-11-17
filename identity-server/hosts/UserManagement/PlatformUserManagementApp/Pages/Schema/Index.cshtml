@@ -1,0 +1,190 @@
+@page
+@using Duende.IdentityServer.DataExtensions
+@model PlatformUserManagementApp.Pages.Schema.IndexModel
+@{
+    ViewData["Title"] = "Schema Management";
+
+    var orderedGroups = Model.Groups.Values.OrderBy(g => g.Order).ToList();
+    var ungroupedAttrs = Model.Attributes.Values
+        .Where(a => a.GroupCode is null)
+        .OrderBy(a => a.Order)
+        .ToList();
+}
+
+<h2 class="brand-title mb-3">Schema Management</h2>
+
+@foreach (var msg in Model.Messages)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle me-2"></i>@msg
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@foreach (var msg in Model.ErrorMessages)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle me-2"></i>@msg
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@* ── Groups ── *@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-collection me-2"></i>Attribute Groups</h5>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#addGroupForm">
+            <i class="bi bi-plus-lg me-1"></i>Add Group
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="collapse mb-3" id="addGroupForm">
+            <form method="post" asp-page-handler="AddGroup" class="row g-2 align-items-end border rounded p-3 bg-light">
+                <div class="col-md-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="groupName" class="form-control form-control-sm" placeholder="e.g. contact_info" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Display Header</label>
+                    <input type="text" name="displayHeader" class="form-control form-control-sm" placeholder="e.g. Contact Information" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+                    <input type="text" name="displayDescription" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Add</button>
+                </div>
+            </form>
+        </div>
+
+        @if (orderedGroups.Count == 0)
+        {
+            <p class="text-muted mb-0">No groups defined.</p>
+        }
+        else
+        {
+            <table class="table table-sm table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Display Header</th>
+                        <th>Description</th>
+                        <th class="text-center">Order</th>
+                        <th class="text-center">Attributes</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var group in orderedGroups)
+                    {
+                        var groupAttrCount = Model.Attributes.Values.Count(a => a.GroupCode?.Value == group.Code.Value);
+                        <tr>
+                            <td><code>@group.Code</code></td>
+                            <td>@group.DisplayName</td>
+                            <td class="text-muted">@(group.Description ?? "—")</td>
+                            <td class="text-center">@group.Order</td>
+                            <td class="text-center">@groupAttrCount</td>
+                            <td class="text-end">
+                                <form method="post" asp-page-handler="RemoveGroup" class="d-inline">
+                                    <input type="hidden" name="groupName" value="@group.Code" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Remove group \'@group.Code\'?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@* ── Attributes ── *@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Attribute Definitions</h5>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#addAttrForm">
+            <i class="bi bi-plus-lg me-1"></i>Add Attribute
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="collapse mb-3" id="addAttrForm">
+            <form method="post" asp-page-handler="AddAttribute" class="row g-2 align-items-end border rounded p-3 bg-light">
+                <div class="col-md-2">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="attrName" class="form-control form-control-sm" placeholder="e.g. department" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Type</label>
+                    <select name="attrType" class="form-select form-select-sm" required>
+                        @foreach (var dt in Enum.GetValues<ScalarDataType>())
+                        {
+                            <option value="@dt">@dt</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Description</label>
+                    <input type="text" name="description" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Group <span class="text-muted">(optional)</span></label>
+                    <select name="groupName" class="form-select form-select-sm">
+                        <option value="">(ungrouped)</option>
+                        @foreach (var g in orderedGroups)
+                        {
+                            <option value="@g.Code">@g.DisplayName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check mt-4">
+                        <input type="checkbox" name="isUnique" value="true" class="form-check-input" id="isUniqueCheck" />
+                        <label class="form-check-label" for="isUniqueCheck">Unique</label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Add</button>
+                </div>
+            </form>
+        </div>
+
+        @* Show grouped attributes first, then ungrouped *@
+        @foreach (var group in orderedGroups)
+        {
+            var groupAttrs = Model.Attributes.Values
+                .Where(a => a.GroupCode?.Value == group.Code.Value)
+                .OrderBy(a => a.Order)
+                .ToList();
+
+            <h6 class="mt-3 mb-2 text-primary">
+                <i class="bi bi-folder me-1"></i>@group.DisplayName
+                <span class="text-muted fw-normal">(@group.Code)</span>
+            </h6>
+
+            if (groupAttrs.Count == 0)
+            {
+                <p class="text-muted ms-3">No attributes in this group.</p>
+            }
+            else
+            {
+                @await Html.PartialAsync("_AttributeTable", groupAttrs)
+            }
+        }
+
+        @if (ungroupedAttrs.Count > 0)
+        {
+            <h6 class="mt-3 mb-2 text-secondary">
+                <i class="bi bi-folder2-open me-1"></i>Ungrouped
+            </h6>
+            @await Html.PartialAsync("_AttributeTable", ungroupedAttrs)
+        }
+
+        @if (Model.Attributes.Count == 0)
+        {
+            <p class="text-muted mb-0">No attributes defined.</p>
+        }
+    </div>
+</div>

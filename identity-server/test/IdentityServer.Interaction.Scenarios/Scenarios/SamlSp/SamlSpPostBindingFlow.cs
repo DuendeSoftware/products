@@ -26,7 +26,7 @@ public sealed class SamlSpPostBindingFlow : IScenario
     public string Description => "OIDC client using IdentityServer as a SAML SP with outbound HTTP-POST binding";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         var upstreamSigningCertificate = CreateSigningCertificate();
         var serviceProviders = new List<SamlServiceProvider>();
@@ -128,7 +128,7 @@ public sealed class SamlSpPostBindingFlow : IScenario
         ];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_client != null)
         {

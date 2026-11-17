@@ -4,6 +4,7 @@
 #nullable enable
 using System.Diagnostics;
 using System.Security.Cryptography.Xml;
+using System.Text;
 using System.Xml;
 using Duende.IdentityServer.Saml.Common;
 
@@ -301,10 +302,18 @@ public class XmlTraverser
     {
         IgnoreChildren();
 
-        // Check for non-text child nodes (elements, CData, etc.) which indicate unexpected structure.
-        // Comments and whitespace are allowed.
+        // Do not descend into malformed content, even if an error inspector later ignores it.
+        var text = new StringBuilder();
         foreach (XmlNode child in CurrentNode!.ChildNodes)
         {
+            if (child.NodeType is XmlNodeType.Text
+                or XmlNodeType.CDATA
+                or XmlNodeType.Whitespace
+                or XmlNodeType.SignificantWhitespace)
+            {
+                text.Append(child.Value);
+            }
+
             if (child.NodeType is not (XmlNodeType.Text
                 or XmlNodeType.Whitespace
                 or XmlNodeType.SignificantWhitespace
@@ -322,7 +331,7 @@ public class XmlTraverser
             }
         }
 
-        return CurrentNode.InnerText;
+        return text.ToString();
     }
     /// <summary>
     /// Ensures that the contents of the current node is an absolute URI and returns the URI.

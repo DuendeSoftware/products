@@ -5,7 +5,7 @@
 
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 
 namespace Duende.IdentityServer.Admin.SamlServiceProviders;
 

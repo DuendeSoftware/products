@@ -9,7 +9,7 @@ public class CloningHttpMessageHandler(HttpClient innerHttpClient) : HttpMessage
         innerHttpClient ?? throw new ArgumentNullException(nameof(innerHttpClient));
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        Ct cancellationToken)
     {
         // Clone the incoming request
         var clonedRequest = await CloneHttpRequestMessageAsync(request);

@@ -6,6 +6,7 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Hosting.OutboxProcessor;
+using Duende.IdentityServer.Infrastructure.DistributedLock;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Saml.Infrastructure;
 using Duende.IdentityServer.Services;
@@ -28,7 +29,7 @@ using Duende.IdentityServer.Stores.Storage.SamlSigninState;
 using Duende.IdentityServer.Stores.Storage.ServerSideSessions;
 using Duende.IdentityServer.Stores.Storage.SigningKeys;
 using Duende.Storage;
-using Duende.Storage.EntityAttributeValue.Internal;
+using Duende.IdentityServer.DataExtensions.Internal;
 using Duende.Storage.Internal;
 using Duende.Storage.Internal.Builder;
 using Duende.Storage.Internal.Outbox;
@@ -86,6 +87,17 @@ public static class IdentityServerStorageBuilderExtensions
             // TryAddEnumerable keeps repeated AddStorage() calls from registering duplicate hosted services.
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, OutboxProcessorHost>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, Hosting.StoragePurgeHost>());
+            builder.Services.TryAddSingleton<OutboxProcessorFactory>();
+
+            // The default instance is the database IdentityServer falls back to for every unmapped
+            // data category, so it is always suitable for coordinating a distributed lock. A named,
+            // non-default instance isn't necessarily reachable from every node (it may hold only data
+            // for one tenant, one region, and so on), so it doesn't switch the lock to Storage on its
+            // own; AddSpaces does, because Spaces' management data always needs one shared location.
+            if (storageInstanceId.IsDefault)
+            {
+                builder.Services.AddDistributedStorageLock();
+            }
 
             return builder;
         }
@@ -323,7 +335,8 @@ public static class IdentityServerStorageBuilderExtensions
             services.TryAddTransient<IClientAdmin, ClientAdmin>();
             services.AddDsoRegistration<ClientDso.V1>();
             services.TryAddTransient<ClientRepository>();
-            services.TryAddTransientOrDefault<IClientStore, EmptyClientStore, ClientStore>();
+            services.TryAddTransient<ClientStore>();
+            services.TryAddTransientOrDefault<IClientStore, EmptyClientStore, ValidatingClientStore<ClientStore>>();
             // CorsPolicy reads from ClientStore
             services.TryAddTransientOrDefault<ICorsPolicyService, DefaultCorsPolicyService, StorageCorsPolicyService>();
 
@@ -346,6 +359,7 @@ public static class IdentityServerStorageBuilderExtensions
             services.AddDsoRegistration<ApiResourceDso.V1>();
             services.AddDsoRegistration<ApiScopeDso.V1>();
             services.AddDsoRegistration<IdentityResourceDso.V1>();
+            services.AddDsoRegistration<ScopeNameDso.V1>();
             services.TryAddTransient<ApiResourceRepository>();
             services.TryAddTransient<ApiScopeRepository>();
             services.TryAddTransient<IdentityResourceRepository>();

@@ -10,8 +10,10 @@ using Duende.IdentityServer.Saml.Models;
 namespace Duende.IdentityServer.Saml.Services;
 
 /// <summary>
-/// Generates SAML NameID values for SSO responses. Register a custom implementation
-/// to override the built-in email, persistent, and unspecified format handling.
+/// Generates SAML NameID values for SSO responses. The built-in handling generates an email NameID for
+/// the email format and uses the <c>sub</c> claim for every other format, including persistent and transient.
+/// Register a custom implementation if a service provider needs a different value, for example a pairwise
+/// identifier for the persistent format or a session-scoped identifier for the transient format.
 /// </summary>
 public interface ISamlNameIdGenerator
 {

@@ -107,7 +107,9 @@ public class ProfileDataRequestContext
     public List<Claim> IssuedClaims { get; set; } = new List<Claim>();
 
     /// <summary>
-    /// Gets the SAML attributes to include directly in the assertion, bypassing claim-to-attribute mapping.
+    /// Gets the SAML attributes to include directly in the assertion. These attributes are merged with the
+    /// attributes mapped from <see cref="IssuedClaims"/>. When a mapped attribute has the same Name as an attribute
+    /// added here, its values are appended to that attribute.
     /// Populated by <see cref="Services.IProfileService"/> implementations for SAML-specific attribute control.
     /// </summary>
     public List<SamlAttribute> SamlAttributes { get; } = new List<SamlAttribute>();

@@ -53,11 +53,14 @@ public static class IdentityServerBuilderDynamicProviderExtensions
 
             // IdentityServer owns the options cache for dynamic provider option types. Replacing it
             // (registering another IOptionsMonitorCache<TProviderOptions> afterwards) disables
-            // per-space isolation of dynamic provider options.
+            // per-space isolation of dynamic provider options, so DynamicProviderOptionsCacheSpacesValidator
+            // fails startup when Spaces is configured.
             builder.Services.AddSingleton<IOptionsMonitorCache<TProviderOptions>>(sp =>
                 new SpaceAwareDynamicOptionsMonitorCache<TProviderOptions>(
                     sp.GetService<ISpaceContextAccessor>(),
-                    sp.GetRequiredService<IHttpContextAccessor>()));
+                    sp.GetRequiredService<IHttpContextAccessor>(),
+                    sp.GetService<TimeProvider>() ?? TimeProvider.System,
+                    sp.GetRequiredService<IOptions<IdentityServerOptions>>().Value.DynamicProviders.CacheIdleTimeout));
 
             return builder;
         }

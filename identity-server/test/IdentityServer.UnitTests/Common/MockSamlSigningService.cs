@@ -23,5 +23,5 @@ internal class MockSamlSigningService : ISamlSigningService
         return Task.FromResult(Convert.ToBase64String(certBytes));
     }
 
-    public Task<IReadOnlyList<X509Certificate2>> GetAllSigningCertificatesAsync(CancellationToken ct) => Task.FromResult<IReadOnlyList<X509Certificate2>>([_certificate]);
+    public Task<IReadOnlyList<X509Certificate2>> GetAllSigningCertificatesAsync(Ct ct) => Task.FromResult<IReadOnlyList<X509Certificate2>>([_certificate]);
 }

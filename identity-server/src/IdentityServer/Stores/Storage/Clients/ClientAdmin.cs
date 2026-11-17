@@ -7,14 +7,15 @@ using System.Security.Cryptography;
 using System.Text;
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.Clients;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.DataExtensions;
+using Duende.IdentityServer.DataExtensions.Internal.Storage;
+using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores.Storage.ApiScopes;
+using Duende.IdentityServer.Stores.Storage.IdentityResources;
 using Duende.IdentityServer.Validation;
-using Duende.Storage;
-using Duende.Storage.EntityAttributeValue;
-using Duende.Storage.EntityAttributeValue.Internal.Storage;
-using Duende.Storage.Internal;
 using Duende.Storage.Internal.Operations;
-using Duende.Storage.Querying;
 using SecretHashAlgorithm = Duende.IdentityServer.Admin.SecretHashAlgorithm;
 
 namespace Duende.IdentityServer.Stores.Storage.Clients;
@@ -23,11 +24,14 @@ namespace Duende.IdentityServer.Stores.Storage.Clients;
 internal sealed class ClientAdmin(
     ClientRepository repository,
     IClientConfigurationValidator extensionPointValidator,
-    ISchemaStore schemaStore) : IClientAdmin
+    ISchemaStore schemaStore,
+    IdentityServerOptions options,
+    ApiScopeRepository apiScopeRepository,
+    IdentityResourceRepository identityResourceRepository) : IClientAdmin
 {
     private readonly IConfigurationValidator<ClientConfiguration>[] validators =
     [
-        new ClientStructureValidator(),
+        new ClientStructureValidator(options.Validation),
         new ClientExtensionPointValidator(extensionPointValidator),
         new ClientExtensionPropertyValidator(schemaStore),
     ];
@@ -47,17 +51,25 @@ internal sealed class ClientAdmin(
             return SaveResult.Failure<ClientId>(validationErrors);
         }
 
-        var id = UuidV7.New();
+        var (scopes, scopeError) = await ResolveAllowedScopesAsync(client.AllowedScopes, ct);
+        if (scopeError is not null)
+        {
+            return SaveResult.Failure<ClientId>(scopeError);
+        }
+
+        var id = Duende.Storage.UuidV7.New();
         var dso = MapToDso(id.Value, client);
 
-        var result = await repository.CreateAsync(id, dso, ct);
+        var outcome = await repository.CreateAsync(id, dso, scopes, ct);
 
-        return result switch
+        return outcome.Kind switch
         {
-            CreateResult.Success => SaveResult.Success((ClientId)id.Value, (DataVersion)1),
-            CreateResult.AlreadyExists or CreateResult.KeyConflict =>
+            ClientBatchOutcomeKind.Success => SaveResult.Success((ClientId)id.Value, (DataVersion)(1)),
+            ClientBatchOutcomeKind.AlreadyExists or ClientBatchOutcomeKind.KeyConflict =>
                 SaveResult.Failure<ClientId>(StorageError.AlreadyExists("client", client.ClientId)),
-            _ => throw new InvalidOperationException($"Unexpected CreateResult: {result}")
+            ClientBatchOutcomeKind.ScopeDoesNotExist =>
+                SaveResult.Failure<ClientId>(StorageError.InvalidValue("AllowedScopes", $"Scope '{outcome.ScopeName}' does not exist.")),
+            _ => throw new InvalidOperationException($"Unexpected ClientBatchOutcome: {outcome.Kind}")
         };
     }
 
@@ -70,8 +82,9 @@ internal sealed class ClientAdmin(
         }
 
         var (dso, version) = result.Value;
+        var scopeNames = await repository.GetAllowedScopeNamesAsync(dso.Id, ct);
         var schema = await schemaStore.GetAsync(SchemaId.Client, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, scopeNames, schema), (DataVersion)(version));
     }
 
     public async Task<GetResult<ClientConfiguration>> GetByClientIdAsync(string clientId, Ct ct)
@@ -83,8 +96,9 @@ internal sealed class ClientAdmin(
         }
 
         var (dso, version) = result.Value;
+        var scopeNames = await repository.GetAllowedScopeNamesAsync(dso.Id, ct);
         var schema = await schemaStore.GetAsync(SchemaId.Client, ct);
-        return GetResult.Found(MapToConfiguration(dso, schema), (DataVersion)version);
+        return GetResult.Found(MapToConfiguration(dso, scopeNames, schema), (DataVersion)(version));
     }
 
     public async Task<SaveResult<ClientId>> UpdateAsync(ClientId id, UpdateClient client, DataVersion expectedVersion, Ct ct)
@@ -105,17 +119,32 @@ internal sealed class ClientAdmin(
             return SaveResult.Failure<ClientId>(validationErrors);
         }
 
+        var (scopes, scopeError) = await ResolveAllowedScopesAsync(client.AllowedScopes, ct);
+        if (scopeError is not null)
+        {
+            return SaveResult.Failure<ClientId>(scopeError);
+        }
+
         var dso = MapToDso(id.Value, client, existingDso.ClientSecrets);
 
-        var result = await repository.UpdateAsync(UuidV7.From(id.Value), dso, expectedVersion.Value, ct);
+        var currentScopes = await repository.GetAllowedScopesAsync(id.Value, ct);
+        var currentScopeIds = currentScopes.Select(s => (s.Id, s.Kind)).ToHashSet();
+        var requestedScopeIds = scopes.Select(s => (s.Id, s.Kind)).ToHashSet();
+        var scopesToLink = scopes.Where(s => !currentScopeIds.Contains((s.Id, s.Kind))).ToList();
+        var scopesToUnlink = currentScopes.Where(s => !requestedScopeIds.Contains((s.Id, s.Kind))).ToList();
 
-        return result switch
+        var outcome = await repository.UpdateAsync(
+            Duende.Storage.UuidV7.From(id.Value), dso, expectedVersion.Value, scopesToLink, scopesToUnlink, ct);
+
+        return outcome.Kind switch
         {
-            UpdateResult.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
-            UpdateResult.UnexpectedVersion => SaveResult.Failure<ClientId>(StorageError.VersionConflict()),
-            UpdateResult.DoesNotExist => SaveResult.Failure<ClientId>(StorageError.NotFound("client", id.ToString())),
-            UpdateResult.KeyConflict => SaveResult.Failure<ClientId>(StorageError.AlreadyExists("client", client.ClientId)),
-            _ => throw new InvalidOperationException($"Unexpected UpdateResult: {result}")
+            ClientBatchOutcomeKind.Success => SaveResult.Success(id, (DataVersion)(expectedVersion.Value + 1)),
+            ClientBatchOutcomeKind.UnexpectedVersion => SaveResult.Failure<ClientId>(StorageError.VersionConflict()),
+            ClientBatchOutcomeKind.ClientDoesNotExist => SaveResult.Failure<ClientId>(StorageError.NotFound("client", id.ToString())),
+            ClientBatchOutcomeKind.KeyConflict => SaveResult.Failure<ClientId>(StorageError.AlreadyExists("client", client.ClientId)),
+            ClientBatchOutcomeKind.ScopeDoesNotExist =>
+                SaveResult.Failure<ClientId>(StorageError.InvalidValue("AllowedScopes", $"Scope '{outcome.ScopeName}' does not exist.")),
+            _ => throw new InvalidOperationException($"Unexpected ClientBatchOutcome: {outcome.Kind}")
         };
     }
 
@@ -125,15 +154,19 @@ internal sealed class ClientAdmin(
 
         return result switch
         {
-            DeleteResult.Success => SaveResult.Success(id, (DataVersion)0),
+            DeleteResult.Success => SaveResult.Success(id, (DataVersion)(0)),
             _ => throw new InvalidOperationException($"Unexpected DeleteResult: {result}")
         };
     }
 
-    public async Task<Duende.Storage.Querying.QueryResult<ClientListItem>> QueryAsync(QueryRequest<ClientFilter, ClientSortField> request, Ct ct)
+    public async Task<QueryResult<ClientListItem>> QueryAsync(QueryRequest<ClientFilter, ClientSortField> request, Ct ct)
     {
-        var result = await repository.QueryAsync(request, ct);
-        return result.ConvertTo(MapToListItem);
+        var result = await StorageMapping.ExecuteQueryAsync(() => repository.QueryAsync(request.ToStorage(), ct));
+
+        var clientIds = result.Items.Select(dso => dso.Id).ToList();
+        var scopeCounts = await repository.CountAllowedScopesByClientIdsAsync(clientIds, ct);
+
+        return result.ConvertTo(dso => MapToListItem(dso, scopeCounts.GetValueOrDefault(dso.Id))).ToModel(request.Range);
     }
 
     // === Secret Management ===
@@ -160,7 +193,7 @@ internal sealed class ClientAdmin(
 
         var shaped = ShapeSecret(secret);
 
-        var secretId = UuidV7.New().Value;
+        var secretId = Duende.Storage.UuidV7.New().Value;
         var newSecret = new ClientDso.SecretDso(
             Id: secretId,
             Value: shaped.Value,
@@ -172,7 +205,13 @@ internal sealed class ClientAdmin(
         var updatedSecrets = dso.ClientSecrets.Append(newSecret).ToList();
         var updatedDso = dso with { ClientSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(clientId.Value), updatedDso, version, ct);
+        var validationErrors = await ValidateUpdatedDsoAsync(updatedDso, ct);
+        if (validationErrors is not null)
+        {
+            return SaveResult.Failure<SecretId>(validationErrors);
+        }
+
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(clientId.Value), updatedDso, version, ct);
 
         return result switch
         {
@@ -202,7 +241,13 @@ internal sealed class ClientAdmin(
         var updatedSecrets = dso.ClientSecrets.Where(s => s.Id != secretId.Value).ToList();
         var updatedDso = dso with { ClientSecrets = updatedSecrets };
 
-        var result = await repository.UpdateAsync(UuidV7.From(clientId.Value), updatedDso, version, ct);
+        var validationErrors = await ValidateUpdatedDsoAsync(updatedDso, ct);
+        if (validationErrors is not null)
+        {
+            return SaveResult.Failure<SecretId>(validationErrors);
+        }
+
+        var result = await repository.UpdateAsync(Duende.Storage.UuidV7.From(clientId.Value), updatedDso, version, ct);
 
         return result switch
         {
@@ -235,6 +280,13 @@ internal sealed class ClientAdmin(
 
     // === Validation Pipeline ===
 
+    private async Task<StorageError?> ValidateUpdatedDsoAsync(ClientDso.V1 dso, Ct ct)
+    {
+        var schema = await schemaStore.GetAsync(SchemaId.Client, ct);
+        var scopeNames = await repository.GetAllowedScopeNamesAsync(dso.Id, ct);
+        return await RunValidationPipelineAsync(MapToConfiguration(dso, scopeNames, schema), ct);
+    }
+
     private async Task<StorageError?> RunValidationPipelineAsync(ClientConfiguration configuration, Ct ct)
     {
         foreach (var validator in validators)
@@ -247,6 +299,45 @@ internal sealed class ClientAdmin(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Resolves allowed-scope names into links by exact name, against both API scopes and identity
+    /// resources, deduplicating names so a name requested more than once is linked only once. Offline_access
+    /// and whitespace-only names are rejected by <see cref="ClientStructureValidator"/> earlier in the
+    /// pipeline; a nonexistent name is rejected here, the single point that resolves scope names at save
+    /// time, so the link target ids are known for the storage batch.
+    /// </summary>
+    private async Task<(List<ScopeLink> Scopes, StorageError? Error)> ResolveAllowedScopesAsync(List<string>? scopeNames, Ct ct)
+    {
+        if (scopeNames is null || scopeNames.Count == 0)
+        {
+            return ([], null);
+        }
+
+        var names = scopeNames.Distinct(StringComparer.Ordinal).ToList();
+
+        var apiScopes = await apiScopeRepository.FindByExactNamesAsync(names, ct);
+        var identityResources = await identityResourceRepository.FindByExactNamesAsync(names, ct);
+
+        var scopes = new List<ScopeLink>(names.Count);
+        foreach (var name in names)
+        {
+            if (apiScopes.TryGetValue(name, out var apiScope))
+            {
+                scopes.Add(new ScopeLink(name, apiScope.Id, ScopeLinkKind.ApiScope));
+            }
+            else if (identityResources.TryGetValue(name, out var identityResource))
+            {
+                scopes.Add(new ScopeLink(name, identityResource.Id, ScopeLinkKind.IdentityResource));
+            }
+            else
+            {
+                return ([], StorageError.InvalidValue("AllowedScopes", $"Scope '{name}' does not exist."));
+            }
+        }
+
+        return (scopes, null);
     }
 
     private static ClientConfiguration MapToClientConfiguration(UpdateClient client, IReadOnlyList<ClientDso.SecretDso> existingSecrets) =>
@@ -385,7 +476,7 @@ internal sealed class ClientAdmin(
             }).ToList().AsReadOnly(),
             ClientSecrets = (client.ClientSecrets ?? []).Select(x => new ClientSecretConfiguration()
             {
-                Id = (SecretId)UuidV7.New().Value,
+                Id = (SecretId)Duende.Storage.UuidV7.New().Value,
                 Type = x.Type ?? IdentityServerConstants.SecretTypes.SharedSecret,
                 Description = x.Description,
                 Expiration = x.Expiration
@@ -485,7 +576,6 @@ internal sealed class ClientAdmin(
 
             // Collections
             AllowedGrantTypes = (client.AllowedGrantTypes ?? []).AsReadOnly(),
-            AllowedScopes = (client.AllowedScopes ?? []).AsReadOnly(),
             RedirectUris = (client.RedirectUris ?? []).AsReadOnly(),
             PostLogoutRedirectUris = (client.PostLogoutRedirectUris ?? []).AsReadOnly(),
             AllowedIdentityTokenSigningAlgorithms = (client.AllowedIdentityTokenSigningAlgorithms ?? []).AsReadOnly(),
@@ -580,7 +670,6 @@ internal sealed class ClientAdmin(
 
             // Collections
             AllowedGrantTypes = (client.AllowedGrantTypes ?? []).AsReadOnly(),
-            AllowedScopes = (client.AllowedScopes ?? []).AsReadOnly(),
             RedirectUris = (client.RedirectUris ?? []).AsReadOnly(),
             PostLogoutRedirectUris = (client.PostLogoutRedirectUris ?? []).AsReadOnly(),
             AllowedIdentityTokenSigningAlgorithms = (client.AllowedIdentityTokenSigningAlgorithms ?? []).AsReadOnly(),
@@ -616,7 +705,7 @@ internal sealed class ClientAdmin(
         var shaped = ShapeSecret(secret);
 
         return new ClientDso.SecretDso(
-            Id: UuidV7.New().Value,
+            Id: Duende.Storage.UuidV7.New().Value,
             Value: shaped.Value,
             Description: secret.Description,
             Expiration: secret.Expiration,
@@ -624,7 +713,7 @@ internal sealed class ClientAdmin(
             HashAlgorithm: shaped.HashAlgorithmName);
     }
 
-    private static ClientConfiguration MapToConfiguration(ClientDso.V1 dso, IReadOnlyAttributeSchema? schema) =>
+    private static ClientConfiguration MapToConfiguration(ClientDso.V1 dso, List<string> scopeNames, IReadOnlyAttributeSchema? schema) =>
         new()
         {
             ClientId = dso.ClientId,
@@ -696,7 +785,7 @@ internal sealed class ClientAdmin(
 
             // Collections
             AllowedGrantTypes = dso.AllowedGrantTypes.ToList().AsReadOnly(),
-            AllowedScopes = dso.AllowedScopes.ToList().AsReadOnly(),
+            AllowedScopes = scopeNames,
             RedirectUris = dso.RedirectUris.ToList().AsReadOnly(),
             PostLogoutRedirectUris = dso.PostLogoutRedirectUris.ToList().AsReadOnly(),
             AllowedIdentityTokenSigningAlgorithms = dso.AllowedIdentityTokenSigningAlgorithms.ToList().AsReadOnly(),
@@ -728,7 +817,7 @@ internal sealed class ClientAdmin(
                 .AsReadOnly()
         };
 
-    private static ClientListItem MapToListItem(ClientDso.V1 dso) =>
+    private static ClientListItem MapToListItem(ClientDso.V1 dso, int allowedScopeCount) =>
         new()
         {
             Id = (ClientId)dso.Id,
@@ -737,7 +826,7 @@ internal sealed class ClientAdmin(
             Enabled = dso.Enabled,
             Description = dso.Description,
             AllowedGrantTypes = [.. dso.AllowedGrantTypes],
-            AllowedScopeCount = dso.AllowedScopes.Count,
+            AllowedScopeCount = allowedScopeCount,
             RedirectUriCount = dso.RedirectUris.Count
         };
 

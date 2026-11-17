@@ -168,7 +168,7 @@ public sealed class ClientAdminIntegrationTests(WebServerFixture webApp)
         var jwkJson = JsonSerializer.Serialize(jwk);
 
         var secretResult = await fixture.ClientAdmin.CreateSecretAsync(
-            createResult.Id,
+            createResult.Id!,
             new CreateClientSecret
             {
                 PlaintextValue = jwkJson,
@@ -282,7 +282,7 @@ public sealed class ClientAdminIntegrationTests(WebServerFixture webApp)
         var material = Convert.ToBase64String(cert.Export(X509ContentType.Cert));
 
         var secretResult = await fixture.ClientAdmin.CreateSecretAsync(
-            createResult.Id,
+            createResult.Id!,
             new CreateClientSecret
             {
                 PlaintextValue = material,

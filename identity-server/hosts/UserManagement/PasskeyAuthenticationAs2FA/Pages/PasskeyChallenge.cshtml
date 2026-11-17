@@ -1,0 +1,55 @@
+@page
+@model PasskeyChallengeModel
+@{
+  ViewData["Title"] = "Verify with passkey";
+}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-container">
+      <h2 class="mb-4 brand-title text-center">Verify with passkey</h2>
+
+      <div class="alert alert-info mb-4" role="alert">
+        <i class="bi bi-shield-lock me-2"></i>
+        OTP verified. Now complete sign-in using your passkey.
+      </div>
+
+      @if (Model.ErrorMessages.Count > 0)
+      {
+        <div class="alert alert-danger mb-4" role="alert">
+          @foreach (var error in Model.ErrorMessages)
+          {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+          }
+        </div>
+      }
+
+      <div id="passkey-status" class="alert d-none" role="alert"></div>
+
+      <div class="d-grid">
+        <button id="second-factor-passkey-btn" type="button" class="btn btn-primary btn-lg">
+          <i class="bi bi-fingerprint me-2"></i>Verify with passkey
+        </button>
+      </div>
+
+      <input type="hidden" id="complete-second-factor-url" value="@Url.Page("/PasskeyChallenge", pageHandler: "CompleteSecondFactor")" />
+
+      <!-- Hidden form POSTed after successful passkey verification -->
+      <form id="promote-form" method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
+        @Html.AntiForgeryToken()
+      </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script src="/passkeys/js"></script>
+  <script src="~/js/passkeys-ui.js"></script>
+  <script>
+    initSecondFactorChallengePage(
+      document.getElementById('second-factor-passkey-btn'),
+      document.getElementById('promote-form')
+    );
+  </script>
+}

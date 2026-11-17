@@ -1,0 +1,56 @@
+@page
+@model IndexModel
+@{
+  ViewData["Title"] = "Home";
+}
+
+<div class="platform-hero text-center">
+  <h1><i class="bi bi-person-badge me-2"></i>ASP.NET Identity Sample</h1>
+  <p class="lead">Demonstrates username/password login, email OTP verification, and optional passkey enrollment.</p>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-check-circle-fill text-success fs-1 mb-3 d-block"></i>
+          <h4>Welcome, @User.Identity.Name!</h4>
+          <p class="text-muted">You are authenticated via ASP.NET Identity.</p>
+
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            @if (Model.HasPasskey)
+            {
+              <form method="post" asp-page-handler="RemovePasskey">
+                <button type="submit" class="btn btn-outline-danger">
+                  <i class="bi bi-fingerprint me-1"></i>Remove passkey
+                </button>
+              </form>
+            }
+            else
+            {
+              <a asp-page="/Account/EnrollPasskey" class="btn btn-outline-primary">
+                <i class="bi bi-fingerprint me-1"></i>Register a passkey
+              </a>
+            }
+            <a asp-page="/Account/Logout" class="btn btn-outline-secondary">
+              <i class="bi bi-box-arrow-right me-1"></i>Log out
+            </a>
+          </div>
+        </div>
+      </div>
+    }
+    else
+    {
+      <div class="card">
+        <div class="card-body text-center">
+          <p class="text-muted mb-4">Log in to explore the authentication flow.</p>
+          <a asp-page="/Account/Login" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Log in
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -56,7 +56,8 @@ public class HttpRedirectBinding : FrontChannelBinding, IHttpRedirectBinding
         var uri = new Uri(url);
         var parsed = ParseQueryString(uri.Query);
 
-        var xml = SecureXmlParser.LoadXmlDocument(Inflate(parsed.Message), _options.Saml.MaxMessageSize).DocumentElement
+        var xml = SecureXmlParser.LoadXmlDocument(
+                Inflate(parsed.Message), _options.Saml.MaxMessageSize, _options.Saml.MaxXmlNestingDepth).DocumentElement
             ?? throw new InvalidOperationException("The SAML message does not contain a document element");
 
         if (parsed.RelayState != null && Encoding.UTF8.GetByteCount(parsed.RelayState) > _options.Saml.MaxRelayStateLength)
@@ -332,7 +333,7 @@ public class HttpRedirectBinding : FrontChannelBinding, IHttpRedirectBinding
     {
         var firstChild = xml.ChildNodes.OfType<System.Xml.XmlElement>().FirstOrDefault();
         var issuer = firstChild is { LocalName: SamlConstants.Elements.Issuer, NamespaceURI: SamlConstants.Namespaces.Assertion }
-            ? firstChild.InnerText
+            ? Xml.XmlHelpers.GetDirectTextContents(firstChild)
             : null;
         if (string.IsNullOrEmpty(issuer))
         {

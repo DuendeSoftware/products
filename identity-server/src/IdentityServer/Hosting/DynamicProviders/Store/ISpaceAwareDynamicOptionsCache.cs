@@ -11,4 +11,11 @@ namespace Duende.IdentityServer.Hosting.DynamicProviders.Store;
 internal interface ISpaceAwareDynamicOptionsCache
 {
     bool TryRemoveDynamic(string name);
+
+    /// <summary>
+    /// Evicts every dynamic entry idle for at least the cache's configured idle timeout, as of
+    /// <paramref name="now"/>. Unlike the cache's own opportunistic sweep, this is not throttled:
+    /// the caller (the single sweep coordinator) is responsible for not calling this too often.
+    /// </summary>
+    void SweepIdle(DateTimeOffset now);
 }

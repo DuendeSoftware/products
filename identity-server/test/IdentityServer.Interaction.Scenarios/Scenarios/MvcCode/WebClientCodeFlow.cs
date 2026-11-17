@@ -25,7 +25,7 @@ public sealed class WebClientCodeFlow : IScenario
     public string Description => "MVC app with authorization code flow + PKCE, calling a protected API";
     public IReadOnlyList<ScenarioLink> Links { get; private set; } = [];
 
-    public async Task StartAsync(IScenarioConfigurator configurator, CancellationToken ct)
+    public async Task StartAsync(IScenarioConfigurator configurator, Ct ct)
     {
         // 1. Start IdentityServer
         _identityServer = new IdentityServerTestHost(configurator, "identity-server");
@@ -89,7 +89,7 @@ public sealed class WebClientCodeFlow : IScenario
         Links = [_identityServer.Link, _webApp.Link, _api.Link];
     }
 
-    public async Task StopAsync(CancellationToken ct)
+    public async Task StopAsync(Ct ct)
     {
         if (_api != null)
         {

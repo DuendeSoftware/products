@@ -1,0 +1,34 @@
+@page
+@model AspNetIdentityApp.Pages.Account.WelcomeModel
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container text-center">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            <h2 class="mt-3 mb-2 brand-title">You're all set!</h2>
+            <p class="text-muted mb-4">
+                You have successfully signed in to the ASP.NET Identity sample app.
+            </p>
+            <div class="d-grid gap-2">
+                @if (Model.ReturnUrl is not null)
+                {
+                    <a href="@Model.ReturnUrl" class="btn btn-primary btn-lg">
+                        <i class="bi bi-arrow-right me-2"></i>Continue
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Index" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house me-2"></i>Go to home
+                    </a>
+                }
+                <a asp-page="/Account/Logout" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-box-arrow-right me-2"></i>Sign out
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

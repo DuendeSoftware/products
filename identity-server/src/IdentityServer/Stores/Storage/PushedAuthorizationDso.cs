@@ -11,6 +11,16 @@ internal static class PushedAuthorizationDso
 {
     internal static readonly EntityType EntityType = new(2106, "PushedAuthorizationDso");
 
+    /// <summary>
+    /// Converts a stored PushedAuthorizationDso of any registered version to the current version (V1).
+    /// A future V2 adds an arm here that upconverts older versions.
+    /// </summary>
+    internal static V1 ToCurrent(IDataStorageObject dso) => dso switch
+    {
+        V1 v1 => v1,
+        _ => throw new InvalidOperationException($"Unexpected {nameof(PushedAuthorizationDso)} type {dso.GetType()}.")
+    };
+
     internal sealed record V1 : IDataStorageObject
     {
         public static DataStorageObjectVersion DsoVersion { get; } = new(EntityType, 1);

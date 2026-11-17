@@ -1,0 +1,42 @@
+@page
+@model LoginModel
+@{
+  ViewData["Title"] = "Log in";
+}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-container">
+      <h2 class="mb-4 brand-title text-center">Log in</h2>
+
+      @if (Model.ErrorMessages.Count > 0)
+      {
+        <div class="alert alert-danger mb-4" role="alert">
+          @foreach (var error in Model.ErrorMessages)
+          {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+          }
+        </div>
+      }
+
+      <form method="post">
+        <input type="hidden" asp-for="ReturnUrl"/>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors alert alert-danger" role="alert"></div>
+
+        <div class="mb-4">
+          <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
+          <input asp-for="Email" type="email" class="form-control form-control-lg"
+                 placeholder="Enter your email address" required autofocus autocomplete="email"/>
+          <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-envelope-check me-2"></i>Send one-time password (OTP)
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+@page
+@model AuthenticationFlowWithWebComponent.Pages.SignInErrorModel
+@{
+    ViewData["Title"] = "Sign In Error";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container text-center">
+            <div class="text-danger mb-4" style="font-size: 4rem;">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <h2 class="brand-title mb-4">Sign In Error</h2>
+            
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                @Model.ErrorMessage
+            </div>
+
+            <div class="d-grid">
+                <a asp-page="/Index" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i>Return to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

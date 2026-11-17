@@ -1,0 +1,162 @@
+@page
+@model ExternalAuthentication.Pages.IndexModel
+@{
+  ViewData["Title"] = "Home page";
+}
+
+<div class="persona-hero text-center">
+  <h1>Welcome to Persona</h1>
+  <p class="lead m-0">
+    A demonstration of External Authentication using Google and Microsoft providers.
+  </p>
+</div>
+
+<div class="mt-4">
+
+  @if (User.Identity?.IsAuthenticated == true)
+  {
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+      </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+      <div class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+      </div>
+    }
+
+    <div class="mb-4">
+      <h3 class="mb-3">Manage External Authenticators</h3>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 table-purple-header">
+          <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Status</th>
+            <th>Provider SubjectId</th>
+            <th class="text-end">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          @foreach (var provider in Model.ExternalProviders)
+          {
+            var linkedAuthenticator = Model.UserExternalAuthenticatorAddresses?.FirstOrDefault(a => a.Name.ToString() == provider.Name);
+            var isLinked = linkedAuthenticator != null;
+
+            <tr>
+              <td>
+                @provider.DisplayName
+              </td>
+              <td>
+                @if (isLinked)
+                {
+                  <span class="badge bg-success">
+                          <i class="bi bi-check-circle"></i> Linked
+                        </span>
+                }
+                else
+                {
+                  <span class="badge bg-secondary">Not Linked</span>
+                }
+              </td>
+              <td>
+                @if (isLinked)
+                {
+                  <code class="text-muted">@linkedAuthenticator!.SubjectId</code>
+                }
+                else
+                {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td class="text-end">
+                @if (isLinked)
+                {
+                  var isLastAuthenticator = Model.UserExternalAuthenticatorAddresses?.Count == 1;
+                  <form method="post" asp-page-handler="RemoveAuthenticator" class="d-inline">
+                    <input type="hidden" name="authenticatorName" value="@linkedAuthenticator!.Name"/>
+                    <input type="hidden" name="authenticatorSubjectId" value="@linkedAuthenticator.SubjectId"/>
+                    <button type="submit" class="btn btn-sm btn-outline-danger" disabled="@isLastAuthenticator"
+                            onclick="return confirm('Are you sure you want to remove this authenticator?');"
+                            title="@(isLastAuthenticator ? "Cannot remove the last authenticator" : "")">
+                      <i class="bi bi-trash"></i> Remove
+                    </button>
+                  </form>
+                }
+                else
+                {
+                  <form method="post" asp-page-handler="AddAuthenticator" class="d-inline">
+                    <button type="submit" name="provider" value="@provider.Name"
+                            class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-plus-circle"></i> Add
+                    </button>
+                  </form>
+                }
+              </td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-4 mb-4">
+      <h3 class="mb-3">Account Management</h3>
+      <div class="card shadow-sm border-danger">
+        <div class="card-body">
+          <h5 class="card-title text-danger">Delete Account</h5>
+          <p class="card-text text-muted">Permanently delete your account and all associated data. This action cannot be
+            undone.</p>
+          <form method="post" asp-page-handler="DeleteAccount">
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');">
+              <i class="bi bi-trash"></i> Delete Account
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    @if (User.Claims.Any())
+    {
+      <h3 class="mt-4 mb-3">Authentication Cookie</h3>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+              Claims
+            </div>
+            <div class="card-body">
+              @foreach (var claim in User.Claims)
+              {
+                <div class="mb-3">
+                  <div class="fw-bold">@claim.Type.Split('/').Last()</div>
+                  <div>@claim.Value</div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+  else
+  {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5 class="card-title mb-3">You are not signed in</h5>
+        <p class="text-muted mb-4">Sign in with an external provider to view your profile and claims</p>
+
+        <div>
+          <a asp-page="/Login" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

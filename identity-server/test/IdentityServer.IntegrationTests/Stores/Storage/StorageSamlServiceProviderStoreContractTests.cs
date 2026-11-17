@@ -79,7 +79,6 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
                 .Select(c => new SamlServiceProviderDso.CertificateDso(Guid.NewGuid(), Convert.ToBase64String(c.Certificate.RawData), (int)c.Use))
                 .ToList(),
             AllowIdpInitiated = sp.AllowIdpInitiated,
-            AllowedScopes = (sp.AllowedScopes ?? []).ToList(),
             ClaimMappings = new Dictionary<string, string>(sp.ClaimMappings),
             AuthnContextMappings = new Dictionary<string, string>(sp.AuthnContextMappings ?? new Dictionary<string, string>()),
             RequestedClaimTypes = sp.RequestedClaimTypes ?? [],
@@ -89,6 +88,46 @@ public class StorageSamlServiceProviderStoreContractTests : SamlServiceProviderS
             AllowedSignatureAlgorithms = sp.AllowedSignatureAlgorithms ?? [],
         };
 
-        await repository.CreateAsync(id, dso, _ct);
+        var scopes = await ResolveScopeLinksAsync(sp.AllowedScopes, _ct);
+        await repository.CreateAsync(id, dso, scopes, _ct);
+    }
+
+    // Contract fixtures name scopes that don't need to exist for ISamlServiceProviderStore's own behavior
+    // (it reads stored data, not admin-validated input), but allowed scopes are now Storage links to
+    // identity resources, so each name must resolve to an identity resource entity. Creates one per unique
+    // name, reusing it across seed calls.
+    private async Task<List<SamlAllowedScopeLink>> ResolveScopeLinksAsync(ICollection<string> scopeNames, Ct ct)
+    {
+        var identityResourceRepository = _provider.GetRequiredService<Duende.IdentityServer.Stores.Storage.IdentityResources.IdentityResourceRepository>();
+        var links = new List<SamlAllowedScopeLink>(scopeNames.Count);
+
+        foreach (var name in scopeNames.Distinct(StringComparer.Ordinal))
+        {
+            var existing = await identityResourceRepository.TryReadByNameAsync(name, ct);
+            Guid resourceId;
+            if (existing is not null)
+            {
+                resourceId = existing.Value.Dso.Id;
+            }
+            else
+            {
+                var id = UuidV7.New();
+                resourceId = id.Value;
+                await identityResourceRepository.CreateAsync(id, new Duende.IdentityServer.Stores.Storage.IdentityResourceDso.V1
+                {
+                    Id = resourceId,
+                    Name = name,
+                    Enabled = true,
+                    ShowInDiscoveryDocument = true,
+                    Required = false,
+                    Emphasize = false,
+                    UserClaims = []
+                }, ct);
+            }
+
+            links.Add(new SamlAllowedScopeLink(name, resourceId));
+        }
+
+        return links;
     }
 }

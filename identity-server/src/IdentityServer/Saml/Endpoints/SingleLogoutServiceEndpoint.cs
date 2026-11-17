@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Xml;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
@@ -65,6 +66,14 @@ internal sealed class SingleLogoutServiceEndpoint(
             return new Saml2FrontChannelResult
             {
                 Error = "Invalid base64 encoding in SAML logout message"
+            };
+        }
+        catch (XmlException e)
+        {
+            logger.SamlParsingError(e);
+            return new Saml2FrontChannelResult
+            {
+                Error = "The SAML logout request could not be processed"
             };
         }
 

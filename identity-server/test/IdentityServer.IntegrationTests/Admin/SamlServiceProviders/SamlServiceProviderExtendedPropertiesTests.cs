@@ -6,7 +6,7 @@
 using Duende.IdentityServer.Admin;
 using Duende.IdentityServer.Admin.SamlServiceProviders;
 using Duende.IdentityServer.Models;
-using Duende.Storage.EntityAttributeValue;
+using Duende.IdentityServer.DataExtensions;
 using Duende.Storage.Schema;
 using Duende.Storage.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,10 +50,10 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(sp, _ct);
         createResult.IsSuccess.ShouldBeTrue($"Create failed: {createResult}");
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var loaded = getResult.Item;
+        var loaded = getResult.Item!;
         loaded.ExtendedProperties.Count.ShouldBe(1);
         loaded.ExtendedProperties.TryGet(TestSamlServiceProviderAttributes.Environment.Code, out var attr).ShouldBeTrue();
         attr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("production");
@@ -99,6 +99,7 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
         var admin = scope.ServiceProvider.GetRequiredService<ISamlServiceProviderAdmin>();
 
         var sp = CreateMinimalConfig();
+        sp.AllowedScopes = [];
         // No extended properties set
 
         var result = await admin.CreateAsync(sp, _ct);
@@ -131,6 +132,7 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
         var admin = scope.ServiceProvider.GetRequiredService<ISamlServiceProviderAdmin>();
 
         var sp = CreateMinimalConfig();
+        sp.AllowedScopes = [];
         sp.ExtendedProperties.Set(AttributeCode.Create("some_attr"), "value");
 
         var result = await admin.CreateAsync(sp, _ct);
@@ -149,18 +151,18 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(sp, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(TestSamlServiceProviderAttributes.Environment, "staging");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
         updateResult.IsSuccess.ShouldBeTrue($"Update failed: {updateResult}");
 
-        var afterUpdate = await admin.GetAsync(createResult.Id, _ct);
+        var afterUpdate = await admin.GetAsync(createResult.Id!, _ct);
         afterUpdate.Found.ShouldBeTrue();
-        afterUpdate.Item.ExtendedProperties.TryGet(TestSamlServiceProviderAttributes.Environment.Code, out var attr).ShouldBeTrue();
+        afterUpdate.Item!.ExtendedProperties.TryGet(TestSamlServiceProviderAttributes.Environment.Code, out var attr).ShouldBeTrue();
         attr.ShouldBeOfType<AttributeValue<string>>().TypedValue.ShouldBe("staging");
     }
 
@@ -173,20 +175,24 @@ public sealed class SamlServiceProviderExtendedPropertiesTests : IAsyncLifetime
         var createResult = await admin.CreateAsync(sp, _ct);
         createResult.IsSuccess.ShouldBeTrue();
 
-        var getResult = await admin.GetAsync(createResult.Id, _ct);
+        var getResult = await admin.GetAsync(createResult.Id!, _ct);
         getResult.Found.ShouldBeTrue();
 
-        var toUpdate = getResult.Item.ToUpdate();
+        var toUpdate = getResult.Item!.ToUpdate();
         toUpdate.ExtendedProperties.Set(AttributeCode.Create("bad_attr"), "value");
 
-        var updateResult = await admin.UpdateAsync(createResult.Id, toUpdate, getResult.Version!, _ct);
+        var updateResult = await admin.UpdateAsync(createResult.Id!, toUpdate, getResult.Version!, _ct);
 
         updateResult.IsSuccess.ShouldBeFalse();
         updateResult.Errors.ShouldNotBeNull();
         updateResult.Errors.ShouldContain(e => e.Code == "validation_failed");
     }
 
-    public async ValueTask InitializeAsync() => await _fixture.InitializeAsync();
+    public async ValueTask InitializeAsync()
+    {
+        await _fixture.InitializeAsync();
+        await _fixture.EnsureIdentityResourcesAsync("openid");
+    }
 
     public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 }

@@ -1,0 +1,302 @@
+@page "{id}"
+@model PlatformUserManagementApp.Pages.Users.EditModel
+@using Duende.IdentityServer.DataExtensions
+@{
+    ViewData["Title"] = "Edit User";
+    const int horizontalThreshold = 4;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="brand-title mb-0">Edit User</h2>
+    <a asp-page="/Users/Detail" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Cancel
+    </a>
+</div>
+
+@if (Model.ErrorMessages.Count > 0)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in Model.ErrorMessages)
+        {
+            <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+        }
+    </div>
+}
+
+@if (Model.UserProfile is not null)
+{
+    <form method="post">
+        <div class="card">
+            <div class="card-body">
+                @{
+                    var orderedGroups = Model.Groups.Values.OrderBy(g => g.Order).ToList();
+                    var grouped = Model.Schema.Values
+                        .Where(d => d.GroupCode is not null)
+                        .ToLookup(d => d.GroupCode!.Value);
+                    var ungrouped = Model.Schema.Values
+                        .Where(d => d.GroupCode is null)
+                        .OrderBy(d => d.Order).ThenBy(d => d.Code.Value)
+                        .ToList();
+                }
+                @foreach (var group in orderedGroups)
+                {
+                    var definitions = grouped[group.Code.Value].OrderBy(d => d.Order).ThenBy(d => d.Code.Value).ToList();
+                    if (definitions.Count == 0)
+                    {
+                        continue;
+                    }
+                    <h6 class="text-uppercase text-muted small mt-3 mb-2">@group.DisplayName?.Value</h6>
+                    @foreach (var definition in definitions)
+                    {
+                        @if (definition.AttributeType is ListAttributeType listType && listType.ElementType is ComplexAttributeType complexElement)
+                        {
+                            @* List of complex objects *@
+                            var items = new List<IReadOnlyDictionary<string, object>>();
+                            if (Model.UserProfile.Attributes.TryGetValue(definition.Code, out var listAttr)
+                                && listAttr.UntypedValue is IReadOnlyList<object> rawList)
+                            {
+                                foreach (var item in rawList)
+                                {
+                                    if (item is IReadOnlyDictionary<string, object> dict)
+                                    {
+                                        items.Add(dict);
+                                    }
+                                }
+                            }
+
+                            if (items.Count == 0)
+                            {
+                                items.Add(new Dictionary<string, object>());
+                            }
+
+                            var isHorizontal = complexElement.Properties.Count <= horizontalThreshold;
+
+                            <div class="mb-3" data-list-attr="@definition.Code.Value" data-list-layout="@(isHorizontal ? "horizontal" : "grid")">
+                                @for (var i = 0; i < items.Count; i++)
+                                {
+                                    var item = items[i];
+                                    <div class="list-item border rounded p-2 mb-2 bg-light @(isHorizontal ? "d-flex align-items-end gap-2" : "")">
+                                        @if (isHorizontal)
+                                        {
+                                            @foreach (var (propName, propType) in complexElement.Properties)
+                                            {
+                                                var fieldName = $"list_{definition.Code.Value}[{i}].{propName.Value}";
+                                                item.TryGetValue(propName.Value, out var propVal);
+                                                <div style="flex: 1 1 0%">
+                                                    <label class="form-label small mb-1" for="@fieldName">@propName.Value</label>
+                                                    @if (propType.Type is ScalarAttributeType { DataType: ScalarDataType.Boolean })
+                                                    {
+                                                        <select id="@fieldName" name="@fieldName" class="form-select form-select-sm">
+                                                            <option value="">—</option>
+                                                            <option value="true" selected="@(propVal is true)">true</option>
+                                                            <option value="false" selected="@(propVal is false)">false</option>
+                                                        </select>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="@fieldName" name="@fieldName"
+                                                               class="form-control form-control-sm"
+                                                               value="@(propVal?.ToString() ?? "")" />
+                                                    }
+                                                </div>
+                                            }
+                                            <button type="button" class="btn btn-outline-danger btn-sm list-item-remove" title="Remove">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex justify-content-end mb-2">
+                                                <button type="button" class="btn btn-outline-danger btn-sm list-item-remove" title="Remove">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                            <div class="row">
+                                                @foreach (var (propName, propType) in complexElement.Properties)
+                                                {
+                                                    var fieldName = $"list_{definition.Code.Value}[{i}].{propName.Value}";
+                                                    item.TryGetValue(propName.Value, out var propVal);
+                                                    <div class="col-md-6 mb-2">
+                                                        <label class="form-label small mb-1" for="@fieldName">@propName.Value</label>
+                                                        @if (propType.Type is ScalarAttributeType { DataType: ScalarDataType.Boolean })
+                                                        {
+                                                            <select id="@fieldName" name="@fieldName" class="form-select form-select-sm">
+                                                                <option value="">—</option>
+                                                                <option value="true" selected="@(propVal is true)">true</option>
+                                                                <option value="false" selected="@(propVal is false)">false</option>
+                                                            </select>
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="text" id="@fieldName" name="@fieldName"
+                                                                   class="form-control form-control-sm"
+                                                                   value="@(propVal?.ToString() ?? "")" />
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                <button type="button" class="btn btn-outline-primary btn-sm list-item-add">
+                                    <i class="bi bi-plus-lg me-1"></i>Add
+                                </button>
+                            </div>
+                        }
+                        else if (definition.AttributeType is ComplexAttributeType complexType)
+                        {
+                            @* Single complex object *@
+                            var complexDict = new Dictionary<string, object>();
+                            if (Model.UserProfile.Attributes.TryGetValue(definition.Code, out var complexAttr)
+                                && complexAttr.UntypedValue is IReadOnlyDictionary<string, object> existingDict)
+                            {
+                                foreach (var kv in existingDict)
+                                {
+                                    complexDict[kv.Key] = kv.Value;
+                                }
+                            }
+
+                            var isComplexHorizontal = complexType.Properties.Count <= horizontalThreshold;
+
+                            <div class="mb-3">
+                                <div class="border rounded p-2 bg-light @(isComplexHorizontal ? "d-flex align-items-end gap-2" : "")">
+                                    @if (isComplexHorizontal)
+                                    {
+                                        @foreach (var (propName, propType) in complexType.Properties)
+                                        {
+                                            var fieldName = $"complex_{definition.Code.Value}.{propName.Value}";
+                                            complexDict.TryGetValue(propName.Value, out var propVal);
+                                            <div style="flex: 1 1 0%">
+                                                <label class="form-label small mb-1" for="@fieldName">@propName.Value</label>
+                                                @if (propType.Type is ScalarAttributeType { DataType: ScalarDataType.Boolean })
+                                                {
+                                                    <select id="@fieldName" name="@fieldName" class="form-select form-select-sm">
+                                                        <option value="">—</option>
+                                                        <option value="true" selected="@(propVal is true)">true</option>
+                                                        <option value="false" selected="@(propVal is false)">false</option>
+                                                    </select>
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" id="@fieldName" name="@fieldName"
+                                                           class="form-control form-control-sm"
+                                                           value="@(propVal?.ToString() ?? "")" />
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="row">
+                                            @foreach (var (propName, propType) in complexType.Properties)
+                                            {
+                                                var fieldName = $"complex_{definition.Code.Value}.{propName.Value}";
+                                                complexDict.TryGetValue(propName.Value, out var propVal);
+                                                <div class="col-md-6 mb-2">
+                                                    <label class="form-label small mb-1" for="@fieldName">@propName.Value</label>
+                                                    @if (propType.Type is ScalarAttributeType { DataType: ScalarDataType.Boolean })
+                                                    {
+                                                        <select id="@fieldName" name="@fieldName" class="form-select form-select-sm">
+                                                            <option value="">—</option>
+                                                            <option value="true" selected="@(propVal is true)">true</option>
+                                                            <option value="false" selected="@(propVal is false)">false</option>
+                                                        </select>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="@fieldName" name="@fieldName"
+                                                               class="form-control form-control-sm"
+                                                               value="@(propVal?.ToString() ?? "")" />
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            @* Scalar attribute *@
+                            var currentValue = Model.UserProfile.Attributes.TryGetValue(definition.Code, out var av)
+                                ? av.UntypedValue?.ToString() ?? ""
+                                : "";
+                            <div class="mb-3">
+                                <label class="form-label" for="attr_@definition.Code.Value">
+                                    @definition.Code.Value
+                                    <span class="text-muted small ms-1">(@definition.DataType)</span>
+                                </label>
+                                @if (definition.DataType == ScalarDataType.Boolean)
+                                {
+                                    <select id="attr_@definition.Code.Value" name="attrs[@definition.Code.Value]" class="form-select">
+                                        <option value="">— not set —</option>
+                                        <option value="true" selected="@(currentValue == "True")">true</option>
+                                        <option value="false" selected="@(currentValue == "False")">false</option>
+                                    </select>
+                                }
+                                else
+                                {
+                                    <input type="text" id="attr_@definition.Code.Value"
+                                           name="attrs[@definition.Code.Value]"
+                                           class="form-control"
+                                           value="@currentValue" />
+                                }
+                                @if (!string.IsNullOrWhiteSpace(definition.Description?.Value))
+                                {
+                                    <div class="form-text">@definition.Description?.Value</div>
+                                }
+                            </div>
+                        }
+                    }
+                }
+                @* Ungrouped attributes *@
+                @if (ungrouped.Count > 0)
+                {
+                    <h6 class="text-uppercase text-muted small mt-3 mb-2">Other</h6>
+                    @foreach (var definition in ungrouped)
+                    {
+                        var currentValue = Model.UserProfile.Attributes.TryGetValue(definition.Code, out var av)
+                            ? av.UntypedValue?.ToString() ?? ""
+                            : "";
+                        <div class="mb-3">
+                            <label class="form-label" for="attr_@definition.Code.Value">
+                                @definition.Code.Value
+                                <span class="text-muted small ms-1">(@definition.DataType)</span>
+                            </label>
+                            @if (definition.DataType == ScalarDataType.Boolean)
+                            {
+                                <select id="attr_@definition.Code.Value" name="attrs[@definition.Code.Value]" class="form-select">
+                                    <option value="">— not set —</option>
+                                    <option value="true" selected="@(currentValue == "True")">true</option>
+                                    <option value="false" selected="@(currentValue == "False")">false</option>
+                                </select>
+                            }
+                            else
+                            {
+                                <input type="text" id="attr_@definition.Code.Value"
+                                       name="attrs[@definition.Code.Value]"
+                                       class="form-control"
+                                       value="@currentValue" />
+                            }
+                            @if (!string.IsNullOrWhiteSpace(definition.Description?.Value))
+                            {
+                                <div class="form-text">@definition.Description?.Value</div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i>Save changes
+                </button>
+                <a asp-page="/Users/Detail" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/list-editor.js"></script>
+}

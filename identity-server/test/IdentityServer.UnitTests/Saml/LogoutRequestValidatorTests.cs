@@ -36,7 +36,7 @@ public sealed class LogoutRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedLogoutRequest(trustLevel: TrustLevel.ConfiguredKey);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -50,7 +50,7 @@ public sealed class LogoutRequestValidatorTests
             trustLevel: TrustLevel.ConfiguredKey,
             issuerEntityId: "https://unknown.example.com");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -65,7 +65,7 @@ public sealed class LogoutRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedLogoutRequest(trustLevel: TrustLevel.ConfiguredKey);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -80,7 +80,7 @@ public sealed class LogoutRequestValidatorTests
         var validator = CreateValidator(sp: sp);
         var request = CreateValidatedLogoutRequest(trustLevel: TrustLevel.ConfiguredKey);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -93,7 +93,7 @@ public sealed class LogoutRequestValidatorTests
         var validator = CreateValidator();
         var request = CreateValidatedLogoutRequest(trustLevel: TrustLevel.None);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -108,7 +108,7 @@ public sealed class LogoutRequestValidatorTests
             trustLevel: TrustLevel.ConfiguredKey,
             version: "1.1");
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.VersionMismatch);
@@ -126,7 +126,7 @@ public sealed class LogoutRequestValidatorTests
             trustLevel: TrustLevel.ConfiguredKey,
             notOnOrAfter: expiredTime);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -145,7 +145,7 @@ public sealed class LogoutRequestValidatorTests
             trustLevel: TrustLevel.ConfiguredKey,
             notOnOrAfter: futureTime);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -159,7 +159,7 @@ public sealed class LogoutRequestValidatorTests
             trustLevel: TrustLevel.ConfiguredKey,
             destination: null);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -174,7 +174,7 @@ public sealed class LogoutRequestValidatorTests
             trustLevel: TrustLevel.ConfiguredKey,
             subject: null);
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -197,7 +197,7 @@ public sealed class LogoutRequestValidatorTests
             sessionIndex: "_session-123",
             subject: CreateAuthenticatedPrincipal());
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }
@@ -214,7 +214,7 @@ public sealed class LogoutRequestValidatorTests
             nameId: "user@example.com",
             subject: CreateAuthenticatedPrincipal());
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.SessionFound.ShouldBeFalse();
@@ -237,7 +237,7 @@ public sealed class LogoutRequestValidatorTests
             nameId: "user@example.com",
             subject: CreateAuthenticatedPrincipal());
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(SamlStatusCodes.Requester);
@@ -262,7 +262,7 @@ public sealed class LogoutRequestValidatorTests
             sessionIndex: "_wrong-session",
             subject: CreateAuthenticatedPrincipal());
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
         result.SessionFound.ShouldBeFalse();
@@ -286,7 +286,7 @@ public sealed class LogoutRequestValidatorTests
             sessionIndex: null,
             subject: CreateAuthenticatedPrincipal());
 
-        var result = await validator.ValidateAsync(request, CancellationToken.None);
+        var result = await validator.ValidateAsync(request, Ct.None);
 
         result.IsError.ShouldBeFalse();
     }

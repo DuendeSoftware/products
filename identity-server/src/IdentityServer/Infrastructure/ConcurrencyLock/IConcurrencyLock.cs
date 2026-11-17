@@ -7,6 +7,7 @@ namespace Duende.IdentityServer.Internal;
 /// <summary>
 /// Interface to model locking.
 /// </summary>
+[Obsolete("IConcurrencyLock<T> is no longer used by IdentityServer. It is retained only for source compatibility with code that still injects it. It will be removed in a future major version.")]
 public interface IConcurrencyLock<T>
 {
     /// <summary>

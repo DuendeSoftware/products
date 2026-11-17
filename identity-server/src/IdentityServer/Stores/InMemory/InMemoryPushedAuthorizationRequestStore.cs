@@ -14,14 +14,34 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
 {
-    private readonly ConcurrentDictionary<string, PushedAuthorizationRequest> _repository = new ConcurrentDictionary<string, PushedAuthorizationRequest>();
+    private readonly PartitionedState<PushedAuthorizationRequestState> _state;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemoryPushedAuthorizationRequestStore"/> class.
+    /// It holds a single partition and isn't split by space; to partition by space use
+    /// <see cref="InMemoryPushedAuthorizationRequestStore(InMemoryStoreState)"/>.
+    /// </summary>
+    public InMemoryPushedAuthorizationRequestStore() : this(new InMemoryStoreState())
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InMemoryPushedAuthorizationRequestStore"/> class
+    /// that partitions its data using the given state source.
+    /// </summary>
+    /// <param name="state">The state source, which decides how data is partitioned.</param>
+    public InMemoryPushedAuthorizationRequestStore(InMemoryStoreState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        _state = new(state.CurrentSpace);
+    }
 
     /// <inheritdoc/>
     public Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Store");
 
-        _repository[pushedAuthorizationRequest.ReferenceValueHash] = pushedAuthorizationRequest;
+        _state.Current.Items[pushedAuthorizationRequest.ReferenceValueHash] = pushedAuthorizationRequest;
 
         return Task.CompletedTask;
     }
@@ -30,7 +50,12 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     public Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Get");
-        _repository.TryGetValue(referenceValueHash, out var request);
+        if (!_state.TryGetCurrent(out var state))
+        {
+            return Task.FromResult<PushedAuthorizationRequest?>(null);
+        }
+
+        state.Items.TryGetValue(referenceValueHash, out var request);
 
         return Task.FromResult(request);
     }
@@ -39,7 +64,15 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     public Task ConsumeByHashAsync(string referenceValueHash, Ct ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Remove");
-        _repository.TryRemove(referenceValueHash, out _);
+        if (_state.TryGetCurrent(out var state))
+        {
+            state.Items.TryRemove(referenceValueHash, out _);
+        }
         return Task.CompletedTask;
     }
+}
+
+internal sealed class PushedAuthorizationRequestState
+{
+    public ConcurrentDictionary<string, PushedAuthorizationRequest> Items { get; } = new();
 }

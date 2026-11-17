@@ -1,0 +1,146 @@
+@model string
+
+@{
+    var steps = new[]
+    {
+        new { Name = "Enter Email", Page = "Register", Icon = "bi-envelope" },
+        new { Name = "Verify Email", Page = "RegisterVerify", Icon = "bi-shield-check" },
+        new { Name = "Set Password", Page = "RegisterSetPassword", Icon = "bi-key" },
+        new { Name = "Save Codes", Page = "RegisterShowRecoveryCodes", Icon = "bi-download" },
+        new { Name = "Enable 2FA", Page = "RegisterEnableAuthenticator", Icon = "bi-qr-code" },
+    };
+
+    var currentPage = Model ?? "";
+    var currentIndex = Array.FindIndex(steps, s => s.Page.Equals(currentPage, StringComparison.OrdinalIgnoreCase));
+
+    // Fallback: if exact match fails, try contains
+    if (currentIndex == -1)
+    {
+        currentIndex = Array.FindIndex(steps, s => currentPage.Contains(s.Page, StringComparison.OrdinalIgnoreCase));
+    }
+}
+
+<div class="registration-progress mb-4">
+    <div class="progress-steps d-flex justify-content-between align-items-center">
+        @for (int i = 0; i < steps.Length; i++)
+        {
+            var step = steps[i];
+            var isCompleted = i < currentIndex;
+            var isCurrent = i == currentIndex;
+            var statusClass = isCompleted ? "completed" : (isCurrent ? "active" : "pending");
+
+            <div class="progress-step @statusClass flex-fill text-center position-relative">
+                <div class="step-circle mx-auto">
+                    @if (isCompleted)
+                    {
+                        <i class="bi bi-check-lg"></i>
+                    }
+                    else
+                    {
+                        <i class="@step.Icon"></i>
+                    }
+                </div>
+                <div class="step-label mt-2">@step.Name</div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .registration-progress {
+        background-color: #f8f9fa;
+        padding: 2rem 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .progress-steps {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .progress-step {
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background-color: #fff;
+        border: 3px solid #dee2e6;
+        color: #6c757d;
+        position: relative;
+    }
+
+    .progress-step.completed .step-circle {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .progress-step.active .step-circle {
+        background-color: #5e2d91;
+        border-color: #5e2d91;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(94, 45, 145, 0.2);
+    }
+
+    .step-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6c757d;
+    }
+
+    .progress-step.completed .step-label {
+        color: #28a745;
+    }
+
+    .progress-step.active .step-label {
+        color: #5e2d91;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .registration-progress {
+            padding: 1.5rem 0.5rem;
+        }
+
+        .step-circle {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .progress-line {
+            top: 17px;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            font-size: 0.875rem;
+        }
+
+        .progress-line {
+            top: 15px;
+            height: 2px;
+        }
+
+        .step-label {
+            font-size: 0.7rem;
+        }
+    }
+</style>

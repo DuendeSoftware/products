@@ -1,0 +1,142 @@
+@page
+@model AuthenticationFlowWithWebComponent.Pages.IndexModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<style>
+    auth-component {
+        --auth-primary-color: #5B6FED;
+        --auth-primary-hover: #4557D2;
+    }
+</style>
+
+<div class="persona-hero text-center">
+    <p class="lead m-0">
+      An experiment of a unified authentication component that will support different types of authentication flows.
+      <br/>
+      <i>We currently do not support the usage of recovery codes</i>
+    </p>
+</div>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <auth-component config-url="/api/auth/config" id="auth-component"></auth-component>
+    </div>
+</div>
+
+<div class="event-panel">
+    <button class="event-panel-toggle" onclick="toggleEventPanel()" aria-label="Toggle event log">
+        <span class="event-badge" id="eventCount">0</span>
+        <i class="bi bi-activity"></i>
+    </button>
+    <div class="event-panel-content" id="eventPanelContent">
+        <div class="event-panel-header">
+            <h6 class="mb-0">Web Component Event Log</h6>
+            <button type="button" class="btn-clear" onclick="clearEvents()" title="Clear events">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div id="eventLog" class="event-log">
+            <div class="event-empty">No events yet</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="/dist/auth-component.js"></script>
+    <script>
+        const authComponent = document.getElementById('auth-component');
+        const eventLog = document.getElementById('eventLog');
+
+        let eventCount = 0;
+
+        function toggleEventPanel() {
+            const content = document.getElementById('eventPanelContent');
+            content.classList.toggle('expanded');
+        }
+
+        function updateEventCount() {
+            const badge = document.getElementById('eventCount');
+            if (badge) {
+                badge.textContent = eventCount;
+                badge.classList.toggle('visible', eventCount > 0);
+            }
+        }
+
+        function clearEvents() {
+            if (eventLog) {
+                eventLog.innerHTML = '<div class="event-empty">Events cleared</div>';
+                eventCount = 0;
+                updateEventCount();
+            }
+        }
+
+        function logEvent(type, detail, isError = false, isSuccess = false) {
+            if (!eventLog) return;
+
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const eventItem = document.createElement('div');
+            eventItem.className = `event-item ${isError ? 'error' : ''} ${isSuccess ? 'success' : ''}`;
+
+            let icon = 'bi-info-circle';
+            if (isSuccess) icon = 'bi-check-circle';
+            else if (isError) icon = 'bi-x-circle';
+
+            const detailStr = typeof detail === 'object' ?
+                Object.entries(detail).map(([k, v]) => `${k}: ${v}`).join(', ') :
+                String(detail);
+
+            eventItem.innerHTML = `
+                <div class="event-icon"><i class="bi ${icon}"></i></div>
+                <div class="event-content">
+                    <div class="event-type">${type.replace(/-/g, ' ')}</div>
+                    <div class="event-detail">${detailStr}</div>
+                    <div class="event-time">${timestamp}</div>
+                </div>
+            `;
+
+            if (eventLog.querySelector('.event-empty')) {
+                eventLog.innerHTML = '';
+            }
+
+            eventLog.insertBefore(eventItem, eventLog.firstChild);
+            eventCount++;
+            updateEventCount();
+
+            const content = document.getElementById('eventPanelContent');
+            if (!content.classList.contains('expanded')) {
+                content.classList.add('expanded');
+            }
+        }
+
+        if (authComponent) {
+            authComponent.addEventListener('auth-state-change', (e) => {
+                console.log('State changed:', e.detail);
+                logEvent('auth-state-change', e.detail);
+            });
+
+            authComponent.addEventListener('auth-success', (e) => {
+                console.log('Authentication successful:', e.detail);
+                logEvent('auth-success', e.detail, false, true);
+                window.location.href = '/Profile';
+            });
+
+            authComponent.addEventListener('auth-error', (e) => {
+                console.error('Authentication error:', e.detail);
+                logEvent('auth-error', e.detail, true);
+            });
+
+            authComponent.addEventListener('mfa-required', (e) => {
+                console.log('MFA required:', e.detail);
+                logEvent('mfa-required', e.detail);
+            });
+
+            authComponent.addEventListener('registration-success', (e) => {
+                console.log('Registration successful:', e.detail);
+                logEvent('registration-success', e.detail, false, true);
+            });
+        }
+    </script>
+}
+

@@ -14,7 +14,9 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Saml.Endpoints;
+using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer.Stores;
+using Duende.Spaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -125,6 +127,8 @@ public static class IdentityServerApplicationBuilderExtensions
 
                 ValidateOptions(options, logger);
 
+                LogSharedSigningKeysWithSpaces(serviceProvider, options, logger);
+
                 ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
             }
         }
@@ -175,6 +179,25 @@ public static class IdentityServerApplicationBuilderExtensions
             logger.UsingSchemeAsDefaultASPNETCoreScheme3((await schemes.GetDefaultSignOutSchemeAsync())?.Name);
             logger.UsingSchemeAsDefaultASPNETCoreScheme4((await schemes.GetDefaultChallengeSchemeAsync())?.Name);
             logger.UsingSchemeAsDefaultASPNETCoreScheme5((await schemes.GetDefaultForbidSchemeAsync())?.Name);
+        }
+    }
+
+    private static void LogSharedSigningKeysWithSpaces(IServiceProvider services, IdentityServerOptions options, ILogger logger)
+    {
+        var registrations = services.GetService<ServiceCollectionAccessor>()?.ServiceCollection;
+        if (registrations == null || !registrations.Any(d => d.ServiceType == typeof(ISpaceContextAccessor)))
+        {
+            return;
+        }
+
+        if (registrations.Any(d => d.ServiceType == typeof(ISigningCredentialStore)))
+        {
+            logger.SigningKeysSharedAcrossSpaces("a static signing credential is registered");
+        }
+        else if (options.KeyManagement.Enabled &&
+                 registrations.LastOrDefault(d => d.ServiceType == typeof(ISigningKeyStore) && !d.IsKeyedService)?.ImplementationType == typeof(FileSystemKeyStore))
+        {
+            logger.SigningKeysSharedAcrossSpaces("automatic keys are stored by the file-system key store");
         }
     }
 

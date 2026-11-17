@@ -16,11 +16,11 @@ public interface ISaml2MetadataResponseGenerator
     /// Generates metadata response.
     /// </summary>
     /// <param name="issuer">Entity Id of IdentityServer</param>
-    /// <param name="signingKeys"></param>
+    /// <param name="signingKeys">The certificates to publish as signing keys in the metadata</param>
     /// <param name="options">Saml options</param>
     /// <param name="baseUrl">Base url of IdentityServer</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <returns></returns>
+    /// <returns>The metadata result containing the generated XML.</returns>
     Task<Saml2MetadataResult> GenerateMetadataAsync(string issuer, IEnumerable<X509Certificate2> signingKeys,
         SamlOptions options, string baseUrl, Ct ct);
 }

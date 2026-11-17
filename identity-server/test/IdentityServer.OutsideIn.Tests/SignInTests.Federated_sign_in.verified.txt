@@ -1,0 +1,173 @@
+﻿{
+  Steps: [
+    {
+      Request: GET {web}/test/signin,
+      Status: 302 Found,
+      SetCookies: [
+        .AspNetCore.OpenIdConnect.Nonce.{NonceCookie_1} ({web}/signin-oidc, secure, httponly, samesite=none, expires={Start+15m}),
+        .AspNetCore.Correlation.{Correlation_1} ({web}/signin-oidc, secure, httponly, samesite=none, expires={Start+15m})
+      ]
+    },
+    {
+      Request: GET {sut}/connect/authorize,
+      Query: {
+        client_id: {client:web},
+        request_uri: {RequestUri_1}
+      },
+      Status: 303 See Other
+    },
+    {
+      Request: GET {sut}/account/login,
+      Query: {
+        ReturnUrl: {
+          Url: {sut}/connect/authorize/callback,
+          Query: {
+            client_id: {client:web},
+            request_uri: {RequestUri_1}
+          }
+        }
+      },
+      Status: 302 Found,
+      SetCookies: [
+        .AspNetCore.OpenIdConnect.Nonce.{NonceCookie_2} ({sut}/federation/upstream/signin, secure, httponly, samesite=none, expires={Start+15m}),
+        .AspNetCore.Correlation.{Correlation_2} ({sut}/federation/upstream/signin, secure, httponly, samesite=none, expires={Start+15m})
+      ]
+    },
+    {
+      Request: GET {upstream}/connect/authorize,
+      Query: {
+        client_id: {client:sut},
+        request_uri: {RequestUri_2}
+      },
+      Status: 303 See Other
+    },
+    {
+      Request: GET {upstream}/account/login,
+      Query: {
+        ReturnUrl: {
+          Url: {upstream}/connect/authorize/callback,
+          Query: {
+            client_id: {client:sut},
+            request_uri: {RequestUri_2}
+          }
+        }
+      },
+      Status: 200 OK
+    },
+    {
+      Request: POST {upstream}/account/login,
+      Query: {
+        ReturnUrl: {
+          Url: {upstream}/connect/authorize/callback,
+          Query: {
+            client_id: {client:sut},
+            request_uri: {RequestUri_2}
+          }
+        }
+      },
+      Form: {
+        password: {password:alice},
+        returnUrl: {
+          Url: {upstream}/connect/authorize/callback,
+          Query: {
+            client_id: {client:sut},
+            request_uri: {RequestUri_2}
+          }
+        },
+        username: {username:alice}
+      },
+      Status: 302 Found,
+      SetCookies: [
+        idsrv.session ({upstream}, secure, samesite=none),
+        idsrv ({upstream}, secure, httponly, samesite=none)
+      ]
+    },
+    {
+      Request: GET {upstream}/connect/authorize/callback,
+      Query: {
+        client_id: {client:sut},
+        request_uri: {RequestUri_2}
+      },
+      Status: 303 See Other,
+      SetCookies: [
+        ConsentResponse.{ConsentResponse_1} ({upstream}, secure, httponly, deleted),
+        idsrv ({upstream}, secure, httponly, samesite=none)
+      ]
+    },
+    {
+      Request: GET {sut}/federation/upstream/signin,
+      Query: {
+        code: {Code_1},
+        iss: {upstream},
+        session_state: {SessionState_1},
+        state: {State_1}
+      },
+      Status: 302 Found,
+      SetCookies: [
+        .AspNetCore.Correlation.{Correlation_2} ({sut}/federation/upstream/signin, secure, httponly, samesite=none, deleted),
+        .AspNetCore.OpenIdConnect.Nonce.{NonceCookie_2} ({sut}/federation/upstream/signin, secure, httponly, samesite=none, deleted),
+        idsrv.external ({sut}, secure, httponly, samesite=none),
+        idsrv.externalC1 ({sut}, secure, httponly, samesite=none),
+        idsrv.externalC2 ({sut}, secure, httponly, samesite=none)
+      ]
+    },
+    {
+      Request: GET {sut}/account/external-callback,
+      Status: 302 Found,
+      SetCookies: [
+        idsrv.session ({sut}, secure, samesite=none),
+        idsrv ({sut}, secure, httponly, samesite=none),
+        idsrv.external ({sut}, secure, httponly, samesite=none, deleted),
+        idsrv.externalC1 ({sut}, secure, httponly, samesite=none, deleted),
+        idsrv.externalC2 ({sut}, secure, httponly, samesite=none, deleted)
+      ]
+    },
+    {
+      Request: GET {sut}/connect/authorize/callback,
+      Query: {
+        client_id: {client:web},
+        request_uri: {RequestUri_1}
+      },
+      Status: 200 OK,
+      SetCookies: [
+        ConsentResponse.{ConsentResponse_2} ({sut}, secure, httponly, deleted),
+        idsrv ({sut}, secure, httponly, samesite=none)
+      ]
+    },
+    {
+      Request: POST {web}/signin-oidc,
+      Form: {
+        code: {Code_2},
+        iss: {sut},
+        session_state: {SessionState_2},
+        state: {State_2}
+      },
+      Status: 302 Found,
+      SetCookies: [
+        .AspNetCore.Correlation.{Correlation_1} ({web}/signin-oidc, secure, httponly, samesite=none, deleted),
+        .AspNetCore.OpenIdConnect.Nonce.{NonceCookie_1} ({web}/signin-oidc, secure, httponly, samesite=none, deleted),
+        .AspNetCore.Cookies ({web}, secure, httponly, samesite=lax)
+      ]
+    },
+    {
+      Request: GET {web}/test/signin,
+      Status: 302 Found
+    },
+    {
+      Request: GET {web}/test/userinfo,
+      Status: 200 OK
+    }
+  ],
+  Result: {
+    Page: AppPage,
+    Url: {web}/test/userinfo,
+    Claims: {
+      amr: external,
+      auth_time: {Start},
+      idp: upstream,
+      name: {username:alice},
+      sid: {Sid_1},
+      sub: {user:alice}
+    }
+  }
+}

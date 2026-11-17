@@ -137,6 +137,11 @@ public class Callback : PageModel
             localClaims.Add(new Claim(JwtClaimTypes.SessionId, sid.Value));
         }
 
+        localClaims.AddRange(externalResult.Principal.Claims.Where(claim => claim.Type
+            is "https://duendesoftware.com/Saml2/Scheme"
+            or "https://duendesoftware.com/Saml2/LogoutNameIdentifier"
+            or "https://duendesoftware.com/Saml2/SessionIndex"));
+
         // if the external provider issued an id_token, we'll keep it for signout
         var idToken = externalResult.Properties?.GetTokenValue("id_token");
         if (idToken != null)

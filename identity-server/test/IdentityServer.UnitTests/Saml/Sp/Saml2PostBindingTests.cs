@@ -10,6 +10,8 @@ using System.Xml.Linq;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Duende.IdentityServer.Internal.Saml.Sp.Bindings;
+using Duende.IdentityServer.Internal.Saml.Sp.Commands;
+using Duende.IdentityServer.Internal.Saml.Sp.Configuration;
 using Duende.IdentityServer.Internal.Saml.Sp.Metadata;
 using Duende.IdentityServer.Internal.Saml.Sp.Protocol;
 
@@ -18,6 +20,22 @@ namespace UnitTests.Saml.Sp;
 public sealed class Saml2PostBindingTests
 {
     private const string ExpectedScriptHash = "sha256-IQKtK10TFgRroV/L1+sRadhw5yAEkHE3GlbgJgxr7K4=";
+
+    [Fact]
+    public void success_when_post_nested_to_configured_depth_preserves_document()
+    {
+        const string xml = """<root><n><n value="kept">before<![CDATA[ middle ]]><!-- comment -->after</n></n></root>""";
+        var options = new Options(new SPOptions { MaxXmlNestingDepth = 2 });
+        var request = new HttpRequestData("POST", new Uri("https://sp.example.com/Saml2/Acs"), "/",
+            new Dictionary<string, IEnumerable<string>>
+            {
+                ["SAMLResponse"] = [Convert.ToBase64String(Encoding.UTF8.GetBytes(xml))]
+            }, storedRequestState: null);
+
+        var result = new Saml2PostBinding().Unbind(request, options);
+
+        result.Data.OuterXml.ShouldBe(xml);
+    }
 
     [Fact]
     public void emitted_script_hash_matches_emitted_CSP_hash()

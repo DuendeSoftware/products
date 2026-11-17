@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Duende.Platform.UserManagement</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Namespace does not match folder structure --> <!--todo: remove-->
+    <NoWarn>$(NoWarn);IDE0130</NoWarn>
+
+    <!-- async suffix for test methods -->
+    <NoWarn>$(NoWarn);IDE0106</NoWarn>
+
+    <!-- TODO: Fix these in platform test code and remove suppressions -->
+    <NoWarn>$(NoWarn);CA1305</NoWarn><!-- Specify IFormatProvider -->
+    <NoWarn>$(NoWarn);CA1829</NoWarn><!-- Use Length/Count property instead of Count() -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn><!-- Naming rule violation -->
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\..\testing\UserManagement.TestInfrastructure\UserManagement.TestInfrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" />
+    <PackageReference Include="Verify.XunitV3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Time.Testing" />
+    <Using Include="Shouldly" />
+  </ItemGroup>
+</Project>

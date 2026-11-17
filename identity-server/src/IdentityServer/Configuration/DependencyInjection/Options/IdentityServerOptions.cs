@@ -71,6 +71,21 @@ public class IdentityServerOptions
     public string LogoutTokenJwtType { get; set; } = "logout+jwt";
 
     /// <summary>
+    /// Gets or sets the JWT <c>typ</c> header values accepted for an <c>id_token_hint</c> at the
+    /// end session endpoint.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to a collection containing only <c>JWT</c>, the value that IdentityServer writes
+    /// to identity tokens it issues. A token with no <c>typ</c> header is always accepted. The
+    /// values IdentityServer uses for other kinds of tokens (<see cref="AccessTokenJwtType"/>,
+    /// <see cref="LogoutTokenJwtType"/>, and the token-introspection response type) are never
+    /// accepted as an identity token hint, even if they are listed here. The generic <c>JWT</c>
+    /// value is the exception: it stays accepted when listed here, even if
+    /// <see cref="AccessTokenJwtType"/> or <see cref="LogoutTokenJwtType"/> is set to it.
+    /// </remarks>
+    public ICollection<string> IdentityTokenJwtTypes { get; set; } = new HashSet<string> { "JWT" };
+
+    /// <summary>
     /// Gets or sets a value indicating whether a static <c>aud</c> claim in all access tokens with the format <c>{issuer}/resources</c> is emitted.
     /// </summary>
     /// <remarks>
@@ -271,24 +286,31 @@ public class IdentityServerOptions
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
-    /// Gets or sets a value indicating whether strict audience validation is enforced for
-    /// <c>private_key_jwt</c> client assertions.
+    /// Gets or sets a value indicating whether strict audience and <c>typ</c> header validation is
+    /// enforced for <c>private_key_jwt</c> client assertions.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// When <see langword="true"/>, the audience (<c>aud</c>) claim must be the issuer identifier
-    /// as the sole value (per draft-ietf-oauth-rfc7523bis), and the <c>typ</c> header must be
-    /// <c>client-authentication+jwt</c>.
+    /// <see href="https://www.rfc-editor.org/rfc/rfc10070.html">RFC 10070</see> (JWT client
+    /// authentication) requires the audience (<c>aud</c>) of a client assertion to identify the
+    /// authorization server's issuer identifier as the sole audience value. It also recommends
+    /// (SHOULD) that clients send <c>typ: client-authentication+jwt</c>, and that authorization
+    /// servers do not (NOT RECOMMENDED) reject an assertion solely because the <c>typ</c> header is
+    /// missing.
     /// </para>
     /// <para>
-    /// When <see langword="false"/>, legacy audience values (token endpoint URL, CIBA endpoint, PAR
-    /// endpoint) are accepted, and the <c>typ</c> header is not required. However, if a token
-    /// includes <c>typ: client-authentication+jwt</c>, strict validation is still applied for that
-    /// token regardless of this setting.
+    /// When <see langword="true"/>, IdentityServer requires the <c>aud</c> claim to be the issuer
+    /// identifier, either as a single string or a single-element array (a trailing slash difference
+    /// is tolerated), and requires the <c>typ</c> header to be <c>client-authentication+jwt</c>.
+    /// Requiring <c>typ</c> is stricter than RFC 10070, so assertions without it are rejected.
+    /// Enabling this setting does not by itself make IdentityServer fully compliant with RFC 10070.
     /// </para>
     /// <para>
-    /// Defaults to <see langword="false"/>. Set to <see langword="true"/> to enforce strict
-    /// validation per draft-ietf-oauth-rfc7523bis.
+    /// When <see langword="false"/> (the default), legacy audience values (the issuer identifier or
+    /// the token, CIBA, or PAR endpoint URLs) are accepted, an audience array may contain multiple
+    /// values, and the <c>typ</c> header is not required. However, if an assertion includes
+    /// <c>typ: client-authentication+jwt</c>, strict validation is applied to that assertion
+    /// regardless of this setting.
     /// </para>
     /// </remarks>
     public bool StrictClientAssertionAudienceValidation { get; set; }

@@ -430,6 +430,12 @@ internal static partial class Log
     internal static partial void UnauthorizedCallIntrospectionEndpointAborting(this ILogger logger);
 
     [LoggerMessage(
+        EventName = nameof(ClientWithoutAuthenticationCannotCallIntrospectionEndpoint),
+        Level = LogLevel.Information,
+        Message = "Client {ClientId} does not authenticate with a secret and cannot call the introspection endpoint. aborting.")]
+    internal static partial void ClientWithoutAuthenticationCannotCallIntrospectionEndpoint(this ILogger logger, object? clientId);
+
+    [LoggerMessage(
         EventName = nameof(ClientMakingIntrospectionRequest),
         Level = LogLevel.Debug,
         Message = "Client making introspection request: {ClientId}")]

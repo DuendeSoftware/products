@@ -174,7 +174,7 @@ internal sealed class CommandHost : IAsyncDisposable
     public async Task<ExecuteCommandResult> ExecuteAsync(
         string commandName,
         Func<CommandContext, Task<ExecuteCommandResult>> handler) =>
-        await _processor.ExecuteWork(commandName, _ => handler(Context), CancellationToken.None);
+        await _processor.ExecuteWork(commandName, _ => handler(Context), Ct.None);
 
     public async ValueTask DisposeAsync()
     {
@@ -188,12 +188,12 @@ internal sealed class CommandHost : IAsyncDisposable
 
 public class Processor : BackgroundService
 {
-    public delegate Task<ExecuteCommandResult> WorkDelegate(CancellationToken ct);
+    public delegate Task<ExecuteCommandResult> WorkDelegate(Ct ct);
 
 
     private AsyncQueue<WorkItem> _queue = new AsyncQueue<WorkItem>();
 
-    protected override async Task ExecuteAsync(CancellationToken ct)
+    protected override async Task ExecuteAsync(Ct ct)
     {
         while (!ct.IsCancellationRequested)
         {
@@ -204,7 +204,7 @@ public class Processor : BackgroundService
 
     }
 
-    public Task<ExecuteCommandResult> ExecuteWork(string name, WorkDelegate work, CancellationToken ct)
+    public Task<ExecuteCommandResult> ExecuteWork(string name, WorkDelegate work, Ct ct)
     {
         var workItem = new WorkItem(work, name);
         _queue.Enqueue(workItem);
@@ -216,10 +216,10 @@ public class WorkItem(Processor.WorkDelegate work, string name)
 {
     private TaskCompletionSource<ExecuteCommandResult> _workComplete = new TaskCompletionSource<ExecuteCommandResult>();
 
-    public async Task<ExecuteCommandResult> WaitUntilWorkIsComplete(CancellationToken ct) =>
+    public async Task<ExecuteCommandResult> WaitUntilWorkIsComplete(Ct ct) =>
         await _workComplete.Task;
 
-    public async Task StartWork(CancellationToken ct)
+    public async Task StartWork(Ct ct)
     {
         using (ExecutionContext.SuppressFlow())
         {

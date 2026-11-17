@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Duende.IdentityServer.Saml.Services;
 
 /// <summary>
-/// Default implementation of <see cref="ISamlLogoutNotificationService"/> that uses the new
+/// Default implementation of <see cref="ISamlLogoutNotificationService"/> that uses the
 /// <see cref="ISaml2FrontChannelLogoutRequestBuilder"/> to build outbound LogoutRequest messages.
 /// </summary>
 public sealed class Saml2LogoutNotificationService(

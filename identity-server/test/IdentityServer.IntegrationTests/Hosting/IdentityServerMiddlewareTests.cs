@@ -65,7 +65,7 @@ public class IdentityServerMiddlewareTests
 
         // Now reset the log messages so that we can verify that we always log for requests that are not canceled
         _pipeline.MockLogger.LogMessages.Clear();
-        var notCanceledRequest = async () => await _pipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryKeysEndpoint, CancellationToken.None);
+        var notCanceledRequest = async () => await _pipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryKeysEndpoint, Ct.None);
         await notCanceledRequest.ShouldThrowAsync<Exception>();
         _pipeline.MockLogger.LogMessages.ShouldContain(m => m.StartsWith("Unhandled exception: "));
     }

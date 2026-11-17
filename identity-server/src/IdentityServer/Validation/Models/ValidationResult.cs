@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Validation;
 public class ValidationResult
 {
     /// <summary>
-    /// Gets or sets a value indicating whether the validation was successful.
+    /// Gets or sets a value indicating whether the validation failed.
     /// </summary>
     /// <value>
     ///   <c>true</c> if the validation is failed; otherwise, <c>false</c>.

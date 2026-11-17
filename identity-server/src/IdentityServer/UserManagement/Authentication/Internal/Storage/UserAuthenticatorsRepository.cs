@@ -1,0 +1,362 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+#nullable enable
+
+using Duende.Storage;
+using Duende.Storage.Internal;
+using Duende.Storage.Internal.Operations;
+using Duende.Storage.Internal.Querying.Expressions;
+using Duende.Storage.Internal.Querying.Sorting;
+using Duende.Storage.Internal.Pagination;
+using Duende.Storage.Internal.Querying;
+using Duende.UserManagement.Authentication.External;
+using Duende.UserManagement.Authentication.External.Internal.Storage;
+using Duende.UserManagement.Authentication.Otp;
+using Duende.UserManagement.Authentication.Otp.Internal.Storage;
+using Duende.UserManagement.Authentication.Passkeys;
+using Duende.UserManagement.Authentication.Passkeys.Internal;
+using Duende.UserManagement.Authentication.Passkeys.Internal.Storage;
+using Duende.UserManagement.Authentication.Totp;
+using Duende.UserManagement.Authentication.Totp.Internal;
+using Duende.UserManagement.Authentication.Totp.Internal.Storage;
+using Duende.UserManagement.Internal.Storage;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Options;
+
+namespace Duende.UserManagement.Authentication.Internal.Storage;
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+internal sealed class UserAuthenticatorsRepository(
+    IPartitionedStorageFactory partitionedStorageFactory,
+    IOptions<UserAuthenticatorsRepository.Options> options,
+    IDataProtectionProvider dataProtectionProvider,
+    UserRepository userRepository)
+{
+    internal enum Keys
+    {
+        ExternalAuthenticator = 1,
+        OtpAddress = 2,
+        SubjectId = 3,
+        PasskeyCredentialId = 4
+    }
+
+    private readonly IDataProtector _dataProtector = dataProtectionProvider.CreateProtector(nameof(UserAuthenticators));
+    private readonly Options _options = options.Value;
+
+    internal async Task<CreateResult> CreateAsync(UserAuthenticators authenticators, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var operations = await BuildCreateOperationsAsync(authenticators, ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
+        if (result.Success)
+        {
+            return CreateResult.Success;
+        }
+
+        var firstFailure = result.Results.First(r => r.Outcome is not OperationOutcome.Success).Outcome;
+        return firstFailure switch
+        {
+            OperationOutcome.KeyConflict => CreateResult.KeyConflict,
+            OperationOutcome.AlreadyExists => CreateResult.AlreadyExists,
+            _ => CreateResult.ConcurrencyConflict
+        };
+    }
+
+    internal async Task<IReadOnlyList<IStorageOperation>> CreateBatchOperationAsync(UserAuthenticators authenticators, Ct ct) =>
+        await BuildCreateOperationsAsync(authenticators, ct);
+
+    internal CreateOperation CreateAspectBatchOperation(UserAuthenticators authenticators) =>
+        CreateOperation.For(
+            authenticators.Id.Uuid,
+            ToDso(authenticators),
+            [
+                DataStorageKey.Create(UserSubjectIdDskV1.Create(authenticators.SubjectId)),
+                .. GetJsonKeys(authenticators)
+            ],
+            [],
+            Expiration.NoExpiration);
+
+    internal static UserDso.AspectRef GetAspectRef(UserAuthenticators authenticators) =>
+        new(authenticators.Id.Uuid.Value, 1, UserAuthenticatorsDso.EntityType.Id);
+
+    internal static UserDso.AspectRef GetAspectRef(UserAuthenticators authenticators, int version) =>
+        new(authenticators.Id.Uuid.Value, version, UserAuthenticatorsDso.EntityType.Id);
+
+    internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(UserSubjectId subjectId, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)), ct);
+        return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
+    }
+
+    internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(OtpAddress otpAddress, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(OtpAddressDskV1.Create(otpAddress)), ct);
+        return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
+    }
+
+    internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(
+        ExternalAuthenticatorAddress externalAuthenticatorAddress,
+        Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(externalAuthenticatorAddress)), ct);
+        return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
+    }
+
+    internal async Task<(UserAuthenticators UserAuthenticators, int Version)?> TryReadAsync(
+        PasskeyCredentialId credentialId, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var result = await partitionedStorage.TryReadAsync(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(credentialId)), ct);
+        return result.Found ? (ToEntity(result.Dso), result.Version.Value) : null;
+    }
+
+    private UserAuthenticators ToEntity(IDataStorageObject value) => ToEntity(UserAuthenticatorsDso.ToCurrent(value));
+
+    internal async Task<UpdateResult> UpdateAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
+    {
+        var partitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var operations = await BuildUpdateOperationsAsync(authenticators, expectedVersion, ct);
+        var result = await partitionedStorage.ExecuteBatchAsync(operations, [], ct);
+        if (result.Success)
+        {
+            return UpdateResult.Success;
+        }
+
+        // Find the first failed operation across the batch
+        var firstFailure = result.Results.First(r => r.Outcome is not OperationOutcome.Success).Outcome;
+        return firstFailure switch
+        {
+            OperationOutcome.KeyConflict => UpdateResult.KeyConflict,
+            OperationOutcome.DoesNotExist => UpdateResult.DoesNotExist,
+            _ => UpdateResult.UnexpectedVersion
+        };
+    }
+
+    internal async Task<IReadOnlyList<IStorageOperation>> UpdateBatchOperationAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct) =>
+        await BuildUpdateOperationsAsync(authenticators, expectedVersion, ct);
+
+    internal UpdateOperation UpdateAspectOnlyBatchOperation(UserAuthenticators authenticators, int expectedVersion) =>
+        UpdateOperation.For(
+            authenticators.Id.Uuid,
+            ToDso(authenticators),
+            expectedVersion,
+            [
+                DataStorageKey.Create(UserSubjectIdDskV1.Create(authenticators.SubjectId)),
+                .. GetJsonKeys(authenticators)
+            ],
+            [],
+            Expiration.NoExpiration);
+
+    internal static DeleteOperation DeleteBatchOperation(UserSubjectId subjectId) =>
+        DeleteOperation.ByKey(UserAuthenticatorsDso.EntityType, DataStorageKey.Create(UserSubjectIdDskV1.Create(subjectId)));
+
+    internal async Task<QueryResult<UserAuthenticators>> QueryAsync(DataRange? range, Ct ct)
+    {
+        var queryPartitionedStorage = await partitionedStorageFactory.GetPartitionedStorageAsync(DataCategoryName.UserManagement, ct);
+        var dataRange = range ?? DataRange.FromPage(1, DataRangeSize.Default);
+        if (dataRange.TokenValue is not null)
+        {
+            throw new NotSupportedException("User authenticator queries do not support continuation-token pagination.");
+        }
+
+        var result = await queryPartitionedStorage.QueryAsync(
+            UserAuthenticatorsDso.EntityType,
+            AllExpression.Instance,
+            SortParameter.Empty,
+            dataRange,
+            ct);
+
+        return result.ConvertTo(envelope => ToEntity(UserAuthenticatorsDso.ToCurrent(envelope.Value)));
+    }
+
+    private async Task<List<IStorageOperation>> BuildCreateOperationsAsync(UserAuthenticators authenticators, Ct ct)
+    {
+        var aspectRef = new UserDso.AspectRef(authenticators.Id.Uuid.Value, 1, UserAuthenticatorsDso.EntityType.Id);
+        var existingUser = await userRepository.TryReadAsync(authenticators.SubjectId, ct);
+
+        var aspectOp = CreateOperation.For(
+            authenticators.Id.Uuid,
+            ToDso(authenticators),
+            [
+                DataStorageKey.Create(UserSubjectIdDskV1.Create(authenticators.SubjectId)),
+                .. GetJsonKeys(authenticators)
+            ],
+            [],
+            Expiration.NoExpiration);
+
+        IStorageOperation userOp = existingUser is var (user, userVersion)
+            ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
+            : UserRepository.CreateBatchOperation(authenticators.SubjectId, [aspectRef]);
+
+        return [userOp, aspectOp];
+    }
+
+    private async Task<List<IStorageOperation>> BuildUpdateOperationsAsync(UserAuthenticators authenticators, int expectedVersion, Ct ct)
+    {
+        var aspectOp = UpdateOperation.For(
+            authenticators.Id.Uuid,
+            ToDso(authenticators),
+            expectedVersion,
+            [
+                DataStorageKey.Create(UserSubjectIdDskV1.Create(authenticators.SubjectId)),
+                .. GetJsonKeys(authenticators)
+            ],
+            [],
+            Expiration.NoExpiration);
+
+        var aspectRef = new UserDso.AspectRef(authenticators.Id.Uuid.Value, expectedVersion + 1, UserAuthenticatorsDso.EntityType.Id);
+        var existingUser = await userRepository.TryReadAsync(authenticators.SubjectId, ct);
+
+        IStorageOperation userOp = existingUser is var (user, userVersion)
+            ? UserRepository.UpdateBatchOperation(UserRepository.AddOrUpdateAspectRef(user, aspectRef), userVersion)
+            : UserRepository.CreateBatchOperation(authenticators.SubjectId, [aspectRef]);
+
+        return [userOp, aspectOp];
+    }
+
+    private UserAuthenticatorsDso.V1 ToDso(UserAuthenticators entity) => new(
+        entity.Id.Uuid.Value,
+        entity.SubjectId.Value,
+        [.. entity.OtpAddresses.Select(a => new OtpAddressDso.V1(a.Channel.Value, a.SubjectId.ToDso()))],
+        [
+            .. entity.ExternalAuthenticatorAddresses.Select(a =>
+                new ExternalAuthenticatorAddressDso.V1(a.Name.Value, a.SubjectId.ToDso()))
+        ],
+        [.. entity.TotpDevices.Values.Select(ToDso)],
+        [.. entity.RecoveryCodes.Select(a => a.ToDso())],
+        entity.HashedPassword?.ToDso(),
+        [.. entity.PasskeyCredentials.Values.Select(c => new PasskeyCredentialDso.V1(
+            c.CredentialId.ToBytes(),
+            [.. c.PublicKeyCose],
+            c.Algorithm,
+            c.SignCount,
+            c.BackupEligible,
+            c.BackedUp,
+            c.Aaguid,
+            c.CreatedAt,
+            c.Name)
+        {
+            Transports = c.Transports?.ToArray()
+        })],
+        [.. entity.FailureStates.Select(ToDso)],
+        entity.PasswordHistory.Count > 0
+            ? [.. entity.PasswordHistory.Select(h => h.ToDso())]
+            : null,
+        entity.PasswordSetAtUtc);
+
+    private UserAuthenticators ToEntity(UserAuthenticatorsDso.V1 dso) => UserAuthenticators.Load(
+        UserAuthenticatorsId.Load(dso.Id),
+        UserSubjectId.Load(dso.SubjectId),
+        dso.OtpAddresses.Select(a => OtpAddress.Load(OtpChannel.Load(a.Channel), a.SubjectId.ToValueObject())),
+        dso.ExternalAuthenticatorAddresses.Select(a =>
+            ExternalAuthenticatorAddress.Load(ExternalAuthenticatorName.Load(a.Name), a.SubjectId.ToValueObject())),
+        [.. dso.TotpDevices.Select(ToValueObject)],
+        dso.RecoveryCodes.Select(a => a.ToValueObject()),
+        dso.HashedPassword?.ToValueObject(),
+        dso.PasskeyCredentials.Select(c => new PasskeyCredential(
+            PasskeyCredentialId.Load(c.CredentialId),
+            c.PublicKeyCose,
+            c.Algorithm,
+            c.SignCount,
+            c.BackupEligible,
+            c.BackedUp,
+            c.Aaguid,
+            c.CreatedAt,
+            c.Name,
+            c.Transports?.ToArray())),
+        (dso.FailureStates ?? []).Select(ToFailureState),
+        (dso.PasswordHistory ?? []).Select(h => h.ToValueObject()),
+        dso.PasswordSetAtUtc);
+
+    private static AuthenticatorFailureStateDso.V1 ToDso(
+        KeyValuePair<AuthenticatorKey, AuthenticatorFailureState> failureState) =>
+        failureState.Key switch
+        {
+            AuthenticatorKey.Password => new AuthenticatorFailureStateDso.V1(
+                nameof(AuthenticatorKey.Password),
+                null,
+                failureState.Value.FailedAttemptCount,
+                failureState.Value.LastFailedAtUtc,
+                failureState.Value.RecentAttemptTimestamps,
+                failureState.Value.LockoutCount),
+            AuthenticatorKey.Totp totp => new AuthenticatorFailureStateDso.V1(
+                nameof(AuthenticatorKey.Totp),
+                totp.Name.ToString(),
+                failureState.Value.FailedAttemptCount,
+                failureState.Value.LastFailedAtUtc,
+                failureState.Value.RecentAttemptTimestamps,
+                failureState.Value.LockoutCount),
+            AuthenticatorKey.RecoveryCode => new AuthenticatorFailureStateDso.V1(
+                nameof(AuthenticatorKey.RecoveryCode),
+                null,
+                failureState.Value.FailedAttemptCount,
+                failureState.Value.LastFailedAtUtc,
+                failureState.Value.RecentAttemptTimestamps,
+                failureState.Value.LockoutCount),
+            _ => throw new InvalidOperationException($"Unexpected authenticator key type: {failureState.Key.GetType().Name}")
+        };
+
+    private static KeyValuePair<AuthenticatorKey, AuthenticatorFailureState> ToFailureState(
+        AuthenticatorFailureStateDso.V1 dso)
+    {
+        AuthenticatorKey key = dso.AuthenticatorType switch
+        {
+            nameof(AuthenticatorKey.Password) => new AuthenticatorKey.Password(),
+            nameof(AuthenticatorKey.Totp) => new AuthenticatorKey.Totp(
+                TotpDeviceName.Load(
+                    !string.IsNullOrWhiteSpace(dso.AuthenticatorId)
+                        ? dso.AuthenticatorId
+                        : throw new InvalidOperationException(
+                            $"AuthenticatorId is required when AuthenticatorType is {nameof(AuthenticatorKey.Totp)}."))),
+            nameof(AuthenticatorKey.RecoveryCode) => new AuthenticatorKey.RecoveryCode(),
+            _ => throw new InvalidOperationException($"Unexpected authenticator type: {dso.AuthenticatorType}")
+        };
+
+        return new KeyValuePair<AuthenticatorKey, AuthenticatorFailureState>(
+            key,
+            AuthenticatorFailureState.Load(dso.FailedAttemptCount, dso.LastFailedAtUtc, dso.RecentAttemptTimestamps, dso.LockoutCount));
+    }
+
+    private TotpDeviceDso.V1 ToDso(TotpDevice vo)
+    {
+        var key = vo.Key.Bytes.ToArray();
+        var storedKey = _options.ProtectTotpKeys
+            ? _dataProtector
+                .CreateProtector(nameof(TotpDevice))
+                .CreateProtector(nameof(TotpDevice.Key))
+                .Protect(key)
+            : key;
+
+        return new TotpDeviceDso.V1(
+            vo.Name.Value, Convert.ToBase64String(storedKey), vo.LastSuccessfulTimeStep);
+    }
+
+    private TotpDevice ToValueObject(TotpDeviceDso.V1 dso)
+    {
+        var storedKey = Convert.FromBase64String(dso.Key);
+        var key = _options.ProtectTotpKeys
+            ? _dataProtector
+                .CreateProtector(nameof(TotpDevice))
+                .CreateProtector(nameof(TotpDevice.Key))
+                .Unprotect(storedKey)
+            : storedKey;
+
+        return TotpDevice.Load(
+            TotpDeviceName.Load(dso.Name), PlainBytesTotpKey.Load(key), dso.LastSuccessfulTimeStep);
+    }
+
+    private static List<DataStorageKey> GetJsonKeys(UserAuthenticators authenticators) =>
+    [
+        .. authenticators.OtpAddresses.Select(a => DataStorageKey.Create(OtpAddressDskV1.Create(a))),
+        .. authenticators.ExternalAuthenticatorAddresses.Select(a => DataStorageKey.Create(ExternalAuthenticatorAddressDskV1.Create(a))),
+        .. authenticators.PasskeyCredentials.Values.Select(c => DataStorageKey.Create(PasskeyCredentialIdDskV1.Create(c.CredentialId)))
+    ];
+
+    internal sealed class Options
+    {
+        internal bool ProtectTotpKeys { get; set; } = true;
+    }
+}

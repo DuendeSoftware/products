@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.Spaces.Tests</AssemblyName>
+    <RootNamespace>Duende.Spaces</RootNamespace>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);IDE0058;IDE0022</NoWarn> <!-- unused expression value; expression body -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Duende.IdentityServer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Storage.Sqlite" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Verify.XunitV3" />
+  </ItemGroup>
+
+</Project>

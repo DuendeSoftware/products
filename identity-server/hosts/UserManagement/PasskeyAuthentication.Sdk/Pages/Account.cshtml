@@ -1,0 +1,166 @@
+@page
+@model AccountModel
+@{
+  ViewData["Title"] = "Account";
+}
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-8">
+
+    @if (Model.ErrorMessages.Count > 0)
+    {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @foreach (var error in Model.ErrorMessages)
+        {
+          <div><i class="bi bi-exclamation-triangle-fill me-2"></i>@error</div>
+        }
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    }
+
+    <!-- profile -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+        <i class="bi bi-person-circle me-2"></i>Profile
+      </div>
+      <div class="card-body">
+        <div>
+          <span class="fw-bold"><i class="bi bi-envelope me-1"></i>Email Address:</span>
+          <span>@Model.Email</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- passkeys -->
+    <div class="card shadow-sm">
+      <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+        <i class="bi bi-key me-2"></i>Passkeys
+      </div>
+      <div class="card-body">
+        <div id="passkey-status" class="d-none" role="alert"></div>
+
+        @if (Model.Passkeys.Any())
+        {
+          <div class="table-responsive mb-3">
+            <table class="table table-hover">
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>Created</th>
+                <th class="text-end"></th>
+              </tr>
+              </thead>
+              <tbody>
+              @foreach (var passkey in Model.Passkeys)
+              {
+                <tr>
+                  <td>
+                    <i class="bi bi-fingerprint me-2 text-primary"></i>
+                    @passkey.Name
+                  </td>
+                  <td>@passkey.CreatedAt.ToString("u")</td>
+                  <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-passkey-btn"
+                            data-credential-id="@passkey.CredentialId.ToBase64String()">
+                      <i class="bi bi-trash"></i> Remove
+                    </button>
+                  </td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <button type="button" id="add-passkey-btn" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>Add passkey
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="passkeyNameModal" class="modal-overlay" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content card shadow" style="background-color: white;">
+      <div class="card-header text-white fw-bold" style="background-color: #6a3d9a;">
+        <i class="bi bi-key me-2"></i>Name your passkey
+      </div>
+      <div class="card-body" style="background-color: white;">
+        <p class="text-muted">Give your passkey a friendly name to help you identify it later.</p>
+        <label for="passkeyNameInput" class="fw-bold">Name</label>
+        <input type="text" class="form-control" id="passkeyNameInput" maxlength="255"/>
+      </div>
+      <div class="card-footer d-flex gap-2 justify-content-end" style="background-color: white;">
+        <button type="button" class="btn btn-secondary" id="cancelPasskeyBtn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmPasskeyBtn">
+          <i class="bi bi-fingerprint me-1"></i>Continue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script src="~/js/site.js"></script>
+  <script src="~/js/passkeys.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const passkeyStatus = document.querySelector('div#passkey-status');
+      const passkeyNameModal = document.querySelector('div#passkeyNameModal');
+      const passkeyNameInput = document.querySelector('input#passkeyNameInput');
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('added')) {
+        history.replaceState(null, '', window.location.pathname);
+        showStatus(passkeyStatus, 'Passkey added', false);
+      } else if (params.has('removed')) {
+        history.replaceState(null, '', window.location.pathname);
+        showStatus(passkeyStatus, 'Passkey removed', false);
+      }
+
+      const getDefaultPasskeyName = () =>
+        `Passkey (${new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })})`;
+
+      const showModal = () => { passkeyNameModal.style.display = 'flex'; passkeyNameInput.focus(); };
+      const hideModal = () => { passkeyNameModal.style.display = 'none'; };
+
+      document.querySelectorAll('button.remove-passkey-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Are you sure you want to remove this passkey?')) return;
+          try {
+            await removePasskey(btn.dataset.credentialId);
+          } catch (error) {
+            showStatus(passkeyStatus, error.message, true);
+            return;
+          }
+
+          window.location.href = window.location.pathname + '?removed';
+        });
+      });
+
+      document.querySelector('button#add-passkey-btn').addEventListener('click', () => {
+        passkeyNameInput.value = getDefaultPasskeyName();
+        showModal();
+        passkeyNameInput.select();
+      });
+
+      passkeyNameModal.addEventListener('click', (e) => { if (e.target === passkeyNameModal) hideModal(); });
+      document.querySelector('button#cancelPasskeyBtn').addEventListener('click', hideModal);
+
+      document.querySelector('button#confirmPasskeyBtn').addEventListener('click', async () => {
+        hideModal();
+        try {
+          const { challengeId, options } = await beginRegistration();
+          const credential = await createCredential(options);
+          await completeRegistration(challengeId, credential, passkeyNameInput.value.trim() || getDefaultPasskeyName());
+        } catch (error) {
+          showStatus(passkeyStatus, error.message, true);
+          return;
+        }
+
+        window.location.href = window.location.pathname + '?added';
+      });
+    });
+  </script>
+}
